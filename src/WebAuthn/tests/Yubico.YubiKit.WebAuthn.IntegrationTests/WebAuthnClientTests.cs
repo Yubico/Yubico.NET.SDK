@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
@@ -68,8 +69,7 @@ public class WebAuthnClientTests
 
         var response = await client.MakeCredentialAsync(
             options,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotNull(response);
         Assert.True(response.CredentialId.Length > 0, "Credential ID should not be empty");
@@ -97,8 +97,7 @@ public class WebAuthnClientTests
 
         var response = await client.MakeCredentialAsync(
             options,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotNull(response);
         Assert.True(response.CredentialId.Length > 0);
@@ -120,20 +119,13 @@ public class WebAuthnClientTests
         var options = CreateRegistrationOptions();
         var statuses = new List<WebAuthnStatus>();
 
-        await foreach (var status in client.MakeCredentialStreamAsync(options))
+        await foreach (var status in client.MakeCredentialStreamAsync(options, KnownTestPin))
         {
             statuses.Add(status);
 
-            switch (status)
+            if (status is WebAuthnStatusFailed failed)
             {
-                case WebAuthnStatusRequestingPin requestingPin:
-                    await requestingPin.SubmitPin(KnownTestPin);
-                    break;
-                case WebAuthnStatusRequestingUv requestingUv:
-                    await requestingUv.SetUseUv(false);
-                    break;
-                case WebAuthnStatusFailed failed:
-                    throw failed.Error;
+                throw failed.Error;
             }
         }
 
@@ -161,8 +153,7 @@ public class WebAuthnClientTests
 
         var regResponse = await regClient.MakeCredentialAsync(
             regOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotNull(regResponse);
         var credentialId = regResponse.CredentialId;
@@ -191,8 +182,7 @@ public class WebAuthnClientTests
 
         var matches = await authClient.GetAssertionAsync(
             authOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotEmpty(matches);
 
@@ -223,8 +213,7 @@ public class WebAuthnClientTests
 
         var regResponse = await regClient.MakeCredentialAsync(
             regOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         await regClient.DisposeAsync();
 
@@ -243,8 +232,7 @@ public class WebAuthnClientTests
 
         var matches = await authClient.GetAssertionAsync(
             authOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotEmpty(matches);
 
@@ -271,10 +259,7 @@ public class WebAuthnClientTests
         var options = CreateRegistrationOptions();
 
         var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
-            client.MakeCredentialAsync(
-                options,
-                pin: (string?)null,
-                useUv: false));
+            client.MakeCredentialAsync(options, pinBytes: null));
 
         Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
     }

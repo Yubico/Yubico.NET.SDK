@@ -18,8 +18,16 @@ namespace Yubico.YubiKit.WebAuthn.Client.Status;
 /// Base type for WebAuthn operation status updates in a streaming context.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Discriminated status union for <see cref="WebAuthnClient"/> streaming operations.
 /// Consumers use pattern matching to handle each status variant.
+/// </para>
+/// <para>
+/// These statuses report progress; they never gather input. A PIN, when one is needed, comes
+/// from the PIN bytes passed to the operation or from the client's configured
+/// <see cref="Yubico.YubiKit.Core.Credentials.ICredentialPrompt"/>. To abandon an operation,
+/// cancel the token supplied to it.
+/// </para>
 /// </remarks>
 public abstract record WebAuthnStatus;
 
@@ -29,25 +37,14 @@ public abstract record WebAuthnStatus;
 public sealed record WebAuthnStatusProcessing : WebAuthnStatus;
 
 /// <summary>
-/// Waiting for user interaction (touch, biometric, or other authenticator prompt).
+/// The authenticator is waiting for the user to touch it.
 /// </summary>
-/// <param name="Cancel">Call to cancel the wait.</param>
-public sealed record WebAuthnStatusWaitingForUser(Func<ValueTask> Cancel) : WebAuthnStatus;
-
-/// <summary>
-/// The operation is requesting a decision on whether to use user verification.
-/// </summary>
-/// <param name="SetUseUv">Call with true to use UV, false to skip UV.</param>
-public sealed record WebAuthnStatusRequestingUv(Func<bool, ValueTask> SetUseUv) : WebAuthnStatus;
-
-/// <summary>
-/// The operation requires a PIN to proceed.
-/// </summary>
-/// <param name="SubmitPin">Submit PIN bytes (UTF-8 encoded) to continue.</param>
-/// <param name="Cancel">Call to cancel PIN entry and abort the operation.</param>
-public sealed record WebAuthnStatusRequestingPin(
-    Func<ReadOnlyMemory<byte>, ValueTask> SubmitPin,
-    Func<ValueTask> Cancel) : WebAuthnStatus;
+/// <remarks>
+/// Emitted when the authenticator reports that it is awaiting user presence, which is the moment
+/// to show a "touch your key" prompt. Only the HID transport signals this; over SmartCard the
+/// ceremony appears as continuous <see cref="WebAuthnStatusProcessing"/>.
+/// </remarks>
+public sealed record WebAuthnStatusWaitingForUser : WebAuthnStatus;
 
 /// <summary>
 /// The operation has finished successfully.

@@ -16,6 +16,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -298,7 +299,7 @@ public class WebAuthnClientMakeCredentialTests
             });
 
         // Act
-        await _client.MakeCredentialAsync(options, "123456", useUv: false, CancellationToken.None);
+        await _client.MakeCredentialAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
 
         // Assert
         Assert.Equal(2, requests.Count);
@@ -356,7 +357,7 @@ public class WebAuthnClientMakeCredentialTests
             });
 
         // Act
-        await _client.MakeCredentialAsync(options, "123456", useUv: false, CancellationToken.None);
+        await _client.MakeCredentialAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
 
         // Assert
         Assert.Equal(4, tokenPermissions.Count);

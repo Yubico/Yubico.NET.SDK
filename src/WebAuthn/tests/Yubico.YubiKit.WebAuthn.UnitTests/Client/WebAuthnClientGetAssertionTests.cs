@@ -15,6 +15,7 @@
 using NSubstitute;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
@@ -260,7 +261,7 @@ public class WebAuthnClientGetAssertionTests
             });
 
         // Act
-        var result = await _client.GetAssertionAsync(options, "123456", useUv: false, CancellationToken.None);
+        var result = await _client.GetAssertionAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
 
         // Assert
         Assert.Single(result);
@@ -305,7 +306,7 @@ public class WebAuthnClientGetAssertionTests
             });
 
         // Act
-        var result = await _client.GetAssertionAsync(options, "123456", useUv: false, CancellationToken.None);
+        var result = await _client.GetAssertionAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
 
         // Assert
         Assert.Empty(result);

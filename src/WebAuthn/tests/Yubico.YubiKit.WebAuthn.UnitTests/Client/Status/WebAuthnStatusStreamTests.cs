@@ -13,13 +13,17 @@
 // limitations under the License.
 
 using NSubstitute;
+using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Client.Status;
 using Yubico.YubiKit.WebAuthn.Preferences;
@@ -28,406 +32,284 @@ using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client.Status;
 
 /// <summary>
-/// Phase 5 tests for WebAuthn status streaming APIs.
+/// The status stream reports ceremony progress. It never gathers input: a PIN comes from the
+/// caller's bytes or the configured <see cref="ICredentialPrompt"/>, and abandoning the stream
+/// cancels the ceremony rather than stranding it.
 /// </summary>
 public class WebAuthnStatusStreamTests
 {
-    [Fact(Timeout = 5000)]
+    private sealed class FixedPrompt(byte[]? pin) : ICredentialPrompt
+    {
+        public int CallCount { get; private set; }
+
+        public ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(
+            CredentialPromptContext context, CancellationToken cancellationToken)
+        {
+            CallCount++;
+            return ValueTask.FromResult<IMemoryOwner<byte>?>(
+                pin is null ? null : DisposableArrayPoolBuffer.CreateFromSpan(pin));
+        }
+    }
+
+    /// <summary>Worst-case prompt: never answers and ignores the token it is handed.</summary>
+    private sealed class StuckPrompt : ICredentialPrompt
+    {
+        private readonly TaskCompletionSource<IMemoryOwner<byte>?> _never = new();
+
+        public ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(
+            CredentialPromptContext context, CancellationToken cancellationToken) => new(_never.Task);
+    }
+
+    private static WebAuthnOrigin Origin()
+    {
+        if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
+            throw new InvalidOperationException("Failed to parse origin");
+        return origin;
+    }
+
+    private static RegistrationOptions RegOptions(
+        UserVerificationPreference uv = UserVerificationPreference.Discouraged) => new()
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(
+            RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            UserVerification = uv
+        };
+
+    private static AuthenticationOptions AuthOptions() => new()
+    {
+        Challenge = RandomNumberGenerator.GetBytes(32),
+        RpId = "example.com"
+    };
+
+    private static IWebAuthnBackend CreateBackend(bool pinSupported = false)
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+                clientPinSupported: pinSupported, uvSupported: false));
+
+        backend.GetPinUvTokenAsync(
+                Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(), Arg.Any<string?>(),
+                Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
+            .Returns(new PinUvAuthTokenSession(new PinUvAuthProtocolV2(), RandomNumberGenerator.GetBytes(32)));
+
+        backend.MakeCredentialAsync(
+                Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+
+        return backend;
+    }
+
+    [Fact(Timeout = 10000)]
     public async Task MakeCredentialStream_HappyPath_EmitsProcessing_ThenFinished()
     {
-        // Arrange - Mock backend that returns success without needing PIN/UV
-        var mockBackend = Substitute.For<IWebAuthnBackend>();
-        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo(
-            clientPinSupported: false,
-            uvSupported: false);
-        mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
-        mockBackend.MakeCredentialAsync(
-            Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+        await using var client = new WebAuthnClient(CreateBackend(), Origin(), _ => false);
 
-        if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
-            throw new InvalidOperationException("Failed to parse origin");
-
-        await using var client = new WebAuthnClient(mockBackend, origin, _ => false);
-
-        var options = new RegistrationOptions
-        {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
-            User = new PublicKeyCredentialUserEntity(
-                RandomNumberGenerator.GetBytes(16),
-                "user@example.com",
-                "User"),
-            PubKeyCredParams = [new CoseAlgorithm(-7)],
-            UserVerification = UserVerificationPreference.Discouraged
-        };
-
-        // Act - Iterate the stream and collect statuses
         var statuses = new List<WebAuthnStatus>();
-        await foreach (var status in client.MakeCredentialStreamAsync(options, TestContext.Current.CancellationToken))
+        await foreach (var status in client.MakeCredentialStreamAsync(
+            RegOptions(), cancellationToken: TestContext.Current.CancellationToken))
         {
             statuses.Add(status);
         }
 
-        // Assert - Sequence pattern: starts with Processing, ends with Finished
-        Assert.NotEmpty(statuses);
         Assert.Contains(statuses, s => s is WebAuthnStatusProcessing);
-        Assert.Contains(statuses, s => s is WebAuthnStatusFinished<RegistrationResponse>);
-
         var finished = statuses.OfType<WebAuthnStatusFinished<RegistrationResponse>>().Single();
-        Assert.NotNull(finished.Result);
         Assert.False(finished.Result.CredentialId.IsEmpty);
-        Assert.NotNull(finished.Result.PublicKey);
     }
 
-    [Fact(Timeout = 5000)]
-    public async Task MakeCredentialStream_NoPin_EmitsRequestingPin_AndResumesAfterSubmit()
+    [Fact(Timeout = 10000)]
+    public async Task GetAssertionStream_NoMatchingCredentials_ReachesFinishedWithEmptyList()
     {
-        // Arrange - Mock backend whose UvDecision wants PIN
-        var mockBackend = Substitute.For<IWebAuthnBackend>();
-        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo(
-            clientPinSupported: true,
-            uvSupported: false);
-        mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
+        var backend = CreateBackend();
+        backend.GetAssertionAsync(
+                Arg.Any<BackendGetAssertionRequest>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ => throw new CtapException(CtapStatus.NoCredentials));
 
-        // Mock GetPinUvTokenAsync to capture the submitted PIN
-        byte[]? capturedPinBytes = null;
-        var mockTokenSession = new PinUvAuthTokenSession(
-            new PinUvAuthProtocolV2(),
-            RandomNumberGenerator.GetBytes(32));
+        await using var client = new WebAuthnClient(backend, Origin(), _ => false);
 
-        mockBackend.GetPinUvTokenAsync(
-            Arg.Any<PinUvAuthMethod>(),
-            Arg.Any<PinUvAuthTokenPermissions>(),
-            Arg.Any<string?>(),
-            Arg.Do<ReadOnlyMemory<byte>?>(pin => capturedPinBytes = pin.HasValue ? pin.Value.ToArray() : null),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>())
-            .Returns(mockTokenSession);
-
-        mockBackend.MakeCredentialAsync(
-            Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
-
-        if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
-            throw new InvalidOperationException("Failed to parse origin");
-
-        await using var client = new WebAuthnClient(mockBackend, origin, _ => false);
-
-        var options = new RegistrationOptions
-        {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
-            User = new PublicKeyCredentialUserEntity(
-                RandomNumberGenerator.GetBytes(16),
-                "user@example.com",
-                "User"),
-            PubKeyCredParams = [new CoseAlgorithm(-7)],
-            UserVerification = UserVerificationPreference.Required
-        };
-
-        // Act - Iterate stream and respond to RequestingPin
-        bool pinRequested = false;
-        RegistrationResponse? result = null;
-
-        await foreach (var status in client.MakeCredentialStreamAsync(options, TestContext.Current.CancellationToken))
-        {
-            switch (status)
-            {
-                case WebAuthnStatusRequestingPin requestingPin:
-                    pinRequested = true;
-                    var pinBytes = Encoding.UTF8.GetBytes("123456");
-                    await requestingPin.SubmitPin(pinBytes);
-                    break;
-
-                case WebAuthnStatusFinished<RegistrationResponse> finished:
-                    result = finished.Result;
-                    break;
-            }
-        }
-
-        // Assert
-        Assert.True(pinRequested, "RequestingPin should have been emitted");
-        Assert.NotNull(result);
-        Assert.False(result.CredentialId.IsEmpty);
-
-        // Verify PIN was submitted to backend
-        Assert.NotNull(capturedPinBytes);
-        var expectedPin = Encoding.UTF8.GetBytes("123456");
-        Assert.Equal(expectedPin, capturedPinBytes);
-    }
-
-    [Fact(Timeout = 5000)]
-    public async Task MakeCredentialStream_DeduplicatesConsecutiveProcessing()
-    {
-        // Focused unit test on StatusChannel itself to verify deduplication
-        // (Full integration would require wiring IProgress<CtapStatus> - Phase 6)
-
-        var channel = new StatusChannel<int>();
-
-        // Act - Write multiple identical Processing statuses, then a Finished
-        var writeTask = Task.Run(async () =>
-        {
-            await channel.WriteAsync(new WebAuthnStatusProcessing(), TestContext.Current.CancellationToken);
-            await channel.WriteAsync(new WebAuthnStatusProcessing(), TestContext.Current.CancellationToken); // Should be deduplicated
-            await channel.WriteAsync(new WebAuthnStatusProcessing(), TestContext.Current.CancellationToken); // Should be deduplicated
-            await channel.WriteAsync(new WebAuthnStatusFinished<int>(42), TestContext.Current.CancellationToken);
-            channel.Complete();
-        }, TestContext.Current.CancellationToken);
-
-        // Collect statuses from reader
         var statuses = new List<WebAuthnStatus>();
-        await foreach (var status in channel.Reader(TestContext.Current.CancellationToken))
+        await foreach (var status in client.GetAssertionStreamAsync(
+            AuthOptions(), cancellationToken: TestContext.Current.CancellationToken))
         {
             statuses.Add(status);
         }
 
-        await writeTask;
-
-        // Assert - No two adjacent Processing records
-        Assert.Equal(2, statuses.Count); // Processing, Finished (duplicates removed)
-        Assert.IsType<WebAuthnStatusProcessing>(statuses[0]);
-        Assert.IsType<WebAuthnStatusFinished<int>>(statuses[1]);
-
-        // Double-check: no consecutive duplicates
-        for (int i = 1; i < statuses.Count; i++)
-        {
-            Assert.False(
-                statuses[i].Equals(statuses[i - 1]),
-                $"Found consecutive duplicate statuses at index {i}");
-        }
+        // An empty match is a successful ceremony, not a failure.
+        var finished = statuses.OfType<WebAuthnStatusFinished<IReadOnlyList<MatchedCredential>>>().Single();
+        Assert.Empty(finished.Result);
     }
 
-    [Fact(Timeout = 5000)]
-    public async Task MakeCredentialDrainConvenience_AutoRespondsWithProvidedPin()
+    [Fact(Timeout = 10000)]
+    public async Task Stream_WhenAuthenticatorAwaitsTouch_EmitsWaitingForUser()
     {
-        // Arrange - Backend wants PIN
-        var mockBackend = Substitute.For<IWebAuthnBackend>();
-        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo(
-            clientPinSupported: true,
-            uvSupported: false);
-        mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
-
-        byte[]? capturedPinBytes = null;
-        var mockTokenSession = new PinUvAuthTokenSession(
-            new PinUvAuthProtocolV2(),
-            RandomNumberGenerator.GetBytes(32));
-
-        mockBackend.GetPinUvTokenAsync(
-            Arg.Any<PinUvAuthMethod>(),
-            Arg.Any<PinUvAuthTokenPermissions>(),
-            Arg.Any<string?>(),
-            Arg.Do<ReadOnlyMemory<byte>?>(pin => capturedPinBytes = pin.HasValue ? pin.Value.ToArray() : null),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>())
-            .Returns(mockTokenSession);
-
-        mockBackend.MakeCredentialAsync(
-            Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
-
-        if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
-            throw new InvalidOperationException("Failed to parse origin");
-
-        await using var client = new WebAuthnClient(mockBackend, origin, _ => false);
-
-        var options = new RegistrationOptions
-        {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
-            User = new PublicKeyCredentialUserEntity(
-                RandomNumberGenerator.GetBytes(16),
-                "user@example.com",
-                "User"),
-            PubKeyCredParams = [new CoseAlgorithm(-7)],
-            UserVerification = UserVerificationPreference.Required
-        };
-
-        // Act - Use convenience overload with string PIN
-        var result = await client.MakeCredentialAsync(options, pin: "654321", useUv: false, TestContext.Current.CancellationToken);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.False(result.CredentialId.IsEmpty);
-
-        // Verify backend.GetPinUvTokenAsync was called with UTF-8 "654321"
-        await mockBackend.Received(1).GetPinUvTokenAsync(
-            Arg.Any<PinUvAuthMethod>(),
-            Arg.Any<PinUvAuthTokenPermissions>(),
-            Arg.Any<string?>(),
-            Arg.Any<ReadOnlyMemory<byte>?>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>());
-
-        Assert.NotNull(capturedPinBytes);
-        var expectedPin = Encoding.UTF8.GetBytes("654321");
-        Assert.Equal(expectedPin, capturedPinBytes);
-    }
-
-    [Fact(Timeout = 5000)]
-    public async Task MakeCredentialDrainConvenience_NullPinWhenRequired_ThrowsNotAllowed()
-    {
-        // Arrange - Backend wants PIN
-        var mockBackend = Substitute.For<IWebAuthnBackend>();
-        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo(
-            clientPinSupported: true,
-            uvSupported: false);
-        mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
-
-        // Should never reach MakeCredentialAsync
-        mockBackend.MakeCredentialAsync(
-            Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
-
-        if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
-            throw new InvalidOperationException("Failed to parse origin");
-
-        await using var client = new WebAuthnClient(mockBackend, origin, _ => false);
-
-        var options = new RegistrationOptions
-        {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
-            User = new PublicKeyCredentialUserEntity(
-                RandomNumberGenerator.GetBytes(16),
-                "user@example.com",
-                "User"),
-            PubKeyCredParams = [new CoseAlgorithm(-7)],
-            UserVerification = UserVerificationPreference.Required
-        };
-
-        // Act & Assert - Expect WebAuthnClientError with NotAllowed
-        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(
-            async () => await client.MakeCredentialAsync(options, pin: null, useUv: false, TestContext.Current.CancellationToken));
-
-        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
-
-        // Verify backend.MakeCredentialAsync was NOT invoked
-        await mockBackend.DidNotReceive().MakeCredentialAsync(
-            Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>());
-    }
-
-    [Fact(Timeout = 5000)]
-    public async Task MakeCredentialDrainConvenience_NullPinBytesWhenRequired_ThrowsNotAllowed()
-    {
-        var mockBackend = Substitute.For<IWebAuthnBackend>();
-        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo(
-            clientPinSupported: true,
-            uvSupported: false);
-        mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
-
-        mockBackend.MakeCredentialAsync(
-            Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
-
-        if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
-            throw new InvalidOperationException("Failed to parse origin");
-
-        await using var client = new WebAuthnClient(mockBackend, origin, _ => false);
-
-        var options = new RegistrationOptions
-        {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
-            User = new PublicKeyCredentialUserEntity(
-                RandomNumberGenerator.GetBytes(16),
-                "user@example.com",
-                "User"),
-            PubKeyCredParams = [new CoseAlgorithm(-7)],
-            UserVerification = UserVerificationPreference.Required
-        };
-
-        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(
-            async () => await client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken));
-
-        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
-        Assert.Equal("PIN required but not provided", ex.Message);
-
-        await mockBackend.DidNotReceive().MakeCredentialAsync(
-            Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>());
-    }
-
-    [Fact(Timeout = 5000)]
-    public async Task MakeCredentialStream_ConsumerBreaks_ProducerCancelledQuickly()
-    {
-        // Arrange - Mock backend with cancellable long-running operation
-        var mockBackend = Substitute.For<IWebAuthnBackend>();
-        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo(
-            clientPinSupported: false,
-            uvSupported: false);
-        mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(mockInfo);
-
-        // Track whether MakeCredentialAsync received a cancellation request
-        var receivedCancellation = false;
-        mockBackend.MakeCredentialAsync(
-            Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
-            Arg.Any<CancellationToken>())
-            .Returns(async callInfo =>
+        var backend = CreateBackend();
+        backend.MakeCredentialAsync(
+                Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
             {
-                var ct = callInfo.ArgAt<CancellationToken>(2);
-                try
-                {
-                    // Wait indefinitely OR until cancelled
-                    await Task.Delay(Timeout.Infinite, ct);
-                    return MockFido2Responses.CreateMockMakeCredentialResponse();
-                }
-                catch (OperationCanceledException)
-                {
-                    receivedCancellation = true;
-                    throw;
-                }
+                // Mirrors a CTAP HID keep-alive reporting that a touch is awaited.
+                callInfo.ArgAt<IProgress<CtapStatus>?>(1)?.Report(CtapStatus.UserActionPending);
+                return MockFido2Responses.CreateMockMakeCredentialResponse();
             });
 
-        if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
-            throw new InvalidOperationException("Failed to parse origin");
+        await using var client = new WebAuthnClient(backend, Origin(), _ => false);
 
-        await using var client = new WebAuthnClient(mockBackend, origin, _ => false);
-
-        var options = new RegistrationOptions
+        var statuses = new List<WebAuthnStatus>();
+        await foreach (var status in client.MakeCredentialStreamAsync(
+            RegOptions(), cancellationToken: TestContext.Current.CancellationToken))
         {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
-            User = new PublicKeyCredentialUserEntity(
-                RandomNumberGenerator.GetBytes(16),
-                "user@example.com",
-                "User"),
-            PubKeyCredParams = [new CoseAlgorithm(-7)],
-            UserVerification = UserVerificationPreference.Discouraged
-        };
-
-        // Act - Consumer breaks after first Processing status
-        var sawProcessing = false;
-        await foreach (var status in client.MakeCredentialStreamAsync(options, TestContext.Current.CancellationToken))
-        {
-            if (status is WebAuthnStatusProcessing)
-            {
-                sawProcessing = true;
-                break; // Consumer breaks early (iterator disposed → linked CTS cancelled)
-            }
+            statuses.Add(status);
         }
 
-        // Assert - Consumer saw Processing before breaking
-        Assert.True(sawProcessing);
+        Assert.Contains(statuses, s => s is WebAuthnStatusWaitingForUser);
+    }
 
-        // Give producer a small window to receive cancellation
-        await Task.Delay(100, TestContext.Current.CancellationToken);
+    [Fact(Timeout = 10000)]
+    public async Task Stream_WhenBackendFails_EmitsFailedRatherThanThrowing()
+    {
+        var backend = CreateBackend();
+        backend.MakeCredentialAsync(
+                Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
+            .Returns<MakeCredentialResponse>(_ => throw new CtapException(CtapStatus.OperationDenied));
 
-        // Verify producer received cancellation (not stuck waiting)
-        Assert.True(receivedCancellation, "Producer should have received cancellation when consumer broke");
+        await using var client = new WebAuthnClient(backend, Origin(), _ => false);
+
+        var statuses = new List<WebAuthnStatus>();
+        await foreach (var status in client.MakeCredentialStreamAsync(
+            RegOptions(), cancellationToken: TestContext.Current.CancellationToken))
+        {
+            statuses.Add(status);
+        }
+
+        Assert.Contains(statuses, s => s is WebAuthnStatusFailed);
+    }
+
+    [Fact(Timeout = 10000)]
+    public async Task Stream_WhenPinNeeded_PromptSuppliesItWithoutAnyStatusInteraction()
+    {
+        var prompt = new FixedPrompt(Encoding.UTF8.GetBytes("123456"));
+        await using var client = new WebAuthnClient(
+            CreateBackend(pinSupported: true), Origin(), _ => false, prompt: prompt);
+
+        var statuses = new List<WebAuthnStatus>();
+        await foreach (var status in client.MakeCredentialStreamAsync(
+            RegOptions(UserVerificationPreference.Required),
+            cancellationToken: TestContext.Current.CancellationToken))
+        {
+            statuses.Add(status);
+        }
+
+        Assert.Equal(1, prompt.CallCount);
+        Assert.Contains(statuses, s => s is WebAuthnStatusFinished<RegistrationResponse>);
+    }
+
+    [Fact(Timeout = 10000)]
+    public async Task Stream_WhenPinNeededAndNoPromptConfigured_EmitsFailed()
+    {
+        await using var client = new WebAuthnClient(
+            CreateBackend(pinSupported: true), Origin(), _ => false);
+
+        var statuses = new List<WebAuthnStatus>();
+        await foreach (var status in client.MakeCredentialStreamAsync(
+            RegOptions(UserVerificationPreference.Required),
+            cancellationToken: TestContext.Current.CancellationToken))
+        {
+            statuses.Add(status);
+        }
+
+        var failed = statuses.OfType<WebAuthnStatusFailed>().Single();
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, failed.Error.Code);
+    }
+
+    /// <summary>
+    /// Regression for the deadlock that the interactive-status design allowed: a consumer that
+    /// abandons the stream while the ceremony waits on a prompt must not hang on disposal.
+    /// </summary>
+    [Fact(Timeout = 20000)]
+    public async Task Stream_ConsumerBreaksWhileWaitingOnPrompt_DisposalCompletes()
+    {
+        await using var client = new WebAuthnClient(
+            CreateBackend(pinSupported: true), Origin(), _ => false, prompt: new StuckPrompt());
+
+        var enumeration = Task.Run(async () =>
+        {
+            await foreach (var status in client.MakeCredentialStreamAsync(
+                RegOptions(UserVerificationPreference.Required), cancellationToken: CancellationToken.None))
+            {
+                if (status is WebAuthnStatusProcessing)
+                {
+                    await Task.Delay(300);
+                    break;
+                }
+            }
+        }, TestContext.Current.CancellationToken);
+
+        var completed = await Task.WhenAny(
+            enumeration, Task.Delay(10000, TestContext.Current.CancellationToken));
+
+        Assert.True(ReferenceEquals(enumeration, completed),
+            "Abandoning the stream while a prompt is outstanding must not deadlock disposal.");
+        await enumeration;
+    }
+
+    /// <summary>
+    /// Regression for the harsher variant: a well-behaved consumer keeps enumerating and cancels
+    /// its own token. Cancellation must reach the pending prompt.
+    /// </summary>
+    [Fact(Timeout = 20000)]
+    public async Task Stream_ExternalCancellationWhileWaitingOnPrompt_Terminates()
+    {
+        await using var client = new WebAuthnClient(
+            CreateBackend(pinSupported: true), Origin(), _ => false, prompt: new StuckPrompt());
+
+        using var cts = new CancellationTokenSource();
+
+        var enumeration = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var status in client.MakeCredentialStreamAsync(
+                    RegOptions(UserVerificationPreference.Required), cancellationToken: cts.Token))
+                {
+                    if (status is WebAuthnStatusProcessing)
+                    {
+                        cts.CancelAfter(300);
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Acceptable terminal outcome.
+            }
+        }, TestContext.Current.CancellationToken);
+
+        var completed = await Task.WhenAny(
+            enumeration, Task.Delay(10000, TestContext.Current.CancellationToken));
+
+        Assert.True(ReferenceEquals(enumeration, completed),
+            "External cancellation must release a ceremony parked on a prompt.");
+        await enumeration;
+    }
+
+    [Fact(Timeout = 10000)]
+    public async Task Stream_ReEnumeration_StartsANewCeremony()
+    {
+        var backend = CreateBackend();
+        await using var client = new WebAuthnClient(backend, Origin(), _ => false);
+
+        var stream = client.MakeCredentialStreamAsync(
+            RegOptions(), cancellationToken: TestContext.Current.CancellationToken);
+
+        await foreach (var _ in stream) { }
+        await foreach (var _ in stream) { }
+
+        // Standard IAsyncEnumerable semantics: each enumeration re-runs the operation.
+        await backend.Received(2).MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<IProgress<CtapStatus>?>(),
+            Arg.Any<CancellationToken>());
     }
 }

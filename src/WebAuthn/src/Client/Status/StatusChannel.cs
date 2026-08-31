@@ -25,7 +25,6 @@ namespace Yubico.YubiKit.WebAuthn.Client.Status;
 /// This channel manages:
 /// - Unbounded status queue
 /// - Deduplication of consecutive identical statuses
-/// - Interactive responses (PIN submission, UV decision)
 /// - Graceful completion on success, cancellation, or error
 /// </remarks>
 internal sealed class StatusChannel<TResult> : IAsyncDisposable
@@ -33,7 +32,6 @@ internal sealed class StatusChannel<TResult> : IAsyncDisposable
     private readonly Channel<WebAuthnStatus> _channel;
     private WebAuthnStatus? _lastWritten;
     private bool _readerStarted;
-    private TaskCompletionSource<ReadOnlyMemory<byte>?>? _pinResponseTcs;
 
     public StatusChannel()
     {
@@ -86,35 +84,34 @@ internal sealed class StatusChannel<TResult> : IAsyncDisposable
     }
 
     /// <summary>
+    /// Writes a status update without blocking, discarding it if the channel is already complete.
+    /// </summary>
+    /// <param name="status">The status to write.</param>
+    /// <remarks>
+    /// For callers that must not block or throw, such as transport keep-alive notifications that
+    /// can arrive as a ceremony is finishing. Applies the same consecutive-duplicate suppression
+    /// as <see cref="WriteAsync"/>.
+    /// </remarks>
+    public void TryWrite(WebAuthnStatus status)
+    {
+        if (_lastWritten is not null && _lastWritten.Equals(status))
+        {
+            return;
+        }
+
+        if (_channel.Writer.TryWrite(status))
+        {
+            _lastWritten = status;
+        }
+    }
+
+    /// <summary>
     /// Completes the channel writer, signaling no more statuses will be written.
     /// </summary>
     /// <param name="error">Optional exception if the channel is being completed due to an error.</param>
     public void Complete(Exception? error = null)
     {
         _channel.Writer.Complete(error);
-    }
-
-    /// <summary>
-    /// Creates a PIN request status that the producer can await.
-    /// </summary>
-    /// <returns>A tuple of (status, response task).</returns>
-    public (WebAuthnStatusRequestingPin Status, Task<ReadOnlyMemory<byte>?> ResponseTask) CreatePinRequest()
-    {
-        _pinResponseTcs = new TaskCompletionSource<ReadOnlyMemory<byte>?>();
-
-        var status = new WebAuthnStatusRequestingPin(
-            SubmitPin: pinBytes =>
-            {
-                _pinResponseTcs?.TrySetResult(pinBytes);
-                return ValueTask.CompletedTask;
-            },
-            Cancel: () =>
-            {
-                _pinResponseTcs?.TrySetResult(null);
-                return ValueTask.CompletedTask;
-            });
-
-        return (status, _pinResponseTcs.Task);
     }
 
     /// <inheritdoc/>

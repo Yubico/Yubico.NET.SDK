@@ -52,6 +52,17 @@ public interface IWebAuthnBackend : IAsyncDisposable
         CancellationToken cancellationToken);
 
     /// <summary>
+    /// Gets the number of PIN attempts remaining before the authenticator blocks the PIN.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>
+    /// The remaining attempt count, or <c>null</c> when the authenticator does not
+    /// report one. Used to populate credential prompts after a rejected PIN, so a
+    /// failure to read it must not fail the surrounding operation.
+    /// </returns>
+    Task<int?> GetPinRetriesAsync(CancellationToken cancellationToken);
+
+    /// <summary>
     /// Creates a new credential via CTAP2 MakeCredential.
     /// </summary>
     Task<MakeCredentialResponse> MakeCredentialAsync(

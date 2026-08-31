@@ -211,9 +211,38 @@ dotnet toolchain.cs -- crap --crap-args "--top 50 --min-crap 15"
 dotnet toolchain.cs -- crap --crap-args "--json artifacts/crap/crap.json"
 ```
 
-Verify the complexity rules against their golden fixtures with `dotnet crap.cs --self-check`.
+### Two complexity axes
 
-v1 reports only. There is no CI gate, no cognitive-complexity second axis, and no baseline ratchet yet; those wait until the baseline shows whether they are needed.
+CRAP is driven by cyclomatic complexity, which answers *how many paths* — not *how risky is this to change*. Those diverge badly on lookup tables, so the report also computes **cognitive complexity** (SonarSource rule S3776).
+
+| method | cyclomatic | cognitive | reading |
+|---|---:|---:|---|
+| `SCardException.GetErrorString` | 69 | 1 | a flat status-word table: large, obvious |
+| `LinuxHidIOReportConnection.ParseReportSizes` | 13 | 24 | a nested parser: small, genuinely hard |
+
+Cognitive complexity applies three rules that produce this split: a `switch` increments **once** regardless of arm count, nesting compounds, and readable shorthand (`??`, `??=`, `?.`) is ignored.
+
+Filter with both to get the actionable set, which avoids maintaining a hand-written ignore list of "big but harmless" methods:
+
+```bash
+dotnet toolchain.cs -- crap --crap-args "--min-crap 8 --min-cognitive 15"
+```
+
+`--min-cognitive` defaults to 15, which is Sonar's own threshold for S3776.
+
+### Cyclomatic complexity rules
+
+The rules follow the [SonarQube C# specification](https://docs.sonarsource.com/sonarqube-server/user-guide/code-metrics/metrics-definition), so the numbers are comparable to any SonarQube report: base 1 per member, plus one for each conditional expression, conditional access (`?.`), switch case or switch-expression arm, `and`/`or` pattern, `do`/`for`/`foreach`/`if`/`while`, and `??`/`??=`/`||`/`&&`.
+
+**One deliberate deviation:** `catch` clauses and `when` guards also increment. SonarQube's C# list omits them; textbook McCabe and the original crap4j both count them, and an exception handler is a real alternate path. This repo has 186 catch clauses, so the difference is material and is stated here rather than hidden.
+
+`default:` and the `_` switch-expression arm do not increment, since neither adds an independent path.
+
+Cognitive complexity does not implement the recursion increment, which needs a semantic model; directly recursive methods score one low.
+
+Verify every rule against its golden fixtures with `dotnet crap.cs --self-check` (51 fixtures, several taken from the SonarSource white paper).
+
+v1 reports only. There is no CI gate and no baseline ratchet yet; those wait until the thresholds are settled.
 
 ## xUnit v2 vs v3 Test Runner Detection
 

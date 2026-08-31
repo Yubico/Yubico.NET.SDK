@@ -32,6 +32,8 @@
  *                       Default: artifacts/coverage
  *   --source <dir>      Source root to analyze. Repeatable. Default: src
  *   --min-crap <n>      Only report methods at or above this CRAP score. Default: 8
+ *   --min-cognitive <n> Cognitive-complexity threshold used to separate genuinely
+ *                       hard code from large-but-flat code. Default: 15 (Sonar's own).
  *   --top <n>           Rows in the console table. Default: 25
  *   --json <path>       Write the full ranked result as JSON.
  *   --no-conditional-access
@@ -44,10 +46,9 @@
  *   2  coverage could not be reconciled with the source tree
  *
  * NOT IMPLEMENTED IN v1 (deliberately):
- *   - cognitive complexity as a second gate
  *   - CI gate / threshold exit code
  *   - baseline ratchet
- *   These wait until the source-CC baseline shows whether they are needed.
+ *   These wait until the thresholds are settled against the baseline.
  *
  * See TOOLCHAIN.md and docs/TESTING.md.
  */
@@ -78,6 +79,9 @@ sealed record CrapOptions
     public required IReadOnlyList<string> SourceRoots { get; init; }
     public required string CoverageGlob { get; init; }
     public double MinCrap { get; init; } = 8;
+
+    /// <summary>Sonar's own default threshold for rule S3776 is 15.</summary>
+    public int MinCognitive { get; init; } = 15;
     public int Top { get; init; } = 25;
     public string? JsonPath { get; init; }
     public bool CountConditionalAccess { get; init; } = true;
@@ -95,6 +99,7 @@ sealed record CrapOptions
         var sources = new List<string>();
         string? coverageGlob = null;
         double minCrap = 8;
+        var minCognitive = 15;
         var top = 25;
         string? json = null;
         var countConditionalAccess = true;
@@ -114,6 +119,14 @@ sealed record CrapOptions
                     if (!double.TryParse(args[++i], NumberStyles.Float, CultureInfo.InvariantCulture, out minCrap))
                     {
                         Console.Error.WriteLine($"error: --min-crap expects a number, got '{args[i]}'");
+                        return null;
+                    }
+
+                    break;
+                case "--min-cognitive" when i + 1 < args.Length:
+                    if (!int.TryParse(args[++i], NumberStyles.Integer, CultureInfo.InvariantCulture, out minCognitive))
+                    {
+                        Console.Error.WriteLine($"error: --min-cognitive expects an integer, got '{args[i]}'");
                         return null;
                     }
 
@@ -153,6 +166,7 @@ sealed record CrapOptions
             SourceRoots = sources,
             CoverageGlob = coverageGlob ?? Path.Combine("artifacts", "coverage"),
             MinCrap = minCrap,
+            MinCognitive = minCognitive,
             Top = top,
             JsonPath = json,
             CountConditionalAccess = countConditionalAccess,
@@ -167,6 +181,7 @@ sealed record CrapOptions
               --coverage <dir>           Directory searched for coverage.cobertura.xml (default: artifacts/coverage)
               --source <dir>             Source root to analyze, repeatable (default: src)
               --min-crap <n>             Minimum CRAP score to report (default: 8)
+              --min-cognitive <n>        Cognitive-complexity threshold for the risk column (default: 15)
               --top <n>                  Rows in the console table (default: 25)
               --json <path>              Write full ranked result as JSON
               --no-conditional-access    Exclude ?. and ?[] from cyclomatic complexity
@@ -195,6 +210,9 @@ sealed record SourceMethod
     public required int StartLine { get; init; }
     public required int EndLine { get; init; }
     public required int Cyclomatic { get; init; }
+
+    /// <summary>SonarSource cognitive complexity: how hard the control flow is to follow.</summary>
+    public required int Cognitive { get; init; }
 
     /// <summary>False for abstract, interface, extern, and auto-property members, which emit no code.</summary>
     public required bool HasImplementation { get; init; }
@@ -237,6 +255,7 @@ static class MethodExtractor
                 StartLine = span.StartLinePosition.Line + 1,
                 EndLine = span.EndLinePosition.Line + 1,
                 Cyclomatic = CyclomaticComplexity.Compute(node, countConditionalAccess),
+                Cognitive = CognitiveComplexity.Compute(node),
                 HasImplementation = HasImplementation(node),
             });
         }
@@ -413,6 +432,193 @@ static class CyclomaticComplexity
     };
 }
 
+/// <summary>
+/// Cognitive complexity: how hard the control flow is to follow, per the SonarSource
+/// specification (rule S3776, white paper Appendix B).
+/// </summary>
+/// <remarks>
+/// This exists because cyclomatic complexity answers "how many paths", which is not the
+/// same question as "how risky is this to change". A flat 63-arm switch that maps status
+/// words to strings has very high cyclomatic complexity and almost no cognitive
+/// complexity; a short method nested four levels deep is the reverse. Gating on both
+/// separates large-but-obvious code from genuinely difficult code without anyone
+/// maintaining a hand-written ignore list.
+///
+/// Three rules from the specification drive the difference:
+///   1. A `switch` increments once, no matter how many arms it has.
+///   2. Nesting compounds: a structure inside N nesting structures costs 1 + N.
+///   3. Readable shorthand is ignored, so `??`, `??=`, and `?.` cost nothing.
+///
+/// Not implemented: the recursion increment, which needs a semantic model to resolve call
+/// targets. Scores for directly recursive methods are therefore low by one.
+/// </remarks>
+static class CognitiveComplexity
+{
+    public static int Compute(SyntaxNode member)
+    {
+        var score = 0;
+
+        foreach (var child in BodyOf(member))
+            Walk(child, nesting: 0, ref score);
+
+        return score;
+    }
+
+    static IEnumerable<SyntaxNode> BodyOf(SyntaxNode member) => member switch
+    {
+        BaseMethodDeclarationSyntax m => Bodies(m.Body, m.ExpressionBody),
+        AccessorDeclarationSyntax a => Bodies(a.Body, a.ExpressionBody),
+        LocalFunctionStatementSyntax l => Bodies(l.Body, l.ExpressionBody),
+        PropertyDeclarationSyntax p => Bodies(null, p.ExpressionBody),
+        IndexerDeclarationSyntax i => Bodies(null, i.ExpressionBody),
+        _ => [],
+    };
+
+    static IEnumerable<SyntaxNode> Bodies(SyntaxNode? body, ArrowExpressionClauseSyntax? arrow)
+    {
+        if (body is not null)
+            yield return body;
+
+        if (arrow?.Expression is not null)
+            yield return arrow.Expression;
+    }
+
+    static void Walk(SyntaxNode node, int nesting, ref int score)
+    {
+        switch (node)
+        {
+            // Structural increments: cost one, plus one per enclosing nesting level, and
+            // raise the nesting level for whatever they contain.
+            case IfStatementSyntax ifStatement:
+                score += 1 + nesting;
+                Walk(ifStatement.Condition, nesting, ref score);
+                Walk(ifStatement.Statement, nesting + 1, ref score);
+                WalkElse(ifStatement.Else, nesting, ref score);
+                return;
+
+            case SwitchStatementSyntax switchStatement:
+                // One increment for the whole switch regardless of arm count.
+                score += 1 + nesting;
+                Walk(switchStatement.Expression, nesting, ref score);
+                foreach (var section in switchStatement.Sections)
+                    WalkChildren(section, nesting + 1, ref score);
+                return;
+
+            case SwitchExpressionSyntax switchExpression:
+                score += 1 + nesting;
+                Walk(switchExpression.GoverningExpression, nesting, ref score);
+                foreach (var arm in switchExpression.Arms)
+                    WalkChildren(arm, nesting + 1, ref score);
+                return;
+
+            case WhileStatementSyntax or DoStatementSyntax or ForStatementSyntax
+                or ForEachStatementSyntax or ForEachVariableStatementSyntax:
+                score += 1 + nesting;
+                WalkChildren(node, nesting + 1, ref score);
+                return;
+
+            case CatchClauseSyntax:
+                // try and finally are free; only the handler is a flow break.
+                score += 1 + nesting;
+                WalkChildren(node, nesting + 1, ref score);
+                return;
+
+            case ConditionalExpressionSyntax conditional:
+                score += 1 + nesting;
+                Walk(conditional.Condition, nesting, ref score);
+                Walk(conditional.WhenTrue, nesting + 1, ref score);
+                Walk(conditional.WhenFalse, nesting + 1, ref score);
+                return;
+
+            // Fundamental increment, no nesting cost: a labelled jump.
+            case GotoStatementSyntax:
+                score += 1;
+                WalkChildren(node, nesting, ref score);
+                return;
+
+            // Lambdas and local functions raise the nesting level but cost nothing
+            // themselves, because extracting code into a named unit aids readability.
+            case AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax:
+                WalkChildren(node, nesting + 1, ref score);
+                return;
+
+            // A run of the same logical operator reads as one condition, so a sequence
+            // costs one regardless of length. Only the root of the tree is scored.
+            case BinaryExpressionSyntax binary when IsLogical(binary) && !IsLogical(node.Parent):
+                score += CountOperatorRuns(binary);
+                WalkChildren(node, nesting, ref score);
+                return;
+
+            default:
+                WalkChildren(node, nesting, ref score);
+                return;
+        }
+    }
+
+    static void WalkElse(ElseClauseSyntax? elseClause, int nesting, ref int score)
+    {
+        if (elseClause is null)
+            return;
+
+        // `else` and `else if` are hybrid increments: they cost one but take no nesting
+        // increment, because the reader already paid that cost at the opening `if`.
+        score += 1;
+
+        if (elseClause.Statement is IfStatementSyntax elseIf)
+        {
+            Walk(elseIf.Condition, nesting, ref score);
+            Walk(elseIf.Statement, nesting + 1, ref score);
+            WalkElse(elseIf.Else, nesting, ref score);
+            return;
+        }
+
+        Walk(elseClause.Statement, nesting + 1, ref score);
+    }
+
+    static void WalkChildren(SyntaxNode node, int nesting, ref int score)
+    {
+        foreach (var child in node.ChildNodes())
+            Walk(child, nesting, ref score);
+    }
+
+    static bool IsLogical(SyntaxNode? node) =>
+        node is BinaryExpressionSyntax b
+        && (b.IsKind(SyntaxKind.LogicalAndExpression) || b.IsKind(SyntaxKind.LogicalOrExpression));
+
+    /// <summary>
+    /// Counts maximal runs of the same logical operator, left to right.
+    /// </summary>
+    /// <remarks>
+    /// <c>a &amp;&amp; b &amp;&amp; c</c> is one run and costs 1;
+    /// <c>a &amp;&amp; b || c &amp;&amp; d</c> is three runs and costs 3, because mixing
+    /// operators is what makes a condition hard to read.
+    /// </remarks>
+    static int CountOperatorRuns(BinaryExpressionSyntax root)
+    {
+        var kinds = new List<SyntaxKind>();
+        Flatten(root, kinds);
+
+        var runs = 0;
+        for (var i = 0; i < kinds.Count; i++)
+        {
+            if (i == 0 || kinds[i] != kinds[i - 1])
+                runs++;
+        }
+
+        return runs;
+
+        static void Flatten(SyntaxNode node, List<SyntaxKind> kinds)
+        {
+            if (node is not BinaryExpressionSyntax b || !IsLogical(b))
+                return;
+
+            Flatten(b.Left, kinds);
+            kinds.Add(b.Kind());
+            Flatten(b.Right, kinds);
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Self-check: golden fixtures for the complexity rules
 // ---------------------------------------------------------------------------
@@ -437,6 +643,22 @@ static class SelfCheck
             {
                 failures++;
                 Console.Error.WriteLine($"FAIL {name}: expected cc={expected}, got {actual}");
+            }
+        }
+
+        foreach (var (name, source, expected) in CognitiveFixtures())
+        {
+            var methods = MethodExtractor.Extract("fixture.cs", Wrap(source), countConditionalAccess: true);
+            var actual = methods.Count == 1 ? methods[0].Cognitive : -methods.Count;
+
+            if (actual == expected)
+            {
+                passes++;
+            }
+            else
+            {
+                failures++;
+                Console.Error.WriteLine($"FAIL cognitive/{name}: expected {expected}, got {actual}");
             }
         }
 
@@ -514,6 +736,48 @@ static class SelfCheck
             "namespace F; internal sealed class C { public void M() { } }", true);
         yield return ("expression-bodied-property-has-implementation",
             "namespace F; internal sealed class C { public int P => 1; }", true);
+    }
+
+    /// <summary>
+    /// Cognitive complexity fixtures, several taken directly from the SonarSource white
+    /// paper so the implementation can be checked against the published specification.
+    /// </summary>
+    static IEnumerable<(string Name, string Source, int Expected)> CognitiveFixtures()
+    {
+        yield return ("straight-line-is-zero", "void M() { var x = 1; }", 0);
+
+        // White paper: a switch costs one increment regardless of arm count. This is the
+        // rule that stops flat lookup tables from dominating the report.
+        yield return ("switch-counts-once-not-per-case",
+            "string M(int n) { switch (n) { case 1: return \"one\"; case 2: return \"two\"; " +
+            "case 3: return \"three\"; default: return \"lots\"; } }", 1);
+        yield return ("switch-expression-counts-once",
+            "string M(int n) => n switch { 1 => \"a\", 2 => \"b\", 3 => \"c\", _ => \"d\" };", 1);
+
+        // Nesting compounds; a flat sequence does not.
+        yield return ("three-sequential-ifs", "void M(int a) { if (a>0){} if (a>1){} if (a>2){} }", 3);
+        yield return ("nested-if-costs-one-plus-depth",
+            "void M(int a, int b) { if (a > 0) { if (b > 0) { } } }", 3);
+        yield return ("triple-nested",
+            "void M(int a, int b, int c) { if (a>0) { if (b>0) { if (c>0) { } } } }", 6);
+
+        // else and else if are hybrid: +1 each, no nesting increment.
+        yield return ("if-else", "void M(int a) { if (a > 0) { } else { } }", 2);
+        yield return ("if-elseif-else", "void M(int a) { if (a>0) { } else if (a<0) { } else { } }", 3);
+
+        // White paper: a run of one operator costs 1; mixing operators costs per run.
+        yield return ("uniform-operator-sequence-costs-one", "bool M(bool a, bool b, bool c, bool d) => a && b && c && d;", 1);
+        yield return ("mixed-operator-sequence-costs-per-run", "bool M(bool a, bool b, bool c, bool d) => a && b || c && d;", 3);
+
+        // Appendix A: readable shorthand is ignored.
+        yield return ("null-coalescing-ignored", "string M(string? a) => a ?? \"x\";", 0);
+        yield return ("conditional-access-ignored", "int? M(string? s) => s?.Length;", 0);
+
+        yield return ("loop-with-nested-if",
+            "void M(int[] xs) { foreach (var x in xs) { if (x > 0) { } } }", 3);
+        yield return ("catch-costs-one-try-is-free", "void M() { try { } catch { } }", 1);
+        yield return ("lambda-adds-nesting-but-no-increment",
+            "void M(System.Collections.Generic.List<int> xs) { xs.RemoveAll(x => { if (x > 0) { return true; } return false; }); }", 2);
     }
 
     static IEnumerable<(string Name, string Source, int Expected)> Fixtures()
@@ -851,18 +1115,19 @@ static class CrapAnalysis
         Console.WriteLine($"  not measurable      {uninstrumented}  (abstract, interface, extern, or auto-property)");
         Console.WriteLine($"  unmatched lines     {unmatchedCoverage}");
         Console.WriteLine($"  CRAP >= {options.MinCrap,-11:0.##}{flagged.Count}");
+        Console.WriteLine($"  of those, cognitive > {options.MinCognitive,-4}{flagged.Count(r => r.Method.Cognitive > options.MinCognitive)}");
         Console.WriteLine($"  conditional access  {(options.CountConditionalAccess ? "counted" : "not counted")}");
         Console.WriteLine();
 
         if (flagged.Count > 0)
         {
-            Console.WriteLine($"{"CRAP",10}  {"cc",4}  {"cov",7}  method");
+            Console.WriteLine($"{"CRAP",10}  {"cc",4}  {"cog",4}  {"cov",7}  method");
             Console.WriteLine(new string('-', 96));
             foreach (var row in flagged.Take(options.Top))
             {
                 var coverage = row.NeverObserved ? "  n/a" : row.Coverage.ToString("P1");
                 Console.WriteLine(
-                    $"{row.Crap,10:F1}  {row.Method.Cyclomatic,4}  {coverage,7}  {row.Method.Display}");
+                    $"{row.Crap,10:F1}  {row.Method.Cyclomatic,4}  {row.Method.Cognitive,4}  {coverage,7}  {row.Method.Display}");
             }
 
             if (flagged.Count > options.Top)
@@ -916,6 +1181,7 @@ static class CrapAnalysis
             writer.WriteNumber("startLine", row.Method.StartLine);
             writer.WriteNumber("endLine", row.Method.EndLine);
             writer.WriteNumber("cyclomatic", row.Method.Cyclomatic);
+            writer.WriteNumber("cognitive", row.Method.Cognitive);
             writer.WriteNumber("coveredLines", row.CoveredLines);
             writer.WriteNumber("totalLines", row.TotalLines);
             writer.WriteNumber("coverage", Math.Round(row.Coverage, 4));

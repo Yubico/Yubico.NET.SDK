@@ -34,7 +34,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_WithMultipleSubscribers_DeliversToAll()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var first = new RecordingObserver<DeviceEvent>();
         var second = new RecordingObserver<DeviceEvent>();
         using var s1 = broadcaster.Subscribe(first);
@@ -49,7 +49,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_DeliversEventsInOrder()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var observer = new RecordingObserver<DeviceEvent>();
         using var subscription = broadcaster.Subscribe(observer);
 
@@ -63,7 +63,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_WithNoSubscribers_DoesNotThrow()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
 
         broadcaster.Publish(Event());
     }
@@ -73,7 +73,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_AfterUnsubscribe_DoesNotDeliverToUnsubscribed()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var staying = new RecordingObserver<DeviceEvent>();
         var leaving = new RecordingObserver<DeviceEvent>();
         using var s1 = broadcaster.Subscribe(staying);
@@ -89,7 +89,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Subscription_Dispose_IsIdempotent()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var observer = new RecordingObserver<DeviceEvent>();
         var subscription = broadcaster.Subscribe(observer);
 
@@ -104,7 +104,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Subscribe_SameObserverTwice_ReceivesEventTwice()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var observer = new RecordingObserver<DeviceEvent>();
         using var s1 = broadcaster.Subscribe(observer);
         using var s2 = broadcaster.Subscribe(observer);
@@ -123,7 +123,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Subscribe_DuringPublish_DoesNotReceiveInFlightEvent()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var lateObserver = new RecordingObserver<DeviceEvent>();
         IDisposable? lateSubscription = null;
 
@@ -145,7 +145,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Unsubscribe_DuringPublish_DoesNotDisturbInFlightDelivery()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var second = new RecordingObserver<DeviceEvent>();
         IDisposable? secondSubscription = null;
 
@@ -167,7 +167,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_SubscriberThrows_PropagatesToPublisher()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var throwing = new RecordingObserver<DeviceEvent>(_ => throw new InvalidOperationException("boom"));
         using var subscription = broadcaster.Subscribe(throwing);
 
@@ -194,7 +194,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Complete_NotifiesAllSubscribers()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var first = new RecordingObserver<DeviceEvent>();
         var second = new RecordingObserver<DeviceEvent>();
         using var s1 = broadcaster.Subscribe(first);
@@ -209,7 +209,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Complete_IsIdempotent()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var observer = new RecordingObserver<DeviceEvent>();
         using var subscription = broadcaster.Subscribe(observer);
 
@@ -223,7 +223,15 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_AfterComplete_IsNoOp()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        // Also the observable-grammar guarantee for serialised producers - which is what the
+        // monitor's publish gate provides: a publish that BEGINS after completion delivers nothing,
+        // so such a producer never sees OnNext after OnCompleted.
+        //
+        // The unsynchronised case (a publish that captured its snapshot before Complete ran) is
+        // deliberately NOT defended against: doing so requires holding a lock across arbitrary
+        // subscriber code, which would let a blocking subscriber wedge start/stop/dispose. See the
+        // remarks on DeviceEventBroadcaster and src/Core/CLAUDE.md.
+        var broadcaster = new DeviceEventBroadcaster();
         var observer = new RecordingObserver<DeviceEvent>();
         using var subscription = broadcaster.Subscribe(observer);
 
@@ -231,6 +239,7 @@ public class DeviceEventBroadcasterTests
         broadcaster.Publish(Event());
 
         Assert.Empty(observer.Items);
+        Assert.Equal(1, observer.CompletedCount);
     }
 
     [Fact]
@@ -249,40 +258,13 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Subscribe_AfterComplete_ReturnsDisposableSubscription()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         broadcaster.Complete();
 
         var subscription = broadcaster.Subscribe(new RecordingObserver<DeviceEvent>());
 
         subscription.Dispose();
         subscription.Dispose();
-    }
-
-    // ---------- Disposal ----------
-
-    [Fact]
-    public void Dispose_CompletesSubscribers()
-    {
-        var broadcaster = new DeviceEventBroadcaster();
-        var observer = new RecordingObserver<DeviceEvent>();
-        using var subscription = broadcaster.Subscribe(observer);
-
-        broadcaster.Dispose();
-
-        Assert.True(observer.IsCompleted);
-    }
-
-    [Fact]
-    public void Dispose_IsIdempotent()
-    {
-        var broadcaster = new DeviceEventBroadcaster();
-        var observer = new RecordingObserver<DeviceEvent>();
-        using var subscription = broadcaster.Subscribe(observer);
-
-        broadcaster.Dispose();
-        broadcaster.Dispose();
-
-        Assert.Equal(1, observer.CompletedCount);
     }
 
     // ---------- Terminal-notification isolation ----------
@@ -292,8 +274,8 @@ public class DeviceEventBroadcasterTests
     {
         // Completion runs during disposal, exactly when a subscriber is likely tearing down its own
         // state. A throwing observer must not starve the others of their terminal signal - an async
-        // consumer whose channel is never completed would hang.
-        using var broadcaster = new DeviceEventBroadcaster();
+        // consumer whose channel is never completed would hang - nor derail the caller's cleanup.
+        var broadcaster = new DeviceEventBroadcaster();
         var throwing = new ThrowOnCompletedObserver();
         var later = new RecordingObserver<DeviceEvent>();
         using var s1 = broadcaster.Subscribe(throwing);
@@ -304,45 +286,15 @@ public class DeviceEventBroadcasterTests
         Assert.True(later.IsCompleted);
     }
 
-    [Fact]
-    public void Dispose_WhenSubscriberThrowsFromOnCompleted_DoesNotPropagate()
-    {
-        // Disposal must not be derailed by observer callbacks.
-        var broadcaster = new DeviceEventBroadcaster();
-        using var subscription = broadcaster.Subscribe(new ThrowOnCompletedObserver());
-
-        broadcaster.Dispose();
-    }
-
     // ---------- Observable grammar ----------
 
     [Fact]
-    public void Publish_StartedAfterComplete_DeliversNothing()
-    {
-        // Serialized producers - which is what the monitor's publish gate guarantees - never see
-        // OnNext after OnCompleted. A publish that BEGINS after completion delivers nothing.
-        //
-        // The concurrent case is deliberately NOT forced into strict observer grammar inside the
-        // broadcaster: doing so requires holding a lock across observer callbacks, which would let
-        // a blocking subscriber wedge start/stop/dispose. See the remarks on DeviceEventBroadcaster
-        // and src/Core/CLAUDE.md.
-        using var broadcaster = new DeviceEventBroadcaster();
-        var observer = new GrammarCheckingObserver();
-        using var subscription = broadcaster.Subscribe(observer);
-
-        broadcaster.Complete();
-        broadcaster.Publish(Event());
-
-        Assert.False(observer.SawOnNextAfterOnCompleted);
-    }
-
-    [Fact]
-    public void Complete_WhileASubscriberIsBlockedInOnNext_DoesNotWedge()
+    public async Task Complete_WhileASubscriberIsBlockedInOnNext_DoesNotWedge()
     {
         // Guards the documented lifecycle invariant: a blocking DeviceChanges subscriber must not be
         // able to wedge start/stop/dispose. This is the constraint that rules out serialising
         // OnNext against OnCompleted inside the broadcaster.
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var entered = new ManualResetEventSlim();
         using var release = new ManualResetEventSlim();
 
@@ -354,13 +306,15 @@ public class DeviceEventBroadcasterTests
         using var subscription = broadcaster.Subscribe(blocking);
 
         var publish = Task.Run(() => broadcaster.Publish(Event()), TestContext.Current.CancellationToken);
-        Assert.True(entered.Wait(TimeSpan.FromSeconds(10)), "subscriber never entered OnNext");
+        Assert.True(
+            entered.Wait(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken),
+            "subscriber never entered OnNext");
 
         // Must return while the subscriber is still blocked inside OnNext.
         broadcaster.Complete();
 
         release.Set();
-        publish.Wait(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+        await publish.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -381,7 +335,7 @@ public class DeviceEventBroadcasterTests
         // Subscriptions are identity-based. Array.IndexOf would use EqualityComparer<T>.Default and
         // remove whichever instance compares equal first - and DeviceChanges is public API, so a
         // consumer may well subscribe a record type that overrides Equals.
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var first = new EquatableObserver("same");
         var second = new EquatableObserver("same");
         Assert.Equal(first, second);
@@ -401,7 +355,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_ConcurrentWithSubscribeAndUnsubscribe_DoesNotCorruptState()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var stable = new RecordingObserver<DeviceEvent>();
         using var stableSubscription = broadcaster.Subscribe(stable);
 
@@ -425,7 +379,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Complete_ConcurrentWithSubscribe_EveryObserverEndsCompleted()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var observers = new List<RecordingObserver<DeviceEvent>>();
 
         Parallel.For(0, 100, i =>
@@ -458,28 +412,6 @@ public class DeviceEventBroadcasterTests
         }
 
         public void OnCompleted() => throw new ObjectDisposedException("SubscriberOwnedResource");
-
-        public void OnError(Exception error)
-        {
-        }
-    }
-
-    /// <summary>Records whether it ever saw <c>OnNext</c> after <c>OnCompleted</c>.</summary>
-    private sealed class GrammarCheckingObserver : IObserver<DeviceEvent>
-    {
-        private int _completed;
-
-        public bool SawOnNextAfterOnCompleted { get; private set; }
-
-        public void OnNext(DeviceEvent value)
-        {
-            if (Volatile.Read(ref _completed) == 1)
-            {
-                SawOnNextAfterOnCompleted = true;
-            }
-        }
-
-        public void OnCompleted() => Volatile.Write(ref _completed, 1);
 
         public void OnError(Exception error)
         {

@@ -29,7 +29,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_YieldsPublishedEventsInOrder()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var collected = new List<string>();
@@ -59,7 +59,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_WhenBroadcasterCompletes_StreamEndsWithoutError()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var count = 0;
@@ -83,7 +83,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_AfterComplete_EndsImmediately()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         broadcaster.Complete();
 
         var count = 0;
@@ -98,7 +98,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_WhenCancelled_ThrowsOperationCanceled()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource();
 
         var consumer = Task.Run(async () =>
@@ -118,7 +118,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_WhenEnumerationStops_UnsubscribesFromBroadcaster()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var consumer = Task.Run(async () =>
@@ -143,7 +143,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_MultipleConsumers_EachReceiveEveryEvent()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         async Task<List<string>> ConsumeTwoAsync()
@@ -179,7 +179,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_WhenConsumerFallsTooFarBehind_FaultsRatherThanDroppingSilently()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var gate = new SemaphoreSlim(0, 1);
@@ -217,7 +217,7 @@ public class DeviceEventStreamTests
     {
         // The overflow path must fault only the offending stream. An observer subscribed alongside
         // it has to keep receiving everything.
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var healthy = new RecordingObserver<DeviceEvent>();

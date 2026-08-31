@@ -95,7 +95,7 @@ public class SessionConstructionGuardTests
         await Task.WhenAll(racers);
 
         Assert.Single(sessions, s => s is not null);
-        var loser = Assert.Single(failures.Where(f => f is not null));
+        var loser = Assert.Single(failures, f => f is not null);
         _ = Assert.IsType<ConnectionInUseException>(loser);
 
         // The winner still holds the connection: the loser's failure path must not have cleared the slot.

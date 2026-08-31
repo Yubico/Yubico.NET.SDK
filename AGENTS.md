@@ -9,10 +9,12 @@
 - Use .NET 10 SDK. The repo defaults to `net10.0`, C# 14, nullable enabled, central package management, and warnings-as-errors for non-test projects.
 - Do not run `dotnet build` directly. Use `dotnet toolchain.cs build` or `dotnet toolchain.cs -- build --project Piv`.
 - Do not run `dotnet test` directly. Unit tests mix xUnit v3/Microsoft Testing Platform and xUnit v2; `dotnet toolchain.cs test` detects and invokes the right runner.
-- Focus tests with both module and filter when possible: `dotnet toolchain.cs -- test --project Fido2 --filter "Method~Sign"`.
+- Focus tests with both module and filter when possible: `dotnet toolchain.cs -- test --project Fido2 --filter "Method~Sign"`. The toolchain normalises `Method~`/`Name~` to `FullyQualifiedName~` for the xUnit v2 integration projects, which have no `Method` property; use `FullyQualifiedName~` directly if you want to be explicit.
+- A filter matching zero tests fails the target (`No tests matched the specified filter`). Do not judge a run by the closing `Passed: N | ... | Total: N` line — that counts **projects**, not tests. Read the per-project `total:` figure.
 - When touching Core runtime loops, polling paths, recovery logic, or listener lifecycle cleanup, also run `dotnet toolchain.cs -- resilience --fast`.
 - `--integration` requires `--project`: `dotnet toolchain.cs -- test --integration --project Piv --smoke`.
-- `--smoke` skips `Slow` and `RequiresUserPresence`; agents should not run touch/insert/remove tests unless a human explicitly coordinates hardware.
+- `--smoke` skips `Slow` and `RequiresUserPresence`; agents should not run touch/insert/remove tests unless a human explicitly coordinates hardware. It can thin coverage sharply — on WebAuthn it leaves a single SmartCard test — so check `total:` before calling a smoke pass validation.
+- Never run a whole `Category=RequiresUserPresence` lane as one blocking command: it blocks for minutes, and aborting mid-ceremony leaves the authenticator holding a user-presence request that wedges the key until it is re-plugged. One narrowly filtered test per invocation, with the human ready.
 - Use `dotnet toolchain.cs -- --help` when arguments act strangely; every script long option, including `--project`, requires the preceding `--` separator.
 - CI runs `dotnet toolchain.cs build`, `dotnet toolchain.cs test`, then `dotnet toolchain.cs -- pack --package-version 2.0.0-alpha.2`.
 - Scope `dotnet format` to your staged files via `--include`, never the whole solution — see `CLAUDE.md` Pre-Commit Checklist for the exact command.

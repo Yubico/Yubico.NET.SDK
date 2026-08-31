@@ -96,6 +96,23 @@ The `--filter` option supports various patterns:
 | `Category!=RequiresHardware` | Exclude tests needing physical YubiKey |
 | `Category!=Slow` | Exclude slow tests (>5 seconds) |
 
+### Reading the result — two traps
+
+**Judge a run by the per-project `total:` line, never the closing summary.** That last line —
+`Passed: 1 | Failed: 0 | Skipped: 1 | Total: 2` — counts **projects**, not tests. Grepping for
+`Passed:` will report success for a run that executed nothing:
+
+```bash
+dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~MyThing" \
+  | grep -E "total:|failed:"
+```
+
+**`Method~` is not a VSTest property.** Unit projects run xUnit v3 / Microsoft Testing Platform;
+integration projects run xUnit v2 under VSTest, which only knows `FullyQualifiedName`,
+`DisplayName` and traits. The toolchain normalises `Method~`/`Name~` to `FullyQualifiedName~` for
+those projects so both runners accept one syntax, and a filter matching zero tests now fails the
+target rather than reporting green. Prefer `FullyQualifiedName~` when you want to be exact.
+
 ### Test Category Traits
 
 Tests are categorized using `TestCategories` constants from `Yubico.YubiKit.Tests.Shared.Infrastructure`:

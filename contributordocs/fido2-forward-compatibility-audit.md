@@ -205,13 +205,15 @@ files have moved since.
 | D5 | direct | `Fido2/AttestationStatement.cs:181,214,236` | `ContainsExactKeys` does the same for `fido-u2f`, `apple`, and `none`. Silent loss of the typed properties rather than a throw | LOW–MED |
 | D6 | direct | `Fido2/Fido2Session.Pin.cs:1422` | Three separate bugs in one line — see section 6 | HIGH |
 | D7 | direct | `Fido2/Cose/CoseEcPublicKey.cs:211-220` | The decode constructor assigns through the public property setters, which run `ValidateCurve`/`ValidateLength` and throw `ArgumentException`. **This escapes `CreateOrUnsupported`, whose catch is `NotSupportedException`-only** — a hole in the PR #585 fix | MED |
-| D8 | direct | `Fido2/Cose/CoseEdDsaPublicKey.cs:128-129` | Same pattern for non-Ed25519 OKP curves. `Ed448` is already a `CoseEcCurve` member but is rejected | MED |
+| D8 | direct | `Fido2/Cose/CoseEdDsaPublicKey.cs:126-131` | Similar, but NOT the same pattern: the object initializer sets `PublicKey` **before** `Curve`, so an Ed448 key (57-byte public key) is rejected by the 32-byte `PublicKey` length check before curve validation ever runs. For OKP, "future curve" and "corrupt Ed25519" are the same wrong-length check — they cannot be told apart at the validator level | MED |
 | D9 | direct | `Fido2/Commands/ClientPinResponse.cs:78` | Still uses strict `CoseKey.Create` for the `keyAgreement` field | MED |
 | D10 | direct | `Fido2/AuthenticatorData.cs:408` | `GetCredProtectExtension()` rejects credProtect values outside 1–3 | MED |
 | D11 | direct | `Fido2/AuthenticatorInfo.cs:460,520` | `AsDictionary<bool>()` is all-or-nothing; a single non-boolean `options` value throws `InvalidCastException` from the **session constructor** | MED |
 | D12 | direct | `Fido2/Cbor/CborMap.cs:162-189` | `ReadArray<T>` rejects the whole array when one element does not convert (throw at line 189); 13 call sites | LOW |
 | D13 | direct | `Fido2/Commands/GetKeyAgreementResponse.cs:53` | Misleading `Ctap2MissingRequiredField` for a field that is present but not an EC key | LOW |
 | D14 | direct | `Fido2/PinProtocols/PinUvAuthProtocolBase.cs:177` | Duplicate of D13 one layer down; line 184 also hard-codes P-256 regardless of what the device reported | LOW |
+| D15 | doc | `Fido2/Cose/CoseEcPublicKey.cs:78`, `Fido2/Cose/CoseEdDsaPublicKey.cs:46` | Both `Curve` property docs promise `NotSupportedException` on set; `ValidateCurve` actually throws `ArgumentException` in both files. Pre-existing code/contract mismatch, discovered during D7 re-analysis | LOW |
+| D16 | direct | `Fido2/Cose/CoseEcPublicKey.cs:156,159` | `throw new ArgumentException(nameof(curve), "Unknown curve")` — arguments swapped; the signature is `(message, paramName)`, so the message renders as "curve" and the parameter name as "Unknown curve". Cosmetic | LOW |
 
 \* **D3's severity is unconfirmed.** Nobody has established whether YubiKey
 firmware ever returns a non-`packed` `fmt`. `MakeCredentialParameters` has no
@@ -275,10 +277,14 @@ with a message naming the actual type, and consumers building with nullable
 reference types disabled would get no warning at all under the nullable design.
 The same reasoning drives the D6 remedy.
 
-**`CreateOrUnsupported` catches only `NotSupportedException`** — to be widened to
-`ArgumentException` for D7/D8, and nothing else. `Ctap2DataException` must keep
-propagating: malformed CBOR, a missing key type or algorithm, and a modeled
-algorithm paired with the wrong key type are corrupt data, not future values.
+**`CreateOrUnsupported` catches only `NotSupportedException`, and stays that
+way for now.** An earlier draft prescribed widening the catch to
+`ArgumentException` for D7/D8; that prescription was **retracted** after
+re-analysis (see Stack 1) because it would absorb genuine corruption — a
+32-coordinate on a 48-curve, a truncated Ed25519 key — into the sentinel.
+`Ctap2DataException` must keep propagating: malformed CBOR, a missing key type
+or algorithm, and a modeled algorithm paired with the wrong key type are
+corrupt data, not future values.
 
 **Public `CoseKey.Create` stays strict.** Making it return the sentinel would
 silently change a documented public throw contract. `Create` is strict;
@@ -318,8 +324,8 @@ commit. Do not touch it in a feature or bugfix PR; put behavior-change notes in
 the PR body for the release manager to pick up.
 
 **Hard constraint set by the owner: no breaking changes, and nothing becomes
-nullable.** This is what blocks D3, and what forces remedy (a) over remedy (b)
-for D7.
+nullable.** This is what blocks D3. It also ruled out remedy (b) for D7;
+remedy (a) was later found independently defective — see Stack 1.
 
 ---
 
@@ -329,42 +335,78 @@ Three stacked PRs. **None of this has been built.**
 
 ```text
 develop
- └─ bugfix/fido2-credmgmt-unsupported-cose-key   → PR #585 (open) + amendment
+ └─ bugfix/fido2-credmgmt-unsupported-cose-key   → PR #585 (open; ships with D7/D8 documented-open)
      └─ bugfix/fido2-unknown-map-keys             → D1, D2, D4, D5, D9
          └─ bugfix/fido2-pinuvauth-protocol       → D6
 ```
 
-### Stack 1 — amend PR #585 (D7, D8)
+### Stack 1 — D7/D8 follow-up (NOT an amendment to PR #585)
 
-Widen `CreateOrUnsupported`'s catch to absorb `ArgumentException` and return the
-sentinel.
+**Status: no known-correct remedy. All three candidates analyzed to date are
+defective. PR #585 ships with D7/D8 open and documented on the API surface.**
+Whoever picks this up: read this whole section first — two independent reviews
+(the original handoff and a later Opus pass) each proposed a fix here that
+detailed re-analysis then killed. The failure modes below are the trap record.
 
-Two remedies were considered; **only (a) is permitted under the
-no-breaking-changes constraint**:
+**Remedies considered and rejected:**
 
-- **(a) widen the catch.** Confines the change to the tolerant path;
-  `CoseEcPublicKey`, `CoseEdDsaPublicKey`, and public `Create` are untouched.
-  **Chosen.**
-- (b) stop the decode constructors running their validators. This changes decode
-  behavior for every caller including direct `Create` users, and would permit a
-  `CoseEcPublicKey` to exist with an out-of-range `Curve`. **Rejected.**
+- **(a) widen the catch to `ArgumentException`.** Originally chosen; now
+  **rejected**. `ValidateLength` rejecting a 31-byte coordinate on a P-256 key,
+  or `PublicKey` rejecting a truncated Ed25519 key, is corruption detection —
+  the exact thing the sentinel design promised never to absorb.
+  `CreateOrUnsupported`'s own XML doc says so: "corrupt data rather than a
+  future algorithm... not tolerated." D7 and D8 want opposite answers; one
+  catch cannot give both.
+- **(b) stop the decode constructors running their validators.** Rejected as
+  before: changes decode behavior for every caller including strict `Create`,
+  and permits a `CoseEcPublicKey` with an out-of-range `Curve`.
+- **(c) change `ValidateCurve` to throw `NotSupportedException`,** aligning the
+  code with the exception both `Curve` property docs already promise (D15), so
+  the existing catch absorbs unmodeled curves with no widening. Attractive —
+  and **rejected as proposed**, for two reasons found on close reading:
+  1. **It does nothing for EdDSA.** The `CreateFromEncodedKey` object
+     initializer sets `PublicKey` before `Curve` (D8's corrected entry in
+     section 5), so an Ed448 key dies on the 32-byte length check before curve
+     validation runs. And for OKP, future-curve and corrupt-key are the *same*
+     length check — the D7/D8 separation this remedy depends on does not exist
+     in that file.
+  2. **It is not one line even for EC.** A `NotSupportedException` from inside
+     the constructor reaches the catch and produces a sentinel whose
+     `Algorithm` is a **modeled** value (e.g. ES256). That falsifies two
+     shipped contracts: `CreateOrUnsupported`'s "when the algorithm is one
+     this SDK models, the behavior is identical to `Create`", and the
+     load-bearing comment above the try block stating the only observable
+     `NotSupportedException` is the dispatch's. Both must be redesigned, not
+     merely edited.
 
-Consequence: `CoseUnsupportedPublicKey`'s XML documentation must widen from
-"algorithm this SDK does not model" to "cannot be represented by a modeled type",
-because you can now receive it for a modeled algorithm on an unmodeled curve.
+**The actual open design question**, which must be answered before any code:
+*may a `CoseUnsupportedPublicKey` ever carry a modeled algorithm?* If yes, the
+sentinel's meaning widens from "algorithm this SDK does not model" to "key this
+SDK cannot represent", every consumer switching on `.Algorithm` must be
+reconsidered, and both documents above must be rewritten to match. If no, D7
+requires a second sentinel or a different mechanism entirely. Decide this
+first; the diff is downstream of the decision.
 
-Criteria: an unmodeled curve, an unmodeled coordinate length, and a non-Ed25519
-OKP curve each yield the sentinel with raw bytes preserved; enumeration returns
-all credentials when one is affected; **anti:** public `Create` still throws for
-all three; **anti:** `CoseEcPublicKey.cs` and `CoseEdDsaPublicKey.cs` are
-unmodified; **anti:** every malformed-encoding rejection listed in
-`CreateOrUnsupported`'s exception contract still throws, so widening the catch
-absorbs the curve and coordinate-length cases only.
+Also fold in when this is picked up: D15 (align `ValidateCurve`'s exception
+with the documented contract — in whichever direction the design decision
+implies) and D16 (swapped `ArgumentException` arguments), both trivial once
+the direction is fixed.
+
+Criteria for whatever remedy survives: an unmodeled EC curve yields the
+sentinel with raw bytes preserved; enumeration returns all credentials when one
+is affected; **anti:** a wrong-length coordinate on a *modeled* curve still
+throws; **anti:** a truncated Ed25519 key still throws; **anti:** public
+`Create` still throws for all of these; **anti:** every malformed-encoding
+rejection in `CreateOrUnsupported`'s documented exception contract still
+throws. Ed448 tolerance may prove unachievable without redesigning
+`CoseEdDsaPublicKey` validation order — if so, document it as out of scope
+rather than forcing it.
 
 Note that `ArgumentException` is currently documented on both
 `CreateOrUnsupported` overloads as the outcome for a modeled algorithm on an
-unmodeled curve. That documentation must be removed as part of this work, since
-the whole point of the change is that those cases stop throwing.
+unmodeled curve. That documentation is **accurate today** and must stay until a
+remedy ships; the earlier instruction to remove it belonged to rejected
+remedy (a).
 
 Do not write a criterion about null input. `ReadOnlyMemory<byte>` is a struct and
 neither `Create` nor `CborMap` performs a null check, so `ArgumentNullException`

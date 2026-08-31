@@ -19,7 +19,10 @@ namespace Yubico.YubiKit.Core.Native.Linux.Libc;
 public static class LibcHelpers
 {
     public static string GetErrnoString() =>
-        Marshal.GetLastWin32Error() switch
+        GetErrnoString(Marshal.GetLastWin32Error());
+
+    internal static string GetErrnoString(int errno) =>
+        errno switch
         {
             7 => "E2BIG(7): Argument list too long",
             13 => "EACCES(13): Permission denied",

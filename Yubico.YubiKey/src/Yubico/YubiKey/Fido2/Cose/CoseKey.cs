@@ -77,6 +77,22 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <summary>
         /// Creates the correct COSE key representation based on the CBOR data provided.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This is the strict entry point. Use it when you require a key this SDK
+        /// can fully model and want an exception otherwise — for example when
+        /// validating a key at a trust boundary before relying on it.
+        /// </para>
+        /// <para>
+        /// If the encoding came from an authenticator rather than from your own
+        /// code, and an algorithm this SDK does not model should not be fatal,
+        /// use <see cref="CreateOrUnsupported(ReadOnlyMemory{byte})"/> instead.
+        /// That returns a <see cref="CoseUnsupportedPublicKey"/> preserving the
+        /// original encoding rather than throwing. This applies both when
+        /// decoding a live response and when re-reading a key your application
+        /// persisted earlier.
+        /// </para>
+        /// </remarks>
         /// <param name="coseEncodedKey">
         /// A valid COSE key representation.
         /// </param>
@@ -98,6 +114,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <exception cref="NotSupportedException">
         /// The <see cref="CoseAlgorithmIdentifier"/> is not supported by this object representation.
         /// </exception>
+        /// <seealso cref="CreateOrUnsupported(ReadOnlyMemory{byte})"/>
         public static CoseKey Create(ReadOnlyMemory<byte> coseEncodedKey, out int bytesRead)
         {
             var cborMap = new CborMap<int>(coseEncodedKey);
@@ -204,6 +221,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// length is not. Such a key is currently rejected rather than returned
         /// as a <see cref="CoseUnsupportedPublicKey"/>.
         /// </exception>
+        /// <seealso cref="Create"/>
         public static CoseKey CreateOrUnsupported(ReadOnlyMemory<byte> coseEncodedKey) =>
             CreateOrUnsupported(coseEncodedKey, out _);
 
@@ -248,6 +266,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// length is not. Such a key is currently rejected rather than returned
         /// as a <see cref="CoseUnsupportedPublicKey"/>.
         /// </exception>
+        /// <seealso cref="Create"/>
         public static CoseKey CreateOrUnsupported(ReadOnlyMemory<byte> coseEncodedKey, out int bytesRead)
         {
             // Build the map outside the try, so that the only

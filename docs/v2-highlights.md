@@ -1,153 +1,150 @@
-# V2 Highlights
+# What's new in YubiKit .NET v2
 
 Last updated: 2026-08-31
 
-This is the source-of-truth feature summary for developer outreach, the Early
-Access program, and launch communications. It is written to be handed to
-developer relations, product, and documentation stakeholders without
-additional interpretation.
+V2 is a ground-up rewrite of the YubiKey .NET SDK. It speaks to YubiKey
+applications v1 never supported, it's async from top to bottom, you install
+only the pieces you actually use, and it compiles to a native binary with no
+.NET runtime required on the machine.
 
-Every claim below is grounded in current source, merged automation records,
-or explicitly named pull requests. Where a capability is not yet true today,
-it is labeled as such rather than implied.
+It also breaks a lot of things on purpose. This page covers both halves —
+what you get, and what it costs you — so you can decide whether v2 is worth
+the migration today.
 
-## New Applet Support
+## New applet support
 
-V2 adds application support that v1 never had at all. These are not rewrites
-of existing v1 capability — they are new YubiKey applications the SDK did not
-previously speak to.
+Two YubiKey applications the SDK simply didn't speak to before.
 
-### WebAuthn (primary highlight)
+### WebAuthn
 
-`Yubico.YubiKit.WebAuthn` is a client package that encapsulates the FIDO
-ceremony end to end: preparing payloads, building `clientDataJSON`, formatting
-requests, making credentials, and getting assertions. This directly answers
-the most common developer question about v1 — which data fields belong where
-in a WebAuthn ceremony. The design is deliberately consistent with the
-Android, Python, and Rust SDKs so behavior transfers across platforms.
+If you've ever squinted at a WebAuthn spec trying to work out which field
+goes where, that part is over. `Yubico.YubiKit.WebAuthn` runs the whole FIDO
+ceremony for you — preparing payloads, building `clientDataJSON`, formatting
+requests, making credentials, and getting assertions.
 
-There is no plan to ship a server-side validation component alongside this
-client. Scope is the client ceremony only.
+This was the single most common source of confusion in v1, so we designed the
+package to match how the Android, Python, and Rust SDKs already do it. If you
+know the ceremony on one platform, it transfers.
+
+It's a client-side package. Server-side validation isn't in scope, and we're
+not planning to add it.
 
 ### OpenPGP
 
-`Yubico.YubiKit.OpenPgp` is new applet support with no v1 equivalent.
-Per-applet documentation covers supported operations and any firmware
-constraints; this summary intentionally does not restate applet-specific
-compatibility details.
+`Yubico.YubiKit.OpenPgp` brings OpenPGP support to the .NET SDK for the first
+time. Supported operations and firmware requirements live in the per-applet
+documentation rather than here.
 
-## Async-First Architecture
+## Async all the way down
 
-Every v2 public API is `async`/`await`. There are no synchronous facades
-anywhere in the SDK. This is a deliberate architectural choice, not a partial
-port: it optimizes for how the SDK actually spends time waiting on the
-YubiKey, at the cost of requiring async adoption even for simple
-console-app or script use cases that v1 didn't require.
+Every public API in v2 is `async`/`await`. There are no synchronous wrappers
+anywhere, and that's deliberate rather than half-finished.
 
-## Compartmentalized Packaging
+Talking to a YubiKey is mostly waiting on a YubiKey, and v2's API shape now
+reflects that honestly. The tradeoff is real: if you're writing a small
+console tool or a script, you'll be writing async code where v1 let you get
+away without it.
 
-V1 shipped as two packages (`Yubico.Core`, `Yubico.YubiKey`) that pulled in
-every applet whether an application used it or not. V2 splits into 10 focused
+## Install only what you use
+
+V1 gave you two packages — `Yubico.Core` and `Yubico.YubiKey` — and every
+applet came along whether you touched it or not. V2 splits into ten focused
 packages:
 
 `Yubico.YubiKit.Core`, `.Management`, `.Piv`, `.Fido2`, `.WebAuthn`, `.Oath`,
-`.YubiOtp`, `.OpenPgp`, `.SecurityDomain`, `.YubiHsm`.
+`.YubiOtp`, `.OpenPgp`, `.SecurityDomain`, `.YubiHsm`
 
-Applications install only the applets they use, which keeps deployed size
-down — this matters for enterprise and CLI/agent tooling scenarios in
-particular.
+Reference the applets your application actually uses and your deployed
+footprint drops accordingly. That matters most for enterprise deployments and
+CLI or agent tooling, where shipping unused protocol code is pure cost.
 
-**There is no meta-package.** This is a deliberate decision, not an
-oversight: bundling "install everything" back into one package would
-undercut the footprint benefit compartmentalization is meant to deliver.
-Consumers who genuinely need every applet add all 10 package references
-explicitly.
+**There's no meta-package, and there won't be one.** An "install everything"
+bundle would hand back exactly the footprint savings the split exists to
+deliver. If you genuinely need all ten applets, reference all ten.
 
-## Native AOT Support
+## Native AOT
 
-V2 SDK libraries compile to a single self-contained native binary with
-`PublishAot=true` and run without a .NET runtime installed on the host
-machine. All 10 SDK libraries are covered.
+V2 compiles to a single self-contained native binary with `PublishAot=true`,
+and runs on machines with no .NET runtime installed. All ten libraries are
+covered.
 
-This work landed through a reviewed, evidence-backed PR stack
-(`#592` → `#578` → `#587`, plus the native packaging prerequisite `#586`):
+- Zero AOT and trimming analyzer warnings across every library — no
+  suppressions hiding anything.
+- Verified against real YubiKey hardware on macOS arm64, Windows x64, and
+  Linux x64.
+- One rough edge is still being smoothed: the current public NativeShims
+  package ships a shared-library sidecar next to your AOT executable. A
+  self-contained static build that removes the sidecar is in progress.
 
-- Zero AOT/trimming analyzer warnings, no suppressions, across all 10
-  libraries.
-- Verified with real physical YubiKey hardware on macOS arm64, Windows x64,
-  and Linux x64.
-- A companion native-packaging effort is closing the last rough edge: today's
-  public NativeShims package still ships a shared-library sidecar next to an
-  AOT executable; a self-contained static NativeShims package removing that
-  sidecar is in progress and expected shortly.
+The work landed through the `#592` → `#578` → `#587` PR stack, with `#586` as
+the native packaging prerequisite.
 
-Deeper protocol-level runtime testing under AOT currently covers Core device
-discovery, Management, and PIV most thoroughly. FIDO2/WebAuthn and YubiOTP
-HID exchanges, and OATH/OpenPGP/SecurityDomain/YubiHSM session operations,
-are confirmed to link and run under AOT but have less exhaustive
-protocol-level runtime coverage than PIV. This is expected to deepen before
-general availability, not a known defect.
+Runtime testing under AOT is deepest on Core device discovery, Management,
+and PIV. FIDO2, WebAuthn, YubiOTP, OATH, OpenPGP, SecurityDomain, and YubiHSM
+all link and run under AOT, but with lighter protocol-level coverage so far.
+We're expanding that before general availability — nothing here is a known
+defect.
 
-## Why V2 Breaks So Much, On Purpose
+## Why v2 breaks so much, on purpose
 
-V1 shipped a large public surface — typed TLV readers/writers, general-purpose
-codecs (`Base16`, `Base32`, `Bcd`, `ModHex`), and pluggable low-level crypto
-primitive interfaces. Because all of it was public, almost any internal
-change became a breaking change, which made the SDK slow to evolve.
+Worth being straight about this, because the migration cost is real.
 
-V2 deliberately keeps this class of low-level primitive internal:
+V1 made almost everything public: typed TLV readers and writers,
+general-purpose codecs (`Base16`, `Base32`, `Bcd`, `ModHex`), and pluggable
+low-level crypto primitive interfaces. Once something is public it's a
+promise, and v1 had made so many promises that nearly any internal
+improvement turned into a breaking change. The SDK got slow to move.
 
-- `TlvReader`/`TlvWriter` (typed, sequential parsing) are gone. They are
-  replaced by a much thinner `Tlv`/`TlvHelper`/`DisposableTlvList` surface —
-  simple tag/value containers and static encode/decode helpers, not a public
-  extensibility point.
-- `Base16`/`Base32`/`Bcd`/`ModHex` standalone codecs are no longer public.
-- Pluggable crypto primitive interfaces (`IAesGcmPrimitives`,
-  `IEcdhPrimitives`, `ICmacPrimitives`) are no longer public extension points.
+V2 keeps that whole class of low-level primitive internal:
 
-This is intentional API discipline, not an oversight. A smaller, more
-deliberate public surface means v2 can keep evolving without repeating v1's
-pattern of constant breaking changes. Application code that depended on these
-utilities directly needs its own replacement; see
-[`docs/v1-to-v2-comparison.md`](v1-to-v2-comparison.md) for the breakdown.
+- `TlvReader`/`TlvWriter` are gone, replaced by a much thinner
+  `Tlv`/`TlvHelper`/`DisposableTlvList` surface — tag/value containers and
+  static encode/decode helpers, not an extensibility point.
+- The `Base16`/`Base32`/`Bcd`/`ModHex` codecs are no longer public.
+- Pluggable crypto primitives (`IAesGcmPrimitives`, `IEcdhPrimitives`,
+  `ICmacPrimitives`) are no longer public extension points.
 
-## Restored From V1 (Since Initial Gap Analysis)
+This is API discipline, not an oversight. A smaller public surface is what
+lets v2 keep improving without putting you through v1's steady drip of
+breaking changes. If your code leaned on those utilities directly, you'll
+need your own replacement —
+[the v1 to v2 comparison](v1-to-v2-comparison.md) has the details.
 
-An initial v1/v2 gap analysis (2026-07-21) flagged several v1 capabilities
-that were missing in early v2. Several of these have since been restored:
+## Restored from v1
 
-- PIV PIN-only (`PinProtected`) management-key mode, plus typed
-  CHUID/CCC/AdminData/KeyHistory data objects.
+An early v1/v2 gap analysis in July flagged capabilities that hadn't made it
+into v2 yet. These are back:
+
+- PIV PIN-only (`PinProtected`) management-key mode, plus typed CHUID, CCC,
+  AdminData, and KeyHistory data objects.
 - OATH `IsPasswordProtected` and `AuthenticateAndRetryAsync`, plus a
   dedicated `OathException`.
-- YubiHSM Auth's `HsmAuthRetryException`, `OnTouchRequired` callback, and the
-  hardware-verified `Counter` → `RetriesRemaining` rename.
+- YubiHSM Auth's `HsmAuthRetryException`, the `OnTouchRequired` callback, and
+  the hardware-verified `Counter` → `RetriesRemaining` rename.
 - YubiOTP keyboard-layout-aware static passwords and Yubico-OTP-algorithm
   challenge-response.
 - Dedicated exception types for SecurityDomain (`SecureChannelException`) and
   OpenPGP (`OpenPgpInvalidPinException`).
 
-See [`docs/v1-to-v2-comparison.md`](v1-to-v2-comparison.md) for what remains
-open, deferred, or intentionally decided against.
+[The v1 to v2 comparison](v1-to-v2-comparison.md) covers what's still open,
+still undecided, or deliberately not coming.
 
-## Not Yet Supported
+## Still to come
 
-- **Post-quantum algorithms (ML-DSA, ML-KEM):** not implemented in the .NET
-  SDK today. Feature-parity timing across SDKs is being coordinated
-  separately; do not commit to a date for this in external communication
-  until that's resolved.
+**Post-quantum algorithms (ML-DSA, ML-KEM)** aren't in the .NET SDK yet.
+We're coordinating parity timing across the SDKs before putting a date on it.
 
-## Near-Term Roadmap
+**A unified way to collect PINs and touch.** V1 had the `KeyCollector`
+delegate — one callback shape shared across PIV, FIDO2, OATH, U2F, and
+YubiHSM Auth. V2 has no equivalent today; each applet handles PIN, PUK, and
+touch prompts its own way. Whether to reintroduce a single pattern is still
+an open design question.
 
-- **Unified credential-collection pattern:** v1's `KeyCollector` delegate is
-  not replaced by an equivalent in v2 — each applet currently handles
-  PIN/PUK/touch collection independently. Whether to add a unified pattern is
-  under evaluation, not committed.
+## Where things stand today
 
-## Current Release State
+V2 is available now as `2.0.0-alpha.2` from a public, anonymous, unsigned
+NuGet feed. It hasn't completed Yubico's formal security audit yet, and it's
+marked not for production use until it does.
 
-V2 ships today as `2.0.0-alpha.2` from a public, anonymous, unsigned NuGet
-feed. It has **not yet completed Yubico's formal security audit** and is
-explicitly marked not for production use. This is a real gap against the
-"audited, fully functional release by end of year" commitment and needs an
-explicit timeline decision, not just documentation work.
+Try it, build against it, and tell us what breaks — that feedback is exactly
+what the alpha is for. Just don't ship it to production yet.

@@ -372,7 +372,7 @@ internal static class CliRunner
         if (device is null) return 1;
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
-        var result = await Certificates.GetCertificateAsync(session, slot.Value, ct);
+        var result = await PivExamples.Certificates.GetCertificateAsync(session, slot.Value, ct);
 
         if (useJson)
         {
@@ -406,7 +406,7 @@ internal static class CliRunner
         if (device is null) return 1;
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
-        var result = await Certificates.ExportCertificatePemAsync(session, slot.Value, ct);
+        var result = await PivExamples.Certificates.ExportCertificatePemAsync(session, slot.Value, ct);
 
         if (!result.Success)
         {
@@ -474,7 +474,7 @@ internal static class CliRunner
                 return 1;
             }
 
-            var result = await Certificates.ImportCertificateAsync(session, slot.Value, certData, compress, ct);
+            var result = await PivExamples.Certificates.ImportCertificateAsync(session, slot.Value, certData, compress, ct);
             if (useJson) JsonOutput.Write(result);
             else if (result.Success) Console.WriteLine("Certificate imported successfully.");
             else Console.Error.WriteLine($"Error: {result.ErrorMessage}");
@@ -520,7 +520,7 @@ internal static class CliRunner
                 return 1;
             }
 
-            var result = await Certificates.GenerateSelfSignedAsync(session, slot.Value, subject, validityDays, ct);
+            var result = await PivExamples.Certificates.GenerateSelfSignedAsync(session, slot.Value, subject, validityDays, ct);
             if (useJson) JsonOutput.Write(result);
             else if (result.Success) Console.WriteLine("Self-signed certificate generated successfully.");
             else Console.Error.WriteLine($"Error: {result.ErrorMessage}");
@@ -560,7 +560,7 @@ internal static class CliRunner
                 return 1;
             }
 
-            var result = await Certificates.GenerateCsrAsync(session, slot.Value, subject, ct);
+            var result = await PivExamples.Certificates.GenerateCsrAsync(session, slot.Value, subject, ct);
 
             if (!result.Success)
             {
@@ -607,7 +607,7 @@ internal static class CliRunner
                 return 1;
             }
 
-            var result = await Certificates.DeleteCertificateAsync(session, slot.Value, ct);
+            var result = await PivExamples.Certificates.DeleteCertificateAsync(session, slot.Value, ct);
             if (useJson) JsonOutput.Write(result);
             else if (result.Success) Console.WriteLine("Certificate deleted.");
             else Console.Error.WriteLine($"Error: {result.ErrorMessage}");

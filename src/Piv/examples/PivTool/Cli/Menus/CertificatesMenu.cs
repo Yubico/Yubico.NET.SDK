@@ -74,7 +74,7 @@ public static class CertificatesMenu
     {
         var slot = SlotSelector.SelectSlot("Select slot:");
 
-        var result = await Certificates.GetCertificateAsync(session, slot, ct);
+        var result = await PivExamples.Certificates.GetCertificateAsync(session, slot, ct);
         if (!result.Success)
         {
             OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to read certificate");
@@ -97,7 +97,7 @@ public static class CertificatesMenu
     {
         var slot = SlotSelector.SelectSlot("Select slot:");
 
-        var result = await Certificates.ExportCertificatePemAsync(session, slot, ct);
+        var result = await PivExamples.Certificates.ExportCertificatePemAsync(session, slot, ct);
 
         if (!result.Success || result.CsrPem is null)
         {
@@ -136,7 +136,7 @@ public static class CertificatesMenu
         }
 
         var certData = await File.ReadAllBytesAsync(filename, ct);
-        var result = await Certificates.ImportCertificateAsync(session, slot, certData, false, ct);
+        var result = await PivExamples.Certificates.ImportCertificateAsync(session, slot, certData, false, ct);
 
         if (result.Success)
         {
@@ -182,7 +182,7 @@ public static class CertificatesMenu
         var subject = AnsiConsole.Ask("Enter subject (e.g., CN=Test User):", "CN=Test User");
         var validDays = AnsiConsole.Ask("Enter validity in days:", 365);
 
-        var result = await Certificates.GenerateSelfSignedAsync(session, slot, subject, validDays, ct);
+        var result = await PivExamples.Certificates.GenerateSelfSignedAsync(session, slot, subject, validDays, ct);
 
         if (result.Success)
         {
@@ -204,7 +204,7 @@ public static class CertificatesMenu
         var slot = SlotSelector.SelectSlot("Select slot (must have existing key):");
         var subject = AnsiConsole.Ask("Enter subject (e.g., CN=Test User):", "CN=Test User");
 
-        var result = await Certificates.GenerateCsrAsync(session, slot, subject, ct);
+        var result = await PivExamples.Certificates.GenerateCsrAsync(session, slot, subject, ct);
 
         if (result.Success && result.CsrPem is not null)
         {
@@ -247,7 +247,7 @@ public static class CertificatesMenu
             return;
         }
 
-        var result = await Certificates.DeleteCertificateAsync(session, slot, ct);
+        var result = await PivExamples.Certificates.DeleteCertificateAsync(session, slot, ct);
 
         if (result.Success)
         {

@@ -78,7 +78,8 @@ internal class AsnPublicKeyDecoder
         throw new NotSupportedException(
             string.Format(
                 CultureInfo.CurrentCulture,
-                "ExceptionMessages.UnsupportedAlgorithm));"));
+                "Unsupported public key algorithm OID '{0}'.",
+                oidAlgorithm));
     }
 
     private static RSAPublicKey CreateRSAPublicKey(byte[] subjectPublicKey)
@@ -108,7 +109,8 @@ internal class AsnPublicKeyDecoder
             throw new NotSupportedException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm));"));
+                    "Unsupported EC curve OID '{0}'.",
+                    curveOid));
         }
 
         // For PKCS EC keys, the bit string contains the EC point in uncompressed form

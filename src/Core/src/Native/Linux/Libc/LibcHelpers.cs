@@ -53,7 +53,7 @@ public static class LibcHelpers
             28 => "ENOSPC(28): No space left on the device.",
             40 => "ENOSYS(40): Function not supported.",
             20 => "ENOTDIR(20): Not a directory.",
-            41 => "ENOTDIR(41): Directory is not empty.",
+            41 => "ENOTEMPTY(41): Directory is not empty.",
             25 => "ENOTTY(25): Inappropriate I/O control operation.",
             6 => "ENXIO(6): No such device or address.",
             1 => "EPERM(1): Operation not permitted.",

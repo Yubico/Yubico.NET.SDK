@@ -48,7 +48,7 @@ public class LibcHelpersTests
     [InlineData(28, "ENOSPC(28): No space left on the device.")]
     [InlineData(40, "ENOSYS(40): Function not supported.")]
     [InlineData(20, "ENOTDIR(20): Not a directory.")]
-    [InlineData(41, "ENOTDIR(41): Directory is not empty.")]
+    [InlineData(41, "ENOTEMPTY(41): Directory is not empty.")]
     [InlineData(25, "ENOTTY(25): Inappropriate I/O control operation.")]
     [InlineData(6, "ENXIO(6): No such device or address.")]
     [InlineData(1, "EPERM(1): Operation not permitted.")]

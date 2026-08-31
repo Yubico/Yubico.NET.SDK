@@ -75,7 +75,8 @@ internal class AsnPrivateKeyDecoder
         throw new InvalidOperationException(
             string.Format(
                 CultureInfo.CurrentCulture,
-                "ExceptionMessages.UnsupportedAlgorithm));"));
+                "Unsupported private key algorithm OID '{0}'.",
+                oidAlgorithm));
     }
 
     /// <summary>
@@ -189,7 +190,8 @@ internal class AsnPrivateKeyDecoder
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm));"));
+                    "Expected an ECDSA private key, but the algorithm OID was '{0}'.",
+                    oidAlgorithm));
         }
 
         var curveOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
@@ -201,7 +203,8 @@ internal class AsnPrivateKeyDecoder
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm));"));
+                    "Unsupported EC curve OID '{0}'. Supported curves are P-256, P-384 and P-521.",
+                    curveOid));
         }
 
         using var privateKeyInfoHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
@@ -309,7 +312,8 @@ internal class AsnPrivateKeyDecoder
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm));"));
+                    "Expected an RSA private key, but the algorithm OID was '{0}'.",
+                    oidAlgorithm));
         }
 
         using var privateKeyDataHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());

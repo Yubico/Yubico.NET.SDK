@@ -74,7 +74,9 @@ namespace Yubico.YubiKit.Core.Cryptography
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        "ExceptionMessages.UnsupportedAlgorithm),nameof(type)"));
+                        "Unsupported key type '{0}'.",
+                        type),
+                    nameof(type));
             }
 
             return definition;
@@ -126,7 +128,8 @@ namespace Yubico.YubiKit.Core.Cryptography
             ?? throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm,curve"));
+                    "Unsupported COSE EC curve '{0}'.",
+                    curve));
 
         /// <summary>
         /// Gets a key definition by its object identifier (OID).
@@ -177,7 +180,8 @@ namespace Yubico.YubiKit.Core.Cryptography
             return keyDefinition ?? throw new NotSupportedException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm));)"));
+                    "Unsupported algorithm or curve OID '{0}'.",
+                    oid));
         }
 
         public static KeyType GetKeyTypeByOid(Oid algorithmOid) => GetKeyTypeByOid(algorithmOid.Value);

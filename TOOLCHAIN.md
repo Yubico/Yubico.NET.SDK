@@ -46,6 +46,7 @@ dotnet toolchain.cs -- build --project Piv --clean
 - **docs-inventory** - Generate the report-only active documentation inventory
 - **docs-architecture** - Validate architecture diagram evidence map and rendered-image freshness
 - **coverage** - Run tests with code coverage collection (depends on: restore, build)
+- **crap** - Compute CRAP scores from collected coverage (requires: coverage)
 - **pack** - Create NuGet packages (depends on: restore, build)
 - **setup-feed** - Configure local NuGet feed
 - **publish** - Publish packages to local feed (depends on: pack, setup-feed)
@@ -92,8 +93,12 @@ dotnet toolchain.cs -- docs-inventory
 # Run tests for specific project with filter
 dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
 
-# Run tests with code coverage (xUnit v2 unit test projects only)
+# Run tests with code coverage (all unit test projects)
 dotnet toolchain.cs coverage
+
+# Rank methods by CRAP score using the collected coverage
+dotnet toolchain.cs crap
+dotnet toolchain.cs -- crap --crap-args "--top 50 --json artifacts/crap/crap.json"
 
 # Run integration tests for a specific module
 dotnet toolchain.cs -- test --integration --project Piv
@@ -130,6 +135,7 @@ clean  (standalone — must be specified explicitly)
 
 - **Packages**: `artifacts/packages/*.nupkg`
 - **Coverage reports**: `artifacts/coverage/**/coverage.cobertura.xml`
+- **CRAP report**: `artifacts/crap/crap.json` (when `--json` is passed)
 - **Local NuGet feed**: `artifacts/nuget-feed/`
 
 ## Analyzers and Formatting
@@ -171,7 +177,72 @@ This means you don't need to manually update the build script when adding new pr
 
 ## Code Coverage
 
-The `coverage` target collects coverage via `dotnet test` with the `coverlet` collector. Both xUnit v2 and v3 (MTP) projects are supported via the VSTest compatibility layer. Use `--project` to run coverage for a specific module.
+The `coverage` target picks a collector per project, because the two test platforms need different mechanisms:
+
+| Test platform | Mechanism | Why |
+|---|---|---|
+| xUnit v3 / Microsoft Testing Platform | `coverlet.console` against the test executable | `--collect:"XPlat Code Coverage"` is a VSTest data collector and requires `Microsoft.NET.Test.Sdk`, which MTP projects deliberately omit. Using it aborts the run with a missing `testhost.deps.json`. |
+| xUnit v2 | `dotnet test --collect:"XPlat Code Coverage"` | The VSTest data collector path. |
+
+All unit test projects currently use MTP, so the second row is not exercised today; it remains for xUnit v2 projects.
+
+`coverlet.runsettings.xml` is the single definition of coverage policy. The VSTest collector reads it directly, and `toolchain.cs` projects the same settings onto `coverlet.console` flags, so both paths filter identically. Change filters there, not in `toolchain.cs`.
+
+Use `--project` to run coverage for a specific module.
+
+`Microsoft.Testing.Extensions.CodeCoverage` is not used: it currently throws `TypeLoadException` against `xunit.v3` 3.0.0, whose `Microsoft.Testing.Platform.MSBuild` 1.7.3 dependency is not binary compatible with `Microsoft.Testing.Platform` 2.3.3. It also does not emit the per-method complexity that CRAP analysis reads.
+
+## CRAP Scores
+
+The `crap` target ranks methods by the CRAP (Change Risk Anti-Patterns) metric:
+
+```
+CRAP(m) = cc(m)^2 * (1 - cov(m))^3 + cc(m)
+```
+
+It runs `crap.cs`, which computes **source-level cyclomatic complexity** with Roslyn and takes only coverage from the Cobertura reports.
+
+This deliberately differs from the "crap score" ReportGenerator shows for the same reports. ReportGenerator reads coverlet's `complexity` attribute, which is `Math.Max(1, branches.Count)` over recorded IL branch outcomes — a single `if` contributes 2. Measured on this repo the ratio to source complexity ranges from 0.5x to 6x with no stable multiplier, and it follows Roslyn codegen, so an SDK upgrade can move the numbers with no source change.
+
+Pass script options through `--crap-args`:
+
+```bash
+dotnet toolchain.cs -- crap --crap-args "--top 50 --min-crap 15"
+dotnet toolchain.cs -- crap --crap-args "--json artifacts/crap/crap.json"
+```
+
+### Two complexity axes
+
+CRAP is driven by cyclomatic complexity, which answers *how many paths* — not *how risky is this to change*. Those diverge badly on lookup tables, so the report also computes **cognitive complexity** (SonarSource rule S3776).
+
+| method | cyclomatic | cognitive | reading |
+|---|---:|---:|---|
+| `SCardException.GetErrorString` | 69 | 1 | a flat status-word table: large, obvious |
+| `LinuxHidIOReportConnection.ParseReportSizes` | 13 | 24 | a nested parser: small, genuinely hard |
+
+Cognitive complexity applies three rules that produce this split: a `switch` increments **once** regardless of arm count, nesting compounds, and readable shorthand (`??`, `??=`, `?.`) is ignored.
+
+Filter with both to get the actionable set, which avoids maintaining a hand-written ignore list of "big but harmless" methods:
+
+```bash
+dotnet toolchain.cs -- crap --crap-args "--min-crap 8 --min-cognitive 15"
+```
+
+`--min-cognitive` defaults to 15, which is Sonar's own threshold for S3776.
+
+### Cyclomatic complexity rules
+
+The rules follow the [SonarQube C# specification](https://docs.sonarsource.com/sonarqube-server/user-guide/code-metrics/metrics-definition), so the numbers are comparable to any SonarQube report: base 1 per member, plus one for each conditional expression, conditional access (`?.`), switch case or switch-expression arm, `and`/`or` pattern, `do`/`for`/`foreach`/`if`/`while`, and `??`/`??=`/`||`/`&&`.
+
+**One deliberate deviation:** `catch` clauses and `when` guards also increment. SonarQube's C# list omits them; textbook McCabe and the original crap4j both count them, and an exception handler is a real alternate path. This repo has 186 catch clauses, so the difference is material and is stated here rather than hidden.
+
+`default:` and the `_` switch-expression arm do not increment, since neither adds an independent path.
+
+Cognitive complexity does not implement the recursion increment, which needs a semantic model; directly recursive methods score one low.
+
+Verify every rule against its golden fixtures with `dotnet crap.cs --self-check` (51 fixtures, several taken from the SonarSource white paper).
+
+v1 reports only. There is no CI gate and no baseline ratchet yet; those wait until the thresholds are settled.
 
 ## xUnit v2 vs v3 Test Runner Detection
 

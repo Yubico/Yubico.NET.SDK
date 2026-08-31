@@ -765,7 +765,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// CredentialExcluded and previewSign-specific statuses are handled by their own catch arms
     /// upstream and never reach this mapper.
     /// </summary>
-    private static WebAuthnClientError MapCtapStatusToWebAuthnError(CtapException ex) =>
+    internal static WebAuthnClientError MapCtapStatusToWebAuthnError(CtapException ex) =>
         ex.Status switch
         {
             CtapStatus.PinAuthInvalid or CtapStatus.PinInvalid or CtapStatus.PinAuthBlocked

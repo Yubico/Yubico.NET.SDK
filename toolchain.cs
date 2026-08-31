@@ -106,12 +106,16 @@
  */
 
 using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
 // Configuration
 const string ProjectPrefix = "Yubico.YubiKit.";
+// Matches <TargetFramework> in Directory.Build.props; used to locate MTP test executables.
+const string TestTargetFramework = "net10.0";
 var repoRoot = GetRepoRoot();
 var solutionFile = "Yubico.YubiKit.sln";
 var configuration = "Release";
@@ -130,6 +134,7 @@ var includeIntegration = HasFlag("--integration");
 var smokeTest = HasFlag("--smoke");
 var fastMode = HasFlag("--fast");
 var benchmarkArgs = GetArgument("--benchmark-args") ?? "";
+var crapArgs = GetArgument("--crap-args") ?? "";
 
 // --smoke injects trait filters to skip slow and user-presence tests
 if (smokeTest)
@@ -273,25 +278,48 @@ Target("coverage", () =>
 {
     PrintHeader("Running tests with coverage");
 
-    // Coverage uses dotnet test with coverlet. Both xUnit v2 and v3 (MTP) projects support
-    // this via the VSTest compatibility layer, so all unit test projects are included.
+    // Coverage collection differs per test platform:
+    //
+    //   xUnit v3 / MTP  -> coverlet.console (out of process).
+    //                      --collect:"XPlat Code Coverage" is a VSTest data collector and needs
+    //                      Microsoft.NET.Test.Sdk, which MTP projects deliberately omit, so it
+    //                      aborts with a missing testhost.deps.json. The MTP-native alternative,
+    //                      Microsoft.Testing.Extensions.CodeCoverage, currently throws
+    //                      TypeLoadException against xunit.v3 3.0.0 (its Microsoft.Testing.Platform.MSBuild
+    //                      1.7.3 dependency is not binary compatible with Microsoft.Testing.Platform 2.3.3).
+    //   xUnit v2        -> the existing VSTest data collector path.
+    //
+    // coverlet is also required for CRAP analysis: it is the only one of these that writes a
+    // per-method `complexity` attribute into the Cobertura XML, which ReportGenerator's risk
+    // hotspots and any CRAP tooling read. See docs/TESTING.md.
     var coverageResultsDir = Path.Combine(artifactsDir, "coverage");
     Directory.CreateDirectory(coverageResultsDir);
 
-    var projectsToCover = FilterProjectsByName(unitTestProjects, projectFilter);
+    var projectsToCover = FilterToProject(
+        unitTestProjects
+            .Select(p => (ProjectPath: p, UsesTestingPlatformRunner: UsesMicrosoftTestingPlatformRunner(repoRoot, p)))
+            .ToArray(),
+        projectFilter);
     if (projectsToCover is null)
         return;
 
+    if (projectsToCover.Any(p => p.UsesTestingPlatformRunner))
+        Run("dotnet", "tool restore");
+
     var results = new List<(string Project, bool Passed, string? Error, bool Skipped)>();
 
-    foreach (var project in projectsToCover)
+    foreach (var (project, usesTestingPlatformRunner) in projectsToCover)
     {
         var projectName = Path.GetFileNameWithoutExtension(project);
         PrintProjectHeader("Coverage", projectName);
 
         try
         {
-            Run("dotnet", $"test {project} -c {configuration} --settings coverlet.runsettings.xml --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
+            if (usesTestingPlatformRunner)
+                CollectMtpCoverage(project, projectName, coverageResultsDir);
+            else
+                Run("dotnet", $"test {project} -c {configuration} --settings coverlet.runsettings.xml --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
+
             results.Add((projectName, true, null, false));
             PrintColored($"✓ {projectName} - Coverage collected", ConsoleColor.Green);
         }
@@ -317,6 +345,21 @@ Target("coverage", () =>
     var failCount = results.Count(r => !r.Passed);
     if (failCount > 0)
         throw new InvalidOperationException($"{failCount} test project(s) failed during coverage collection");
+});
+
+Target("crap", () =>
+{
+    // The analysis itself lives in crap.cs so it stays independently runnable and
+    // self-checkable; this target exists because CRAP consumes the reports that the
+    // coverage target produces, so it belongs on the same discovery surface.
+    PrintHeader("Computing CRAP scores");
+
+    var coverageResultsDir = Path.Combine(artifactsDir, "coverage");
+    if (!Directory.Exists(coverageResultsDir))
+        throw new InvalidOperationException(
+            "No coverage results found. Run 'dotnet toolchain.cs coverage' first.");
+
+    Run("dotnet", $"crap.cs {crapArgs}".TrimEnd(), workingDirectory: repoRoot);
 });
 
 Target("resilience", () =>
@@ -525,7 +568,7 @@ if (args.Contains("--help") || args.Contains("-h"))
 // Run Bullseye — strip all custom args so Bullseye only sees target names and its own flags
 var bullseyeArgs = FilterBullseyeArgs(args,
     optionsWithValues: ["--project", "--filter", "--package-version", "--nuget-feed-name", "--nuget-feed-path",
-                        "--nuget-feed-url", "--nuget-api-key", "--benchmark-args"],
+                        "--nuget-feed-url", "--nuget-api-key", "--benchmark-args", "--crap-args"],
     flags: ["--integration", "--include-docs", "--embed-symbols", "--dry-run", "--clean", "--smoke", "--fast"]);
 await RunTargetsAndExitAsync(bullseyeArgs);
 
@@ -712,6 +755,97 @@ List<(string Project, bool Passed, string? Error, bool Skipped)> RunTestProjects
 
     return results;
 }
+
+// Collects coverage for a Microsoft Testing Platform (xUnit v3) test project.
+//
+// MTP test projects are plain executables, so coverlet.console can instrument the output
+// directory and launch the test binary directly.
+void CollectMtpCoverage(string projectPath, string projectName, string coverageResultsDir)
+{
+    Run("dotnet", $"build {projectPath} -c {configuration}");
+
+    var projectDir = Path.GetDirectoryName(Path.Combine(repoRoot, projectPath))!;
+    var outputDir = Path.Combine(projectDir, "bin", configuration, TestTargetFramework);
+    // Windows appends .exe to the apphost; Linux and macOS do not.
+    var testExecutable = Path.Combine(outputDir, projectName);
+    if (!File.Exists(testExecutable) && File.Exists(testExecutable + ".exe"))
+        testExecutable += ".exe";
+
+    if (!File.Exists(testExecutable))
+        throw new FileNotFoundException(
+            $"MTP test executable not found at {testExecutable}. Expected an OutputType=Exe test project.",
+            testExecutable);
+
+    var outputFile = Path.Combine(coverageResultsDir, projectName, "coverage.cobertura.xml");
+    Directory.CreateDirectory(Path.GetDirectoryName(outputFile)!);
+
+    var coverletArgs = new StringBuilder();
+    coverletArgs.Append($"coverlet \"{outputDir}\"");
+    coverletArgs.Append($" --target \"{testExecutable}\"");
+    coverletArgs.Append(" --format cobertura");
+    coverletArgs.Append($" --output \"{outputFile}\"");
+    coverletArgs.Append(TranslateRunsettingsToCoverletArgs());
+
+    Run("dotnet", coverletArgs.ToString());
+}
+
+// Translates coverlet.runsettings.xml into coverlet.console command-line flags.
+//
+// The VSTest data collector reads the runsettings file directly; coverlet.console cannot.
+// Rather than restating the filters here, the runsettings file stays the single definition
+// of coverage policy and this function projects it onto the CLI, so both collection paths
+// cannot drift apart.
+string TranslateRunsettingsToCoverletArgs()
+{
+    var settingsPath = Path.Combine(repoRoot, "coverlet.runsettings.xml");
+    if (!File.Exists(settingsPath))
+        throw new FileNotFoundException(
+            $"coverlet.runsettings.xml not found at {settingsPath}; it defines the coverage filters.",
+            settingsPath);
+
+    var settings = XDocument.Load(settingsPath)
+        .Descendants("Configuration")
+        .FirstOrDefault()
+        ?? throw new InvalidOperationException(
+            "coverlet.runsettings.xml has no <Configuration> element.");
+
+    var args = new StringBuilder();
+
+    foreach (var (element, flag) in new[]
+             {
+                 ("Exclude", "--exclude"),
+                 ("Include", "--include"),
+                 ("ExcludeByFile", "--exclude-by-file"),
+                 ("ExcludeByAttribute", "--exclude-by-attribute"),
+             })
+    {
+        foreach (var value in SplitSettingList(settings.Element(element)?.Value))
+            args.Append($" {flag} \"{value}\"");
+    }
+
+    if (IsSettingTrue(settings.Element("SkipAutoProps")?.Value))
+        args.Append(" --skipautoprops");
+
+    if (IsSettingTrue(settings.Element("SingleHit")?.Value))
+        args.Append(" --single-hit");
+
+    if (IsSettingTrue(settings.Element("UseSourceLink")?.Value))
+        args.Append(" --use-source-link");
+
+    // coverlet.console omits the test assembly unless asked; VSTest needs it stated.
+    if (IsSettingTrue(settings.Element("IncludeTestAssembly")?.Value))
+        args.Append(" --include-test-assembly");
+
+    return args.ToString();
+}
+
+static IEnumerable<string> SplitSettingList(string? value) =>
+    string.IsNullOrWhiteSpace(value)
+        ? []
+        : value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+static bool IsSettingTrue(string? value) =>
+    string.Equals(value?.Trim(), "true", StringComparison.OrdinalIgnoreCase);
 
 void PrintTestSummary(List<(string Project, bool Passed, string? Error, bool Skipped)> results, string label)
 {
@@ -1283,13 +1417,6 @@ static bool ShouldSkipMarkdownLink(string target)
 }
 
 static bool IsCodeFenceLine(string line) => Regex.IsMatch(line, @"^\s*```");
-
-// Returns null when no projects matched and an error was already printed (caller should return early).
-List<string>? FilterProjectsByName(string[] projects, string? filter)
-{
-    var matched = FilterProjectPaths(projects, filter, "No projects match");
-    return matched is null ? null : [..matched];
-}
 
 string[] FilterBullseyeArgs(string[] args, string[] optionsWithValues, string[] flags)
 {

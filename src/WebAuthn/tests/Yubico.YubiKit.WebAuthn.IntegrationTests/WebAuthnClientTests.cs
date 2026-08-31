@@ -132,6 +132,11 @@ public class WebAuthnClientTests
         Assert.Contains(statuses, s => s is WebAuthnStatusProcessing);
         Assert.Contains(statuses, s => s is WebAuthnStatusFinished<RegistrationResponse>);
 
+        // The ceremony above required a touch, so the authenticator must have told us it was
+        // waiting for one. Only real hardware exercises this: it comes from CTAP HID keep-alive
+        // frames, which no fake produces.
+        Assert.Contains(statuses, s => s is WebAuthnStatusWaitingForUser);
+
         var finished = statuses.OfType<WebAuthnStatusFinished<RegistrationResponse>>().Single();
         Assert.True(finished.Result.CredentialId.Length > 0);
     }
@@ -244,23 +249,57 @@ public class WebAuthnClientTests
         Assert.True(authResponse.Signature.Length > 0);
     }
 
+    /// <summary>
+    /// Registration with <see cref="UserVerificationPreference.Discouraged"/> and no PIN must
+    /// succeed and produce a credential that was NOT user-verified.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The relying party asking for <c>discouraged</c> is asking for no user verification. Demanding
+    /// a PIN anyway would make a non-UV credential impossible to create, so the ceremony proceeds
+    /// with no <c>pinUvAuthParam</c> on the wire.
+    /// </para>
+    /// <para>
+    /// This mirrors the canonical Rust client, whose <c>should_use_uv</c> returns false for
+    /// <c>Discouraged</c> unless user verification is actually configured AND one of: <c>alwaysUv</c>
+    /// is set, <c>makeCredUvNotRqd</c> is unset, or the request needs a permission beyond
+    /// makeCredential/getAssertion. A YubiKey 5.8.0 advertises <c>makeCredUvNotRqd: true</c>, so a
+    /// PIN being set on the key does not by itself force verification here.
+    /// </para>
+    /// <para>
+    /// The flag assertions are the point of the test: user presence and user verification are
+    /// independent. Touch is still required (CTAP never lets a client set <c>up</c> on
+    /// makeCredential, so the authenticator default of true applies), while UV must stay clear.
+    /// An earlier revision of this test asserted <c>NotAllowed</c>; that only passed because the
+    /// client hardcoded "a PIN is available" and then failed for want of one.
+    /// </para>
+    /// </remarks>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
-    public async Task MakeCredential_NoPinProvided_ThrowsNotAllowed(YubiKeyTestState state)
+    public async Task MakeCredential_UvDiscouragedAndNoPinProvided_CreatesNonVerifiedCredential(
+        YubiKeyTestState state)
     {
         await using var session = await state.Device
             .CreateFidoSessionAsync();
 
+        // A PIN is deliberately set on the authenticator. Discouraged must still skip verification.
         await NormalizePinAsync(session);
 
         await using var client = CreateClient(session);
 
         var options = CreateRegistrationOptions();
 
-        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
-            client.MakeCredentialAsync(options, pinBytes: null));
+        var response = await client.MakeCredentialAsync(options, pinBytes: null);
 
-        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
+        Assert.NotNull(response);
+        Assert.True(response.CredentialId.Length > 0, "Credential ID should not be empty");
+
+        Assert.True(
+            response.AuthenticatorData.UserPresent,
+            "User presence must be set: makeCredential always requires touch, independent of UV.");
+        Assert.False(
+            response.AuthenticatorData.UserVerified,
+            "User verification must be clear: the relying party asked for UV=Discouraged.");
     }
 }

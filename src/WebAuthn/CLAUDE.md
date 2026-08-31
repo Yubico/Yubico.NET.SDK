@@ -17,11 +17,12 @@ The WebAuthn module implements the W3C Web Authentication API (Level 2/3) on top
 - **High-level WebAuthn API**: `WebAuthnClient` orchestrates credential registration and authentication
 - **Extension Framework**: Pluggable CTAP v4 extensions (e.g., `previewSign`)
 - **Backend Abstraction**: Transparently routes operations through `IFidoSession`
-- **Status Streaming**: Async enumerable for operation progress (`IAsyncEnumerable<WebAuthnStatus>`)
+- **Status Streaming**: Observation-only async enumerable for ceremony progress (`IAsyncEnumerable<WebAuthnStatus>`)
+- **Credential Prompting**: Optional `ICredentialPrompt` supplies a PIN on demand; the SDK owns the retry loop
 
 **Key Dependencies:**
 - **One-way dependency on Fido2**: WebAuthn builds on FIDO2/CTAP primitives but FIDO2 does NOT depend on WebAuthn
-- **Core**: Shared types, logging, memory management
+- **Core**: Shared types, logging, memory management, `ICredentialPrompt`
 
 **Key Directories:**
 ```
@@ -30,25 +31,38 @@ src/
 │   ├── WebAuthnClient.cs
 │   ├── PublicSuffixChecker.cs
 │   ├── FidoSessionWebAuthnBackend.cs
-│   └── WebAuthnStatus.cs
+│   ├── IWebAuthnBackend.cs
+│   ├── PinUvAuthTokenSession.cs
+│   ├── WebAuthnClientData.cs
+│   ├── WebAuthnOrigin.cs
+│   ├── Status/                   # Ceremony progress reporting
+│   │   ├── WebAuthnStatus.cs
+│   │   └── StatusChannel.cs
+│   ├── UserVerification/         # UV/PIN decision logic
+│   │   └── UvDecision.cs
+│   ├── Validation/
+│   │   └── RpIdValidator.cs
+│   ├── Registration/             # Registration options and responses
+│   │   ├── RegistrationOptions.cs
+│   │   └── RegistrationResponse.cs
+│   └── Authentication/           # Authentication options and responses
+│       ├── AuthenticationOptions.cs
+│       ├── AuthenticationResponse.cs
+│       ├── CredentialMatcher.cs
+│       └── MatchedCredential.cs
 ├── Attestation/                  # Attestation object types
-│   ├── WebAuthnAttestationObject.cs
-│   └── WebAuthnAuthenticatorData.cs
+│   └── WebAuthnAttestationObject.cs
 ├── Extensions/                   # CTAP v4 extension framework
-│   ├── Adapters/
-│   │   └── PreviewSignAdapter.cs  # WebAuthn-level adapter (translates to Fido2)
-│   ├── PreviewSign/              # previewSign extension
-│   │   ├── PreviewSignAuthenticationInput.cs
-│   │   ├── PreviewSignRegistrationInput.cs
-│   │   └── PreviewSignErrors.cs
-│   └── IExtensionAdapter.cs
-├── Client/Registration/          # Registration options and responses
-│   ├── RegistrationOptions.cs
-│   └── RegistrationResponse.cs
-├── Client/Authentication/        # Authentication options and responses
-│   ├── AuthenticationOptions.cs
-│   ├── AuthenticationResponse.cs
-│   └── MatchedCredential.cs
+│   ├── Adapters/                 # credBlob, credProps, credProtect, largeBlob,
+│   │                             # minPinLength, prf, previewSign
+│   ├── Inputs/  Outputs/
+│   ├── PreviewSign/              # previewSign extension types
+│   └── ExtensionPipeline.cs
+├── Internal/
+│   └── ExcludeListPreflight.cs
+├── Preferences/                  # AttestationPreference, ResidentKeyPreference,
+│                                 # UserVerificationPreference
+├── WebAuthnAuthenticatorData.cs
 └── WebAuthnClientError.cs        # Error handling
 ```
 
@@ -76,10 +90,13 @@ Logger.LogError(ex, "PreviewSign authentication failed");
 ```csharp
 // Create client from an existing FIDO2 session.
 // The PublicSuffixChecker should be backed by Public Suffix List data.
+// `prompt` is optional; supply one to let the SDK ask for a PIN when the ceremony needs it.
 await using var client = new WebAuthnClient(
     fidoSession,
     origin,
-    isPublicSuffix: domain => publicSuffixList.Contains(domain));
+    isPublicSuffix: domain => publicSuffixList.Contains(domain),
+    enterpriseRpIds: null,
+    prompt: myCredentialPrompt);
 
 // Or create the FIDO2 session and WebAuthn client from a YubiKey device.
 await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
@@ -96,7 +113,8 @@ var createOptions = new RegistrationOptions
     Extensions = extensionInputs
 };
 
-var credential = await client.MakeCredentialAsync(createOptions, pin: null, useUv: false);
+// Pass pinBytes to supply a PIN directly, or leave it null to use the configured prompt.
+var credential = await client.MakeCredentialAsync(createOptions, pinBytes: null);
 
 // Authentication
 var requestOptions = new AuthenticationOptions
@@ -107,27 +125,93 @@ var requestOptions = new AuthenticationOptions
     Extensions = extensionInputs
 };
 
-var matches = await client.GetAssertionAsync(requestOptions, pin: null, useUv: false);
+var matches = await client.GetAssertionAsync(requestOptions, pinBytes: null);
 var assertion = await matches[0].SelectAsync();
 ```
 
-### Status Streaming
+### Credential Prompting
 
-WebAuthn operations expose progress via `IAsyncEnumerable<WebAuthnStatus>`:
+A PIN reaches the client one of two ways: the caller passes `pinBytes`, or the client was
+constructed with an `ICredentialPrompt` (from `Yubico.YubiKit.Core.Credentials`) and asks for one
+when the ceremony needs it. There is no callback on the status stream.
 
 ```csharp
-await foreach (var status in client.MakeCredentialStreamAsync(options))
+public interface ICredentialPrompt
+{
+    ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(
+        CredentialPromptContext context,
+        CancellationToken cancellationToken);
+}
+```
+
+Contract, in both directions:
+
+- Returning `null` means **the user declined**, and nothing else. It is not a channel for
+  "cancelled" or "failed" — cancellation throws, and failures throw.
+- The returned `Memory<byte>` must be **exactly** the secret's length. Use
+  `DisposableArrayPoolBuffer.CreateFromSpan`, whose `Memory` already slices exactly; a
+  pool-sized buffer with trailing slack will be read as part of the secret.
+- Ownership transfers to the SDK, which disposes and zeroes the buffer.
+- **The SDK owns the retry loop.** On a rejected PIN it zeroes the secret, never resubmits it, and
+  calls the prompt again with a fresh `CredentialPromptContext` carrying `IsRetry = true` and the
+  refreshed `RetriesRemaining`. Implementations must not retry internally.
+- `MaxPromptAttempts` (3) bounds a prompt that keeps answering wrongly, so a buggy implementation
+  cannot burn the PIN retry counter to zero.
+- The caller's `CancellationToken` is applied to the prompt call, so a prompt that never returns
+  cannot strand the ceremony.
+
+`CredentialPromptContext` carries `Kind`, `Scope` (the RP ID), `RetriesRemaining`, `IsRetry`,
+`MinLengthBytes`, `MaxLengthBytes`, and `RequiresConfirmation`. Note lengths here are **bytes**,
+not characters.
+
+### User Verification Decision
+
+`UvDecisionLogic.Decide` (`src/Client/UserVerification/UvDecision.cs`) answers two questions in
+order, and keeping them separate is the point: **whether** the ceremony needs a PIN/UV auth token,
+and only then **which** method supplies it. Collapsing them is what previously made `Discouraged`
+demand a PIN whenever one happened to be reachable.
+
+"Configured" throughout means the option is advertised **and** enabled. A YubiKey with no PIN set
+still advertises `clientPin: false`, so testing for the key's presence rather than its value reads
+as "verification is available" on a key that has none.
+
+| Preference | Needs a token? |
+|---|---|
+| `Required` | Always. Throws `NotAllowed` if nothing can satisfy it. |
+| `Preferred` | Only if verification is configured; otherwise degrades to an unverified credential. |
+| `Discouraged` | No — unless verification is configured AND one of: `alwaysUv` is enabled; this is a makeCredential and `makeCredUvNotRqd` is not enabled (pre-CTAP-2.1 keys); or the request needs a permission beyond makeCredential/getAssertion (e.g. `LargeBlobWrite`). |
+
+This mirrors the canonical Rust client's `should_use_uv` in
+`crates/yubikit/src/webauthn/client.rs`, with **one deliberate divergence**: canonical's `Preferred`
+arm tests whether the option is *advertised*, which on a PIN-less YubiKey decides verification is
+needed and then fails for want of a method. Since `preferred` is the WebAuthn default, that turns
+the most common request into a hard error, so this SDK gates `Preferred` on *configured* per
+WebAuthn L2 §5.4.2. **Do not "fix" this back to match Rust** without re-reading that clause.
+
+Backstop: if the client's model of the authenticator is wrong and the key answers
+`CTAP2_ERR_PUAT_REQUIRED` (0x36), `ShouldRetryWithRequiredUv` escalates to `Required` and retries the
+ceremony once.
+
+Known gap: extension-driven permissions are not aggregated before the decision, so a largeBlob
+write does not yet contribute `LargeBlobWrite` to `requestedPermissions`. The logic handles that
+permission correctly once something requests it.
+
+### Status Streaming
+
+WebAuthn operations report ceremony progress via `IAsyncEnumerable<WebAuthnStatus>`. The stream is
+**observation-only**: statuses never gather input and carry no callbacks. To abandon an operation,
+cancel the token you passed to it.
+
+```csharp
+await foreach (var status in client.MakeCredentialStreamAsync(options, cancellationToken: ct))
 {
     switch (status)
     {
         case WebAuthnStatusProcessing:
             Console.WriteLine("Processing WebAuthn ceremony...");
             break;
-        case WebAuthnStatusRequestingPin requestingPin:
-            await requestingPin.SubmitPin(pinBytes);
-            break;
-        case WebAuthnStatusRequestingUv requestingUv:
-            await requestingUv.SetUseUv(false);
+        case WebAuthnStatusWaitingForUser:
+            Console.WriteLine("Touch your YubiKey...");
             break;
         case WebAuthnStatusFinished<RegistrationResponse> finished:
             Console.WriteLine($"Created credential {Convert.ToHexString(finished.Result.CredentialId.Span)}");
@@ -140,10 +224,17 @@ await foreach (var status in client.MakeCredentialStreamAsync(options))
 
 **Status records:**
 - `WebAuthnStatusProcessing` — ceremony work is in progress
-- `WebAuthnStatusRequestingPin` — caller must supply PIN bytes or cancel
-- `WebAuthnStatusRequestingUv` — caller must opt in/out of UV
+- `WebAuthnStatusWaitingForUser` — the authenticator is awaiting a touch; show a touch prompt.
+  Driven by real CTAP HID keep-alive frames, so **only the HID transport emits it**. Over
+  SmartCard the ceremony appears as continuous `WebAuthnStatusProcessing`.
 - `WebAuthnStatusFinished<T>` — operation completed successfully
 - `WebAuthnStatusFailed` — operation completed with a typed WebAuthn error
+
+> **Removed in the `ICredentialPrompt` migration:** `WebAuthnStatusRequestingPin`,
+> `WebAuthnStatusRequestingUv`, and the `useUv` parameter. The first two smuggled response
+> callbacks into stream states, which deadlocked both a consumer that stopped enumerating and one
+> that merely cancelled its own token; `useUv` was a silent no-op. PIN acquisition now goes through
+> `ICredentialPrompt`, which makes those deadlocks structurally impossible rather than patched.
 
 ### RP ID Validation
 
@@ -308,3 +399,15 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 4. **No LoggingFactory** — Use `YubiKitLogging.CreateLogger<T>()` from Core
 5. **Status stream must be consumed** — `IAsyncEnumerable` won't advance unless caller enumerates
 6. **CBOR key constants are context-specific** — key `7` means authentication `additionalArgs` in GetAssertion input and attestation object in MakeCredential unsigned output; keep parsing paths context-specific
+7. **The status stream never asks for anything** — it reports only. Do not add a state that carries a
+   response callback; that is exactly what caused the two deadlocks the `ICredentialPrompt`
+   migration removed. Input comes from `pinBytes` or `ICredentialPrompt`; abandonment comes from
+   the cancellation token.
+8. **`WaitingForUser` is HID-only** — it is driven by CTAP HID keep-alive frames. No fake backend
+   produces them, so this state can only be observed on real hardware over HID. Over SmartCard a
+   touch wait looks like continuous `Processing`.
+9. **User presence and user verification are independent** — touch (UP) is always required for
+   makeCredential regardless of the UV preference. CTAP does not let a client set `up` on
+   makeCredential at all, so never send it; the authenticator's default of `true` applies. `up=false`
+   is legitimate only on the silent exclude-list pre-flight getAssertion probe
+   (`Internal/ExcludeListPreflight.cs`).

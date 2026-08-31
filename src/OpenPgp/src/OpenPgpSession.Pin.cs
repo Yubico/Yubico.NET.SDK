@@ -238,39 +238,8 @@ public sealed partial class OpenPgpSession
 
             if (!response.IsOK())
             {
-                // Standard wrong-PIN SW: 0x63Cx where x = remaining retries
-                var remaining = SWConstants.ExtractRetryCount(response.SW) ?? -1;
-
-                if (remaining < 0 && response.SW == SWConstants.AuthenticationMethodBlocked)
-                {
-                    // The PIN/PUK is already permanently blocked (0 retries remaining).
-                    // No status query is needed; 0x6983 unambiguously means zero.
-                    remaining = 0;
-                }
-                else if (remaining < 0 && response.SW == SWConstants.SecurityStatusNotSatisfied)
-                {
-                    // Some firmware (including 5.8.0-alpha) returns 0x6982 (Security Status
-                    // Not Satisfied) for wrong PIN instead of 0x63Cx. Per Python canonical:
-                    // query GET DATA for PW_STATUS_BYTES to get remaining attempts.
-                    try
-                    {
-                        var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
-                        remaining = pw == Pw.User
-                            ? status.AttemptsUser
-                            : pw == Pw.Admin
-                                ? status.AttemptsAdmin
-                                : status.AttemptsReset;
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        throw;
-                    }
-                    catch
-                    {
-                        // If status query fails, the retry count is genuinely unknown.
-                    }
-                }
-
+                var remaining = await ResolveRemainingRetriesAsync(pw, response, cancellationToken)
+                    .ConfigureAwait(false);
                 int? retriesRemaining = remaining >= 0 ? remaining : null;
 
                 throw new OpenPgpInvalidPinException(
@@ -290,6 +259,51 @@ public sealed partial class OpenPgpSession
                 CryptographicOperations.ZeroMemory(derivedBytes);
             }
         }
+    }
+
+    // Resolves the number of retries remaining after a failed VERIFY, handling the two
+    // status-word special cases firmware can return instead of the standard 0x63Cx form.
+    private async Task<int> ResolveRemainingRetriesAsync(
+        Pw pw,
+        ApduResponse response,
+        CancellationToken cancellationToken)
+    {
+        // Standard wrong-PIN SW: 0x63Cx where x = remaining retries
+        var remaining = SWConstants.ExtractRetryCount(response.SW) ?? -1;
+
+        if (remaining < 0 && response.SW == SWConstants.AuthenticationMethodBlocked)
+        {
+            // The PIN/PUK is already permanently blocked (0 retries remaining).
+            // No status query is needed; 0x6983 unambiguously means zero.
+            return 0;
+        }
+
+        if (remaining < 0 && response.SW == SWConstants.SecurityStatusNotSatisfied)
+        {
+            // Some firmware (including 5.8.0-alpha) returns 0x6982 (Security Status
+            // Not Satisfied) for wrong PIN instead of 0x63Cx. Per Python canonical:
+            // query GET DATA for PW_STATUS_BYTES to get remaining attempts.
+            try
+            {
+                var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
+                remaining = pw switch
+                {
+                    Pw.User => status.AttemptsUser,
+                    Pw.Admin => status.AttemptsAdmin,
+                    _ => status.AttemptsReset,
+                };
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                // If status query fails, the retry count is genuinely unknown.
+            }
+        }
+
+        return remaining;
     }
 
     private async Task ChangePwAsync(

@@ -118,6 +118,52 @@ public sealed class OpenPgpInvalidPinExceptionTests
     }
 
     [Fact]
+    public async Task VerifyAdminAsync_WhenSecurityStatusNotSatisfied_FallsBackToAdminAttemptsFromPinStatusQuery()
+    {
+        // SW 6982 (Security Status Not Satisfied) for an Admin PIN verify: the fallback must
+        // resolve AttemptsAdmin, not AttemptsUser or AttemptsReset. Distinct attempt counts
+        // in PwStatusResponse make a wrong arm mapping fail loudly.
+        var connection = CreateInitializedConnection(
+            KdfNotFoundResponse(),
+            [0x69, 0x82],
+            PwStatusResponse(attemptsUser: 5, attemptsReset: 6, attemptsAdmin: 7));
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var exception = await Assert.ThrowsAsync<OpenPgpInvalidPinException>(() => session.VerifyAdminAsync(
+            "00000000"u8.ToArray(),
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(7, exception.RetriesRemaining);
+        Assert.Equal(unchecked((short)0x6982), exception.SW);
+    }
+
+    [Fact]
+    public async Task VerifyPinAsync_ExtendedWhenSecurityStatusNotSatisfied_FallsBackToResetAttemptsFromPinStatusQuery()
+    {
+        // SW 6982 (Security Status Not Satisfied) for an extended-mode (Pw.Reset) verify: the
+        // fallback must resolve AttemptsReset, not AttemptsUser or AttemptsAdmin. The only route
+        // that reaches VerifyPwAsync with Pw.Reset is VerifyPinAsync(pinUtf8, extended: true, ...).
+        // Distinct attempt counts in PwStatusResponse make a wrong arm mapping fail loudly.
+        var connection = CreateInitializedConnection(
+            KdfNotFoundResponse(),
+            [0x69, 0x82],
+            PwStatusResponse(attemptsUser: 5, attemptsReset: 6, attemptsAdmin: 7));
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var exception = await Assert.ThrowsAsync<OpenPgpInvalidPinException>(() => session.VerifyPinAsync(
+            "000000"u8.ToArray(),
+            extended: true,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(6, exception.RetriesRemaining);
+        Assert.Equal(unchecked((short)0x6982), exception.SW);
+    }
+
+    [Fact]
     public async Task VerifyPinAsync_WhenStatusQueryAlsoFails_ExposesNullRetriesRemaining()
     {
         // SW 6982 followed by a failing PW_STATUS_BYTES query: the retry count is genuinely
@@ -173,8 +219,8 @@ public sealed class OpenPgpInvalidPinExceptionTests
     // so VerifyPwAsync falls back to sending raw PIN bytes through KdfNone.
     private static byte[] KdfNotFoundResponse() => [0x6A, 0x82];
 
-    private static byte[] PwStatusResponse(int attemptsUser) =>
-        [0x00, 0x7F, 0x7F, 0x7F, (byte)attemptsUser, 0x00, 0x03, 0x90, 0x00];
+    private static byte[] PwStatusResponse(int attemptsUser, int attemptsReset = 0, int attemptsAdmin = 3) =>
+        [0x00, 0x7F, 0x7F, 0x7F, (byte)attemptsUser, (byte)attemptsReset, (byte)attemptsAdmin, 0x90, 0x00];
 
     private sealed class CancelOnPwStatusLookupConnection(
         RecordingSmartCardConnection inner,

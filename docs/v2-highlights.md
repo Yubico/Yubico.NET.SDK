@@ -60,7 +60,7 @@ CLI or agent tooling, where shipping unused protocol code is pure cost.
 
 **There's no meta-package, and there won't be one.** An "install everything"
 bundle would hand back exactly the footprint savings the split exists to
-deliver. If you genuinely need all ten applets, reference all ten.
+deliver.
 
 ## Native AOT
 
@@ -68,66 +68,26 @@ V2 compiles to a single self-contained native binary with `PublishAot=true`,
 and runs on machines with no .NET runtime installed. All ten libraries are
 covered.
 
-- Zero AOT and trimming analyzer warnings across every library — no
-  suppressions hiding anything.
-- Verified against real YubiKey hardware on macOS arm64, Windows x64, and
-  Linux x64.
-- One rough edge is still being smoothed: the current public NativeShims
-  package ships a shared-library sidecar next to your AOT executable. A
-  self-contained static build that removes the sidecar is in progress.
-
-The work landed through the `#592` → `#578` → `#587` PR stack, with `#586` as
-the native packaging prerequisite.
-
-Runtime testing under AOT is deepest on Core device discovery, Management,
-and PIV. FIDO2, WebAuthn, YubiOTP, OATH, OpenPGP, SecurityDomain, and YubiHSM
-all link and run under AOT, but with lighter protocol-level coverage so far.
-We're expanding that before general availability — nothing here is a known
-defect.
+Verified against real YubiKey hardware on macOS arm64, Windows x64, and
+Linux x64. Runtime coverage under AOT still varies by library — we're
+deepening it before general availability.
 
 ## Why v2 breaks so much, on purpose
 
 Worth being straight about this, because the migration cost is real.
 
 V1 made almost everything public: typed TLV readers and writers,
-general-purpose codecs (`Base16`, `Base32`, `Bcd`, `ModHex`), and pluggable
-low-level crypto primitive interfaces. Once something is public it's a
-promise, and v1 had made so many promises that nearly any internal
-improvement turned into a breaking change. The SDK got slow to move.
+general-purpose codecs, and pluggable low-level crypto primitive interfaces.
+Once something is public it's a promise, and v1 had made so many promises
+that nearly any internal improvement turned into a breaking change. The SDK
+got slow to move.
 
-V2 keeps that whole class of low-level primitive internal:
-
-- `TlvReader`/`TlvWriter` are gone, replaced by a much thinner
-  `Tlv`/`TlvHelper`/`DisposableTlvList` surface — tag/value containers and
-  static encode/decode helpers, not an extensibility point.
-- The `Base16`/`Base32`/`Bcd`/`ModHex` codecs are no longer public.
-- Pluggable crypto primitives (`IAesGcmPrimitives`, `IEcdhPrimitives`,
-  `ICmacPrimitives`) are no longer public extension points.
-
-This is API discipline, not an oversight. A smaller public surface is what
-lets v2 keep improving without putting you through v1's steady drip of
-breaking changes. If your code leaned on those utilities directly, you'll
-need your own replacement —
-[the v1 to v2 comparison](v1-to-v2-comparison.md) has the details.
-
-## Restored from v1
-
-An early v1/v2 gap analysis in July flagged capabilities that hadn't made it
-into v2 yet. These are back:
-
-- PIV PIN-only (`PinProtected`) management-key mode, plus typed CHUID, CCC,
-  AdminData, and KeyHistory data objects.
-- OATH `IsPasswordProtected` and `AuthenticateAndRetryAsync`, plus a
-  dedicated `OathException`.
-- YubiHSM Auth's `HsmAuthRetryException`, the `OnTouchRequired` callback, and
-  the hardware-verified `Counter` → `RetriesRemaining` rename.
-- YubiOTP keyboard-layout-aware static passwords and Yubico-OTP-algorithm
-  challenge-response.
-- Dedicated exception types for SecurityDomain (`SecureChannelException`) and
-  OpenPGP (`OpenPgpInvalidPinException`).
-
-[The v1 to v2 comparison](v1-to-v2-comparison.md) covers what's still open,
-still undecided, or deliberately not coming.
+V2 keeps that whole class of low-level primitives internal. This is API
+discipline, not an oversight. A smaller public surface is what lets v2 keep
+improving without putting you through v1's steady drip of breaking changes.
+If your code leaned on those utilities directly, you'll need your own
+replacement — [the v1 to v2 comparison](v1-to-v2-comparison.md) has the full
+list and the reasoning behind each one.
 
 ## Still to come
 
@@ -141,9 +101,12 @@ direct method parameters, matching Yubico's other SDKs, so your application
 owns the authentication flow. Whether v2 should additionally offer a
 unified pattern for interactive flows is still an open design question.
 
+[The v1 to v2 comparison](v1-to-v2-comparison.md) has the full inventory of
+what's changed, restored, still open, or deliberately not coming.
+
 ## Where things stand today
 
-V2 is available now as `2.0.0-alpha.2` from a public, anonymous, unsigned
+V2 is available now as `2.0.0-alpha.*` from a public, anonymous, unsigned
 NuGet feed. It hasn't completed Yubico's formal security audit yet, and it's
 marked not for production use until it does.
 

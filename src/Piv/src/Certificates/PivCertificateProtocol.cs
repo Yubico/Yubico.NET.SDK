@@ -167,7 +167,7 @@ internal static class PivCertificateProtocol
         await PivDataObjectProtocol.PutObjectAsync(backend, isAuthenticated, objectId, null, cancellationToken).ConfigureAwait(false);
     }
 
-    private static int GetCertificateObjectId(PivSlot slot)
+    internal static int GetCertificateObjectId(PivSlot slot)
     {
         return slot switch
         {

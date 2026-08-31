@@ -38,6 +38,12 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # github.actor is the pusher, not the PR author. When a human-authored PR
+          # receives a commit from the Claude GitHub App, the actor becomes
+          # claude[bot] and the action's human-actor check fails the job. The
+          # job-level `if` above already blocks bot-authored PRs, and this step only
+          # runs a fixed prompt with read-only tools, so allow just this bot.
+          allowed_bots: claude
           prompt: |
             Read and follow `.github/prompts/migration-docs-pr-preview.md`.
             The generated context is in `.migration-context/`.

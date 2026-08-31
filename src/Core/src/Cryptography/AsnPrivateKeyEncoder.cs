@@ -60,7 +60,13 @@ internal static class AsnPrivateKeyEncoder
     /// </summary>
     /// <param name="parameters">The RSA parameters including private key values.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
-    public static byte[] EncodeToPkcs8(RSAParameters parameters)
+    public static byte[] EncodeToPkcs8(RSAParameters parameters) =>
+        EncodeToPkcs8(parameters, integerBufferEncoded: null, rsaKeyEncoded: null);
+
+    internal static byte[] EncodeToPkcs8(
+        RSAParameters parameters,
+        Action<byte[]>? integerBufferEncoded,
+        Action<byte[]>? rsaKeyEncoded)
     {
         // Ensure parameters include private key parts
         if (parameters.D is null ||
@@ -79,18 +85,22 @@ internal static class AsnPrivateKeyEncoder
 
         rsaKeyWriter.WriteInteger(0);
 
-        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.Modulus));
-        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.Exponent));
-        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.D));
-        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.P));
-        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.Q));
-        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.DP));
-        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.DQ));
-        rsaKeyWriter.WriteInteger(AsnUtilities.GetIntegerBytes(parameters.InverseQ));
+        // The RSAParameters arrays remain caller-owned. WriteInteger creates an owned DER copy
+        // for every field and clears that copy only after AsnWriter has consumed it.
+        WriteInteger(rsaKeyWriter, parameters.Modulus, integerBufferEncoded);
+        WriteInteger(rsaKeyWriter, parameters.Exponent, integerBufferEncoded);
+        WriteInteger(rsaKeyWriter, parameters.D, integerBufferEncoded);
+        WriteInteger(rsaKeyWriter, parameters.P, integerBufferEncoded);
+        WriteInteger(rsaKeyWriter, parameters.Q, integerBufferEncoded);
+        WriteInteger(rsaKeyWriter, parameters.DP, integerBufferEncoded);
+        WriteInteger(rsaKeyWriter, parameters.DQ, integerBufferEncoded);
+        WriteInteger(rsaKeyWriter, parameters.InverseQ, integerBufferEncoded);
 
         rsaKeyWriter.PopSequence();
 
         var rsaKeyData = rsaKeyWriter.Encode();
+        using var rsaKeyDataHandle = new DisposableBufferHandle(rsaKeyData);
+        rsaKeyEncoded?.Invoke(rsaKeyData);
 
         // Start PrivateKeyInfo SEQUENCE
         var writer = new AsnWriter(AsnEncodingRules.DER);
@@ -104,11 +114,22 @@ internal static class AsnPrivateKeyEncoder
         writer.WriteNull();
         writer.PopSequence();
 
-        writer.WriteOctetString(rsaKeyData);
+        writer.WriteOctetString(rsaKeyDataHandle.Data.Span);
 
         writer.PopSequence();
 
         return writer.Encode();
+    }
+
+    private static void WriteInteger(
+        AsnWriter writer,
+        ReadOnlySpan<byte> value,
+        Action<byte[]>? integerBufferEncoded)
+    {
+        var integerBuffer = AsnUtilities.GetOwnedIntegerBytes(value);
+        using var integerBufferHandle = new DisposableBufferHandle(integerBuffer);
+        integerBufferEncoded?.Invoke(integerBuffer);
+        writer.WriteInteger(integerBufferHandle.Data.Span);
     }
 
     /// <summary>

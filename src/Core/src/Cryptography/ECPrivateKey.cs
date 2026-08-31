@@ -220,10 +220,11 @@ namespace Yubico.YubiKit.Core.Cryptography
                            throw new ArgumentException("The key definition for this key type has no Curve OID is null.");
 
             var curve = ECCurve.CreateFromValue(curveOid);
+            var initialPrivateValue = privateValue.ToArray();
             var parameters = new ECParameters
             {
                 Curve = curve,
-                D = privateValue.ToArray(),
+                D = initialPrivateValue,
             };
 
             try

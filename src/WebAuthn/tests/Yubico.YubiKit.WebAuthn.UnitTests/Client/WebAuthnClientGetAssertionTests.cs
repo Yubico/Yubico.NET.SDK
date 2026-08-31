@@ -64,7 +64,6 @@ public class WebAuthnClientGetAssertionTests
         BackendGetAssertionRequest? capturedRequest = null;
         _mockBackend.GetAssertionAsync(
             Arg.Do<BackendGetAssertionRequest>(r => capturedRequest = r),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockGetAssertionResponse(credentialId));
 
@@ -111,7 +110,6 @@ public class WebAuthnClientGetAssertionTests
 
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockGetAssertionResponse(credentialId, numberOfCredentials: 1));
 
@@ -141,7 +139,6 @@ public class WebAuthnClientGetAssertionTests
         // First call returns numberOfCredentials = 3
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockGetAssertionResponse(cred1, numberOfCredentials: 3));
 
@@ -172,7 +169,6 @@ public class WebAuthnClientGetAssertionTests
 
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockGetAssertionResponse(credentialId));
 
@@ -190,7 +186,6 @@ public class WebAuthnClientGetAssertionTests
         // Backend GetAssertion should have been called only once during GetAssertionAsync
         await _mockBackend.Received(1).GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -208,7 +203,6 @@ public class WebAuthnClientGetAssertionTests
 
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockGetAssertionResponse(credentialId, signature: signature));
 
@@ -232,7 +226,6 @@ public class WebAuthnClientGetAssertionTests
             PinUvAuthTokenPermissions.GetAssertion,
             "example.com",
             Arg.Any<ReadOnlyMemory<byte>?>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
 
@@ -247,7 +240,6 @@ public class WebAuthnClientGetAssertionTests
         var callCount = 0;
         _mockBackend.GetAssertionAsync(
             Arg.Do<BackendGetAssertionRequest>(r => requests.Add(r)),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(_ =>
             {
@@ -284,7 +276,6 @@ public class WebAuthnClientGetAssertionTests
             PinUvAuthTokenPermissions.GetAssertion,
             "example.com",
             Arg.Any<ReadOnlyMemory<byte>?>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
 
@@ -297,7 +288,6 @@ public class WebAuthnClientGetAssertionTests
         var callCount = 0;
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns<GetAssertionResponse>(_ =>
             {
@@ -327,7 +317,6 @@ public class WebAuthnClientGetAssertionTests
         // Backend throws "no credentials" CTAP error
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns<GetAssertionResponse>(x => throw new CtapException(CtapStatus.NoCredentials));
 
@@ -352,7 +341,6 @@ public class WebAuthnClientGetAssertionTests
 
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockGetAssertionResponse(credentialId));
 

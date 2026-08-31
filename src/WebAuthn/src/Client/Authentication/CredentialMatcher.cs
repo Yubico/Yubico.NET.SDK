@@ -32,9 +32,6 @@ internal sealed class CredentialMatcher
     /// <param name="backend">The WebAuthn backend to use.</param>
     /// <param name="request">The backend GetAssertion request.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <param name="keepAliveProgress">
-    /// Optional observer for authenticator-busy notifications while the assertion is pending.
-    /// </param>
     /// <returns>
     /// A list of tuples containing credential ID, optional user, and the GetAssertionResponse.
     /// May be empty if no credentials match.
@@ -43,14 +40,13 @@ internal sealed class CredentialMatcher
         MatchAsync(
             IWebAuthnBackend backend,
             BackendGetAssertionRequest request,
-            CancellationToken cancellationToken,
-            IProgress<CtapStatus>? keepAliveProgress = null)
+            CancellationToken cancellationToken)
     {
         GetAssertionResponse firstResponse;
 
         try
         {
-            firstResponse = await backend.GetAssertionAsync(request, keepAliveProgress, cancellationToken);
+            firstResponse = await backend.GetAssertionAsync(request, cancellationToken);
         }
         catch (CtapException ex) when (IsNoCredentialsError(ex.Status))
         {

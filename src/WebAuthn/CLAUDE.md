@@ -164,6 +164,35 @@ Contract, in both directions:
 `MinLengthBytes`, `MaxLengthBytes`, and `RequiresConfirmation`. Note lengths here are **bytes**,
 not characters.
 
+### Touch notification — deliberately absent, deferred by design
+
+WebAuthn currently has **no way to tell a caller that the authenticator is waiting for a touch**.
+The status stream reports `Processing` → `Finished`/`Failed` and nothing in between, so a UI can
+only prompt speculatively before the call rather than at the moment the key actually asks.
+
+This is a known gap, not an oversight. An earlier iteration carried a `WebAuthnStatusWaitingForUser`
+state fed by CTAP HID keep-alive `0x02` frames, threaded as an `IProgress<CtapStatus>` through
+`IFidoHidProtocol` → `IFidoBackend` → `IFidoSession` → the WebAuthn backend. It worked and was
+validated on hardware, but it added an optional parameter to the two hottest methods on the
+**public** `IFidoSession` to serve a single consumer, so it was removed.
+
+Context for whoever picks this up:
+
+- **Canonical does have this.** The Rust client holds a `user_interaction` field and calls
+  `prompt_up()` from an `on_keepalive` closure when the status byte is `0x02`
+  (`crates/yubikit/src/webauthn/client.rs:356-361`). Note it scopes the handler at the *client*,
+  not as a per-call parameter.
+- **This repo already has a convention.** PIV and YubiHsm both expose
+  `public TouchNotificationCallback? OnTouchRequired { get; set; }` on the session
+  (`Piv/src/TouchNotification.cs`, `PivSession.cs:100`). FIDO2 — the applet where touch matters
+  most — is the one that lacks it.
+- **The intended direction is a unified cross-applet touch notification**, rather than a third
+  bespoke per-module callback. `ICredentialPrompt` is the natural place to look: it is already the
+  shared async, context-carrying prompt primitive, and "tell the user to touch" is the same class
+  of interaction as "ask the user for a PIN". Deferred pending that design.
+
+Until then, do not reintroduce a per-call `IProgress` parameter on public session methods.
+
 ### User Verification Decision
 
 `UvDecisionLogic.Decide` (`src/Client/UserVerification/UvDecision.cs`) answers two questions in
@@ -210,9 +239,6 @@ await foreach (var status in client.MakeCredentialStreamAsync(options, cancellat
         case WebAuthnStatusProcessing:
             Console.WriteLine("Processing WebAuthn ceremony...");
             break;
-        case WebAuthnStatusWaitingForUser:
-            Console.WriteLine("Touch your YubiKey...");
-            break;
         case WebAuthnStatusFinished<RegistrationResponse> finished:
             Console.WriteLine($"Created credential {Convert.ToHexString(finished.Result.CredentialId.Span)}");
             break;
@@ -224,9 +250,6 @@ await foreach (var status in client.MakeCredentialStreamAsync(options, cancellat
 
 **Status records:**
 - `WebAuthnStatusProcessing` — ceremony work is in progress
-- `WebAuthnStatusWaitingForUser` — the authenticator is awaiting a touch; show a touch prompt.
-  Driven by real CTAP HID keep-alive frames, so **only the HID transport emits it**. Over
-  SmartCard the ceremony appears as continuous `WebAuthnStatusProcessing`.
 - `WebAuthnStatusFinished<T>` — operation completed successfully
 - `WebAuthnStatusFailed` — operation completed with a typed WebAuthn error
 
@@ -403,9 +426,9 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
    response callback; that is exactly what caused the two deadlocks the `ICredentialPrompt`
    migration removed. Input comes from `pinBytes` or `ICredentialPrompt`; abandonment comes from
    the cancellation token.
-8. **`WaitingForUser` is HID-only** — it is driven by CTAP HID keep-alive frames. No fake backend
-   produces them, so this state can only be observed on real hardware over HID. Over SmartCard a
-   touch wait looks like continuous `Processing`.
+8. **There is currently no touch notification** — the stream cannot tell a caller when the
+   authenticator is waiting for a touch, so a UI can only prompt speculatively before the call.
+   See "Touch notification" below.
 9. **User presence and user verification are independent** — touch (UP) is always required for
    makeCredential regardless of the UV preference. CTAP does not let a client set `up` on
    makeCredential at all, so never send it; the authenticator's default of `true` applies. `up=false`

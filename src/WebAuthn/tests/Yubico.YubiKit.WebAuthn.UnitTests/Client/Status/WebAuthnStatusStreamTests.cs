@@ -93,11 +93,11 @@ public class WebAuthnStatusStreamTests
 
         backend.GetPinUvTokenAsync(
                 Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(), Arg.Any<string?>(),
-                Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
+                Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
             .Returns(new PinUvAuthTokenSession(new PinUvAuthProtocolV2(), RandomNumberGenerator.GetBytes(32)));
 
         backend.MakeCredentialAsync(
-                Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
+                Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
             .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         return backend;
@@ -125,7 +125,7 @@ public class WebAuthnStatusStreamTests
     {
         var backend = CreateBackend();
         backend.GetAssertionAsync(
-                Arg.Any<BackendGetAssertionRequest>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
+                Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
             .Returns<GetAssertionResponse>(_ => throw new CtapException(CtapStatus.NoCredentials));
 
         await using var client = new WebAuthnClient(backend, Origin(), _ => false);
@@ -143,36 +143,11 @@ public class WebAuthnStatusStreamTests
     }
 
     [Fact(Timeout = 10000)]
-    public async Task Stream_WhenAuthenticatorAwaitsTouch_EmitsWaitingForUser()
-    {
-        var backend = CreateBackend();
-        backend.MakeCredentialAsync(
-                Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
-            {
-                // Mirrors a CTAP HID keep-alive reporting that a touch is awaited.
-                callInfo.ArgAt<IProgress<CtapStatus>?>(1)?.Report(CtapStatus.UserActionPending);
-                return MockFido2Responses.CreateMockMakeCredentialResponse();
-            });
-
-        await using var client = new WebAuthnClient(backend, Origin(), _ => false);
-
-        var statuses = new List<WebAuthnStatus>();
-        await foreach (var status in client.MakeCredentialStreamAsync(
-            RegOptions(), cancellationToken: TestContext.Current.CancellationToken))
-        {
-            statuses.Add(status);
-        }
-
-        Assert.Contains(statuses, s => s is WebAuthnStatusWaitingForUser);
-    }
-
-    [Fact(Timeout = 10000)]
     public async Task Stream_WhenBackendFails_EmitsFailedRatherThanThrowing()
     {
         var backend = CreateBackend();
         backend.MakeCredentialAsync(
-                Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<IProgress<CtapStatus>?>(), Arg.Any<CancellationToken>())
+                Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
             .Returns<MakeCredentialResponse>(_ => throw new CtapException(CtapStatus.OperationDenied));
 
         await using var client = new WebAuthnClient(backend, Origin(), _ => false);
@@ -309,7 +284,6 @@ public class WebAuthnStatusStreamTests
         // Standard IAsyncEnumerable semantics: each enumeration re-runs the operation.
         await backend.Received(2).MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>());
     }
 }

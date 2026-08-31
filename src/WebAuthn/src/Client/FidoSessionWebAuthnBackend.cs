@@ -74,7 +74,6 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         PinUvAuthTokenPermissions permissions,
         string? rpId,
         ReadOnlyMemory<byte>? pinBytes,
-        IProgress<CtapStatus>? progress,
         CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -104,7 +103,6 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     /// <inheritdoc/>
     public async Task<MakeCredentialResponse> MakeCredentialAsync(
         BackendMakeCredentialRequest request,
-        IProgress<CtapStatus>? progress,
         CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -144,9 +142,7 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
                 request.User,
                 request.PubKeyCredParams,
                 options,
-                cancellationToken,
-                progress
-            ).ConfigureAwait(false);
+                cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -157,7 +153,6 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     /// <inheritdoc/>
     public async Task<GetAssertionResponse> GetAssertionAsync(
         BackendGetAssertionRequest request,
-        IProgress<CtapStatus>? progress,
         CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -202,8 +197,7 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
                 request.RpId,
                 request.ClientDataHash,
                 options,
-                cancellationToken,
-                progress).ConfigureAwait(false);
+                cancellationToken).ConfigureAwait(false);
         }
         finally
         {

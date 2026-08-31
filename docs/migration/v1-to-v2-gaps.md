@@ -137,7 +137,8 @@ v2 locations: `src/Fido2/src/**`, `src/WebAuthn/src/**`
 
 - **Feature/API**: `KeyCollector` delegate for PIN/touch/UV prompts on `Fido2Session`
   **v2 status**: Present-but-renamed/Behavior-changed — `Fido2Session` exposes explicit async methods (`SetPinAsync`, `ChangePinAsync`, `GetPinUvAuthTokenUsingPinAsync/UsingUvAsync`) with no callback. At the WebAuthn layer the closest analog is `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`), an optional async prompt supplied to `WebAuthnClient`: the SDK calls it when a ceremony needs a PIN and owns the retry loop itself (fresh prompt per attempt, rejected secrets zeroed and never resubmitted, attempts capped so a buggy prompt cannot burn the retry counter).
-  `IAsyncEnumerable<WebAuthnStatus>` is **not** the replacement — it is observation-only ceremony progress (`Processing`, `WaitingForUser`, `Finished`, `Failed`) and never gathers input. Abandonment is via the cancellation token, not a stream state.
+  `IAsyncEnumerable<WebAuthnStatus>` is **not** the replacement — it is observation-only ceremony progress (`Processing`, `Finished`, `Failed`) and never gathers input. Abandonment is via the cancellation token, not a stream state.
+  Remaining gap: v1's `KeyCollector` also signalled touch. WebAuthn has no touch notification yet, so a UI can only prompt speculatively before a ceremony. PIV and YubiHsm expose `OnTouchRequired`; a unified cross-applet mechanism is deferred by design (see `src/WebAuthn/CLAUDE.md`, "Touch notification").
   No 1:1 analog; arguably more explicit/testable, but requires a rewrite.
   **Severity**: Minor (migration friction, not capability loss) | **Confidence**: High
 

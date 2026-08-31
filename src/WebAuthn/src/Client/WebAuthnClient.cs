@@ -360,7 +360,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// This method handles validation, UV/PIN decision, token acquisition, and CTAP execution.
-    /// It may write status updates to the channel (e.g., WaitingForUser) and awaits interactive
+    /// It may write status updates to the channel and awaits interactive
     /// responses when PIN/UV is needed.
     /// </remarks>
     private async Task<RegistrationResponse> MakeCredentialCoreAsync(
@@ -397,7 +397,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
         PinUvAuthTokenSession? tokenSession = null;
         IMemoryOwner<byte>? pinOwner = null;
         ReadOnlyMemory<byte>? pinBytes = callerPinBytes;
-        var keepAliveProgress = CreateKeepAliveObserver(channel);
 
         try
         {
@@ -426,7 +425,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
             MakeCredentialResponse ctapResponse;
             try
             {
-                ctapResponse = await ExecuteMakeCredentialAsync(request, keepAliveProgress, cancellationToken).ConfigureAwait(false);
+                ctapResponse = await ExecuteMakeCredentialAsync(request, cancellationToken).ConfigureAwait(false);
             }
             catch (CtapException ex) when (ShouldRetryWithRequiredUv(ex, options.UserVerification))
             {
@@ -457,7 +456,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed);
                 try
                 {
-                    ctapResponse = await ExecuteMakeCredentialAsync(request, keepAliveProgress, cancellationToken).ConfigureAwait(false);
+                    ctapResponse = await ExecuteMakeCredentialAsync(request, cancellationToken).ConfigureAwait(false);
                 }
                 catch (CtapException retryEx)
                 {
@@ -504,7 +503,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// This method handles validation, UV/PIN decision, token acquisition, credential matching, and CTAP execution.
-    /// It may write status updates to the channel (e.g., WaitingForUser) and awaits interactive
+    /// It may write status updates to the channel and awaits interactive
     /// responses when PIN/UV is needed.
     /// </remarks>
     private async Task<IReadOnlyList<MatchedCredential>> GetAssertionCoreAsync(
@@ -541,7 +540,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
         PinUvAuthTokenSession? tokenSession = null;
         IMemoryOwner<byte>? pinOwner = null;
         ReadOnlyMemory<byte>? pinBytes = callerPinBytes;
-        var keepAliveProgress = CreateKeepAliveObserver(channel);
 
         try
         {
@@ -559,7 +557,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
             IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> matches;
             try
             {
-                matches = await MatchCredentialsAsync(request, keepAliveProgress, cancellationToken).ConfigureAwait(false);
+                matches = await MatchCredentialsAsync(request, cancellationToken).ConfigureAwait(false);
             }
             catch (CtapException ex) when (ShouldRetryWithRequiredUv(ex, options.UserVerification))
             {
@@ -582,7 +580,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision);
                 try
                 {
-                    matches = await MatchCredentialsAsync(request, keepAliveProgress, cancellationToken).ConfigureAwait(false);
+                    matches = await MatchCredentialsAsync(request, cancellationToken).ConfigureAwait(false);
                 }
                 catch (CtapException retryEx)
                 {
@@ -734,47 +732,13 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ex.Status == CtapStatus.PuatRequired &&
         userVerification != Preferences.UserVerificationPreference.Required;
 
-    /// <summary>
-    /// Builds an observer that republishes authenticator-busy notifications as ceremony statuses,
-    /// so a consumer learns the moment a touch is being awaited.
-    /// </summary>
-    /// <remarks>
-    /// Returns <c>null</c> when nobody is listening, which keeps the non-streaming path free of
-    /// per-keep-alive work. Duplicate statuses are collapsed by the channel.
-    /// </remarks>
-    private static IProgress<CtapStatus>? CreateKeepAliveObserver<T>(StatusChannel<T>? channel)
-    {
-        if (channel is null)
-        {
-            return null;
-        }
-
-        return new KeepAliveObserver<T>(channel);
-    }
-
-    /// <summary>
-    /// Republishes authenticator keep-alive notifications as ceremony statuses.
-    /// </summary>
-    /// <remarks>
-    /// Reports synchronously so a status cannot arrive after the ceremony has completed, and uses
-    /// the non-blocking write so transport notifications can never stall or fail the ceremony.
-    /// </remarks>
-    private sealed class KeepAliveObserver<T>(StatusChannel<T> channel) : IProgress<CtapStatus>
-    {
-        public void Report(CtapStatus value) =>
-            channel.TryWrite(value == CtapStatus.UserActionPending
-                ? new WebAuthnStatusWaitingForUser()
-                : new WebAuthnStatusProcessing());
-    }
-
     private async Task<MakeCredentialResponse> ExecuteMakeCredentialAsync(
         BackendMakeCredentialRequest request,
-        IProgress<CtapStatus>? keepAliveProgress,
         CancellationToken cancellationToken)
     {
         try
         {
-            return await _backend.MakeCredentialAsync(request, keepAliveProgress, cancellationToken)
+            return await _backend.MakeCredentialAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -785,12 +749,11 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
     private async Task<IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)>> MatchCredentialsAsync(
         BackendGetAssertionRequest request,
-        IProgress<CtapStatus>? keepAliveProgress,
         CancellationToken cancellationToken)
     {
         try
         {
-            return await CredentialMatcher.MatchAsync(_backend, request, cancellationToken, keepAliveProgress)
+            return await CredentialMatcher.MatchAsync(_backend, request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -937,7 +900,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 permissions,
                 rpId,
                 pinBytes,
-                progress: null,
                 cancellationToken).ConfigureAwait(false);
         }
         catch (CtapException ex) when (IsPinRejection(ex.Status))
@@ -1002,8 +964,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     permissions,
                     rpId,
                     secret.Memory,
-                    progress: null,
-                    cancellationToken).ConfigureAwait(false);
+                        cancellationToken).ConfigureAwait(false);
 
                 return (tokenSession, secret);
             }

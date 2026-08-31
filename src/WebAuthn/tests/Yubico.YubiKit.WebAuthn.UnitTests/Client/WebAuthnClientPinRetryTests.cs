@@ -70,7 +70,6 @@ public sealed class WebAuthnClientPinRetryTests
             Arg.Any<PinUvAuthTokenPermissions>(),
             Arg.Any<string?>(),
             Arg.Any<ReadOnlyMemory<byte>?>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Throws(new CtapException(CtapStatus.PinAuthInvalid))
             .AndDoes(_ => _tokenCallCount++);
@@ -107,7 +106,6 @@ public sealed class WebAuthnClientPinRetryTests
             Arg.Any<PinUvAuthTokenPermissions>(),
             Arg.Any<string?>(),
             Arg.Any<ReadOnlyMemory<byte>?>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Throws(new CtapException(CtapStatus.PinAuthInvalid))
             .AndDoes(_ => _tokenCallCount++);

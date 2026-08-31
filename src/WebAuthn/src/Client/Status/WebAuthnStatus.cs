@@ -37,16 +37,6 @@ public abstract record WebAuthnStatus;
 public sealed record WebAuthnStatusProcessing : WebAuthnStatus;
 
 /// <summary>
-/// The authenticator is waiting for the user to touch it.
-/// </summary>
-/// <remarks>
-/// Emitted when the authenticator reports that it is awaiting user presence, which is the moment
-/// to show a "touch your key" prompt. Only the HID transport signals this; over SmartCard the
-/// ceremony appears as continuous <see cref="WebAuthnStatusProcessing"/>.
-/// </remarks>
-public sealed record WebAuthnStatusWaitingForUser : WebAuthnStatus;
-
-/// <summary>
 /// The operation has finished successfully.
 /// </summary>
 /// <typeparam name="T">The result type (RegistrationResponse or IReadOnlyList&lt;MatchedCredential&gt;).</typeparam>

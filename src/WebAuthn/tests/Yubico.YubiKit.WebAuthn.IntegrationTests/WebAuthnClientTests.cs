@@ -132,11 +132,6 @@ public class WebAuthnClientTests
         Assert.Contains(statuses, s => s is WebAuthnStatusProcessing);
         Assert.Contains(statuses, s => s is WebAuthnStatusFinished<RegistrationResponse>);
 
-        // The ceremony above required a touch, so the authenticator must have told us it was
-        // waiting for one. Only real hardware exercises this: it comes from CTAP HID keep-alive
-        // frames, which no fake produces.
-        Assert.Contains(statuses, s => s is WebAuthnStatusWaitingForUser);
-
         var finished = statuses.OfType<WebAuthnStatusFinished<RegistrationResponse>>().Single();
         Assert.True(finished.Result.CredentialId.Length > 0);
     }

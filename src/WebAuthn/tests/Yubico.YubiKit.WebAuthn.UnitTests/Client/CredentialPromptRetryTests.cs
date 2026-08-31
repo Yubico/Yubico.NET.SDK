@@ -79,7 +79,6 @@ public class CredentialPromptRetryTests
                 Arg.Any<PinUvAuthTokenPermissions>(),
                 Arg.Any<string?>(),
                 Arg.Any<ReadOnlyMemory<byte>?>(),
-                Arg.Any<IProgress<CtapStatus>?>(),
                 Arg.Any<CancellationToken>())
             .Returns(callInfo =>
             {
@@ -97,7 +96,6 @@ public class CredentialPromptRetryTests
 
         backend.MakeCredentialAsync(
                 Arg.Any<BackendMakeCredentialRequest>(),
-                Arg.Any<IProgress<CtapStatus>?>(),
                 Arg.Any<CancellationToken>())
             .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 

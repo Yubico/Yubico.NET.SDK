@@ -136,9 +136,10 @@ We're coordinating parity timing across the SDKs before putting a date on it.
 
 **A unified way to collect PINs and touch.** V1 had the `KeyCollector`
 delegate — one callback shape shared across PIV, FIDO2, OATH, U2F, and
-YubiHSM Auth. V2 has no equivalent today; each applet handles PIN, PUK, and
-touch prompts its own way. Whether to reintroduce a single pattern is still
-an open design question.
+YubiHSM Auth. V2 has no callback equivalent: sessions take credentials as
+direct method parameters, matching Yubico's other SDKs, so your application
+owns the authentication flow. Whether v2 should additionally offer a
+unified pattern for interactive flows is still an open design question.
 
 ## Where things stand today
 

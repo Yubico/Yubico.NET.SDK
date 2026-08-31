@@ -38,11 +38,20 @@ That's the cost, and we think the smaller surface is worth it.
 
 ## Still being decided
 
-**A unified way to collect credentials.** V1's `KeyCollector` delegate gave
-you one callback shape across PIV, FIDO2, OATH, U2F, and YubiHSM Auth. V2
-doesn't have an equivalent — each applet handles PIN, PUK, and touch prompts
-its own way right now. Whether to bring back a single unified pattern is an
-open design question, and we haven't landed either way.
+**Whether to offer a unified prompting pattern at all.** V1's
+`KeyCollector` delegate gave you one callback across PIV, FIDO2, OATH, U2F,
+and YubiHSM Auth: the SDK would stop mid-operation and pull a PIN, PUK, or
+touch confirmation out of your application.
+
+V2 has no callback equivalent, and dropping it at the session layer was
+deliberate: sessions take credentials as direct method parameters —
+`PivSession.VerifyPinAsync(pin)`, `AuthenticateAsync(managementKey)` — the
+same shape as Yubico's other SDKs, so your application owns the
+authentication flow instead of the SDK calling back into it mid-operation.
+
+Whether v2 should additionally offer a unified pattern for interactive
+flows — prompting, retries, touch — and what shape that would take is still
+an open design question, and we haven't landed either way.
 
 ## Decided against
 

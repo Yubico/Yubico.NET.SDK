@@ -762,7 +762,17 @@ List<(string Project, bool Passed, string? Error, bool Skipped)> RunTestProjects
 // directory and launch the test binary directly.
 void CollectMtpCoverage(string projectPath, string projectName, string coverageResultsDir)
 {
-    Run("dotnet", $"build {projectPath} -c {configuration}");
+    // DeterministicSourcePaths must be off for this build. Directory.Build.props turns on
+    // ContinuousIntegrationBuild whenever GITHUB_ACTIONS is set, and with SourceLink that
+    // rewrites the source paths recorded in the PDB to the deterministic "/_/" form.
+    // coverlet resolves the files it instruments through those paths, so on a deterministic
+    // build it finds nothing and emits a 231-byte cobertura report containing "<sources />"
+    // and "<packages />" - no classes, no lines, silently 0% for everything.
+    //
+    // These binaries exist only to be executed once for coverage and are never shipped or
+    // attested, so real paths here cost nothing. The packages published by the `pack` target
+    // build separately and keep deterministic paths.
+    Run("dotnet", $"build {projectPath} -c {configuration} -p:DeterministicSourcePaths=false");
 
     var projectDir = Path.GetDirectoryName(Path.Combine(repoRoot, projectPath))!;
     var outputDir = Path.Combine(projectDir, "bin", configuration, TestTargetFramework);
@@ -787,6 +797,19 @@ void CollectMtpCoverage(string projectPath, string projectName, string coverageR
     coverletArgs.Append(TranslateRunsettingsToCoverletArgs());
 
     Run("dotnet", coverletArgs.ToString());
+
+    // An instrumentation failure does not fail coverlet: it writes a well-formed cobertura
+    // report containing "<sources />" and "<packages />" and exits 0. Every downstream
+    // consumer then reads a valid file that says nothing is covered, so CRAP scores every
+    // method 0% and the real cause surfaces far away, if at all. Fail here instead, where
+    // the cause is still obvious.
+    var reportClassCount = XDocument.Load(outputFile).Descendants("class").Count();
+    if (reportClassCount == 0)
+        throw new InvalidOperationException(
+            $"coverlet produced an empty coverage report for {projectName} ({outputFile}). " +
+            "It exited successfully but instrumented nothing, so the report contains no classes. " +
+            "The usual cause is source paths coverlet cannot resolve on disk - check that this " +
+            "build is not producing deterministic '/_/' source paths.");
 }
 
 // Translates coverlet.runsettings.xml into coverlet.console command-line flags.

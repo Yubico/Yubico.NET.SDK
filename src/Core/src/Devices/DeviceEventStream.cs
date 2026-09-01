@@ -67,7 +67,9 @@ internal static class DeviceEventStream
     /// otherwise events raised in the gap are not observed.
     /// </para>
     /// <para>
-    /// <strong>Overflow faults instead of dropping.</strong> A <see cref="DeviceEvent"/> is a delta,
+    /// <strong>Overflow faults instead of dropping.</strong> The publisher writes with
+    /// <c>TryWrite</c> and never blocks, so a consumer that stops draining fills its own buffer
+    /// rather than stalling the device monitor. A <see cref="DeviceEvent"/> is a delta,
     /// not a snapshot: consumers fold Added/Removed into their own view of what is connected.
     /// Silently discarding one would permanently desynchronise that view — a removal for a device
     /// never seen added, or a device pinned in the list forever. So an overflow ends the stream with

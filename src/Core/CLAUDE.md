@@ -218,29 +218,22 @@ Two consumer surfaces over one pipeline, both BCL-typed — the SDK has no react
 
 Two internal types back them, split by reason-to-change:
 
-- `DeviceEventBroadcaster` — multicast only: who is subscribed, and notification order.
-  Copy-on-write observer array; `Publish` reads a lock-free snapshot; mutations take a short lock.
-- `DeviceEventStream` — buffering only: one bounded channel (256) per `WatchAsync` consumer.
-  The publisher uses `TryWrite` and never blocks. Overflow **faults that one stream** rather than
-  dropping, because `DeviceEvent` is a delta and a dropped event permanently desynchronises the
-  consumer's device list.
+- `DeviceEventBroadcaster` (`Devices/DeviceEventBroadcaster.cs`) — multicast only: who is
+  subscribed, and in what order they are notified.
+- `DeviceEventStream` (`Devices/DeviceEventStream.cs`) — buffering only: one bounded 256-event
+  channel per `WatchAsync` consumer.
 
-Contracts worth knowing before editing:
+The delivery contracts — inline synchronous publish, exception handling per notification kind,
+subscription identity, ordering under concurrent publish/complete, and overflow policy — are
+documented in full in the XML remarks on those two types, along with the reasoning and the
+alternatives that were tried and reverted. Read them before changing either type. Two of those
+contracts look like defects and must not be "fixed" in passing:
 
-- **`OnNext` exceptions propagate to the publisher and abort delivery to later observers.** This is
-  inherited from the Rx `Subject<T>` this replaced and is pinned by monitor-service tests.
-- **`OnCompleted` exceptions are isolated per observer** and logged. Completion runs during
-  disposal, when a subscriber is likely tearing down its own state; one throwing subscriber must not
-  starve the others or abort the caller's cleanup.
-- **Notification serialisation is the producer's job**, as with Rx. `Publish` deliberately does not
-  synchronise against `Complete`, so a publication already in flight can deliver after completion.
-  Closing that would require holding a lock across arbitrary subscriber code, which would let a
-  blocking subscriber wedge start/stop/dispose — the invariant below. A per-observer gate was tried,
-  deadlocked the blocking-subscriber tests, and was reverted.
-- **Subscribing after completion** delivers `OnCompleted` immediately rather than throwing.
-- **Subscriptions are identity-based.** Unsubscribe matches on `ReferenceEquals`, not
-  `Array.IndexOf` (which would use `EqualityComparer<T>.Default` and could remove a sibling
-  subscription when a consumer subscribes two equal-but-distinct observers).
+- **`OnNext` exceptions propagate to the publisher and abort delivery to later observers.** Do not
+  wrap the publish loop in a `try`/`catch`. The partial delivery is inherited from the Rx
+  `Subject<T>` this replaced and is pinned by monitor-service tests.
+- **Buffer overflow faults the one affected stream rather than dropping the event.** `DeviceEvent`
+  is a delta, so a dropped event permanently desynchronises that consumer's device list.
 
 ### Listener Event Semantics
 

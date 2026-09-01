@@ -61,9 +61,10 @@ namespace Yubico.YubiKit.Core.Devices;
 /// which is already an exceptional, logged condition.</para>
 /// <para>
 /// Closing that window here would mean holding a lock across arbitrary subscriber code, which would
-/// let a blocking subscriber wedge start/stop/dispose — the opposite of the guarantee documented in
-/// <c>src/Core/CLAUDE.md</c> ("a blocking <c>DeviceChanges</c> subscriber cannot wedge
-/// start/stop/dispose"). Liveness wins; a per-observer gate was implemented, deadlocked the
+/// let a blocking subscriber wedge start/stop/dispose — the opposite of the guarantee documented
+/// under "Concurrency Model" in <c>src/Core/CLAUDE.md</c>, where lifecycle operations deliberately
+/// never take the publish gate so that a blocking <c>DeviceChanges</c> subscriber cannot wedge
+/// start/stop/dispose. Liveness wins; a per-observer gate was implemented, deadlocked the
 /// blocking-subscriber tests, and was reverted.
 /// </para>
 /// </remarks>
@@ -103,8 +104,15 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>
     /// <see cref="IObserver{T}.OnCompleted"/>. Idempotent.
     /// </summary>
     /// <remarks>
-    /// After this returns, subscribers are released and any later <see cref="Subscribe"/> call
-    /// completes immediately.
+    /// <para>After this returns, subscribers are released and any later <see cref="Subscribe"/>
+    /// call completes immediately.</para>
+    /// <para><strong>Exceptions from <see cref="IObserver{T}.OnCompleted"/> are isolated per
+    /// observer and logged</strong> — unlike <see cref="IObserver{T}.OnNext"/>, where a throwing
+    /// subscriber deliberately propagates to the publisher. Completion runs during disposal,
+    /// exactly when a subscriber is likely to be tearing down its own state and may throw
+    /// <see cref="ObjectDisposedException"/>. Letting that escape would starve every later observer
+    /// of its terminal signal (an async consumer would hang on a channel that never completes) and
+    /// abort the caller's remaining cleanup.</para>
     /// </remarks>
     public void Complete()
     {
@@ -126,12 +134,8 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>
         // hold the gate, or a handler that subscribes/unsubscribes would deadlock.
         foreach (var observer in snapshot)
         {
-            // Unlike OnNext - where a throwing subscriber deliberately propagates to the publisher -
-            // a terminal notification is isolated per observer. Completion runs during disposal,
-            // exactly when a subscriber is likely to be tearing down its own state and may throw
-            // ObjectDisposedException. Letting that escape would starve every later observer of its
-            // terminal signal (an async consumer would hang on a channel that never completes) and
-            // abort the caller's remaining cleanup.
+            // Terminal notifications are isolated per observer - see the remarks on this method for
+            // why this differs from OnNext.
             try
             {
                 observer.OnCompleted();
@@ -147,11 +151,15 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>
 
     /// <inheritdoc/>
     /// <remarks>
-    /// Subscribing after <see cref="Complete"/> delivers <see cref="IObserver{T}.OnCompleted"/>
-    /// immediately and returns an inert subscription, rather than throwing. A completed sequence
-    /// completing its late subscribers is the conventional observable contract, and it keeps the
-    /// subscribe/complete race benign: whether a caller lands just before or just after completion,
-    /// it observes a clean terminal signal either way.
+    /// <para>Subscribing after <see cref="Complete"/> delivers
+    /// <see cref="IObserver{T}.OnCompleted"/> immediately and returns an inert subscription, rather
+    /// than throwing. A completed sequence completing its late subscribers is the conventional
+    /// observable contract, and it keeps the subscribe/complete race benign: whether a caller lands
+    /// just before or just after completion, it observes a clean terminal signal either way.</para>
+    /// <para><strong>Subscriptions are identity-based.</strong> Disposing the returned handle
+    /// removes exactly the <paramref name="observer"/> instance that was passed in, matched by
+    /// reference and not by equality, so a consumer that subscribes two equal-but-distinct
+    /// observers cannot have one unsubscribe remove the other's registration.</para>
     /// </remarks>
     public IDisposable Subscribe(IObserver<DeviceEvent> observer)
     {

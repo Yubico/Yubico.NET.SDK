@@ -88,17 +88,15 @@ internal partial class ScpState
         // GPC v2.3 Amendment F (SCP11) v1.4 §7.6.2.3
         // Construct the host authentication command
         // These contain the parameters for the host authentication command that the YubiKey will respond to.
-        var oceAuthenticateData = TlvHelper.EncodeList(
-        [
-            new Tlv(0xA6, TlvHelper.EncodeList(
-            [
+        // EncodeAndDisposeList rather than EncodeList: these Tlvs are constructed inline and
+        // unreachable afterwards, and EncodeList does not dispose what it is given.
+        var oceAuthenticateData = TlvHelper.EncodeAndDisposeList(
+            new Tlv(0xA6, TlvHelper.EncodeAndDisposeList(
                 new Tlv(0x90, [0x11, scpTypeParam]),
                 new Tlv(0x95, keyUsage),
                 new Tlv(0x80, keyType),
-                new Tlv(0x81, keyLen)
-            ])),
-            new Tlv(0x5F49, epkOce)
-        ]);
+                new Tlv(0x81, keyLen))),
+            new Tlv(0x5F49, epkOce));
 
         try
         {

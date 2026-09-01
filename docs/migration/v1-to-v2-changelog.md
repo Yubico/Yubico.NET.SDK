@@ -76,3 +76,11 @@
 
 - Analyzed range `6608d9bc51748d9cdb771dafbae445bc8a9d82cf..HEAD`; no migration-relevant source, package, namespace, or project-shape changes were found.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `570db241ec23534ac0b45a658b4db7522ca642b6`.
+
+## 2026-08-31 - No migration impact
+
+- Analyzed range `570db241ec23534ac0b45a658b4db7522ca642b6..HEAD` (30 changed files). The range is entirely v2-internal: test-seam visibility changes from `private` to `internal` (`PivCertificateProtocol.GetCertificateObjectId`, `WebAuthnClient.MapCtapStatusToWebAuthnError`, `LinuxHidDevice.ParseHidDescriptorBytes`, `LinuxHidIOReportConnection.ParseReportSizes`, `LibcHelpers.GetErrnoString(int)`), a new internal `HidReportDescriptorReader` shared HID short-item walker replacing two duplicated hand-rolled parsers, an internal `ResolveRemainingRetriesAsync` extraction in OpenPGP PIN verification (behavior unchanged, confirmed by reading the diff), a `crap.cs`/`toolchain.cs` code-complexity dev-tool addition, and new unit tests for all of the above.
+- One behavior fix: `FidoHidProtocol.ReceiveResponse` now sends `CTAPHID_CANCEL` when the caller's `cancellationToken` is signaled while a keep-alive is pending, so an abandoned ceremony does not strand the authenticator on a busy channel. `SendVendorCommandAsync`'s public signature (`byte command, ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default`) is unchanged, so this is not a v1-to-v2 API or mapping change.
+- `api-added.txt`, `api-removed.txt`, and `package-changes.txt` showed no public API or package/namespace-shape changes for this range.
+- No migration guide or map updates were needed; the existing `v1-to-v2.md` and `v1-to-v2-map.yml` guidance is unaffected.
+- Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `6e8cf371214436beb36755abf0c82522d481f603`.

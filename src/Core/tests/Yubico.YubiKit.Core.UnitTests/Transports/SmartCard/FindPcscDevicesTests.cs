@@ -180,15 +180,4 @@ public class FindPcscDevicesTests
         public IYubiKey Create(IDevice device) =>
             throw new InvalidOperationException("No device should be created when PC/SC admission is saturated.");
     }
-
-    private sealed class FakeYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey
-    {
-        public string DeviceId { get; } = deviceId;
-
-        public ConnectionType AvailableConnections { get; } = connectionType;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            throw new NotSupportedException();
-    }
 }

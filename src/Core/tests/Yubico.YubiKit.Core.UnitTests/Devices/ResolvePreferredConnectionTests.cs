@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -38,7 +38,7 @@ public class ResolvePreferredConnectionTests
     [InlineData(ConnectionType.Unknown, ConnectionType.Unknown)]
     public void ManagementOrder_ResolvesExpected(ConnectionType available, ConnectionType expected)
     {
-        var device = new FakeYubiKey(available);
+        var device = new FakeYubiKey("fake", available);
         Assert.Equal(expected, device.ResolvePreferredConnection(ManagementOrder));
     }
 
@@ -50,7 +50,7 @@ public class ResolvePreferredConnectionTests
     [InlineData(ConnectionType.HidFido, ConnectionType.Unknown)]
     public void YubiOtpOrder_ResolvesExpected(ConnectionType available, ConnectionType expected)
     {
-        var device = new FakeYubiKey(available);
+        var device = new FakeYubiKey("fake", available);
         Assert.Equal(expected, device.ResolvePreferredConnection(YubiOtpOrder));
     }
 
@@ -58,16 +58,6 @@ public class ResolvePreferredConnectionTests
     public void SingleInterfaceDevice_ResolvesToThatInterface()
     {
         Assert.Equal(ConnectionType.HidOtp,
-            new FakeYubiKey(ConnectionType.HidOtp).ResolvePreferredConnection(ManagementOrder));
-    }
-
-    private sealed class FakeYubiKey(ConnectionType available) : IYubiKey
-    {
-        public string DeviceId => "fake";
-        public ConnectionType AvailableConnections { get; } = available;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-            => throw new NotSupportedException();
+            new FakeYubiKey("fake", ConnectionType.HidOtp).ResolvePreferredConnection(ManagementOrder));
     }
 }

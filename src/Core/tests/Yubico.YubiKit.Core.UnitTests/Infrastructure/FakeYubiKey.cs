@@ -21,11 +21,11 @@ namespace Yubico.YubiKit.Core.UnitTests.Infrastructure;
 /// Inert <see cref="IYubiKey"/> for tests that only need identity and advertised connections.
 /// </summary>
 /// <remarks>
-/// Connecting throws — this is for tests about discovery, caching, and event plumbing, not about
-/// transports. Several older test files still declare their own private equivalents; prefer this one
-/// for new tests so the copies can be retired opportunistically.
+/// Connecting throws — this is for tests about discovery, caching, merging, and event plumbing, not
+/// about transports. A test that needs <see cref="ConnectAsync{TConnection}"/> to actually hand back a
+/// connection is testing something else and should declare its own double rather than extend this one.
 /// </remarks>
-internal sealed class StubYubiKey(
+internal sealed class FakeYubiKey(
     string deviceId,
     ConnectionType availableConnections = ConnectionType.SmartCard) : IYubiKey
 {
@@ -35,5 +35,5 @@ internal sealed class StubYubiKey(
 
     public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection =>
-        throw new NotSupportedException();
+        throw new NotSupportedException("FakeYubiKey does not support connections.");
 }

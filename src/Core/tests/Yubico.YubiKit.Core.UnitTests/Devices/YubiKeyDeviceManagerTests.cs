@@ -110,7 +110,7 @@ public class YubiKeyDeviceManagerTests
         // Start monitoring performs one startup rescan, then FindAllAsync returns cache.
         manager.StartMonitoring(TimeSpan.FromSeconds(10));
 
-        await WaitUntilAsync(() => findYubiKeys.ScanCount >= 2, "Monitoring startup rescan did not run");
+        await AsyncWait.WaitUntilAsync(() => findYubiKeys.ScanCount >= 2, "Monitoring startup rescan did not run");
         var scanCountAfterStart = findYubiKeys.ScanCount;
 
         // Act - Call FindAllAsync while monitoring
@@ -352,20 +352,6 @@ public class YubiKeyDeviceManagerTests
         return (manager, findYubiKeys, repository);
     }
 
-    private static async Task WaitUntilAsync(Func<bool> condition, string failureMessage)
-    {
-        var deadline = DateTimeOffset.UtcNow.AddSeconds(5);
-        while (!condition())
-        {
-            if (DateTimeOffset.UtcNow >= deadline)
-            {
-                throw new TimeoutException(failureMessage);
-            }
-
-            await Task.Delay(TimeSpan.FromMilliseconds(20), TestContext.Current.CancellationToken);
-        }
-    }
-
     /// <summary>
     /// Fake IFindYubiKeys for testing with scan counting. Counters use interlocked/volatile
     /// access because scans run on the monitor loop while tests read from the test thread.
@@ -423,19 +409,6 @@ public class YubiKeyDeviceManagerTests
         public void Stop() => Status = DeviceListenerStatus.Stopped;
 
         public void Dispose() => DeviceEvent = null;
-    }
-
-    /// <summary>
-    /// Minimal fake IYubiKey implementation for testing.
-    /// </summary>
-    private sealed class FakeYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey
-    {
-        public string DeviceId { get; } = deviceId;
-        public ConnectionType AvailableConnections { get; } = connectionType;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-            => throw new NotSupportedException("FakeYubiKey does not support connections.");
     }
 
 }

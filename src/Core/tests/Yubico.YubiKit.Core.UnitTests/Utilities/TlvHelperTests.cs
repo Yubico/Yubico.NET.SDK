@@ -143,4 +143,58 @@ public class TlvHelperTests
         Assert.Equal(1, tlv.Length);
         Assert.Equal(0xAA, tlv.Value.Span[0]);
     }
+
+    /// <summary>
+    ///     Pins the header arithmetic that makes <see cref="Tlv.TotalLength" /> trustworthy as the
+    ///     sole size input to <see cref="TlvHelper.EncodeList" />. The expected size is spelled out
+    ///     here rather than read back off the Tlv, so this fails if either the length-field encoding
+    ///     in <see cref="Tlv" /> or the meaning of TotalLength changes.
+    ///     An undersized TotalLength would make EncodeList throw; an oversized one would silently
+    ///     zero-pad its output.
+    /// </summary>
+    [Theory]
+    [InlineData(0x5A, 0x00, 2)]   // 1 tag + 1 short-form length
+    [InlineData(0x5A, 0x7F, 2)]   // largest short-form length
+    [InlineData(0x5A, 0x80, 3)]   // 1 tag + 0x81 0x80
+    [InlineData(0x5A, 0xFF, 3)]
+    [InlineData(0x5A, 0x100, 4)]  // 1 tag + 0x82 0x01 0x00
+    [InlineData(0x9F33, 0x7F, 3)] // 2-byte tag + 1 short-form length
+    [InlineData(0x9F33, 0x100, 5)]
+    public void Tlv_TotalLength_IsHeaderPlusValue(int tag, int valueLength, int headerLength)
+    {
+        using var tlv = new Tlv(tag, new byte[valueLength]);
+
+        Assert.Equal(headerLength + valueLength, tlv.TotalLength);
+    }
+
+    [Fact]
+    public void EncodeList_EmitsExpectedBytes()
+    {
+        using var first = new Tlv(0x5A, new byte[] { 0xAA });
+        using var second = new Tlv(0x9F33, new byte[] { 0xFF });
+
+        var encoded = TlvHelper.EncodeList([first, second]);
+
+        Assert.Equal(
+            new byte[] { 0x5A, 0x01, 0xAA, 0x9F, 0x33, 0x01, 0xFF },
+            encoded.ToArray());
+    }
+
+    [Fact]
+    public void EncodeList_WithSingleElement_EmitsThatElementOnly()
+    {
+        using var only = new Tlv(0x5A, new byte[] { 0xAA, 0xBB });
+
+        var encoded = TlvHelper.EncodeList([only]);
+
+        Assert.Equal(new byte[] { 0x5A, 0x02, 0xAA, 0xBB }, encoded.ToArray());
+    }
+
+    [Fact]
+    public void EncodeList_WithNoElements_ReturnsEmpty()
+    {
+        var encoded = TlvHelper.EncodeList([]);
+
+        Assert.True(encoded.IsEmpty);
+    }
 }

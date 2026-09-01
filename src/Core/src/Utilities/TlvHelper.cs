@@ -73,25 +73,41 @@ public static class TlvHelper
     ///     Encodes a list of Tlvs into a sequence of BER-TLV encoded data.
     /// </summary>
     /// <param name="tlvData">List of Tlvs to encode</param>
-    /// <returns>BER-TLV encoded list</returns>
+    /// <returns>
+    ///     BER-TLV encoded list, or an empty buffer if <paramref name="tlvData" /> contains no elements.
+    /// </returns>
+    /// <exception cref="ArgumentNullException"><paramref name="tlvData" /> is <see langword="null" />.</exception>
+    /// <remarks>
+    ///     A disposed <see cref="Tlv" /> still reports its original <see cref="Tlv.TotalLength" /> while
+    ///     exposing zeroed bytes, so passing one encodes a correctly sized run of <c>0x00</c> rather than
+    ///     throwing. Encode before disposing, or use <see cref="EncodeAndDisposeList" />.
+    /// </remarks>
     public static Memory<byte> EncodeList(Tlv[] tlvData)
     {
-        // Calculate total size to avoid resizing
-        var estimatedSize = 0;
+        ArgumentNullException.ThrowIfNull(tlvData);
+
         var tlvSpan = tlvData.AsSpan();
+
+        // Exact, not an estimate: Tlv.TotalLength is the length of the buffer Tlv.AsSpan() exposes,
+        // so the sum is the precise output size and no growth step is possible. The header
+        // arithmetic behind it is pinned by TlvHelperTests.Tlv_TotalLength_IsHeaderPlusValue.
+        var totalLength = 0;
         foreach (var tlv in tlvSpan)
-            estimatedSize += tlv.TotalLength;
+            totalLength += tlv.TotalLength;
 
-        var writer = new ArrayBufferWriter<byte>(estimatedSize);
-
+        // Assemble directly into the array that is returned. Staging through a separate writer
+        // would leave a second, complete copy of every encoded value - including PINs, keys and
+        // other secret material - on the heap, abandoned to the GC without being zeroed.
+        var encoded = new byte[totalLength];
+        var position = 0;
         foreach (var tlv in tlvSpan)
         {
-            var tlvBytes = tlv.AsMemory().Span;
-            tlvBytes.CopyTo(writer.GetSpan(tlvBytes.Length));
-            writer.Advance(tlvBytes.Length);
+            var tlvBytes = tlv.AsSpan();
+            tlvBytes.CopyTo(encoded.AsSpan(position));
+            position += tlvBytes.Length;
         }
 
-        return writer.WrittenMemory.ToArray();
+        return encoded;
     }
 
     /// <summary>

@@ -73,6 +73,21 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task DeviceChanges_AcrossRepeatedHotPlugCycles_PairsEventsAndKeepsIdentityStable()
     {
+        // This test reads back "the" device after each cycle, so a second connected key makes every
+        // identity assertion ambiguous: the baseline can be captured from one key and the settled
+        // read taken from the other, which looks exactly like an identity bug and is not one.
+        // Fail fast and say so, rather than reporting a mismatch the operator cannot interpret.
+        var connected = await YubiKeyManager.FindAllAsync();
+        Assert.True(
+            connected.Count == 1,
+            $"This test drives a single key by hand and needs exactly one YubiKey connected; found " +
+            $"{connected.Count} ({string.Join(", ", connected.Select(d => d.DeviceId))}). " +
+            "Unplug the others and re-run.");
+
+        // That probe re-populated the cache InitializeAsync had just cleared, and a populated cache
+        // makes the initial rescan a no-op — no Added event, no baseline. Clear it again.
+        await YubiKeyManager.ShutdownAsync();
+
         // Subscribe before monitoring starts, otherwise the initial rescan races the subscription.
         using var subscription = YubiKeyManager.DeviceChanges.Subscribe(_log);
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
@@ -101,8 +116,11 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             Assert.True(
                 settledId == baselineId,
                 $"DeviceId changed across a same-slot reinsertion on cycle {cycle}: expected " +
-                $"'{baselineId}', got '{settledId}'. This is the identity-cache staleness case " +
-                $"described in src/Core/CLAUDE.md.{Environment.NewLine}{_log}");
+                $"'{baselineId}', got '{settledId}'. Note that a tier change is not by itself a " +
+                $"defect — the merger picks the strongest available identity, so a serial-tier id " +
+                $"legitimately becomes a PID-tier one when the metadata read does not land. What " +
+                $"this pins is that a settled key reaches the same identity it had before, given " +
+                $"the same slot and the same readable metadata.{Environment.NewLine}{_log}");
         }
 
         output.WriteLine(_log.ToString());
@@ -146,6 +164,17 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         private DeviceAction? _awaited;
         private TaskCompletionSource<DeviceEvent>? _pending;
 
+        /// <summary>
+        /// Index of the first entry not yet handed to a <see cref="WaitForAsync"/> caller.
+        /// </summary>
+        /// <remarks>
+        /// A human cannot be expected to stay in lockstep with the prompts, and acting early must not
+        /// fail the test. Events are therefore consumed from the recorded log rather than only from
+        /// the live callback, so a removal that happened before the prompt was printed still
+        /// satisfies the wait for it.
+        /// </remarks>
+        private int _cursor;
+
         public void OnNext(DeviceEvent value)
         {
             TaskCompletionSource<DeviceEvent>? toComplete = null;
@@ -159,6 +188,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
                     toComplete = _pending;
                     _pending = null;
                     _awaited = null;
+                    _cursor = _entries.Count;
                 }
             }
 
@@ -173,13 +203,26 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         {
         }
 
-        /// <summary>Waits for the next event of <paramref name="action"/>; null on timeout.</summary>
+        /// <summary>
+        /// Consumes the next unconsumed event of <paramref name="action"/>, waiting for one if it has
+        /// not happened yet; null on timeout.
+        /// </summary>
         public async Task<DeviceEvent?> WaitForAsync(DeviceAction action, TimeSpan timeout)
         {
-            var tcs = new TaskCompletionSource<DeviceEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
+            TaskCompletionSource<DeviceEvent> tcs;
 
             lock (_gate)
             {
+                for (var i = _cursor; i < _entries.Count; i++)
+                {
+                    if (_entries[i].Event.Action == action)
+                    {
+                        _cursor = i + 1;
+                        return _entries[i].Event;
+                    }
+                }
+
+                tcs = new TaskCompletionSource<DeviceEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
                 _awaited = action;
                 _pending = tcs;
             }

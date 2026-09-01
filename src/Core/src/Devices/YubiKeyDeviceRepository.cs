@@ -64,22 +64,21 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
 
         return [.. _deviceCache.Values.Where(d => type.Matches(d.AvailableConnections))];
     }
-
     /// <inheritdoc/>
     public void UpdateCache(IEnumerable<IYubiKey> devices)
     {
         ThrowIfDisposed();
 
         // Diffing is keyed by PHYSICAL identity — the set of interface paths a key occupies — and never by
-        // IYubiKey.DeviceId. A composite's DeviceId names the evidence tier that resolved the merge, so it
+        // IYubiKey.DeviceId. A published device's DeviceId names the evidence tier that resolved the merge, so it
         // flips when the surrounding evidence changes even though the key never moved (see
-        // CompositeYubiKey.PhysicalIdentityKeyFor). Diffing on it reported an unmoved key as Removed+Added.
+        // YubiKeyDevice.PhysicalIdentityKeyFor). Diffing on it reported an unmoved key as Removed+Added.
         var currentKeys = _deviceCache.Keys.ToHashSet();
         var newDeviceMap = new Dictionary<string, IYubiKey>();
 
         foreach (var device in devices)
         {
-            newDeviceMap[CompositeYubiKey.PhysicalIdentityKeyFor(device)] = device;
+            newDeviceMap[YubiKeyDevice.PhysicalIdentityKeyFor(device)] = device;
         }
 
         var newKeys = newDeviceMap.Keys.ToHashSet();
@@ -126,6 +125,12 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
                     updated.DeviceId,
                     existing.AvailableConnections,
                     updated.AvailableConnections);
+            }
+            else if (existing is YubiKeyDevice retained &&
+                updated is YubiKeyDevice latest &&
+                latest.DeviceInfo is { } metadata)
+            {
+                retained.DeviceInfo = metadata;
             }
 
             // Otherwise retain the object whose DeviceId was published in Added, so a later Removed event

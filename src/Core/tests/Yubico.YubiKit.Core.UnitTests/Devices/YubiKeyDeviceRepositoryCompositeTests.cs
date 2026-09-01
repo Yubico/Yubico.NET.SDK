@@ -43,7 +43,6 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Equal(DeviceAction.Added, events[1].Action);
         Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidFido, events[1].Device.AvailableConnections);
     }
-
     [Fact]
     public void UpdateCache_SamePhysicalIdUnchangedConnections_EmitsNoEvent()
     {
@@ -55,6 +54,53 @@ public class YubiKeyDeviceRepositoryCompositeTests
 
         repository.UpdateCache([new FakeYubiKey("ykphysical:103", ConnectionType.SmartCard | ConnectionType.HidOtp)]);
 
+        Assert.Empty(events);
+    }
+
+    [Fact]
+    public void UpdateCache_LaterScanHasMetadata_UpdatesRetainedPublishedObjectWithoutEvents()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var firstScan = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
+        repository.UpdateCache([firstScan]);
+
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
+        var metadata = default(DeviceInfo) with
+        {
+            FirmwareVersion = new FirmwareVersion(5, 7, 2),
+            SerialNumber = 103
+        };
+
+        var laterScan = Published("ykphysical:103", "pcsc:a", "hid-fido:a", metadata);
+        repository.UpdateCache([laterScan]);
+
+        var retained = Assert.Single(repository.GetAll());
+        Assert.Same(firstScan, retained);
+        Assert.Equal(metadata, firstScan.DeviceInfo);
+        Assert.Empty(events);
+    }
+
+    [Fact]
+    public void UpdateCache_LaterScanWithoutMetadata_DoesNotClearRetainedMetadata()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var metadata = default(DeviceInfo) with
+        {
+            FirmwareVersion = new FirmwareVersion(5, 7, 2),
+            SerialNumber = 103
+        };
+        var firstScan = Published("ykphysical:103", "pcsc:a", "hid-fido:a", metadata);
+        repository.UpdateCache([firstScan]);
+
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
+        var laterScan = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
+
+        repository.UpdateCache([laterScan]);
+
+        Assert.Same(firstScan, Assert.Single(repository.GetAll()));
+        Assert.Equal(metadata, firstScan.DeviceInfo);
         Assert.Empty(events);
     }
 
@@ -80,8 +126,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
     public void UpdateCache_SamePidCompositeDifferentMemberIds_EmitsRemovedThenAdded()
     {
         using var repository = new YubiKeyDeviceRepository();
-        var first = Composite("ykphysical:pid:0407", "pcsc:key-a", "hid:key-a");
-        var second = Composite("ykphysical:pid:0407", "pcsc:key-b", "hid:key-b");
+        var first = Published("ykphysical:pid:0407", "pcsc:key-a", "hid:key-a", deviceInfo: null);
+        var second = Published("ykphysical:pid:0407", "pcsc:key-b", "hid:key-b", deviceInfo: null);
         repository.UpdateCache([first]);
 
         var events = new RecordingObserver<DeviceEvent>();
@@ -104,15 +150,16 @@ public class YubiKeyDeviceRepositoryCompositeTests
         // composite DeviceId therefore encodes WHICH EVIDENCE resolved the key, and changes when the
         // evidence changes even though the physical key never moved. The member interface ids do not.
         var both = CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]);
-        var survivorWhileSiblingPresent = Assert.IsType<CompositeYubiKey>(
-            Assert.Single(both, d => d.DeviceId == "ykphysical:103"));
+        var survivorWhileSiblingPresent = Assert.Single(both, d => d.DeviceId == "ykphysical:103");
 
         var alone = CompositeDeviceMerger.Merge(KeyInterfaces("a", null));
-        var survivorAlone = Assert.IsType<CompositeYubiKey>(Assert.Single(alone));
+        var survivorAlone = Assert.Single(alone);
 
         Assert.NotEqual(survivorWhileSiblingPresent.DeviceId, survivorAlone.DeviceId);
         Assert.Equal("ykphysical:pid:0407", survivorAlone.DeviceId);
-        Assert.Equal(survivorWhileSiblingPresent.MemberDeviceIds, survivorAlone.MemberDeviceIds);
+        Assert.Equal(
+            InterfaceIdsOf(survivorWhileSiblingPresent),
+            InterfaceIdsOf(survivorAlone));
     }
 
     [Fact]
@@ -165,11 +212,10 @@ public class YubiKeyDeviceRepositoryCompositeTests
         var added = Assert.Single(events, e =>
             e.Action == DeviceAction.Added && e.Device.DeviceId == "ykphysical:103");
         var removed = Assert.Single(events, e =>
-            e.Action == DeviceAction.Removed &&
-            e.Device is CompositeYubiKey composite &&
-            composite.MemberDeviceIds.Contains("pcsc:a"));
+            e.Action == DeviceAction.Removed && e.Device.DeviceId == added.Device.DeviceId);
 
         Assert.Equal(added.Device.DeviceId, removed.Device.DeviceId);
+        Assert.Same(added.Device, removed.Device);
     }
 
     // INVARIANT PIN (not fix evidence): a genuinely removed physical key still emits Removed.
@@ -177,7 +223,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
     public void UpdateCache_CompositeKeyUnplugged_EmitsRemoved()
     {
         using var repository = new YubiKeyDeviceRepository();
-        var key = Composite("ykphysical:pid:0407", "pcsc:a", "hid-fido:a");
+        var key = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([key]);
 
         var events = new RecordingObserver<DeviceEvent>();
@@ -200,7 +246,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
         var events = new RecordingObserver<DeviceEvent>();
         using var subscription = repository.DeviceChanges.Subscribe(events);
 
-        var key = Composite("ykphysical:pid:0407", "pcsc:a", "hid-fido:a");
+        var key = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([key]);
 
         var evt = Assert.Single(events);
@@ -219,14 +265,30 @@ public class YubiKeyDeviceRepositoryCompositeTests
     ];
 
     private static DeviceInterfaceDescriptor Usb(string id, ConnectionType connection, int? serial) =>
-        new(new FakeYubiKey(id, connection), connection, IsUsb: true, FullKeyPid, serial, null);
+        new(new FakeSlot(id, connection), connection, IsUsb: true, FullKeyPid, serial, null);
 
-    private static CompositeYubiKey Composite(string deviceId, string smartCardId, string hidFidoId) =>
+    private static YubiKeyDevice Published(
+        string deviceId,
+        string smartCardId,
+        string hidFidoId,
+        DeviceInfo? deviceInfo) =>
         new(
             deviceId,
-            [
-                new FakeYubiKey(smartCardId, ConnectionType.SmartCard),
-                new FakeYubiKey(hidFidoId, ConnectionType.HidFido)
-            ],
-            null);
+            new FakeSlot(smartCardId, ConnectionType.SmartCard),
+            new FakeSlot(hidFidoId, ConnectionType.HidFido),
+            hidOtp: null,
+            deviceInfo);
+
+    private static IReadOnlyList<string> InterfaceIdsOf(IYubiKey device) =>
+        Assert.IsType<YubiKeyDevice>(device).InterfaceIds;
+
+    private sealed class FakeSlot(string deviceId, ConnectionType connectionType) : IYubiKeyConnectionSlot
+    {
+        public string DeviceId { get; } = deviceId;
+        public ConnectionType AvailableConnections { get; } = connectionType;
+
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection
+            => throw new NotSupportedException();
+    }
 }

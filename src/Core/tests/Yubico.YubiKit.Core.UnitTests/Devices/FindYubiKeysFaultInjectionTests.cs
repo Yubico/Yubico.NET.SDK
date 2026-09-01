@@ -88,8 +88,10 @@ public class FindYubiKeysFaultInjectionTests
 
         Assert.Equal(2, scan1.Count);
         Assert.All(scan1, d => Assert.Equal(Dual, d.AvailableConnections));
-        var keyB1 = Assert.IsType<CompositeYubiKey>(Assert.Single(scan1, d => d.DeviceId == "ykphysical:222"));
-        Assert.Contains(keyB1.MemberDeviceIds, id => id.EndsWith(OtpB, StringComparison.Ordinal));
+        var keyB1 = Assert.Single(scan1, d => d.DeviceId == "ykphysical:222");
+        Assert.Contains(
+            Assert.IsType<YubiKeyDevice>(keyB1).InterfaceIds,
+            id => id.EndsWith(OtpB, StringComparison.Ordinal));
 
         var otpAConnectsAfterScan1 = factory.ConnectCalls(OtpA);
         var otpBConnectsAfterScan1 = factory.ConnectCalls(OtpB);
@@ -108,7 +110,6 @@ public class FindYubiKeysFaultInjectionTests
             "The failed identity read must be retried on the next scan (failures are not cached).");
         Assert.Equal(otpAConnectsAfterScan1, factory.ConnectCalls(OtpA));
     }
-
     [Fact]
     public async Task FindAllAsync_InterfaceDisappearance_EvictsIdentityCacheEntries_Pin()
     {
@@ -143,7 +144,7 @@ public class FindYubiKeysFaultInjectionTests
         var scan3 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
         Assert.Equal(3, scan3.Count);
-        var keyA = Assert.IsType<CompositeYubiKey>(Assert.Single(scan3, d => d is CompositeYubiKey));
+        var keyA = Assert.Single(scan3, d => Assert.IsType<YubiKeyDevice>(d).InterfaceIds.Count > 1);
         Assert.Equal("ykphysical:111", keyA.DeviceId);
         Assert.Equal(Dual, keyA.AvailableConnections);
         Assert.DoesNotContain(scan3, d => d.DeviceId == "ykphysical:222");
@@ -200,8 +201,10 @@ public class FindYubiKeysFaultInjectionTests
 
         Assert.Equal(2, scan2.Count);
         Assert.All(scan2, d => Assert.Equal(Dual, d.AvailableConnections));
-        var keyA = Assert.IsType<CompositeYubiKey>(Assert.Single(scan2, d => d.DeviceId == "ykphysical:111"));
-        Assert.Contains(keyA.MemberDeviceIds, id => id.EndsWith(ReaderARenamed, StringComparison.Ordinal));
+        var keyA = Assert.Single(scan2, d => d.DeviceId == "ykphysical:111");
+        Assert.Contains(
+            Assert.IsType<YubiKeyDevice>(keyA).InterfaceIds,
+            id => id.EndsWith(ReaderARenamed, StringComparison.Ordinal));
         Assert.True(
             factory.ConnectCalls(ReaderARenamed) > 0,
             "The renamed reader must be re-read (cache keyed by DeviceId cannot carry identity across renames).");
@@ -329,6 +332,71 @@ public class FindYubiKeysFaultInjectionTests
     }
 
     [Fact]
+    public async Task FindAllAsync_OneSlotUsbDevice_PopulatesBestEffortMetadata()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        const string fidoPath = "single-slot-fido";
+        var factory = new ScriptedIdentityFactory();
+        factory.SucceedReads(fidoPath, serial: 333);
+        var find = new FindYubiKeys(
+            new MutableFindPcscDevices(),
+            new MutableFindHidDevices
+            {
+                Devices = [new FakeHidDevice(0x0120, HidInterfaceType.Fido, fidoPath)]
+            },
+            factory);
+
+        var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        var published = Assert.Single(result);
+        Assert.Equal(ConnectionType.HidFido, published.AvailableConnections);
+        Assert.Equal(333, Assert.IsType<YubiKeyDevice>(published).DeviceInfo?.SerialNumber);
+        Assert.Equal(1, factory.ConnectCalls(fidoPath));
+    }
+
+    [Fact]
+    public async Task FindAllAsync_NfcDevice_PopulatesBestEffortMetadata()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        const string readerName = "single-slot-nfc";
+        var factory = new ScriptedIdentityFactory();
+        factory.SucceedReads(readerName, serial: 444);
+        var find = new FindYubiKeys(
+            new MutableFindPcscDevices
+            {
+                Devices = [new FakePcscDevice(readerName, PscsConnectionKind.Nfc)]
+            },
+            new MutableFindHidDevices(),
+            factory);
+
+        var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        var published = Assert.Single(result);
+        Assert.Equal(ConnectionType.SmartCard, published.AvailableConnections);
+        Assert.Equal(444, Assert.IsType<YubiKeyDevice>(published).DeviceInfo?.SerialNumber);
+        Assert.Equal(1, factory.ConnectCalls(readerName));
+    }
+
+    [Fact]
+    public async Task FindAllAsync_ConsumedIdentityBudget_DoesNotAddMetadataOpenAndRetriesLater()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        var (find, factory, _, _) = CreateTwoDualKeyRig();
+        foreach (var name in new[] { ReaderA, ReaderB, OtpA, OtpB })
+            factory.FailReads(name);
+
+        var scan1 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        Assert.Equal(4, scan1.Count);
+        Assert.Equal(12, factory.TotalConnectCalls); // three identity attempts per interface; no metadata open
+
+        var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        Assert.Equal(4, scan2.Count);
+        Assert.Equal(24, factory.TotalConnectCalls);
+    }
+
+    [Fact]
     [Trait("Category", "RuntimeResilience")]
     public async Task FindAllAsync_SixIdentityReadsAgainstFourWorkerAdmission_WaitForSlotsInsteadOfSkipping()
     {
@@ -420,7 +488,7 @@ public class FindYubiKeysFaultInjectionTests
         }
 
         Assert.Equal(6, result.Count);
-        Assert.DoesNotContain(result, d => d is CompositeYubiKey);
+        Assert.All(result, d => Assert.Single(Assert.IsType<YubiKeyDevice>(d).InterfaceIds));
         Assert.Equal(4, connectsAtScanEnd); // bound preserved: hung native calls never multiply workers
         Assert.True(
             allSixEventuallyConnected,
@@ -497,11 +565,13 @@ public class FindYubiKeysFaultInjectionTests
             Task.FromResult(Devices);
     }
 
-    private sealed class FakePcscDevice(string readerName) : IPcscDevice
+    private sealed class FakePcscDevice(
+        string readerName,
+        PscsConnectionKind kind = PscsConnectionKind.Usb) : IPcscDevice
     {
         public string ReaderName { get; } = readerName;
         public AnswerToReset? Atr => null;
-        public PscsConnectionKind Kind => PscsConnectionKind.Usb;
+        public PscsConnectionKind Kind => kind;
     }
 
     private sealed class FakeHidDevice(short productId, HidInterfaceType interfaceType, string name) : IHidDevice
@@ -563,7 +633,7 @@ public class FindYubiKeysFaultInjectionTests
                 blocked.TrySetException(new InvalidOperationException("Expected blocked-read cleanup failure."));
         }
 
-        public IYubiKey Create(IDevice device) => device switch
+        public IYubiKeyConnectionSlot Create(IDevice device) => device switch
         {
             IPcscDevice p => new ScriptedYubiKey($"{_prefix}:pcsc:{p.ReaderName}", p.ReaderName, ConnectionType.SmartCard, this),
             IHidDevice h => new ScriptedYubiKey(
@@ -653,7 +723,7 @@ public class FindYubiKeysFaultInjectionTests
         string deviceId,
         string name,
         ConnectionType connection,
-        ScriptedIdentityFactory owner) : IYubiKey, IDiscoveryConnectionProvider
+        ScriptedIdentityFactory owner) : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
     {
         public string DeviceId { get; } = deviceId;
 
@@ -664,9 +734,14 @@ public class FindYubiKeysFaultInjectionTests
             Task.FromException<TConnection>(
                 new InvalidOperationException("Public connect must not be used by discovery."));
 
-        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+        public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType connectionType,
             CancellationToken cancellationToken) =>
             owner.ConnectFor(name);
+
+        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+            ConnectionType connectionType,
+            CancellationToken cancellationToken) =>
+            OpenRawConnectionAsync(connectionType, cancellationToken);
     }
 }

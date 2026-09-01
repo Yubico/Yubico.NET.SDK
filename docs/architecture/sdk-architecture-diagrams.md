@@ -298,9 +298,9 @@ flowchart TD
 
     Merge{"Merge interfaces of<br/>same physical key<br/>(by USB Product ID)"}
 
-    Pcsc["PcscYubiKey<br/>SmartCard only"]
-    Hid["HidYubiKey<br/>FIDO or OTP"]
-    Comp["CompositeYubiKey<br/>≥2 merged interfaces"]
+    Pcsc["PcscYubiKey<br/><i>internal pre-merge slot adapter</i>"]
+    Hid["HidYubiKey<br/><i>internal pre-merge slot adapter</i>"]
+    Flat["YubiKeyDevice<br/>optional SmartCard · FIDO · OTP slots"]
 
     Result(["IReadOnlyList&lt;IYubiKey&gt;<br/>one per physical key normally;<br/>conservative splits when ambiguous"])
 
@@ -311,15 +311,14 @@ flowchart TD
     Find --> FPcsc
     Find --> FHid
     Find --> Factory
-    FPcsc --> Merge
-    FHid --> Merge
-    Factory --> Merge
-    Merge --> Pcsc
-    Merge --> Hid
-    Merge --> Comp
-    Pcsc --> Result
-    Hid --> Result
-    Comp --> Result
+    FPcsc --> Factory
+    FHid --> Factory
+    Factory --> Pcsc
+    Factory --> Hid
+    Pcsc --> Merge
+    Hid --> Merge
+    Merge --> Flat
+    Flat --> Result
 ```
 
 ### Then: connecting (transport selection)
@@ -372,8 +371,8 @@ flowchart TD
 
 **Teaching notes:**
 - **One `IYubiKey` = one physical key.** It exposes `AvailableConnections`
-  (`SmartCard | HidFido | HidOtp` flags). Three concrete impls: `PcscYubiKey`, `HidYubiKey`,
-  `CompositeYubiKey`.
+  (`SmartCard | HidFido | HidOtp` flags). Discovery publishes one internal production implementation,
+  `YubiKeyDevice`; `PcscYubiKey` and `HidYubiKey` are pre-merge adapters only.
 - **Merge logic** is conservative: interfaces merge by USB Product ID; NFC is never merged
   with USB; ambiguity → surface as separate rows rather than mis-merge.
 - **Connection ownership:** a grouped physical key admits one live connection across CCID, FIDO HID,

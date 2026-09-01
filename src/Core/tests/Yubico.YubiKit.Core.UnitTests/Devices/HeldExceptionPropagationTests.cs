@@ -22,27 +22,31 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
 ///     A held <see cref="SCardException" /> from a SmartCard connect must propagate unchanged, without
-///     cross-transport fallback. These tests pin the current connect chain
-///     (<see cref="CompositeYubiKey" /> and <see cref="PcscYubiKey" />) against a future wrapping regression.
+///     cross-transport fallback. These tests pin the published-device and pre-merge PC/SC connect chains
+///     against a future wrapping regression.
 /// </summary>
 public class HeldExceptionPropagationTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     [Fact]
-    public async Task CompositeYubiKey_MemberThrowsHeldScard_PropagatesUnwrapped()
+    public async Task YubiKeyDevice_SmartCardSlotThrowsHeldScard_PropagatesUnwrapped()
     {
         var held = new SCardException("held", (long)ErrorCode.SCARD_E_SHARING_VIOLATION);
         var smartCardMember = new ThrowingMember(ConnectionType.SmartCard, held);
         var hidMember = new ThrowingMember(ConnectionType.HidFido, new InvalidOperationException("unused"));
-        var composite = new CompositeYubiKey("composite:test", [smartCardMember, hidMember], deviceInfo: null);
+        var device = new YubiKeyDevice(
+            "composite:test",
+            smartCardMember,
+            hidMember,
+            hidOtp: null,
+            deviceInfo: null);
 
         var ex = await Assert.ThrowsAsync<SCardException>(
-            () => composite.ConnectAsync<ISmartCardConnection>(Ct));
+            () => device.ConnectAsync<ISmartCardConnection>(Ct));
 
         Assert.Equal(unchecked((int)ErrorCode.SCARD_E_SHARING_VIOLATION), ex.HResult);
     }
-
     [Fact]
     public async Task PcscYubiKey_FactoryThrowsHeldScard_PropagatesUnwrapped()
     {
@@ -55,22 +59,26 @@ public class HeldExceptionPropagationTests
 
         Assert.Equal(unchecked((int)ErrorCode.SCARD_E_SERVER_TOO_BUSY), ex.HResult);
     }
-
     private sealed class ThrowingMember(ConnectionType available, Exception exception)
-        : IYubiKey, IScopedConnectionProvider
+        : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
     {
-        public string DeviceId => $"member:{available}";
+        private readonly string _deviceId = $"member:{available}:{Guid.NewGuid():N}";
+
+        public string DeviceId => _deviceId;
         public ConnectionType AvailableConnections => available;
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection =>
             Task.FromException<TConnection>(exception);
 
-        public Task<TConnection> ConnectWithLeaseScopeAsync<TConnection>(
-            IReadOnlyCollection<string> interfaceIds,
-            CancellationToken cancellationToken)
-            where TConnection : class, IConnection =>
-            Task.FromException<TConnection>(exception);
+        public Task<IConnection> OpenRawConnectionAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken) => Task.FromException<IConnection>(exception);
+
+        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken) =>
+            OpenRawConnectionAsync(connection, cancellationToken);
     }
 
     private sealed class ThrowingFactory(Exception exception) : ISmartCardConnectionFactory

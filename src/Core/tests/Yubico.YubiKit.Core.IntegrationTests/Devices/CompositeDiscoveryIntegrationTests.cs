@@ -70,7 +70,6 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
                 $"Conservation violated for {type}: {enumerated} interface(s) enumerated at the USB layer " +
                 $"but {exposed} returned device(s) expose the type. Devices: {Describe(devices)}");
         }
-
         // Per-connection filters must return exactly the devices from the same snapshot exposing the type.
         foreach (var type in ConcreteTypes)
         {
@@ -147,6 +146,25 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         Assert.Equal(
             scan1.Select(d => d.DeviceId).Order(StringComparer.Ordinal),
             scan2.Select(d => d.DeviceId).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task FindAllAsync_RepeatedScans_EventuallyPopulateMetadataOnEveryRetainedDevice()
+    {
+        // Best-effort metadata reads use four process-wide worker slots. A rig with more keys can leave a
+        // first-scan object without metadata, but later scans must retry and propagate successful metadata
+        // onto the object retained by the repository without requiring a hot-plug.
+        IReadOnlyList<IYubiKey> devices = [];
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+            if (devices.All(device => Assert.IsType<YubiKeyDevice>(device).DeviceInfo is not null))
+                break;
+        }
+
+        Assert.NotEmpty(devices);
+        Assert.All(devices, device => Assert.NotNull(Assert.IsType<YubiKeyDevice>(device).DeviceInfo));
     }
 
     [Fact]

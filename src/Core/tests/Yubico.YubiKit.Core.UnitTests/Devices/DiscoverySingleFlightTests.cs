@@ -71,7 +71,6 @@ public class DiscoverySingleFlightTests
                 TimeSpan.FromSeconds(5),
                 TestContext.Current.CancellationToken);
         }
-
         Assert.IsType<TimeoutException>(exception);
         Assert.True(
             elapsed < TimeSpan.FromMilliseconds(300),
@@ -166,11 +165,12 @@ public class DiscoverySingleFlightTests
     }
 
     [Fact]
-    public async Task ReadBoundedAsync_CompositeMemberWithoutDiscoveryProvider_SkipsWithoutPublicConnect()
+    public async Task ReadBoundedAsync_PublishedSlotWithoutRawOpen_ReportsNoDiscoveryProvider()
     {
         var smartCard = new UnsupportedDiscoveryYubiKey(ConnectionType.SmartCard);
         var hid = new UnsupportedDiscoveryYubiKey(ConnectionType.HidFido);
-        var composite = new CompositeYubiKey($"composite:{Guid.NewGuid():N}", [smartCard, hid], deviceInfo: null);
+        var composite = new YubiKeyDevice(
+            $"composite:{Guid.NewGuid():N}", smartCard, hid, hidOtp: null, deviceInfo: null);
 
         var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
             ProtocolDeviceInfo.ReadBoundedAsync(
@@ -180,6 +180,7 @@ public class DiscoverySingleFlightTests
                 NullLogger.Instance,
                 TestContext.Current.CancellationToken));
 
+        Assert.Equal(DiscoveryReadSkipCause.NoDiscoveryProvider, exception.Cause);
         Assert.Contains(smartCard.DeviceId, exception.Message, StringComparison.Ordinal);
         Assert.Equal(0, smartCard.ConnectCalls);
         Assert.Equal(0, hid.ConnectCalls);
@@ -533,7 +534,7 @@ public class DiscoverySingleFlightTests
         public void Dispose() => _escape.Dispose();
     }
 
-    private sealed class UnsupportedDiscoveryYubiKey(ConnectionType availableConnections) : IYubiKey
+    private sealed class UnsupportedDiscoveryYubiKey(ConnectionType availableConnections) : IYubiKeyConnectionSlot
     {
         private int _connectCalls;
 

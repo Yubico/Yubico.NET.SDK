@@ -48,10 +48,9 @@ public class FindYubiKeysPidMergeTests
         {
             factory.FailAllReads();
         }
-
         Assert.True(
             stopwatch.Elapsed < TimeSpan.FromSeconds(3),
-            $"Independent 2s identity budgets accumulated sequentially for {stopwatch.Elapsed}.");
+            $"The scan waited beyond its single bounded identity pass: {stopwatch.Elapsed}.");
         Assert.Equal(2, result.Count);
         Assert.Equal(2, factory.TotalConnectCalls);
         Assert.All(result, device => Assert.Equal(ConnectionType.SmartCard, device.AvailableConnections));
@@ -87,7 +86,7 @@ public class FindYubiKeysPidMergeTests
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, result.Count);
-        Assert.DoesNotContain(result, d => d is CompositeYubiKey);
+        Assert.All(result, d => Assert.Single(Assert.IsType<YubiKeyDevice>(d).InterfaceIds));
     }
 
     private sealed class FakeFindPcscDevices(IReadOnlyList<IPcscDevice> devices) : IFindPcscDevices
@@ -120,7 +119,7 @@ public class FindYubiKeysPidMergeTests
 
     private sealed class ThrowingFactory : IYubiKeyFactory
     {
-        public IYubiKey Create(IDevice device) => device switch
+        public IYubiKeyConnectionSlot Create(IDevice device) => device switch
         {
             IPcscDevice p => new ThrowingYubiKey($"pcsc:{p.ReaderName}", ConnectionType.SmartCard),
             IHidDevice h => new ThrowingYubiKey(
@@ -135,7 +134,7 @@ public class FindYubiKeysPidMergeTests
 
         public int TotalConnectCalls => _devices.Sum(device => device.ConnectCalls);
 
-        public IYubiKey Create(IDevice device)
+        public IYubiKeyConnectionSlot Create(IDevice device)
         {
             var pcscDevice = Assert.IsAssignableFrom<IPcscDevice>(device);
             var yubiKey = new BlockingIdentityYubiKey($"pcsc:{pcscDevice.ReaderName}");
@@ -150,7 +149,7 @@ public class FindYubiKeysPidMergeTests
         }
     }
 
-    private sealed class BlockingIdentityYubiKey(string deviceId) : IYubiKey, IDiscoveryConnectionProvider
+    private sealed class BlockingIdentityYubiKey(string deviceId) : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
     {
         private readonly TaskCompletionSource<IConnection> _connection =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -166,7 +165,7 @@ public class FindYubiKeysPidMergeTests
             where TConnection : class, IConnection =>
             Task.FromException<TConnection>(new InvalidOperationException("Public connect must not be used by discovery."));
 
-        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+        public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType connection,
             CancellationToken cancellationToken)
         {
@@ -174,11 +173,16 @@ public class FindYubiKeysPidMergeTests
             return _connection.Task;
         }
 
+        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken) =>
+            OpenRawConnectionAsync(connection, cancellationToken);
+
         public void FailRead() =>
             _connection.TrySetException(new InvalidOperationException("Expected identity-read cleanup failure."));
     }
 
-    private sealed class ThrowingYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey
+    private sealed class ThrowingYubiKey(string deviceId, ConnectionType connectionType) : IYubiKeyConnectionSlot
     {
         public string DeviceId { get; } = deviceId;
         public ConnectionType AvailableConnections { get; } = connectionType;

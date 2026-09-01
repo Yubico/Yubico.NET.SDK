@@ -73,6 +73,9 @@ deterministically by the fault-injection vectors above.
 
 ## Device identity: what `DeviceId` does and does not promise
 
+See [device identity and physical-device correlation](./device-identity.md) for the architecture decision
+covering public identity, repository object retention, discovery metadata, and canonical yubikit behavior.
+
 The merge hierarchy above decides *which interfaces form one key*. It also decides *what that key is
 called*, and the two are the same decision — which is why the identifier is evidence-dependent rather than
 intrinsic. This section is the consumer-facing contract; `IYubiKey.DeviceId` carries the same statement in
@@ -165,8 +168,9 @@ It adds no uniqueness — the serial is already unique — and it is not dependa
 - It can differ per applet on one physical key. This SDK carries an explicit workaround taking the higher
   of the Management and OTP values on NEO (`src/YubiOtp/src/YubiOtpSession.cs`).
 - Canonical yubikit sometimes *guesses* it (`version = Version(3, 0, 0); // Guess NEO`).
-- Canonical uses it only as a tie-breaker for which metadata record to retain once serials already match,
-  never as a match key.
+- Canonical Rust's polling merger has a `(version, serial)` fallback match. This SDK deliberately does not:
+  development keys can expose an alpha/beta USB descriptor version while Management reports the effective
+  firmware version, so firmware would make identity less stable rather than more precise.
 
 This SDK's merger contains no firmware-version logic, and none should be added for identity purposes.
 
@@ -179,16 +183,17 @@ This SDK's merger contains no firmware-version logic, and none should be added f
 | G3 | Same-PID keys that report serials: complete grouping | first scan, with topology | first scan in practice; converges — see [G3](#g3-convergence) | same as macOS |
 | G4 | Serial-less multi-interface keys: complete grouping | yes, with topology | **no — permanent split** | **no — permanent split** |
 | G5 | Reconfigured key (different enabled interfaces) | yes | yes | yes |
-| G6 | Single-interface keys are never wrapped in a composite | yes | yes | yes |
-| G7 | Conservation: every enumerated interface appears exactly once | yes | yes | yes |
+| G6 | Single-interface keys publish as one-slot flat devices with their transport-shaped `DeviceId` preserved | yes | yes | yes |
+| G7 | Conservation: every supported concrete interface appears exactly once | yes | yes | yes |
 | G8 | Interfaces held in use since plug-in | attributed once idle and readable — see [G8](#g8-in-use-interfaces) | same | same |
 | G9 | Topology-read failure degrades safely | yes — becomes macOS semantics | n/a | n/a |
 
-`AvailableConnections` is the union of the concrete interfaces observed for the published device;
-`CompositeYubiKeyTests.AvailableConnections_IsUnionOfMembers` pins that structural rule. It is
+`AvailableConnections` is the union of the supported concrete interfaces observed for the published device;
+`YubiKeyDeviceTests.FlatSlots_ExposeCombinedConnectionsAndSortedInterfaceIds` pins that structural rule. It is
 transport availability only. It does not prove that every applet or capability is enabled over every
 interface, nor that interfaces or operations are safe to use concurrently. Applet capability and
-connection-ownership rules remain separate contracts.
+connection-ownership rules remain separate contracts. Yubico HID reports that cannot be classified as FIDO
+or OTP are logged and excluded because they do not represent an openable Core connection slot.
 
 "with topology evidence" is the normal Windows case. Topology reads can fail (stale devnode during
 hotplug, `CR_NO_SUCH_DEVNODE`, missing ContainerId, API unavailable before Windows 8); when they
@@ -209,7 +214,7 @@ Hardware invariants: `Core.IntegrationTests/Devices/CompositeDiscoveryIntegratio
 | G4 (Windows yes) | `Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys` |
 | G4 (mac/Linux no) | `Merge_TwoSamePidTripleKeysNoSerialsFullVisibility_ConservativeSplit_Pin`, `Merge_TwoSamePidDualKeysNoSerialsFullVisibility_ConservativeSplit_Pin` |
 | G5 | `Merge_ReconfiguredKeyReenumeratedUnderNewPid_GroupsByCurrentPidTruth_Pin`, `Merge_OneOfTwoKeysReconfigured_DifferentPidsNoSerials_TriviallyDistinguishable_Pin`; hardware: `ReconfigurationDiscoveryInvariantTests.UsbReconfigurationReboot_DiscoveryIdentityInvariantsHoldThroughTheTransition` (Slow — drives a real PID-changing reboot and asserts the identity invariants on every scan across the transition, self-restoring) |
-| G6 | `Merge_SingleInterfacePid_StandsAloneWithoutCompositeWrapper_Pin`; hardware: Phase 4 Tier 1 CASE 2 |
+| G6 | `Merge_SingleInterfacePid_PublishesOneSlotWithTransportShapedDeviceId_Pin`; hardware: Phase 4 Tier 1 CASE 2 |
 | G7 | `Merge_MixedTopologyAndSerialEvidence_IsDeterministicAndConserving_Pin`, `FindAllAsync_Conservation_EveryEnumeratedUsbInterfaceAppearsExactlyOnce` |
 | G8 | Cache convergence / eviction / reader-rename vectors in `FindYubiKeysFaultInjectionTests` |
 | G9 | `Merge_TopologyAbsentForAllInterfaces_IsByteIdenticalToPreTopologyBehavior_Pin`, `Merge_PartialTopology_KeyedInterfacesGroup_UnkeyedFallThroughUnguessed_Pin`, and the 13 failure-mode vectors in `WindowsDeviceTopologyResolverTests` |

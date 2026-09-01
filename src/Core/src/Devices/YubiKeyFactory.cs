@@ -20,17 +20,17 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Devices;
 
-public interface IYubiKeyFactory
+internal interface IYubiKeyFactory
 {
-    IYubiKey Create(IDevice device);
+    IYubiKeyConnectionSlot Create(IDevice device);
 }
 
-public class YubiKeyFactory(
+internal sealed class YubiKeyFactory(
     ILoggerFactory loggerFactory,
     ISmartCardConnectionFactory connectionFactory
 ) : IYubiKeyFactory
 {
-    public IYubiKey Create(IDevice device) =>
+    public IYubiKeyConnectionSlot Create(IDevice device) =>
         device switch
         {
             IPcscDevice pcscDevice => CreatePcscYubiKey(pcscDevice),
@@ -52,6 +52,6 @@ public class YubiKeyFactory(
             loggerFactory.CreateLogger<HidYubiKey>()
         );
 
-    public static YubiKeyFactory Create(ILoggerFactory? loggerFactory = null) =>
+    internal static YubiKeyFactory Create(ILoggerFactory? loggerFactory = null) =>
         new(loggerFactory ?? NullLoggerFactory.Instance, SmartCardConnectionFactory.CreateDefault());
 }

@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <summary>
 ///     Describes one discovered per-interface device as input to the composite-device merge.
 /// </summary>
-/// <param name="Device">The per-interface <see cref="IYubiKey" /> (e.g. a <see cref="PcscYubiKey" /> or HID key).</param>
+/// <param name="Device">The concrete connection slot (e.g. a <see cref="PcscYubiKey" /> or HID key).</param>
 /// <param name="Connection">The single concrete connection this interface exposes.</param>
 /// <param name="IsUsb">
 ///     Whether this interface is USB-attached (HID is always USB; PC/SC is USB only when its kind is
@@ -33,14 +33,19 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     (Windows Container ID). <c>null</c> whenever topology evidence is unavailable — always on macOS and
 ///     Linux, and on Windows when the topology read fails. See <see cref="IDeviceTopologyResolver" />.
 /// </param>
+/// <param name="IdentityReadBudgetConsumed">
+///     Whether this scan consumed the bounded identity-read budget for the interface, including time spent
+///     waiting for worker admission before any native connection could open.
+/// </param>
 internal readonly record struct DeviceInterfaceDescriptor(
-    IYubiKey Device,
+    IYubiKeyConnectionSlot Device,
     ConnectionType Connection,
     bool IsUsb,
     ushort? Pid,
     int? Serial,
     DeviceInfo? DeviceInfo,
-    string? TopologyKey = null);
+    string? TopologyKey = null,
+    bool IdentityReadBudgetConsumed = false);
 
 /// <summary>
 ///     Deterministic, side-effect-free merge of per-interface descriptors into physical YubiKey devices,
@@ -61,13 +66,13 @@ internal readonly record struct DeviceInterfaceDescriptor(
 /// </remarks>
 internal static class CompositeDeviceMerger
 {
-    public static IReadOnlyList<IYubiKey> Merge(
+    public static IReadOnlyList<YubiKeyDevice> Merge(
         IReadOnlyList<DeviceInterfaceDescriptor> descriptors,
         bool pidCorrelationUntrusted = false)
     {
         ArgumentNullException.ThrowIfNull(descriptors);
 
-        var result = new List<IYubiKey>();
+        var result = new List<YubiKeyDevice>();
 
         // Tier 1 — topology evidence (strongest, when available). Interfaces carrying a topology key are
         // grouped by the physical USB device that owns them and are removed from all later tiers; every
@@ -80,18 +85,17 @@ internal static class CompositeDeviceMerger
             // Reader-name drift: correlate remaining USB interfaces by serial (Phase 37 behavior) so an
             // unparsed CCID rejoins its HID siblings. Non-USB interfaces still stand alone.
             MergeUsbBySerial(usbRemaining, result);
-            result.AddRange(descriptors.Where(d => !d.IsUsb).Select(d => d.Device));
+            AddStandaloneDevices(descriptors.Where(d => !d.IsUsb), result);
             return result;
         }
-
         var pidCounts = ComputePidCounts(usbRemaining);
 
         // Serials observed under more than one PID this scan. Normally empty: a physical key has exactly
         // one PID at a time, so one serial under two PIDs is ONE key caught mid-reconfiguration (serial is
         // globally unique per key; PID changes with configuration), enumerated once staly and once fresh.
-        // Those enumerations must not be fused into one composite - it would hold two members of the same
-        // connection type, which AvailableConnections' flags-union hides and TryResolveMember's first-match
-        // would route to arbitrarily - and they must not both mint ykphysical:{serial}. The winner rule
+        // Those enumerations must not be fused into one published device - the flat shape has only one slot
+        // per connection type, and a flags union would hide the duplicate candidate - and they must not both
+        // mint ykphysical:{serial}. The winner rule
         // resolves it; see ResolveContestedSerials.
         var contested = ResolveContestedSerials(usbRemaining);
 
@@ -106,7 +110,6 @@ internal static class CompositeDeviceMerger
             else
                 MergeSamePidBySerialWithDeduction(group.Key, [.. group], result, contested);
         }
-
         // USB interfaces with a known PID present on more than one physical key: disambiguate by serial
         // within each PID class, then attribute remaining orphans by pigeonhole deduction.
         var ambiguous = usbRemaining.Where(d => d.Pid is { } pid && pidCounts.GetValueOrDefault(pid) > 1);
@@ -115,8 +118,10 @@ internal static class CompositeDeviceMerger
 
         // USB interfaces without a known PID (e.g. unparsed CCID outside the serial-only path), NFC, and
         // other non-USB interfaces stand alone (conservative).
-        result.AddRange(usbRemaining.Where(d => d.Pid is null || !ReaderNamePidParser.IsKnownPid(d.Pid.Value)).Select(d => d.Device));
-        result.AddRange(descriptors.Where(d => !d.IsUsb).Select(d => d.Device));
+        AddStandaloneDevices(
+            usbRemaining.Where(d => d.Pid is null || !ReaderNamePidParser.IsKnownPid(d.Pid.Value)),
+            result);
+        AddStandaloneDevices(descriptors.Where(d => !d.IsUsb), result);
 
         return result;
     }
@@ -154,7 +159,7 @@ internal static class CompositeDeviceMerger
     /// </remarks>
     private static List<DeviceInterfaceDescriptor> MergeUsbByTopology(
         IEnumerable<DeviceInterfaceDescriptor> usbDescriptors,
-        List<IYubiKey> result)
+        List<YubiKeyDevice> result)
     {
         var descriptors = usbDescriptors.ToList();
         var withTopology = descriptors.Where(d => !string.IsNullOrEmpty(d.TopologyKey)).ToList();
@@ -284,7 +289,7 @@ internal static class CompositeDeviceMerger
     private static void MergeSamePidBySerialWithDeduction(
         ushort pid,
         IReadOnlyList<DeviceInterfaceDescriptor> descriptors,
-        List<IYubiKey> result,
+        List<YubiKeyDevice> result,
         ContestedSerials contested)
     {
         var anchored = descriptors
@@ -299,7 +304,7 @@ internal static class CompositeDeviceMerger
         // if awarded at all, belongs to the complete enumeration in another PID group.
         var eligible = anchored.Where(a => contested.IsWinner(pid, a.Serial)).ToList();
         foreach (var loser in anchored.Where(a => !contested.IsWinner(pid, a.Serial)))
-            result.AddRange(loser.Members.Select(m => m.Device));
+            AddStandaloneDevices(loser.Members, result);
 
         var attributed = new Dictionary<int, List<DeviceInterfaceDescriptor>>();
         var standalone = new List<DeviceInterfaceDescriptor>();
@@ -344,7 +349,7 @@ internal static class CompositeDeviceMerger
         }
 
         // Unattributed null serials do not collapse (conservative standalone).
-        result.AddRange(standalone.Select(d => d.Device));
+        AddStandaloneDevices(standalone, result);
     }
 
     private static bool NoInterfaceTypeOutnumbersCandidateKeys(
@@ -373,7 +378,7 @@ internal static class CompositeDeviceMerger
             ConnectionType.Unknown,
             static (current, descriptor) => current | descriptor.Connection);
 
-    private static void MergeUsbBySerial(IEnumerable<DeviceInterfaceDescriptor> usbDescriptors, List<IYubiKey> result)
+    private static void MergeUsbBySerial(IEnumerable<DeviceInterfaceDescriptor> usbDescriptors, List<YubiKeyDevice> result)
     {
         var descriptors = usbDescriptors.ToList();
 
@@ -384,24 +389,68 @@ internal static class CompositeDeviceMerger
             AddGroupedDevice(group, $"ykphysical:{group.Key}", result);
 
         // Null/unreadable serial does not collapse.
-        result.AddRange(descriptors.Where(d => d.Serial is null).Select(d => d.Device));
+        AddStandaloneDevices(descriptors.Where(d => d.Serial is null), result);
     }
 
-    private static void AddGroupedDevice(IEnumerable<DeviceInterfaceDescriptor> group, string deviceId, List<IYubiKey> result)
+    private static void AddGroupedDevice(IEnumerable<DeviceInterfaceDescriptor> group, string deviceId, List<YubiKeyDevice> result)
     {
         var ordered = group.OrderBy(m => ConnectionOrder(m.Connection)).ToList();
 
         if (ordered.Count == 1)
         {
-            // G6: a group of one is published as the bare interface device, never wrapped in a composite —
-            // a composite must always represent two or more interfaces.
-            result.Add(ordered[0].Device);
+            AddStandaloneDevice(ordered[0], result);
+            return;
+        }
+
+        // A flat published device has exactly one slot per concrete connection. Duplicate slot candidates
+        // can occur only in an inconsistent/stale enumeration; preserve every interface by publishing them
+        // conservatively instead of routing one arbitrarily and hiding the other behind a flags union.
+        if (ordered.GroupBy(descriptor => descriptor.Connection).Any(slot => slot.Count() > 1))
+        {
+            AddStandaloneDevices(ordered, result);
             return;
         }
 
         var deviceInfo = ordered.Select(m => m.DeviceInfo).FirstOrDefault(di => di.HasValue);
-        var members = ordered.Select(m => m.Device).ToList();
-        result.Add(new CompositeYubiKey(deviceId, members, deviceInfo));
+        result.Add(new YubiKeyDevice(
+            deviceId,
+            Slot(ordered, ConnectionType.SmartCard),
+            Slot(ordered, ConnectionType.HidFido),
+            Slot(ordered, ConnectionType.HidOtp),
+            deviceInfo,
+            ordered.Any(descriptor => descriptor.IdentityReadBudgetConsumed)));
+    }
+
+    private static void AddStandaloneDevices(
+        IEnumerable<DeviceInterfaceDescriptor> descriptors,
+        List<YubiKeyDevice> result)
+    {
+        foreach (var descriptor in descriptors)
+            AddStandaloneDevice(descriptor, result);
+    }
+
+    private static void AddStandaloneDevice(
+        DeviceInterfaceDescriptor descriptor,
+        List<YubiKeyDevice> result) =>
+        result.Add(new YubiKeyDevice(
+            descriptor.Device.DeviceId,
+            descriptor.Connection == ConnectionType.SmartCard ? descriptor.Device : null,
+            descriptor.Connection == ConnectionType.HidFido ? descriptor.Device : null,
+            descriptor.Connection == ConnectionType.HidOtp ? descriptor.Device : null,
+            descriptor.DeviceInfo,
+            descriptor.IdentityReadBudgetConsumed));
+
+    private static IYubiKeyConnectionSlot? Slot(
+        IReadOnlyList<DeviceInterfaceDescriptor> descriptors,
+        ConnectionType connection)
+    {
+        foreach (var descriptor in descriptors)
+        {
+            if (descriptor.Connection == connection)
+                return descriptor.Device;
+        }
+
+        return null;
     }
 
     private static int ConnectionOrder(ConnectionType connection) => connection switch

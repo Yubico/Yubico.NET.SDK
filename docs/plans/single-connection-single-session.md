@@ -31,13 +31,13 @@ Canonical SDKs may treat parallel physical-device connections as undefined behav
 
 ### Current behavior
 
-`src/Core/src/Devices/DeviceConnectionRegistry.cs` leases per interface ID. A CCID connection and a FIDO HID or OTP HID connection to the same composite device can therefore coexist.
+`src/Core/src/Devices/DeviceConnectionRegistry.cs` leases per interface ID. A CCID connection and a FIDO HID or OTP HID connection to the same merged physical device can therefore coexist.
 
 ### Required behavior
 
-A connection claims every known interface ID belonging to the physical `CompositeYubiKey`. Opening any second interface on that key must throw `ConnectionInUseException` before native open.
+A connection claims every known interface ID belonging to the physical `YubiKeyDevice`. Opening any second interface on that key must throw `ConnectionInUseException` before native open.
 
-Do not use the composite `DeviceId` as the registry key. It encodes merge evidence and is not stable across scans. Keep stable member interface IDs and acquire their ownership records atomically as one logical lease.
+Do not use the merged `DeviceId` as the registry key. It encodes merge evidence and is not stable across scans. Keep stable interface IDs and acquire their ownership records atomically as one logical lease.
 
 Illustrative pseudocode:
 
@@ -83,25 +83,7 @@ Requirements:
 - A connection holding all member IDs causes discovery on any member to be refused.
 - Preserve the existing internal discovery path that bypasses public connection leasing while holding its discovery lease.
 
-Give `PcscYubiKey` and `HidYubiKey` a lease scope that defaults to their own `DeviceId`. When assembled into a `CompositeYubiKey`, all members must receive the same complete set of member interface IDs. Reuse the existing connection registration decorators and failure cleanup.
-
-Suggested shape:
-
-```csharp
-internal IReadOnlyList<string> ConnectionLeaseScope { get; private set; } = [DeviceId];
-
-internal void SetConnectionLeaseScope(IReadOnlyList<string> ids)
-{
-    ConnectionLeaseScope = ids;
-}
-
-// Composite construction/adoption:
-string[] scope = [.. members.Select(member => member.DeviceId).Distinct().Order()];
-foreach (var member in members)
-    member.SetConnectionLeaseScope(scope);
-```
-
-Do not force this exact setter if a smaller existing abstraction provides a cleaner fit.
+Keep `PcscYubiKey` and `HidYubiKey` as pre-merge adapters that claim only their own `DeviceId`. The published `YubiKeyDevice` owns the complete sorted interface-ID set, claims it as one logical lease, and routes the requested connection type to exactly one adapter. Reuse the existing connection registration decorators and failure cleanup.
 
 Update the exception text to state the physical-device rule, for example:
 
@@ -315,7 +297,7 @@ Run the `/Craftsman` Craft workflow in autonomous mode separately for each layer
 - Phase 3: run the full DevTeam correctness review and Simplify Apply sweep on the settled layer.
 - Phase 4: put the reshape rationale, gate decisions, and deferred owner decisions in that PR's body.
 
-The multi-interface claim rather than composite-ID keying is a settled design decision. Do not relitigate it during fit audit.
+The multi-interface claim rather than merged-device-ID keying is a settled design decision. Do not relitigate it during fit audit.
 
 ## Verification
 

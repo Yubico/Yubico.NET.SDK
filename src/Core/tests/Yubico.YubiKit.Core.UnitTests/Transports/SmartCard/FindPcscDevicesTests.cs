@@ -178,7 +178,7 @@ public class FindPcscDevicesTests
 
     private sealed class UnexpectedYubiKeyFactory : IYubiKeyFactory
     {
-        public IYubiKey Create(IDevice device) =>
+        public IYubiKeyConnectionSlot Create(IDevice device) =>
             throw new InvalidOperationException("No device should be created when PC/SC admission is saturated.");
     }
 }

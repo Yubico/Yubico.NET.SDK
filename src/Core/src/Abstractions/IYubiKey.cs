@@ -33,8 +33,10 @@ public interface IYubiKey
     ///     <para>
     ///         The value is derived from whatever grouping evidence discovery had available, so it takes
     ///         one of several shapes: <c>ykphysical:topology:{key}</c> (Windows Container ID),
-    ///         <c>ykphysical:{serial}</c>, or <c>ykphysical:pid:{PID}</c>. The shape is an implementation
-    ///         detail, is platform-dependent, and may change.
+    ///         <c>ykphysical:{serial}</c>, or <c>ykphysical:pid:{PID}</c>. When discovery cannot prove that
+    ///         multiple interfaces belong together, a one-interface device preserves its transport-shaped
+    ///         <c>hid:*</c> or <c>pcsc:*</c> identifier. The shape is an implementation detail, is
+    ///         platform-dependent, and may change.
     ///     </para>
     ///     <para>
     ///         <strong>The same physical key can present different values.</strong> Evidence depends on what
@@ -57,8 +59,9 @@ public interface IYubiKey
     ///         identity: it can differ per applet on the same key and is not a disambiguator.
     ///     </para>
     ///     <para>
-    ///         Distinct from the per-interface identifier (<c>hid:*</c>, <c>pcsc:*</c>) used by the
-    ///         connection registry. That one names a single interface; this one names a physical key.
+    ///         A grouped device identifier is distinct from the per-interface identifiers (<c>hid:*</c>,
+    ///         <c>pcsc:*</c>) used by the connection registry. A one-interface device intentionally uses
+    ///         that sole interface identifier as its physical-device identifier.
     ///     </para>
     /// </remarks>
     string DeviceId { get; }

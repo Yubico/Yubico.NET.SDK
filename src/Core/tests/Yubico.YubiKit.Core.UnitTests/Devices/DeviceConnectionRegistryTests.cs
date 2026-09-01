@@ -51,7 +51,6 @@ public class DeviceConnectionRegistryTests
             id, TestContext.Current.CancellationToken);
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
     }
-
     [Fact]
     public async Task AcquireConnection_MultipleInterfaces_DeduplicatesAndReleasesAllMembers()
     {
@@ -172,9 +171,10 @@ public class DeviceConnectionRegistryTests
     {
         var smartCardMember = new RecordingYubiKey(NewId(), ConnectionType.SmartCard);
         var otpMember = new RecordingYubiKey(NewId(), ConnectionType.HidOtp);
-        var composite = new CompositeYubiKey(NewId(), [smartCardMember, otpMember], deviceInfo: null);
+        var composite = new YubiKeyDevice(
+            NewId(), smartCardMember, hidFido: null, otpMember, deviceInfo: null);
         using var registration = await DeviceConnectionRegistry.AcquireConnectionAsync(
-            composite.MemberDeviceIds, TestContext.Current.CancellationToken);
+            composite.InterfaceIds, TestContext.Current.CancellationToken);
 
         var info = await CompositeMetadataReader.TryReadAsync(
             composite, TimeSpan.FromSeconds(5), NullLogger.Instance, TestContext.Current.CancellationToken);
@@ -393,7 +393,8 @@ public class DeviceConnectionRegistryTests
         public void Dispose() => Interlocked.Increment(ref _releaseCount);
     }
 
-    private sealed class RecordingYubiKey(string deviceId, ConnectionType available) : IYubiKey, IDiscoveryConnectionProvider
+    private sealed class RecordingYubiKey(string deviceId, ConnectionType available)
+        : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
     {
         public int ConnectCalls { get; private set; }
 
@@ -408,13 +409,18 @@ public class DeviceConnectionRegistryTests
             throw new InvalidOperationException("Test connect refused by design.");
         }
 
-        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+        public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType connection,
             CancellationToken cancellationToken)
         {
             ConnectCalls++;
             throw new InvalidOperationException("Test discovery connect refused by design.");
         }
+
+        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken) =>
+            OpenRawConnectionAsync(connection, cancellationToken);
     }
 
     /// <summary>

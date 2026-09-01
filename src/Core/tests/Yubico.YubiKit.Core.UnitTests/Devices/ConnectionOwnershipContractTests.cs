@@ -67,7 +67,6 @@ public class ConnectionOwnershipContractTests
         AssertExclusiveInterfaceRefusal(refusal, device.DeviceId);
         Assert.Equal(1, factory.CreateCalls); // refused before a second physical handle was opened
     }
-
     /// <summary>
     ///     Exclusive is not permanent: the interface is reusable the moment the holder is disposed. Sequential
     ///     use is the supported pattern, so the refusal above must not become a one-shot device.
@@ -172,7 +171,8 @@ public class ConnectionOwnershipContractTests
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
         var hid = CreateHidDevice(hidDevice);
-        var composite = new CompositeYubiKey($"composite:{Guid.NewGuid():N}", [smartCard, hid], null);
+        var composite = new YubiKeyDevice(
+            $"composite:{Guid.NewGuid():N}", smartCard, hid, hidOtp: null, deviceInfo: null);
 
         await using var ccid = await composite.ConnectAsync<ISmartCardConnection>(Ct);
         var refusal = await Assert.ThrowsAsync<ConnectionInUseException>(
@@ -203,24 +203,30 @@ public class ConnectionOwnershipContractTests
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
         var firstHid = CreateHidDevice(firstHidDevice);
-        var olderComposite = new CompositeYubiKey(
+        var olderComposite = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}",
-            [firstSmartCard, firstHid],
-            null);
+            firstSmartCard,
+            firstHid,
+            hidOtp: null,
+            deviceInfo: null);
 
         var laterHid = CreateHidDevice(new FakeHidDevice(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido));
-        _ = new CompositeYubiKey(
+        _ = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}",
-            [firstSmartCard, laterHid],
-            null);
+            firstSmartCard,
+            laterHid,
+            hidOtp: null,
+            deviceInfo: null);
 
         var laterSmartCard = CreateSmartCardDevice(new CountingFactory());
-        _ = new CompositeYubiKey(
+        _ = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}",
-            [laterSmartCard, firstHid],
-            null);
+            laterSmartCard,
+            firstHid,
+            hidOtp: null,
+            deviceInfo: null);
 
         await using var ccid = await olderComposite.ConnectAsync<ISmartCardConnection>(Ct);
 

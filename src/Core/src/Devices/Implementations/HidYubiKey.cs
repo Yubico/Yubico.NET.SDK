@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.Core.Devices;
 internal class HidYubiKey(
     IHidDevice hidDevice,
     ILogger<HidYubiKey> logger)
-    : IYubiKey, IDiscoveryConnectionProvider, IScopedConnectionProvider
+    : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
 {
     public string DeviceId { get; } =
         $"hid:{hidDevice.ReaderName}:{hidDevice.DescriptorInfo.Usage:X4}";
@@ -42,16 +42,9 @@ internal class HidYubiKey(
 
     public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection
-        => ConnectWithLeaseScopeAsync<TConnection>([DeviceId], cancellationToken);
+        => ConnectRegisteredAsync<TConnection>(cancellationToken);
 
-    Task<TConnection> IScopedConnectionProvider.ConnectWithLeaseScopeAsync<TConnection>(
-        IReadOnlyCollection<string> interfaceIds,
-        CancellationToken cancellationToken) =>
-        ConnectWithLeaseScopeAsync<TConnection>(interfaceIds, cancellationToken);
-
-    private async Task<TConnection> ConnectWithLeaseScopeAsync<TConnection>(
-        IReadOnlyCollection<string> interfaceIds,
-        CancellationToken cancellationToken)
+    private async Task<TConnection> ConnectRegisteredAsync<TConnection>(CancellationToken cancellationToken)
         where TConnection : class, IConnection
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -62,27 +55,26 @@ internal class HidYubiKey(
                 $"Connection type {typeof(TConnection).Name} is not supported by this YubiKey device.");
         }
 
-        // The connection claims this member's physical-device lease scope and releases it on disposal.
+        // A pre-merge adapter claims only its own interface and releases it on disposal.
         var ownership = await DeviceConnectionRegistry
-            .AcquireConnectionAsync(
-                interfaceIds,
-                cancellationToken)
+            .AcquireConnectionAsync(DeviceId, cancellationToken)
             .ConfigureAwait(false);
         try
         {
             if (typeof(TConnection) == typeof(IFidoHidConnection))
             {
-                var registered = new RegisteredFidoHidConnection(CreateFidoConnection(), ownership);
-                return registered as TConnection ??
-                       throw new InvalidOperationException("Connection is not of the expected type.");
+                return (TConnection)(IConnection)new RegisteredFidoHidConnection(
+                    CreateFidoConnection(),
+                    ownership);
             }
 
             if (typeof(TConnection) == typeof(IOtpHidConnection))
             {
-                var registered = new RegisteredOtpHidConnection(CreateOtpConnection(), ownership);
-                return registered as TConnection ??
-                       throw new InvalidOperationException("Connection is not of the expected type.");
+                return (TConnection)(IConnection)new RegisteredOtpHidConnection(
+                    CreateOtpConnection(),
+                    ownership);
             }
+
             throw new InvalidOperationException("Connection type validation did not select a HID implementation.");
         }
         catch
@@ -92,7 +84,7 @@ internal class HidYubiKey(
         }
     }
 
-    Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+    public Task<IConnection> OpenRawConnectionAsync(
         ConnectionType connection,
         CancellationToken cancellationToken)
     {
@@ -107,6 +99,11 @@ internal class HidYubiKey(
 
         return Task.FromResult(result);
     }
+
+    Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+        ConnectionType connection,
+        CancellationToken cancellationToken) =>
+        OpenRawConnectionAsync(connection, cancellationToken);
 
     private IFidoHidConnection CreateFidoConnection()
     {

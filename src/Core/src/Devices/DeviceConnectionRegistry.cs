@@ -59,8 +59,8 @@ internal static class DeviceConnectionRegistry
 
     /// <summary>
     ///     Whether the interface of <paramref name="device" /> that would serve <paramref name="connection" />
-    ///     is in use. Composite members are resolved through
-    ///     <see cref="CompositeYubiKey.TryResolveMember" />, the same routing a connect uses, so the check
+    ///     is in use. Published-device slots are resolved through
+    ///     <see cref="YubiKeyDevice.TryResolveSlot" />, the same routing a connect uses, so the check
     ///     matches the interface a read would actually open.
     /// </summary>
     public static bool IsInterfaceInUse(IYubiKey device, ConnectionType connection) =>
@@ -72,14 +72,13 @@ internal static class DeviceConnectionRegistry
     /// </summary>
     public static string ResolveInterfaceId(IYubiKey device, ConnectionType connection)
     {
-        if (device is not CompositeYubiKey composite)
+        if (device is not YubiKeyDevice published)
             return device.DeviceId;
 
-        return composite.TryResolveMember(connection, out var member)
-            ? member.DeviceId
+        return published.TryResolveSlot(connection, out var slot)
+            ? slot.DeviceId
             : device.DeviceId;
     }
-
     /// <summary>
     ///     Acquires the interface lease for a connection, before physical connection creation. Waits while
     ///     discovery owns the interface; cancellation applies only while waiting.

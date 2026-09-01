@@ -26,8 +26,9 @@ namespace Yubico.YubiKit.Core.UnitTests.Transports.SmartCard;
 [Collection(DiscoveryWorkerAdmissionCollection.Name)]
 public class FindPcscDevicesTests
 {
-    private const string SaturatedMessage =
-        "PC/SC device enumeration could not start because discovery worker capacity is saturated; retry the scan.";
+    // Reference the product constant rather than copying the string: a copy stops matching silently if the
+    // wording changes, which would leave this test asserting nothing useful.
+    private const string SaturatedMessage = FindPcscDevices.WorkerSaturationMessage;
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]

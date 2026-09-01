@@ -34,7 +34,8 @@ public class MonitorService_Disabled_Tests : IAsyncLifetime
     public async Task WhenMonitoringDisabled_StillFindsDevicesOnDemand()
     {
         // Static API performs on-demand scan even without monitoring
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
+        var devices = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindAllAsync(ConnectionType.All));
         Assert.NotEmpty(devices);
     }
 

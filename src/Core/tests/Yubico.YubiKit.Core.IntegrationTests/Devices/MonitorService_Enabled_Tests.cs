@@ -32,7 +32,8 @@ public class MonitorService_Enabled_Tests : IAsyncLifetime
     [Fact]
     public async Task WhenMonitoringEnabled_FindsDevices()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All);
+        var devices = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindAllAsync(ConnectionType.All));
         Assert.NotEmpty(devices);
     }
 

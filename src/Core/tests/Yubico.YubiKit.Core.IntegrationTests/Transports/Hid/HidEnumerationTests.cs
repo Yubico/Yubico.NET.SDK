@@ -66,7 +66,7 @@ public class HidEnumerationTests
     {
         var finder = FindYubiKeys.Create();
 
-        var yubiKeys = await finder.FindAllAsync();
+        var yubiKeys = await TransientScanRetry.ScanAsync(() => finder.FindAllAsync());
 
         _output.WriteLine($"Found {yubiKeys.Count} YubiKeys");
 

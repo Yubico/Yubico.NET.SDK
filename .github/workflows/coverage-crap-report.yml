@@ -3,6 +3,26 @@ name: Coverage and CRAP report
 on:
   pull_request:
     branches: [ yubikit*, yubikit/** ]
+    # Only run when the numbers could actually move. Every delta would be "." otherwise, and
+    # this job costs two full coverage passes. Of the four most recent pull requests to
+    # yubikit, all four touched no .cs file at all.
+    #
+    # Two groups of paths matter:
+    #   - the measured code. src/**/*.cs covers production and tests alike, and tests belong
+    #     here because adding a test changes coverage, which is the point of the report.
+    #   - the measuring apparatus. A change to crap.cs or the coverage plumbing changes the
+    #     numbers without touching a single line of src/, so it must be validated too. This
+    #     workflow's own pull request is exactly that case.
+    paths:
+      - 'src/**/*.cs'
+      - 'crap.cs'
+      - 'toolchain.cs'
+      - 'coverlet.runsettings.xml'
+      - '.config/dotnet-tools.json'
+      - 'Directory.Build.props'
+      - 'Directory.Build.targets'
+      - 'Directory.Packages.props'
+      - '.github/workflows/coverage-crap-report.yml'
 
 jobs:
   coverage-crap-report:

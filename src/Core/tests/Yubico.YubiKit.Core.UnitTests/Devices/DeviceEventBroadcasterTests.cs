@@ -27,7 +27,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 public class DeviceEventBroadcasterTests
 {
     private static DeviceEvent Event(string deviceId = "device-1") =>
-        new(DeviceAction.Added, new StubYubiKey(deviceId));
+        new(DeviceAction.Added, new FakeYubiKey(deviceId));
 
     // ---------- Multicast delivery ----------
 

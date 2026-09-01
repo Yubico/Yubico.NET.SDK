@@ -19,6 +19,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 using Yubico.YubiKit.Core.Utilities;
 
@@ -359,11 +360,11 @@ public class FindYubiKeysFaultInjectionTests
             var scanTask = find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
             Assert.True(
-                await TryWaitForAsync(() => factory.TotalConnectCalls >= 4, TimeSpan.FromSeconds(5)),
+                await AsyncWait.TryWaitUntilAsync(() => factory.TotalConnectCalls >= 4, TimeSpan.FromSeconds(5)),
                 "The first four identity reads never reached a connect; cannot stage admission saturation.");
             factory.ReleaseAllGatedReads();
 
-            allSixConnected = await TryWaitForAsync(() => factory.TotalConnectCalls >= 6, TimeSpan.FromSeconds(3));
+            allSixConnected = await AsyncWait.TryWaitUntilAsync(() => factory.TotalConnectCalls >= 6, TimeSpan.FromSeconds(3));
             factory.ReleaseAllGatedReads();
 
             result = await scanTask;
@@ -412,7 +413,7 @@ public class FindYubiKeysFaultInjectionTests
         finally
         {
             factory.FailAllBlockedReads();
-            allSixEventuallyConnected = await TryWaitForAsync(
+            allSixEventuallyConnected = await AsyncWait.TryWaitUntilAsync(
                 () => factory.TotalConnectCalls >= 6,
                 TimeSpan.FromSeconds(5));
             await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
@@ -429,19 +430,6 @@ public class FindYubiKeysFaultInjectionTests
     // ---------------------------------------------------------------------------------------------
     // Rig construction
     // ---------------------------------------------------------------------------------------------
-
-    private static async Task<bool> TryWaitForAsync(Func<bool> condition, TimeSpan timeout)
-    {
-        var clock = System.Diagnostics.Stopwatch.StartNew();
-        while (clock.Elapsed < timeout)
-        {
-            if (condition())
-                return true;
-            await Task.Delay(TimeSpan.FromMilliseconds(10), TestContext.Current.CancellationToken);
-        }
-
-        return condition();
-    }
 
     private static (FindYubiKeys Find, ScriptedIdentityFactory Factory, MutableFindPcscDevices Pcsc, MutableFindHidDevices Hid)
         CreateTwoDualKeyRig()

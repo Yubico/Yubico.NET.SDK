@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -802,21 +803,10 @@ public class CompositeDeviceMergerVectorTests
         int? serial = null,
         bool isUsb = true,
         string? topologyKey = null) =>
-        new(new StubYubiKey(deviceId, connection), connection, isUsb, pid, serial, DeviceInfo: null, topologyKey);
+        new(new FakeYubiKey(deviceId, connection), connection, isUsb, pid, serial, DeviceInfo: null, topologyKey);
 
     private static string Describe(IReadOnlyList<IYubiKey> result) =>
         string.Join("; ", result.Select(d => d is CompositeYubiKey c
             ? $"{c.DeviceId}=[{string.Join("|", c.MemberDeviceIds)}]"
             : $"{d.DeviceId}({d.AvailableConnections})"));
-
-    private sealed class StubYubiKey(string deviceId, ConnectionType connection) : IYubiKey
-    {
-        public string DeviceId { get; } = deviceId;
-
-        public ConnectionType AvailableConnections { get; } = connection;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            throw new InvalidOperationException("Merger vectors never open connections.");
-    }
 }

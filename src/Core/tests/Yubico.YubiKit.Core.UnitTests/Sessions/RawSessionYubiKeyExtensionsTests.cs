@@ -30,7 +30,7 @@ public class RawSessionYubiKeyExtensionsTests
     public async Task CreateRawSmartCardSessionAsync_DisposeSession_DisposesHiddenConnection()
     {
         var connection = new MultiTransportConnection(ConnectionType.SmartCard);
-        var yubiKey = new StubYubiKey(connection);
+        var yubiKey = new ConnectingYubiKey(connection);
 
         RawSmartCardSession session = await yubiKey.CreateRawSmartCardSessionAsync(
             cancellationToken: TestContext.Current.CancellationToken);
@@ -44,7 +44,7 @@ public class RawSessionYubiKeyExtensionsTests
     public async Task CreateRawFidoHidSessionAsync_DisposeSession_DisposesHiddenConnection()
     {
         var connection = new MultiTransportConnection(ConnectionType.HidFido);
-        var yubiKey = new StubYubiKey(connection);
+        var yubiKey = new ConnectingYubiKey(connection);
 
         RawFidoHidSession session = await yubiKey.CreateRawFidoHidSessionAsync(TestContext.Current.CancellationToken);
         await session.DisposeAsync();
@@ -57,7 +57,7 @@ public class RawSessionYubiKeyExtensionsTests
     public async Task CreateRawOtpHidSessionAsync_DisposeSession_DisposesHiddenConnection()
     {
         var connection = new MultiTransportConnection(ConnectionType.HidOtp);
-        var yubiKey = new StubYubiKey(connection);
+        var yubiKey = new ConnectingYubiKey(connection);
 
         RawOtpHidSession session = await yubiKey.CreateRawOtpHidSessionAsync(TestContext.Current.CancellationToken);
         await session.DisposeAsync();
@@ -70,7 +70,7 @@ public class RawSessionYubiKeyExtensionsTests
     public async Task CreateRawSmartCardSessionAsync_WhenScpInitializationFails_DisposesHiddenConnection()
     {
         var connection = new MultiTransportConnection(ConnectionType.SmartCard);
-        var yubiKey = new StubYubiKey(connection);
+        var yubiKey = new ConnectingYubiKey(connection);
         using var scp = Scp03KeyParameters.Default;
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -89,7 +89,7 @@ public class RawSessionYubiKeyExtensionsTests
         var connection = new MultiTransportConnection(ConnectionType.SmartCard);
         connection.Enqueue(new byte[] { 0x90, 0x00 });
         connection.HoldNextOperation();
-        var yubiKey = new StubYubiKey(connection);
+        var yubiKey = new ConnectingYubiKey(connection);
         RawSmartCardSession session = await yubiKey.CreateRawSmartCardSessionAsync(
             cancellationToken: cancellationToken);
         Task<ApduResponse> exchange = session.TransmitAndReceiveAsync(
@@ -124,7 +124,7 @@ public class RawSessionYubiKeyExtensionsTests
         var connection = new MultiTransportConnection(ConnectionType.HidFido);
         connection.Enqueue(CreateFidoInitPacket(0x01020304, 0x42, [0xAB]));
         connection.HoldNextOperation();
-        var yubiKey = new StubYubiKey(connection);
+        var yubiKey = new ConnectingYubiKey(connection);
         RawFidoHidSession session = await yubiKey.CreateRawFidoHidSessionAsync(cancellationToken);
         Task<ReadOnlyMemory<byte>> exchange = session.SendAndReceiveAsync(
             0x42,
@@ -162,7 +162,7 @@ public class RawSessionYubiKeyExtensionsTests
             connection.Enqueue(OtpStatus(programmingSequence: 1));
         connection.Enqueue(OtpStatus(programmingSequence: 2));
         connection.HoldNextOperation();
-        var yubiKey = new StubYubiKey(connection);
+        var yubiKey = new ConnectingYubiKey(connection);
         RawOtpHidSession session = await yubiKey.CreateRawOtpHidSessionAsync(cancellationToken);
         Task<ReadOnlyMemory<byte>> exchange = session.SendAndReceiveAsync(
             0x13,
@@ -203,7 +203,7 @@ public class RawSessionYubiKeyExtensionsTests
     private static byte[] OtpStatus(byte versionMajor = 0, byte programmingSequence = 0) =>
         [0x00, versionMajor, 0x04, 0x03, programmingSequence, 0x00, 0x00, 0x00];
 
-    private sealed class StubYubiKey(IConnection connection) : IYubiKey
+    private sealed class ConnectingYubiKey(IConnection connection) : IYubiKey
     {
         public string DeviceId => "raw-session-test";
         public ConnectionType AvailableConnections => connection.Type;

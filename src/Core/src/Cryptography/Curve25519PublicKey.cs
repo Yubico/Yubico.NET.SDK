@@ -108,8 +108,4 @@ public sealed class Curve25519PublicKey : PublicKey
 
         return new Curve25519PublicKey(publicPoint, keyDefinition);
     }
-
-    [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
-    public static Curve25519PublicKey CreateFromPkcs8(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
-        CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
 }

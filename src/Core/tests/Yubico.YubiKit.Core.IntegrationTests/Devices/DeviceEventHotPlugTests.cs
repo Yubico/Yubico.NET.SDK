@@ -31,12 +31,24 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 /// nothing anywhere exercised more than one cycle.
 /// </para>
 /// <para>
-/// Repetition is the point. Several documented hazards in <c>src/Core/CLAUDE.md</c> can only be
-/// reached by removing and reinserting: the identity cache keys on interface id, and a same-slot
-/// swap reuses that id, so a stale entry would attribute a departed key's serial to its successor.
-/// The composite merger also flips a device's <c>DeviceId</c> between the serial tier and the PID
-/// tier as sibling interfaces come and go. Both are unit-tested against fakes; this is the only
-/// place either is checked against real hardware.
+/// Repetition is the point: a listener that dies after one cycle, or a monitor that stops diffing
+/// once it has seen a removal, passes a single-cycle test and fails this one.
+/// </para>
+/// <para>
+/// It asserts pairing only, and deliberately makes no claim about <c>DeviceId</c>. An earlier
+/// version asserted that a key returns under the identity it left with; hardware runs showed that
+/// is not an invariant. Within one session the same physical key was observed as
+/// <c>ykphysical:&lt;serial&gt;</c>, as <c>ykphysical:pid:&lt;pid&gt;</c> when the metadata read did
+/// not land, and removals sometimes reported a transport-tier id such as
+/// <c>pcsc:Yubico YubiKey OTP+FIDO+CCID</c> while the matching arrival reported
+/// <c>ykphysical:*</c>. The merger picking the strongest identity currently available is by design,
+/// so an identity assertion here fails constantly and means nothing. The ids are printed per cycle
+/// so a human can eyeball them; they are not asserted on.
+/// </para>
+/// <para>
+/// Other keys may stay connected. A key that simply sits there emits no events, so bystanders need
+/// no filtering — and filtering them by <c>DeviceId</c> was tried and does not work, for the reasons
+/// above.
 /// </para>
 /// <para>
 /// Requires manual interaction, so it is not part of any automated run. It is written for the
@@ -71,71 +83,48 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
-    public async Task DeviceChanges_AcrossRepeatedHotPlugCycles_PairsEventsAndKeepsIdentityStable()
+    public async Task DeviceChanges_AcrossRepeatedHotPlugCycles_PairsEveryRemovalWithAnArrival()
     {
-        // This test reads back "the" device after each cycle, so a second connected key makes every
-        // identity assertion ambiguous: the baseline can be captured from one key and the settled
-        // read taken from the other, which looks exactly like an identity bug and is not one.
-        // Fail fast and say so, rather than reporting a mismatch the operator cannot interpret.
-        var connected = await YubiKeyManager.FindAllAsync();
-        Assert.True(
-            connected.Count == 1,
-            $"This test drives a single key by hand and needs exactly one YubiKey connected; found " +
-            $"{connected.Count} ({string.Join(", ", connected.Select(d => d.DeviceId))}). " +
-            "Unplug the others and re-run.");
-
-        // That probe re-populated the cache InitializeAsync had just cleared, and a populated cache
-        // makes the initial rescan a no-op — no Added event, no baseline. Clear it again.
-        await YubiKeyManager.ShutdownAsync();
-
         // Subscribe before monitoring starts, otherwise the initial rescan races the subscription.
         using var subscription = YubiKeyManager.DeviceChanges.Subscribe(_log);
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
 
         Prompt($"Leave your YubiKey plugged in. {Cycles} remove/insert cycles will be requested.");
+        Prompt("Other keys may stay connected — a key that just sits there emits no events.");
 
-        var baseline = await ExpectAsync(DeviceAction.Added, "initial discovery");
+        _ = await ExpectAsync(e => e.Action == DeviceAction.Added, "initial discovery");
         await Task.Delay(SettleDelay);
-        var baselineId = _log.LastDeviceId(DeviceAction.Added) ?? baseline.Device.DeviceId;
-        output.WriteLine($"Baseline device: {baselineId}");
 
         for (var cycle = 1; cycle <= Cycles; cycle++)
         {
-            Prompt($"[cycle {cycle}/{Cycles}] REMOVE the YubiKey now.");
-            _ = await ExpectAsync(DeviceAction.Removed, $"cycle {cycle} removal");
+            Prompt($"[cycle {cycle}/{Cycles}] REMOVE a YubiKey now.");
+            var removed = await ExpectAsync(e => e.Action == DeviceAction.Removed, $"cycle {cycle} removal");
 
-            Prompt($"[cycle {cycle}/{Cycles}] RE-INSERT the YubiKey now.");
-            _ = await ExpectAsync(DeviceAction.Added, $"cycle {cycle} insertion");
+            Prompt($"[cycle {cycle}/{Cycles}] RE-INSERT the same YubiKey now.");
+            var added = await ExpectAsync(e => e.Action == DeviceAction.Added, $"cycle {cycle} insertion");
 
-            // Let a composite key finish enumerating before reading the settled identity.
+            // Let a composite key finish enumerating before reporting what it settled as.
             await Task.Delay(SettleDelay);
 
-            var settledId = _log.LastDeviceId(DeviceAction.Added);
-            output.WriteLine($"[cycle {cycle}] settled device: {settledId}");
-
-            Assert.True(
-                settledId == baselineId,
-                $"DeviceId changed across a same-slot reinsertion on cycle {cycle}: expected " +
-                $"'{baselineId}', got '{settledId}'. Note that a tier change is not by itself a " +
-                $"defect — the merger picks the strongest available identity, so a serial-tier id " +
-                $"legitimately becomes a PID-tier one when the metadata read does not land. What " +
-                $"this pins is that a settled key reaches the same identity it had before, given " +
-                $"the same slot and the same readable metadata.{Environment.NewLine}{_log}");
+            // Reported, deliberately not asserted. See the class remarks: DeviceId is not stable
+            // enough across events to carry an assertion.
+            output.WriteLine(
+                $"[cycle {cycle}] removed as '{removed.Device.DeviceId}', returned as '{added.Device.DeviceId}'");
         }
 
         output.WriteLine(_log.ToString());
     }
 
-    private async Task<DeviceEvent> ExpectAsync(DeviceAction action, string what)
+    private async Task<DeviceEvent> ExpectAsync(Func<DeviceEvent, bool> match, string what)
     {
-        var deviceEvent = await _log.WaitForAsync(action, HumanActionTimeout);
+        var deviceEvent = await _log.WaitForAsync(match, HumanActionTimeout);
 
         Assert.True(
             deviceEvent is not null,
-            $"Timed out after {HumanActionTimeout.TotalSeconds:0}s waiting for {action} " +
-            $"({what}).{Environment.NewLine}{_log}");
+            $"Timed out after {HumanActionTimeout.TotalSeconds:0}s waiting for " +
+            $"{what}.{Environment.NewLine}{_log}");
 
-        output.WriteLine($"  observed {action}: {deviceEvent!.Device.DeviceId}");
+        output.WriteLine($"  observed {deviceEvent!.Action}: {deviceEvent.Device.DeviceId}");
 
         return deviceEvent;
     }
@@ -161,7 +150,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         private readonly List<(TimeSpan At, DeviceEvent Event)> _entries = [];
         private readonly Stopwatch _clock = Stopwatch.StartNew();
 
-        private DeviceAction? _awaited;
+        private Func<DeviceEvent, bool>? _awaited;
         private TaskCompletionSource<DeviceEvent>? _pending;
 
         /// <summary>
@@ -183,7 +172,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             {
                 _entries.Add((_clock.Elapsed, value));
 
-                if (_awaited == value.Action && _pending is not null)
+                if (_pending is not null && _awaited is not null && _awaited(value))
                 {
                     toComplete = _pending;
                     _pending = null;
@@ -204,10 +193,10 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         }
 
         /// <summary>
-        /// Consumes the next unconsumed event of <paramref name="action"/>, waiting for one if it has
-        /// not happened yet; null on timeout.
+        /// Consumes the next unconsumed event matching <paramref name="match"/>, waiting for one if it
+        /// has not happened yet; null on timeout.
         /// </summary>
-        public async Task<DeviceEvent?> WaitForAsync(DeviceAction action, TimeSpan timeout)
+        public async Task<DeviceEvent?> WaitForAsync(Func<DeviceEvent, bool> match, TimeSpan timeout)
         {
             TaskCompletionSource<DeviceEvent> tcs;
 
@@ -215,7 +204,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             {
                 for (var i = _cursor; i < _entries.Count; i++)
                 {
-                    if (_entries[i].Event.Action == action)
+                    if (match(_entries[i].Event))
                     {
                         _cursor = i + 1;
                         return _entries[i].Event;
@@ -223,7 +212,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
                 }
 
                 tcs = new TaskCompletionSource<DeviceEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
-                _awaited = action;
+                _awaited = match;
                 _pending = tcs;
             }
 
@@ -241,23 +230,6 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             }
 
             return null;
-        }
-
-        /// <summary>Most recent device id seen for <paramref name="action"/>, or null.</summary>
-        public string? LastDeviceId(DeviceAction action)
-        {
-            lock (_gate)
-            {
-                for (var i = _entries.Count - 1; i >= 0; i--)
-                {
-                    if (_entries[i].Event.Action == action)
-                    {
-                        return _entries[i].Event.Device.DeviceId;
-                    }
-                }
-
-                return null;
-            }
         }
 
         /// <summary>Full timeline, attached to any failure so a manual run leaves a usable trace.</summary>

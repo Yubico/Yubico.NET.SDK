@@ -38,23 +38,30 @@
  *   --json <path>       Write the full ranked result as JSON.
  *   --no-conditional-access
  *                       Exclude `?.` / `?[]` from cyclomatic complexity.
+ *   --baseline <path>   Load a previous `--json` report and diff module aggregates
+ *                       against it (module grouping, not per-method).
+ *   --markdown          Emit a GitHub-flavoured markdown module report instead of the
+ *                       console top-N method table. Combines with --baseline to add
+ *                       delta columns; the CI PR-comment case is
+ *                       `--baseline old.json --markdown`.
+ *   --fail-on-crap-increase
+ *                       Exit 1 if total CRAP increased versus --baseline. Off by
+ *                       default; requires --baseline to have any effect.
  *   --self-check        Run the built-in golden fixtures and exit.
  *
  * EXIT CODES:
  *   0  success
- *   1  usage / IO error, or a self-check fixture failed
+ *   1  usage / IO error, a self-check fixture failed, or (with
+ *      --fail-on-crap-increase) total CRAP increased versus --baseline
  *   2  coverage could not be reconciled with the source tree
- *
- * NOT IMPLEMENTED IN v1 (deliberately):
- *   - CI gate / threshold exit code
- *   - baseline ratchet
- *   These wait until the thresholds are settled against the baseline.
  *
  * See TOOLCHAIN.md and docs/TESTING.md.
  */
 
 using System.Globalization;
+using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -87,6 +94,15 @@ sealed record CrapOptions
     public bool CountConditionalAccess { get; init; } = true;
     public bool SelfCheck { get; init; }
 
+    /// <summary>Path to a previous `--json` report to diff module aggregates against.</summary>
+    public string? BaselinePath { get; init; }
+
+    /// <summary>Emit a GitHub-flavoured markdown module report instead of the console table.</summary>
+    public bool Markdown { get; init; }
+
+    /// <summary>Exit 1 if total CRAP increased versus --baseline. No effect without --baseline.</summary>
+    public bool FailOnCrapIncrease { get; init; }
+
     public static CrapOptions? Parse(string[] args)
     {
         var repoRoot = FindRepoRoot();
@@ -104,6 +120,9 @@ sealed record CrapOptions
         string? json = null;
         var countConditionalAccess = true;
         var selfCheck = false;
+        string? baseline = null;
+        var markdown = false;
+        var failOnCrapIncrease = false;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -145,6 +164,15 @@ sealed record CrapOptions
                 case "--no-conditional-access":
                     countConditionalAccess = false;
                     break;
+                case "--baseline" when i + 1 < args.Length:
+                    baseline = args[++i];
+                    break;
+                case "--markdown":
+                    markdown = true;
+                    break;
+                case "--fail-on-crap-increase":
+                    failOnCrapIncrease = true;
+                    break;
                 case "--self-check":
                     selfCheck = true;
                     break;
@@ -171,6 +199,9 @@ sealed record CrapOptions
             JsonPath = json,
             CountConditionalAccess = countConditionalAccess,
             SelfCheck = selfCheck,
+            BaselinePath = baseline,
+            Markdown = markdown,
+            FailOnCrapIncrease = failOnCrapIncrease,
         };
     }
 
@@ -185,6 +216,9 @@ sealed record CrapOptions
               --top <n>                  Rows in the console table (default: 25)
               --json <path>              Write full ranked result as JSON
               --no-conditional-access    Exclude ?. and ?[] from cyclomatic complexity
+              --baseline <path>          Diff module aggregates against a previous --json report
+              --markdown                 Emit a markdown module report instead of the console table
+              --fail-on-crap-increase    Exit 1 if total CRAP increased versus --baseline (default: off)
               --self-check               Run built-in golden fixtures and exit
             """);
 
@@ -679,6 +713,19 @@ static class SelfCheck
             }
         }
 
+        foreach (var (name, passed, detail) in ModuleReportFixtures())
+        {
+            if (passed)
+            {
+                passes++;
+            }
+            else
+            {
+                failures++;
+                Console.Error.WriteLine($"FAIL module-report/{name}: {detail}");
+            }
+        }
+
         // Anchor against a real method whose complexity was derived by hand.
         var anchor = Path.Combine(options.RepoRoot, "src", "Piv", "src", "Metadata", "PivMetadataProtocol.cs");
         if (File.Exists(anchor))
@@ -717,6 +764,65 @@ static class SelfCheck
         {{body}}
         }
         """;
+
+    /// <summary>
+    /// Golden fixtures for the --baseline/--markdown module report: grouping a file path into
+    /// a module, ordering modules, and diffing module aggregates when a module exists on only
+    /// one side of the comparison (renamed/moved methods, or a module added/removed outright).
+    /// </summary>
+    static IEnumerable<(string Name, bool Passed, string Detail)> ModuleReportFixtures()
+    {
+        // Module grouping from a file path.
+        var pivModule = ModuleAggregator.ModuleOf("src/Piv/src/Metadata/PivMetadataProtocol.cs");
+        yield return ("module-of-src-path", pivModule == "Piv", $"expected 'Piv', got '{pivModule ?? "null"}'");
+
+        var testsModule = ModuleAggregator.ModuleOf("src/Piv/tests/PivMetadataProtocolTests.cs");
+        yield return ("module-of-tests-path-is-excluded", testsModule is null, $"expected null, got '{testsModule}'");
+
+        var order = ModuleAggregator.OrderModules(["OpenPgp", "Cli.Shared", "Core", "Piv", "Cli.Commands", "Fido2"]);
+        var expectedOrder = new[] { "Core", "Piv", "Fido2", "OpenPgp", "Cli.Commands", "Cli.Shared" };
+        yield return ("module-order-core-then-applets-then-alphabetical",
+            order.SequenceEqual(expectedOrder),
+            $"expected [{string.Join(",", expectedOrder)}], got [{string.Join(",", order)}]");
+
+        // A module present only in the baseline must still appear, with the head side at zero.
+        var headWithoutOath = new Dictionary<string, ModuleStats>();
+        var baselineWithOath = new Dictionary<string, ModuleStats>
+        {
+            ["Oath"] = new() { MethodCount = 10, TotalCrap = 50, CountCrapAtLeast8 = 2, CountCognitiveOver15 = 1, MeanCoveragePercent = 60 },
+        };
+        var (removedModuleText, removedModuleDelta) = ModuleReportBuilder.Build(headWithoutOath, baselineWithOath, markdown: false);
+        yield return ("module-only-in-baseline-compares-against-zero",
+            removedModuleDelta < 0 && removedModuleText.Contains("Oath", StringComparison.Ordinal),
+            $"expected negative total CRAP delta and 'Oath' listed, got delta={removedModuleDelta}, text=\n{removedModuleText}");
+
+        // A module present only in the head must still appear, with the baseline side at zero.
+        var headWithYubiHsm = new Dictionary<string, ModuleStats>
+        {
+            ["YubiHsm"] = new() { MethodCount = 5, TotalCrap = 40, CountCrapAtLeast8 = 1, CountCognitiveOver15 = 0, MeanCoveragePercent = 80 },
+        };
+        var baselineWithoutYubiHsm = new Dictionary<string, ModuleStats>();
+        var (newModuleText, newModuleDelta) = ModuleReportBuilder.Build(headWithYubiHsm, baselineWithoutYubiHsm, markdown: false);
+        yield return ("module-only-in-head-compares-against-zero",
+            newModuleDelta > 0 && newModuleText.Contains("YubiHsm", StringComparison.Ordinal),
+            $"expected positive total CRAP delta and 'YubiHsm' listed, got delta={newModuleDelta}, text=\n{newModuleText}");
+
+        // An unchanged module renders "." in both delta columns rather than "+0"/"-0".
+        var unchangedCore = new Dictionary<string, ModuleStats>
+        {
+            ["Core"] = new() { MethodCount = 100, TotalCrap = 500, CountCrapAtLeast8 = 20, CountCognitiveOver15 = 5, MeanCoveragePercent = 70 },
+        };
+        var (unchangedText, unchangedDelta) = ModuleReportBuilder.Build(unchangedCore, unchangedCore, markdown: true);
+        const string expectedUnchangedRow = "| **Core** | 100 | 500 | . | 20 | 5 | 70.0% | . |";
+        yield return ("unchanged-module-renders-dot-not-zero",
+            Math.Abs(unchangedDelta) < 0.5 && unchangedText.Contains(expectedUnchangedRow, StringComparison.Ordinal),
+            $"expected row '{expectedUnchangedRow}' and unchanged verdict, got delta={unchangedDelta}, text=\n{unchangedText}");
+
+        // Verdict selection is driven by total CRAP delta alone.
+        yield return ("verdict-decreased", CrapVerdict.Render(-42) == "**CRAP decreased by 42.**", CrapVerdict.Render(-42));
+        yield return ("verdict-increased", CrapVerdict.Render(42) == "**CRAP increased by 42.**", CrapVerdict.Render(42));
+        yield return ("verdict-unchanged", CrapVerdict.Render(0.2) == "**CRAP unchanged.**", CrapVerdict.Render(0.2));
+    }
 
     /// <summary>
     /// Members that emit no code must be distinguishable from members that were simply
@@ -850,6 +956,422 @@ sealed record CrapRow
     }
 }
 
+// ---------------------------------------------------------------------------
+// Module-level report: --baseline and --markdown
+// ---------------------------------------------------------------------------
+
+/// <summary>
+/// The subset of a per-method row needed for module aggregation, sourced either from a
+/// freshly computed <see cref="CrapRow"/> or from a loaded <c>--json</c> baseline report.
+/// </summary>
+sealed record MethodSample
+{
+    /// <summary>Repo-relative path with forward slashes, e.g. "src/Piv/src/PivSession.cs".</summary>
+    public required string File { get; init; }
+    public required double Crap { get; init; }
+    public required int Cognitive { get; init; }
+    public required double Coverage { get; init; }
+}
+
+sealed record ModuleStats
+{
+    public required int MethodCount { get; init; }
+    public required double TotalCrap { get; init; }
+    public required int CountCrapAtLeast8 { get; init; }
+    public required int CountCognitiveOver15 { get; init; }
+
+    /// <summary>Mean of per-method coverage across the module, as a percentage (0-100).</summary>
+    public required double MeanCoveragePercent { get; init; }
+
+    /// <summary>
+    /// Stands in for a module absent from one side of a --baseline comparison. A module that
+    /// disappeared (or has not yet appeared) is not skipped: it is compared against zero.
+    /// </summary>
+    public static readonly ModuleStats Zero = new()
+    {
+        MethodCount = 0,
+        TotalCrap = 0,
+        CountCrapAtLeast8 = 0,
+        CountCognitiveOver15 = 0,
+        MeanCoveragePercent = 0,
+    };
+}
+
+/// <summary>
+/// Groups methods into shipping SDK modules and aggregates CRAP/coverage per module.
+/// </summary>
+static class ModuleAggregator
+{
+    static readonly Regex ModulePattern = new("^src/([^/]+)/src/", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Applet module display order. Core always leads; anything not listed here (including
+    /// Cli.Commands and Cli.Shared) sorts alphabetically after this list.
+    /// </summary>
+    static readonly string[] AppletOrder =
+    [
+        "Management", "Piv", "Fido2", "WebAuthn", "Oath", "YubiOtp", "OpenPgp", "SecurityDomain", "YubiHsm",
+    ];
+
+    /// <summary>
+    /// Extracts the module name from a repo-relative file path, or null if the path is not
+    /// shipping production code (tests, examples, and anything outside src/&lt;module&gt;/src/).
+    /// </summary>
+    public static string? ModuleOf(string file)
+    {
+        var match = ModulePattern.Match(file.Replace('\\', '/'));
+        return match.Success ? match.Groups[1].Value : null;
+    }
+
+    /// <summary>Orders module names: Core, then the known applet order, then the rest alphabetically.</summary>
+    public static List<string> OrderModules(IEnumerable<string> modules)
+    {
+        var remaining = new HashSet<string>(modules, StringComparer.Ordinal);
+        var ordered = new List<string>();
+
+        if (remaining.Remove("Core"))
+            ordered.Add("Core");
+
+        foreach (var known in AppletOrder)
+        {
+            if (remaining.Remove(known))
+                ordered.Add(known);
+        }
+
+        ordered.AddRange(remaining.OrderBy(m => m, StringComparer.Ordinal));
+        return ordered;
+    }
+
+    public static Dictionary<string, ModuleStats> Aggregate(IEnumerable<MethodSample> samples)
+    {
+        var byModule = new Dictionary<string, List<MethodSample>>(StringComparer.Ordinal);
+
+        foreach (var sample in samples)
+        {
+            var module = ModuleOf(sample.File);
+            if (module is null)
+                continue;
+
+            if (!byModule.TryGetValue(module, out var list))
+                byModule[module] = list = [];
+
+            list.Add(sample);
+        }
+
+        return byModule.ToDictionary(
+            kv => kv.Key,
+            kv => new ModuleStats
+            {
+                MethodCount = kv.Value.Count,
+                TotalCrap = kv.Value.Sum(s => s.Crap),
+                CountCrapAtLeast8 = kv.Value.Count(s => s.Crap >= 8),
+                CountCognitiveOver15 = kv.Value.Count(s => s.Cognitive > 15),
+                MeanCoveragePercent = kv.Value.Average(s => s.Coverage) * 100,
+            },
+            StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// Sums module aggregates into a single TOTAL row. Coverage is deliberately not
+    /// re-derived here: a single mean-of-means across modules of very different sizes would
+    /// misrepresent overall coverage, so the report leaves that cell blank.
+    /// </summary>
+    public static ModuleStats Total(IReadOnlyDictionary<string, ModuleStats> byModule)
+    {
+        if (byModule.Count == 0)
+            return ModuleStats.Zero;
+
+        return new ModuleStats
+        {
+            MethodCount = byModule.Values.Sum(s => s.MethodCount),
+            TotalCrap = byModule.Values.Sum(s => s.TotalCrap),
+            CountCrapAtLeast8 = byModule.Values.Sum(s => s.CountCrapAtLeast8),
+            CountCognitiveOver15 = byModule.Values.Sum(s => s.CountCognitiveOver15),
+            MeanCoveragePercent = 0,
+        };
+    }
+}
+
+/// <summary>Loads the <c>methods</c> array of a previous <c>--json</c> report.</summary>
+static class BaselineReport
+{
+    public static List<MethodSample>? Load(CrapOptions options, string path)
+    {
+        var fullPath = Path.IsPathRooted(path) ? path : Path.Combine(options.RepoRoot, path);
+        if (!File.Exists(fullPath))
+        {
+            Console.Error.WriteLine($"error: --baseline file not found: {fullPath}");
+            return null;
+        }
+
+        try
+        {
+            using var stream = File.OpenRead(fullPath);
+            using var doc = JsonDocument.Parse(stream);
+
+            if (!doc.RootElement.TryGetProperty("methods", out var methodsElement)
+                || methodsElement.ValueKind != JsonValueKind.Array)
+            {
+                Console.Error.WriteLine($"error: --baseline file has no 'methods' array: {fullPath}");
+                return null;
+            }
+
+            var samples = new List<MethodSample>();
+            foreach (var entry in methodsElement.EnumerateArray())
+            {
+                var file = entry.TryGetProperty("file", out var fileProp) ? fileProp.GetString() : null;
+                if (string.IsNullOrEmpty(file))
+                    continue;
+
+                var crap = entry.TryGetProperty("crap", out var crapProp) ? crapProp.GetDouble() : 0;
+                var cognitive = entry.TryGetProperty("cognitive", out var cognitiveProp) ? cognitiveProp.GetInt32() : 0;
+                var coverage = entry.TryGetProperty("coverage", out var coverageProp) ? coverageProp.GetDouble() : 0;
+
+                samples.Add(new MethodSample
+                {
+                    File = file.Replace('\\', '/'),
+                    Crap = crap,
+                    Cognitive = cognitive,
+                    Coverage = coverage,
+                });
+            }
+
+            return samples;
+        }
+        catch (JsonException ex)
+        {
+            Console.Error.WriteLine($"error: could not parse --baseline JSON '{fullPath}': {ex.Message}");
+            return null;
+        }
+        catch (IOException ex)
+        {
+            Console.Error.WriteLine($"error: could not read --baseline file '{fullPath}': {ex.Message}");
+            return null;
+        }
+    }
+}
+
+/// <summary>Shared numeric formatting for the module report, so deltas read the same in both renderers.</summary>
+static class Fmt
+{
+    public static string WholeNumber(double value) =>
+        Math.Round(value, MidpointRounding.AwayFromZero).ToString("0", CultureInfo.InvariantCulture);
+
+    /// <summary>"." when the absolute change is under half a CRAP point; otherwise a signed whole number.</summary>
+    public static string SignedCrapDelta(double? delta)
+    {
+        if (delta is null)
+            return string.Empty;
+
+        if (Math.Abs(delta.Value) < 0.5)
+            return ".";
+
+        var rounded = Math.Round(delta.Value, MidpointRounding.AwayFromZero);
+        return rounded > 0 ? $"+{WholeNumber(rounded)}" : WholeNumber(rounded);
+    }
+
+    /// <summary>"." when the absolute change is under half a percentage point; otherwise signed "pp".</summary>
+    public static string SignedCoverageDeltaPp(double? deltaPp)
+    {
+        if (deltaPp is null)
+            return string.Empty;
+
+        if (Math.Abs(deltaPp.Value) < 0.5)
+            return ".";
+
+        var sign = deltaPp.Value > 0 ? "+" : "-";
+        return $"{sign}{Math.Abs(deltaPp.Value).ToString("F1", CultureInfo.InvariantCulture)}pp";
+    }
+}
+
+static class CrapVerdict
+{
+    public static string Render(double totalCrapDelta)
+    {
+        if (Math.Abs(totalCrapDelta) < 0.5)
+            return "**CRAP unchanged.**";
+
+        var magnitude = Fmt.WholeNumber(Math.Abs(totalCrapDelta));
+        return totalCrapDelta > 0
+            ? $"**CRAP increased by {magnitude}.**"
+            : $"**CRAP decreased by {magnitude}.**";
+    }
+}
+
+sealed record ModuleRow
+{
+    public required string Name { get; init; }
+    public required bool Bold { get; init; }
+    public required bool IsTotal { get; init; }
+    public required int Methods { get; init; }
+    public required double Crap { get; init; }
+    public required double? CrapDelta { get; init; }
+    public required int CrapAtLeast8 { get; init; }
+    public required int CognitiveOver15 { get; init; }
+
+    /// <summary>Null for the TOTAL row, which leaves coverage blank rather than a misleading mean-of-means.</summary>
+    public required double? CoveragePercent { get; init; }
+    public required double? CoverageDeltaPp { get; init; }
+}
+
+/// <summary>
+/// Builds the module-aggregate report used by --markdown and/or --baseline. Compares module
+/// aggregates, not individual methods, so renamed methods and modules that appear or
+/// disappear between the two sides are handled by treating the missing side as zero.
+/// </summary>
+static class ModuleReportBuilder
+{
+    public static (string Text, double TotalCrapDelta) Build(
+        IReadOnlyDictionary<string, ModuleStats> head,
+        IReadOnlyDictionary<string, ModuleStats>? baseline,
+        bool markdown)
+    {
+        var moduleNames = ModuleAggregator.OrderModules(
+            head.Keys.Concat(baseline?.Keys ?? Enumerable.Empty<string>()));
+
+        var rows = new List<ModuleRow>();
+        foreach (var name in moduleNames)
+        {
+            var headStats = head.TryGetValue(name, out var h) ? h : ModuleStats.Zero;
+            ModuleStats? baseStats = baseline is null
+                ? null
+                : baseline.TryGetValue(name, out var b) ? b : ModuleStats.Zero;
+
+            rows.Add(BuildRow(name, headStats, baseStats, bold: name == "Core", isTotal: false));
+        }
+
+        var headTotal = ModuleAggregator.Total(head);
+        var baseTotal = baseline is null ? null : ModuleAggregator.Total(baseline);
+        rows.Add(BuildRow("TOTAL", headTotal, baseTotal, bold: true, isTotal: true));
+
+        var totalCrapDelta = baseline is null ? 0 : headTotal.TotalCrap - baseTotal!.TotalCrap;
+        var hasBaseline = baseline is not null;
+
+        var text = markdown
+            ? RenderMarkdown(rows, hasBaseline, totalCrapDelta)
+            : RenderConsole(rows, hasBaseline, totalCrapDelta);
+
+        return (text, totalCrapDelta);
+    }
+
+    static ModuleRow BuildRow(string name, ModuleStats head, ModuleStats? baseline, bool bold, bool isTotal)
+    {
+        double? crapDelta = baseline is null ? null : head.TotalCrap - baseline.TotalCrap;
+        double? coveragePercent = isTotal ? null : head.MeanCoveragePercent;
+        double? coverageDelta = isTotal || baseline is null ? null : head.MeanCoveragePercent - baseline.MeanCoveragePercent;
+
+        return new ModuleRow
+        {
+            Name = name,
+            Bold = bold,
+            IsTotal = isTotal,
+            Methods = head.MethodCount,
+            Crap = head.TotalCrap,
+            CrapDelta = crapDelta,
+            CrapAtLeast8 = head.CountCrapAtLeast8,
+            CognitiveOver15 = head.CountCognitiveOver15,
+            CoveragePercent = coveragePercent,
+            CoverageDeltaPp = coverageDelta,
+        };
+    }
+
+    static string RenderMarkdown(List<ModuleRow> rows, bool hasBaseline, double totalCrapDelta)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("<!-- yubikit-crap-report -->");
+        sb.AppendLine("### Coverage and CRAP");
+        sb.AppendLine();
+        sb.AppendLine(hasBaseline
+            ? "| module | methods | CRAP | Δ CRAP | ≥8 | cog>15 | coverage | Δ cov |"
+            : "| module | methods | CRAP | ≥8 | cog>15 | coverage |");
+        sb.AppendLine(hasBaseline
+            ? "|---|---:|---:|---:|---:|---:|---:|---:|"
+            : "|---|---:|---:|---:|---:|---:|");
+
+        foreach (var row in rows)
+        {
+            var name = row.Bold ? $"**{row.Name}**" : row.Name;
+            var crap = Fmt.WholeNumber(row.Crap);
+            var coverage = row.CoveragePercent is null
+                ? ""
+                : $"{row.CoveragePercent.Value.ToString("F1", CultureInfo.InvariantCulture)}%";
+
+            if (hasBaseline)
+            {
+                var crapDelta = Fmt.SignedCrapDelta(row.CrapDelta);
+                if (row.IsTotal && crapDelta != ".")
+                    crapDelta = $"**{crapDelta}**";
+
+                var coverageDelta = Fmt.SignedCoverageDeltaPp(row.CoverageDeltaPp);
+
+                sb.AppendLine(
+                    $"| {name} | {row.Methods} | {crap} | {crapDelta} | {row.CrapAtLeast8} | {row.CognitiveOver15} | {coverage} | {coverageDelta} |");
+            }
+            else
+            {
+                sb.AppendLine($"| {name} | {row.Methods} | {crap} | {row.CrapAtLeast8} | {row.CognitiveOver15} | {coverage} |");
+            }
+        }
+
+        if (hasBaseline)
+        {
+            sb.AppendLine();
+            sb.AppendLine(CrapVerdict.Render(totalCrapDelta));
+
+            var increased = rows.Where(r => !r.IsTotal && r.CrapDelta is > 0.5).ToList();
+            if (increased.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("> [!NOTE]");
+                var names = string.Join(", ", increased.Select(r => $"{r.Name} (+{Fmt.WholeNumber(r.CrapDelta!.Value)})"));
+                sb.AppendLine($"> CRAP increased in: {names}.");
+            }
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
+    static string RenderConsole(List<ModuleRow> rows, bool hasBaseline, double totalCrapDelta)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine();
+        sb.AppendLine("Coverage and CRAP by module");
+        sb.AppendLine(new string('=', 96));
+        sb.AppendLine(hasBaseline
+            ? $"{"module",-16}{"methods",8}{"CRAP",8}{"dCRAP",9}{">=8",6}{"cog>15",8}{"coverage",10}{"dcov",9}"
+            : $"{"module",-16}{"methods",8}{"CRAP",8}{">=8",6}{"cog>15",8}{"coverage",10}");
+        sb.AppendLine(new string('-', 96));
+
+        foreach (var row in rows)
+        {
+            var crap = Fmt.WholeNumber(row.Crap);
+            var coverage = row.CoveragePercent is null
+                ? ""
+                : $"{row.CoveragePercent.Value.ToString("F1", CultureInfo.InvariantCulture)}%";
+
+            if (hasBaseline)
+            {
+                var crapDelta = Fmt.SignedCrapDelta(row.CrapDelta);
+                var coverageDelta = Fmt.SignedCoverageDeltaPp(row.CoverageDeltaPp);
+                sb.AppendLine(
+                    $"{row.Name,-16}{row.Methods,8}{crap,8}{crapDelta,9}{row.CrapAtLeast8,6}{row.CognitiveOver15,8}{coverage,10}{coverageDelta,9}");
+            }
+            else
+            {
+                sb.AppendLine($"{row.Name,-16}{row.Methods,8}{crap,8}{row.CrapAtLeast8,6}{row.CognitiveOver15,8}{coverage,10}");
+            }
+        }
+
+        if (hasBaseline)
+        {
+            sb.AppendLine();
+            sb.AppendLine(CrapVerdict.Render(totalCrapDelta).Replace("**", ""));
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+}
+
 static class CrapAnalysis
 {
     public static int Run(CrapOptions options)
@@ -872,8 +1394,34 @@ static class CrapAnalysis
 
         var hits = LoadCoverage(reports);
         var rows = Correlate(methods, hits, out var unmatchedCoverage, out var uninstrumented);
+        var ranked = rows.OrderByDescending(r => r.Crap).ToList();
 
-        Report(options, rows, methods.Count, reports.Count, unmatchedCoverage, uninstrumented);
+        Dictionary<string, ModuleStats>? baselineByModule = null;
+        if (options.BaselinePath is not null)
+        {
+            var baselineSamples = BaselineReport.Load(options, options.BaselinePath);
+            if (baselineSamples is null)
+                return 1;
+
+            baselineByModule = ModuleAggregator.Aggregate(baselineSamples);
+        }
+
+        var crapIncreased = false;
+
+        if (options.Markdown || baselineByModule is not null)
+        {
+            var headByModule = ModuleAggregator.Aggregate(ToSamples(options, rows));
+            var (text, totalCrapDelta) = ModuleReportBuilder.Build(headByModule, baselineByModule, options.Markdown);
+            Console.WriteLine(text);
+            crapIncreased = totalCrapDelta > 0.5;
+        }
+        else
+        {
+            Report(options, ranked, methods.Count, reports.Count, unmatchedCoverage, uninstrumented);
+        }
+
+        if (options.JsonPath is not null)
+            WriteJson(options, ranked, methods.Count, reports.Count, unmatchedCoverage, uninstrumented);
 
         // Coverage that cannot be tied back to a source method means the two halves of the
         // formula disagree about the code under analysis. Reporting a number anyway is how
@@ -889,8 +1437,21 @@ static class CrapAnalysis
             return 2;
         }
 
+        if (options.FailOnCrapIncrease && crapIncreased)
+            return 1;
+
         return 0;
     }
+
+    /// <summary>Projects freshly computed rows into the shape the module aggregator shares with --baseline.</summary>
+    static List<MethodSample> ToSamples(CrapOptions options, IEnumerable<CrapRow> rows) =>
+        rows.Select(r => new MethodSample
+        {
+            File = Path.GetRelativePath(options.RepoRoot, r.Method.FilePath).Replace('\\', '/'),
+            Crap = r.Crap,
+            Cognitive = r.Method.Cognitive,
+            Coverage = r.Coverage,
+        }).ToList();
 
     static List<SourceMethod> LoadSourceMethods(CrapOptions options)
     {
@@ -1095,13 +1656,13 @@ static class CrapAnalysis
 
     static void Report(
         CrapOptions options,
-        List<CrapRow> rows,
+        List<CrapRow> ranked,
         int methodCount,
         int reportCount,
         int unmatchedCoverage,
         int uninstrumented)
     {
-        var ranked = rows.OrderByDescending(r => r.Crap).ToList();
+        var rows = ranked;
         var flagged = ranked.Where(r => r.Crap >= options.MinCrap).ToList();
 
         Console.WriteLine();
@@ -1133,9 +1694,6 @@ static class CrapAnalysis
             if (flagged.Count > options.Top)
                 Console.WriteLine($"... and {flagged.Count - options.Top} more (raise --top or use --json)");
         }
-
-        if (options.JsonPath is not null)
-            WriteJson(options, ranked, methodCount, reportCount, unmatchedCoverage, uninstrumented);
     }
 
     // Written with Utf8JsonWriter rather than JsonSerializer: the repo enables the trim and

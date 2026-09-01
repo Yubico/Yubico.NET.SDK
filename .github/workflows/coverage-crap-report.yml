@@ -1,0 +1,139 @@
+name: Coverage and CRAP report
+
+on:
+  pull_request:
+    branches: [ yubikit*, yubikit/** ]
+
+jobs:
+  coverage-crap-report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - name: Check out source
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          # Full history: the base measurement step below needs to `git checkout` the PR's
+          # base commit, which a shallow clone would not contain.
+          fetch-depth: 0
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Install PC/SC dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends pcscd libpcsclite-dev libudev-dev
+          # Run pcscd directly (bypasses systemd/socket-activation issues on CI runners)
+          # and open socket permissions so the test runner user can connect
+          sudo mkdir -p /run/pcscd
+          sudo pcscd --foreground &
+          # Wait for socket to appear (more robust than fixed sleep)
+          timeout 10 bash -c 'until [ -S /run/pcscd/pcscd.comm ]; do sleep 0.2; done' || true
+          # Open socket read/write for the runner user (sockets don't need +x)
+          sudo chmod 666 /run/pcscd/pcscd.comm || true
+
+      - name: Measure head coverage and CRAP
+        run: |
+          dotnet toolchain.cs coverage
+          dotnet toolchain.cs -- crap --crap-args "--json artifacts/crap/head.json"
+
+      - name: Preserve head measurement
+        # Copied outside the worktree before the base checkout below replaces artifacts/
+        # and crap.cs/toolchain.cs with the base commit's versions.
+        run: |
+          mkdir -p "$RUNNER_TEMP/head-coverage"
+          cp -r artifacts/coverage/. "$RUNNER_TEMP/head-coverage/"
+          cp artifacts/crap/head.json "$RUNNER_TEMP/head.json"
+
+      - name: Cache base measurement
+        id: base-cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ runner.temp }}/base.json
+          key: crap-base-${{ github.event.pull_request.base.sha }}
+
+      - name: Measure base coverage and CRAP
+        if: steps.base-cache.outputs.cache-hit != 'true'
+        run: |
+          # Capture the exact commit to return to. `git checkout -` would usually work, but
+          # pull_request events check out a detached merge ref, and relying on the shell's
+          # notion of "previous ref" across a long build is needless risk.
+          head_sha="$(git rev-parse HEAD)"
+          git checkout --detach ${{ github.event.pull_request.base.sha }}
+          rm -rf artifacts/coverage
+          dotnet toolchain.cs coverage
+          dotnet toolchain.cs -- crap --crap-args "--json artifacts/crap/base.json"
+          cp artifacts/crap/base.json "$RUNNER_TEMP/base.json"
+          git checkout --detach "$head_sha"
+
+      - name: Render coverage and CRAP report
+        # Ordering: crap.cs itself must be the PR's (head) version, since --baseline and
+        # --markdown are the features this PR adds — running the base commit's crap.cs would
+        # not understand them. `git checkout -` above already returned the worktree to head,
+        # so crap.cs is correct here. It also needs *coverage data* to compute CRAP; re-running
+        # `dotnet toolchain.cs coverage` a second time would work but costs another full test
+        # pass for output identical to the one already produced in "Measure head coverage and
+        # CRAP". Restoring the preserved head coverage artifacts is the cheaper option and
+        # produces the same result, so that is what this step does.
+        run: |
+          rm -rf artifacts/coverage
+          mkdir -p artifacts/coverage
+          cp -r "$RUNNER_TEMP/head-coverage/." artifacts/coverage/
+          dotnet crap.cs --baseline "$RUNNER_TEMP/base.json" --markdown > "$RUNNER_TEMP/report.md"
+          cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment on pull request
+        # pull_request from a fork gets a read-only GITHUB_TOKEN, so posting a comment would
+        # fail. The report was already written to the job summary above regardless, so forked
+        # PRs still get the report; they just don't get the sticky PR comment.
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- yubikit-crap-report -->';
+            const body = fs.readFileSync(`${process.env.RUNNER_TEMP}/report.md`, 'utf8');
+
+            // Paginate: listComments returns 100 per page, and on a long-running PR the
+            // bot's own comment can fall past the first page. Missing it would post a
+            // duplicate on every push instead of updating in place.
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+
+            const existing = comments.find((c) => c.body?.startsWith(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

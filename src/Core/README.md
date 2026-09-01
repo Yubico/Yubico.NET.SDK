@@ -188,23 +188,23 @@ must not be called from inside the operation being drained.
 ```csharp
 using Yubico.YubiKit.Core.Utilities;
 
-// Parse TLV data
-var tlvs = TlvHelper.ParseMany(responseData);
+// Parse TLV data - DecodeList returns a disposable collection
+using var tlvs = TlvHelper.DecodeList(responseData);
 var certificateTlv = tlvs.FirstOrDefault(t => t.Tag == 0x53);
 
-// Build TLV structure
-using var builder = new TlvBuilder();
-builder.Add(0x5C, new byte[] { 0x5F, 0xC1, 0x02 });  // Tag list
-builder.Add(0x53, certificateData);  // Certificate
-var encodedData = builder.ToArray();
+// Or read a single value directly
+if (TlvHelper.TryFindValue(0x53, responseData, out var certificate)) { /* use certificate */ }
 
-// Nested TLV
-using var nestedBuilder = new TlvBuilder();
-using (var nested = nestedBuilder.AddNested(0x7F49))  // Public key template
-{
-    nested.Add(0x81, modulusBytes);   // RSA modulus
-    nested.Add(0x82, exponentBytes);  // RSA exponent
-}
+// Build TLV structure - EncodeAndDisposeList disposes the TLVs it is given
+var encodedData = TlvHelper.EncodeAndDisposeList(
+    new Tlv(0x5C, new byte[] { 0x5F, 0xC1, 0x02 }),  // Tag list
+    new Tlv(0x53, certificateData));                 // Certificate
+
+// Nested TLV - the inner encoding becomes the outer tag's value
+var publicKeyBody = TlvHelper.EncodeAndDisposeList(
+    new Tlv(0x81, modulusBytes),    // RSA modulus
+    new Tlv(0x82, exponentBytes));  // RSA exponent
+var publicKeyTemplate = TlvHelper.EncodeAndDisposeList(new Tlv(0x7F49, publicKeyBody));
 ```
 
 ## Architecture
@@ -277,7 +277,7 @@ Platform detection is automatic via `SdkPlatformInfo.OperatingSystem`.
 | `RawOtpHidSession` | Supported raw OTP HID logical exchange |
 | `ApduCommand` / `ApduResponse` | APDU command/response representations |
 | `ScpProtocol` | Secure Channel Protocol wrapper (SCP03, SCP11) |
-| `TlvHelper` / `TlvBuilder` | TLV parsing and construction utilities |
+| `TlvHelper` / `Tlv` | TLV parsing and construction utilities |
 | `ApplicationSession` | Base class for application-specific sessions |
 
 ## Logging

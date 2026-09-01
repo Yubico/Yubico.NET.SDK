@@ -53,13 +53,23 @@ jobs:
           dotnet toolchain.cs coverage
           dotnet toolchain.cs -- crap --crap-args "--json artifacts/crap/head.json"
 
-      - name: Preserve head measurement
-        # Copied outside the worktree before the base checkout below replaces artifacts/
-        # and crap.cs/toolchain.cs with the base commit's versions.
+      - name: Preserve head measurement and measurement tooling
+        # Two separate reasons to copy things out before the base checkout:
+        #
+        # 1. artifacts/ and head.json would be clobbered by the base build.
+        #
+        # 2. The measurement tooling must be held CONSTANT across both sides. The base
+        #    commit is measured with the *head* commit's crap.cs, toolchain.cs and coverage
+        #    settings, so only the source differs. Otherwise a PR that touches crap.cs -
+        #    such as this one - compares two different metrics and the delta is meaningless.
+        #    It also avoids a bootstrap problem: a base predating a fix to the coverage
+        #    tooling cannot measure itself.
         run: |
-          mkdir -p "$RUNNER_TEMP/head-coverage"
+          mkdir -p "$RUNNER_TEMP/head-coverage" "$RUNNER_TEMP/tooling"
           cp -r artifacts/coverage/. "$RUNNER_TEMP/head-coverage/"
           cp artifacts/crap/head.json "$RUNNER_TEMP/head.json"
+          cp crap.cs toolchain.cs coverlet.runsettings.xml "$RUNNER_TEMP/tooling/"
+          cp .config/dotnet-tools.json "$RUNNER_TEMP/tooling/dotnet-tools.json"
 
       - name: Cache base measurement
         id: base-cache
@@ -76,10 +86,20 @@ jobs:
           # notion of "previous ref" across a long build is needless risk.
           head_sha="$(git rev-parse HEAD)"
           git checkout --detach ${{ github.event.pull_request.base.sha }}
+
+          # Measure the base SOURCE with the head's TOOLING - see the preserve step above.
+          cp "$RUNNER_TEMP/tooling/crap.cs" crap.cs
+          cp "$RUNNER_TEMP/tooling/toolchain.cs" toolchain.cs
+          cp "$RUNNER_TEMP/tooling/coverlet.runsettings.xml" coverlet.runsettings.xml
+          cp "$RUNNER_TEMP/tooling/dotnet-tools.json" .config/dotnet-tools.json
+
           rm -rf artifacts/coverage
           dotnet toolchain.cs coverage
           dotnet toolchain.cs -- crap --crap-args "--json artifacts/crap/base.json"
           cp artifacts/crap/base.json "$RUNNER_TEMP/base.json"
+
+          # Discard the tooling overlay so the return checkout has a clean tree.
+          git checkout -- crap.cs toolchain.cs coverlet.runsettings.xml .config/dotnet-tools.json
           git checkout --detach "$head_sha"
 
       - name: Render coverage and CRAP report

@@ -76,27 +76,14 @@ internal static class DeviceConnectionRegistry
             return device.DeviceId;
 
         return published.TryResolveSlot(connection, out var slot)
-            ? slot.DeviceId
+            ? slot.InterfaceId
             : device.DeviceId;
     }
     /// <summary>
-    ///     Acquires the interface lease for a connection, before physical connection creation. Waits while
-    ///     discovery owns the interface; cancellation applies only while waiting.
-    /// </summary>
-    /// <param name="deviceId">The per-interface device id.</param>
-    /// <param name="cancellationToken">Cancels the wait for an active discovery read only.</param>
-    /// <exception cref="ConnectionInUseException">
-    ///     The interface already has a live connection.
-    /// </exception>
-    public static ValueTask<IDisposable> AcquireConnectionAsync(
-        string deviceId,
-        CancellationToken cancellationToken = default) =>
-        GetOwnership(deviceId).AcquireConnectionAsync(deviceId, cancellationToken);
-
-    /// <summary>
-    ///     Acquires every known interface lease for one physical YubiKey as a single logical registration.
-    ///     Interface ids are de-duplicated and acquired in ordinal order; partial acquisition rolls back in
-    ///     reverse order.
+    ///     Acquires every known interface lease for one physical YubiKey as a single logical registration,
+    ///     before physical connection creation. Interface ids are de-duplicated and acquired in ordinal
+    ///     order; partial acquisition rolls back in reverse order. Waits while discovery owns an interface;
+    ///     cancellation applies only while waiting. Standalone devices pass a one-element scope.
     /// </summary>
     /// <exception cref="ConnectionInUseException">Any member ID already has a live connection.</exception>
     public static async ValueTask<IDisposable> AcquireConnectionAsync(

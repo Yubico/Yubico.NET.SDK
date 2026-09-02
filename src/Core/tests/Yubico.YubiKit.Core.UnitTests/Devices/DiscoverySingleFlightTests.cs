@@ -132,10 +132,11 @@ public class DiscoverySingleFlightTests
     public async Task ReadBoundedAsync_TransparentWrapperWithoutDiscoveryProvider_SkipsWithoutPublicConnect()
     {
         var factory = new CountingConnectionFactory();
-        var inner = new PcscYubiKey(
+        var slot = new DeviceConnectionSlot(
             new PcscDevice { ReaderName = $"wrapped-reader-{Guid.NewGuid():N}", Atr = null },
-            factory,
-            NullLogger<PcscYubiKey>.Instance);
+            factory);
+        var inner = new YubiKeyDevice(
+            slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
         using var wrapper = new TransparentYubiKey(inner);
 
         Exception? exception = null;
@@ -181,9 +182,7 @@ public class DiscoverySingleFlightTests
                 TestContext.Current.CancellationToken));
 
         Assert.Equal(DiscoveryReadSkipCause.NoDiscoveryProvider, exception.Cause);
-        Assert.Contains(smartCard.DeviceId, exception.Message, StringComparison.Ordinal);
-        Assert.Equal(0, smartCard.ConnectCalls);
-        Assert.Equal(0, hid.ConnectCalls);
+        Assert.Contains(smartCard.InterfaceId, exception.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -290,6 +289,113 @@ public class DiscoverySingleFlightTests
             device.FailConnect();
             await device.ConnectFinished.Task.WaitAsync(TestContext.Current.CancellationToken);
         }
+    }
+
+    [Fact]
+    public async Task ReadBoundedAsync_TransportActivityBetweenReads_DetachesFromInFlightRead()
+    {
+        // Single-flight reads are keyed by reusable interface identifiers. A timed-out native read that
+        // survives a removal + same-slot replacement must NOT be joined by the replacement's scan — that
+        // would hand the departed key's device info to its successor. NotifyTransportActivity bumps the
+        // key generation, so the post-activity read starts its own attempt instead of awaiting the old
+        // one; here that attempt is refused (the abandoned read still holds the interface's discovery
+        // lease) and is retried on a later scan — never resolved from pre-activity hardware's result.
+        var device = new ControllableConnectYubiKey(cancelConnectWithCaller: false);
+
+        try
+        {
+            await Assert.ThrowsAsync<TimeoutException>(() => ProtocolDeviceInfo.ReadBoundedAsync(
+                device,
+                ConnectionType.SmartCard,
+                TimeSpan.FromMilliseconds(50),
+                NullLogger.Instance,
+                CancellationToken.None));
+            Assert.Equal(1, device.ConnectCalls);
+
+            ProtocolDeviceInfo.NotifyTransportActivity();
+
+            // Pre-fix this joined the in-flight read (and would have consumed its DeviceInfo); post-fix
+            // it is a new attempt that observes the still-held discovery lease and skips.
+            var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
+                ProtocolDeviceInfo.ReadBoundedAsync(
+                    device,
+                    ConnectionType.SmartCard,
+                    TimeSpan.FromMilliseconds(50),
+                    NullLogger.Instance,
+                    CancellationToken.None));
+
+            Assert.Equal(DiscoveryReadSkipCause.InterfaceLeaseHeld, exception.Cause);
+            Assert.Equal(1, device.ConnectCalls);
+        }
+        finally
+        {
+            device.FailConnect();
+            await device.ConnectFinished.Task.WaitAsync(TestContext.Current.CancellationToken);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task ReadBoundedAsync_TransportActivityWhileQueuedForAdmission_FailsFastWithoutConnecting()
+    {
+        // Queued identity reads wait (uncancelled by their caller's timeout) for a worker slot. With hung
+        // native reads holding all slots, every hotplug event used to be able to enqueue another orphaned
+        // waiter that would eventually open an interface its evidence no longer named. Transport activity
+        // must cancel superseded queued waits promptly - not leave them accumulating behind hung workers.
+        // The generation and the supersede token are captured as ONE immutable epoch, so no interleaving
+        // of epoch reads and activity can produce a waiter holding an old generation with a token that
+        // never fires; the double notification below leaves the queued read's epoch two generations stale
+        // and it must still fail through its own epoch's token.
+        const int maximumWorkers = 4;
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+
+        var hungDevices = Enumerable.Range(0, maximumWorkers)
+            .Select(_ => new ControllableConnectYubiKey(cancelConnectWithCaller: false))
+            .ToArray();
+        var queuedDevice = new ControllableConnectYubiKey(cancelConnectWithCaller: false);
+
+        try
+        {
+            // Saturate all workers with hung native reads.
+            var hungReads = hungDevices.Select(device => Record.ExceptionAsync(() =>
+                ProtocolDeviceInfo.ReadBoundedAsync(
+                    device,
+                    ConnectionType.SmartCard,
+                    TimeSpan.FromMilliseconds(100),
+                    NullLogger.Instance,
+                    CancellationToken.None)).AsTask()).ToArray();
+            foreach (var device in hungDevices)
+                await device.ConnectStarted.Task.WaitAsync(TestContext.Current.CancellationToken);
+            Assert.All(await Task.WhenAll(hungReads), exception => Assert.IsType<TimeoutException>(exception));
+
+            // Queue a read behind them with a budget far larger than this test's runtime, then supersede it.
+            var queuedRead = ProtocolDeviceInfo.ReadBoundedAsync(
+                queuedDevice,
+                ConnectionType.SmartCard,
+                TimeSpan.FromSeconds(30),
+                NullLogger.Instance,
+                CancellationToken.None,
+                waitForWorkerSlot: true);
+
+            ProtocolDeviceInfo.NotifyTransportActivity();
+            ProtocolDeviceInfo.NotifyTransportActivity();
+
+            var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
+                queuedRead.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+            Assert.Equal(DiscoveryReadSkipCause.SupersededByTransportActivity, exception.Cause);
+            Assert.Equal(0, queuedDevice.ConnectCalls);
+        }
+        finally
+        {
+            foreach (var device in hungDevices)
+                device.FailConnect();
+            foreach (var device in hungDevices)
+                await device.ConnectFinished.Task.WaitAsync(TestContext.Current.CancellationToken);
+            await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        }
+
+        // Even after the hung workers free their slots, the superseded read must never reach hardware.
+        Assert.Equal(0, queuedDevice.ConnectCalls);
     }
 
     [Fact]
@@ -536,20 +642,9 @@ public class DiscoverySingleFlightTests
 
     private sealed class UnsupportedDiscoveryYubiKey(ConnectionType availableConnections) : IYubiKeyConnectionSlot
     {
-        private int _connectCalls;
+        public string InterfaceId { get; } = $"unsupported:{availableConnections}:{Guid.NewGuid():N}";
 
-        public int ConnectCalls => Volatile.Read(ref _connectCalls);
-
-        public string DeviceId { get; } = $"unsupported:{availableConnections}:{Guid.NewGuid():N}";
-
-        public ConnectionType AvailableConnections => availableConnections;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-        {
-            _ = Interlocked.Increment(ref _connectCalls);
-            return Task.FromException<TConnection>(new InvalidOperationException("Public connect must not be used by discovery."));
-        }
+        public ConnectionType ConnectionType => availableConnections;
     }
 
     private sealed class CountingConnectionFactory : ISmartCardConnectionFactory

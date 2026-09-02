@@ -54,7 +54,7 @@ public class CompositeDeviceMergerTests
 
         var published = Assert.Single(merged);
         Assert.NotSame(sky, published);
-        Assert.Equal(sky.DeviceId, published.DeviceId);
+        Assert.Equal(sky.InterfaceId, published.DeviceId);
         Assert.Equal(ConnectionType.HidFido, published.AvailableConnections);
         Assert.Equal("8:hid:fido", YubiKeyDevice.PhysicalIdentityKeyFor(published));
     }
@@ -131,7 +131,7 @@ public class CompositeDeviceMergerTests
 
         var published = Assert.Single(merged);
         Assert.NotSame(single, published);
-        Assert.Equal(single.DeviceId, published.DeviceId);
+        Assert.Equal(single.InterfaceId, published.DeviceId);
         Assert.Equal(ConnectionType.SmartCard, published.AvailableConnections);
     }
 
@@ -145,7 +145,7 @@ public class CompositeDeviceMergerTests
 
         var published = Assert.Single(merged);
         Assert.NotSame(single, published);
-        Assert.Equal(single.DeviceId, published.DeviceId);
+        Assert.Equal(single.InterfaceId, published.DeviceId);
         Assert.Equal(ConnectionType.HidFido, published.AvailableConnections);
     }
 
@@ -185,12 +185,8 @@ public class CompositeDeviceMergerTests
     }
     private sealed class FakeSlot(string deviceId, ConnectionType connectionType) : IYubiKeyConnectionSlot
     {
-        public string DeviceId { get; } = deviceId;
-        public ConnectionType AvailableConnections { get; } = connectionType;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-            => throw new NotSupportedException("FakeYubiKey does not support connections.");
+        public string InterfaceId { get; } = deviceId;
+        public ConnectionType ConnectionType { get; } = connectionType;
     }
 
     private static IReadOnlyList<string> InterfaceIdsOf(IYubiKey device) =>

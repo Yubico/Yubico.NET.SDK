@@ -261,6 +261,9 @@ finally
 A physical `IYubiKey` exposes one or more concrete interfaces; a typed `ConnectAsync<TConnection>()` routes
 to the requested interface.
 
+Discovery first represents each live enumerated PC/SC or HID handle as an internal raw connection slot,
+then merges those slots into the single production `YubiKeyDevice` shape exposed as `IYubiKey`.
+
 ```
 IYubiKey (one physical device)
     │  AvailableConnections / SupportsConnection(...)

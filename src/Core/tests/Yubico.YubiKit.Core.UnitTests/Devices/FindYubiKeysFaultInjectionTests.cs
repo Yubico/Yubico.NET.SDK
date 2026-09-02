@@ -40,12 +40,13 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 ///         the CONNECTION object type, so HID interface fakes can use the same smart-card scripting seam.
 ///     </para>
 ///     <para>
-///         The identity-cache pins use a two-key 0x0405 (OTP+CCID) rig — FOUR concurrent identity reads —
-///         because the process-wide discovery admission has exactly four workers and skips (rather than
-///         queues) the excess: a six-read 0x0407 rig nondeterministically orphans up to two interfaces even
-///         with instantly-succeeding fakes. That saturation behavior is itself the Phase-0 finding-1/5
-///         defect mechanism and is pinned deterministically by
-///         <see cref="FindAllAsync_SixIdentityReadsAgainstFourWorkerAdmission_TwoSkipWithoutConnecting" />.
+///         The identity-cache pins use a two-key 0x0405 (OTP+CCID) rig — four concurrent identity reads
+///         against the four-worker process-wide discovery admission — so they never depend on admission
+///         behavior. Oversubscription itself (six reads, four workers) is covered separately: identity
+///         reads now WAIT for a worker slot, bounded by their read budget, instead of skipping (see
+///         <see cref="FindAllAsync_SixIdentityReadsAgainstFourWorkerAdmission_WaitForSlotsInsteadOfSkipping" />
+///         and the bound-preservation vector
+///         <see cref="FindAllAsync_SaturatedWorkersBeyondBudget_IdentityDegradesToNull_BoundPreserved" />).
 ///     </para>
 /// </remarks>
 [Collection(DiscoveryWorkerAdmissionCollection.Name)]
@@ -260,16 +261,56 @@ public class FindYubiKeysFaultInjectionTests
     }
 
     /// <summary>
-    ///     Invalidation is scoped per transport: HID activity does not discard PC/SC identity evidence.
+    ///     The metadata cache is exposed to the same same-slot swap as the identity cache: it is keyed by
+    ///     PhysicalIdentityKey (built from reusable interface ids), so without hotplug-driven invalidation
+    ///     the swapped-in key would be published with the departed key's serial and capabilities.
+    /// </summary>
+    [Fact]
+    public async Task FindAllAsync_SameSlotSwapWithTransportActivity_DoesNotServeStaleMetadata()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        const string fidoPath = "swap-slot-fido";
+        var factory = new ScriptedIdentityFactory();
+        factory.SucceedReads(fidoPath, serial: 333);
+        var find = new FindYubiKeys(
+            new MutableFindPcscDevices(),
+            new MutableFindHidDevices
+            {
+                Devices = [new FakeHidDevice(0x0120, HidInterfaceType.Fido, fidoPath)]
+            },
+            factory.Create);
+
+        var scan1 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+        Assert.Equal(333, Assert.IsType<YubiKeyDevice>(Assert.Single(scan1)).DeviceInfo?.SerialNumber);
+        var connectsAfterScan1 = factory.ConnectCalls(fidoPath);
+
+        // Same-model key swapped into the same slot between scans: identical interface id, different
+        // hardware. Only the firmware answers differently.
+        factory.SucceedReads(fidoPath, serial: 999);
+        find.NotifyTransportActivity(ConnectionType.Hid);
+
+        var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        Assert.Equal(999, Assert.IsType<YubiKeyDevice>(Assert.Single(scan2)).DeviceInfo?.SerialNumber);
+        Assert.True(
+            factory.ConnectCalls(fidoPath) > connectsAfterScan1,
+            "Transport activity must invalidate cached metadata: serving the old key's DeviceInfo for the " +
+            "swapped-in key is key substitution, not a stale cache entry.");
+    }
+
+    /// <summary>
+    ///     Invalidation is deliberately NOT scoped per transport: activity on one transport evicts all
+    ///     cached evidence, including the other transport's.
     /// </summary>
     /// <remarks>
-    ///     The point of caching is to avoid re-reading serials (each read costs I/O and briefly takes an
-    ///     exclusive lease). Evicting both transports on any event would make every hotplug double the
-    ///     next scan's read cost for no correctness gain — a removal observed on HID says nothing about
-    ///     what is in the PC/SC slots.
+    ///     A composite key's swap surfaces removal/arrival events on multiple transports, and nothing
+    ///     guarantees which arrives first. If eviction were scoped to the event's transport, the first
+    ///     event would refresh that transport's evidence while the sibling transport still named the
+    ///     departed key — splitting one replacement key into phantom devices built from two keys'
+    ///     evidence. Re-reading budgeted identities on the next scan is the price of never mixing them.
     /// </remarks>
     [Fact]
-    public async Task NotifyTransportActivity_HidOnly_LeavesPcscIdentityCacheIntact()
+    public async Task NotifyTransportActivity_HidOnly_EvictsPcscIdentityEvidenceToo()
     {
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
         var (find, factory, _, _) = CreateTwoDualKeyRig();
@@ -285,11 +326,114 @@ public class FindYubiKeysFaultInjectionTests
         var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, scan2.Count);
-        Assert.Equal(readerAConnectsAfterScan1, factory.ConnectCalls(ReaderA));
-        Assert.Equal(readerBConnectsAfterScan1, factory.ConnectCalls(ReaderB));
         Assert.True(
             factory.ConnectCalls(OtpA) > otpAConnectsAfterScan1,
             "HID activity must invalidate HID-read identity entries.");
+        Assert.True(
+            factory.ConnectCalls(ReaderA) > readerAConnectsAfterScan1,
+            "HID activity must also invalidate PC/SC identity entries: a composite swap's events can " +
+            "arrive on one transport first, and retained sibling evidence would mix two keys.");
+        Assert.True(
+            factory.ConnectCalls(ReaderB) > readerBConnectsAfterScan1,
+            "HID activity must also invalidate PC/SC identity entries: a composite swap's events can " +
+            "arrive on one transport first, and retained sibling evidence would mix two keys.");
+    }
+
+    /// <summary>
+    ///     A read that STARTED before hotplug activity and COMPLETED after it must not repopulate the
+    ///     just-cleared identity cache: later scans would trust the departed key's serial indefinitely.
+    /// </summary>
+    [Fact]
+    public async Task FindAllAsync_TransportActivityWhileIdentityReadsInFlight_DiscardsTheirCacheWrites()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        var (find, factory, _, _) = CreateTwoDualKeyRig();
+        factory.GateReads(ReaderA, serial: 111);
+        factory.GateReads(OtpA, serial: 111);
+        factory.GateReads(ReaderB, serial: 222);
+        factory.GateReads(OtpB, serial: 222);
+
+        IReadOnlyList<IYubiKey> scan1;
+        try
+        {
+            var scanTask = find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+            Assert.True(
+                await TryWaitForAsync(() => factory.TotalConnectCalls >= 4, TimeSpan.FromSeconds(5)),
+                "The identity reads never reached a connect; cannot stage the in-flight interleaving.");
+
+            // Hotplug lands while all four identity reads are in flight; they complete afterwards.
+            find.NotifyTransportActivity(ConnectionType.SmartCard);
+            factory.ReleaseAllGatedReads();
+
+            scan1 = await scanTask;
+        }
+        finally
+        {
+            factory.ReleaseAllGatedReads();
+            await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        }
+
+        // The scan itself publishes what it read; only the cached copies must have been discarded.
+        Assert.Equal(2, scan1.Count);
+        var connectsAfterScan1 = factory.TotalConnectCalls;
+        foreach (var name in new[] { ReaderA, OtpA, ReaderB, OtpB })
+            factory.SucceedReads(name, serial: name is ReaderA or OtpA ? 111 : 222);
+
+        var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, scan2.Count);
+        Assert.True(
+            factory.TotalConnectCalls > connectsAfterScan1,
+            "Identity reads completing after transport activity must not repopulate the cache: scan 2 " +
+            "served the departed hardware's cached identity instead of re-reading.");
+    }
+
+    /// <summary>
+    ///     Same interleaving for the metadata cache: a best-effort metadata read completing after hotplug
+    ///     activity must not repopulate the cache with the departed key's DeviceInfo.
+    /// </summary>
+    [Fact]
+    public async Task FindAllAsync_TransportActivityWhileMetadataReadInFlight_DiscardsItsCacheWrite()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        const string fidoPath = "race-slot-fido";
+        var factory = new ScriptedIdentityFactory();
+        factory.GateReads(fidoPath, serial: 333);
+        var find = new FindYubiKeys(
+            new MutableFindPcscDevices(),
+            new MutableFindHidDevices
+            {
+                Devices = [new FakeHidDevice(0x0120, HidInterfaceType.Fido, fidoPath)]
+            },
+            factory.Create);
+
+        try
+        {
+            var scanTask = find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+            Assert.True(
+                await TryWaitForAsync(() => factory.TotalConnectCalls >= 1, TimeSpan.FromSeconds(5)),
+                "The metadata read never reached a connect; cannot stage the in-flight interleaving.");
+
+            find.NotifyTransportActivity(ConnectionType.Hid);
+            factory.ReleaseAllGatedReads();
+
+            _ = await scanTask;
+        }
+        finally
+        {
+            factory.ReleaseAllGatedReads();
+            await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        }
+
+        // The swapped-in hardware answers with a different serial; a retained stale cache entry would
+        // publish 333 without re-reading.
+        factory.SucceedReads(fidoPath, serial: 999);
+
+        var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+
+        Assert.Equal(
+            999,
+            Assert.IsType<YubiKeyDevice>(Assert.Single(scan2)).DeviceInfo?.SerialNumber);
     }
 
     /// <summary>
@@ -344,7 +488,7 @@ public class FindYubiKeysFaultInjectionTests
             {
                 Devices = [new FakeHidDevice(0x0120, HidInterfaceType.Fido, fidoPath)]
             },
-            factory);
+            factory.Create);
 
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
@@ -367,7 +511,7 @@ public class FindYubiKeysFaultInjectionTests
                 Devices = [new FakePcscDevice(readerName, PscsConnectionKind.Nfc)]
             },
             new MutableFindHidDevices(),
-            factory);
+            factory.Create);
 
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
@@ -521,7 +665,7 @@ public class FindYubiKeysFaultInjectionTests
             ]
         };
 
-        return (new FindYubiKeys(pcsc, hid, factory), factory, pcsc, hid);
+        return (new FindYubiKeys(pcsc, hid, factory.Create), factory, pcsc, hid);
     }
 
     private static (FindYubiKeys Find, ScriptedIdentityFactory Factory) CreateTwoTripleKeyRig()
@@ -542,7 +686,7 @@ public class FindYubiKeysFaultInjectionTests
             ]
         };
 
-        return (new FindYubiKeys(pcsc, hid, factory), factory);
+        return (new FindYubiKeys(pcsc, hid, factory.Create), factory);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -592,12 +736,12 @@ public class FindYubiKeysFaultInjectionTests
     }
 
     /// <summary>
-    ///     Creates <see cref="ScriptedYubiKey" /> per-interface devices whose discovery connects follow a
+    ///     Creates scripted per-interface slots whose discovery connects follow a
     ///     per-interface script keyed by the underlying device name. DeviceIds carry a per-factory prefix so
     ///     the process-wide registries (DeviceConnectionRegistry, ProtocolDeviceInfo single-flight) never
     ///     collide across tests, while staying stable across scans within one test.
     /// </summary>
-    private sealed class ScriptedIdentityFactory : IYubiKeyFactory
+    private sealed class ScriptedIdentityFactory
     {
         private readonly string _prefix = $"test-fi:{Guid.NewGuid():N}";
         private readonly ConcurrentDictionary<string, (ReadOutcome Outcome, int Serial)> _scripts = new();
@@ -725,14 +869,9 @@ public class FindYubiKeysFaultInjectionTests
         ConnectionType connection,
         ScriptedIdentityFactory owner) : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
     {
-        public string DeviceId { get; } = deviceId;
+        public string InterfaceId { get; } = deviceId;
 
-        public ConnectionType AvailableConnections { get; } = connection;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            Task.FromException<TConnection>(
-                new InvalidOperationException("Public connect must not be used by discovery."));
+        public ConnectionType ConnectionType { get; } = connection;
 
         public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType connectionType,

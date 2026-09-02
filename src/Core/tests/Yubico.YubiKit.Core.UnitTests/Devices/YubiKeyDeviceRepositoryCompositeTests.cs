@@ -284,11 +284,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
 
     private sealed class FakeSlot(string deviceId, ConnectionType connectionType) : IYubiKeyConnectionSlot
     {
-        public string DeviceId { get; } = deviceId;
-        public ConnectionType AvailableConnections { get; } = connectionType;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-            => throw new NotSupportedException();
+        public string InterfaceId { get; } = deviceId;
+        public ConnectionType ConnectionType { get; } = connectionType;
     }
 }

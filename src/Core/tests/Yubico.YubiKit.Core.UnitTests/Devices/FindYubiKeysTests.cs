@@ -31,7 +31,7 @@ public class FindYubiKeysTests
             new FakeHidDevice("generic-hid", HidInterfaceType.Unknown),
             new FakeHidDevice("otp", HidInterfaceType.Otp)
         ]);
-        var findYubiKeys = new FindYubiKeys(new FakeFindPcscDevices([]), findHid, new FakeSlotFactory());
+        var findYubiKeys = new FindYubiKeys(new FakeFindPcscDevices([]), findHid, CreateFakeSlot);
 
         // Act
         var result = await findYubiKeys.FindAllAsync(ConnectionType.HidFido, TestContext.Current.CancellationToken);
@@ -50,7 +50,7 @@ public class FindYubiKeysTests
             new FakeHidDevice("fido", HidInterfaceType.Fido),
             new FakeHidDevice("otp", HidInterfaceType.Otp)
         ]);
-        var findYubiKeys = new FindYubiKeys(new FakeFindPcscDevices([]), findHid, new FakeSlotFactory());
+        var findYubiKeys = new FindYubiKeys(new FakeFindPcscDevices([]), findHid, CreateFakeSlot);
 
         // Act
         var result = await findYubiKeys.FindAllAsync(ConnectionType.Hid, TestContext.Current.CancellationToken);
@@ -69,7 +69,7 @@ public class FindYubiKeysTests
             new FakeHidDevice("fido", HidInterfaceType.Fido)
         ]);
         var factory = new RejectUnsupportedHidFactory();
-        var findYubiKeys = new FindYubiKeys(new FakeFindPcscDevices([]), findHid, factory);
+        var findYubiKeys = new FindYubiKeys(new FakeFindPcscDevices([]), findHid, factory.Create);
 
         var result = await findYubiKeys.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
@@ -84,7 +84,7 @@ public class FindYubiKeysTests
         // Arrange
         var findPcsc = new FakeFindPcscDevices([new FakePcscDevice("smartcard")]);
         var findHid = new FakeFindHidDevices([new FakeHidDevice("fido", HidInterfaceType.Fido)]);
-        var findYubiKeys = new FindYubiKeys(findPcsc, findHid, new FakeSlotFactory());
+        var findYubiKeys = new FindYubiKeys(findPcsc, findHid, CreateFakeSlot);
 
         // Act
         var result = await findYubiKeys.FindAllAsync(ConnectionType.Unknown, TestContext.Current.CancellationToken);
@@ -117,17 +117,14 @@ public class FindYubiKeysTests
         }
     }
 
-    private sealed class FakeSlotFactory : IYubiKeyFactory
+    private static IYubiKeyConnectionSlot CreateFakeSlot(IDevice device) => device switch
     {
-        public IYubiKeyConnectionSlot Create(IDevice device) => device switch
-        {
-            IPcscDevice pcscDevice => new FakeSlot(pcscDevice.ReaderName, ConnectionType.SmartCard),
-            IHidDevice hidDevice => new FakeSlot(hidDevice.ReaderName, ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType)),
-            _ => throw new NotSupportedException()
-        };
-    }
+        IPcscDevice pcscDevice => new FakeSlot(pcscDevice.ReaderName, ConnectionType.SmartCard),
+        IHidDevice hidDevice => new FakeSlot(hidDevice.ReaderName, ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType)),
+        _ => throw new NotSupportedException()
+    };
 
-    private sealed class RejectUnsupportedHidFactory : IYubiKeyFactory
+    private sealed class RejectUnsupportedHidFactory
     {
         public int CreateCalls { get; private set; }
 
@@ -159,11 +156,7 @@ public class FindYubiKeysTests
     }
     private sealed class FakeSlot(string deviceId, ConnectionType connectionType) : IYubiKeyConnectionSlot
     {
-        public string DeviceId { get; } = deviceId;
-        public ConnectionType AvailableConnections { get; } = connectionType;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-            => throw new NotSupportedException("FakeSlot does not support connections.");
+        public string InterfaceId { get; } = deviceId;
+        public ConnectionType ConnectionType { get; } = connectionType;
     }
 }

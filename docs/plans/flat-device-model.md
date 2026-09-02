@@ -2,9 +2,10 @@
 
 ## Assignment
 
-Execute stages A and B through the autonomous Craftsman workflow. Stages C and D are recorded follow-ups
-and require a separate approval. The feature slice is Core device discovery, connection routing, repository
-correlation, its tests, and the corresponding architecture documentation.
+Stages A and B are complete (commit `fa54aeea`). Stage C was approved on 2026-09-02 and executes on
+branch `yubikit-flat-device-model-v2` through the autonomous Craftsman workflow. Stage D remains a
+recorded follow-up requiring separate approval. The feature slice is Core device discovery, connection
+routing, repository correlation, its tests, and the corresponding architecture documentation.
 
 The public `IYubiKey` interface remains. It is a consumer contract and a critical testing seam with many
 fake implementations. The goal is one production implementation returned by discovery, not the removal of
@@ -98,15 +99,123 @@ summary counts projects, not tests.
 
 ### Stage C: raw interface candidates
 
-Replace pre-merge `IYubiKey` wrappers with raw interface candidates carrying live handles, interface ids,
-connection type, PID, serial metadata, and topology. Delete `PcscYubiKey`, `HidYubiKey`, and the factory.
+Replace the pre-merge `IYubiKey` wrappers with raw interface candidates. Delete `PcscYubiKey`,
+`HidYubiKey`, `IYubiKeyFactory`, and `YubiKeyFactory`. The soak gate was satisfied by the
+Stage A/B verification runs against `fa54aeea` (unit, resilience, Core and PIV hardware
+integration); approval is recorded in the Assignment.
 
-This stage is soak-gated. Do not begin it automatically after stages A and B. Exercise the flat published
-device model against the `yubikit` baseline first, including discovery grouping, routing, repository
-retention, metadata propagation, and hot-plug or partial-enumeration behavior. Stage C requires separate
-approval after that comparison and any resulting adaptations are complete.
+#### Current shape
 
-### Stage D: identity policy
+- `PcscYubiKey` / `HidYubiKey` (`src/Core/src/Devices/Implementations/`) implement
+  `IYubiKeyConnectionSlot : IYubiKey` and `IDiscoveryConnectionProvider`. Production uses only three
+  of their members: `DeviceId` (the stable `pcsc:{ReaderName}` / `hid:{ReaderName}:{Usage:X4}`
+  strings), `AvailableConnections` (constructor validation in `YubiKeyDevice.ValidateSlot`), and
+  `OpenRawConnectionAsync` (called from `YubiKeyDevice.ConnectAsync<T>` and
+  `ConnectForDiscoveryAsync`). Their registered `ConnectAsync<T>` self-claim paths are
+  production-dead since Stage B; only `ConnectionOwnershipContractTests` and
+  `DeviceConnectionOwnershipTests` exercise them. `PcscYubiKey.Create` has zero callers.
+- Candidate data already lives on records, not the wrappers: `FindYubiKeys.InterfaceCandidate`
+  (private: slot, connection, IsUsb, PID, topology key) and `DeviceInterfaceDescriptor`
+  (internal, `CompositeDeviceMerger.cs`: adds serial, `DeviceInfo`, identity-read budget flag).
+- The pre-merge identity read (`ProtocolDeviceInfo.ConnectAndReadAsync`) type-tests
+  `IDiscoveryConnectionProvider` and leases via `DeviceConnectionRegistry.ResolveInterfaceId`.
+- `FindYubiKeys` receives `IYubiKeyFactory` by constructor; unit tests inject fake factories to
+  script identity reads and fault injection.
+
+#### Target shape
+
+One internal sealed slot type — working name `DeviceConnectionSlot` — constructed directly from a
+live enumerated `IPcscDevice` or `IHidDevice`:
+
+- carries the live handle, the unchanged interface-id string, and its single `ConnectionType`;
+- absorbs the connection-creation logic of both wrappers (`SmartCard` via
+  `ISmartCardConnectionFactory`; `FidoHidConnection` / `OtpHidConnection` with interface-type
+  validation) behind `OpenRawConnectionAsync`;
+- implements the discovery-read provider so `ProtocolDeviceInfo` keeps working;
+- is not an `IYubiKey`. Pre-merge candidates never appear as devices anywhere.
+
+`IYubiKeyConnectionSlot` is narrowed to the slot contract actually consumed by `YubiKeyDevice`:
+interface id, slot connection type, `OpenRawConnectionAsync` (keeping the default-throw
+`NonOpenableConnectionSlotException` seam). It no longer extends `IYubiKey`. Existing test fakes
+migrate mechanically. `InterfaceCandidate` and `DeviceInterfaceDescriptor` keep their shapes with
+`Device` retyped to the narrowed `IYubiKeyConnectionSlot` interface — not the sealed concrete
+type — so scripted/fault-injection fakes keep flowing through the candidate records.
+
+The pre-merge identity-read pipeline (`DiscoveryIdentityReader`, `ProtocolDeviceInfo`,
+`CompositeMetadataReader` lease-key resolution) currently accepts `IYubiKey`. Stage C retypes the
+pre-merge entry points to the narrowed slot contract (or a slot overload) so a non-`IYubiKey`
+candidate flows through identity reads without an adapter; the post-merge `YubiKeyDevice` metadata
+read path keeps its current shape.
+
+#### Steps
+
+1. Introduce `DeviceConnectionSlot` implementing the narrowed `IYubiKeyConnectionSlot` and
+   `IDiscoveryConnectionProvider`, absorbing both wrappers' raw-open and discovery-connect logic.
+   Byte-for-byte identical interface-id strings are a hard invariant: in-flight
+   `DeviceConnectionRegistry` leases correlate across scans by these strings. Add unit tests that
+   pin the exact production formats — `pcsc:{ReaderName}` and `hid:{ReaderName}:{Usage:X4}`
+   (upper-case hex, four digits) — against real `DeviceConnectionSlot` instances, not fakes.
+2. Narrow `IYubiKeyConnectionSlot` (drop the `IYubiKey` base) and update `YubiKeyDevice`
+   (`ValidateSlot`, slot fields, `TryResolveSlot`) for the narrowed contract. Retype the pre-merge
+   identity-read pipeline entry points per the target shape above. The `ResolveInterfaceId`
+   single-`DeviceId` fallback for third-party/test `IYubiKey` implementations is unchanged.
+3. Rework `FindYubiKeys.BuildInterfaces` to construct slots directly; delete the factory pair.
+   Replace the factory constructor seam with the smallest seam that preserves the existing
+   fault-injection and scripted-identity tests (a slot-construction delegate is acceptable; do not
+   reintroduce an `IYubiKey`-shaped factory).
+4. Delete `PcscYubiKey`, `HidYubiKey`, `YubiKeyFactory.cs`, and dead members. Migrate the two
+   self-claim contract test files to assert the same ownership contracts at the `YubiKeyDevice`
+   level; delete any test made redundant by an existing Stage B equivalent rather than porting it.
+5. Update test fakes in the remaining files listed below.
+6. Update documentation: `docs/architecture/sdk-architecture-map.yml`,
+   `sdk-architecture-diagrams.md`, `device-discovery-guarantees.md` (wrapper mentions), the
+   `CompositeDeviceMerger` doc comment, and `src/Core/CLAUDE.md` / `src/Core/README.md` wrapper
+   references. If any mermaid source changed, regenerate images with
+   `scripts/architecture/render-architecture.sh`, then validate with
+   `dotnet toolchain.cs -- docs-architecture` (the toolchain target validates evidence and image
+   freshness; it does not regenerate).
+
+#### Invariants pinned for Stage C
+
+- Interface-id strings, merger evidence tiers, ambiguity handling, conservation, one-slot
+  `DeviceId` values, `PhysicalIdentityKey` encoding, and repository retention/metadata propagation
+  are all byte-for-byte unchanged. Stage C deletes types, not behavior.
+- The identity-read budget, metadata cache keying/eviction, and discovery lease scope are
+  unchanged.
+- No public API change. `IYubiKey` remains public and fakeable; applet modules stay coupled only to
+  `IYubiKey` and `ConnectionType`.
+
+#### Test migration inventory
+
+Files with hard breakage (construct wrappers or implement `IYubiKeyFactory`), all under
+`src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/` unless noted:
+`ConnectionOwnershipContractTests.cs`, `DeviceConnectionOwnershipTests.cs`,
+`DiscoverySingleFlightTests.cs`, `HeldExceptionPropagationTests.cs`, `FindYubiKeysTests.cs`,
+`FindYubiKeysPidMergeTests.cs`, `FindYubiKeysFaultInjectionTests.cs`,
+`DiscoveryIdentityReaderTests.cs` (exercises the retyped identity-read boundary), and
+`../Transports/SmartCard/FindPcscDevicesTests.cs`. Files whose `IYubiKeyConnectionSlot` fakes need
+mechanical retyping only: `YubiKeyDeviceTests.cs`, `CompositeDeviceMergerTests.cs`,
+`CompositeDeviceMergerVectorTests.cs`, `YubiKeyDeviceRepositoryCompositeTests.cs`,
+`DeviceConnectionRegistryTests.cs`. Preserve the intent of every ownership/lease contract test;
+behavior assertions replace type assertions.
+
+#### Stage C verification
+
+```bash
+dotnet toolchain.cs -- build --project Core
+dotnet toolchain.cs -- test --project Core
+dotnet toolchain.cs -- resilience --fast
+dotnet toolchain.cs test
+dotnet toolchain.cs -- test --integration --project Core \
+  --filter "FullyQualifiedName~CompositeDiscoveryIntegrationTests&Category!=RequiresUserPresence"
+dotnet toolchain.cs -- test --integration --project Piv \
+  --filter "FullyQualifiedName~PivSessionContentionTests&Category!=RequiresUserPresence"
+```
+
+Read per-project `total:` values, not the closing project-count summary. Run `dotnet format` only
+over changed files. No `RequiresUserPresence` tests.
+
+### Stage D: identity policy (deferred, separate approval required)
 
 Resolve complete interface-set equality versus serial-first shared-path correlation; decide one-slot
 `DeviceId`; then expose discovery metadata under an explicit nullability and lifetime contract.

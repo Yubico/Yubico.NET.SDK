@@ -552,7 +552,7 @@ public class CompositeDeviceMergerVectorTests
         var attributed = result.SelectMany(InterfaceIdsOf).ToList();
         Assert.Equal(descriptors.Length, attributed.Count);
         Assert.Equal(
-            descriptors.Select(d => d.Device.DeviceId).Order(StringComparer.Ordinal),
+            descriptors.Select(d => d.Device.InterfaceId).Order(StringComparer.Ordinal),
             attributed.Order(StringComparer.Ordinal));
     }
 
@@ -820,12 +820,8 @@ public class CompositeDeviceMergerVectorTests
 
     private sealed class FakeSlot(string deviceId, ConnectionType connection) : IYubiKeyConnectionSlot
     {
-        public string DeviceId { get; } = deviceId;
+        public string InterfaceId { get; } = deviceId;
 
-        public ConnectionType AvailableConnections { get; } = connection;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            throw new InvalidOperationException("Merger vectors never open connections.");
+        public ConnectionType ConnectionType { get; } = connection;
     }
 }

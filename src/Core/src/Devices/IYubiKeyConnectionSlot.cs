@@ -19,8 +19,14 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <summary>
 ///     One concrete transport slot that can open its raw, unregistered connection.
 /// </summary>
-internal interface IYubiKeyConnectionSlot : IYubiKey
+internal interface IYubiKeyConnectionSlot
 {
+    /// <summary>The stable identifier for this enumerated interface.</summary>
+    string InterfaceId { get; }
+
+    /// <summary>The single concrete connection exposed by this slot.</summary>
+    ConnectionType ConnectionType { get; }
+
     /// <summary>Opens this slot's raw, unregistered connection.</summary>
     /// <remarks>
     ///     The default exists for non-openable or fake slot implementations. It throws the narrow

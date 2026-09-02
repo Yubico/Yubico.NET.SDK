@@ -41,16 +41,16 @@ internal static class DiscoveryIdentityReader
     private static readonly TimeSpan PerAttemptBudget = TimeSpan.FromSeconds(2);
 
     public static async Task<DeviceInfo?> TryReadAsync(
-        IYubiKey device,
+        IYubiKeyConnectionSlot device,
         ConnectionType connection,
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        if (DeviceConnectionRegistry.IsInterfaceInUse(device, connection))
+        if (DeviceConnectionRegistry.IsInUse(device.InterfaceId))
         {
             logger.LogDebug(
                 "Discovery identity read for {DeviceId} over {Connection} skipped: interface has a live connection in this process; treating serial as unknown.",
-                device.DeviceId,
+                device.InterfaceId,
                 connection);
             return null;
         }
@@ -60,7 +60,7 @@ internal static class DiscoveryIdentityReader
             try
             {
                 return await ProtocolDeviceInfo
-                    .ReadBoundedAsync(device, connection, PerAttemptBudget, logger, cancellationToken, waitForWorkerSlot: true)
+                    .ReadSlotBoundedAsync(device, connection, PerAttemptBudget, logger, cancellationToken, waitForWorkerSlot: true)
                     .ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -75,7 +75,7 @@ internal static class DiscoveryIdentityReader
                 // connection path. The cause is logged verbatim so diagnostics can tell them apart.
                 logger.LogDebug(
                     "Discovery identity read for {DeviceId} over {Connection} skipped ({Cause}); treating serial as unknown.",
-                    device.DeviceId,
+                    device.InterfaceId,
                     connection,
                     e.Cause);
                 return null;
@@ -84,7 +84,7 @@ internal static class DiscoveryIdentityReader
             {
                 logger.LogDebug(
                     "Discovery identity read for {DeviceId} over {Connection} exceeded its {Budget} budget (device busy?); treating serial as unknown.",
-                    device.DeviceId,
+                    device.InterfaceId,
                     connection,
                     PerAttemptBudget);
                 return null;
@@ -96,7 +96,7 @@ internal static class DiscoveryIdentityReader
                     logger.LogDebug(
                         e,
                         "Discovery identity read failed for {DeviceId} over {Connection} after {Attempts} attempts; treating serial as unknown.",
-                        device.DeviceId,
+                        device.InterfaceId,
                         connection,
                         attempt);
                     return null;
@@ -106,7 +106,7 @@ internal static class DiscoveryIdentityReader
                     e,
                     "Discovery identity read attempt {Attempt} for {DeviceId} over {Connection} failed; retrying.",
                     attempt,
-                    device.DeviceId,
+                    device.InterfaceId,
                     connection);
                 await Task.Delay(150 * attempt, cancellationToken).ConfigureAwait(false);
             }

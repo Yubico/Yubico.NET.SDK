@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
@@ -22,7 +21,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
 ///     A held <see cref="SCardException" /> from a SmartCard connect must propagate unchanged, without
-///     cross-transport fallback. These tests pin the published-device and pre-merge PC/SC connect chains
+///     cross-transport fallback. These tests pin the published-device and concrete PC/SC slot connect chains
 ///     against a future wrapping regression.
 /// </summary>
 public class HeldExceptionPropagationTests
@@ -48,11 +47,19 @@ public class HeldExceptionPropagationTests
         Assert.Equal(unchecked((int)ErrorCode.SCARD_E_SHARING_VIOLATION), ex.HResult);
     }
     [Fact]
-    public async Task PcscYubiKey_FactoryThrowsHeldScard_PropagatesUnwrapped()
+    public async Task YubiKeyDevice_ConcretePcscSlotThrowsHeldScard_PropagatesUnwrapped()
     {
         var held = new SCardException("held", (long)ErrorCode.SCARD_E_SERVER_TOO_BUSY);
         var device = new PcscDevice { ReaderName = "fake-reader", Atr = null };
-        var yubiKey = new PcscYubiKey(device, new ThrowingFactory(held), NullLogger<PcscYubiKey>.Instance);
+        var slot = new DeviceConnectionSlot(
+            device,
+            new ThrowingFactory(held));
+        var yubiKey = new YubiKeyDevice(
+            slot.InterfaceId,
+            slot,
+            hidFido: null,
+            hidOtp: null,
+            deviceInfo: null);
 
         var ex = await Assert.ThrowsAsync<SCardException>(
             () => yubiKey.ConnectAsync<ISmartCardConnection>(Ct));
@@ -64,12 +71,8 @@ public class HeldExceptionPropagationTests
     {
         private readonly string _deviceId = $"member:{available}:{Guid.NewGuid():N}";
 
-        public string DeviceId => _deviceId;
-        public ConnectionType AvailableConnections => available;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            Task.FromException<TConnection>(exception);
+        public string InterfaceId => _deviceId;
+        public ConnectionType ConnectionType => available;
 
         public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType connection,

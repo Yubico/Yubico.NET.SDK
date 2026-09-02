@@ -35,7 +35,7 @@ public class FindYubiKeysPidMergeTests
                 new FakePcscDevice("Yubico YubiKey OTP+FIDO+CCID 01", PscsConnectionKind.Usb)
             ]),
             new FakeFindHidDevices([]),
-            factory);
+            factory.Create);
 
         IReadOnlyList<IYubiKey> result;
         var stopwatch = Stopwatch.StartNew();
@@ -64,7 +64,7 @@ public class FindYubiKeysPidMergeTests
         var find = new FindYubiKeys(
             new FakeFindPcscDevices([new FakePcscDevice("Yubico YubiKey OTP+FIDO+CCID 00 00", PscsConnectionKind.Usb)]),
             new FakeFindHidDevices([new FakeHidDevice(0x0407, HidInterfaceType.Fido), new FakeHidDevice(0x0407, HidInterfaceType.Otp)]),
-            new ThrowingFactory());
+            ThrowingFactory.Create);
 
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
@@ -81,7 +81,7 @@ public class FindYubiKeysPidMergeTests
         var find = new FindYubiKeys(
             new FakeFindPcscDevices([]),
             new FakeFindHidDevices([new FakeHidDevice(0, HidInterfaceType.Fido), new FakeHidDevice(0, HidInterfaceType.Otp)]),
-            new ThrowingFactory());
+            ThrowingFactory.Create);
 
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
@@ -117,9 +117,9 @@ public class FindYubiKeysPidMergeTests
         public IHidConnection ConnectToIOReports() => throw new NotSupportedException();
     }
 
-    private sealed class ThrowingFactory : IYubiKeyFactory
+    private static class ThrowingFactory
     {
-        public IYubiKeyConnectionSlot Create(IDevice device) => device switch
+        public static IYubiKeyConnectionSlot Create(IDevice device) => device switch
         {
             IPcscDevice p => new ThrowingYubiKey($"pcsc:{p.ReaderName}", ConnectionType.SmartCard),
             IHidDevice h => new ThrowingYubiKey(
@@ -128,7 +128,7 @@ public class FindYubiKeysPidMergeTests
         };
     }
 
-    private sealed class BlockingIdentityFactory : IYubiKeyFactory
+    private sealed class BlockingIdentityFactory
     {
         private readonly List<BlockingIdentityYubiKey> _devices = [];
 
@@ -157,13 +157,9 @@ public class FindYubiKeysPidMergeTests
 
         public int ConnectCalls => Volatile.Read(ref _connectCalls);
 
-        public string DeviceId { get; } = deviceId;
+        public string InterfaceId { get; } = deviceId;
 
-        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            Task.FromException<TConnection>(new InvalidOperationException("Public connect must not be used by discovery."));
+        public ConnectionType ConnectionType => ConnectionType.SmartCard;
 
         public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType connection,
@@ -184,11 +180,7 @@ public class FindYubiKeysPidMergeTests
 
     private sealed class ThrowingYubiKey(string deviceId, ConnectionType connectionType) : IYubiKeyConnectionSlot
     {
-        public string DeviceId { get; } = deviceId;
-        public ConnectionType AvailableConnections { get; } = connectionType;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-            => throw new InvalidOperationException("connection unavailable (simulated exclusive holder).");
+        public string InterfaceId { get; } = deviceId;
+        public ConnectionType ConnectionType { get; } = connectionType;
     }
 }

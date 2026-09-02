@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <summary>
 ///     Describes one discovered per-interface device as input to the composite-device merge.
 /// </summary>
-/// <param name="Device">The concrete connection slot (e.g. a <see cref="PcscYubiKey" /> or HID key).</param>
+/// <param name="Device">The raw enumerated connection slot for this interface.</param>
 /// <param name="Connection">The single concrete connection this interface exposes.</param>
 /// <param name="IsUsb">
 ///     Whether this interface is USB-attached (HID is always USB; PC/SC is USB only when its kind is
@@ -433,7 +433,7 @@ internal static class CompositeDeviceMerger
         DeviceInterfaceDescriptor descriptor,
         List<YubiKeyDevice> result) =>
         result.Add(new YubiKeyDevice(
-            descriptor.Device.DeviceId,
+            descriptor.Device.InterfaceId,
             descriptor.Connection == ConnectionType.SmartCard ? descriptor.Device : null,
             descriptor.Connection == ConnectionType.HidFido ? descriptor.Device : null,
             descriptor.Connection == ConnectionType.HidOtp ? descriptor.Device : null,

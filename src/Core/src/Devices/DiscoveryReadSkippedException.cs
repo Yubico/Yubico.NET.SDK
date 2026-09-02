@@ -34,7 +34,14 @@ internal enum DiscoveryReadSkipCause
     ///     All bounded discovery workers were busy and this read path skips instead of waiting
     ///     (the best-effort metadata path; identity reads wait for a slot instead).
     /// </summary>
-    WorkerAdmissionSaturated
+    WorkerAdmissionSaturated,
+
+    /// <summary>
+    ///     Hotplug activity superseded this read before it opened the interface: the physical topology it
+    ///     was started against may no longer exist, so it aborts (or its queued admission wait is
+    ///     cancelled) instead of reading hardware it can no longer name. Retried on the next scan.
+    /// </summary>
+    SupersededByTransportActivity
 }
 
 /// <summary>

@@ -55,7 +55,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
         DeviceInfo = deviceInfo;
         IdentityReadBudgetConsumedThisScan = identityReadBudgetConsumedThisScan;
         InterfaceIds = Slots()
-            .Select(slot => slot.DeviceId)
+            .Select(slot => slot.InterfaceId)
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToArray();
         PhysicalIdentityKey = EncodeInterfaceIds(InterfaceIds);
@@ -179,7 +179,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
         }
         catch (NonOpenableConnectionSlotException)
         {
-            throw new DiscoveryReadSkippedException(slot.DeviceId, DiscoveryReadSkipCause.NoDiscoveryProvider);
+            throw new DiscoveryReadSkippedException(slot.InterfaceId, DiscoveryReadSkipCause.NoDiscoveryProvider);
         }
     }
 
@@ -217,7 +217,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
         ConnectionType expected,
         string parameterName)
     {
-        if (slot is not null && slot.AvailableConnections != expected)
+        if (slot is not null && slot.ConnectionType != expected)
         {
             throw new ArgumentException(
                 $"The {expected} slot must expose exactly that connection.",

@@ -244,8 +244,8 @@ evidence. Healing is conditional on evidence, not on elapsed time — an interfa
 busy, or unreadable keeps the window open. Discovery keeps scanning, but no scan is guaranteed to
 heal.
 
-**Blast radius:** connections are path-bound — a `PcscYubiKey` connects by reader name, a HID key
-by device path — so a misgrouped composite never routes a connection to a different physical
+**Blast radius:** raw interface slots are path-bound — PC/SC connects through its enumerated reader
+and HID through its enumerated device handle — so a misgrouped composite never routes a connection to a different physical
 interface than the one it names. The exposure is composite-level metadata and capability-filter
 truth, not connection misdelivery.
 

@@ -41,7 +41,9 @@ public interface IFindYubiKeys
     ///         and a cached serial from the old key would be attributed to the new one. For an SDK whose
     ///         consumers bind sessions to serial-derived identity, that is key substitution, not a stale
     ///         cache entry. Hotplug events are the signal that physical topology changed; implementations
-    ///         discard cached identity for that transport and re-read on the next scan.
+    ///         discard cached identity evidence and re-read on the next scan. The transport is diagnostic
+    ///         context, not an eviction scope: a composite key's swap can surface its events on one
+    ///         transport first, so evicting only that transport would mix two keys' evidence.
     ///     </para>
     ///     <para>
     ///         Default is a no-op so that test fakes and custom implementations without an identity cache
@@ -58,7 +60,7 @@ public class FindYubiKeys : IFindYubiKeys
 
     private readonly IFindPcscDevices findPcscService;
     private readonly IFindHidDevices findHidService;
-    private readonly IYubiKeyFactory yubiKeyFactory;
+    private readonly Func<IDevice, IYubiKeyConnectionSlot> createSlot;
 
     // Tier-1 evidence source. Optional by contract: the no-topology resolver on macOS/Linux, and on Windows
     // any per-interface read failure simply yields no key for that interface.
@@ -67,11 +69,11 @@ public class FindYubiKeys : IFindYubiKeys
     internal FindYubiKeys(
         IFindPcscDevices findPcscService,
         IFindHidDevices findHidService,
-        IYubiKeyFactory yubiKeyFactory)
+        Func<IDevice, IYubiKeyConnectionSlot> createSlot)
     {
         this.findPcscService = findPcscService;
         this.findHidService = findHidService;
-        this.yubiKeyFactory = yubiKeyFactory;
+        this.createSlot = createSlot;
         _topologyResolver = DeviceTopologyResolver.Create();
     }
 
@@ -93,16 +95,22 @@ public class FindYubiKeys : IFindYubiKeys
     //  - Hardware: scan-time eviction (EvictAbsentIdentities) only catches interfaces observed absent. A
     //    same-slot swap completing BETWEEN scans reuses the slot-derived interface id, so the old key's
     //    serial would be attributed to the new key - key substitution. Hotplug events are the signal that
-    //    hardware changed; NotifyTransportActivity discards that transport's entries.
+    //    hardware changed; NotifyTransportActivity discards all cached evidence.
     private readonly ConcurrentDictionary<string, CachedIdentity> _identityCache = new();
 
     /// <summary>A successful identity read plus the evidence context that makes it reusable.</summary>
-    private readonly record struct CachedIdentity(DeviceInfo Info, ushort? Pid, ConnectionType Transport);
+    private readonly record struct CachedIdentity(DeviceInfo Info, ushort? Pid);
 
     // Best-effort metadata cache, keyed by the published device's stable interface-set key
     // (YubiKeyDevice.PhysicalIdentityKey, NOT DeviceId, which can flip between pid- and
     // serial-forms). Evicted when any member interface disappears.
     private readonly ConcurrentDictionary<string, MetadataCacheEntry> _metadataCache = new();
+
+    // Monotonic hotplug generation. Captured before a cache-feeding read starts and validated when the
+    // result is written: a read that STARTED before hotplug activity can COMPLETE after the caches were
+    // cleared, and without the write-time check it would repopulate them with the departed key's data,
+    // which every later scan would then trust. See ReadIdentityAsync / PopulateMetadataAsync.
+    private long _cacheGeneration;
 
     // Serializes discovery so two concurrent scans do not open connections to the same interface at once.
     private readonly SemaphoreSlim _scanLock = new(1, 1);
@@ -172,7 +180,7 @@ public class FindYubiKeys : IFindYubiKeys
 
         foreach (var pcscDevice in pcscDevices)
         {
-            var device = yubiKeyFactory.Create(pcscDevice);
+            var device = createSlot(pcscDevice);
             var isUsb = pcscDevice.Kind == PscsConnectionKind.Usb;
             var pid = isUsb ? ReaderNamePidParser.FromReaderName(pcscDevice.ReaderName) : null;
             // NFC and other non-USB readers never share a USB container; do not even probe topology.
@@ -193,7 +201,7 @@ public class FindYubiKeys : IFindYubiKeys
                 continue;
             }
 
-            var device = yubiKeyFactory.Create(hidDevice);
+            var device = createSlot(hidDevice);
             var rawPid = hidDevice.DescriptorInfo.ProductId;
             ushort? pid = rawPid > 0 && ReaderNamePidParser.IsKnownPid((ushort)rawPid) ? (ushort)rawPid : null;
             var topologyKey = ResolveTopologyKey(hidDevice, connection);
@@ -253,38 +261,65 @@ public class FindYubiKeys : IFindYubiKeys
     {
         // A hit is valid only for the configuration it was read under: the PID is part of the evidence,
         // not incidental metadata. A mismatch is a miss, and a successful re-read overwrites below.
-        if (_identityCache.TryGetValue(iface.Device.DeviceId, out var cached) && cached.Pid == iface.Pid)
+        if (_identityCache.TryGetValue(iface.Device.InterfaceId, out var cached) && cached.Pid == iface.Pid)
             return cached.Info;
 
+        // Capture the hotplug generation BEFORE the read starts: a read that outlives a hotplug event
+        // read hardware that may no longer exist, and its result must not repopulate the cache.
+        var generation = Volatile.Read(ref _cacheGeneration);
         var info = await DiscoveryIdentityReader
             .TryReadAsync(iface.Device, iface.Connection, Logger, cancellationToken)
             .ConfigureAwait(false);
 
         // Cache only successful reads so a transient failure is retried on the next scan (not poisoned).
         if (info is { } identity)
-            _identityCache[iface.Device.DeviceId] = new CachedIdentity(identity, iface.Pid, iface.Connection);
+            PublishUnlessSuperseded(_identityCache, iface.Device.InterfaceId, new CachedIdentity(identity, iface.Pid), generation);
 
         return info;
+    }
+
+    /// <summary>
+    ///     Publishes a cache entry only if no hotplug activity happened since <paramref name="generation" />
+    ///     was captured. The write-then-recheck closes the race with <see cref="NotifyTransportActivity" />:
+    ///     the invalidator bumps the generation before clearing, so a stale writer either published before
+    ///     the clear (and is cleared) or observes the bumped generation here and removes exactly its own
+    ///     entry (never a fresh one written concurrently under the new generation).
+    /// </summary>
+    private void PublishUnlessSuperseded<TValue>(
+        ConcurrentDictionary<string, TValue> cache,
+        string key,
+        TValue value,
+        long generation)
+    {
+        if (Volatile.Read(ref _cacheGeneration) != generation)
+            return;
+
+        cache[key] = value;
+        if (Volatile.Read(ref _cacheGeneration) != generation)
+            _ = cache.TryRemove(KeyValuePair.Create(key, value));
     }
 
     /// <inheritdoc />
     public void NotifyTransportActivity(ConnectionType transport)
     {
-        // Coarse per-transport eviction, deliberately. The events carry no reliable per-interface identity
-        // (the PC/SC listener is payload-less; HID hints are diagnostic-only), and hotplug is rare enough
-        // that re-reading one transport's serials on the next scan is the proportionate price for never
-        // attributing a departed key's serial to its same-slot successor. Scoped per transport because a
-        // removal observed on HID says nothing about what is in the PC/SC slots.
+        // Full eviction, deliberately - the events carry no reliable per-interface identity (the PC/SC
+        // listener is payload-less; HID hints are diagnostic-only), and per-transport scoping is unsound
+        // for composite keys: a swap whose events arrive on one transport first would refresh that
+        // transport's evidence while the sibling transport still names the departed key, splitting one
+        // replacement key into phantoms. Hotplug is rare and identity/metadata reads are budgeted, so
+        // re-reading on the next scan is the proportionate price for never mixing two keys' evidence.
         //
-        // Races with an in-flight scan are benign: entries are re-added only by a successful fresh read,
-        // and the event that triggered this also triggers a rescan, so a stale value consumed by an
-        // overlapping scan is corrected by the next one.
-        foreach (var entry in _identityCache)
-        {
-            // Matches expands the Hid group filter to HidFido|HidOtp; a raw & would not (Hid is its own bit).
-            if (transport.Matches(entry.Value.Transport))
-                _ = _identityCache.TryRemove(entry.Key, out _);
-        }
+        // Order matters: bump the generation BEFORE clearing so a concurrent read completing right now
+        // either published before the clear (cleared here) or sees the new generation at write time and
+        // discards its own write (see PublishUnlessSuperseded).
+        _ = Interlocked.Increment(ref _cacheGeneration);
+        _identityCache.Clear();
+        _metadataCache.Clear();
+
+        // Detach in-flight single-flight device-info reads too: without this, a read started against the
+        // departed key could be joined - and its result consumed - by the replacement's scan, and queued
+        // reads would open hardware their evidence no longer names.
+        ProtocolDeviceInfo.NotifyTransportActivity();
     }
 
     private async Task PopulateMetadataAsync(
@@ -300,7 +335,10 @@ public class FindYubiKeys : IFindYubiKeys
             return;
 
         // Read best-effort metadata for each published key concurrently (bounded by one timeout, never blocks
-        // the merge result which is already computed).
+        // the merge result which is already computed). The hotplug generation is captured before the reads
+        // start so a read outliving a hotplug event cannot repopulate the just-cleared cache (the scan still
+        // publishes what it read; only the cached copy is dropped and re-read next scan).
+        var generation = Volatile.Read(ref _cacheGeneration);
         var reads = devices.Select(async device =>
         {
             var key = device.PhysicalIdentityKey;
@@ -322,7 +360,7 @@ public class FindYubiKeys : IFindYubiKeys
 
             if (info is { } metadata)
             {
-                _metadataCache[key] = new MetadataCacheEntry(metadata, device.InterfaceIds);
+                PublishUnlessSuperseded(_metadataCache, key, new MetadataCacheEntry(metadata, device.InterfaceIds), generation);
                 device.DeviceInfo = metadata;
             }
         });
@@ -332,14 +370,14 @@ public class FindYubiKeys : IFindYubiKeys
 
     private void EvictAbsentIdentities(IReadOnlyList<InterfaceCandidate> interfaces)
     {
-        var present = interfaces.Select(i => i.Device.DeviceId).ToHashSet();
+        var present = interfaces.Select(i => i.Device.InterfaceId).ToHashSet();
         foreach (var staleKey in _identityCache.Keys.Where(k => !present.Contains(k)).ToList())
             _ = _identityCache.TryRemove(staleKey, out _);
     }
 
     private void EvictAbsentMetadata(IReadOnlyList<InterfaceCandidate> interfaces)
     {
-        var present = interfaces.Select(i => i.Device.DeviceId).ToHashSet();
+        var present = interfaces.Select(i => i.Device.InterfaceId).ToHashSet();
         foreach (var entry in _metadataCache)
         {
             // An entry is kept only while all of its member interface ids are still enumerated.
@@ -348,8 +386,20 @@ public class FindYubiKeys : IFindYubiKeys
         }
     }
 
-    public static FindYubiKeys Create() =>
-        new(FindPcscDevices.Create(), FindHidDevices.Create(), YubiKeyFactory.Create());
+    public static FindYubiKeys Create()
+    {
+        var smartCardConnectionFactory = SmartCardConnectionFactory.CreateDefault();
+        return new(
+            FindPcscDevices.Create(),
+            FindHidDevices.Create(),
+            device => device switch
+            {
+                IPcscDevice pcscDevice => new DeviceConnectionSlot(pcscDevice, smartCardConnectionFactory),
+                IHidDevice hidDevice => new DeviceConnectionSlot(hidDevice),
+                _ => throw new NotSupportedException(
+                    $"Device type {device.GetType().Name} is not supported as a connection slot.")
+            });
+    }
 
     private readonly record struct InterfaceCandidate(
         IYubiKeyConnectionSlot Device,

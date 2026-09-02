@@ -33,7 +33,7 @@ public class YubiKeyDeviceTests
             ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp,
             device.AvailableConnections);
         Assert.Equal(
-            new[] { smartCard.DeviceId, fido.DeviceId, otp.DeviceId }.Order(StringComparer.Ordinal),
+            new[] { smartCard.InterfaceId, fido.InterfaceId, otp.InterfaceId }.Order(StringComparer.Ordinal),
             device.InterfaceIds);
     }
     [Fact]
@@ -66,7 +66,7 @@ public class YubiKeyDeviceTests
     {
         var device = FullKey(out var smartCard, out var fido, out var otp);
 
-        Assert.Equal(smartCard.DeviceId, DeviceConnectionRegistry.ResolveInterfaceId(device, ConnectionType.SmartCard));
+        Assert.Equal(smartCard.InterfaceId, DeviceConnectionRegistry.ResolveInterfaceId(device, ConnectionType.SmartCard));
 
         await using (var connection = await device.ConnectAsync<ISmartCardConnection>(Ct))
             Assert.Equal(ConnectionType.SmartCard, connection.Type);
@@ -85,7 +85,7 @@ public class YubiKeyDeviceTests
     {
         var device = FullKey(out var smartCard, out var fido, out var otp);
 
-        Assert.Equal(fido.DeviceId, DeviceConnectionRegistry.ResolveInterfaceId(device, ConnectionType.HidFido));
+        Assert.Equal(fido.InterfaceId, DeviceConnectionRegistry.ResolveInterfaceId(device, ConnectionType.HidFido));
 
         await using (var connection = await device.ConnectAsync<IFidoHidConnection>(Ct))
             Assert.Equal(ConnectionType.HidFido, connection.Type);
@@ -104,7 +104,7 @@ public class YubiKeyDeviceTests
     {
         var device = FullKey(out var smartCard, out var fido, out var otp);
 
-        Assert.Equal(otp.DeviceId, DeviceConnectionRegistry.ResolveInterfaceId(device, ConnectionType.HidOtp));
+        Assert.Equal(otp.InterfaceId, DeviceConnectionRegistry.ResolveInterfaceId(device, ConnectionType.HidOtp));
 
         await using (var connection = await device.ConnectAsync<IOtpHidConnection>(Ct))
             Assert.Equal(ConnectionType.HidOtp, connection.Type);
@@ -123,7 +123,7 @@ public class YubiKeyDeviceTests
     {
         var device = FullKey(out _, out var fido, out _);
 
-        Assert.Equal(fido.DeviceId, DeviceConnectionRegistry.ResolveInterfaceId(device, ConnectionType.Hid));
+        Assert.Equal(fido.InterfaceId, DeviceConnectionRegistry.ResolveInterfaceId(device, ConnectionType.Hid));
     }
 
     [Fact]
@@ -238,13 +238,9 @@ public class YubiKeyDeviceTests
 
         public int ConnectCalls { get; private set; }
 
-        public string DeviceId => _deviceId;
+        public string InterfaceId => _deviceId;
 
-        public ConnectionType AvailableConnections => connection;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            throw new InvalidOperationException("Published-device routing must use the raw slot connection path.");
+        public ConnectionType ConnectionType => connection;
 
         public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType requested,
@@ -275,13 +271,9 @@ public class YubiKeyDeviceTests
 
     private sealed class UnsupportedRawSlot(NotSupportedException exception) : IYubiKeyConnectionSlot
     {
-        public string DeviceId => "member:unsupported-raw";
+        public string InterfaceId => "member:unsupported-raw";
 
-        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            Task.FromException<TConnection>(new InvalidOperationException("Published routing must not use slot ConnectAsync."));
+        public ConnectionType ConnectionType => ConnectionType.SmartCard;
 
         public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType connection,

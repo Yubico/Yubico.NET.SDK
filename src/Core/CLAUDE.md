@@ -195,7 +195,7 @@ initialization failure does not try another interface. Read-only metadata types 
 (`Yubico.YubiKit.Core.Devices`); mutating operations stay in Management. Full reference:
 [Physical Device Model](../../docs/architecture/physical-device-model.md). What grouping of a physical key's interfaces does and does not guarantee - per platform, with every guarantee pinned to a named test - is in [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md). Read it before changing `CompositeDeviceMerger`, `FindYubiKeys`, or the topology resolver: the merge tiers are an evidence hierarchy that never guesses, and several conservative-looking outcomes are documented bounds with pinning tests, not defects.
 
-Pre-merge candidates are raw internal `DeviceConnectionSlot` instances over live enumerated PC/SC or HID
+Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
 handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by production discovery.
 
 ### ConnectionType Semantics

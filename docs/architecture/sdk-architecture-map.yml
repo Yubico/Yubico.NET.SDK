@@ -159,7 +159,8 @@ diagrams:
       YubiKeyDeviceRepository: src/Core/src/Devices/YubiKeyDeviceRepository.cs
       YubiKeyDeviceMonitorService: src/Core/src/Devices/YubiKeyDeviceMonitorService.cs
       FindYubiKeys: src/Core/src/Devices/FindYubiKeys.cs
-      DeviceConnectionSlot: src/Core/src/Devices/DeviceConnectionSlot.cs
+      PcscConnectionSlot: src/Core/src/Devices/PcscConnectionSlot.cs
+      HidConnectionSlot: src/Core/src/Devices/HidConnectionSlot.cs
       IYubiKeyConnectionSlot: src/Core/src/Devices/IYubiKeyConnectionSlot.cs
       IFindPcscDevices: src/Core/src/Transports/SmartCard/FindPcscDevices.cs
       IFindHidDevices: src/Core/src/Transports/Hid/FindHidDevices.cs

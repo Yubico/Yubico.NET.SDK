@@ -158,12 +158,12 @@ public class DeviceConnectionOwnershipTests
     private static YubiKeyDevice CreateDevice(ISmartCardConnectionFactory factory) =>
         CreateDevice(CreateSlot(factory));
 
-    private static DeviceConnectionSlot CreateSlot(ISmartCardConnectionFactory factory) =>
+    private static PcscConnectionSlot CreateSlot(ISmartCardConnectionFactory factory) =>
         new(
             new PcscDevice { ReaderName = $"test-reader-{Guid.NewGuid():N}", Atr = null },
             factory);
 
-    private static YubiKeyDevice CreateDevice(DeviceConnectionSlot slot)
+    private static YubiKeyDevice CreateDevice(PcscConnectionSlot slot)
     {
         return new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
     }

@@ -17,30 +17,11 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
-public class DeviceConnectionSlotTests
+public class HidConnectionSlotTests
 {
-    [Fact]
-    public async Task PcscSlot_UsesExactInterfaceId_AndOpensSmartCardConnection()
-    {
-        var device = new PcscDevice { ReaderName = "Yubico YubiKey OTP+FIDO+CCID 01 00", Atr = null };
-        var expected = new FakeSmartCardConnection();
-        var factory = new RecordingSmartCardConnectionFactory(expected);
-        var slot = new DeviceConnectionSlot(device, factory);
-
-        var connection = await slot.OpenRawConnectionAsync(
-            ConnectionType.SmartCard,
-            TestContext.Current.CancellationToken);
-
-        Assert.Equal("pcsc:Yubico YubiKey OTP+FIDO+CCID 01 00", slot.InterfaceId);
-        Assert.Equal(ConnectionType.SmartCard, slot.ConnectionType);
-        Assert.Same(expected, connection);
-        Assert.Equal(device, factory.LastDevice);
-    }
-
     [Theory]
     [InlineData(HidInterfaceType.Fido, 0x0001, "hid:test-hid:0001", typeof(IFidoHidConnection))]
     [InlineData(HidInterfaceType.Otp, 0x00AF, "hid:test-hid:00AF", typeof(IOtpHidConnection))]
@@ -51,7 +32,7 @@ public class DeviceConnectionSlotTests
         Type expectedConnectionType)
     {
         var device = new FakeHidDevice("test-hid", interfaceType, usage);
-        var slot = new DeviceConnectionSlot(device);
+        var slot = new HidConnectionSlot(device);
         var connectionType = ConnectionTypeMapper.ToConnectionType(interfaceType);
 
         await using var connection = await slot.OpenRawConnectionAsync(
@@ -63,18 +44,22 @@ public class DeviceConnectionSlotTests
         Assert.IsAssignableFrom(expectedConnectionType, connection);
     }
 
-    private sealed class RecordingSmartCardConnectionFactory(ISmartCardConnection connection)
-        : ISmartCardConnectionFactory
+    [Fact]
+    public void HidSlot_UnsupportedInterfaceType_ThrowsAtConstruction()
     {
-        public IPcscDevice? LastDevice { get; private set; }
+        var device = new FakeHidDevice("test-hid", HidInterfaceType.Unknown, 0x0001);
 
-        public Task<ISmartCardConnection> CreateAsync(
-            IPcscDevice smartCardDevice,
-            CancellationToken cancellationToken = default)
-        {
-            LastDevice = smartCardDevice;
-            return Task.FromResult(connection);
-        }
+        Assert.Throws<NotSupportedException>(() => new HidConnectionSlot(device));
+    }
+
+    [Fact]
+    public async Task HidSlot_WrongConnectionType_ThrowsWithoutConnecting()
+    {
+        var slot = new HidConnectionSlot(new FakeHidDevice("test-hid", HidInterfaceType.Fido, 0x0001));
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => slot.OpenRawConnectionAsync(
+            ConnectionType.SmartCard,
+            TestContext.Current.CancellationToken));
     }
 
     private sealed class FakeHidDevice(
@@ -106,21 +91,6 @@ public class DeviceConnectionSlotTests
         public int OutputReportSize => 64;
         public void SetReport(byte[] report) { }
         public byte[] GetReport() => new byte[64];
-        public void Dispose() { }
-        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
-    }
-
-    private sealed class FakeSmartCardConnection : ISmartCardConnection
-    {
-        public ConnectionType Type => ConnectionType.SmartCard;
-        public Transport Transport => Transport.Usb;
-        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-            ReadOnlyMemory<byte> command,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(ReadOnlyMemory<byte>.Empty);
-        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
-        public bool SupportsExtendedApdu() => true;
         public void Dispose() { }
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }

@@ -51,7 +51,7 @@ public class HeldExceptionPropagationTests
     {
         var held = new SCardException("held", (long)ErrorCode.SCARD_E_SERVER_TOO_BUSY);
         var device = new PcscDevice { ReaderName = "fake-reader", Atr = null };
-        var slot = new DeviceConnectionSlot(
+        var slot = new PcscConnectionSlot(
             device,
             new ThrowingFactory(held));
         var yubiKey = new YubiKeyDevice(

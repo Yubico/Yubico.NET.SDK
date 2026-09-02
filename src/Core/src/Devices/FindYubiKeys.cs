@@ -394,8 +394,8 @@ public class FindYubiKeys : IFindYubiKeys
             FindHidDevices.Create(),
             device => device switch
             {
-                IPcscDevice pcscDevice => new DeviceConnectionSlot(pcscDevice, smartCardConnectionFactory),
-                IHidDevice hidDevice => new DeviceConnectionSlot(hidDevice),
+                IPcscDevice pcscDevice => new PcscConnectionSlot(pcscDevice, smartCardConnectionFactory),
+                IHidDevice hidDevice => new HidConnectionSlot(hidDevice),
                 _ => throw new NotSupportedException(
                     $"Device type {device.GetType().Name} is not supported as a connection slot.")
             });

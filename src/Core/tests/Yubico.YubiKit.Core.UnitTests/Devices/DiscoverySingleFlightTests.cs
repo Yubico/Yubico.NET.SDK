@@ -132,7 +132,7 @@ public class DiscoverySingleFlightTests
     public async Task ReadBoundedAsync_TransparentWrapperWithoutDiscoveryProvider_SkipsWithoutPublicConnect()
     {
         var factory = new CountingConnectionFactory();
-        var slot = new DeviceConnectionSlot(
+        var slot = new PcscConnectionSlot(
             new PcscDevice { ReaderName = $"wrapped-reader-{Guid.NewGuid():N}", Atr = null },
             factory);
         var inner = new YubiKeyDevice(

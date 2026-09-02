@@ -220,6 +220,15 @@ over changed files. No `RequiresUserPresence` tests.
 Resolve complete interface-set equality versus serial-first shared-path correlation; decide one-slot
 `DeviceId`; then expose discovery metadata under an explicit nullability and lifetime contract.
 
+Explicit preconditions before Stage D work starts:
+
+1. Measure hardware latency of `PopulateMetadataAsync` for one-slot USB and NFC devices — including the
+   lone-NFC-key case where the metadata read fails persistently and is retried on every scan. This cost
+   grew after `NotifyTransportActivity` switched to full cache eviction (transport activity now discards
+   all cached metadata, so every hotplug event re-triggers these reads on the next scan).
+2. Decide whether persistently failing metadata reads need per-identity backoff, or whether
+   retry-every-scan remains acceptable at measured latencies.
+
 ## Hardware protocol for deferred hot-plug checks
 
 Run one narrowly filtered test per invocation with a human ready. Never run the complete

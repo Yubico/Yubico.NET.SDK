@@ -345,7 +345,7 @@ public class ConnectionOwnershipContractTests
         return new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
     }
 
-    private static DeviceConnectionSlot CreateSmartCardSlot(ISmartCardConnectionFactory factory) =>
+    private static PcscConnectionSlot CreateSmartCardSlot(ISmartCardConnectionFactory factory) =>
         new(
             new PcscDevice { ReaderName = $"ownership-reader-{Guid.NewGuid():N}", Atr = null },
             factory);
@@ -363,7 +363,7 @@ public class ConnectionOwnershipContractTests
         };
     }
 
-    private static DeviceConnectionSlot CreateHidSlot(IHidDevice hidDevice) =>
+    private static HidConnectionSlot CreateHidSlot(IHidDevice hidDevice) =>
         new(hidDevice);
 
     private sealed class CountingFactory : ISmartCardConnectionFactory

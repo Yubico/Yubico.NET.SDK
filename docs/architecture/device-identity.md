@@ -82,6 +82,13 @@ retains the previously published `IYubiKey` object while its interface identity 
 unchanged. Reference equality or an ordinary `Dictionary<IYubiKey, T>` therefore correlates cached scans
 and the eventual `Removed` event.
 
+> **Caveat:** this pattern is valid only for device objects obtained from one manager's live snapshot.
+> `YubiKeyDevice` overrides neither `Equals` nor `GetHashCode`, so `Dictionary<IYubiKey, T>` /
+> `HashSet<IYubiKey>` work purely by reference equality — the repository's instance retention is the
+> mechanism, not any identity semantics on the type. Objects from different managers, different scans of a
+> restarted manager, or independently constructed devices never compare equal even for the same physical
+> key. Identity-based equality is an explicit Stage D decision, not an implied property of today's model.
+
 This guarantee does not survive `ShutdownAsync`, process restart, independent repositories, or a
 capability/interface-set change represented as `Removed` plus `Added`. It does not satisfy the original
 story's stronger requirement for independently created scan objects; serial remains the only durable

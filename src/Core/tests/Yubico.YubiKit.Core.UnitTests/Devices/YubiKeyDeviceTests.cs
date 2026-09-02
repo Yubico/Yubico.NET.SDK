@@ -221,6 +221,30 @@ public class YubiKeyDeviceTests
         Assert.Equal(metadata, device.DeviceInfo);
     }
 
+    /// <summary>
+    ///     A published device is a snapshot handle, not a resource owner: it holds no disposable state,
+    ///     and disposing a connection obtained through it must not tear down the slot that opened it.
+    /// </summary>
+    [Fact]
+    public async Task YubiKeyDevice_OwnsNoDisposableState()
+    {
+        Assert.False(
+            typeof(IDisposable).IsAssignableFrom(typeof(YubiKeyDevice)),
+            "YubiKeyDevice must not be IDisposable: devices are repository-retained snapshots, not resource owners.");
+        Assert.False(
+            typeof(IAsyncDisposable).IsAssignableFrom(typeof(YubiKeyDevice)),
+            "YubiKeyDevice must not be IAsyncDisposable: devices are repository-retained snapshots, not resource owners.");
+
+        var slot = new DisposalRecordingSlot();
+        var device = new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+
+        var connection = await device.ConnectAsync<ISmartCardConnection>(Ct);
+        await connection.DisposeAsync();
+
+        Assert.Equal(1, slot.ConnectCalls);
+        Assert.Equal(0, slot.DisposeCalls);
+    }
+
     private static YubiKeyDevice FullKey(
         out RecordingSlot smartCard,
         out RecordingSlot fido,
@@ -256,6 +280,37 @@ public class YubiKeyDeviceTests
                 _ => throw new NotSupportedException()
             };
             return Task.FromResult(result);
+        }
+    }
+
+    /// <summary>
+    ///     A slot that could observe teardown if the device (wrongly) owned it: connection disposal must
+    ///     never reach the slot.
+    /// </summary>
+    private sealed class DisposalRecordingSlot : IYubiKeyConnectionSlot, IDisposable, IAsyncDisposable
+    {
+        public int ConnectCalls { get; private set; }
+
+        public int DisposeCalls { get; private set; }
+
+        public string InterfaceId { get; } = $"member:disposal-recording:{Guid.NewGuid():N}";
+
+        public ConnectionType ConnectionType => ConnectionType.SmartCard;
+
+        public Task<IConnection> OpenRawConnectionAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken = default)
+        {
+            ConnectCalls++;
+            return Task.FromResult<IConnection>(new FakeSmartCardConnection());
+        }
+
+        public void Dispose() => DisposeCalls++;
+
+        public ValueTask DisposeAsync()
+        {
+            DisposeCalls++;
+            return ValueTask.CompletedTask;
         }
     }
 

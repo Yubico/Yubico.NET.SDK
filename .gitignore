@@ -559,3 +559,8 @@ codebase_ast/
 docs/ralph-loop/
 # Personal editor settings (leak local paths / preferences)
 .vscode/settings.json
+
+worktrees/
+.humanlayer/
+.playwright-mcp/
+Plans/

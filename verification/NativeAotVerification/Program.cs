@@ -73,6 +73,8 @@ return 0;
 
 internal static class NativeShimsProbe
 {
+    // The candidate workflow enforces static binding by rejecting sidecars and dynamic dependencies.
+    // This attribute mirrors the Core interop declarations but is not that enforcement on Unix.
     [DllImport("Yubico.NativeShims", EntryPoint = "Native_BN_new", ExactSpelling = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static extern IntPtr BnNew();
@@ -91,33 +93,88 @@ internal static class NativeShimsProbe
 
     internal static int Run()
     {
-        IntPtr value = BnNew();
-        if (value == IntPtr.Zero)
+        IntPtr value = IntPtr.Zero;
+        IntPtr context = IntPtr.Zero;
+        try
         {
-            Console.Error.WriteLine("Native_BN_new returned a null pointer.");
+            value = BnNew();
+            if (value == IntPtr.Zero)
+            {
+                Console.Error.WriteLine("Native_BN_new returned a null pointer.");
+                return 1;
+            }
+
+            BnClearFree(value);
+            value = IntPtr.Zero;
+
+            uint result = SCardEstablishContext(2, out context);
+            Console.WriteLine($"Native_SCardEstablishContext returned 0x{result:X8}.");
+            // Require an operational PC/SC call, not merely proof that the export was reached.
+            if (result != 0)
+            {
+                Console.Error.WriteLine("Native_SCardEstablishContext failed.");
+                return 1;
+            }
+
+            result = SCardReleaseContext(context);
+            context = IntPtr.Zero;
+            Console.WriteLine($"Native_SCardReleaseContext returned 0x{result:X8}.");
+            if (result != 0)
+            {
+                Console.Error.WriteLine("Native_SCardReleaseContext failed.");
+                return 1;
+            }
+
+            Console.WriteLine("Direct NativeShims OpenSSL and PC/SC calls succeeded.");
+            return 0;
+        }
+        catch (DllNotFoundException e)
+        {
+            Console.Error.WriteLine(e.Message);
             return 1;
         }
-
-        BnClearFree(value);
-
-        uint result = SCardEstablishContext(2, out IntPtr context);
-        Console.WriteLine($"Native_SCardEstablishContext returned 0x{result:X8}.");
-        if (result != 0)
+        catch (EntryPointNotFoundException e)
         {
-            Console.Error.WriteLine("Native_SCardEstablishContext failed.");
+            Console.Error.WriteLine(e.Message);
             return 1;
         }
-
-        result = SCardReleaseContext(context);
-        Console.WriteLine($"Native_SCardReleaseContext returned 0x{result:X8}.");
-        if (result != 0)
+        finally
         {
-            Console.Error.WriteLine("Native_SCardReleaseContext failed.");
-            return 1;
-        }
+            if (value != IntPtr.Zero)
+            {
+                TryFreeBn(value);
+            }
 
-        Console.WriteLine("Direct NativeShims OpenSSL and PC/SC calls succeeded.");
-        return 0;
+            if (context != IntPtr.Zero)
+            {
+                TryReleaseContext(context);
+            }
+        }
+    }
+
+    private static void TryFreeBn(IntPtr value)
+    {
+        try
+        {
+            BnClearFree(value);
+        }
+        catch (EntryPointNotFoundException e)
+        {
+            Console.Error.WriteLine(e.Message);
+        }
+    }
+
+    private static void TryReleaseContext(IntPtr context)
+    {
+        try
+        {
+            uint result = SCardReleaseContext(context);
+            Console.WriteLine($"Native_SCardReleaseContext cleanup returned 0x{result:X8}.");
+        }
+        catch (EntryPointNotFoundException e)
+        {
+            Console.Error.WriteLine(e.Message);
+        }
     }
 }
 

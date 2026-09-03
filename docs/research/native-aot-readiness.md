@@ -76,8 +76,7 @@ cross-platform support claim and its exact boundaries are now documented in `doc
 | Package | Used by | AOT finding |
 |---|---|---|
 | `System.Reactive` 6.0.1 | No current SDK library | Historical `IL3058` finding from the audit. The dependency was removed before Native AOT compatibility metadata was enabled permanently. |
-| `Yubico.NativeShims` 1.16.1 | Core | **Runtime-verified for its live code paths.** Ships only native binaries (`.dll`/`.dylib`/`.so`) + MSBuild targets, no managed assembly, so nothing for the managed dependency analyzer to check against the package itself. Core reaches it via 23 *live* P/Invoke declarations, all blittable (`int`, `IntPtr`, `byte[]` with explicit length; no strings/structs/delegates) — the AOT-safest interop shape, and a different/lower-risk pattern than the `dlopen`/`dlsym` + `Marshal.GetDelegateForFunctionPointer` dynamic resolution Core uses for OS-level APIs (Cfgmgr32, HidD, IOKit, udev): (1) `SCard.Interop.cs`, 11 `[LibraryImport]` PC/SC functions — runtime-verified via the Experiment 3 hardware probe; (2) `ArkgPrimitivesOpenSsl.cs`, 12 `[DllImport]` OpenSSL EC functions backing ARKG-P256 (`CryptographyProviders.ArkgPrimitivesCreator` default) — **runtime-verified in a follow-up Native AOT publish+run** that called `IsPointOnCurve`, `Derive`, and `ComputeEcdhSharedSecret` with real P-256 test vectors (see Experiment 4 in the data log). A 5-function `CmacPrimitivesOpenSsl.cs` DllImport set also exists but is **dead code** — `CryptographyProviders.CmacPrimitivesCreator` defaults to the built-in `System.Security.Cryptography.AesCmac`, and the OpenSSL CMAC class is referenced only in a comment (`Scp11X963Kdf.cs:222`, "This works in legacy code"). It is unreachable from any production code path and out of scope for AOT risk. |
-| `Yubico.NativeShims` 1.16.1 (public/local default); 1.17.4-prerelease.20260825.3 (authenticated validation) | Core | **Candidate runtime-verified; all-RID package and v2 consumer validation complete.** Core reaches the package through 23 live, blittable P/Invoke declarations. Experiments 3 and 4 verified the PC/SC and OpenSSL ARKG paths under Native AOT. The 1.17.4 package implementation adds merged static archives and automatic AOT link targets; Experiment 10 records the passing package and internal-feed workflow evidence. The package contains no managed assembly for the dependency analyzer to inspect. |
+| `Yubico.NativeShims` 1.16.1 (public/local default); 1.17.4-prerelease.20260825.3 (authenticated validation) | Core | **Stable live paths runtime-verified; prerelease package-side evidence covers seven RIDs and v2 consumer evidence covers `osx-arm64`.** The package contains no managed assembly for the dependency analyzer. Core reaches it through 23 live, blittable P/Invoke declarations. Experiments 3 and 4 verify the stable PC/SC and OpenSSL ARKG paths. Experiment 10 records the prerelease static-package and internal-feed evidence. |
 | `Microsoft.Extensions.Hosting.Abstractions`, `Microsoft.Extensions.Logging`, `Microsoft.Extensions.Logging.Abstractions` | Core, Fido2 | Not flagged by `VerifyReferenceAotCompatibility` in these builds |
 | `System.Formats.Cbor` | Fido2 | Not flagged |
 | `Spectre.Console(.Cli)` | Cli.Shared/Cli.Commands only | Out of scope (CLI, not a published library) |
@@ -140,10 +139,13 @@ Real, reproducible evidence exists for:
   default provider (`CryptographyProviders.CmacPrimitivesCreator` uses the built-in
   `System.Security.Cryptography.AesCmac` instead) — so it carries no AOT risk and was excluded from
   further verification.
-- **Static package wiring is implemented for the 1.17.4 package line.** The package supplies a
+- **Stable 1.16.1 deployment requires its shared sidecar.** Running the self-contained AOT binary
+  outside its publish directory failed to resolve `libYubico.NativeShims.dylib`; running from the
+  publish directory succeeded. This is the evidence behind the stable deployment guidance.
+- **Static package wiring is implemented in the 1.17.4 prerelease candidate.** The package supplies a
   merged NativeShims/OpenSSL archive and AOT-only MSBuild targets, removing the NativeShims sidecar
-  and its working-directory sensitivity. Experiment 10 records the companion local, all-RID
-  package, and internal-feed consumer evidence.
+  and its working-directory sensitivity. Experiment 10 records the local evidence, the seven-RID
+  package-side evidence, and the `osx-arm64` internal-feed consumer evidence.
 
 The evidence establishes analyzer compatibility, cross-platform linking, and the specific runtime
 paths listed above. It does not establish runtime behavior for every transport or applet session.
@@ -199,7 +201,8 @@ None of the above surfaced an architectural blocker in this assessment — they 
 
 **AOT-B3 — Add a permanent Native AOT verification host**
 - Status: **Closed.** `verification/NativeAotVerification` references reachable entry types from
-  all ten supported libraries, directly probes NativeShims, and runs Core discovery.
+  all ten supported libraries and runs Core discovery. A separate candidate-backed invocation
+  directly probes NativeShims.
 
 **AOT-B4 — Run and record Windows + Linux Native AOT publishes**
 - Status: **Closed.** Both RIDs published and ran successfully against 2 physical YubiKeys each;
@@ -237,8 +240,10 @@ None of the above surfaced an architectural blocker in this assessment — they 
 **AOT-B11 — Statically link `Yubico.NativeShims` into an AOT binary (GitHub
 [#60](https://github.com/Yubico/Yubico.NET.SDK/issues/60))**
 - Modules: `Yubico.NativeShims` (packaging), Core (consumer-side opt-in props)
-- Status: **Resolved by implementation and prerelease validation; stable release pending.** This
-  branch's authenticated workflows pin internal package `1.17.4-prerelease.20260825.3`. Its package targets select a per-RID merged
+- Status: **Resolved by implementation and prerelease validation; stable release pending.** The
+  candidate job in `.github/workflows/native-aot.yml` pins internal package
+  `1.17.4-prerelease.20260825.3`; it runs manually through `workflow_dispatch` or automatically on
+  the `yubikit-nativeshims-static` branch. Its package targets select a per-RID merged
   NativeShims/OpenSSL static archive for `PublishAot=true`, add `DirectPInvoke`/`NativeLibrary`, and
   supply the platform PC/SC link arguments. Non-AOT consumers continue to use the shared library.
 - Historical root cause: `Yubico.NativeShims` 1.16.1 shipped **only shared libraries** (7 RIDs) and **zero

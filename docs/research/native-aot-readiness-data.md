@@ -543,8 +543,8 @@ add the authenticated source and source mapping ephemerally.
 
 The preceding `.1` and `.2` prereleases exposed OpenSSL archive members tagged for macOS 14 while
 the AOT application targeted macOS 12. The `.3` build uses custom vcpkg triplets that set the
-dependency deployment target to 12.0. The package workflow rejects the actual linker diagnostic,
-so passing macOS jobs prove the merged archive respects the SDK's deployment floor.
+dependency deployment target to 12.0. Per the NativeShims package workflow, which is outside this
+repository, its macOS jobs reject that linker diagnostic before reporting success.
 
 ### M1 — Local artifact-size evidence (macOS companion work)
 
@@ -601,9 +601,13 @@ The v2 consumer then restored the published `.3` prerelease from the internal fe
 without a sidecar or dynamic NativeShims/OpenSSL dependency, completed direct Native_BN and SCard
 calls, and ran the existing discovery path. The companion
 [ordinary build](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32943193053) passed
-documentation validation, build, unit tests, runtime resilience checks, package creation, and
-internal publication against the same NativeShims prerelease. Public-feed restores remain on the
-parent branch's stable NativeShims 1.16.1; both a clean local restore and the repository's
+documentation validation, build, unit tests, runtime resilience checks, and package creation
+against the same NativeShims prerelease. That superseded workflow also published fixed-version SDK
+packages with the internal candidate dependency. The active build workflow deliberately uses stable
+1.16.1 for build, pack, and publish, while candidate validation lives only in the dedicated Native
+AOT candidate job. The affected `2.0.0-alpha.2` GitHub package versions require separate package-feed
+cleanup or a superseding version. Public-feed restores remain on stable NativeShims 1.16.1; both a
+clean local restore and the repository's
 [automatic dependency submission](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/32943191939)
 passed without access to the internal feed.
 

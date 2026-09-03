@@ -9,6 +9,7 @@ name: Native AOT Publish Gate (2.0)
 # See docs/NATIVE-AOT.md for the evidence matrix.
 
 on:
+  workflow_dispatch:
   push:
     branches: [ yubikit*, yubikit/** ]
   pull_request:
@@ -16,6 +17,53 @@ on:
 
 jobs:
   native-aot-publish:
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            rid: osx-arm64
+    runs-on: ${{ matrix.os }}
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - name: Check out source
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Publish Native AOT verification host (${{ matrix.rid }})
+        run: >
+          dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj
+          -c Release -r ${{ matrix.rid }} --self-contained -p:PublishAot=true
+
+      - name: Run published Native AOT binary (Core discovery entry point)
+        working-directory: verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish
+        run: |
+          BIN="./Yubico.YubiKit.NativeAotVerification"
+          chmod +x "$BIN"
+          output="$($BIN)"
+          printf '%s\n' "$output"
+          test "$(printf '%s\n' "$output" | grep -c '^  Linked module entry type: ')" -eq 10
+          printf '%s\n' "$output" | grep -Fx 'Found 0 YubiKey(s).'
+
+  native-aot-static-candidate:
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/yubikit-nativeshims-static'
     permissions:
       contents: read
       packages: read
@@ -46,6 +94,9 @@ jobs:
         shell: pwsh
         run: |
           dotnet nuget add source https://nuget.pkg.github.com/Yubico/index.json --name yubico_internal --configfile nuget.config
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to add the internal NativeShims package source."
+          }
 
           [xml]$config = Get-Content -Raw nuget.config
           $mapping = $config.CreateElement("packageSourceMapping")
@@ -64,15 +115,7 @@ jobs:
           [void]$config.configuration.AppendChild($mapping)
           $config.Save((Resolve-Path nuget.config).Path)
 
-      - name: Cache NuGet packages
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: Publish Native AOT verification host (${{ matrix.rid }})
+      - name: Publish Native AOT verification host with static candidate (${{ matrix.rid }})
         run: >
           dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj
           -c Release -r ${{ matrix.rid }} --self-contained -p:PublishAot=true
@@ -92,7 +135,7 @@ jobs:
         run: |
           PUBLISH_DIR="verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish"
           BIN="$PUBLISH_DIR/Yubico.YubiKit.NativeAotVerification"
-          SIDECARS="$(find "$PUBLISH_DIR" -type f \( -name 'libYubico.NativeShims.dylib' -o -name 'libYubico.NativeShims.so' -o -name 'Yubico.NativeShims.dll' \) -print)"
+          SIDECARS="$(find "$PUBLISH_DIR" -type f \( -name 'libYubico.NativeShims*.dylib' -o -name 'libYubico.NativeShims*.so*' -o -name 'Yubico.NativeShims*.dll' \) -print)"
           if [[ -n "$SIDECARS" ]]; then
             echo "NativeShims sidecar found under publish output:"
             echo "$SIDECARS"
@@ -106,14 +149,14 @@ jobs:
             exit 1
           fi
 
-      - name: Run direct NativeShims probe (no fallback)
+      - name: Run direct NativeShims probe
         working-directory: verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish
         run: |
           BIN="./Yubico.YubiKit.NativeAotVerification"
           chmod +x "$BIN"
           "$BIN" --native-shims-probe
 
-      - name: Run published Native AOT binary (Core discovery entry point)
+      - name: Run candidate-backed binary (Core discovery entry point)
         working-directory: verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish
         run: |
           BIN="./Yubico.YubiKit.NativeAotVerification"

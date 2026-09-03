@@ -37,19 +37,10 @@ internal readonly record struct UvDecision(
 /// User verification decision logic.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Mirrors the canonical Rust client's <c>should_use_uv</c>
-/// (<c>crates/yubikit/src/webauthn/client.rs</c>): first decide <em>whether</em> user verification
-/// is needed at all, then decide <em>which</em> method satisfies it. Collapsing those two questions
-/// is what previously made <see cref="UserVerificationPreference.Discouraged"/> demand a PIN
-/// whenever one happened to be reachable.
-/// </para>
-/// <para>
-/// Throughout, "configured" means the authenticator advertises the option <em>and</em> has it
-/// enabled. That distinction matters: a YubiKey with no PIN set still advertises
-/// <c>clientPin: false</c>, so testing for the key's presence rather than its value would read as
-/// "user verification is available" on a key that has none.
-/// </para>
+/// First decides <em>whether</em> user verification is needed, then decides <em>which</em> method
+/// satisfies it. "Configured" means the option is both advertised and enabled: a YubiKey with no
+/// PIN set still advertises <c>clientPin: false</c>, and treating advertisement alone as available
+/// verification would request a token from a key that has no enabled verification method.
 /// </remarks>
 internal static class UvDecisionLogic
 {
@@ -149,12 +140,10 @@ internal static class UvDecisionLogic
         {
             UserVerificationPreference.Required => true,
 
-            // Deliberate divergence from canonical Rust, which uses "advertised" here and would
-            // therefore decide UV is needed on a PIN-less YubiKey (it still advertises
-            // clientPin: false) and then fail for want of a method. Since `preferred` is the
-            // WebAuthn default, that would turn the most common request into a hard error. WebAuthn
-            // L2 5.4.2 says preferred degrades to no verification when none is available, so gate on
-            // "configured". Do not "fix" this back to match Rust without re-reading that clause.
+            // WebAuthn L2 5.4.2 allows Preferred to proceed without verification when none is
+            // available, so only enabled verification methods count as configured here. This
+            // intentionally differs from implementations that treat an advertised false option as
+            // available verification.
             UserVerificationPreference.Preferred => uvConfigured,
 
             UserVerificationPreference.Discouraged =>

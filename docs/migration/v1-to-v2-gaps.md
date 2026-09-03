@@ -136,9 +136,9 @@ v2 locations: `src/Fido2/src/**`, `src/WebAuthn/src/**`
   **Severity**: Major (Blocker for U2F-only consumers) | **Confidence**: High
 
 - **Feature/API**: `KeyCollector` delegate for PIN/touch/UV prompts on `Fido2Session`
-  **v2 status**: Present-but-renamed/Behavior-changed — `Fido2Session` exposes explicit async methods (`SetPinAsync`, `ChangePinAsync`, `GetPinUvAuthTokenUsingPinAsync/UsingUvAsync`) with no callback. At the WebAuthn layer the closest analog is `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`), an optional async prompt supplied to `WebAuthnClient`: the SDK calls it when a ceremony needs a PIN and owns the retry loop itself (fresh prompt per attempt, rejected secrets zeroed and never resubmitted, attempts capped so a buggy prompt cannot burn the retry counter).
+  **v2 status**: Present-but-renamed/Behavior-changed — `Fido2Session` exposes explicit async methods (`SetPinAsync`, `ChangePinAsync`, `GetPinUvAuthTokenUsingPinAsync/UsingUvAsync`) with no callback. At the WebAuthn layer the closest analog is `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`), an optional async prompt supplied to `WebAuthnClient`: the SDK calls it when a ceremony needs a PIN and owns a bounded retry loop with a fresh, zeroed secret for each attempt.
   `IAsyncEnumerable<WebAuthnStatus>` is **not** the replacement — it is observation-only ceremony progress (`Processing`, `Finished`, `Failed`) and never gathers input. Abandonment is via the cancellation token, not a stream state.
-  Remaining gap: v1's `KeyCollector` also signalled touch. WebAuthn has no touch notification yet, so a UI can only prompt speculatively before a ceremony. PIV and YubiHsm expose `OnTouchRequired`; a unified cross-applet mechanism is deferred by design (see `src/WebAuthn/CLAUDE.md`, "Touch notification").
+  Touch remains a gap: WebAuthn has no dedicated in-flight touch signal, so UI can only prompt speculatively while a ceremony may be waiting for user presence.
   No 1:1 analog; arguably more explicit/testable, but requires a rewrite.
   **Severity**: Minor (migration friction, not capability loss) | **Confidence**: High
 
@@ -359,7 +359,7 @@ v2 location: `src/Management/src/**`
   **User impact**: Simple synchronous console-app/script consumers must adopt async/await throughout, including `await using` for disposal — a non-trivial rewrite for straightforward use cases v1 didn't require.
   **Severity**: Major (understandable architecturally, but a real DX cost) | **Confidence**: High
 
-- **`KeyCollector` delegate pattern**: removed entirely. v1 had one callback shape shared across Piv/Fido2/Oath/U2f/YubiHsmAuth (31 files reference it). v2 has zero matches for `KeyCollector`/`IAsyncKeyCollector`/`PinCollector`/`IPinProvider`/`IUserVerifier` — most applets take credentials as direct parameters. Confirmed deliberate per `docs/migration/v1-to-v2.md`.
+- **`KeyCollector` delegate pattern**: removed entirely. v1 had one callback shape shared across Piv/Fido2/Oath/U2f/YubiHsmAuth (31 files reference it). v2 has zero matches for `KeyCollector`/`IAsyncKeyCollector`/`PinCollector`/`IPinProvider`/`IUserVerifier` — most applets take credentials as direct parameters.
   Partially addressed: `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) is a shared async, context-carrying, cancellable prompt primitive intended as the one reusable shape. It is currently consumed only by `WebAuthnClient`; other applets remain direct-parameter and would adopt the same interface if they grow interactive needs.
   **User impact**: A caller cannot yet wire one prompt across all applets. Prompting patterns still differ per applet outside WebAuthn.
   **Severity**: Major | **Confidence**: High

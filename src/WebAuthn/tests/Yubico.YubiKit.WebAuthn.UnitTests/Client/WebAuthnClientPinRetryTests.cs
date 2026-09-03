@@ -31,10 +31,6 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 /// <summary>
 /// Tests for PIN retry behavior in WebAuthnClient.
 /// </summary>
-/// <remarks>
-/// These tests verify that PinAuthInvalid errors are handled correctly without
-/// burning YubiKey PIN attempts through unsafe retry loops.
-/// </remarks>
 public sealed class WebAuthnClientPinRetryTests
 {
     private readonly IWebAuthnBackend _mockBackend;

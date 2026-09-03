@@ -36,6 +36,42 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 /// </summary>
 public class CredentialPromptRetryTests
 {
+    private sealed class DelayedPrompt : ICredentialPrompt
+    {
+        private readonly TaskCompletionSource<IMemoryOwner<byte>?> _result =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public TaskCompletionSource Requested { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(
+            CredentialPromptContext context, CancellationToken cancellationToken)
+        {
+            Requested.TrySetResult();
+            return new ValueTask<IMemoryOwner<byte>?>(_result.Task);
+        }
+
+        public void Complete(IMemoryOwner<byte>? owner) => _result.TrySetResult(owner);
+
+        public void Fault(Exception error) => _result.TrySetException(error);
+    }
+
+    private sealed class TrackingMemoryOwner(params byte[] secret) : IMemoryOwner<byte>
+    {
+        public Memory<byte> Memory => secret;
+
+        public int DisposeCount { get; private set; }
+
+        public TaskCompletionSource Disposed { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public void Dispose()
+        {
+            DisposeCount++;
+            Disposed.TrySetResult();
+        }
+    }
+
     /// <summary>Prompt that returns a scripted sequence of answers.</summary>
     private sealed class ScriptedPrompt : ICredentialPrompt
     {
@@ -198,17 +234,59 @@ public class CredentialPromptRetryTests
     }
 
     [Fact(Timeout = 10000)]
-    public async Task RepeatedWrongPin_StopsAtAttemptCap()
+    public async Task RepeatedWrongPin_InvokesPromptExactlyMaxPromptAttempts()
     {
-        // A prompt that always answers wrongly must not burn every hardware attempt.
+        var submitted = new List<byte[]?>();
         var prompt = new ScriptedPrompt(WrongPin, WrongPin, WrongPin, WrongPin, WrongPin, WrongPin);
         await using var client = new WebAuthnClient(
-            CreateBackend(), Origin(), _ => false, prompt: prompt);
+            CreateBackend(submittedPins: submitted), Origin(), _ => false, prompt: prompt);
 
-        await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             client.MakeCredentialAsync(CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken));
 
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
         Assert.Equal(WebAuthnClient.MaxPromptAttempts, prompt.Contexts.Count);
+        Assert.Equal(WebAuthnClient.MaxPromptAttempts, submitted.Count);
+    }
+
+    [Fact(Timeout = 10000)]
+    public async Task CancellationWhilePromptIgnoresToken_LateOwnerIsZeroedAndDisposed()
+    {
+        var prompt = new DelayedPrompt();
+        await using var client = new WebAuthnClient(
+            CreateBackend(), Origin(), _ => false, prompt: prompt);
+        using var cts = new CancellationTokenSource();
+
+        var operation = client.MakeCredentialAsync(CreateOptions(), pinBytes: null, cts.Token);
+        await prompt.Requested.Task.WaitAsync(TestContext.Current.CancellationToken);
+        cts.Cancel();
+
+        var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => operation);
+        Assert.Equal(cts.Token, exception.CancellationToken);
+
+        var owner = new TrackingMemoryOwner(1, 2, 3, 4, 5, 6);
+        prompt.Complete(owner);
+        await owner.Disposed.Task.WaitAsync(
+            TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+
+        Assert.All(owner.Memory.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal(1, owner.DisposeCount);
+    }
+
+    [Fact(Timeout = 10000)]
+    public async Task CancellationBeforePrompt_DoesNotInvokePrompt()
+    {
+        var prompt = new ScriptedPrompt(CorrectPin);
+        await using var client = new WebAuthnClient(
+            CreateBackend(), Origin(), _ => false, prompt: prompt);
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            client.MakeCredentialAsync(CreateOptions(), pinBytes: null, cts.Token));
+
+        Assert.Equal(cts.Token, exception.CancellationToken);
+        Assert.Empty(prompt.Contexts);
     }
 
     [Fact(Timeout = 10000)]

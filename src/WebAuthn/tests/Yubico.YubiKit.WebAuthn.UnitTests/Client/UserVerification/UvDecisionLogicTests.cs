@@ -21,14 +21,12 @@ using Yubico.YubiKit.WebAuthn.Preferences;
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client.UserVerification;
 
 /// <summary>
-/// Truth table for "does this ceremony need a PIN/UV auth token", checked against the canonical
-/// Rust client's <c>should_use_uv</c> (<c>crates/yubikit/src/webauthn/client.rs</c>).
+/// Truth table for whether a ceremony needs a PIN/UV auth token.
 /// </summary>
 /// <remarks>
 /// The case worth protecting is <see cref="UserVerificationPreference.Discouraged"/> on a key that
-/// has a PIN set. Verification must be skipped there. An earlier implementation asked for a token
-/// whenever one was reachable, which meant that merely configuring an <c>ICredentialPrompt</c> was
-/// enough to start demanding PINs for relying parties that had explicitly asked for none.
+/// has a PIN set. Verification must be skipped when no authenticator or permission rule requires it,
+/// and <c>preferred</c> must degrade cleanly when verification is not configured.
 /// </remarks>
 public class UvDecisionLogicTests
 {
@@ -72,8 +70,7 @@ public class UvDecisionLogicTests
 
     /// <summary>
     /// A relying party that discouraged verification gets none, even though the key has a PIN and
-    /// the client could ask for it. This is the regression the prompt feature would otherwise have
-    /// introduced.
+    /// the client could ask for it.
     /// </summary>
     [Fact]
     public void Decide_DiscouragedOnModernKeyWithPinSet_DoesNotRequestToken()
@@ -228,11 +225,6 @@ public class UvDecisionLogicTests
     /// Preferred is the WebAuthn default. On a key with nothing configured it must degrade to an
     /// unverified credential rather than fail.
     /// </summary>
-    /// <remarks>
-    /// Deliberate divergence from canonical Rust, which tests whether the option is advertised
-    /// rather than enabled and would therefore fail here. See the comment in
-    /// <c>UvDecisionLogic.ShouldUseUv</c>.
-    /// </remarks>
     [Fact]
     public void Decide_PreferredOnKeyWithNoUvConfigured_DegradesToNoUv()
     {

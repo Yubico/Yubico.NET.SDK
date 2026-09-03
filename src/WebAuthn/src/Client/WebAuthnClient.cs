@@ -49,10 +49,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// for a PIN during a single operation.
     /// </summary>
     /// <remarks>
-    /// The authenticator's own retry counter is the security boundary; this cap is a
-    /// blast-radius bound so that a prompt implementation which repeatedly returns the
-    /// same wrong secret cannot consume every hardware attempt and block the credential.
-    /// Reaching the cap fails the operation, which the user can simply retry.
+    /// Reaching the cap fails the operation. The authenticator independently enforces its own
+    /// retry limit and may report a terminal PIN state before this cap is reached.
     /// </remarks>
     public const int MaxPromptAttempts = 3;
 
@@ -136,10 +134,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The registration response with credential details.</returns>
     /// <exception cref="WebAuthnClientError">Thrown on validation or operation failure.</exception>
-    /// <remarks>
-    /// To observe ceremony progress (for example, to show a "touch your key" prompt), use
-    /// <see cref="MakeCredentialStreamAsync"/> instead.
-    /// </remarks>
     public async Task<RegistrationResponse> MakeCredentialAsync(
         RegistrationOptions options,
         ReadOnlyMemory<byte>? pinBytes = null,
@@ -163,10 +157,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// to complete the authentication and retrieve the assertion response.
     /// </returns>
     /// <remarks>
-    /// <para>
-    /// To observe ceremony progress (for example, to show a "touch your key" prompt), use
-    /// <see cref="GetAssertionStreamAsync"/> instead.
-    /// </para>
     /// <para>
     /// This method follows the deferred-selection pattern: the authenticator enumerates
     /// all matching credentials, and the caller can present a credential picker UI before
@@ -350,9 +340,14 @@ public sealed class WebAuthnClient : IAsyncDisposable
             return;
         }
 
-        // Zero entire rented buffer for defense-in-depth even though only the PIN prefix was written.
-        CryptographicOperations.ZeroMemory(owner.Memory.Span);
-        owner.Dispose();
+        try
+        {
+            CryptographicOperations.ZeroMemory(owner.Memory.Span);
+        }
+        finally
+        {
+            owner.Dispose();
+        }
     }
 
     /// <summary>
@@ -492,8 +487,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
             if (pinOwner is not null)
             {
-                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span);
-                pinOwner.Dispose();
+                ZeroAndDispose(pinOwner);
             }
         }
     }
@@ -621,8 +615,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
             if (pinOwner is not null)
             {
-                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span);
-                pinOwner.Dispose();
+                ZeroAndDispose(pinOwner);
             }
         }
     }
@@ -881,9 +874,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// Acquires a PIN/UV auth token from the backend using a secret the caller already supplied.
     /// </summary>
     /// <remarks>
-    /// A caller-supplied secret is never retried: resubmitting identical PIN bytes would burn
-    /// authenticator attempts without any chance of a different outcome. Deciding whether to ask
-    /// the user again belongs to the caller, or to the prompt-driven path in
+    /// A caller-supplied secret is never retried because the SDK has no replacement value to
+    /// submit. Deciding whether to ask the user again belongs to the caller, or to the prompt-driven path in
     /// <see cref="AcquireTokenViaPromptAsync"/>.
     /// </remarks>
     private async Task<PinUvAuthTokenSession> AcquirePinUvTokenAsync(
@@ -933,6 +925,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
         for (var attempt = 0; attempt < MaxPromptAttempts; attempt++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var context = new CredentialPromptContext
             {
                 Kind = CredentialKind.Pin,
@@ -943,12 +937,17 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 MaxLengthBytes = Ctap2MaxPinLengthBytes
             };
 
-            // WaitAsync bounds the wait even if an implementation ignores the token it is handed,
-            // so a stuck prompt cannot strand the operation.
-            var secret = await prompt.RequestSecretAsync(context, cancellationToken)
-                .AsTask()
-                .WaitAsync(cancellationToken)
-                .ConfigureAwait(false);
+            var promptTask = prompt.RequestSecretAsync(context, cancellationToken).AsTask();
+            IMemoryOwner<byte>? secret;
+            try
+            {
+                secret = await promptTask.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                _ = DisposeLatePromptResultAsync(promptTask);
+                throw;
+            }
 
             if (secret is null)
             {
@@ -964,14 +963,19 @@ public sealed class WebAuthnClient : IAsyncDisposable
                     permissions,
                     rpId,
                     secret.Memory,
-                        cancellationToken).ConfigureAwait(false);
+                    cancellationToken).ConfigureAwait(false);
 
                 return (tokenSession, secret);
             }
-            catch (CtapException ex) when (ex.Status == CtapStatus.PinInvalid
-                                           && attempt + 1 < MaxPromptAttempts)
+            catch (CtapException ex) when (ex.Status == CtapStatus.PinInvalid)
             {
                 ZeroAndDispose(secret);
+
+                if (attempt + 1 >= MaxPromptAttempts)
+                {
+                    throw MapPinRejection(ex);
+                }
+
                 retriesRemaining = await TryGetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (CtapException ex) when (IsPinRejection(ex.Status))
@@ -988,7 +992,30 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
         throw new WebAuthnClientError(
             WebAuthnClientErrorCode.NotAllowed,
-            $"PIN was rejected on {MaxPromptAttempts} attempts.");
+            "PIN authentication did not complete within the prompt-attempt limit.");
+    }
+
+    private static async Task DisposeLatePromptResultAsync(Task<IMemoryOwner<byte>?> promptTask)
+    {
+        IMemoryOwner<byte>? owner;
+        try
+        {
+            owner = await promptTask.ConfigureAwait(false);
+        }
+        catch
+        {
+            // Observe a fault from work that completed after the operation was cancelled.
+            return;
+        }
+
+        try
+        {
+            ZeroAndDispose(owner);
+        }
+        catch
+        {
+            // Cleanup cannot be surfaced because the cancelled operation has already returned.
+        }
     }
 
     /// <summary>

@@ -34,6 +34,8 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// signals cancellation, an input error, or a retry request.
 /// </item>
 /// <item>
+/// The method must return a <see cref="ValueTask{TResult}"/> promptly, must not block the calling
+/// thread while obtaining the secret, and must honor the supplied cancellation token.
 /// Cancellation is reported by throwing <see cref="OperationCanceledException"/>.
 /// </item>
 /// <item>
@@ -46,22 +48,15 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// exact length, rather than handing back a raw rented buffer.
 /// </item>
 /// <item>
-/// Ownership of the returned buffer transfers to the SDK, which disposes it
-/// (and thereby zeroes it) once the secret has been used.
-/// </item>
-/// </list>
-/// <para><b>Guarantees the SDK provides to implementations</b></para>
-/// <list type="bullet">
-/// <item>
-/// Prompt invocations are bounded by the caller's cancellation token even if an
-/// implementation ignores the token it is given, so a slow or stuck prompt
-/// cannot strand an SDK operation.
+/// The implementation owns the buffer until the returned <see cref="ValueTask{TResult}"/>
+/// completes successfully. At that point ownership transfers to the SDK. The implementation must
+/// not access or dispose the buffer after successful completion. A null, faulted, or cancelled
+/// result transfers no buffer ownership.
 /// </item>
 /// <item>
-/// Retry loops are owned by the SDK: after a rejected secret the SDK calls
-/// again with <see cref="CredentialPromptContext.IsRetry"/> set and an updated
-/// <see cref="CredentialPromptContext.RetriesRemaining"/>. A cached secret is
-/// never resubmitted on the application's behalf.
+/// Implementations must not retry credential verification internally. The SDK component using the
+/// prompt owns any retry policy so each authenticator submission is represented by a separate
+/// prompt invocation and context.
 /// </item>
 /// </list>
 /// <para><b>Example</b></para>
@@ -76,9 +71,19 @@ namespace Yubico.YubiKit.Core.Credentials;
 ///             : $"Enter PIN for {context.Scope}";
 ///
 ///         byte[]? entered = await ShowPinDialogAsync(title, cancellationToken);
-///         return entered is null
-///             ? null
-///             : DisposableArrayPoolBuffer.CreateFromSpan(entered);
+///         if (entered is null)
+///         {
+///             return null;
+///         }
+///
+///         try
+///         {
+///             return DisposableArrayPoolBuffer.CreateFromSpan(entered);
+///         }
+///         finally
+///         {
+///             System.Security.Cryptography.CryptographicOperations.ZeroMemory(entered);
+///         }
 ///     }
 /// }
 /// </code>
@@ -89,11 +94,12 @@ public interface ICredentialPrompt
     /// Requests a secret from the user or another source.
     /// </summary>
     /// <param name="context">Describes what is being requested and why.</param>
-    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <param name="cancellationToken">Token that the implementation must monitor for cancellation requests.</param>
     /// <returns>
     /// The secret bytes in a buffer whose <see cref="IMemoryOwner{T}.Memory"/> is
-    /// sized exactly to the secret and whose ownership transfers to the caller,
-    /// or <c>null</c> if the user declined to supply one.
+    /// sized exactly to the secret, or <c>null</c> if the user declined to supply one. Ownership
+    /// transfers to the caller only when the returned task completes successfully with a non-null
+    /// owner.
     /// </returns>
     /// <exception cref="OperationCanceledException">
     /// Thrown when cancellation is requested through <paramref name="cancellationToken"/>.

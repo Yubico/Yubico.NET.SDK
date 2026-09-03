@@ -73,7 +73,7 @@ public class WebAuthnStatusStreamTests
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
             User = new PublicKeyCredentialUserEntity(
-            RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+                RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
             PubKeyCredParams = [new CoseAlgorithm(-7)],
             UserVerification = uv
         };
@@ -199,10 +199,7 @@ public class WebAuthnStatusStreamTests
         Assert.Equal(WebAuthnClientErrorCode.NotAllowed, failed.Error.Code);
     }
 
-    /// <summary>
-    /// Regression for the deadlock that the interactive-status design allowed: a consumer that
-    /// abandons the stream while the ceremony waits on a prompt must not hang on disposal.
-    /// </summary>
+    /// <summary>Abandoning a stream waiting on a prompt must not hang on disposal.</summary>
     [Fact(Timeout = 20000)]
     public async Task Stream_ConsumerBreaksWhileWaitingOnPrompt_DisposalCompletes()
     {
@@ -230,10 +227,7 @@ public class WebAuthnStatusStreamTests
         await enumeration;
     }
 
-    /// <summary>
-    /// Regression for the harsher variant: a well-behaved consumer keeps enumerating and cancels
-    /// its own token. Cancellation must reach the pending prompt.
-    /// </summary>
+    /// <summary>External cancellation must release a stream waiting on a prompt.</summary>
     [Fact(Timeout = 20000)]
     public async Task Stream_ExternalCancellationWhileWaitingOnPrompt_Terminates()
     {

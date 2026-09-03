@@ -255,18 +255,9 @@ public class WebAuthnClientTests
     /// with no <c>pinUvAuthParam</c> on the wire.
     /// </para>
     /// <para>
-    /// This mirrors the canonical Rust client, whose <c>should_use_uv</c> returns false for
-    /// <c>Discouraged</c> unless user verification is actually configured AND one of: <c>alwaysUv</c>
-    /// is set, <c>makeCredUvNotRqd</c> is unset, or the request needs a permission beyond
-    /// makeCredential/getAssertion. A YubiKey 5.8.0 advertises <c>makeCredUvNotRqd: true</c>, so a
-    /// PIN being set on the key does not by itself force verification here.
-    /// </para>
-    /// <para>
     /// The flag assertions are the point of the test: user presence and user verification are
     /// independent. Touch is still required (CTAP never lets a client set <c>up</c> on
     /// makeCredential, so the authenticator default of true applies), while UV must stay clear.
-    /// An earlier revision of this test asserted <c>NotAllowed</c>; that only passed because the
-    /// client hardcoded "a PIN is available" and then failed for want of one.
     /// </para>
     /// </remarks>
     [SkippableTheory]

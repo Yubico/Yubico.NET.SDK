@@ -261,6 +261,48 @@ public class FindYubiKeysFaultInjectionTests
     }
 
     /// <summary>
+    ///     Stage D' R4 boundedness pin (docs/plans/flat-device-model.md): an interface whose identity
+    ///     read fails persistently costs a small, CONSTANT number of connect attempts per scan —
+    ///     bounded by the per-scan retry cap — and never accumulates work across scan intervals.
+    ///     Retry-every-scan is the decided policy; this pin is what makes "bounded" mechanical.
+    /// </summary>
+    [Fact]
+    public async Task FindAllAsync_PersistentIdentityFailureAcrossScans_PerScanAttemptsStayConstant_Pin()
+    {
+        await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
+        var (find, factory, _, _) = CreateTwoDualKeyRig();
+        factory.FailReads(OtpB);
+
+        // The within-scan retry cap (DiscoveryIdentityReader.MaxAttempts).
+        const int MaxAttemptsPerScan = 3;
+
+        var attemptsPerScan = new List<int>();
+        var previous = 0;
+        for (var scan = 0; scan < 4; scan++)
+        {
+            _ = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+            var total = factory.ConnectCalls(OtpB);
+            attemptsPerScan.Add(total - previous);
+            previous = total;
+        }
+
+        Assert.All(attemptsPerScan, attempts =>
+        {
+            Assert.InRange(attempts, 1, MaxAttemptsPerScan);
+        });
+        Assert.True(
+            attemptsPerScan.Distinct().Count() == 1,
+            "Per-scan attempt cost under persistent failure must be constant across scans - growth " +
+            $"would be an unbounded retry hot loop. Observed: [{string.Join(", ", attemptsPerScan)}].");
+
+        // The healthy sibling interface is read once and then served from cache - persistent failure
+        // of one interface never amplifies reads of others.
+        var healthyAfterScan1 = factory.ConnectCalls(OtpA);
+        _ = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
+        Assert.Equal(healthyAfterScan1, factory.ConnectCalls(OtpA));
+    }
+
+    /// <summary>
     ///     The metadata cache is exposed to the same same-slot swap as the identity cache: it is keyed by
     ///     PhysicalIdentityKey (built from reusable interface ids), so without hotplug-driven invalidation
     ///     the swapped-in key would be published with the departed key's serial and capabilities.

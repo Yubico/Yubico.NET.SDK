@@ -132,29 +132,17 @@ var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oce
 
 ### TLV Processing
 
-Use `TlvHelper` and `Tlv` for parsing/constructing TLV data:
+The canonical usage examples for `DecodeList`, `TryFindValue`, `Tlv`, `EncodeList`, nested encoding, and
+`EncodeAndDisposeList` are in the [Core README](README.md#tlv-processing). Keep the full examples there rather
+than duplicating them in this contributor guide.
 
-```csharp
-// Parsing - DecodeList returns a disposable collection
-using var tlvs = TlvHelper.DecodeList(data);
-var specificTlv = tlvs.FirstOrDefault(t => t.Tag == 0x9F);
-
-// Or read a single value without materialising the list
-if (TlvHelper.TryFindValue(0x9F, data, out var found)) { /* use found */ }
-
-// Construction - EncodeAndDisposeList disposes the TLVs it is given
-var encoded = TlvHelper.EncodeAndDisposeList(
-    new Tlv(0x9F, value),
-    new Tlv(0x5C, tagList));
-
-// Nested TLV - the inner encoding becomes the outer tag's value
-var inner = TlvHelper.EncodeAndDisposeList(new Tlv(0x83, kidKvn));
-var outer = TlvHelper.EncodeAndDisposeList(new Tlv(0xE0, inner));
-```
-
-**Important:** `Tlv` and `DisposableTlvList` are `IDisposable` and must be disposed so their
-buffers are zeroed. `EncodeAndDisposeList` disposes the TLVs passed to it; `EncodeList` does
-not, so TLVs built inline for `EncodeList` are left unzeroed unless you dispose them yourself.
+Contributor rules:
+- Dispose every `Tlv` and `DisposableTlvList`. `EncodeAndDisposeList` disposes the `Tlv` inputs passed to that
+  call; `EncodeList` does not.
+- Neither encoding method clears caller-owned source buffers. `EncodeAndDisposeList` also does not clear its
+  returned encoding or a returned encoding used as an intermediate value in nested TLV construction.
+- Classify buffers by semantics. For sensitive nested data, clear source buffers plus returned and intermediate
+  encodings in `finally`; public or nonsecret encodings do not require special clearing.
 
 ### Platform Interop Pattern
 

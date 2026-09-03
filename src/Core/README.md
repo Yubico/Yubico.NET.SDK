@@ -186,25 +186,72 @@ must not be called from inside the operation being drained.
 ### TLV Processing
 
 ```csharp
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Utilities;
 
-// Parse TLV data - DecodeList returns a disposable collection
+// DecodeList returns a disposable collection whose Tlv buffers are cleared on dispose.
 using var tlvs = TlvHelper.DecodeList(responseData);
 var certificateTlv = tlvs.FirstOrDefault(t => t.Tag == 0x53);
 
-// Or read a single value directly
-if (TlvHelper.TryFindValue(0x53, responseData, out var certificate)) { /* use certificate */ }
+// TryFindValue returns a new buffer containing the matching value.
+if (TlvHelper.TryFindValue(0x53, responseData.Span, out var certificate))
+{
+    // Use certificate.Span. Clear certificate when its contents are sensitive.
+}
 
-// Build TLV structure - EncodeAndDisposeList disposes the TLVs it is given
-var encodedData = TlvHelper.EncodeAndDisposeList(
-    new Tlv(0x5C, new byte[] { 0x5F, 0xC1, 0x02 }),  // Tag list
-    new Tlv(0x53, certificateData));                 // Certificate
+// EncodeAndDisposeList is convenient for inline Tlv objects.
+Memory<byte> encodedData = TlvHelper.EncodeAndDisposeList(
+    new Tlv(0x5C, new byte[] { 0x5F, 0xC1, 0x02 }),
+    new Tlv(0x53, certificateData));
 
-// Nested TLV - the inner encoding becomes the outer tag's value
-var publicKeyBody = TlvHelper.EncodeAndDisposeList(
-    new Tlv(0x81, modulusBytes),    // RSA modulus
-    new Tlv(0x82, exponentBytes));  // RSA exponent
-var publicKeyTemplate = TlvHelper.EncodeAndDisposeList(new Tlv(0x7F49, publicKeyBody));
+// EncodeList leaves disposal to the caller.
+using var tagList = new Tlv(0x5C, new byte[] { 0x5F, 0xC1, 0x02 });
+using var certificateValue = new Tlv(0x53, certificateData);
+Memory<byte> explicitlyOwnedEncoding = TlvHelper.EncodeList([tagList, certificateValue]);
+```
+
+`Tlv` and the collection returned by `DecodeList` own buffers and must be disposed. `EncodeAndDisposeList`
+disposes only the `Tlv` inputs passed to that call; `EncodeList` does not dispose its inputs. Neither method
+clears source buffers supplied to `Tlv` constructors, returned encodings, or intermediate encodings used for
+nesting.
+
+For public, nonsecret nested data, encode the inner elements and use that encoding as the outer value:
+
+```csharp
+Memory<byte> publicKeyBody = TlvHelper.EncodeAndDisposeList(
+    new Tlv(0x81, modulusBytes),
+    new Tlv(0x82, exponentBytes));
+Memory<byte> publicKeyTemplate = TlvHelper.EncodeAndDisposeList(
+    new Tlv(0x7F49, publicKeyBody));
+```
+
+The calls dispose their `Tlv` inputs, but not `modulusBytes`, `exponentBytes`, `publicKeyBody`, or
+`publicKeyTemplate`. These values are public, so the concise example does not clear them.
+
+For sensitive nested data, clear every caller-owned source buffer and every returned or intermediate encoding
+in a `finally` block:
+
+```csharp
+using System.Security.Cryptography;
+
+Memory<byte> innerEncoding = Memory<byte>.Empty;
+Memory<byte> outerEncoding = Memory<byte>.Empty;
+
+try
+{
+    innerEncoding = TlvHelper.EncodeAndDisposeList(
+        new Tlv(0x81, privateKeyBytes));
+    outerEncoding = TlvHelper.EncodeAndDisposeList(
+        new Tlv(0x7F49, innerEncoding));
+
+    UseSensitiveEncoding(outerEncoding.Span);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(outerEncoding.Span);
+    CryptographicOperations.ZeroMemory(innerEncoding.Span);
+    CryptographicOperations.ZeroMemory(privateKeyBytes);
+}
 ```
 
 ## Architecture

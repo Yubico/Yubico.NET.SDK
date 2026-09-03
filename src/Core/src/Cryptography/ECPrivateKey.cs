@@ -31,7 +31,9 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// </summary>
         /// <value>
         /// An <see cref="ECParameters"/> structure containing the curve parameters, key, and other
-        /// cryptographic elements needed for EC operations.
+        /// cryptographic elements needed for EC operations. The array fields are owned by this
+        /// object, must not be modified or cleared by the caller, and are cleared when the object is
+        /// disposed.
         /// </value>
         public ECParameters Parameters { get; }
 
@@ -55,16 +57,28 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// the parameters from the ECParameters object.
         /// </remarks>
         /// <param name="parameters">The EC parameters.</param>
+        /// <param name="parametersCopied">An optional internal observation hook.</param>
         /// <exception cref="ArgumentException">Thrown when parameters do not contain D value.</exception>
-        private ECPrivateKey(ECParameters parameters)
+        private ECPrivateKey(
+            ECParameters parameters,
+            Action<ECParameters>? parametersCopied = null)
         {
             if (parameters.D is null)
             {
                 throw new ArgumentException("Parameters must contain private key data (D value)", nameof(parameters));
             }
 
+            KeyDefinition = KeyDefinitions.GetByOid(parameters.Curve.Oid);
             Parameters = parameters.DeepCopy();
-            KeyDefinition = KeyDefinitions.GetByOid(Parameters.Curve.Oid);
+            try
+            {
+                parametersCopied?.Invoke(Parameters);
+            }
+            catch
+            {
+                CryptographicOperations.ZeroMemory(Parameters.D);
+                throw;
+            }
         }
 
         /// <inheritdoc/>
@@ -86,10 +100,11 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// Creates a new instance of <see cref="ECPrivateKey"/> from a DER-encoded private key.
         /// </summary>
         /// <param name="encodedKey">
-        /// The DER-encoded private key.
+        /// The borrowed DER-encoded private key. This method copies the decoded key material and
+        /// does not modify or clear the input.
         /// </param>
         /// <returns>
-        /// A new instance of <see cref="ECPrivateKey"/>.
+        /// A new disposable key that owns and clears its copied private-key material.
         /// </returns>
         /// <exception cref="CryptographicException">
         /// Thrown if the private key is invalid.
@@ -97,6 +112,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         public static ECPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
             => CreateFromPkcs8(encodedKey, parametersDecoded: null);
 
+        // Test observation hook. The callback must not retain or mutate the decoded private value.
         internal static ECPrivateKey CreateFromPkcs8(
             ReadOnlyMemory<byte> encodedKey,
             Action<ECParameters>? parametersDecoded)
@@ -119,15 +135,27 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// <summary>
         /// Creates an instance of <see cref="ECPrivateKey"/> from the given <paramref name="parameters"/>.
         /// </summary>
-        /// <param name="parameters">The parameters to create the key from.</param>
-        /// <returns>An instance of <see cref="ECPrivateKey"/>.</returns>
+        /// <param name="parameters">
+        /// The borrowed parameters to copy. The caller retains ownership of every input array and
+        /// remains responsible for clearing sensitive arrays.
+        /// </param>
+        /// <returns>A new disposable key that owns and clears its copied private-key material.</returns>
         public static ECPrivateKey CreateFromParameters(ECParameters parameters) => new(parameters);
+
+        // Test observation hook. The callback must not retain or mutate the copied private value.
+        internal static ECPrivateKey CreateFromParameters(
+            ECParameters parameters,
+            Action<ECParameters>? parametersCopied) =>
+            new(parameters, parametersCopied);
 
         /// <summary>
         /// Creates an instance of <see cref="ECPrivateKey"/> from an <see cref="ECDiffieHellman"/> instance.
         /// </summary>
-        /// <param name="ecdh">The ECDiffieHellman instance containing the private key.</param>
-        /// <returns>An instance of <see cref="ECPrivateKey"/>.</returns>
+        /// <param name="ecdh">
+        /// The borrowed <see cref="ECDiffieHellman"/> instance containing the private key. This
+        /// method does not dispose it.
+        /// </param>
+        /// <returns>A new disposable key that owns and clears its copied private-key material.</returns>
         /// <remarks>
         /// This method exports the private key parameters from the <see cref="ECDiffieHellman"/> instance
         /// and creates a new <see cref="ECPrivateKey"/> wrapper. This is useful when working with ephemeral
@@ -135,9 +163,24 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="ecdh"/> is null.</exception>
         public static ECPrivateKey CreateFromEcdh(ECDiffieHellman ecdh)
+            => CreateFromEcdh(ecdh, parametersExported: null);
+
+        // Test observation hook. The callback must not retain or mutate the exported private value.
+        internal static ECPrivateKey CreateFromEcdh(
+            ECDiffieHellman ecdh,
+            Action<ECParameters>? parametersExported)
         {
             ArgumentNullException.ThrowIfNull(ecdh);
-            return CreateFromParameters(ecdh.ExportParameters(includePrivateParameters: true));
+            var parameters = ecdh.ExportParameters(includePrivateParameters: true);
+            try
+            {
+                parametersExported?.Invoke(parameters);
+                return CreateFromParameters(parameters);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(parameters.D);
+            }
         }
 
         /// <summary>
@@ -147,15 +190,25 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// <remarks>
         /// The <paramref name="privateValue"/> is taken as the raw private key data (scalar value).
         /// </remarks>
-        /// <param name="privateValue">The raw private key data.</param>
+        /// <param name="privateValue">
+        /// The borrowed raw private value to copy. The caller retains ownership and remains
+        /// responsible for clearing the input.
+        /// </param>
         /// <param name="keyType">The type of key this is.</param>
-        /// <returns>A new instance of <see cref="ECPrivateKey"/>.</returns>
+        /// <returns>A new disposable key that owns and clears its copied private-key material.</returns>
         /// <exception cref="ArgumentException">
         /// Thrown if the key type is not a valid EC key.
         /// </exception>
         public static ECPrivateKey CreateFromValue(
             ReadOnlyMemory<byte> privateValue,
             KeyType keyType)
+            => CreateFromValue(privateValue, keyType, parametersCreated: null);
+
+        // Test observation hook. The callback must not retain or mutate the temporary private values.
+        internal static ECPrivateKey CreateFromValue(
+            ReadOnlyMemory<byte> privateValue,
+            KeyType keyType,
+            Action<ECParameters>? parametersCreated)
         {
             var keyDefinition = keyType.GetKeyDefinition();
             if (keyDefinition.AlgorithmOid is not Oids.ECDSA)
@@ -173,8 +226,25 @@ namespace Yubico.YubiKit.Core.Cryptography
                 D = privateValue.ToArray(),
             };
 
-            var ecdsa = ECDsa.Create(parameters);
-            return CreateFromParameters(ecdsa.ExportParameters(true));
+            try
+            {
+                parametersCreated?.Invoke(parameters);
+                using var ecdsa = ECDsa.Create(parameters);
+                var exportedParameters = ecdsa.ExportParameters(includePrivateParameters: true);
+                try
+                {
+                    parametersCreated?.Invoke(exportedParameters);
+                    return CreateFromParameters(exportedParameters);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(exportedParameters.D);
+                }
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(parameters.D);
+            }
         }
 
         /// <summary>

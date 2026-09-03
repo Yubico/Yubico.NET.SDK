@@ -46,7 +46,11 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// <summary>
     /// Gets the raw private key bytes exactly as imported.
     /// </summary>
-    /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the raw private key value.</returns>
+    /// <value>
+    /// A borrowed read-only view of the key-owned bytes. The view remains valid until this object
+    /// is disposed. The caller must not attempt to modify or clear the underlying memory.
+    /// </value>
+    /// <exception cref="ObjectDisposedException">This object has been disposed.</exception>
     public ReadOnlyMemory<byte> PrivateKey
     {
         get
@@ -97,10 +101,11 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// ASN.1 DER-encoded private key.
     /// </summary>
     /// <param name="pkcs8EncodedKey">
-    /// The ASN.1 DER-encoded private key.
+    /// The borrowed ASN.1 DER-encoded private key. This method copies the decoded private value and
+    /// does not modify or clear the input.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="Curve25519PrivateKey"/>.
+    /// A new disposable key that owns and clears its copied private-key material.
     /// </returns>
     /// <exception cref="ArgumentException">
     /// Thrown if the algorithm OID is not X25519 or Ed25519.
@@ -121,9 +126,12 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// Creates an instance of <see cref="Curve25519PrivateKey"/> from the given
     /// <paramref name="privateKey"/> and <paramref name="keyType"/>.
     /// </summary>
-    /// <param name="privateKey">The 32 raw private key bytes. These are copied and preserved unchanged.</param>
+    /// <param name="privateKey">
+    /// The 32 borrowed raw private-key bytes. These are copied and preserved unchanged. The caller
+    /// retains ownership and remains responsible for clearing the input.
+    /// </param>
     /// <param name="keyType">The type of key this is.</param>
-    /// <returns>An instance of <see cref="Curve25519PrivateKey"/>.</returns>
+    /// <returns>A new disposable key that owns and clears its copied private-key material.</returns>
     /// <exception cref="ArgumentException">Thrown if <paramref name="keyType"/> is not X25519 or Ed25519, or if <paramref name="privateKey"/> is not exactly 32 bytes.</exception>
     public static Curve25519PrivateKey CreateFromValue(ReadOnlyMemory<byte> privateKey, KeyType keyType) => new(privateKey, keyType);
 

@@ -21,6 +21,87 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 public class PrivateKeyDecodingZeroingTests
 {
     [Fact]
+    public void NormalizeParameters_PaddingRequired_ZeroesSupersededCopies()
+    {
+        var original = new RSAParameters
+        {
+            Modulus = [0x01, 0x02, 0x03, 0x04],
+            Exponent = [0x01, 0x00, 0x01],
+            D = [0x11, 0x12, 0x13],
+            P = [0x21],
+            Q = [0x31],
+            DP = [0x41],
+            DQ = [0x51],
+            InverseQ = [0x61]
+        };
+        RSAParameters normalized = default;
+        byte[][]? supersededArrays = null;
+
+        try
+        {
+            normalized = original.NormalizeParameters(
+                copied => supersededArrays = GetPrivateArrays(copied));
+
+            AssertAllZero(Assert.IsType<byte[][]>(supersededArrays));
+            Assert.Equal(4, normalized.D!.Length);
+            Assert.Equal(2, normalized.P!.Length);
+            AssertContainsNonZero(normalized.D);
+            AssertContainsNonZero(normalized.P);
+        }
+        finally
+        {
+            ZeroPrivateArrays(original);
+            ZeroPrivateArrays(normalized);
+        }
+    }
+
+    [Fact]
+    public void RSAPrivateKey_CreateFromParameters_UnsupportedLength_DoesNotAllocateOwnedCopy()
+    {
+        var parameters = CreateRsaParameters(modulusLength: 192);
+        RSAParameters? copiedParameters = null;
+
+        try
+        {
+            Assert.Throws<NotSupportedException>(() =>
+                RSAPrivateKey.CreateFromParameters(
+                    parameters,
+                    copied => copiedParameters = copied));
+
+            Assert.Null(copiedParameters);
+        }
+        finally
+        {
+            ZeroPrivateArrays(parameters);
+        }
+    }
+
+    [Fact]
+    public void ECPrivateKey_CreateFromParameters_UnsupportedCurve_DoesNotAllocateOwnedCopy()
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue("1.2.3.4"),
+            D = [0x11]
+        };
+        ECParameters? copiedParameters = null;
+
+        try
+        {
+            Assert.Throws<NotSupportedException>(() =>
+                ECPrivateKey.CreateFromParameters(
+                    parameters,
+                    copied => copiedParameters = copied));
+
+            Assert.Null(copiedParameters);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(parameters.D);
+        }
+    }
+
+    [Fact]
     public void CreateRSAParameters_ZeroesPrivateArraysSupersededByNormalization()
     {
         using var rsa = RSA.Create(2048);
@@ -87,6 +168,32 @@ public class PrivateKeyDecodingZeroingTests
     }
 
     [Fact]
+    public void RSAPrivateKey_CreateFromPkcs8_ObserverThrows_ZeroesDecoderArrays()
+    {
+        using var rsa = RSA.Create(2048);
+        var pkcs8 = rsa.ExportPkcs8PrivateKey();
+        byte[][]? decoderArrays = null;
+
+        try
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+                RSAPrivateKey.CreateFromPkcs8(
+                    pkcs8,
+                    parameters =>
+                    {
+                        decoderArrays = GetPrivateArrays(parameters);
+                        throw new InvalidOperationException("observe failure");
+                    }));
+
+            AssertAllZero(Assert.IsType<byte[][]>(decoderArrays));
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pkcs8);
+        }
+    }
+
+    [Fact]
     public void ECPrivateKey_CreateFromPkcs8_ZeroesDecoderDAndPreservesCopiedKey()
     {
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -122,6 +229,71 @@ public class PrivateKeyDecodingZeroingTests
     }
 
     [Fact]
+    public void ECPrivateKey_CreateFromPkcs8_ObserverThrows_ZeroesDecoderD()
+    {
+        using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var pkcs8 = ecdsa.ExportPkcs8PrivateKey();
+        byte[]? decoderD = null;
+
+        try
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+                ECPrivateKey.CreateFromPkcs8(
+                    pkcs8,
+                    parameters =>
+                    {
+                        decoderD = parameters.D;
+                        throw new InvalidOperationException("observe failure");
+                    }));
+
+            AssertAllZero([Assert.IsType<byte[]>(decoderD)]);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pkcs8);
+        }
+    }
+
+    [Fact]
+    public void ECPrivateKey_CreateFromEcdh_ZeroesExportedPrivateValue()
+    {
+        using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        byte[]? exportedD = null;
+
+        using var key = ECPrivateKey.CreateFromEcdh(
+            ecdh,
+            parameters => exportedD = parameters.D);
+
+        AssertAllZero([Assert.IsType<byte[]>(exportedD)]);
+        AssertContainsNonZero(Assert.IsType<byte[]>(key.Parameters.D));
+    }
+
+    [Fact]
+    public void ECPrivateKey_CreateFromValue_ZeroesAllTemporaryPrivateValues()
+    {
+        using var source = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var sourceParameters = source.ExportParameters(includePrivateParameters: true);
+        var privateValue = Assert.IsType<byte[]>(sourceParameters.D);
+        var temporaryValues = new List<byte[]>();
+
+        try
+        {
+            using var key = ECPrivateKey.CreateFromValue(
+                privateValue,
+                KeyType.ECP256,
+                parameters => temporaryValues.Add(Assert.IsType<byte[]>(parameters.D)));
+
+            Assert.Equal(2, temporaryValues.Count);
+            AssertAllZero(temporaryValues);
+            AssertContainsNonZero(Assert.IsType<byte[]>(key.Parameters.D));
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(privateValue);
+        }
+    }
+
+    [Fact]
     public void GetCurve25519PrivateKeyData_TrailingDataThrowsAndZeroesDecodedScalar()
     {
         var privateKey = new byte[32];
@@ -132,6 +304,30 @@ public class PrivateKeyDecodingZeroingTests
         try
         {
             Assert.Throws<AsnContentException>(() =>
+                AsnPrivateKeyDecoder.GetCurve25519PrivateKeyData(
+                    pkcs8,
+                    decoded => decodedPrivateKey = decoded));
+
+            AssertAllZero([Assert.IsType<byte[]>(decodedPrivateKey)]);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(privateKey);
+            CryptographicOperations.ZeroMemory(pkcs8);
+        }
+    }
+
+    [Fact]
+    public void GetCurve25519PrivateKeyData_WrongLengthThrowsAndZeroesDecodedScalar()
+    {
+        var privateKey = new byte[31];
+        Array.Fill(privateKey, (byte)0x5A);
+        var pkcs8 = BuildCurve25519Pkcs8(privateKey);
+        byte[]? decodedPrivateKey = null;
+
+        try
+        {
+            Assert.Throws<CryptographicException>(() =>
                 AsnPrivateKeyDecoder.GetCurve25519PrivateKeyData(
                     pkcs8,
                     decoded => decodedPrivateKey = decoded));
@@ -172,6 +368,22 @@ public class PrivateKeyDecodingZeroingTests
         {
             CryptographicOperations.ZeroMemory(array);
         }
+    }
+
+    private static RSAParameters CreateRsaParameters(int modulusLength)
+    {
+        var halfLength = modulusLength / 2;
+        return new RSAParameters
+        {
+            Modulus = Enumerable.Repeat((byte)0x11, modulusLength).ToArray(),
+            Exponent = [0x01, 0x00, 0x01],
+            D = Enumerable.Repeat((byte)0x21, modulusLength).ToArray(),
+            P = Enumerable.Repeat((byte)0x31, halfLength).ToArray(),
+            Q = Enumerable.Repeat((byte)0x41, halfLength).ToArray(),
+            DP = Enumerable.Repeat((byte)0x51, halfLength).ToArray(),
+            DQ = Enumerable.Repeat((byte)0x61, halfLength).ToArray(),
+            InverseQ = Enumerable.Repeat((byte)0x71, halfLength).ToArray()
+        };
     }
 
     private static IEnumerable<byte[]> GetExistingPrivateArrays(RSAParameters parameters)
@@ -220,6 +432,22 @@ public class PrivateKeyDecodingZeroingTests
         writer.PopSequence();
         writer.WriteOctetString(innerWriter.Encode());
         writer.WriteNull();
+        writer.PopSequence();
+        return writer.Encode();
+    }
+
+    private static byte[] BuildCurve25519Pkcs8(byte[] privateKey)
+    {
+        var innerWriter = new AsnWriter(AsnEncodingRules.DER);
+        innerWriter.WriteOctetString(privateKey);
+
+        var writer = new AsnWriter(AsnEncodingRules.DER);
+        writer.PushSequence();
+        writer.WriteInteger(0);
+        writer.PushSequence();
+        writer.WriteObjectIdentifier(Oids.Ed25519);
+        writer.PopSequence();
+        writer.WriteOctetString(innerWriter.Encode());
         writer.PopSequence();
         return writer.Encode();
     }

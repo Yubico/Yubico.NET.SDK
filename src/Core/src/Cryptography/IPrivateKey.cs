@@ -28,12 +28,14 @@ public interface IPrivateKey : IKeyBase
     /// Exports the current key in the PKCS#8 PrivateKeyInfo format.
     /// </summary>
     /// <returns>
-    /// A byte array containing the PKCS#8 PrivateKeyInfo representation of this key.
+    /// A new caller-owned byte array containing the PKCS#8 PrivateKeyInfo representation of this
+    /// key. The caller must clear the array when it is no longer needed.
     /// </returns>
     public byte[] ExportPkcs8PrivateKey();
 
     /// <summary>
     /// Clears the buffers containing private key data.
     /// </summary>
+    /// <remarks>Callers should not use the key after clearing it.</remarks>
     public void Clear();
 }

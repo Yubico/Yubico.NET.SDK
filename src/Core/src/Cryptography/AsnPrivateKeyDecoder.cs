@@ -32,10 +32,10 @@ internal class AsnPrivateKeyDecoder
     /// ASN.1 DER-encoded private key.
     /// </summary>
     /// <param name="pkcs8EncodedKey">
-    /// The ASN.1 DER-encoded private key.
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="IPrivateKey"/>.
+    /// A new disposable private-key object that owns its decoded key material.
     /// </returns>
     /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the algorithm is not supported</exception>
@@ -83,10 +83,10 @@ internal class AsnPrivateKeyDecoder
     /// ASN.1 DER-encoded private key.
     /// </summary>
     /// <param name="pkcs8EncodedKey">
-    /// The ASN.1 DER-encoded private key.
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="Curve25519PrivateKey"/>.
+    /// A new disposable private-key object that owns its decoded key material.
     /// </returns>
     /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
     /// <exception cref="ArgumentException">Thrown if the algorithm is not <see cref="Oids.X25519"/> or 
@@ -98,9 +98,22 @@ internal class AsnPrivateKeyDecoder
         return Curve25519PrivateKey.CreateFromValue(privateKeyHandle.Data, keyType);
     }
 
+    /// <summary>
+    /// Decodes a Curve25519 private value and its key type from a PKCS#8 private key.
+    /// </summary>
+    /// <param name="pkcs8EncodedKey">
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
+    /// </param>
+    /// <returns>
+    /// A caller-owned 32-byte private-value array and the decoded key type. The caller must clear
+    /// the returned array when it is no longer needed.
+    /// </returns>
+    /// <exception cref="ArgumentException">The algorithm is not X25519 or Ed25519.</exception>
+    /// <exception cref="CryptographicException">The private-key encoding or length is invalid.</exception>
     public static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
         GetCurve25519PrivateKeyData(pkcs8EncodedKey, privateKeyDecoded: null);
 
+    // Test observation hook. The callback must not retain or mutate the decoded private value.
     internal static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(
         ReadOnlyMemory<byte> pkcs8EncodedKey,
         Action<byte[]>? privateKeyDecoded)
@@ -149,6 +162,18 @@ internal class AsnPrivateKeyDecoder
         }
     }
 
+    /// <summary>
+    /// Decodes elliptic-curve parameters from a PKCS#8 private key.
+    /// </summary>
+    /// <param name="pkcs8EncodedKey">
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
+    /// </param>
+    /// <returns>
+    /// Parameters containing caller-owned arrays. The caller must clear <see cref="ECParameters.D"/>
+    /// when the parameters are no longer needed.
+    /// </returns>
+    /// <exception cref="CryptographicException">The private-key encoding is invalid.</exception>
+    /// <exception cref="InvalidOperationException">The algorithm or curve is unsupported.</exception>
     public static ECParameters CreateECParameters(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
@@ -243,9 +268,22 @@ internal class AsnPrivateKeyDecoder
         };
     }
 
+    /// <summary>
+    /// Decodes RSA parameters from a PKCS#8 private key.
+    /// </summary>
+    /// <param name="pkcs8EncodedKey">
+    /// The borrowed ASN.1 DER-encoded private key. This method does not modify or clear the input.
+    /// </param>
+    /// <returns>
+    /// Parameters containing caller-owned arrays. The caller must clear the private parameter
+    /// arrays when they are no longer needed.
+    /// </returns>
+    /// <exception cref="CryptographicException">The private-key encoding is invalid.</exception>
+    /// <exception cref="InvalidOperationException">The algorithm is unsupported.</exception>
     public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
         CreateRSAParameters(pkcs8EncodedKey, parametersDecoded: null);
 
+    // Test observation hook. The callback must not retain or mutate the decoded private arrays.
     internal static RSAParameters CreateRSAParameters(
         ReadOnlyMemory<byte> pkcs8EncodedKey,
         Action<RSAParameters>? parametersDecoded)

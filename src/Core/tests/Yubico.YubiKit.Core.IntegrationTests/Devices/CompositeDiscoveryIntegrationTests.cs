@@ -175,6 +175,66 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task FindAllAsync_RepeatedScans_EventuallyExposeSerialNumberWithoutASession()
+    {
+        // Stage D' (R2): IYubiKey.SerialNumber surfaces the discovery-read serial with no session and
+        // no Management dependency. Non-SKY rig keys report serials, so every retained device must
+        // eventually expose a non-null value purely through the public interface member.
+        var devices = await ScanUntilAsync(scan => scan.All(d => d.SerialNumber is not null));
+
+        Assert.NotEmpty(devices);
+        Assert.All(devices, device => Assert.NotNull(device.SerialNumber));
+
+        // Serials on one rig are pairwise distinct - two published devices never share one.
+        var serials = devices.Select(d => d.SerialNumber!.Value).ToList();
+        Assert.Equal(serials.Count, serials.Distinct().Count());
+    }
+
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task SameDeviceAs_AcrossConsecutiveScans_CorrelatesEveryKeyExactlyOnce()
+    {
+        // Stage D' (R3): once serials are known, each device from scan 1 must correlate Same with
+        // exactly one device from scan 2 and Different with all others; within one scan, distinct
+        // physical keys must be Different. Retained objects additionally satisfy Same by reference.
+        var scan1 = await ScanUntilAsync(scan => scan.All(d => d.SerialNumber is not null));
+        var scan2 = await ScanUntilAsync(scan => scan.All(d => d.SerialNumber is not null));
+        Assert.NotEmpty(scan1);
+        Assert.Equal(scan1.Count, scan2.Count);
+
+        foreach (var device in scan1)
+        {
+            Assert.Equal(1, scan2.Count(other => device.SameDeviceAs(other) == DeviceCorrelation.Same));
+            Assert.Equal(
+                scan2.Count - 1,
+                scan2.Count(other => device.SameDeviceAs(other) == DeviceCorrelation.Different));
+        }
+
+        foreach (var device in scan1)
+            foreach (var sibling in scan1.Where(other => !ReferenceEquals(device, other)))
+                Assert.Equal(DeviceCorrelation.Different, device.SameDeviceAs(sibling));
+    }
+
+    /// <summary>
+    ///     Rescans (bounded attempts) until <paramref name="ready" /> holds, tolerating the four-worker
+    ///     metadata budget leaving early scans partially populated on larger rigs.
+    /// </summary>
+    private static async Task<IReadOnlyList<IYubiKey>> ScanUntilAsync(
+        Func<IReadOnlyList<IYubiKey>, bool> ready)
+    {
+        IReadOnlyList<IYubiKey> devices = [];
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+            if (devices.Count > 0 && ready(devices))
+                break;
+        }
+
+        return devices;
+    }
+
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     public async Task ConnectAsync_TypedTransports_OnEveryReturnedDevice_Succeed()
     {
         // Every returned device must honor its advertised interface set with a working typed connect

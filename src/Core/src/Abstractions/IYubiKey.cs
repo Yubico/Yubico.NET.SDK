@@ -52,11 +52,11 @@ public interface IYubiKey
     ///         different identifier for the same key. Both are correct.
     ///     </para>
     ///     <para>
-    ///         For a durable key — persistence, audit logs, allow lists — use the device serial number from
-    ///         <c>DeviceInfo.SerialNumber</c> instead. Note that reading it costs a connection and a
-    ///         Management exchange, and that it is <see langword="null" /> on devices which do not report a
-    ///         serial (for example Security Key series). Firmware version is deliberately not part of
-    ///         identity: it can differ per applet on the same key and is not a disambiguator.
+    ///         For a durable key — persistence, audit logs, allow lists — use <see cref="SerialNumber" />
+    ///         instead, and note that it is <see langword="null" /> until discovery has read it and on
+    ///         devices which do not report a serial (for example Security Key series). Firmware version is
+    ///         deliberately not part of identity: it can differ per applet on the same key and is not a
+    ///         disambiguator.
     ///     </para>
     ///     <para>
     ///         A grouped device identifier is distinct from the per-interface identifiers (<c>hid:*</c>,
@@ -73,6 +73,66 @@ public interface IYubiKey
     ///     group flag or <see cref="ConnectionType.All"/>.
     /// </summary>
     ConnectionType AvailableConnections { get; }
+
+    /// <summary>
+    ///     The hardware serial number read by discovery, or <see langword="null" /> while it is unknown.
+    ///     Available without opening a session and without a Management package dependency.
+    /// </summary>
+    /// <remarks>
+    ///     <para>Contract:</para>
+    ///     <list type="bullet">
+    ///         <item><description>
+    ///             <see langword="null" /> until a discovery metadata read has succeeded — and possibly
+    ///             forever: reads can fail persistently, the discovery read budget can be exhausted, and
+    ///             whole device classes (for example the Security Key series) report no serial at all.
+    ///         </description></item>
+    ///         <item><description>
+    ///             Once non-<see langword="null" />, it never reverts to <see langword="null" />. It may
+    ///             transition from <see langword="null" /> to a value after publication, without any
+    ///             device event.
+    ///         </description></item>
+    ///         <item><description>
+    ///             A republished device object (see the retention contract in
+    ///             <c>docs/architecture/device-identity.md</c>) never inherits the value from its
+    ///             predecessor object; it starts at <see langword="null" /> until discovery
+    ///             (re-)establishes it, which may be satisfied immediately from cached evidence for an
+    ///             unchanged interface set.
+    ///         </description></item>
+    ///         <item><description>
+    ///             The object delivered with a removal event retains its last-known value.
+    ///         </description></item>
+    ///     </list>
+    ///     <para>
+    ///         This is the only durable physical identity the SDK offers. When it is
+    ///         <see langword="null" />, physical identity is unknowable without a live session.
+    ///     </para>
+    /// </remarks>
+    int? SerialNumber => null;
+
+    /// <summary>
+    ///     Answers whether this reference and <paramref name="other" /> describe the same physical key.
+    ///     The answer is tri-state and never guesses: <see cref="DeviceCorrelation.Unknown" /> whenever
+    ///     either side's <see cref="SerialNumber" /> is unknown.
+    /// </summary>
+    /// <remarks>
+    ///     The same object is always <see cref="DeviceCorrelation.Same" />. Two references with known,
+    ///     equal serials are <see cref="DeviceCorrelation.Same" />; known, unequal serials are
+    ///     <see cref="DeviceCorrelation.Different" />. No equality comparer over this relation is
+    ///     offered: the serial arrives after publication, so any serial-derived hash could mutate while
+    ///     the object already keys a collection. Key collections by reference instead — instance
+    ///     retention within one manager makes that a supported pattern.
+    /// </remarks>
+    DeviceCorrelation SameDeviceAs(IYubiKey other)
+    {
+        ArgumentNullException.ThrowIfNull(other);
+
+        if (ReferenceEquals(this, other))
+            return DeviceCorrelation.Same;
+
+        return SerialNumber is { } ownSerial && other.SerialNumber is { } otherSerial
+            ? ownSerial == otherSerial ? DeviceCorrelation.Same : DeviceCorrelation.Different
+            : DeviceCorrelation.Unknown;
+    }
 
     /// <summary>
     ///     Whether this device can open the requested connection. Only concrete openable types are valid

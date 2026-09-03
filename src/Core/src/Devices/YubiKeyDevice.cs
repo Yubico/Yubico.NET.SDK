@@ -31,6 +31,7 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     private readonly IYubiKeyConnectionSlot? _hidFido;
     private readonly IYubiKeyConnectionSlot? _hidOtp;
     private DeviceInfoSnapshot? _deviceInfo;
+    private object? _serialNumber; // boxed int, published atomically as a reference
 
     internal YubiKeyDevice(
         string deviceId,
@@ -88,9 +89,24 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
         internal set
         {
             if (value is { } metadata)
+            {
                 Volatile.Write(ref _deviceInfo, new DeviceInfoSnapshot(metadata));
+
+                // The serial is latched independently of DeviceInfo churn: a later successful read
+                // whose metadata carries no serial (serial-less report, mid-reconfiguration read) must
+                // not regress an already-known serial to null. A different non-null serial does update
+                // the latch, mirroring the metadata healing behavior after a same-slot key swap.
+                if (metadata.SerialNumber is { } serial)
+                    Volatile.Write(ref _serialNumber, serial);
+            }
         }
     }
+
+    /// <summary>
+    ///     The latched hardware serial number per the <see cref="IYubiKey.SerialNumber" /> contract:
+    ///     null until a metadata read delivering a serial succeeds, monotonically non-null afterward.
+    /// </summary>
+    public int? SerialNumber => (int?)Volatile.Read(ref _serialNumber);
 
     internal bool IdentityReadBudgetConsumedThisScan { get; }
 

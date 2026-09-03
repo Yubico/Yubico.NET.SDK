@@ -124,8 +124,9 @@ integration); approval is recorded in the Assignment.
 
 #### Target shape
 
-One internal sealed slot type — working name `DeviceConnectionSlot` — constructed directly from a
-live enumerated `IPcscDevice` or `IHidDevice`:
+Two internal sealed slot types — `PcscConnectionSlot` and `HidConnectionSlot` — are constructed
+directly from live enumerated `IPcscDevice` and `IHidDevice` handles behind
+`IYubiKeyConnectionSlot`:
 
 - carries the live handle, the unchanged interface-id string, and its single `ConnectionType`;
 - absorbs the connection-creation logic of both wrappers (`SmartCard` via
@@ -149,12 +150,14 @@ read path keeps its current shape.
 
 #### Steps
 
-1. Introduce `DeviceConnectionSlot` implementing the narrowed `IYubiKeyConnectionSlot` and
-   `IDiscoveryConnectionProvider`, absorbing both wrappers' raw-open and discovery-connect logic.
+1. Introduce `PcscConnectionSlot` and `HidConnectionSlot` implementing the narrowed
+   `IYubiKeyConnectionSlot` and `IDiscoveryConnectionProvider`, absorbing their respective wrappers'
+   raw-open and discovery-connect logic.
    Byte-for-byte identical interface-id strings are a hard invariant: in-flight
    `DeviceConnectionRegistry` leases correlate across scans by these strings. Add unit tests that
    pin the exact production formats — `pcsc:{ReaderName}` and `hid:{ReaderName}:{Usage:X4}`
-   (upper-case hex, four digits) — against real `DeviceConnectionSlot` instances, not fakes.
+   (upper-case hex, four digits) — against real `PcscConnectionSlot` and `HidConnectionSlot`
+   instances, not fakes.
 2. Narrow `IYubiKeyConnectionSlot` (drop the `IYubiKey` base) and update `YubiKeyDevice`
    (`ValidateSlot`, slot fields, `TryResolveSlot`) for the narrowed contract. Retype the pre-merge
    identity-read pipeline entry points per the target shape above. The `ResolveInterfaceId`
@@ -181,7 +184,8 @@ read path keeps its current shape.
   `DeviceId` values, `PhysicalIdentityKey` encoding, and repository retention/metadata propagation
   are all byte-for-byte unchanged. Stage C deletes types, not behavior.
 - The identity-read budget, metadata cache keying/eviction, and discovery lease scope are
-  unchanged.
+  unchanged. Activity observed on any transport globally invalidates both identity and metadata
+  caches; the reported transport is diagnostic context, not an eviction scope.
 - No public API change. `IYubiKey` remains public and fakeable; applet modules stay coupled only to
   `IYubiKey` and `ConnectionType`.
 

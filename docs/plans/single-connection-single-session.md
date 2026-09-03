@@ -83,7 +83,9 @@ Requirements:
 - A connection holding all member IDs causes discovery on any member to be refused.
 - Preserve the existing internal discovery path that bypasses public connection leasing while holding its discovery lease.
 
-> **Superseded by Stage C (flat device model):** `PcscYubiKey`/`HidYubiKey` were replaced by the internal `DeviceConnectionSlot`; the paragraph below is kept as history.
+> **Superseded by Stage C (flat device model):** `PcscYubiKey`/`HidYubiKey` were replaced by internal
+> `PcscConnectionSlot`/`HidConnectionSlot` implementations behind `IYubiKeyConnectionSlot`; the paragraph
+> below is kept as history.
 
 Keep `PcscYubiKey` and `HidYubiKey` as pre-merge adapters that claim only their own `DeviceId`. The published `YubiKeyDevice` owns the complete sorted interface-ID set, claims it as one logical lease, and routes the requested connection type to exactly one adapter. Reuse the existing connection registration decorators and failure cleanup.
 

@@ -314,8 +314,8 @@ public class DiscoverySingleFlightTests
 
             ProtocolDeviceInfo.NotifyTransportActivity();
 
-            // Pre-fix this joined the in-flight read (and would have consumed its DeviceInfo); post-fix
-            // it is a new attempt that observes the still-held discovery lease and skips.
+            // A read from the new generation cannot join the in-flight read from the superseded generation.
+            // Its independent attempt observes the still-held discovery lease and skips.
             var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
                 ProtocolDeviceInfo.ReadBoundedAsync(
                     device,
@@ -338,10 +338,9 @@ public class DiscoverySingleFlightTests
     [Trait("Category", "RuntimeResilience")]
     public async Task ReadBoundedAsync_TransportActivityWhileQueuedForAdmission_FailsFastWithoutConnecting()
     {
-        // Queued identity reads wait (uncancelled by their caller's timeout) for a worker slot. With hung
-        // native reads holding all slots, every hotplug event used to be able to enqueue another orphaned
-        // waiter that would eventually open an interface its evidence no longer named. Transport activity
-        // must cancel superseded queued waits promptly - not leave them accumulating behind hung workers.
+        // Queued identity reads wait (uncancelled by their caller's timeout) for a worker slot. Transport
+        // activity cancels waits from superseded generations promptly, so they cannot accumulate behind
+        // hung workers or eventually open an interface their evidence no longer names.
         // The generation and the supersede token are captured as ONE immutable epoch, so no interleaving
         // of epoch reads and activity can produce a waiter holding an old generation with a token that
         // never fires; the double notification below leaves the queued read's epoch two generations stale

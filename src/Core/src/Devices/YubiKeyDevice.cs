@@ -99,11 +99,9 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
     ///     for transparent third-party or test implementations.
     /// </summary>
     /// <remarks>
-    ///     <see cref="DeviceId" /> names the evidence tier used by discovery, so it can flip while the
-    ///     physical key remains unchanged. The interface set does not flip merely because merge evidence
-    ///     changes. Canonical Python similarly fingerprints a transport path rather than the evidence tier,
-    ///     but explicitly documents that fingerprint as unstable across sessions and reinsertion; it is not
-    ///     durable identity.
+    ///     <see cref="DeviceId" /> names the evidence tier used by discovery, so it can change while the
+    ///     physical key remains unchanged. The interface set does not change merely because merge evidence
+    ///     changes; broader identity-policy comparisons belong in the architecture documentation.
     /// </remarks>
     internal static string PhysicalIdentityKeyFor(IYubiKey device) =>
         device is YubiKeyDevice published

@@ -52,12 +52,15 @@ either. **Hardware**: scan-time eviction only catches interfaces observed absent
 completing between scans reuses the slot-derived interface identifier — the old key's serial would be
 attributed to its same-model successor (key substitution). A physical swap cannot happen without the OS
 observing removal and arrival, so the device monitor forwards every listener event to
-`IFindYubiKeys.NotifyTransportActivity` at ingress, which discards that transport's cached identities
-before the rescan the event triggers. Eviction is per transport (HID activity does not discard PC/SC
-evidence, and vice versa). **Configuration**: each entry records the PID observed at read time, and a
+`IFindYubiKeys.NotifyTransportActivity` at ingress before the rescan the event triggers. Activity on any
+transport globally discards both identity and metadata caches; the reported transport is diagnostic
+context, not an eviction scope. A composite swap's events can arrive on one transport before another, so
+per-transport retention could combine evidence from the departed and replacement keys. **Configuration**:
+each entry records the PID observed at read time, and a
 hit under a different PID is a miss. Pinned by
 `FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial`,
-`NotifyTransportActivity_HidOnly_LeavesPcscIdentityCacheIntact`, and
+`FindAllAsync_SameSlotSwapWithTransportActivity_DoesNotServeStaleMetadata`,
+`NotifyTransportActivity_HidOnly_EvictsPcscIdentityEvidenceToo`, and
 `FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit`; the monitor wiring by
 `ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport`.
 
@@ -257,9 +260,11 @@ than closing it, and doubles metadata reads.
 
 ### G3: convergence
 
-Successful serial reads are cached per interface and evicted only when the interface disappears, so
-knowledge accumulates monotonically across scans. In practice a long-lived `YubiKeyManager` reaches
-complete grouping on the first scan and stays there.
+Successful serial reads are cached per interface and evicted when an interface disappears or any
+transport activity globally invalidates cached identity and metadata. Between invalidations, knowledge
+accumulates across scans. In practice a long-lived `YubiKeyManager` reaches complete grouping on the first
+scan and stays there until any HID or PC/SC hotplug activity invalidates it. Listener activity is
+transport-wide and can include devices other than YubiKeys.
 
 Convergence is conditional: it completes **provided each interface is eventually idle and
 identity-readable**. An interface held in use forever, or persistently unreadable, stays
@@ -292,8 +297,10 @@ evidence while it stays busy.
 
 The guarantee is: an in-use interface is attributed **once it first becomes idle AND a subsequent
 scan successfully reads its identity**; the cache retains that attribution thereafter, including
-across later periods of use. An interface that is in use from the moment of plug-in and never
-becomes idle is never attributed by serial — on Windows, topology attributes it anyway.
+across later periods of use, until transport activity invalidates it. If invalidation occurs while
+the interface is held by a live connection, discovery cannot re-read the serial and temporarily
+falls back to the remaining evidence. An interface that is in use from the moment of plug-in and
+never becomes idle is never attributed by serial — on Windows, topology attributes it anyway.
 
 ### G9: topology-read failure
 

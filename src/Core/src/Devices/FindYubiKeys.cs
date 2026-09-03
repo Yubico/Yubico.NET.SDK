@@ -26,8 +26,8 @@ public interface IFindYubiKeys
     Task<IReadOnlyList<IYubiKey>> FindAllAsync(ConnectionType type, CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Signals that hotplug activity was observed on a transport, so identity evidence cached from
-    ///     that transport's interfaces may describe hardware that is no longer there.
+    ///     Signals that hotplug activity was observed on a transport, so cached identity and metadata
+    ///     evidence may describe hardware that is no longer present.
     /// </summary>
     /// <param name="transport">
     ///     The transport family the activity was observed on — <see cref="ConnectionType.SmartCard" /> or
@@ -41,9 +41,10 @@ public interface IFindYubiKeys
     ///         and a cached serial from the old key would be attributed to the new one. For an SDK whose
     ///         consumers bind sessions to serial-derived identity, that is key substitution, not a stale
     ///         cache entry. Hotplug events are the signal that physical topology changed; implementations
-    ///         discard cached identity evidence and re-read on the next scan. The transport is diagnostic
-    ///         context, not an eviction scope: a composite key's swap can surface its events on one
-    ///         transport first, so evicting only that transport would mix two keys' evidence.
+    ///         discard cached identity and metadata evidence, supersede in-flight reads, and re-read on the
+    ///         next scan. The transport is diagnostic context, not an eviction scope: a composite key's
+    ///         swap can surface its events on one transport first, so evicting only that transport would
+    ///         mix two keys' evidence.
     ///     </para>
     ///     <para>
     ///         Default is a no-op so that test fakes and custom implementations without an identity cache
@@ -334,10 +335,11 @@ public class FindYubiKeys : IFindYubiKeys
         if (devices.Count == 0)
             return;
 
-        // Read best-effort metadata for each published key concurrently (bounded by one timeout, never blocks
-        // the merge result which is already computed). The hotplug generation is captured before the reads
-        // start so a read outliving a hotplug event cannot repopulate the just-cleared cache (the scan still
-        // publishes what it read; only the cached copy is dropped and re-read next scan).
+        // Read best-effort metadata for each published key concurrently. Grouping is already computed and
+        // does not depend on these results, but the bounded reads are awaited and may delay scan completion
+        // by up to the metadata budget. The hotplug generation is captured before the reads start so a read
+        // outliving a hotplug event cannot repopulate the just-cleared cache (the scan still publishes what
+        // it read; only the cached copy is dropped and re-read next scan).
         var generation = Volatile.Read(ref _cacheGeneration);
         var reads = devices.Select(async device =>
         {

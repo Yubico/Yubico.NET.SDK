@@ -69,10 +69,10 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
     {
         ThrowIfDisposed();
 
-        // Diffing is keyed by PHYSICAL identity — the set of interface paths a key occupies — and never by
-        // IYubiKey.DeviceId. A published device's DeviceId names the evidence tier that resolved the merge, so it
-        // flips when the surrounding evidence changes even though the key never moved (see
-        // YubiKeyDevice.PhysicalIdentityKeyFor). Diffing on it reported an unmoved key as Removed+Added.
+        // Diffing is keyed by physical identity — the set of interface paths a key occupies — and never by
+        // IYubiKey.DeviceId. DeviceId names the evidence tier that resolved the merge and may change while
+        // the interface set remains unchanged; the repository retains the existing object across those
+        // evidence changes so later removal remains correlated (see YubiKeyDevice.PhysicalIdentityKeyFor).
         var currentKeys = _deviceCache.Keys.ToHashSet();
         var newDeviceMap = new Dictionary<string, IYubiKey>();
 

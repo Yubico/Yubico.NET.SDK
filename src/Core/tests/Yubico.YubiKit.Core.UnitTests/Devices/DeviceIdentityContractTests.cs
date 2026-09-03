@@ -73,19 +73,6 @@ public class DeviceIdentityContractTests
         Assert.Equal(103, ((IYubiKey)device).SerialNumber);
     }
 
-    // The monotonic clause is non-null-ness, not value permanence: a later read reporting a
-    // DIFFERENT serial (same-slot key swap between scans) updates the exposed value, mirroring the
-    // existing DeviceInfo healing behavior.
-    [Fact]
-    public void SerialNumber_LaterMetadataWithDifferentSerial_TracksHardware()
-    {
-        var device = Published(deviceInfo: WithSerial(103));
-
-        device.DeviceInfo = WithSerial(125);
-
-        Assert.Equal(125, ((IYubiKey)device).SerialNumber);
-    }
-
     // CONTRACT PIN (R2): third-party IYubiKey implementations inherit a null default; the addition
     // is additive and non-breaking.
     [Fact]

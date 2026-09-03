@@ -94,8 +94,9 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
 
                 // The serial is latched independently of DeviceInfo churn: a later successful read
                 // whose metadata carries no serial (serial-less report, mid-reconfiguration read) must
-                // not regress an already-known serial to null. A different non-null serial does update
-                // the latch, mirroring the metadata healing behavior after a same-slot key swap.
+                // not regress an already-known serial to null. Any later serial-bearing metadata updates
+                // the latch; repository scan correlation prevents proven substitutions from reaching this
+                // retained-object update path.
                 if (metadata.SerialNumber is { } serial)
                     Volatile.Write(ref _serialNumber, serial);
             }

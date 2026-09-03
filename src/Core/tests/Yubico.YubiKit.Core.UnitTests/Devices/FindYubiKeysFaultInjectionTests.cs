@@ -216,18 +216,17 @@ public class FindYubiKeysFaultInjectionTests
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         The identity cache is keyed by per-interface DeviceId and evicted only when that interface
-    ///         is observed absent at scan time. A swap that completes <em>between</em> scans — key B
+    ///         The identity cache is keyed by per-interface DeviceId. Its scan-time eviction path runs when
+    ///         that interface is observed absent. A swap that completes <em>between</em> scans — key B
     ///         unplugged, a same-model key plugged into the same slot — reuses the same PC/SC reader name
     ///         (slot-derived) and the same HID path, so the interface is never observed absent and
     ///         scan-time eviction never fires. Without hotplug-driven invalidation, the new key inherits
     ///         the old key's serial: key substitution, found independently by two consultation runs.
     ///     </para>
     ///     <para>
-    ///         The physical swap cannot happen without the OS observing removal and arrival — the same
-    ///         events that trigger rescans — so those events are the invalidation signal.
-    ///         <see cref="IFindYubiKeys.NotifyTransportActivity" /> is what the device monitor calls at
-    ///         event ingress.
+    ///         Platform removal and arrival notifications are therefore the invalidation signal when they
+    ///         are delivered. <see cref="IFindYubiKeys.NotifyTransportActivity" /> is what the device monitor
+    ///         calls at event ingress.
     ///     </para>
     /// </remarks>
     [Fact]

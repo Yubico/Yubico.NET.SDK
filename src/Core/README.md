@@ -58,7 +58,10 @@ var fidoDevices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 `YubiKeyManager.StartMonitoring()` starts platform listeners and performs an initial repository rescan. Listener
 notifications are only rescan hints; public `YubiKeyManager.DeviceChanges` events are emitted after discovery
 updates the repository and computes an `Added` or `Removed` diff. This means an OS-level HID notification does
-not by itself mean a public YubiKey device was added or removed.
+not by itself mean a public YubiKey device was added or removed. Unchanged interface and connection sets retain
+their published object unless a fresh known serial proves that different hardware occupies the same interfaces;
+that substitution emits `Removed` for the predecessor followed by `Added` for the successor. Without a listener
+event or a scan that observes absence, same-interface cached identity cannot distinguish a replacement.
 
 ### Opening a Connection
 

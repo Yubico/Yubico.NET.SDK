@@ -92,11 +92,15 @@ public interface IYubiKey
     ///             device event.
     ///         </description></item>
     ///         <item><description>
+    ///             A manager-retained object's known value does not change to another known value. If a
+    ///             fresh scan reports a different known serial for the same interface set, the manager
+    ///             republishes the device as a removal followed by an addition.
+    ///         </description></item>
+    ///         <item><description>
     ///             A republished device object (see the retention contract in
-    ///             <c>docs/architecture/device-identity.md</c>) never inherits the value from its
-    ///             predecessor object; it starts at <see langword="null" /> until discovery
-    ///             (re-)establishes it, which may be satisfied immediately from cached evidence for an
-    ///             unchanged interface set.
+    ///             <c>docs/architecture/device-identity.md</c>) never inherits identity from its
+    ///             predecessor object. It exposes only what discovery established for that fresh object,
+    ///             which may already include a serial when the addition is published.
     ///         </description></item>
     ///         <item><description>
     ///             The object delivered with a removal event retains its last-known value.
@@ -117,10 +121,13 @@ public interface IYubiKey
     /// <remarks>
     ///     The same object is always <see cref="DeviceCorrelation.Same" />. Two references with known,
     ///     equal serials are <see cref="DeviceCorrelation.Same" />; known, unequal serials are
-    ///     <see cref="DeviceCorrelation.Different" />. No equality comparer over this relation is
-    ///     offered: the serial arrives after publication, so any serial-derived hash could mutate while
-    ///     the object already keys a collection. Key collections by reference instead — instance
-    ///     retention within one manager makes that a supported pattern.
+    ///     <see cref="DeviceCorrelation.Different" />. This three-valued correlation is not a total
+    ///     equality predicate: <see cref="DeviceCorrelation.Unknown" /> conveys neither equality nor
+    ///     inequality and must not be coerced to either result for collection equality or deduplication.
+    ///     No equality comparer over this relation is offered: the serial arrives after publication, so
+    ///     any serial-derived hash could mutate while the object already keys a collection. Key
+    ///     collections by reference instead — instance retention within one manager makes that a
+    ///     supported pattern.
     /// </remarks>
     DeviceCorrelation SameDeviceAs(IYubiKey other)
     {

@@ -39,9 +39,9 @@ The comparison below was made against `yubikey-manager-rust-auto` commit `7d7a74
   device, including cached metadata.
 - Rust correlates monitor snapshots by serial when both sides have one, otherwise by any shared transport
   path (`crates/yubikit/src/platform/monitor.rs:1243-1255,1526-1534`). This tolerates an interface being
-  added or removed. The C# repository instead requires equality of the complete interface set, which is
-  stricter and helps prevent same-slot key substitution but causes a discontinuity during partial
-  enumeration.
+  added or removed. The C# repository instead requires equality of the complete interface set and treats
+  different known serials as contradictory evidence. This is stricter during partial enumeration and
+  republishes a same-slot substitution once discovery obtains the successor's serial.
 - Python's fingerprint is the first non-empty value of `reader_name or hid_path or fido_path`
   (`packages/yubikit/yubikit/device.py:201-231`). Its public contract explicitly says the fingerprint is
   not stable between sessions or after unplugging and reinserting a device
@@ -75,16 +75,18 @@ session and without a Management package dependency. It is a default interface m
   series) report no serial at all.
 - Once non-`null`, it never reverts to `null`. The value is latched independently of internal
   `DeviceInfo` churn: a later successful read whose metadata carries no serial cannot regress it.
+- A manager-retained object's known serial does not change to another known value. A fresh scan reporting
+  a different known serial for the same interface set proves substitution and republishes a new object.
 - It may transition `null` → non-`null` after publication, without any device event
   (`UpdateCache_LateSerialArrival_PopulatesRetainedObjectWithoutEvents`).
-- A republished object never inherits the value from its predecessor object. It starts at `null`
-  until discovery (re-)establishes it — which, for an unchanged interface set within one manager, may
-  be satisfied immediately from cached evidence
+- A republished object never inherits identity from its predecessor object. It exposes only what discovery
+  established for that fresh object, which may already include a serial when the addition is published
   (`UpdateCache_ConnectionSetChangeRepublication_NewObjectDoesNotInheritSerial`).
 - The object delivered with a removal event retains its last-known value
   (`UpdateCache_RemovalEvent_ObjectRetainsLastKnownSerial`).
 
-Every clause is pinned by `DeviceIdentityContractTests`.
+The clauses are pinned by `DeviceIdentityContractTests` and
+`YubiKeyDeviceRepositoryCompositeTests`.
 
 Full `DeviceInfo` exposure remains rejected for now: its fields (enabled capabilities, flags,
 configuration) are mutable via Management reconfiguration, so a cached copy can go stale. Canonical
@@ -95,21 +97,25 @@ burned-in hardware identity.
 
 ### D3: instance retention and republication are contract
 
-Within one manager instance, an attached physical key whose interface set is unchanged is represented
-by exactly one retained `IYubiKey` object across scans (stage D', R1). Reference-keyed collections —
-`Dictionary<IYubiKey, T>`, `HashSet<IYubiKey>` — are therefore a supported in-process pattern
+Within one manager instance, an attached physical key whose interface and connection sets are unchanged
+and whose known serial is not contradicted is represented by exactly one retained `IYubiKey` object across
+scans (stage D', R1). Reference-keyed collections — `Dictionary<IYubiKey, T>`, `HashSet<IYubiKey>` — are
+therefore a supported in-process pattern
 (`UpdateCache_UnchangedInterfaceSet_ReferenceKeyedDictionaryRemainsValidAcrossScans`).
 
 A device is instead republished as `Removed` + `Added` — delivering a **new object** that inherits
-nothing from its predecessor — in exactly three cases, each pinned in
+nothing from its predecessor — in exactly four cases, each pinned in
 `YubiKeyDeviceRepositoryCompositeTests`:
 
 1. **Interface-set change** — an interface appears or disappears, including merger rule G6 partial
    enumeration (`UpdateCache_InterfaceSetChanged_RepublishesAsNewObject`).
 2. **Connection-set change** over an unchanged interface set (ISC-17;
-   `UpdateCache_ConnectionSetChangedSameInterfaceSet_RepublishesAsNewObject`).
+   `UpdateCache_ConnectionSetChangedSameInterfaceSet_RepublishesOnce`).
 3. **Reinsertion** observed across scans
    (`UpdateCache_ReinsertionObservedAcrossScans_PublishesNewObject`).
+4. **Known-serial substitution** — unchanged interface and connection sets, but a fresh scan reports a
+   different known serial
+   (`UpdateCache_DifferentKnownSerials_RepublishesDifferentDevice`).
 
 The guarantee is scoped to one manager instance and one uninterrupted physical presence. It does not
 survive `ShutdownAsync`, process restart, or independent repositories.
@@ -135,14 +141,22 @@ Documentation and source comments must not call canonical Python's fingerprint d
 reinsertion. The relevant narrow similarity is only that path identity is independent of the evidence tier
 used to group a scan.
 
-### D5: repository correlation policy — decided: complete interface-set equality
+### D5: repository correlation policy — decided: stable sets without serial contradiction
 
-Stage D' closes this question: complete interface-set equality **is** the retention contract (D3).
-Canonical Rust's serial-first, any-shared-path correlation is rejected for this SDK because it
-weakens substitution safety — a same-slot key swap would be silently correlated as continuity — and
-because mixed-evidence correlation (serial when available, path fallback otherwise) is intransitive
-and cannot back an honest public contract. The discontinuity during partial enumeration is the
-accepted, documented cost; it is exactly republication trigger 1.
+Stage D' closes this question: equality of the complete interface and connection sets, guarded by
+known-serial contradiction, is the retention contract (D3). Interface-set equality detects an observed
+absence or changed interface shape; when neither is observed, different known serials are the substitution
+backstop. Canonical Rust's serial-first, any-shared-path correlation is rejected for this SDK because it
+deliberately tolerates interface churn and because mixed-evidence correlation (serial when available, path
+fallback otherwise) is intransitive and cannot back the exact retention scope promised here. The
+discontinuity during partial enumeration is the accepted, documented cost; it is exactly republication
+trigger 1.
+
+This backstop depends on fresh evidence. If no transport-activity notification invalidates discovery's
+identity and metadata caches and no scan observes the slot empty, a same-slot successor can receive its
+predecessor's cached serial. The repository then has no contradictory evidence and cannot distinguish the
+swap. A direct caller orchestrating removal and insertion must scan while the slot is empty or restart the
+manager; forcing only a post-insertion scan does not invalidate same-interface cache entries.
 
 ### D6: `Equals`/`GetHashCode` on published device objects remain referential — decided
 

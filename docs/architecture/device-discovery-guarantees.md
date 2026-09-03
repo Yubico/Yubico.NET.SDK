@@ -50,28 +50,32 @@ concept); failures and null serials are retried on later scans. This is pinned b
 A cached identity is evidence about specific hardware in a specific configuration, and it expires with
 either. **Hardware**: scan-time eviction only catches interfaces observed absent, and a same-slot swap
 completing between scans reuses the slot-derived interface identifier — the old key's serial would be
-attributed to its same-model successor (key substitution). A physical swap cannot happen without the OS
-observing removal and arrival, so the device monitor forwards every listener event to
-`IFindYubiKeys.NotifyTransportActivity` at ingress before the rescan the event triggers. Activity on any
-transport globally discards both identity and metadata caches; the reported transport is diagnostic
-context, not an eviction scope. A composite swap's events can arrive on one transport before another, so
-per-transport retention could combine evidence from the departed and replacement keys. **Configuration**:
-each entry records the PID observed at read time, and a hit under a different PID is a miss. Pinned by
+attributed to its same-model successor (key substitution). When a platform listener reports removal or
+arrival, the device monitor forwards that activity to `IFindYubiKeys.NotifyTransportActivity` at ingress
+before the rescan the event triggers. Activity on any transport globally discards both identity and
+metadata caches; the reported transport is diagnostic context, not an eviction scope. A fresh different
+serial then makes the repository republish the successor rather than mutate the retained predecessor. A
+composite swap's events can arrive on one transport before another, so per-transport retention could
+combine evidence from the departed and replacement keys. **Configuration**: each entry records the PID
+observed at read time, and a hit under a different PID is a miss. Pinned by
 `FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial`,
 `FindAllAsync_SameSlotSwapWithTransportActivity_DoesNotServeStaleMetadata`,
 `NotifyTransportActivity_HidOnly_EvictsPcscIdentityEvidenceToo`, and
 `FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit`; the monitor wiring by
 `ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport`.
 
-Documented bound: without monitoring running there are no listener events, and staleness detection
-degrades to scan-observed absence. Consumers driving `FindAllAsync` directly across a physical swap
-they orchestrated themselves should force a rescan after replugging.
+Documented bound: if no listener event reports the change, staleness detection degrades to scan-observed
+absence. A forced scan only after replugging does not invalidate same-interface cache entries. Consumers
+driving `FindAllAsync` directly across a physical swap they orchestrated themselves should force a scan
+while the slot is empty before replugging, or restart `YubiKeyManager` to discard the caches.
 
 Hardware evidence and its limit: an operator-coordinated port swap of two same-model keys (the
 reader-name-reuse shape behind the substitution hazard) re-published both under their correct serial
 identities with monitoring running. A hand-timed swap necessarily spans scan intervals, so scan-observed
 absence also fires; the between-scan timing that only the event-driven eviction catches is covered
-deterministically by the fault-injection vectors above.
+deterministically by the fault-injection vectors above, and repository republication on fresh contradictory
+serial evidence is pinned by
+`UpdateCache_DifferentKnownSerials_RepublishesDifferentDevice`.
 
 ## Device identity: what `DeviceId` does and does not promise
 

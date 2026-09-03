@@ -106,6 +106,69 @@ public class YubiKeyDeviceRepositoryCompositeTests
     }
 
     [Fact]
+    public void UpdateCache_DifferentKnownSerials_RepublishesDifferentDevice()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var oldMetadata = default(DeviceInfo) with { SerialNumber = 103 };
+        var existing = Published("ykphysical:103", "pcsc:a", "hid-fido:a", oldMetadata);
+        repository.UpdateCache([existing]);
+
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
+        var updatedMetadata = default(DeviceInfo) with { SerialNumber = 125 };
+        var updated = Published("ykphysical:125", "pcsc:a", "hid-fido:a", updatedMetadata);
+
+        Assert.Equal(existing.PhysicalIdentityKey, updated.PhysicalIdentityKey);
+        Assert.Equal(existing.AvailableConnections, updated.AvailableConnections);
+
+        repository.UpdateCache([updated]);
+
+        Assert.Collection(
+            events,
+            removed =>
+            {
+                Assert.Equal(DeviceAction.Removed, removed.Action);
+                Assert.Same(existing, removed.Device);
+            },
+            added =>
+            {
+                Assert.Equal(DeviceAction.Added, added.Action);
+                Assert.Same(updated, added.Device);
+            });
+        Assert.Same(updated, Assert.Single(repository.GetAll()));
+        Assert.Equal(oldMetadata, existing.DeviceInfo);
+        Assert.Equal(103, existing.SerialNumber);
+    }
+
+    [Fact]
+    public void UpdateCache_KnownSerialContradiction_DoesNotTrustCustomCorrelationOverride()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        IYubiKey existing = new CorrelationOverridingYubiKey("same-interface", serialNumber: 103);
+        IYubiKey updated = new CorrelationOverridingYubiKey("same-interface", serialNumber: 125);
+        repository.UpdateCache([existing]);
+
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
+
+        repository.UpdateCache([updated]);
+
+        Assert.Collection(
+            events,
+            removed =>
+            {
+                Assert.Equal(DeviceAction.Removed, removed.Action);
+                Assert.Same(existing, removed.Device);
+            },
+            added =>
+            {
+                Assert.Equal(DeviceAction.Added, added.Action);
+                Assert.Same(updated, added.Device);
+            });
+        Assert.Same(updated, Assert.Single(repository.GetAll()));
+    }
+
+    [Fact]
     public void UpdateCache_OnePhysicalDevice_EmitsSingleAddedNotPerInterface()
     {
         using var repository = new YubiKeyDeviceRepository();
@@ -257,9 +320,10 @@ public class YubiKeyDeviceRepositoryCompositeTests
 
     // ---------------------------------------------------------------------------------------------
     // Stage D' retention contract (docs/architecture/device-identity.md): within one manager, an
-    // attached key whose interface set is unchanged is represented by exactly one retained object
-    // across scans. Republication as Removed+Added (a NEW object) happens in exactly three cases:
-    // interface-set change, connection-set change, and reinsertion observed across scans.
+    // attached key whose interface and connection sets are unchanged and whose known serial is not
+    // contradicted is represented by exactly one retained object across scans. Republication as
+    // Removed+Added (a NEW object) happens on interface-set change, connection-set change, reinsertion
+    // observed across scans, or a different known serial proving substitution on otherwise unchanged sets.
     // ---------------------------------------------------------------------------------------------
 
     // CONTRACT PIN (R1): reference-keyed collections are a supported in-process pattern.
@@ -289,8 +353,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         var twoInterfaces = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([twoInterfaces]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // The same physical key now also enumerates its OTP interface: the interface set changed.
         var threeInterfaces = new YubiKeyDevice(
@@ -311,8 +375,12 @@ public class YubiKeyDeviceRepositoryCompositeTests
 
     // CONTRACT PIN (R1, trigger 2): a connection-set change over an UNCHANGED interface set also
     // republishes as a new object (ISC-17) - production-shaped variant of the FakeYubiKey test above.
-    [Fact]
-    public void UpdateCache_ConnectionSetChangedSameInterfaceSet_RepublishesAsNewObject()
+    [Theory]
+    [InlineData(103, 103)]
+    [InlineData(103, 125)]
+    public void UpdateCache_ConnectionSetChangedSameInterfaceSet_RepublishesOnce(
+        int existingSerial,
+        int updatedSerial)
     {
         using var repository = new YubiKeyDeviceRepository();
         var fidoShape = new YubiKeyDevice(
@@ -320,7 +388,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
             smartCard: null,
             new FakeSlot("hid:a", ConnectionType.HidFido),
             hidOtp: null,
-            deviceInfo: null);
+            default(DeviceInfo) with { SerialNumber = existingSerial });
         repository.UpdateCache([fidoShape]);
 
         var events = new List<DeviceEvent>();
@@ -332,7 +400,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
             smartCard: null,
             hidFido: null,
             new FakeSlot("hid:a", ConnectionType.HidOtp),
-            deviceInfo: null);
+            default(DeviceInfo) with { SerialNumber = updatedSerial });
         Assert.Equal(
             YubiKeyDevice.PhysicalIdentityKeyFor(fidoShape),
             YubiKeyDevice.PhysicalIdentityKeyFor(otpShape));
@@ -401,5 +469,17 @@ public class YubiKeyDeviceRepositoryCompositeTests
     {
         public string InterfaceId { get; } = deviceId;
         public ConnectionType ConnectionType { get; } = connectionType;
+    }
+    private sealed class CorrelationOverridingYubiKey(string deviceId, int serialNumber) : IYubiKey
+    {
+        public string DeviceId { get; } = deviceId;
+        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+        public int? SerialNumber { get; } = serialNumber;
+
+        public DeviceCorrelation SameDeviceAs(IYubiKey other) => DeviceCorrelation.Same;
+
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
+            where TConnection : class, IConnection =>
+            throw new NotSupportedException();
     }
 }

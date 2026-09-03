@@ -228,10 +228,11 @@ machinery. Decided and shipped (see `docs/architecture/device-identity.md` for t
 and the full contract, each clause pinned by `DeviceIdentityContractTests` and the retention pins in
 `YubiKeyDeviceRepositoryCompositeTests`):
 
-- **Retention is contract (R1).** Interface-set equality is the repository correlation policy;
-  serial-first shared-path correlation is rejected. One retained `IYubiKey` object per attached key
-  with an unchanged interface set; republication as a new object happens on exactly three triggers:
-  interface-set change, connection-set change, reinsertion.
+- **Retention is contract (R1).** Equality of the complete interface and connection sets plus a known-serial
+  contradiction guard is the repository correlation policy; serial-first shared-path correlation is
+  rejected. One retained `IYubiKey` object per attached key with unchanged sets and no contradictory known
+  serial; republication as a new object happens on exactly four triggers: interface-set change,
+  connection-set change, reinsertion, or a different known serial proving same-slot substitution.
 - **`IYubiKey.SerialNumber` (R2).** The discovery-read serial is public, session-free, and
   Management-free, under an explicit nullability/lifetime contract, added as a default interface
   member so external implementers do not break.

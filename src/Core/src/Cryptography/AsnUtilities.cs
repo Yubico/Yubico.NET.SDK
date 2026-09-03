@@ -82,7 +82,7 @@ internal static class AsnUtilities
     /// The caller owns the returned buffer and is responsible for zeroing it when it contains
     /// sensitive material.
     /// </remarks>
-    public static byte[] GetOwnedIntegerBytes(ReadOnlySpan<byte> value)
+    public static byte[] GetOwnedIntegerContentOctets(ReadOnlySpan<byte> value)
     {
         if (value.IsEmpty)
         {

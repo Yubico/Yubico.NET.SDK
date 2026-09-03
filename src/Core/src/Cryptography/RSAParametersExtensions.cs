@@ -57,8 +57,6 @@ public static class RSAParametersExtensions
         this RSAParameters parameters,
         Action<RSAParameters>? parametersCopied)
     {
-        // The input arrays remain caller-owned. Only the arrays created by this DeepCopy may be
-        // replaced and cleared below.
         var normalized = parameters.DeepCopy();
         try
         {

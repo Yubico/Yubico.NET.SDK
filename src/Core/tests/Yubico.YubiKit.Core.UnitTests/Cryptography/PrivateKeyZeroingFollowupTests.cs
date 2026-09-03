@@ -20,28 +20,28 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 public class PrivateKeyZeroingFollowupTests
 {
     [Fact]
-    public void EncodeToPkcs8_Rsa_ZeroesOwnedEncodingBuffersAndPreservesCallerKey()
+    public void EncodeToPkcs8_Rsa_ZeroesTemporaryBuffersAndPreservesCallerKey()
     {
         using var rsa = RSA.Create(2048);
         var parameters = rsa.ExportParameters(includePrivateParameters: true);
         RSAParameters decoded = default;
         byte[]? pkcs8 = null;
         byte[]? encodedPkcs1 = null;
-        List<byte[]> integerBuffers = [];
+        List<byte[]> integerContents = [];
 
         try
         {
             pkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(
                 parameters,
-                integerBufferEncoded: integerBuffers.Add,
+                integerContentCreated: integerContents.Add,
                 rsaKeyEncoded: value => encodedPkcs1 = value);
 
-            Assert.Equal(8, integerBuffers.Count);
-            AssertAllZero(integerBuffers);
+            Assert.Equal(8, integerContents.Count);
+            AssertAllZero(integerContents);
             AssertAllZero([Assert.IsType<byte[]>(encodedPkcs1)]);
 
             var survivingD = Assert.IsType<byte[]>(parameters.D);
-            Assert.NotSame(integerBuffers[2], survivingD);
+            Assert.NotSame(integerContents[2], survivingD);
             AssertContainsNonZero(survivingD);
 
             using var check = RSA.Create();

@@ -241,20 +241,33 @@ and the full contract, each clause pinned by `DeviceIdentityContractTests` and t
 - **Referential `Equals`/`GetHashCode` and transport-shaped one-slot `DeviceId` are decided, not
   deferred** — recorded with rationale in the architecture document.
 
-**Still open — bounded metadata-read retries (R4).** Persistently failing metadata reads currently
-retry every scan interval. The bounded-retry policy remains gated on the original preconditions:
+**R4 — bounded metadata-read retries: decided 2026-09-03, retry-every-scan stands.** Both
+preconditions were completed on hardware (macOS, two composite USB 0x0407 keys with serials 103 and
+31683481, HID Global OMNIKEY 5022 NFC reader, YubiKey 5 NFC serial 125):
 
-1. Measure hardware latency of `PopulateMetadataAsync` for one-slot USB and NFC devices — including the
-   lone-NFC-key case where the metadata read fails persistently and is retried on every scan. This cost
-   grew after `NotifyTransportActivity` switched to full cache eviction (transport activity now discards
-   all cached metadata, so every hotplug event re-triggers these reads on the next scan).
-2. Decide whether persistently failing metadata reads need per-identity backoff, or whether
-   retry-every-scan remains acceptable at measured latencies.
+1. **Measured latencies.** Cold 3-key scan (2 USB composites + 1 NFC key, all serials resolved):
+   260–580 ms. Warm scans with populated identity/metadata caches: 1–3 ms. Post-hotplug full cache
+   eviction: serial re-read completed within the same scan (~250 ms; the serial was already present
+   on the published object at the `Added` event). Cold-cache serial availability on a single-key
+   rig: 79–264 ms.
+2. **Persistent-failure exposure is narrower than feared.** A non-YubiKey card on an NFC reader
+   (credit card) is rejected by the ATR allow-list in `FindPcscDevices` before any budgeted read —
+   per-scan cost ~0. A YubiKey with all NFC applications disabled takes its NFC transport silent
+   entirely and is not enumerated — cost 0. On current firmware the Management applet cannot be
+   disabled while the NFC transport is up, so a published-but-persistently-unreadable NFC YubiKey is
+   not manufacturable by configuration; cross-process reader contention fails fast with a sharing
+   violation. The remaining failure path — a published USB device whose identity read fails — costs
+   at most `DiscoveryIdentityReader.MaxAttempts` (3) fail-fast connect attempts per scan, constant
+   across scans, worst-case bounded by the per-scan budgets (2 s identity / 3 s metadata, never
+   stacked).
 
-The intended shape once the numbers are decided: a per-physical-identity failure ledger in
-`FindYubiKeys` with a capped cross-scan backoff, reset by `NotifyTransportActivity` and absence
-eviction, pinned by no-hardware fault-injection tests counting connect attempts across simulated
-scans.
+**Decision:** retry-every-scan remains the policy; no per-identity backoff ledger is added. The
+bound is pinned mechanically by
+`FindYubiKeysFaultInjectionTests.FindAllAsync_PersistentIdentityFailureAcrossScans_PerScanAttemptsStayConstant_Pin`
+(constant per-scan attempt count under persistent failure, healthy siblings unaffected, no hardware
+required, never self-skips). If future hardware changes the numbers, the fallback design remains: a
+per-physical-identity failure ledger in `FindYubiKeys` with a capped cross-scan backoff, reset by
+`NotifyTransportActivity` and absence eviction.
 
 ## Hardware protocol for deferred hot-plug checks
 

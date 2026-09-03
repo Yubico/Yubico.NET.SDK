@@ -1,7 +1,8 @@
 # Device identity and physical-device correlation
 
-**Status:** accepted; stage D' identity contract decided and shipped (bounded metadata retries remain
-gated on hardware measurements — see the stage D' section of `docs/plans/flat-device-model.md`)
+**Status:** accepted; stage D' identity contract decided and shipped, including the metadata-retry
+policy (retry-every-scan, measured and pinned — see the stage D' section of
+`docs/plans/flat-device-model.md`)
 
 ## Context
 
@@ -198,12 +199,30 @@ stable consecutive grouping, eventual metadata propagation across repeated scans
 opens. This validates complete serial-tier grouping and retained-object metadata propagation on the current
 five-key/four-worker rig; it does not validate hot-plug transitions.
 
+On 2026-09-03, the deferred hot-plug protocol ran on macOS with a human operator (single composite
+USB key, PID `0x0407`, serial `103`, 1 s monitoring interval). One remove/reinsert cycle produced a
+clean `Added` → `Removed` → `Added` timeline with no spurious intermediate events (the question-8
+phantom `Added` did not reproduce). All stage D' clauses held on hardware: the `Removed` event
+delivered the exact retained object with its last-known serial; reinsertion published a new object;
+the serial was re-established from hardware after full hotplug cache eviction within the same scan;
+and `SameDeviceAs` correlated the pre- and post-reinsertion objects as `Same` in both directions.
+The same session ran the R4 latency measurements on a 3-key rig (two USB composites plus an OMNIKEY
+5022 NFC reader) — the numbers and the resulting retry-policy decision are recorded in the stage D'
+section of `docs/plans/flat-device-model.md`. The repeatable harness is
+`HotPlugIdentityContractTests` (`RequiresUserPresence`; one filtered test per invocation, operator
+present); it passed the full ceremony the same day. Open observation: one earlier ceremony where the
+harness awaited only the event stream (no concurrent `FindAllAsync` polling) missed a
+human-confirmed removal under the VSTest host, while the identical sequence in a console host
+detected it. Not reproduced with diagnostics yet; the harness now polls the snapshot alongside the
+event stream and records which layer observed the removal, so a recurrence will localize itself.
+
 ## Consequences and follow-ups
 
 - The flat published-device model, retained-object metadata propagation, and the stage D' identity
   contract (D2, D3, D5, D6, D7) are implemented and pinned by deterministic tests.
-- Bounded retries for persistently failing metadata reads remain gated on hardware latency
-  measurements and a policy decision — see the stage D' section of `docs/plans/flat-device-model.md`.
+- Metadata-read retry policy is decided with hardware evidence: retry-every-scan, bounded by the
+  per-scan attempt cap and read budgets, pinned by the constant-attempts fault-injection test — see
+  the stage D' section of `docs/plans/flat-device-model.md` for the measurements.
 - A derived product name ("YubiKey 5C NFC"-style, per Rust's `name()` convenience) is deferred: it
   requires the PID/version/form-factor naming table.
 - Reproduce the hot-plug observations with one narrowly filtered test per invocation and a human ready to

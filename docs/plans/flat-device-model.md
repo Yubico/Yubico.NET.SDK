@@ -4,8 +4,8 @@
 
 Stages A and B are complete (commit `fa54aeea`). Stage C was approved on 2026-09-02 and executes on
 branch `yubikit-flat-device-model-v2` through the autonomous Craftsman workflow. Stage D was resolved
-as the stage D' device identity contract (branch `yubikit-device-identity-contract`); only its
-bounded-metadata-retry follow-up remains gated on hardware measurements. The feature slice is Core
+as the stage D' device identity contract (branch `yubikit-device-identity-contract`), with all
+preconditions and the bounded-metadata-retry policy completed on 2026-09-03. The feature slice is Core
 device discovery, connection routing, repository correlation, its tests, and the corresponding
 architecture documentation.
 
@@ -221,7 +221,7 @@ dotnet toolchain.cs -- test --integration --project Piv \
 Read per-project `total:` values, not the closing project-count summary. Run `dotnet format` only
 over changed files. No `RequiresUserPresence` tests.
 
-### Stage D': device identity contract (shipped, except bounded metadata retries)
+### Stage D': device identity contract (shipped)
 
 Stage D was resolved as stage D' — a documented, honest identity contract rather than new identity
 machinery. Decided and shipped (see `docs/architecture/device-identity.md` for the decision records

@@ -186,9 +186,10 @@ it: `ykphysical:*` appears only when grouping evidence proved a physical key.
    differs because one contains all observed interface identifiers and the other contains one identifier.
 7. **Can discovery cache serials for removal events?** Yes — shipped: the object delivered with a
    removal event retains its last-known `SerialNumber` (D2).
-8. **Was the untouched-key `Added` event a defect?** Not independently reproduced. A G6 one-slot record and
-   a complete multi-slot record have different interface-set keys, so a legitimate `Removed` plus `Added` is a
-   plausible explanation. Verification requires a human-coordinated hot-plug run.
+8. **Was the untouched-key `Added` event a defect?** Did not reproduce during the 2026-09-03 human-coordinated
+   hardware hot-plug run, which showed a clean `Added` → `Removed` → `Added` timeline. A G6 one-slot record
+   and a complete multi-slot record have different interface-set keys, so a legitimate `Removed` plus `Added`
+   remains the plausible explanation for earlier multi-key observations.
 
 ## Hardware evidence
 
@@ -225,5 +226,6 @@ event stream and records which layer observed the removal, so a recurrence will 
   the stage D' section of `docs/plans/flat-device-model.md` for the measurements.
 - A derived product name ("YubiKey 5C NFC"-style, per Rust's `name()` convenience) is deferred: it
   requires the PID/version/form-factor naming table.
-- Reproduce the hot-plug observations with one narrowly filtered test per invocation and a human ready to
-  remove or insert hardware. Never run the whole user-presence category as a blocking lane.
+- Run the repeatable `HotPlugIdentityContractTests` ceremony (`RequiresUserPresence`) as one narrowly
+  filtered test per invocation with a human ready to remove or insert hardware. Never run the whole
+  user-presence category as a blocking lane.

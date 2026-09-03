@@ -145,12 +145,8 @@ public class TlvHelperTests
     }
 
     /// <summary>
-    ///     Pins the header arithmetic that makes <see cref="Tlv.TotalLength" /> trustworthy as the
-    ///     sole size input to <see cref="TlvHelper.EncodeList" />. The expected size is spelled out
-    ///     here rather than read back off the Tlv, so this fails if either the length-field encoding
-    ///     in <see cref="Tlv" /> or the meaning of TotalLength changes.
-    ///     An undersized TotalLength would make EncodeList throw; an oversized one would silently
-    ///     zero-pad its output.
+    ///     Verifies the invariant that total output length is exact because <see cref="Tlv.TotalLength" />
+    ///     equals the encoded span length.
     /// </summary>
     [Theory]
     [InlineData(0x5A, 0x00, 2)]   // 1 tag + 1 short-form length
@@ -164,6 +160,7 @@ public class TlvHelperTests
     {
         using var tlv = new Tlv(tag, new byte[valueLength]);
 
+        // These literal sizes stay independent of the production TotalLength implementation.
         Assert.Equal(headerLength + valueLength, tlv.TotalLength);
     }
 
@@ -196,5 +193,31 @@ public class TlvHelperTests
         var encoded = TlvHelper.EncodeList([]);
 
         Assert.True(encoded.IsEmpty);
+    }
+
+    [Fact]
+    public void EncodeAndDisposeList_WithNullArray_ThrowsArgumentNullException()
+    {
+        var exception = Assert.Throws<ArgumentNullException>(() => TlvHelper.EncodeAndDisposeList(null!));
+
+        Assert.Equal("tlvData", exception.ParamName);
+    }
+
+    [Fact]
+    public void EncodeAndDisposeList_WithNullElement_DisposesAllNonNullTlvs()
+    {
+        using var first = new Tlv(0x5A, [0xAA]);
+        using var sensitiveLater = new Tlv(0x5B, [0x10, 0x20, 0x30]);
+        var tlvs = new Tlv[] { first, null!, sensitiveLater };
+
+        var exception = Assert.Throws<ArgumentNullException>(() => TlvHelper.EncodeAndDisposeList(tlvs));
+
+        Assert.Equal("tlvData", exception.ParamName);
+        Assert.Equal(0, first.Length);
+        Assert.Equal(0, first.Tag);
+        Assert.Equal(0, sensitiveLater.Length);
+        Assert.Equal(0, sensitiveLater.Tag);
+        Assert.All(first.AsSpan().ToArray(), static b => Assert.Equal(0, b));
+        Assert.All(sensitiveLater.AsSpan().ToArray(), static b => Assert.Equal(0, b));
     }
 }

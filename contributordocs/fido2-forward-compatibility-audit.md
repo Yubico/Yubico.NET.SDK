@@ -12,490 +12,184 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# FIDO2 forward-compatibility audit and handoff
+# FIDO2 forward-compatibility audit
 
-**Date:** 2026-08-25
-**Branch:** `bugfix/fido2-credmgmt-unsupported-cose-key`
-**Open PR:** <https://github.com/Yubico/Yubico.NET.SDK/pull/585>
-**Status:** one fix shipped to that PR; 12 further defects identified, none built.
+This audit identifies FIDO2 response-decoding paths where an authenticator can
+return valid data that the SDK does not yet model. Its purpose is to distinguish
+forward-compatibility limitations from required protocol validation and
+malformed-data handling.
 
-This document exists so the remaining work can be picked up cold. It records
-what was fixed, what was found, what was decided and why, and what was
-deliberately *not* done. The design-rationale sections exist to stop decisions
-being relitigated.
+## Scope
 
----
+The audit covers CBOR response decoding under
+`Yubico.YubiKey/src/Yubico/YubiKey/Fido2/`. It does not cover caller-supplied
+request validation. CTAPHID transport framing under `Pipelines/` has not been
+assessed for this class of defect.
 
-## 1. Origin
+A forward-compatibility finding requires all of the following:
 
-Reported by Jonas Markström: `Fido2Session.EnumerateCredentialsForRelyingParty`
-throws and aborts enumeration of *all* credentials for a relying party when any
-one credential's public key uses a COSE algorithm the SDK does not model.
+- The data was received from an authenticator.
+- The data is valid under the applicable CTAP structure.
+- The SDK does not recognize an optional value, field, or representation.
+- The recognized data would still be useful to the caller.
 
-Two corrections to the original report, both confirmed by reading the code and
-later by the reporter's stack trace:
+The following are not forward-compatibility findings:
 
-- The exception is `System.NotSupportedException` ("The requested algorithm is
-  not supported"), **not** `Ctap2DataException`.
-- The message quoted in the report — `Ctap2CborUnexpectedKey`, *"An unexpected
-  key was encountered in a CBOR map; expected to find {0} (name '{1}')"* — is
-  thrown from exactly one place in the SDK: `Fido2/RelyingParty.cs:128`. That is
-  **not** on the reported code path, and was a red herring.
+- malformed CBOR or a violation of CTAP canonical encoding;
+- a missing required field;
+- a recognized discriminator paired with an invalid payload; or
+- a protocol field whose exact algorithm, key type, or curve is required for
+  interoperability or security.
 
-### The stack trace, and what it actually showed
+Existing tolerant patterns include `AuthenticatorOptions`, which maps unknown
+option values to `OptionValue.Unknown`; `CborMap`, which preserves values it
+cannot model as `RawCborValue`; and response types that expose raw encoded data
+alongside typed properties.
 
-```text
-Yubico.YubiKey 1.17.2.0 · .NET 10.0.9 · YubiKey firmware 5.8.0
+## COSE key decoding
 
-System.NotSupportedException: The requested algorithm is not supported.
-   at Yubico.YubiKey.Fido2.Cose.CoseKey.Create(ReadOnlyMemory`1 coseEncodedKey, Int32& bytesRead)
-   at powershellYK.Cmdlets.Fido.TraceYubiKeyFIDO2CredentialManagementCommand.TryCoseKeyCreate(...)
-```
+`CoseKey.Create` is the strict public decoder. It returns a modeled key or
+throws. `CoseKey.CreateOrUnsupported` is the tolerant decoder for contexts in
+which an otherwise valid key representation must be preserved even when the SDK
+cannot provide a strongly typed key. It returns `CoseUnsupportedPublicKey` for
+an algorithm unsupported by the strongly typed decoder and preserves the
+original encoded key, reported key type, and reported algorithm.
 
-**The fault is not in enumeration at all.** The caller had persisted an ARKG
-seed to disk (`previewsign-<serial>.json`) during an earlier previewSign
-registration, and on reload was calling the **public** `CoseKey.Create` on those
-bytes directly. No SDK response object is involved anywhere in that path.
+The numeric type and algorithm on `CoseUnsupportedPublicKey` may or may not
+correspond to named `CoseKeyType` and `CoseAlgorithmIdentifier` members. The
+unsupported part is the complete key representation, not necessarily both
+metadata values.
 
-This matters for two reasons:
+The tolerant decoder still rejects malformed encodings, missing type or
+algorithm labels, and modeled algorithms paired with the wrong key type. It
+also currently rejects a modeled algorithm with an unsupported curve or invalid
+coordinate length. This avoids treating corrupted modeled keys as merely
+unsupported.
 
-1. It **confirms** the hardware non-reproduction in section 3. Enumeration was
-   never the failing path, which is why it could not be reproduced.
-2. It **refuted** the working hypothesis that D1 (`RelyingParty`) was the real
-   fault. It is not. D1 remains a genuine HIGH defect worth fixing, but it is
-   unrelated to this report.
+Credential-management and authenticator-data response decoders use
+`CreateOrUnsupported` because an unsupported credential public-key
+representation must not discard the surrounding credential or response.
+Applications that persist such keys can use the same decoder when loading them
+and inspect `CoseUnsupportedPublicKey.EncodedKey`.
 
-The reported 172-byte key is captured verbatim as a regression vector in
-`CoseKeyTests` (`RealWorldUnmodeledKeyHex`). Decoded:
+### Strict PIN/UV key agreement
 
-```text
-map(5) {
-   1: -65537,          key type this SDK does not model
-   3: -65700,          algorithm this SDK does not model
-  -1: EC2 P-256 key,   alg ES256 (-7)
-  -2: EC2 P-256 key,   alg ECDH-ES+HKDF-256 (-25)
-  -3: -9
-}
-```
+The `keyAgreement` field returned by `authenticatorClientPIN` is not an open
+algorithm-negotiation point. PIN/UV auth protocols one and two define the
+returned `COSE_Key` as:
 
----
+- key type `EC2` (`kty = 2`);
+- algorithm `ECDH-ES + HKDF-256` (`alg = -25`); and
+- curve NIST P-256 (`crv = 1`).
 
-## 2. What shipped (PR #585)
+Consequently, `ClientPinResponse` must continue to decode this field with the
+strict `CoseKey.Create` path. Accepting an unsupported key representation here
+would only postpone failure until key agreement and could obscure a protocol
+violation. Future PIN/UV auth protocols that define another key agreement
+scheme require explicit protocol support rather than tolerant decoding of this
+field.
 
-Two commits on `bugfix/fido2-credmgmt-unsupported-cose-key`:
+## Forward-compatibility findings
 
-- `89effa2b` — `fix(fido2): tolerate unmodeled COSE key types when enumerating credentials`
-- `94093fd9` — `docs(fido2): generalize wording for unmodeled COSE key types`
+Locations identify symbols rather than line numbers so that the audit remains
+useful as files evolve.
 
-**Change:** added `CoseUnsupportedPublicKey` (sealed, internal constructor,
-carries the original encoding plus the reported key type and algorithm) and a
-public `CoseKey.CreateOrUnsupported`. Applied at all three data-bearing
-`CoseKey.Create` call sites: `CredentialUserInfo.cs`,
-`Commands/CredentialManagementData.cs`, and `AuthenticatorData.cs`.
-`Commands/ClientPinResponse.cs` was deliberately left on strict `Create`.
-
-**Behavior change shipped:** `AuthenticatorData.CredentialPublicKey` now returns
-the sentinel instead of `null` for an unmodeled key. Code detecting such a
-credential via a null check must test for `CoseUnsupportedPublicKey` instead.
-`null` on that property now means unambiguously "no attested credential data".
-
-**Known incomplete:** see D7/D8 in section 5. PR #585 as it stands does not
-fully deliver its own guarantee.
-
----
-
-## 3. Hardware findings — the reported scenario did NOT reproduce
-
-Run against three connected devices. **This section exists so nobody repeats
-the experiment.**
-
-| Serial | Firmware | Extensions | credMgmt |
+| ID | Location | Finding | Impact |
 |---|---|---|---|
-| 25555459 | 5.4.3 | credProtect, hmac-secret | NotSupported |
-| 103 | 5.8.0 | ..., **previewSign** | True |
-| 125 | 5.8.0 | ..., **`sign`** | True |
-
-**Note serials 103 and 125: same firmware version, different extension name.**
-`previewSign` has already been partly renamed to `sign` in the field. This is
-why the documentation shipped in PR #585 describes the *mechanism* rather than
-naming the extension. Do not reintroduce extension names into permanent API
-documentation.
-
-What the hardware confirmed:
-
-- A previewSign-generated key **is** an unmodeled COSE key:
-  `kty = -65537, alg = -65700`. After the fix it decodes to
-  `CoseUnsupportedPublicKey` with byte-exact raw preservation. The sentinel is
-  therefore validated against real authenticator bytes, not just synthetic CBOR.
-
-What the hardware **disproved**:
-
-- `EnumerateCredentialsForRelyingParty` returned the credential cleanly, with
-  `CoseEcPublicKey kty=2 alg=-7`. The ARKG key rides inside the *extension
-  output*; it is **not** stored as its own discoverable credential.
-- The other route is closed too: requesting the unmodeled algorithm as the
-  credential's own algorithm (`alg = -65539`, `rk = true`) is **rejected by the
-  YubiKey** with `Fido2Exception`.
-- `AddPreviewSignGenerateKeyExtension` has no discoverability flag — its
-  `PreviewSignOptions` are user-presence/user-verification policy only.
-
-**Conclusion:** on firmware 5.8.0 there is no route via the public SDK API to a
-discoverable credential whose own public key is an unmodeled COSE type. The code
-defect is real and worth fixing regardless, but it is not what the reporter hit.
-The stack trace in section 1 later confirmed this: the failure was the strict
-public `CoseKey.Create` applied to a persisted key, with enumeration never
-involved.
-
-**Safety note for anyone re-running this:** `FidoSessionIntegrationTestBase`'s
-constructor (`Yubico.YubiKey/tests/integration/Yubico/YubiKey/Fido2/FidoIntegrationTestBase.cs`)
-**deletes every discoverable credential on the device** and asserts the PIN is
-the integration-test PIN. Do not point it at a personal key. The probes used for
-the results above deliberately did not inherit it, restricted writes to a serial
-allowlist, and cleaned up after themselves. They were not committed.
-
----
-
-## 4. Audit scope and method
-
-139 `.cs` files under `Yubico.YubiKey/src/Yubico/YubiKey/Fido2/` were enumerated
-and every decoding file read. `Yubico.Core` was searched — **no FIDO2 response
-decoding exists there**; all CBOR parsing uses `System.Formats.Cbor` from
-`Yubico.YubiKey`.
-
-**A defect** is code that decodes data *received from a YubiKey* and hard-fails
-on something it does not recognize, when the data it *does* recognize would have
-been sufficient for the caller.
-
-**Not defects** (explicitly considered and rejected): validation of
-caller-supplied input; genuinely malformed CBOR; missing *required* fields; a
-recognized discriminator paired with a structurally wrong payload; and `default`
-arms over `CtapStatus`, which correctly funnel into a `Fido2Exception` carrying
-the raw code.
-
-**Exemplary patterns already in the codebase** — use these as templates:
-
-- `Fido2/AuthenticatorOptions.cs` — `default: return OptionValue.Unknown`.
-- `Fido2/Cbor/CborMap.cs` — `default` arms fall back to `RawCborValue`.
-- `Fido2/UserEntity.cs` and `Fido2/CredentialId.cs` — `CborMap<string>`, unknown
-  keys silently ignored.
-- `Fido2/Commands/CredentialManagementData.cs` — `RawData` + `UnknownFields`
-  (PR #508).
-- `Fido2/CredentialUserInfo.cs` — `TryGetCredentialManagementField` (PR #508).
-- `Fido2/AuthenticatorData.cs` — `EncodedCredentialPublicKey` (PR #468).
-
-**Not audited:** CTAPHID transport framing in
-`Yubico.YubiKey/src/Yubico/YubiKey/Pipelines/`. Explicitly out of scope by
-decision. An unrecognized CTAPHID command byte has not been assessed.
-
----
-
-## 5. Defects
-
-The **Confirmed** column records how the finding was checked. `direct` means the
-file and line were read and the defect confirmed by hand. Every line reference
-below was verified against the tree at commit `94093fd9`; re-check them if the
-files have moved since.
-
-| ID | Confirmed | Location | Defect | Severity |
-|---|---|---|---|---|
-| D1 | direct | `Fido2/RelyingParty.cs:124` | `default: throw` on any relying-party map key but `id`/`name`. Kills `EnumerateRelyingParties()`. **Only site emitting the message in the bug report.** | HIGH |
-| D2 | direct | `Fido2/Commands/ClientPinResponse.cs:97` | `default: throw` on any clientPIN response key but `0x01`–`0x05`. Breaks **every** PIN/UV path, and therefore MakeCredential, GetAssertions, and all credential management | HIGH |
-| D3 | direct | `Fido2/MakeCredentialData.cs:188` | `Statement as PackedAttestationStatement ?? throw`. Any non-`packed` `fmt` breaks `MakeCredential` | HIGH\* |
-| D4 | direct | `Fido2/AttestationStatement.cs:136` | `ContainsOnlyKeys` rejects a `packed` attestation statement carrying any extra key, degrading it to `UnknownAttestationStatement`, which then trips D3 | HIGH |
-| D5 | direct | `Fido2/AttestationStatement.cs:181,214,236` | `ContainsExactKeys` does the same for `fido-u2f`, `apple`, and `none`. Silent loss of the typed properties rather than a throw | LOW–MED |
-| D6 | direct | `Fido2/Fido2Session.Pin.cs:1422` | Three separate bugs in one line — see section 6 | HIGH |
-| D7 | direct | `Fido2/Cose/CoseEcPublicKey.cs:211-220` | The decode constructor assigns through the public property setters, which run `ValidateCurve`/`ValidateLength` and throw `ArgumentException`. **This escapes `CreateOrUnsupported`, whose catch is `NotSupportedException`-only** — a hole in the PR #585 fix | MED |
-| D8 | direct | `Fido2/Cose/CoseEdDsaPublicKey.cs:126-131` | Similar, but NOT the same pattern: the object initializer sets `PublicKey` **before** `Curve`, so an Ed448 key (57-byte public key) is rejected by the 32-byte `PublicKey` length check before curve validation ever runs. For OKP, "future curve" and "corrupt Ed25519" are the same wrong-length check — they cannot be told apart at the validator level | MED |
-| D9 | direct | `Fido2/Commands/ClientPinResponse.cs:78` | Still uses strict `CoseKey.Create` for the `keyAgreement` field | MED |
-| D10 | direct | `Fido2/AuthenticatorData.cs:408` | `GetCredProtectExtension()` rejects credProtect values outside 1–3 | MED |
-| D11 | direct | `Fido2/AuthenticatorInfo.cs:460,520` | `AsDictionary<bool>()` is all-or-nothing; a single non-boolean `options` value throws `InvalidCastException` from the **session constructor** | MED |
-| D12 | direct | `Fido2/Cbor/CborMap.cs:162-189` | `ReadArray<T>` rejects the whole array when one element does not convert (throw at line 189); 13 call sites | LOW |
-| D13 | direct | `Fido2/Commands/GetKeyAgreementResponse.cs:53` | Misleading `Ctap2MissingRequiredField` for a field that is present but not an EC key | LOW |
-| D14 | direct | `Fido2/PinProtocols/PinUvAuthProtocolBase.cs:177` | Duplicate of D13 one layer down; line 184 also hard-codes P-256 regardless of what the device reported | LOW |
-| D15 | doc | `Fido2/Cose/CoseEcPublicKey.cs:78`, `Fido2/Cose/CoseEdDsaPublicKey.cs:46` | Both `Curve` property docs promise `NotSupportedException` on set; `ValidateCurve` actually throws `ArgumentException` in both files. Pre-existing code/contract mismatch, discovered during D7 re-analysis | LOW |
-| D16 | direct | `Fido2/Cose/CoseEcPublicKey.cs:156,159` | `throw new ArgumentException(nameof(curve), "Unknown curve")` — arguments swapped; the signature is `(message, paramName)`, so the message renders as "curve" and the parameter name as "Unknown curve". Cosmetic | LOW |
-
-\* **D3's severity is unconfirmed.** Nobody has established whether YubiKey
-firmware ever returns a non-`packed` `fmt`. `MakeCredentialParameters` has no
-attestation-format preference input, so the format is entirely the
-authenticator's choice today. The presence of
-`AuthenticatorInfo.AttestationFormats` (getInfo key `0x16`) and four modeled
-format classes is circumstantial evidence that non-packed is expected. **A
-firmware owner must confirm before this is scheduled.**
-
----
-
-## 6. D6 in detail
-
-```csharp
-// Fido2Session.Pin.cs:1422 — called unconditionally from the constructor (Fido2Session.cs:273)
-var protocol = AuthenticatorInfo.PinUvAuthProtocols?[0] ?? PinUvAuthProtocol.ProtocolOne;
-```
-
-Three separate defects:
-
-1. **It only inspects index 0.** CTAP 2.1 defines `pinUvAuthProtocols` as a list
-   *in order of decreasing authenticator preference*. A device advertising
-   `[3, 2, 1]` means "I prefer 3, but I also support 2 and 1." The SDK throws and
-   refuses to construct a session against a device that supports both protocols
-   the SDK implements. Unambiguously a bug.
-2. **`?[0]` does not guard against an empty list.** The null-conditional operator
-   guards null only. A non-null empty list yields `ArgumentOutOfRangeException`
-   rather than the intended `NotSupportedException`. Only reachable on a device
-   that does not conform to CTAP, which requires the array to be non-empty when
-   present.
-3. **It throws from the constructor**, which is disproportionate *and* defeats
-   the SDK's own escape hatch. `AuthProtocol` is consumed only by PIN/UV paths;
-   reading `AuthenticatorInfo`, calling `Reset`, and a non-UV `GetAssertion`
-   never need it. Worse, `SetAuthProtocol(PinUvAuthProtocolBase)` exists and is
-   documented as *"Overrides the default PIN/UV Auth protocol"* — but it is an
-   **instance method**. If the constructor throws you never obtain an instance,
-   so the designed override is unreachable in exactly the scenario it exists for.
-
-**Chosen remedy** (see section 7 for the reasoning): walk the list for the first
-implemented protocol; handle the empty case; and when the device advertises only
-unmodeled protocols, assign an **internal**
-`UnsupportedPinUvAuthProtocol : PinUvAuthProtocolBase` sentinel that reports the
-advertised protocol number and throws a precise `NotSupportedException` from each
-of its eight abstract members. The session then constructs, non-PIN work
-proceeds, `SetAuthProtocol` becomes reachable, and `AuthProtocol` stays
-non-nullable.
-
----
-
-## 7. Decisions already made — do not relitigate without new information
-
-**Sentinel over nullable.** For `CredentialUserInfo.CredentialPublicKey`,
-nullable was rejected. The property is non-nullable and CTAP mandates field
-`0x08` for `enumerateCredentials`, so nullable is both the wrong model and a
-source-breaking annotation change that would force null checks on 100% of
-callers to guard a case that fires for a fraction of a percent of credentials.
-The sentinel costs nothing unless you meet an unmodeled key, and it degrades
-better: `is CoseEcPublicKey` skips gracefully, `.Algorithm`/`.Type` return the
-real reported values instead of a `NullReferenceException`, a hard cast fails
-with a message naming the actual type, and consumers building with nullable
-reference types disabled would get no warning at all under the nullable design.
-The same reasoning drives the D6 remedy.
-
-**`CreateOrUnsupported` catches only `NotSupportedException`, and stays that
-way for now.** An earlier draft prescribed widening the catch to
-`ArgumentException` for D7/D8; that prescription was **retracted** after
-re-analysis (see Stack 1) because it would absorb genuine corruption — a
-32-coordinate on a 48-curve, a truncated Ed25519 key — into the sentinel.
-`Ctap2DataException` must keep propagating: malformed CBOR, a missing key type
-or algorithm, and a modeled algorithm paired with the wrong key type are
-corrupt data, not future values.
-
-**Public `CoseKey.Create` stays strict.** Making it return the sentinel would
-silently change a documented public throw contract. `Create` is strict;
-`CreateOrUnsupported` is lenient.
-
-**`CreateOrUnsupported` is public — this reverses an earlier decision.** It was
-originally `internal`, on the reasoning that callers obtain the sentinel through
-SDK response objects and therefore never need to invoke the lenient parse
-themselves. **The reporter's stack trace refuted that.** An application that
-persists a key and reloads it later holds only raw bytes; there is no SDK
-response object in that path, and the only public entry point available was the
-strict `Create`, which throws. Corroborating evidence that the surface was
-missing something: the SDK's own test utility
-`PreviewSignGeneratedKeyExtensions.ParseArkgCoseKey` hand-rolls roughly sixty
-lines of CBOR parsing, which at the time it was written was the only way to
-parse one of these keys. A caller can now use `CreateOrUnsupported` and read
-`CoseUnsupportedPublicKey.EncodedKey` instead; that utility could be simplified
-to match, though doing so is not required and is out of scope here.
-
-Both overloads are public: the plain form, and a `out int bytesRead` form for
-parity with `Create` so callers can parse a key embedded in a larger buffer.
-
-**No `TryCreate`.** With a sentinel the method cannot fail, so the boolean would
-duplicate `key is CoseUnsupportedPublicKey`; none of the three call sites branch
-on it; and every `Try*` method in this codebase pairs `false` with a null or
-default out-parameter, several of them annotated `[MaybeNullWhen(false)]`, which
-an always-populated out-parameter would invert.
-
-**Decode-side tolerance must never become encode-side fabrication.** Preserved
-unknown fields must **not** be re-emitted from any `CborEncode()`.
-`RelyingParty.CborEncode()` is fed to the authenticator from
-`MakeCredentialParameters`; re-emitting authenticator-originated keys during
-registration is wrong, and CTAP2 canonical ordering makes it fiddly besides.
-
-**`whats-new.md` is release-time only.** Every edit to it comes from a release
-commit. Do not touch it in a feature or bugfix PR; put behavior-change notes in
-the PR body for the release manager to pick up.
-
-**Hard constraint set by the owner: no breaking changes, and nothing becomes
-nullable.** This is what blocks D3. It also ruled out remedy (b) for D7;
-remedy (a) was later found independently defective — see Stack 1.
-
----
-
-## 8. Proposed remaining work
-
-Three stacked PRs. **None of this has been built.**
-
-```text
-develop
- └─ bugfix/fido2-credmgmt-unsupported-cose-key   → PR #585 (open; ships with D7/D8 documented-open)
-     └─ bugfix/fido2-unknown-map-keys             → D1, D2, D4, D5, D9
-         └─ bugfix/fido2-pinuvauth-protocol       → D6
-```
-
-### Stack 1 — D7/D8 follow-up (NOT an amendment to PR #585)
-
-**Status: no known-correct remedy. All three candidates analyzed to date are
-defective. PR #585 ships with D7/D8 open and documented on the API surface.**
-Whoever picks this up: read this whole section first — two independent reviews
-(the original handoff and a later Opus pass) each proposed a fix here that
-detailed re-analysis then killed. The failure modes below are the trap record.
-
-**Remedies considered and rejected:**
-
-- **(a) widen the catch to `ArgumentException`.** Originally chosen; now
-  **rejected**. `ValidateLength` rejecting a 31-byte coordinate on a P-256 key,
-  or `PublicKey` rejecting a truncated Ed25519 key, is corruption detection —
-  the exact thing the sentinel design promised never to absorb.
-  `CreateOrUnsupported`'s own XML doc says so: "corrupt data rather than a
-  future algorithm... not tolerated." D7 and D8 want opposite answers; one
-  catch cannot give both.
-- **(b) stop the decode constructors running their validators.** Rejected as
-  before: changes decode behavior for every caller including strict `Create`,
-  and permits a `CoseEcPublicKey` with an out-of-range `Curve`.
-- **(c) change `ValidateCurve` to throw `NotSupportedException`,** aligning the
-  code with the exception both `Curve` property docs already promise (D15), so
-  the existing catch absorbs unmodeled curves with no widening. Attractive —
-  and **rejected as proposed**, for two reasons found on close reading:
-  1. **It does nothing for EdDSA.** The `CreateFromEncodedKey` object
-     initializer sets `PublicKey` before `Curve` (D8's corrected entry in
-     section 5), so an Ed448 key dies on the 32-byte length check before curve
-     validation runs. And for OKP, future-curve and corrupt-key are the *same*
-     length check — the D7/D8 separation this remedy depends on does not exist
-     in that file.
-  2. **It is not one line even for EC.** A `NotSupportedException` from inside
-     the constructor reaches the catch and produces a sentinel whose
-     `Algorithm` is a **modeled** value (e.g. ES256). That falsifies two
-     shipped contracts: `CreateOrUnsupported`'s "when the algorithm is one
-     this SDK models, the behavior is identical to `Create`", and the
-     load-bearing comment above the try block stating the only observable
-     `NotSupportedException` is the dispatch's. Both must be redesigned, not
-     merely edited.
-
-**The actual open design question**, which must be answered before any code:
-*may a `CoseUnsupportedPublicKey` ever carry a modeled algorithm?* If yes, the
-sentinel's meaning widens from "algorithm this SDK does not model" to "key this
-SDK cannot represent", every consumer switching on `.Algorithm` must be
-reconsidered, and both documents above must be rewritten to match. If no, D7
-requires a second sentinel or a different mechanism entirely. Decide this
-first; the diff is downstream of the decision.
-
-Also fold in when this is picked up: D15 (align `ValidateCurve`'s exception
-with the documented contract — in whichever direction the design decision
-implies) and D16 (swapped `ArgumentException` arguments), both trivial once
-the direction is fixed.
-
-Criteria for whatever remedy survives: an unmodeled EC curve yields the
-sentinel with raw bytes preserved; enumeration returns all credentials when one
-is affected; **anti:** a wrong-length coordinate on a *modeled* curve still
-throws; **anti:** a truncated Ed25519 key still throws; **anti:** public
-`Create` still throws for all of these; **anti:** every malformed-encoding
-rejection in `CreateOrUnsupported`'s documented exception contract still
-throws. Ed448 tolerance may prove unachievable without redesigning
-`CoseEdDsaPublicKey` validation order — if so, document it as out of scope
-rather than forcing it.
-
-Note that `ArgumentException` is currently documented on both
-`CreateOrUnsupported` overloads as the outcome for a modeled algorithm on an
-unmodeled curve. That documentation is **accurate today** and must stay until a
-remedy ships; the earlier instruction to remove it belonged to rejected
-remedy (a).
-
-Do not write a criterion about null input. `ReadOnlyMemory<byte>` is a struct and
-neither `Create` nor `CborMap` performs a null check, so `ArgumentNullException`
-is unreachable on these entry points — an earlier draft of this document claimed
-otherwise, and `Create`'s XML documentation carried the same false claim until it
-was removed.
-
-### Stack 2 — unknown map keys (D1, D2, D4, D5, D9)
-
-- **D1** — rewrite `RelyingParty`'s decode constructor onto `CborMap<string>`,
-  matching `UserEntity` and `CredentialId`, and add
-  `TryGetUnknownField(string, out ReadOnlyMemory<byte>)` mirroring
-  `CredentialUserInfo.TryGetCredentialManagementField`.
-  **`RelyingParty` has no unit tests today** — a new `RelyingPartyTests.cs` is
-  required, as is `EnumerateRpsResponseTests.cs`.
-  Note that `RelyingParty` is decoded at exactly one site, in
-  `Commands/CredentialManagementData.cs`, so a single fix covers
-  `EnumerateRpsBeginResponse`, `EnumerateRpsGetNextResponse`, and
-  `CredentialManagementResponse`.
-- **D2** — have the `default:` arm collect into an unknown-fields dictionary, and
-  add `RawData` and `UnknownFields` to the public `ClientPinData`, exactly as
-  `CredentialManagementData` does.
-- **D4/D5** — drop `ContainsOnlyKeys`/`ContainsExactKeys` and keep only the
-  `Contains(...)` required-field checks. Then **delete both helpers from
-  `CborMap`**, along with their unit test in `CborMapTests.cs` — they are used
-  nowhere else, so this removes the hazard from the toolkit permanently.
-  `CborMap<TKey>` is `internal`, so this is not a public API change.
-- **D9** — swap the `keyAgreement` decode in `ClientPinResponse` to
-  `CreateOrUnsupported`.
-
-**Anti-criteria:** `RelyingParty.CborEncode()` on a decoded relying party that
-carried unknown fields must emit **only** `id` and `name`; and `CborEncode()` for
-`new RelyingParty("x")` must remain byte-identical to its current output.
-
-### Stack 3 — PIN/UV protocol selection (D6)
-
-As described in section 6. The key criterion, and the point of the exercise: with
-a device advertising only unmodeled protocols, `SetAuthProtocol(myProtocol)` must
-succeed and subsequent PIN operations must use it. **Anti:** `AuthProtocol`
-remains non-nullable; the sentinel type is `internal`; and `Dispose` on a session
-holding the sentinel does not throw.
-
-### Not scheduled
-
-| ID | Disposition |
-|---|---|
-| D3 | **Blocked twice.** The fix makes three public properties nullable, which violates the constraint, and reachability needs a firmware owner |
-| D10, D11, D12, D13, D14 | All non-breaking and buildable. Deferred only on reviewer-load grounds. Pull them forward freely |
-
----
-
-## 9. Open items
-
-1. ~~Jonas's stack trace~~ — **received and resolved.** See section 1. The fault
-   was the strict public `CoseKey.Create` applied to a persisted key, not
-   enumeration and not D1. Addressed by making `CreateOrUnsupported` public.
-2. **D3 reachability** — needs a firmware owner to confirm whether a non-`packed`
-   attestation format is ever returned.
-3. **D6 tail case** — the sentinel approach was chosen, but "device advertises
-   only unmodeled protocols" is product-visible behavior; confirm before building.
-4. **CTAPHID transport** (`Pipelines/`) has never been assessed for this class of
-   defect.
-5. **Version** — PR #585 adds a public type and changes shipped behavior. A minor
-   bump (1.18.0) was recommended over a patch release; not yet ratified.
-
----
-
-## 10. Reproducing the audit
-
-Sweep for the two throwing patterns:
-
-```bash
-grep -rn "Ctap2CborUnexpectedKey\|CborUnexpectedMapTag" --include='*.cs' Yubico.YubiKey/src/
-grep -rn "ContainsExactKeys\|ContainsOnlyKeys" --include='*.cs' Yubico.YubiKey/src/
-```
-
-Both were exhaustive at the time of writing: two `default: throw` sites (D1 and
-D2) and four `Contains*Keys` sites, all four in `AttestationStatement.cs`.
-
----
+| F1 | `Fido2/RelyingParty.cs`, encoded-value constructor | Any relying-party map key other than `id` or `name` causes a throw instead of being ignored or preserved. | High: credential-management relying-party enumeration can fail on an added field. |
+| F2 | `Fido2/Commands/ClientPinResponse.cs`, `GetData` | An unknown top-level response key causes a throw even when all fields needed for the selected subcommand are present. | High: PIN/UV operations can fail on an additive response field. This does not apply to the strictly defined contents of `keyAgreement`. |
+| F3 | `Fido2/MakeCredentialData.cs`, constructor | The response requires a `PackedAttestationStatement`; another valid attestation format is rejected after it has been decoded. | Potentially high, but reachability depends on which formats supported authenticators return. |
+| F4 | `Fido2/AttestationStatement.cs`, `PackedAttestationStatement.FromCbor` | `ContainsOnlyKeys` rejects a packed attestation statement with an additional field. | High when an authenticator extends a packed statement. |
+| F5 | `Fido2/AttestationStatement.cs`, `FidoU2fAttestationStatement.FromCbor`, `AppleAttestationStatement.FromCbor`, and `NoneAttestationStatement.FromCbor` | `ContainsExactKeys` rejects otherwise valid statements with additional fields. | Low to medium: typed attestation data is lost. |
+| F6 | `Fido2/Fido2Session.Pin.cs`, `GetPreferredPinProtocol` | Selection inspects only the first advertised protocol, indexing an empty list throws the wrong exception, and an unsupported first protocol prevents construction even when a supported protocol appears later. The configuration escape hatch is an instance method, so constructor failure prevents callers from reaching it. | High: session construction can fail despite a mutually supported protocol. |
+| F7 | `Fido2/Cose/CoseEcPublicKey.cs`, encoded-value constructor | Validation of an unsupported curve throws `ArgumentException`, so `CreateOrUnsupported` cannot preserve a key that uses a modeled algorithm with a future EC curve. | Medium: a future key representation is rejected. Any remedy must continue rejecting invalid coordinate lengths for modeled curves. |
+| F8 | `Fido2/Cose/CoseEdDsaPublicKey.cs`, `CreateFromEncodedKey` | Public-key length is validated before the curve, making an unsupported OKP curve indistinguishable from a malformed Ed25519 key at that point. | Medium: future OKP representations cannot be preserved without restructuring validation. |
+| F9 | `Fido2/AuthenticatorData.cs`, `GetCredProtectExtension` | Values outside the currently modeled range are rejected. | Medium: a future credProtect policy cannot be inspected through this helper. |
+| F10 | `Fido2/AuthenticatorInfo.cs`, `Options` decoding | `AsDictionary<bool>()` rejects the entire options map when one value is not Boolean. | Medium: session construction can fail instead of preserving recognized options. |
+| F11 | `Fido2/Cbor/CborMap.cs`, `ReadArray<TValue>` | One unconvertible array element rejects the complete array. | Low: callers cannot retain recognized elements where the protocol permits future values. Each call site must be assessed because some arrays are homogeneous by contract. |
+
+`AuthenticatorInfo.Certifications` also uses an all-or-nothing dictionary
+conversion. It is excluded from F10 because the current CTAP schema requires
+integer certification values; a noninteger value is malformed rather than an
+unrecognized extension.
+
+## Related contract and diagnostic findings
+
+These issues were identified in related COSE key handling code but do not meet
+the forward-compatibility criteria above.
+
+| ID | Location | Finding | Impact |
+|---|---|---|---|
+| F12 | `Fido2/Commands/GetKeyAgreementResponse.cs`, `GetData`, and `Fido2/PinProtocols/PinUvAuthProtocolBase.cs`, `Encapsulate` | A present but invalid key-agreement key is reported as a missing field at the response boundary, while the protocol layer reports a different generic key error. | Low: diagnostics do not clearly identify a protocol-invalid key. Requiring EC2, P-256, and algorithm `-25` remains correct. |
+| F13 | `Fido2/Cose/CoseEcPublicKey.cs` and `Fido2/Cose/CoseEdDsaPublicKey.cs`, `Curve` properties | The property documentation names `NotSupportedException`, but unsupported curves currently produce `ArgumentException`. Correct the property documentation; do not change `ValidateCurve` while `CreateOrUnsupported` catches `NotSupportedException` (see the constraints below). | Low: the documented exception contract is inaccurate. |
+| F14 | `Fido2/Cose/CoseEcPublicKey.cs`, curve-based constructor | Two `ArgumentException` calls pass message and parameter name in the wrong order. | Low: exception diagnostics are misleading. |
+
+## Design constraints for remediation
+
+Do not change `ValidateCurve` to throw `NotSupportedException` while `CreateOrUnsupported` catches
+that exception type. Doing so would convert a modeled algorithm with an invalid or unsupported curve
+into the forward-compatible sentinel, conflating malformed modeled data with an unmodeled algorithm.
+
+Likewise, do not bypass the typed key constructors' curve and coordinate validation. The tolerant
+path is for algorithms the typed decoder does not implement, not for structurally invalid data using
+a modeled algorithm. Whether a future sentinel should ever represent a modeled algorithm is a
+separate API decision and is not established by this audit.
+
+Any remediation of these findings should retain these boundaries:
+
+- Decode-side tolerance must not fabricate or re-emit authenticator-originated
+  unknown fields in request encodings.
+- Required fields and malformed CBOR must remain errors.
+- Modeled algorithms with structurally invalid keys must remain errors.
+- `CoseKey.Create` must remain strict; tolerant behavior belongs in
+  `CreateOrUnsupported` and response decoders where surrounding data remains
+  useful.
+- PIN/UV key agreement must remain strict for protocols one and two: EC2,
+  P-256, and algorithm `-25` are required.
+- Public nullability and existing public property types should not be changed
+  merely to represent an unsupported value when a preserving representation is
+  available.
+
+For F7 and F8, broadening a catch from `NotSupportedException` to
+`ArgumentException` is unsafe because the same exception also represents
+corrupt modeled keys. A solution must distinguish unsupported representation
+from invalid data before changing tolerant-decoder behavior.
+
+For F3, confirm that supported firmware can return a non-packed attestation
+format before assigning priority. The SDK models multiple attestation statement
+formats, but that alone does not establish current device behavior.
+
+## Verification targets
+
+Tests for tolerant COSE decoding should continue to establish that:
+
+- modeled keys produce their modeled key types;
+- unsupported representations preserve the complete original encoding and the
+  reported metadata;
+- persisted unsupported keys can be decoded again through the public tolerant
+  API;
+- trailing data is excluded from `EncodedKey` and `bytesRead` identifies only
+  the key;
+- malformed CBOR, missing required labels, wrong key-type pairings, and invalid
+  modeled-key lengths still throw; and
+- credential enumeration returns all entries when one credential uses an
+  unsupported public-key representation.
+
+## References
+
+- CTAP PIN/UV auth protocol definitions, including the required key-agreement
+  COSE key parameters.
+- RFC 8949, Concise Binary Object Representation.
+- RFC 9052, CBOR Object Signing and Encryption structures.
+- RFC 9053, CBOR Object Signing and Encryption algorithms.
 
 ## Glossary
 
-- **ARKG** — Asynchronous Remote Key Generation.
-- **CBOR** — Concise Binary Object Representation (RFC 8949).
-- **COSE** — CBOR Object Signing and Encryption (RFC 8152).
-- **CTAP / CTAP2** — Client to Authenticator Protocol.
-- **CTAPHID** — CTAP over the USB Human Interface Device transport.
-- **OKP** — Octet Key Pair, the COSE key type used for Edwards curves.
-- **PIN/UV** — Personal Identification Number / User Verification.
-- **RP** — Relying Party.
-- **SDK** — Software Development Kit.
+- **CBOR**: Concise Binary Object Representation.
+- **COSE**: CBOR Object Signing and Encryption.
+- **CTAP**: Client to Authenticator Protocol.
+- **CTAPHID**: CTAP over the USB Human Interface Device transport.
+- **EC2**: COSE key type for elliptic-curve keys with x- and y-coordinates.
+- **OKP**: Octet Key Pair.
+- **PIN/UV**: Personal Identification Number / User Verification.
+- **SDK**: Software Development Kit.

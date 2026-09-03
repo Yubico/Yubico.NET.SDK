@@ -17,17 +17,17 @@ using System;
 namespace Yubico.YubiKey.Fido2.Cose
 {
     /// <summary>
-    /// A COSE public key whose algorithm this SDK does not model, preserved in
-    /// its original encoded form.
+    /// A COSE public key whose algorithm this SDK cannot decode into a strongly
+    /// typed key representation, preserved in its original encoded form.
     /// </summary>
     /// <remarks>
     /// <para>
     /// The SDK returns an instance of this class when a YubiKey reports a public
-    /// key using a COSE algorithm that has no strongly-typed representation in
-    /// this version of the SDK. Rather than failing, the SDK preserves the
-    /// original encoding in <see cref="EncodedKey"/> along with the key type and
-    /// algorithm the YubiKey reported, so callers that understand the algorithm
-    /// can decode it themselves.
+    /// key using an algorithm that its strongly typed COSE key decoder does not
+    /// implement. Rather than failing, the SDK preserves the original encoding
+    /// in <see cref="EncodedKey"/> along with the key type and algorithm the
+    /// YubiKey reported, so callers that understand the representation can
+    /// decode it themselves.
     /// </para>
     /// <para>
     /// This typically arises with a credential created by an extension that
@@ -35,11 +35,13 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// version of the SDK was released.
     /// </para>
     /// <para>
-    /// Because the algorithm is not modeled, <see cref="CoseKey.Type"/> and
-    /// <see cref="CoseKey.Algorithm"/> will generally hold values that are not
-    /// defined members of <see cref="CoseKeyType"/> or
-    /// <see cref="CoseAlgorithmIdentifier"/>. Compare them numerically rather
-    /// than against named members.
+    /// <see cref="CoseKey.Type"/> and <see cref="CoseKey.Algorithm"/> preserve
+    /// the values from the encoding. Either value may still be a named member
+    /// of <see cref="CoseKeyType"/> or <see cref="CoseAlgorithmIdentifier"/>;
+    /// do not assume that both values are unrecognized merely because the full
+    /// algorithm is not implemented by the typed decoder.
+    /// Check whether a decoded key is an instance of this class rather than inferring support from
+    /// whether the reported enum values are named.
     /// </para>
     /// <para>
     /// This class has no public constructor. Instances are produced by the SDK
@@ -101,10 +103,10 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// key.
         /// </summary>
         /// <remarks>
-        /// Because the SDK does not model this key's algorithm, it cannot
-        /// re-encode the key from decoded components. This method returns a copy
-        /// of <see cref="EncodedKey"/>, so the result is byte-for-byte identical
-        /// to the encoding this key was decoded from.
+        /// Because the SDK does not implement this key's algorithm, it cannot
+        /// re-encode the key from decoded components. This method returns a
+        /// copy of <see cref="EncodedKey"/>, so the result is byte-for-byte
+        /// identical to the encoding this key was decoded from.
         /// </remarks>
         /// <returns>
         /// The encoded key.

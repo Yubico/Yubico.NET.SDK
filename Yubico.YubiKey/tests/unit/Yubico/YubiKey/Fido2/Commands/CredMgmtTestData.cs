@@ -28,16 +28,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// A COSE key type this SDK does not model.
         /// </summary>
         /// <remarks>
-        /// Taken from a real extension-defined key type rather than invented, so
-        /// the fixtures exercise a shape a YubiKey can actually return. The
-        /// specific value does not matter to these tests; what matters is that
-        /// it is outside the set the SDK models.
+        /// Exercises an extension-defined value outside the set this SDK
+        /// models. Its exact numeric value is not significant to these tests.
         /// </remarks>
         public const int UnmodeledKeyType = -65537;
 
         /// <summary>
-        /// A COSE algorithm this SDK does not model. See
-        /// <see cref="UnmodeledKeyType"/> for why these values were chosen.
+        /// A COSE algorithm this SDK does not model. Its exact numeric value is
+        /// not significant to these tests.
         /// </summary>
         public const int UnmodeledAlgorithm = -65700;
 
@@ -87,8 +85,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <summary>
         /// A key whose type and algorithm are both outside the set this SDK
         /// models, and whose value is itself structured (two nested EC2 points).
-        /// Mirrors the shape of a real extension-defined key rather than a
-        /// trivially malformed one.
+        /// Exercises a valid structured representation rather than a trivially
+        /// malformed value.
         /// </summary>
         public static byte[] BuildUnmodeledStructuredCoseKey()
         {

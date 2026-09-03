@@ -154,19 +154,20 @@ namespace Yubico.YubiKey.Fido2.Cose
 
         /// <summary>
         /// Creates the COSE key representation for <paramref name="coseEncodedKey"/>,
-        /// tolerating algorithms this SDK does not model.
+        /// tolerating algorithms this SDK does not implement in its typed decoder.
         /// </summary>
         /// <remarks>
         /// <para>
         /// This never returns null. When the algorithm is one this SDK models,
         /// the behavior is identical to <see cref="Create"/>. When the algorithm
-        /// is unrecognized, this returns a <see cref="CoseUnsupportedPublicKey"/>
+        /// is not implemented by the typed decoder, this returns a
+        /// <see cref="CoseUnsupportedPublicKey"/>
         /// carrying the original encoding plus the reported key type and
         /// algorithm, instead of throwing <see cref="NotSupportedException"/>.
         /// </para>
         /// <para>
         /// This still throws when the encoding is malformed, when the key type
-        /// or algorithm is missing, or when a recognized algorithm is paired
+        /// or algorithm is missing, or when a modeled algorithm is paired
         /// with the wrong key type. Those indicate corrupt data rather than a
         /// future algorithm, so they are not tolerated. Malformed CBOR fails
         /// here exactly as it does in <see cref="Create"/>, with the same
@@ -200,7 +201,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <returns>
         /// A COSE key instance corresponding to the type described by the CBOR
         /// data, or a <see cref="CoseUnsupportedPublicKey"/> if this SDK does
-        /// not model the algorithm.
+        /// not implement the algorithm.
         /// </returns>
         /// <exception cref="Ctap2DataException">
         /// The encoding is not a CBOR map, is missing the key type or the
@@ -227,7 +228,7 @@ namespace Yubico.YubiKey.Fido2.Cose
 
         /// <summary>
         /// Creates the COSE key representation for <paramref name="coseEncodedKey"/>,
-        /// tolerating algorithms this SDK does not model, and reports how many
+        /// tolerating algorithms this SDK does not implement in its typed decoder, and reports how many
         /// bytes were consumed.
         /// </summary>
         /// <remarks>
@@ -245,7 +246,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <returns>
         /// A COSE key instance corresponding to the type described by the CBOR
         /// data, or a <see cref="CoseUnsupportedPublicKey"/> if this SDK does
-        /// not model the algorithm.
+        /// not implement the algorithm in its typed decoder.
         /// </returns>
         /// <exception cref="Ctap2DataException">
         /// The encoding is not a CBOR map, is missing the key type or the

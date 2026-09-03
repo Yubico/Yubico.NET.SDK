@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         {
             // A key whose type and algorithm are both outside the set this SDK
             // models, and whose value is itself structured rather than a flat
-            // point. Mirrors the shape of a real extension-defined key.
+            // point, exercising a valid unsupported representation.
             byte[] encodedKey = BuildUnmodeledStructuredKey();
 
             CoseKey key = CoseKey.CreateOrUnsupported(encodedKey);
@@ -122,9 +122,8 @@ namespace Yubico.YubiKey.Fido2.Cose
         [Fact]
         public void Create_RealWorldUnmodeledKey_ThrowsNotSupportedException()
         {
-            // Captured from a firmware 5.8.0 YubiKey. Pins the failure a caller
-            // reported when reloading a persisted key and parsing it with the
-            // strict public entry point.
+            // The strict entry point must reject an authenticator key whose
+            // algorithm this SDK does not model.
             byte[] encodedKey = Convert.FromHexString(RealWorldUnmodeledKeyHex);
 
             _ = Assert.Throws<NotSupportedException>(() => CoseKey.Create(encodedKey, out _));
@@ -147,10 +146,8 @@ namespace Yubico.YubiKey.Fido2.Cose
         [Fact]
         public void CreateOrUnsupported_PersistAndReloadUnmodeledKey_RoundTrips()
         {
-            // The reported workflow: store a key returned by the authenticator,
-            // then reload and parse it in a later process. The application never
-            // holds an SDK response object, only the bytes, so the whole
-            // round-trip has to work through the public surface.
+            // An unsupported authenticator key must remain decodable through
+            // the public tolerant entry point after an encode/reload cycle.
             byte[] fromAuthenticator = Convert.FromHexString(RealWorldUnmodeledKeyHex);
 
             byte[] persisted = CoseKey.CreateOrUnsupported(fromAuthenticator).Encode();
@@ -256,14 +253,13 @@ namespace Yubico.YubiKey.Fido2.Cose
             _ = Assert.Throws<Ctap2DataException>(() => CoseKey.CreateOrUnsupported(cbor.Encode()));
         }
 
-        // Taken from a real extension-defined key type rather than invented, so
-        // the fixtures exercise a shape a YubiKey can actually return. The
-        // specific values do not matter; what matters is that they are outside
-        // the set the SDK models.
+        // Exercise extension-defined values outside the ranges this SDK models.
+        // Their exact numeric values are not significant to these tests.
         private const int UnmodeledKeyType = -65537;
         private const int UnmodeledAlgorithm = -65700;
 
-        // A verbatim 172-byte key captured from a firmware 5.8.0 YubiKey:
+        // Real-world structured key fixture with two nested EC2 points. The
+        // tests use it to exercise an unsupported key representation:
         //   map(5) {
         //     1:  -65537,          key type this SDK does not model
         //     3:  -65700,          algorithm this SDK does not model
@@ -271,9 +267,8 @@ namespace Yubico.YubiKey.Fido2.Cose
         //     -2: EC2 P-256 key,   alg ECDH-ES+HKDF-256 (-25)
         //     -3: -9
         //   }
-        // Kept verbatim rather than rebuilt from a writer so that the test
-        // exercises real authenticator bytes, including the nested structure
-        // and the trailing scalar that the synthetic fixtures above omit.
+        // Keep this as a literal encoding because it includes a trailing scalar omitted by the
+        // generated fixtures.
         private const string RealWorldUnmodeledKeyHex =
             "a5013a00010000033a000100a320a501020326200121582030cda7a5e32646f7ed" +
             "318725c47847d7c2af80794d76bf758e46bf4a5efa22b4225820b2c65e2789bed6" +

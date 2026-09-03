@@ -78,13 +78,12 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// This is the reported bug. Enumerating a relying party issues one
-        /// Begin response followed by one GetNext response per remaining
-        /// credential, and a single credential whose public key this SDK does
-        /// not model previously aborted the whole enumeration.
+        /// Verifies that a credential with an unsupported public-key
+        /// representation does not prevent the complete enumeration sequence
+        /// from being decoded.
         /// </summary>
         /// <remarks>
-        /// This mirrors the response-decoding loop in
+        /// Mirrors the response-decoding loop in
         /// <c>Fido2Session.EnumerateCredentialsForRelyingParty</c>, driving the
         /// GetNext count off the credential count returned by Begin. It stops at
         /// the response boundary: exercising the session method itself would

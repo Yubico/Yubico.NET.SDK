@@ -160,8 +160,17 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The public key for a credential returned.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Not all calls to get credential management data will return this
         /// element, hence, it can be null.
+        /// </para>
+        /// <para>
+        /// If the response contained a public key using a COSE algorithm this
+        /// SDK does not model, this is a <see cref="CoseUnsupportedPublicKey"/>
+        /// carrying the original encoding, rather than null. Callers that need
+        /// to detect such a key should test for that type rather than testing
+        /// for null.
+        /// </para>
         /// </remarks>
         public CoseKey? CredentialPublicKey { get; private set; }
 
@@ -260,7 +269,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         break;
 
                     case KeyPublicKey:
-                        CredentialPublicKey = CoseKey.Create(cborReader.ReadEncodedValue(), out int _);
+                        CredentialPublicKey = CoseKey.CreateOrUnsupported(cborReader.ReadEncodedValue());
                         break;
 
                     case KeyTotalRpCredentials:

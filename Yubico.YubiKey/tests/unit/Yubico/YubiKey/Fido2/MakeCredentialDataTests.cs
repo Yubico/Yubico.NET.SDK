@@ -218,7 +218,9 @@ namespace Yubico.YubiKey.Fido2
 
             var data = new MakeCredentialData(ctapResponse);
 
-            Assert.Null(data.AuthenticatorData.CredentialPublicKey);
+            var unsupported = Assert.IsType<CoseUnsupportedPublicKey>(
+                data.AuthenticatorData.CredentialPublicKey);
+            Assert.Equal(coseKey, unsupported.EncodedKey.ToArray());
             Assert.Equal(coseKey, data.AuthenticatorData.EncodedCredentialPublicKey!.Value.ToArray());
         }
 

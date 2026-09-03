@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// </para>
     /// <para>
     /// The FIDO2 standard also specifies an encoding of the public key information. It uses the representation defined
-    /// in RFC8152: CBOR Object Signing and Encryption (COSE) standard. Supplementary information can be found in
+    /// in RFC 9052 and RFC 9053: CBOR Object Signing and Encryption (COSE). Supplementary information can be found in
     /// section 6.5.6 of the CTAP2.1 specification (under the heading `getPublicKey()`).
     /// </para>
     /// </remarks>

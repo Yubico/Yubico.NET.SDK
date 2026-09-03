@@ -81,6 +81,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal const int EcP256PrivateKeyLength = 32;
     internal const int EcP256PublicKeyLength = 65; // 0x04 + x[32] + y[32]
 
+    internal const int SymmetricContextLength = 16; // host challenge[8] + HSM challenge[8]
+    internal const int AsymmetricContextLength = EcP256PublicKeyLength * 2;
+
     // Label constraints
     internal const int MinLabelLength = 1;
     internal const int MaxLabelLength = 64;
@@ -191,12 +194,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// </summary>
     /// <param name="passwordUtf8">The UTF-8 encoded password bytes.</param>
     /// <remarks>
-    ///     The applet wire format carries a fixed 16-byte credential password, but the SDK
-    ///     accepts <em>at most</em> 16 bytes and null-pads shorter values in
-    ///     <see cref="ParseCredentialPassword" />. This mirrors the padding the previous
-    ///     <c>string</c>-based API performed, and the Python canonical SDK's <c>str</c> path,
-    ///     so the byte-based API is a type change only — not a behavior change. Callers that
-    ///     want strict 16-byte input should length-check before calling.
+    ///     The applet wire format carries a fixed 16-byte credential password. The SDK accepts at
+    ///     most 16 bytes and null-pads shorter values in <see cref="ParseCredentialPassword" />.
     /// </remarks>
     /// <exception cref="ArgumentException">Thrown when the password exceeds 16 bytes.</exception>
     internal static void ValidateCredentialPassword(ReadOnlySpan<byte> passwordUtf8)
@@ -424,6 +423,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        ValidateContextLength(context, SymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
 
         await NotifyTouchIfRequiredAsync(label, cancellationToken).ConfigureAwait(false);
@@ -544,6 +544,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     {
         ThrowIfDisposed();
         EnsureSupports(FeatureAsymmetric);
+        ValidateContextLength(context, AsymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
 
         await NotifyTouchIfRequiredAsync(label, cancellationToken).ConfigureAwait(false);
@@ -582,6 +583,16 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
+        }
+    }
+
+    private static void ValidateContextLength(ReadOnlyMemory<byte> context, int expectedLength)
+    {
+        if (context.Length != expectedLength)
+        {
+            throw new ArgumentException(
+                $"Context must be exactly {expectedLength} bytes.",
+                nameof(context));
         }
     }
 

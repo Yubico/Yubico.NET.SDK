@@ -33,26 +33,39 @@ raises a clear error rather than an opaque APDU failure. Use `IsSupported(...)` 
 
 ```csharp
 using System.Security.Cryptography;
-using System.Text;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.YubiHsm;
 
-IYubiKey yubiKey = ...;
-await using var session = await yubiKey.CreateHsmAuthSessionAsync();
-
-var passwordUtf8 = Encoding.UTF8.GetBytes("my-password");
-var context = RandomNumberGenerator.GetBytes(32); // host challenge[16] || HSM challenge[16]
-try
+static async Task UseSymmetricCredentialAsync(
+    IHsmAuthSession session,
+    string label,
+    ReadOnlyMemory<byte> hostChallenge,
+    ReadOnlyMemory<byte> hsmChallenge,
+    ReadOnlyMemory<byte> credentialPasswordUtf8,
+    ReadOnlyMemory<byte>? cardCryptogram,
+    CancellationToken cancellationToken)
 {
-    using var keys = await session.CalculateSessionKeysSymmetricAsync(
-        "my-credential", context, passwordUtf8);
+    if (hostChallenge.Length != 8 || hsmChallenge.Length != 8)
+        throw new ArgumentException("The host and HSM challenges must each be 8 bytes.");
 
-    // Use keys.SEnc / keys.SMac / keys.SRmac to open the YubiHSM 2 session.
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(passwordUtf8);
-    CryptographicOperations.ZeroMemory(context);
+    var context = new byte[16];
+    try
+    {
+        hostChallenge.CopyTo(context);
+        hsmChallenge.CopyTo(context.AsMemory(8));
+
+        using var sessionKeys = await session.CalculateSessionKeysSymmetricAsync(
+            label,
+            context,
+            credentialPasswordUtf8,
+            cardCryptogram,
+            cancellationToken);
+
+        // Use sessionKeys with the YubiHSM connector session.
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(context);
+    }
 }
 ```
 
@@ -96,14 +109,6 @@ Every credential is protected by a credential password. Passwords cross the API 
 - **You own the buffer.** The SDK zeroes its own padded copy, but never the array you passed in.
   Zero it yourself in a `finally`, or hand in a buffer type that zeroes on disposal.
 
-> **Breaking change (2026-08-31):** these parameters were previously `string`. They are now
-> UTF-8 `ReadOnlyMemory<byte>` and are named with a `...Utf8` suffix, matching Fido2, OpenPgp,
-> and OATH. .NET strings are immutable and cannot be securely wiped from memory, so the old
-> signatures made it impossible for callers to clear a credential password after use. The legacy
-> v1 SDK already used `ReadOnlyMemory<byte>` here, so this restores v1 parity. Migrate by passing
-> `Encoding.UTF8.GetBytes(password)` and zeroing the array when finished. The at-most-16-bytes
-> validation and null-padding behavior are unchanged.
-
 ### Management key
 
 A 16-byte key (default: all zeros) authorizing credential add/delete and admin password changes.
@@ -125,7 +130,7 @@ await using var session = await yubiKey.CreateHsmAuthSessionAsync(
     cancellationToken: cancellationToken);
 
 // Directly from a SmartCard connection, optionally over SCP
-await using var session = await HsmAuthSession.CreateAsync(
+await using var scpSession = await HsmAuthSession.CreateAsync(
     connection,
     scpKeyParams: scpParams,
     cancellationToken: cancellationToken);
@@ -169,13 +174,19 @@ await session.DeleteCredentialAsync(managementKey, label);
 
 ```csharp
 // Symmetric
-using var keys = await session.CalculateSessionKeysSymmetricAsync(
-    label, context, credentialPasswordUtf8, cardCryptogram);
+using var symmetricKeys = await session.CalculateSessionKeysSymmetricAsync(
+    label, symmetricContext, credentialPasswordUtf8, symmetricCardCryptogram);
 
 // Asymmetric (fw 5.6.0+); cardCryptogram is required for mutual authentication
-using var keys = await session.CalculateSessionKeysAsymmetricAsync(
-    label, context, publicKey, credentialPasswordUtf8, cardCryptogram);
+using var asymmetricKeys = await session.CalculateSessionKeysAsymmetricAsync(
+    label, asymmetricContext, hsmPublicKey, credentialPasswordUtf8, asymmetricCardCryptogram);
 ```
+
+The symmetric context is exactly 16 bytes: the 8-byte host challenge from `GetChallengeAsync`
+followed by the actual 8-byte HSM challenge returned by the connector. The asymmetric context is
+exactly 130 bytes: EPK-OCE followed by the connector's EPK-SD, each encoded as a 65-byte
+uncompressed P-256 point. The SDK validates these lengths before device I/O. It does not implement
+the YubiHSM connector handshake or generate the HSM-owned values.
 
 ### Touch notification
 

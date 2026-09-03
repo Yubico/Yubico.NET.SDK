@@ -77,10 +77,7 @@ naming convention they use.
   buffer it does not own.
 - `ValidateCredentialPassword(ReadOnlySpan<byte>)` is the single guard: **at most** 16 bytes.
 - `ParseCredentialPassword(ReadOnlySpan<byte>)` validates, then copies into a fresh 16-byte
-  buffer, null-padding the remainder. **Padding is deliberate and load-bearing** — it preserves
-  the exact behavior of the retired `ParseCredentialPassword(string)` and matches the Python
-  canonical SDK's `str` path. Do not "tighten" this to require exactly 16 bytes; that would be a
-  silent behavior break for every short password.
+  buffer, null-padding the remainder.
 - The padded copy is always zeroed in a `finally` block.
 - Never log password values — log operation metadata only.
 
@@ -107,10 +104,16 @@ finally
 
 ### Session Keys Lifecycle
 ```csharp
-using var keys = await session.CalculateSessionKeysSymmetricAsync(label, context, password);
+using var keys = await session.CalculateSessionKeysSymmetricAsync(
+    label, context, credentialPasswordUtf8, cardCryptogram);
 // Use keys.SEnc, keys.SMac, keys.SRmac
 // All key material zeroed automatically on dispose
 ```
+
+The symmetric context is `hostChallenge[8] || hsmChallenge[8]`; the HSM challenge and optional
+card cryptogram come from the YubiHSM connector. The asymmetric context is
+`epkOce[65] || epkSd[65]`. Validate these exact lengths before any device I/O, and never generate
+the connector-owned half locally.
 
 ### EC Private Key Handling
 - Private keys are never generated or stored in managed memory longer than necessary

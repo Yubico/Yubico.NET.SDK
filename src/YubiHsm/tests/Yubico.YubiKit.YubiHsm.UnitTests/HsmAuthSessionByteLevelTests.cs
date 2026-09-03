@@ -100,6 +100,60 @@ public class HsmAuthSessionByteLevelTests
         ], CommandData(command).ToArray());
     }
 
+    [Theory]
+    [InlineData(15)]
+    [InlineData(17)]
+    public async Task CalculateSessionKeysSymmetricAsync_InvalidContextLength_ThrowsBeforeDeviceIo(int length)
+    {
+        var connection = CreateInitializedConnection(SessionKeyResponse());
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            cancellationToken: TestContext.Current.CancellationToken);
+        var commandCount = connection.TransmittedCommands.Count;
+        var touchCallbackInvoked = false;
+        session.OnTouchRequired = () => touchCallbackInvoked = true;
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            session.CalculateSessionKeysSymmetricAsync(
+                "cred",
+                new byte[length],
+                "pass"u8.ToArray(),
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("context", exception.ParamName);
+        Assert.False(touchCallbackInvoked);
+        Assert.Equal(commandCount, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
+    [InlineData(129)]
+    [InlineData(131)]
+    public async Task CalculateSessionKeysAsymmetricAsync_InvalidContextLength_ThrowsBeforeDeviceIo(int length)
+    {
+        var connection = CreateInitializedConnection(SessionKeyResponse());
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            cancellationToken: TestContext.Current.CancellationToken);
+        var commandCount = connection.TransmittedCommands.Count;
+        var touchCallbackInvoked = false;
+        session.OnTouchRequired = () => touchCallbackInvoked = true;
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            session.CalculateSessionKeysAsymmetricAsync(
+                "cred",
+                new byte[length],
+                Sequence(0x60, 65),
+                "pass"u8.ToArray(),
+                Sequence(0x70, 8),
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal("context", exception.ParamName);
+        Assert.False(touchCallbackInvoked);
+        Assert.Equal(commandCount, connection.TransmittedCommands.Count);
+    }
+
     [Fact]
     public async Task DeleteCredentialAsync_WhenManagementKeyRetryFailure_ThrowsHsmAuthRetryException()
     {

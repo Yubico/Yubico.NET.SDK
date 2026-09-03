@@ -33,22 +33,16 @@ public interface IHsmAuthSession : IApplicationSession
     /// <summary>
     ///     Stores a symmetric (AES-128) credential in the YubiHSM Auth applet.
     /// </summary>
-    /// <param name="managementKey">The 16-byte management key for authorization.</param>
+    /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
     /// <param name="keyEnc">The 16-byte encryption key (K-ENC).</param>
     /// <param name="keyMac">The 16-byte MAC key (K-MAC).</param>
     /// <param name="credentialPasswordUtf8">
-    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
-    ///     null-padded to 16 bytes before transmission.
+    ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <remarks>
-    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
-    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
-    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
-    ///     and zero the resulting array when finished. Padding behavior is unchanged.
-    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.
@@ -65,24 +59,18 @@ public interface IHsmAuthSession : IApplicationSession
     /// <summary>
     ///     Stores a symmetric credential derived from a password via PBKDF2-HMAC-SHA256.
     /// </summary>
-    /// <param name="managementKey">The 16-byte management key for authorization.</param>
+    /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
     /// <param name="derivationPasswordUtf8">
-    ///     The UTF-8 encoded password to derive K-ENC and K-MAC from. Must not be empty.
+    ///     The borrowed UTF-8 encoded password used to derive K-ENC and K-MAC. It must not be
+    ///     empty. The caller must clear it after use.
     /// </param>
     /// <param name="credentialPasswordUtf8">
-    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
-    ///     null-padded to 16 bytes before transmission.
+    ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <remarks>
-    ///     <b>Breaking change:</b> The <c>derivationPassword</c> and <c>credentialPassword</c>
-    ///     parameters changed from <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8
-    ///     encoded) to allow callers to zero sensitive material after use. Pass
-    ///     <c>Encoding.UTF8.GetBytes(password)</c> and zero the resulting array when finished.
-    ///     The PBKDF2 parameters and padding behavior are unchanged.
-    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.
@@ -98,7 +86,7 @@ public interface IHsmAuthSession : IApplicationSession
     /// <summary>
     ///     Deletes a credential from the YubiHSM Auth applet.
     /// </summary>
-    /// <param name="managementKey">The 16-byte management key for authorization.</param>
+    /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The label of the credential to delete.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="HsmAuthRetryException">
@@ -114,20 +102,19 @@ public interface IHsmAuthSession : IApplicationSession
     ///     Calculates session keys using a symmetric credential.
     /// </summary>
     /// <param name="label">The credential label.</param>
-    /// <param name="context">The 16-byte host challenge concatenated with 16-byte HSM challenge.</param>
-    /// <param name="credentialPasswordUtf8">
-    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
-    ///     null-padded to 16 bytes before transmission.
+    /// <param name="context">
+    ///     The borrowed 16-byte context: the 8-byte host challenge returned by
+    ///     <see cref="GetChallengeAsync" />, followed by the actual 8-byte HSM challenge returned
+    ///     by the YubiHSM connector. The caller must clear it after use.
     /// </param>
-    /// <param name="cardCryptogram">Optional card cryptogram for mutual authentication.</param>
+    /// <param name="credentialPasswordUtf8">
+    ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
+    /// </param>
+    /// <param name="cardCryptogram">The optional borrowed card cryptogram returned by the YubiHSM connector.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
-    /// <remarks>
-    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
-    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
-    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
-    ///     and zero the resulting array when finished. Padding behavior is unchanged.
-    /// </remarks>
+    /// <exception cref="ArgumentException"><paramref name="context" /> is not exactly 16 bytes.</exception>
     /// <exception cref="HsmAuthRetryException">
     ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining credential password attempts.
@@ -149,8 +136,8 @@ public interface IHsmAuthSession : IApplicationSession
     /// <summary>
     ///     Changes the management key.
     /// </summary>
-    /// <param name="currentManagementKey">The current 16-byte management key.</param>
-    /// <param name="newManagementKey">The new 16-byte management key.</param>
+    /// <param name="currentManagementKey">The borrowed current 16-byte management key. The caller must clear it after use.</param>
+    /// <param name="newManagementKey">The borrowed new 16-byte management key. The caller must clear it after use.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="HsmAuthRetryException">
     ///     The current management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
@@ -172,26 +159,26 @@ public interface IHsmAuthSession : IApplicationSession
     ///     Requires firmware 5.6.0+.
     /// </summary>
     /// <param name="label">The credential label.</param>
-    /// <param name="context">The context data (EPK-OCE public key + EPK-SD public key, 130 bytes).</param>
+    /// <param name="context">
+    ///     The borrowed 130-byte context: the 65-byte uncompressed EPK-OCE returned by
+    ///     <see cref="GetChallengeAsync" />, followed by the actual 65-byte uncompressed EPK-SD
+    ///     returned by the YubiHSM connector. The caller must clear it after use.
+    /// </param>
     /// <param name="publicKey">
-    ///     The uncompressed EC P256 public key of the YubiHSM 2 device (65 bytes: 0x04 || X || Y).
+    ///     The borrowed uncompressed EC P256 public key of the YubiHSM 2 device (65 bytes:
+    ///     0x04 || X || Y).
     /// </param>
     /// <param name="credentialPasswordUtf8">
-    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
-    ///     null-padded to 16 bytes before transmission.
+    ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
     /// <param name="cardCryptogram">
-    ///     The card cryptogram from the YubiHSM 2 device. Required for asymmetric session key calculation
-    ///     as it is used for mutual authentication between the YubiKey and the YubiHSM 2.
+    ///     The borrowed card cryptogram returned by the YubiHSM connector for mutual
+    ///     authentication.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
-    /// <remarks>
-    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
-    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
-    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
-    ///     and zero the resulting array when finished. Padding behavior is unchanged.
-    /// </remarks>
+    /// <exception cref="ArgumentException"><paramref name="context" /> is not exactly 130 bytes.</exception>
     /// <exception cref="HsmAuthRetryException">
     ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining credential password attempts.
@@ -210,18 +197,12 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <param name="label">The credential label.</param>
     /// <param name="credentialPasswordUtf8">
-    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
     ///     null-padded to 16 bytes before transmission. Required for firmware &lt; 5.7.1;
-    ///     optional for firmware &gt;= 5.7.1.
+    ///     optional for firmware &gt;= 5.7.1. The caller must clear the input after use.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The challenge or ephemeral public key bytes.</returns>
-    /// <remarks>
-    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
-    ///     <c>string?</c> to <c>ReadOnlyMemory&lt;byte&gt;?</c> (UTF-8 encoded) to allow callers
-    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
-    ///     and zero the resulting array when finished. Padding behavior is unchanged.
-    /// </remarks>
+    /// <returns>The 8-byte host challenge or 65-byte uncompressed EPK-OCE.</returns>
     Task<ReadOnlyMemory<byte>> GetChallengeAsync(
         string label,
         ReadOnlyMemory<byte>? credentialPasswordUtf8 = null,
@@ -231,21 +212,15 @@ public interface IHsmAuthSession : IApplicationSession
     ///     Stores an asymmetric (EC P256) credential with an explicit private key.
     ///     Requires firmware 5.6.0+.
     /// </summary>
-    /// <param name="managementKey">The 16-byte management key for authorization.</param>
+    /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
-    /// <param name="privateKey">The 32-byte EC P256 private key.</param>
+    /// <param name="privateKey">The borrowed 32-byte EC P256 private key. The caller must clear it after use.</param>
     /// <param name="credentialPasswordUtf8">
-    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
-    ///     null-padded to 16 bytes before transmission.
+    ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <remarks>
-    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
-    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
-    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
-    ///     and zero the resulting array when finished. Padding behavior is unchanged.
-    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.
@@ -263,20 +238,14 @@ public interface IHsmAuthSession : IApplicationSession
     ///     The private key is generated by the YubiKey and never leaves the device.
     ///     Requires firmware 5.6.0+.
     /// </summary>
-    /// <param name="managementKey">The 16-byte management key for authorization.</param>
+    /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
     /// <param name="credentialPasswordUtf8">
-    ///     The UTF-8 encoded credential password, at most 16 bytes. Shorter values are
-    ///     null-padded to 16 bytes before transmission.
+    ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
+    ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
     /// <param name="touchRequired">Whether touch is required to use this credential.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <remarks>
-    ///     <b>Breaking change:</b> The <c>credentialPassword</c> parameter changed from
-    ///     <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers
-    ///     to zero sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c>
-    ///     and zero the resulting array when finished. Padding behavior is unchanged.
-    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.
@@ -305,21 +274,14 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <param name="label">The credential label.</param>
     /// <param name="currentPasswordUtf8">
-    ///     The UTF-8 encoded current credential password, at most 16 bytes. Shorter values are
-    ///     null-padded to 16 bytes before transmission.
+    ///     The borrowed UTF-8 encoded current credential password, at most 16 bytes. Shorter values
+    ///     are null-padded in an internal copy. The caller must clear the input after use.
     /// </param>
     /// <param name="newPasswordUtf8">
-    ///     The UTF-8 encoded new credential password, at most 16 bytes. Shorter values are
-    ///     null-padded to 16 bytes before transmission.
+    ///     The borrowed UTF-8 encoded new credential password, at most 16 bytes. Shorter values are
+    ///     null-padded in an internal copy. The caller must clear the input after use.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <remarks>
-    ///     <b>Breaking change:</b> The <c>currentPassword</c> and <c>newPassword</c> parameters
-    ///     changed from <c>string</c> to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to
-    ///     allow callers to zero sensitive material after use. Pass
-    ///     <c>Encoding.UTF8.GetBytes(password)</c> and zero the resulting array when finished.
-    ///     Padding behavior is unchanged.
-    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The current credential password is incorrect.
     ///     <see cref="HsmAuthRetryException.RetriesRemaining" /> reports the remaining attempts.
@@ -334,19 +296,13 @@ public interface IHsmAuthSession : IApplicationSession
     ///     Changes the password for a credential using the management key (admin override).
     ///     Requires firmware 5.8.0+.
     /// </summary>
-    /// <param name="managementKey">The 16-byte management key for authorization.</param>
+    /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The credential label.</param>
     /// <param name="newPasswordUtf8">
-    ///     The UTF-8 encoded new credential password, at most 16 bytes. Shorter values are
-    ///     null-padded to 16 bytes before transmission.
+    ///     The borrowed UTF-8 encoded new credential password, at most 16 bytes. Shorter values are
+    ///     null-padded in an internal copy. The caller must clear the input after use.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <remarks>
-    ///     <b>Breaking change:</b> The <c>newPassword</c> parameter changed from <c>string</c>
-    ///     to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers to zero
-    ///     sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c> and zero
-    ///     the resulting array when finished. Padding behavior is unchanged.
-    /// </remarks>
     /// <exception cref="HsmAuthRetryException">
     ///     The management key is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining management key attempts.

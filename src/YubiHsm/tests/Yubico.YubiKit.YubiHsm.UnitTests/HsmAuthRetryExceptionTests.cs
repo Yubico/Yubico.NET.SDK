@@ -195,7 +195,7 @@ public class HsmAuthRetryExceptionTests
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.CalculateSessionKeysAsymmetricAsync(
             "cred",
-            Sequence(0x40, 16),
+            Sequence(0x40, 130),
             Sequence(0x60, 65),
             "pass"u8.ToArray(),
             Sequence(0x70, 8),

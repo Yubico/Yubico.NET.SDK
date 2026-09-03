@@ -18,10 +18,8 @@ using System.Text;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 /// <summary>
-///     Pins the credential-password contract after the <c>string</c> → <c>ReadOnlyMemory&lt;byte&gt;</c>
-///     migration. The behavior these tests assert is deliberately identical to the retired
-///     <c>ParseCredentialPassword(string)</c>: at most 16 UTF-8 bytes in, always exactly 16
-///     null-padded bytes out.
+///     Verifies that credential passwords accept at most 16 UTF-8 bytes and are returned as a
+///     separate, null-padded 16-byte buffer.
 /// </summary>
 public class CredentialPasswordTests
 {

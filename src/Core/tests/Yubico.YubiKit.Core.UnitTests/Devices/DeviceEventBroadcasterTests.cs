@@ -272,9 +272,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Complete_WhenOneSubscriberThrows_StillNotifiesTheRest()
     {
-        // Completion runs during disposal, exactly when a subscriber is likely tearing down its own
-        // state. A throwing observer must not starve the others of their terminal signal - an async
-        // consumer whose channel is never completed would hang - nor derail the caller's cleanup.
+        // A throwing observer must not starve later observers of their terminal signal.
         var broadcaster = new DeviceEventBroadcaster();
         var throwing = new ThrowOnCompletedObserver();
         var later = new RecordingObserver<DeviceEvent>();
@@ -291,9 +289,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public async Task Complete_WhileASubscriberIsBlockedInOnNext_DoesNotWedge()
     {
-        // Guards the documented lifecycle invariant: a blocking DeviceChanges subscriber must not be
-        // able to wedge start/stop/dispose. This is the constraint that rules out serialising
-        // OnNext against OnCompleted inside the broadcaster.
+        // Complete does not wait for an in-flight observer callback.
         var broadcaster = new DeviceEventBroadcaster();
         using var entered = new ManualResetEventSlim();
         using var release = new ManualResetEventSlim();
@@ -323,6 +319,7 @@ public class DeviceEventBroadcasterTests
         var broadcasterType = typeof(DeviceEventBroadcaster);
 
         Assert.False(typeof(IObserver<DeviceEvent>).IsAssignableFrom(broadcasterType));
+        Assert.False(typeof(IDisposable).IsAssignableFrom(broadcasterType));
         Assert.Null(broadcasterType.GetMethod(nameof(IObserver<DeviceEvent>.OnNext), [typeof(DeviceEvent)]));
         Assert.Null(broadcasterType.GetMethod(nameof(IObserver<DeviceEvent>.OnCompleted), Type.EmptyTypes));
     }

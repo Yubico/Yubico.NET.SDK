@@ -20,62 +20,23 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
 /// <summary>
-/// Drives repeated physical insert/remove cycles against the <see cref="IObservable{T}"/> device
-/// event surface.
+/// Verifies that the observable device-event surface remains live across repeated physical
+/// removal and insertion cycles.
 /// </summary>
 /// <remarks>
-/// <para>
-/// This fills two gaps that no other test covers. <c>YubiKeyTests</c> exercises a single hot-plug
-/// but only through <c>WatchAsync</c>, and <c>CoreTests</c> exercises <c>DeviceChanges</c> but only
-/// through the initial rescan. Nothing exercised <c>DeviceChanges</c> under an actual hot-plug, and
-/// nothing anywhere exercised more than one cycle.
-/// </para>
-/// <para>
-/// Repetition is the point: a listener that dies after one cycle, or a monitor that stops diffing
-/// once it has seen a removal, passes a single-cycle test and fails this one.
-/// </para>
-/// <para>
-/// It asserts pairing only, and deliberately makes no claim about <c>DeviceId</c>. An earlier
-/// version asserted that a key returns under the identity it left with; hardware runs showed that
-/// is not an invariant. Within one session the same physical key was observed as
-/// <c>ykphysical:&lt;serial&gt;</c>, as <c>ykphysical:pid:&lt;pid&gt;</c> when the metadata read did
-/// not land, and removals sometimes reported a transport-tier id such as
-/// <c>pcsc:Yubico YubiKey OTP+FIDO+CCID</c> while the matching arrival reported
-/// <c>ykphysical:*</c>. The merger picking the strongest identity currently available is by design,
-/// so an identity assertion here fails constantly and means nothing. The ids are printed per cycle
-/// so a human can eyeball them; they are not asserted on.
-/// </para>
-/// <para>
-/// Other keys may stay connected. A key that simply sits there emits no events, so bystanders need
-/// no filtering — and filtering them by <c>DeviceId</c> was tried and does not work, for the reasons
-/// above.
-/// </para>
-/// <para>
-/// Requires manual interaction, so it is not part of any automated run. It is written for the
-/// mandated pre-release pass over <c>RequiresUserPresence</c> tests. Prompts are written to
-/// <see cref="Console"/> rather than <c>ITestOutputHelper</c> because the latter is buffered until
-/// the test finishes, which is useless when the test is waiting on you.
-/// </para>
+/// This test requires an operator to remove and insert a YubiKey when prompted. It asserts event
+/// sequence liveness after each prompt and does not attempt to correlate event identity.
 /// </remarks>
 public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 {
-    /// <summary>Insert/remove round trips to perform. Raise it when chasing an intermittent fault.</summary>
+    /// <summary>Insert/remove round trips to perform.</summary>
     private const int Cycles = 3;
 
-    /// <summary>How long to wait for a human to unplug or replug the key.</summary>
+    /// <summary>How long to wait for the requested operator action.</summary>
     private static readonly TimeSpan HumanActionTimeout = TimeSpan.FromSeconds(30);
-
-    /// <summary>
-    /// Quiet period after an arrival before its <c>DeviceId</c> is treated as settled. A composite
-    /// key's interfaces do not all enumerate at once, so the merger can legitimately emit
-    /// Removed/Added churn while the picture fills in.
-    /// </summary>
-    private static readonly TimeSpan SettleDelay = TimeSpan.FromSeconds(2);
 
     private readonly EventLog _log = new();
 
-    // Same reasoning as CoreTests: YubiKeyManager is static and its device cache outlives a test
-    // class, so a populated cache would suppress the initial Added this test uses as its baseline.
     public async Task InitializeAsync() => await YubiKeyManager.ShutdownAsync();
 
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
@@ -83,31 +44,34 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
-    public async Task DeviceChanges_AcrossRepeatedHotPlugCycles_PairsEveryRemovalWithAnArrival()
+    public async Task DeviceChanges_AcrossRepeatedHotPlugCycles_EmitsRemovalAndArrivalAfterEachPrompt()
     {
-        // Subscribe before monitoring starts, otherwise the initial rescan races the subscription.
+        Assert.False(
+            Console.IsInputRedirected,
+            "This test requires interactive console input for each remove and insert checkpoint.");
+
         using var subscription = YubiKeyManager.DeviceChanges.Subscribe(_log);
+        var initialCheckpoint = _log.CreateCheckpoint();
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
 
         Prompt($"Leave your YubiKey plugged in. {Cycles} remove/insert cycles will be requested.");
-        Prompt("Other keys may stay connected — a key that just sits there emits no events.");
 
-        _ = await ExpectAsync(e => e.Action == DeviceAction.Added, "initial discovery");
-        await Task.Delay(SettleDelay);
+        _ = await ExpectAsync(initialCheckpoint, DeviceAction.Added, "initial discovery");
 
         for (var cycle = 1; cycle <= Cycles; cycle++)
         {
+            Prompt($"[cycle {cycle}/{Cycles}] Press Enter when ready to remove a YubiKey.");
+            _ = Console.ReadLine();
+            var removalCheckpoint = _log.CreateCheckpoint();
             Prompt($"[cycle {cycle}/{Cycles}] REMOVE a YubiKey now.");
-            var removed = await ExpectAsync(e => e.Action == DeviceAction.Removed, $"cycle {cycle} removal");
+            var removed = await ExpectAsync(removalCheckpoint, DeviceAction.Removed, $"cycle {cycle} removal");
 
+            Prompt($"[cycle {cycle}/{Cycles}] Press Enter when ready to re-insert the YubiKey.");
+            _ = Console.ReadLine();
+            var insertionCheckpoint = _log.CreateCheckpoint();
             Prompt($"[cycle {cycle}/{Cycles}] RE-INSERT the same YubiKey now.");
-            var added = await ExpectAsync(e => e.Action == DeviceAction.Added, $"cycle {cycle} insertion");
+            var added = await ExpectAsync(insertionCheckpoint, DeviceAction.Added, $"cycle {cycle} insertion");
 
-            // Let a composite key finish enumerating before reporting what it settled as.
-            await Task.Delay(SettleDelay);
-
-            // Reported, deliberately not asserted. See the class remarks: DeviceId is not stable
-            // enough across events to carry an assertion.
             output.WriteLine(
                 $"[cycle {cycle}] removed as '{removed.Device.DeviceId}', returned as '{added.Device.DeviceId}'");
         }
@@ -115,9 +79,12 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         output.WriteLine(_log.ToString());
     }
 
-    private async Task<DeviceEvent> ExpectAsync(Func<DeviceEvent, bool> match, string what)
+    private async Task<DeviceEvent> ExpectAsync(int checkpoint, DeviceAction action, string what)
     {
-        var deviceEvent = await _log.WaitForAsync(match, HumanActionTimeout);
+        var deviceEvent = await _log.WaitForAsync(
+            checkpoint,
+            deviceEvent => deviceEvent.Action == action,
+            HumanActionTimeout);
 
         Assert.True(
             deviceEvent is not null,
@@ -131,7 +98,6 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
 
     private void Prompt(string message)
     {
-        // Console, not ITestOutputHelper: the human needs to read this while the test is blocked.
         Console.WriteLine($">>> {message}");
         output.WriteLine($">>> {message}");
     }
@@ -153,17 +119,6 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         private Func<DeviceEvent, bool>? _awaited;
         private TaskCompletionSource<DeviceEvent>? _pending;
 
-        /// <summary>
-        /// Index of the first entry not yet handed to a <see cref="WaitForAsync"/> caller.
-        /// </summary>
-        /// <remarks>
-        /// A human cannot be expected to stay in lockstep with the prompts, and acting early must not
-        /// fail the test. Events are therefore consumed from the recorded log rather than only from
-        /// the live callback, so a removal that happened before the prompt was printed still
-        /// satisfies the wait for it.
-        /// </remarks>
-        private int _cursor;
-
         public void OnNext(DeviceEvent value)
         {
             TaskCompletionSource<DeviceEvent>? toComplete = null;
@@ -177,7 +132,6 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
                     toComplete = _pending;
                     _pending = null;
                     _awaited = null;
-                    _cursor = _entries.Count;
                 }
             }
 
@@ -193,20 +147,22 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         }
 
         /// <summary>
-        /// Consumes the next unconsumed event matching <paramref name="match"/>, waiting for one if it
-        /// has not happened yet; null on timeout.
+        /// Returns the first event at or after <paramref name="checkpoint"/> that matches
+        /// <paramref name="match"/>, waiting for one if necessary; null on timeout.
         /// </summary>
-        public async Task<DeviceEvent?> WaitForAsync(Func<DeviceEvent, bool> match, TimeSpan timeout)
+        public async Task<DeviceEvent?> WaitForAsync(
+            int checkpoint,
+            Func<DeviceEvent, bool> match,
+            TimeSpan timeout)
         {
             TaskCompletionSource<DeviceEvent> tcs;
 
             lock (_gate)
             {
-                for (var i = _cursor; i < _entries.Count; i++)
+                for (var i = checkpoint; i < _entries.Count; i++)
                 {
                     if (match(_entries[i].Event))
                     {
-                        _cursor = i + 1;
                         return _entries[i].Event;
                     }
                 }
@@ -216,20 +172,44 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
                 _pending = tcs;
             }
 
-            var winner = await Task.WhenAny(tcs.Task, Task.Delay(timeout)).ConfigureAwait(false);
-
-            if (winner == tcs.Task)
+            try
             {
-                return await tcs.Task.ConfigureAwait(false);
+                return await tcs.Task.WaitAsync(timeout).ConfigureAwait(false);
             }
+            catch (TimeoutException)
+            {
+                lock (_gate)
+                {
+                    for (var i = checkpoint; i < _entries.Count; i++)
+                    {
+                        if (match(_entries[i].Event))
+                        {
+                            return _entries[i].Event;
+                        }
+                    }
 
+                    return null;
+                }
+            }
+            finally
+            {
+                lock (_gate)
+                {
+                    if (ReferenceEquals(_pending, tcs))
+                    {
+                        _awaited = null;
+                        _pending = null;
+                    }
+                }
+            }
+        }
+
+        public int CreateCheckpoint()
+        {
             lock (_gate)
             {
-                _awaited = null;
-                _pending = null;
+                return _entries.Count;
             }
-
-            return null;
         }
 
         /// <summary>Full timeline, attached to any failure so a manual run leaves a usable trace.</summary>

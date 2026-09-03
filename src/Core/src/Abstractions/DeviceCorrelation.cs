@@ -21,14 +21,15 @@ namespace Yubico.YubiKit.Core.Abstractions;
 /// <remarks>
 ///     The answer is honest rather than convenient: physical identity can only be proven by the
 ///     hardware serial number, and whole device classes (for example the Security Key series) never
-///     report one. When either side's serial is unknown, the answer is <see cref="Unknown" /> —
-///     never a guess based on transport paths, product IDs, or timing.
+///     report one. Reference identity is evaluated first; for distinct references, an unknown serial on
+///     either side produces <see cref="Unknown" /> rather than a guess based on transport paths, product
+///     IDs, or timing.
 /// </remarks>
 public enum DeviceCorrelation
 {
     /// <summary>
-    ///     At least one side's serial number is unknown, so physical identity cannot be determined.
-    ///     Treat this as "cannot correlate", not as "different".
+    ///     The references are distinct and at least one serial number is unknown, so physical identity
+    ///     cannot be determined. Treat this as "cannot correlate", not as "different".
     /// </summary>
     Unknown = 0,
 

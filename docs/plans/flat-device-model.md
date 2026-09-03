@@ -237,8 +237,8 @@ and the full contract, each clause pinned by `DeviceIdentityContractTests` and t
   Management-free, under an explicit nullability/lifetime contract, added as a default interface
   member so external implementers do not break.
 - **`IYubiKey.SameDeviceAs` (R3).** Tri-state physical correlation (`DeviceCorrelation`); unknown
-  serial on either side answers `Unknown`, never a guess. No equality comparer ships (recorded
-  decision).
+  serial on either side of two distinct references answers `Unknown`, never a guess. Comparing a
+  reference with itself always answers `Same`. No equality comparer ships (recorded decision).
 - **Referential `Equals`/`GetHashCode` and transport-shaped one-slot `DeviceId` are decided, not
   deferred** — recorded with rationale in the architecture document.
 
@@ -257,16 +257,21 @@ preconditions were completed on hardware (macOS, two composite USB 0x0407 keys w
    entirely and is not enumerated — cost 0. On current firmware the Management applet cannot be
    disabled while the NFC transport is up, so a published-but-persistently-unreadable NFC YubiKey is
    not manufacturable by configuration; cross-process reader contention fails fast with a sharing
-   violation. The remaining failure path — a published USB device whose identity read fails — costs
-   at most `DiscoveryIdentityReader.MaxAttempts` (3) fail-fast connect attempts per scan, constant
-   across scans, worst-case bounded by the per-scan budgets (2 s identity / 3 s metadata, never
-   stacked).
+   violation. An ambiguous USB interface whose identity read fails uses at most
+   `DiscoveryIdentityReader.MaxAttempts` (3) connect attempts per scan, constant across scans. Each
+   attempt has its own 2 s caller-wait budget; a timeout returns unknown immediately and is not
+   retried. Other failures can retry after 150 ms and 300 ms delays. A published device that instead
+   needs best-effort metadata makes one no-retry pass over its available transports with a single 3 s
+   caller-wait budget shared across that pass; persistent failure repeats that constant work on later
+   scans. A device that used the identity-read path does not also incur the metadata-read budget in
+   that scan.
 
 **Decision:** retry-every-scan remains the policy; no per-identity backoff ledger is added. The
-bound is pinned mechanically by
-`FindYubiKeysFaultInjectionTests.FindAllAsync_PersistentIdentityFailureAcrossScans_PerScanAttemptsStayConstant_Pin`
-(constant per-scan attempt count under persistent failure, healthy siblings unaffected, no hardware
-required, never self-skips). If future hardware changes the numbers, the fallback design remains: a
+attempt behavior is covered by
+`FindYubiKeysFaultInjectionTests.FindAllAsync_PersistentIdentityFailureAcrossScans_PerScanAttemptsStayConstant`
+(exactly three attempts per scan under the scripted failure, constant across scans, and healthy
+siblings unaffected; no hardware required). The test counts attempts; it does not measure the two-second
+per-attempt wait budget. If future hardware changes the numbers, the fallback design remains: a
 per-physical-identity failure ledger in `FindYubiKeys` with a capped cross-scan backoff, reset by
 `NotifyTransportActivity` and absence eviction.
 

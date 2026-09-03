@@ -115,8 +115,8 @@ public interface IYubiKey
 
     /// <summary>
     ///     Answers whether this reference and <paramref name="other" /> describe the same physical key.
-    ///     The answer is tri-state and never guesses: <see cref="DeviceCorrelation.Unknown" /> whenever
-    ///     either side's <see cref="SerialNumber" /> is unknown.
+    ///     Reference identity is evaluated first. Distinct references are then compared by serial number,
+    ///     with <see cref="DeviceCorrelation.Unknown" /> returned when either serial is unknown.
     /// </summary>
     /// <remarks>
     ///     The same object is always <see cref="DeviceCorrelation.Same" />. Two references with known,
@@ -129,6 +129,13 @@ public interface IYubiKey
     ///     collections by reference instead — instance retention within one manager makes that a
     ///     supported pattern.
     /// </remarks>
+    /// <param name="other">The device reference to compare with this reference.</param>
+    /// <returns>
+    ///     <see cref="DeviceCorrelation.Same" /> for the same reference or equal known serials,
+    ///     <see cref="DeviceCorrelation.Different" /> for unequal known serials, or
+    ///     <see cref="DeviceCorrelation.Unknown" /> for distinct references when either serial is unknown.
+    /// </returns>
+    /// <exception cref="ArgumentNullException"><paramref name="other" /> is <see langword="null" />.</exception>
     DeviceCorrelation SameDeviceAs(IYubiKey other)
     {
         ArgumentNullException.ThrowIfNull(other);

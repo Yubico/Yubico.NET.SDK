@@ -21,10 +21,9 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
 /// <summary>
-///     The deferred hot-plug hardware protocol for the stage D' identity contract
-///     (docs/architecture/device-identity.md, docs/plans/flat-device-model.md). Run ONE narrowly
-///     filtered test per invocation with a human ready at the machine — never the whole
-///     user-presence category. Requires a single-key USB rig.
+///     Verifies identity retention and correlation across removal and reinsertion. Run one narrowly
+///     filtered test per invocation with a human ready at the machine, never the whole user-presence
+///     category. Requires a single-key USB rig.
 /// </summary>
 /// <remarks>
 ///     Operator choreography for <see cref="RemoveAndReinsert_RemovalRetainsSerial_ReinsertionPublishesNewCorrelatedObject" />:
@@ -76,7 +75,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Note("monitoring started (1 s interval)");
 
-        // Phase 1 - baseline: exactly one key, retained object, serial known (R2 on hardware).
+        // Establish one published key with a known serial before the operator removes it.
         IYubiKey? original = null;
         while (clock.Elapsed < TimeSpan.FromSeconds(20))
         {
@@ -97,7 +96,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         var originalSerial = original.SerialNumber!.Value;
         Note($"BASELINE {original.DeviceId} connections={original.AvailableConnections} serial={originalSerial}");
 
-        // Phase 2 - the operator unplugs the key. Poll the repository snapshot alongside the event
+        // The operator unplugs the key. Poll the repository snapshot alongside the event
         // stream: if the snapshot empties without a Removed event, the event plumbing lost it; if
         // neither happens, the monitor never observed the removal.
         var snapshotEmptied = false;
@@ -121,14 +120,12 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         var removed = await removedTcs.Task;
         Note($"REMOVED delivered ref={removed.GetHashCode():x8} retainedSerial={removed.SerialNumber?.ToString() ?? "null"}");
 
-        // R1: the removal event delivers the exact retained object.
         Assert.True(
             ReferenceEquals(original, removed),
             $"The Removed event must deliver the retained published object.{Environment.NewLine}{Timeline()}");
-        // R2: the removal-event object retains its last-known serial.
         Assert.Equal(originalSerial, removed.SerialNumber);
 
-        // Phase 3 - the operator reinserts the key; discovery must republish a NEW object and
+        // The operator reinserts the key; discovery must republish a new object and
         // re-establish the serial from hardware (hot-plug evicted all cached metadata).
         IYubiKey? reinserted = null;
         var phase3Deadline = clock.Elapsed + TimeSpan.FromSeconds(120);
@@ -151,11 +148,9 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         Note($"REINSERTED {reinserted.DeviceId} connections={reinserted.AvailableConnections} " +
              $"serial={reinserted.SerialNumber} ref={reinserted.GetHashCode():x8}");
 
-        // R1 trigger 3: reinsertion publishes a new object - identity is never object-inherited.
         Assert.True(
             !ReferenceEquals(original, reinserted),
             $"Reinsertion must publish a new object.{Environment.NewLine}{Timeline()}");
-        // R3: with both serials known, the tri-state correlation proves same physical key.
         Assert.Equal(originalSerial, reinserted.SerialNumber);
         Assert.Equal(DeviceCorrelation.Same, original.SameDeviceAs(reinserted));
         Assert.Equal(DeviceCorrelation.Same, reinserted.SameDeviceAs(original));

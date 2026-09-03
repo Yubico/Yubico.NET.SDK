@@ -126,7 +126,7 @@ describe the same physical key?" honestly, with `DeviceCorrelation` tri-state se
 
 - the same object is always `Same`;
 - two references with known, equal serials are `Same`; known, unequal serials are `Different`;
-- if either serial is unknown, the answer is `Unknown` — never a guess.
+- distinct references produce `Unknown` if either serial is unknown — never a guess.
 
 When the serial is present it is the durable identity: use it to deduplicate rescans, key
 cross-process state, and match audit records. When it is absent, physical identity is unknowable
@@ -235,9 +235,14 @@ event stream and records which layer observed the removal, so a recurrence will 
 
 - The flat published-device model, retained-object metadata propagation, and the stage D' identity
   contract (D2, D3, D5, D6, D7) are implemented and pinned by deterministic tests.
-- Metadata-read retry policy is decided with hardware evidence: retry-every-scan, bounded by the
-  per-scan attempt cap and read budgets, pinned by the constant-attempts fault-injection test — see
-  the stage D' section of `docs/plans/flat-device-model.md` for the measurements.
+- Failed identity and metadata reads are not cached, so both are retried on later scans. Within one
+  scan, an identity read allows at most three attempts, each with its own two-second caller-wait
+  budget; a timeout is not retried. A metadata read instead makes one pass over the available
+  transports with no retries and one three-second caller-wait budget shared across that pass. A
+  device that used the identity-read path does not also incur the metadata-read budget in that scan.
+  The identity fault-injection test verifies exactly three attempts across repeated scans and that a
+  failing interface does not amplify reads of a healthy sibling. See the stage D' section of
+  `docs/plans/flat-device-model.md` for the measurements.
 - A derived product name ("YubiKey 5C NFC"-style, per Rust's `name()` convenience) is deferred: it
   requires the PID/version/form-factor naming table.
 - Run the repeatable `HotPlugIdentityContractTests` ceremony (`RequiresUserPresence`) as one narrowly

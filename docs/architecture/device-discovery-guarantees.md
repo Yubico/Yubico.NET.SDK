@@ -167,8 +167,8 @@ For persistence, audit logs, allow lists, or anything surviving a process restar
   visibility is disabled). A null serial cannot be a durable key; such devices are only distinguishable by
   topology evidence, which exists on Windows alone (see G4 in the guarantee matrix).
 - To ask whether two `IYubiKey` references describe the same physical key, use
-  `IYubiKey.SameDeviceAs`: it answers `Same`/`Different`/`Unknown` and never guesses when a serial is
-  missing.
+  `IYubiKey.SameDeviceAs`: the same reference answers `Same`; distinct references answer
+  `Same`/`Different` from known serials or `Unknown` when either serial is missing.
 
 ### Firmware version is deliberately not part of identity
 

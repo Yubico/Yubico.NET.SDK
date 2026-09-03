@@ -41,7 +41,7 @@ public class DiscoveryIdentityReaderTests
                 NullLogger.Instance,
                 TestContext.Current.CancellationToken);
 
-            // Generous bound: 3 attempts x per-attempt timeout + retry backoff must all fit well inside it.
+            // A timeout is not retried, so the two-second per-attempt budget must fit well inside this bound.
             var winner = await Task.WhenAny(
                 readTask,
                 Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));

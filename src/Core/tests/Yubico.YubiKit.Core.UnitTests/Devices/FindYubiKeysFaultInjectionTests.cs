@@ -260,20 +260,15 @@ public class FindYubiKeysFaultInjectionTests
     }
 
     /// <summary>
-    ///     Stage D' R4 boundedness pin (docs/plans/flat-device-model.md): an interface whose identity
-    ///     read fails persistently costs a small, CONSTANT number of connect attempts per scan —
-    ///     bounded by the per-scan retry cap — and never accumulates work across scan intervals.
-    ///     Retry-every-scan is the decided policy; this pin is what makes "bounded" mechanical.
+    ///     An interface whose identity read fails persistently uses no more than three connect attempts
+    ///     in each scan, with no growth across repeated scans.
     /// </summary>
     [Fact]
-    public async Task FindAllAsync_PersistentIdentityFailureAcrossScans_PerScanAttemptsStayConstant_Pin()
+    public async Task FindAllAsync_PersistentIdentityFailureAcrossScans_PerScanAttemptsStayConstant()
     {
         await DiscoveryWorkerAdmissionCollection.WaitUntilIdleAsync(TestContext.Current.CancellationToken);
         var (find, factory, _, _) = CreateTwoDualKeyRig();
         factory.FailReads(OtpB);
-
-        // The within-scan retry cap (DiscoveryIdentityReader.MaxAttempts).
-        const int MaxAttemptsPerScan = 3;
 
         var attemptsPerScan = new List<int>();
         var previous = 0;
@@ -285,10 +280,7 @@ public class FindYubiKeysFaultInjectionTests
             previous = total;
         }
 
-        Assert.All(attemptsPerScan, attempts =>
-        {
-            Assert.InRange(attempts, 1, MaxAttemptsPerScan);
-        });
+        Assert.All(attemptsPerScan, attempts => Assert.Equal(3, attempts));
         Assert.True(
             attemptsPerScan.Distinct().Count() == 1,
             "Per-scan attempt cost under persistent failure must be constant across scans - growth " +

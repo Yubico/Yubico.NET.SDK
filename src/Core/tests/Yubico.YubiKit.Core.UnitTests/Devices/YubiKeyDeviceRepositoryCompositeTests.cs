@@ -319,14 +319,13 @@ public class YubiKeyDeviceRepositoryCompositeTests
     }
 
     // ---------------------------------------------------------------------------------------------
-    // Stage D' retention contract (docs/architecture/device-identity.md): within one manager, an
+    // Within one manager, an
     // attached key whose interface and connection sets are unchanged and whose known serial is not
     // contradicted is represented by exactly one retained object across scans. Republication as
     // Removed+Added (a NEW object) happens on interface-set change, connection-set change, reinsertion
     // observed across scans, or a different known serial proving substitution on otherwise unchanged sets.
     // ---------------------------------------------------------------------------------------------
 
-    // CONTRACT PIN (R1): reference-keyed collections are a supported in-process pattern.
     [Fact]
     public void UpdateCache_UnchangedInterfaceSet_ReferenceKeyedDictionaryRemainsValidAcrossScans()
     {
@@ -345,7 +344,6 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Equal("state", perDeviceState[retained]);
     }
 
-    // CONTRACT PIN (R1, trigger 1): an interface-set change republishes the key as a new object.
     [Fact]
     public void UpdateCache_InterfaceSetChanged_RepublishesAsNewObject()
     {
@@ -373,8 +371,6 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.NotSame(twoInterfaces, Assert.Single(repository.GetAll()));
     }
 
-    // CONTRACT PIN (R1, trigger 2): a connection-set change over an UNCHANGED interface set also
-    // republishes as a new object (ISC-17) - production-shaped variant of the FakeYubiKey test above.
     [Theory]
     [InlineData(103, 103)]
     [InlineData(103, 125)]
@@ -413,8 +409,6 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Same(otpShape, events[1].Device);
     }
 
-    // CONTRACT PIN (R1, trigger 3): a reinsertion observed across scans publishes a new object; the
-    // Removed event delivers the original retained object.
     [Fact]
     public void UpdateCache_ReinsertionObservedAcrossScans_PublishesNewObject()
     {

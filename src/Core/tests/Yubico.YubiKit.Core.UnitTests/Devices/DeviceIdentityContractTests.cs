@@ -18,17 +18,15 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-///     Stage D' device identity contract (docs/architecture/device-identity.md): the public
-///     <see cref="IYubiKey.SerialNumber" /> nullability/lifetime clauses and the tri-state
-///     <see cref="IYubiKey.SameDeviceAs" /> correlation truth table.
+///     Verifies the public <see cref="IYubiKey.SerialNumber" /> lifetime rules and the tri-state
+///     <see cref="IYubiKey.SameDeviceAs" /> truth table.
 /// </summary>
 public class DeviceIdentityContractTests
 {
     // ---------------------------------------------------------------------------------------------
-    // R2: SerialNumber contract on the published production device
+    // SerialNumber behavior on a published production device
     // ---------------------------------------------------------------------------------------------
 
-    // CONTRACT PIN (R2): null until a metadata read has succeeded.
     [Fact]
     public void SerialNumber_BeforeAnyMetadataRead_IsNull()
     {
@@ -37,7 +35,6 @@ public class DeviceIdentityContractTests
         Assert.Null(device.SerialNumber);
     }
 
-    // CONTRACT PIN (R2): serial delivered with discovery metadata is exposed without a session.
     [Fact]
     public void SerialNumber_MetadataWithSerialArrives_IsExposed()
     {
@@ -48,8 +45,7 @@ public class DeviceIdentityContractTests
         Assert.Equal(103, ((IYubiKey)device).SerialNumber);
     }
 
-    // CONTRACT PIN (R2): once non-null, the serial never reverts to null - even when a later
-    // successful metadata read carries no serial (serial-less report, mid-reconfiguration read).
+    // A later metadata snapshot without a serial must not erase an established identity.
     [Fact]
     public void SerialNumber_LaterMetadataWithoutSerial_DoesNotRegressToNull()
     {
@@ -62,24 +58,22 @@ public class DeviceIdentityContractTests
         Assert.Equal(serialLess, device.DeviceInfo); // the metadata snapshot itself does update
     }
 
-    // CONTRACT PIN (R2): a null DeviceInfo update (transient read failure) changes nothing.
     [Fact]
-    public void SerialNumber_TransientReadFailure_DoesNotRegress()
+    public void DeviceInfo_NullAssignment_DoesNotChangeMetadataOrSerial()
     {
-        var device = Published(deviceInfo: WithSerial(103));
+        var original = WithSerial(103);
+        var device = Published(deviceInfo: original);
 
         device.DeviceInfo = null;
 
+        Assert.Equal(original, device.DeviceInfo);
         Assert.Equal(103, ((IYubiKey)device).SerialNumber);
     }
 
-    // CONTRACT PIN (R2): third-party IYubiKey implementations inherit a null default; the addition
-    // is additive and non-breaking.
+    // Existing third-party implementations inherit the default interface behavior.
     [Fact]
     public void SerialNumber_ThirdPartyImplementation_DefaultsToNull()
     {
-        // BareThirdPartyYubiKey declares only the abstract members; SerialNumber and SameDeviceAs
-        // come entirely from the interface defaults, so this compiles against pre-existing code.
         IYubiKey device = new BareThirdPartyYubiKey("third:party");
 
         Assert.Null(device.SerialNumber);
@@ -87,11 +81,9 @@ public class DeviceIdentityContractTests
     }
 
     // ---------------------------------------------------------------------------------------------
-    // R2: SerialNumber lifetime clauses through the repository
+    // SerialNumber lifetime through the repository
     // ---------------------------------------------------------------------------------------------
 
-    // CONTRACT PIN (R2): the serial may transition null -> non-null after publication without any
-    // device event; the retained published object is updated in place.
     [Fact]
     public void UpdateCache_LateSerialArrival_PopulatesRetainedObjectWithoutEvents()
     {
@@ -110,9 +102,7 @@ public class DeviceIdentityContractTests
         Assert.Empty(events);
     }
 
-    // CONTRACT PIN (R2): a republished object never inherits identity from its predecessor object.
-    // A connection-set change delivers a NEW object whose serial is whatever discovery established
-    // for it - null here, because the replacement scan object carries no metadata.
+    // The replacement has only the metadata established for that scan.
     [Fact]
     public void UpdateCache_ConnectionSetChangeRepublication_NewObjectDoesNotInheritSerial()
     {
@@ -143,7 +133,6 @@ public class DeviceIdentityContractTests
         Assert.Null(added.SerialNumber);
     }
 
-    // CONTRACT PIN (R2): the object delivered with a removal event retains its last-known serial.
     [Fact]
     public void UpdateCache_RemovalEvent_ObjectRetainsLastKnownSerial()
     {
@@ -164,10 +153,9 @@ public class DeviceIdentityContractTests
     }
 
     // ---------------------------------------------------------------------------------------------
-    // R3: SameDeviceAs tri-state truth table
+    // SameDeviceAs tri-state truth table
     // ---------------------------------------------------------------------------------------------
 
-    // CONTRACT PIN (R3): the same object is always Same, even when its serial is unknown.
     [Fact]
     public void SameDeviceAs_SameReferenceWithUnknownSerial_Same()
     {
@@ -176,7 +164,6 @@ public class DeviceIdentityContractTests
         Assert.Equal(DeviceCorrelation.Same, device.SameDeviceAs(device));
     }
 
-    // CONTRACT PIN (R3): known, equal serials are Same across distinct objects.
     [Fact]
     public void SameDeviceAs_EqualKnownSerials_Same()
     {
@@ -188,7 +175,6 @@ public class DeviceIdentityContractTests
         Assert.Equal(DeviceCorrelation.Same, second.SameDeviceAs(first));
     }
 
-    // CONTRACT PIN (R3): known, unequal serials are Different.
     [Fact]
     public void SameDeviceAs_UnequalKnownSerials_Different()
     {
@@ -199,7 +185,6 @@ public class DeviceIdentityContractTests
         Assert.Equal(DeviceCorrelation.Different, second.SameDeviceAs(first));
     }
 
-    // CONTRACT PIN (R3): an unknown serial on EITHER side yields Unknown - never a guess.
     [Fact]
     public void SameDeviceAs_OwnSerialUnknown_Unknown()
     {
@@ -227,8 +212,6 @@ public class DeviceIdentityContractTests
         Assert.Equal(DeviceCorrelation.Unknown, first.SameDeviceAs(second));
     }
 
-    // CONTRACT PIN (R3): the default interface implementation gives third-party devices the same
-    // truth table, and it interoperates with production devices.
     [Fact]
     public void SameDeviceAs_ThirdPartyDefaultImplementation_UsesSerialContract()
     {
@@ -270,8 +253,7 @@ public class DeviceIdentityContractTests
     }
 
     /// <summary>
-    ///     An external implementation declaring only the abstract members - the compile-time proof
-    ///     that the stage D' additions are non-breaking for existing third-party implementers.
+    ///     An external implementation declaring only the abstract interface members.
     /// </summary>
     private sealed class BareThirdPartyYubiKey(string deviceId) : IYubiKey
     {

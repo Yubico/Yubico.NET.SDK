@@ -21,22 +21,14 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 /// Tests for <see cref="AsnPublicKeyEncoder"/>.
 /// </summary>
 /// <remarks>
-/// Every EC/RSA test anchors to the .NET BCL as an independent oracle: this encoder produces a
-/// SubjectPublicKeyInfo and the BCL is asked to import it, with the parameters the BCL reports
-/// compared against the parameters that went in. This is intentional: a same-code round trip
-/// (encode here, decode with <see cref="AsnPublicKeyDecoder"/>) would pass even if both sides
-/// shared the same bug, which is the most likely failure mode for a bespoke ASN.1 implementation.
-/// <para>
-/// <see cref="AsnPublicKeyEncoder.EncodeECDsaPublicKey"/> and
-/// <see cref="AsnPublicKeyEncoder.EncodeCurve25519PublicKey"/> are private; they are covered
-/// indirectly through the public overloads below rather than by widening their accessibility.
-/// </para>
+/// EC and RSA tests use .NET cryptography APIs as an independent decoding oracle rather than
+/// round-tripping through the matching SDK decoder, which could share the same defect. Ed25519 and
+/// X25519 tests use RFC 8410 vectors because .NET 10 has no standalone Ed25519 or X25519 key-import
+/// API suitable as a test oracle.
 /// </remarks>
 public class AsnPublicKeyEncoderTests
 {
-    // RFC 8410 section 10.1, "Example Ed25519 Public Key". Base64-decoded SubjectPublicKeyInfo,
-    // reproduced byte for byte. There is no Ed25519/X25519 type in the .NET 10 BCL, so this
-    // published vector is the independent oracle for Curve25519 instead of the BCL.
+    // RFC 8410 section 10.1, "Example Ed25519 Public Key", Base64-decoded SubjectPublicKeyInfo.
     private static readonly byte[] Rfc8410Ed25519PublicKeySpki =
     [
         0x30, 0x2A, 0x30, 0x05, 0x06, 0x03, 0x2B, 0x65, 0x70, 0x03, 0x21, 0x00,
@@ -47,9 +39,8 @@ public class AsnPublicKeyEncoderTests
 
     private static readonly byte[] Rfc8410Ed25519RawPublicKey = Rfc8410Ed25519PublicKeySpki[12..];
 
-    // RFC 8410 section 10.2, "Example X25519 Certificate". The certificate's ASN.1 dump shows
-    // the subjectPublicKeyInfo field verbatim (a self-contained 44-byte SEQUENCE). Reproduced
-    // byte for byte from the RFC's own hex dump, not invented.
+    // RFC 8410 section 10.2, "Example X25519 Certificate". SubjectPublicKeyInfo reconstructed from
+    // the certificate's ASN.1 dump at offset 115.
     private static readonly byte[] Rfc8410X25519PublicKeySpki =
     [
         0x30, 0x2A, 0x30, 0x05, 0x06, 0x03, 0x2B, 0x65, 0x6E, 0x03, 0x21, 0x00,
@@ -59,12 +50,6 @@ public class AsnPublicKeyEncoderTests
     ];
 
     private static readonly byte[] Rfc8410X25519RawPublicKey = Rfc8410X25519PublicKeySpki[12..];
-
-    // ---------------------------------------------------------------------
-    // Overload 1: EncodeToSubjectPublicKeyInfo(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
-    // EC branch. Our encoder encodes; BCL decodes and reports parameters. Covers the private
-    // EncodeECDsaPublicKey helper indirectly.
-    // ---------------------------------------------------------------------
 
     [Theory]
     [InlineData("1.2.840.10045.3.1.7", KeyType.ECP256)] // P-256
@@ -136,11 +121,6 @@ public class AsnPublicKeyEncoderTests
         Assert.Throws<ArgumentException>(
             () => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(new byte[16], KeyType.Ed25519));
 
-    // ---------------------------------------------------------------------
-    // Overload 2: EncodeToSubjectPublicKeyInfo(ReadOnlyMemory<byte> modulus, ReadOnlyMemory<byte> exponent)
-    // Our encoder encodes; BCL decodes and reports parameters.
-    // ---------------------------------------------------------------------
-
     [Theory]
     [InlineData(2048)]
     [InlineData(3072)]
@@ -159,10 +139,6 @@ public class AsnPublicKeyEncoderTests
         Assert.Equal(original.Modulus, decoded.Modulus);
         Assert.Equal(original.Exponent, decoded.Exponent);
     }
-
-    // ---------------------------------------------------------------------
-    // Overload 3: EncodeToSubjectPublicKeyInfo(RSAParameters)
-    // ---------------------------------------------------------------------
 
     [Theory]
     [InlineData(2048)]
@@ -199,11 +175,6 @@ public class AsnPublicKeyEncoderTests
         Assert.Throws<InvalidOperationException>(
             () => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(parameters));
     }
-
-    // ---------------------------------------------------------------------
-    // Overload 4: EncodeToSubjectPublicKeyInfo(ECParameters)
-    // Covers the private EncodeECDsaPublicKey helper indirectly through a second call path.
-    // ---------------------------------------------------------------------
 
     [Theory]
     [InlineData("1.2.840.10045.3.1.7")] // P-256

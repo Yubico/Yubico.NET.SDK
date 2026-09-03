@@ -22,12 +22,10 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 /// Tests for <see cref="AsnPublicKeyDecoder"/>.
 /// </summary>
 /// <remarks>
-/// Every EC/RSA test anchors to the .NET BCL as an independent oracle: the BCL encodes a
-/// SubjectPublicKeyInfo and this decoder is asked to interpret it, with the result compared
-/// against the parameters the BCL itself reports for the same key. This is intentional: a
-/// same-code round trip (encode with <see cref="AsnPublicKeyEncoder"/>, decode with this class)
-/// would pass even if both sides shared the same bug, which is the most likely failure mode for
-/// a bespoke ASN.1 implementation.
+/// EC and RSA tests use .NET cryptography APIs as an independent encoding oracle rather than
+/// round-tripping through the matching SDK encoder, which could share the same defect. Ed25519 and
+/// X25519 tests use RFC 8410 vectors because .NET 10 has no standalone Ed25519 or X25519 key-import
+/// API suitable as a test oracle.
 /// </remarks>
 public class AsnPublicKeyDecoderTests
 {
@@ -35,9 +33,7 @@ public class AsnPublicKeyDecoderTests
     //   -----BEGIN PUBLIC KEY-----
     //   MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE=
     //   -----END PUBLIC KEY-----
-    // Base64-decoded, this is the full DER-encoded SubjectPublicKeyInfo below. There is no
-    // Ed25519/X25519 support in the .NET 10 BCL, so RFC 8410's published vector is the
-    // independent oracle for this key type instead of the BCL.
+    // Base64-decoded as the DER-encoded SubjectPublicKeyInfo below.
     private static readonly byte[] Rfc8410Ed25519PublicKeySpki =
     [
         0x30, 0x2A, 0x30, 0x05, 0x06, 0x03, 0x2B, 0x65, 0x70, 0x03, 0x21, 0x00,
@@ -48,10 +44,8 @@ public class AsnPublicKeyDecoderTests
 
     private static readonly byte[] Rfc8410Ed25519RawPublicKey = Rfc8410Ed25519PublicKeySpki[12..];
 
-    // RFC 8410 section 10.2, "Example X25519 Certificate". The ASN.1 dump of the certificate
-    // shows the subjectPublicKeyInfo field verbatim at offset 115 (a 44-byte, self-contained
-    // SEQUENCE): SEQUENCE { SEQUENCE { OID 1.3.101.110 }, BIT STRING (0 unused bits) || 32 raw
-    // key bytes }. Reproduced here byte for byte from the RFC's own hex dump, not invented.
+    // RFC 8410 section 10.2, "Example X25519 Certificate". SubjectPublicKeyInfo reconstructed from
+    // the certificate's ASN.1 dump at offset 115.
     private static readonly byte[] Rfc8410X25519PublicKeySpki =
     [
         0x30, 0x2A, 0x30, 0x05, 0x06, 0x03, 0x2B, 0x65, 0x6E, 0x03, 0x21, 0x00,
@@ -61,10 +55,6 @@ public class AsnPublicKeyDecoderTests
     ];
 
     private static readonly byte[] Rfc8410X25519RawPublicKey = Rfc8410X25519PublicKeySpki[12..];
-
-    // ---------------------------------------------------------------------
-    // EC: BCL encodes, our decoder decodes. BCL ExportParameters is the oracle.
-    // ---------------------------------------------------------------------
 
     [Theory]
     [InlineData("1.2.840.10045.3.1.7")] // P-256
@@ -84,10 +74,6 @@ public class AsnPublicKeyDecoderTests
         Assert.Equal(expected.Q.Y, decoded.Parameters.Q.Y);
     }
 
-    // ---------------------------------------------------------------------
-    // RSA: BCL encodes, our decoder decodes. BCL ExportParameters is the oracle.
-    // ---------------------------------------------------------------------
-
     [Theory]
     [InlineData(2048)]
     [InlineData(3072)]
@@ -102,11 +88,6 @@ public class AsnPublicKeyDecoderTests
         Assert.Equal(expected.Modulus, decoded.Parameters.Modulus);
         Assert.Equal(expected.Exponent, decoded.Parameters.Exponent);
     }
-
-    // ---------------------------------------------------------------------
-    // Curve25519: no BCL oracle exists (.NET 10 has no Ed25519/X25519 types), so the
-    // published RFC 8410 section 10 vectors are the independent oracle instead.
-    // ---------------------------------------------------------------------
 
     [Fact]
     public void CreatePublicKey_Rfc8410Ed25519Vector_DecodesToPublishedRawKey()
@@ -125,10 +106,6 @@ public class AsnPublicKeyDecoderTests
         Assert.Equal(KeyType.X25519, decoded.KeyType);
         Assert.Equal(Rfc8410X25519RawPublicKey, decoded.PublicPoint.ToArray());
     }
-
-    // ---------------------------------------------------------------------
-    // Error paths
-    // ---------------------------------------------------------------------
 
     [Fact]
     public void CreatePublicKey_EcPointPrefixNotUncompressed_ThrowsCryptographicExceptionWithExpectedMessage()
@@ -173,15 +150,10 @@ public class AsnPublicKeyDecoderTests
         Assert.Throws<CryptographicException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
     }
 
-    // Line numbers reference AsnPublicKeyDecoder.cs as of this writing.
-    // These two throw sites (AsnPublicKeyDecoder.cs:78-81 and :108-112) both contain the same
-    // un-substituted resource placeholder literal:
-    //   string.Format(CultureInfo.CurrentCulture, "ExceptionMessages.UnsupportedAlgorithm));")
-    // We deliberately assert exception type only, not message text, so that fixing this bug
-    // later does not look like a test regression.
     [Fact]
     public void CreatePublicKey_UnsupportedAlgorithmOid_ThrowsNotSupportedException()
     {
+        // The exception type, rather than a particular diagnostic string, is the contract here.
         var writer = new AsnWriter(AsnEncodingRules.DER);
         using (writer.PushSequence())
         {

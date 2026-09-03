@@ -3,9 +3,11 @@
 ## Assignment
 
 Stages A and B are complete (commit `fa54aeea`). Stage C was approved on 2026-09-02 and executes on
-branch `yubikit-flat-device-model-v2` through the autonomous Craftsman workflow. Stage D remains a
-recorded follow-up requiring separate approval. The feature slice is Core device discovery, connection
-routing, repository correlation, its tests, and the corresponding architecture documentation.
+branch `yubikit-flat-device-model-v2` through the autonomous Craftsman workflow. Stage D was resolved
+as the stage D' device identity contract (branch `yubikit-device-identity-contract`); only its
+bounded-metadata-retry follow-up remains gated on hardware measurements. The feature slice is Core
+device discovery, connection routing, repository correlation, its tests, and the corresponding
+architecture documentation.
 
 The public `IYubiKey` interface remains. It is a consumer contract and a critical testing seam with many
 fake implementations. The goal is one production implementation returned by discovery, not the removal of
@@ -219,12 +221,28 @@ dotnet toolchain.cs -- test --integration --project Piv \
 Read per-project `total:` values, not the closing project-count summary. Run `dotnet format` only
 over changed files. No `RequiresUserPresence` tests.
 
-### Stage D: identity policy (deferred, separate approval required)
+### Stage D': device identity contract (shipped, except bounded metadata retries)
 
-Resolve complete interface-set equality versus serial-first shared-path correlation; decide one-slot
-`DeviceId`; then expose discovery metadata under an explicit nullability and lifetime contract.
+Stage D was resolved as stage D' — a documented, honest identity contract rather than new identity
+machinery. Decided and shipped (see `docs/architecture/device-identity.md` for the decision records
+and the full contract, each clause pinned by `DeviceIdentityContractTests` and the retention pins in
+`YubiKeyDeviceRepositoryCompositeTests`):
 
-Explicit preconditions before Stage D work starts:
+- **Retention is contract (R1).** Interface-set equality is the repository correlation policy;
+  serial-first shared-path correlation is rejected. One retained `IYubiKey` object per attached key
+  with an unchanged interface set; republication as a new object happens on exactly three triggers:
+  interface-set change, connection-set change, reinsertion.
+- **`IYubiKey.SerialNumber` (R2).** The discovery-read serial is public, session-free, and
+  Management-free, under an explicit nullability/lifetime contract, added as a default interface
+  member so external implementers do not break.
+- **`IYubiKey.SameDeviceAs` (R3).** Tri-state physical correlation (`DeviceCorrelation`); unknown
+  serial on either side answers `Unknown`, never a guess. No equality comparer ships (recorded
+  decision).
+- **Referential `Equals`/`GetHashCode` and transport-shaped one-slot `DeviceId` are decided, not
+  deferred** — recorded with rationale in the architecture document.
+
+**Still open — bounded metadata-read retries (R4).** Persistently failing metadata reads currently
+retry every scan interval. The bounded-retry policy remains gated on the original preconditions:
 
 1. Measure hardware latency of `PopulateMetadataAsync` for one-slot USB and NFC devices — including the
    lone-NFC-key case where the metadata read fails persistently and is retried on every scan. This cost
@@ -232,6 +250,11 @@ Explicit preconditions before Stage D work starts:
    all cached metadata, so every hotplug event re-triggers these reads on the next scan).
 2. Decide whether persistently failing metadata reads need per-identity backoff, or whether
    retry-every-scan remains acceptable at measured latencies.
+
+The intended shape once the numbers are decided: a per-physical-identity failure ledger in
+`FindYubiKeys` with a capped cross-scan backoff, reset by `NotifyTransportActivity` and absence
+eviction, pinned by no-hardware fault-injection tests counting connect attempts across simulated
+scans.
 
 ## Hardware protocol for deferred hot-plug checks
 

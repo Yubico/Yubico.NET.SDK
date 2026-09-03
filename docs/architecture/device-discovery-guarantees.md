@@ -56,8 +56,7 @@ observing removal and arrival, so the device monitor forwards every listener eve
 transport globally discards both identity and metadata caches; the reported transport is diagnostic
 context, not an eviction scope. A composite swap's events can arrive on one transport before another, so
 per-transport retention could combine evidence from the departed and replacement keys. **Configuration**:
-each entry records the PID observed at read time, and a
-hit under a different PID is a miss. Pinned by
+each entry records the PID observed at read time, and a hit under a different PID is a miss. Pinned by
 `FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial`,
 `FindAllAsync_SameSlotSwapWithTransportActivity_DoesNotServeStaleMetadata`,
 `NotifyTransportActivity_HidOnly_EvictsPcscIdentityEvidenceToo`, and
@@ -154,15 +153,18 @@ subscribers, the other reports present truth. Observed simultaneously on macOS �
 ### Use the serial as the durable key
 
 For persistence, audit logs, allow lists, or anything surviving a process restart, use
-`DeviceInfo.SerialNumber`, not `DeviceId`. Caveats:
+`IYubiKey.SerialNumber`, not `DeviceId`. Caveats:
 
 - YubiKeys expose **no USB `iSerialNumber` descriptor**. The serial lives inside the key and is read by
-  opening an interface, so obtaining it costs a connection and a Management exchange — it is not free the
-  way `DeviceId` is.
+  opening an interface, so discovery obtains it with a budgeted best-effort read — it is not free the way
+  `DeviceId` is, and `IYubiKey.SerialNumber` stays `null` until such a read succeeds (see the contract in
+  `docs/architecture/device-identity.md`).
 - It is `null` on devices that do not report one (for example Security Key series, or when serial
   visibility is disabled). A null serial cannot be a durable key; such devices are only distinguishable by
   topology evidence, which exists on Windows alone (see G4 in the guarantee matrix).
-- Discovery itself reads serials only on demand, for the reasons given above.
+- To ask whether two `IYubiKey` references describe the same physical key, use
+  `IYubiKey.SameDeviceAs`: it answers `Same`/`Different`/`Unknown` and never guesses when a serial is
+  missing.
 
 ### Firmware version is deliberately not part of identity
 

@@ -31,14 +31,8 @@ internal readonly record struct HidReportItem(int Type, int Tag, uint Value);
 /// = tag).
 /// </summary>
 /// <remarks>
-/// HID long items (prefix 0xFE) are recognized and skipped entirely: <see cref="TryReadItem"/>
-/// consumes the long item's <c>bDataSize</c>/<c>bLongItemTag</c> header and its data bytes, then
-/// continues to the next item so a long item is never surfaced to callers. Neither consumer of
-/// this reader has any use for long-item data, and HID 1.11 defines no standard long-item tags,
-/// so skipping is correct. A truncated long item (fewer than 3 header bytes, or fewer than
-/// <c>bDataSize</c> data bytes remaining) terminates the walk by returning
-/// <see langword="false"/>, matching short-item truncation semantics. A descriptor consisting
-/// solely of long items terminates cleanly once the bytes are exhausted.
+/// HID long items (prefix 0xFE) have no standard tags in HID 1.11. Complete long items are skipped
+/// without being surfaced. A truncated long-item header or payload ends iteration.
 /// </remarks>
 internal static class HidReportDescriptorReader
 {
@@ -69,14 +63,15 @@ internal static class HidReportDescriptorReader
     /// <paramref name="position"/> past it.
     /// </summary>
     /// <param name="descriptor">The raw HID report descriptor bytes.</param>
-    /// <param name="position">The read cursor. Advanced past the item just read on success;
-    /// left unspecified once this method returns <see langword="false"/>.</param>
+    /// <param name="position">The read cursor. On success, it is advanced past any skipped long
+    /// items and the decoded short item. Its value is unspecified when this method returns
+    /// <see langword="false"/>.</param>
     /// <param name="item">The decoded item, when this method returns <see langword="true"/>.</param>
     /// <returns><see langword="true"/> if an item was read; <see langword="false"/> once the
     /// descriptor is exhausted or the trailing item is truncated.</returns>
     /// <remarks>
-    /// A truncated item (fewer bytes remaining than its prefix declares) terminates the walk
-    /// rather than being clamped or skipped, matching the two hand-rolled walkers this replaces.
+    /// A truncated short item (fewer bytes remaining than its prefix declares) terminates the
+    /// walk rather than being clamped or skipped.
     /// An item declaring a size of zero still advances the cursor by its prefix byte and yields a
     /// <see cref="HidReportItem.Value"/> of zero.
     /// </remarks>
@@ -95,9 +90,6 @@ internal static class HidReportDescriptorReader
 
             if (prefix == LongItemPrefix)
             {
-                // Long item: 0xFE, bDataSize, bLongItemTag, <bDataSize bytes of data>. Neither
-                // consumer of this reader uses long-item data, so skip the whole item (header +
-                // data) and continue to the next item.
                 if (position + 3 > descriptor.Length)
                 {
                     return false;

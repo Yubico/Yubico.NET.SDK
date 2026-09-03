@@ -255,6 +255,120 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Same(key, evt.Device);
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // Stage D' retention contract (docs/architecture/device-identity.md): within one manager, an
+    // attached key whose interface set is unchanged is represented by exactly one retained object
+    // across scans. Republication as Removed+Added (a NEW object) happens in exactly three cases:
+    // interface-set change, connection-set change, and reinsertion observed across scans.
+    // ---------------------------------------------------------------------------------------------
+
+    // CONTRACT PIN (R1): reference-keyed collections are a supported in-process pattern.
+    [Fact]
+    public void UpdateCache_UnchangedInterfaceSet_ReferenceKeyedDictionaryRemainsValidAcrossScans()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var firstScan = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
+        repository.UpdateCache([firstScan]);
+
+        var perDeviceState = new Dictionary<IYubiKey, string> { [firstScan] = "state" };
+
+        // Three further scans, each producing fresh merger output objects for the same interface set.
+        for (var scan = 0; scan < 3; scan++)
+            repository.UpdateCache([Published("ykphysical:103", "pcsc:a", "hid-fido:a", deviceInfo: null)]);
+
+        var retained = Assert.Single(repository.GetAll());
+        Assert.Same(firstScan, retained);
+        Assert.Equal("state", perDeviceState[retained]);
+    }
+
+    // CONTRACT PIN (R1, trigger 1): an interface-set change republishes the key as a new object.
+    [Fact]
+    public void UpdateCache_InterfaceSetChanged_RepublishesAsNewObject()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var twoInterfaces = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
+        repository.UpdateCache([twoInterfaces]);
+
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+
+        // The same physical key now also enumerates its OTP interface: the interface set changed.
+        var threeInterfaces = new YubiKeyDevice(
+            "ykphysical:pid:0407",
+            new FakeSlot("pcsc:a", ConnectionType.SmartCard),
+            new FakeSlot("hid-fido:a", ConnectionType.HidFido),
+            new FakeSlot("hid-otp:a", ConnectionType.HidOtp),
+            deviceInfo: null);
+        repository.UpdateCache([threeInterfaces]);
+
+        Assert.Equal(2, events.Count);
+        Assert.Equal(DeviceAction.Removed, events[0].Action);
+        Assert.Same(twoInterfaces, events[0].Device);
+        Assert.Equal(DeviceAction.Added, events[1].Action);
+        Assert.Same(threeInterfaces, events[1].Device);
+        Assert.NotSame(twoInterfaces, Assert.Single(repository.GetAll()));
+    }
+
+    // CONTRACT PIN (R1, trigger 2): a connection-set change over an UNCHANGED interface set also
+    // republishes as a new object (ISC-17) - production-shaped variant of the FakeYubiKey test above.
+    [Fact]
+    public void UpdateCache_ConnectionSetChangedSameInterfaceSet_RepublishesAsNewObject()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var fidoShape = new YubiKeyDevice(
+            "ykphysical:pid:0402",
+            smartCard: null,
+            new FakeSlot("hid:a", ConnectionType.HidFido),
+            hidOtp: null,
+            deviceInfo: null);
+        repository.UpdateCache([fidoShape]);
+
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+
+        // Same sole interface id, but it now reports the OTP connection type instead of FIDO.
+        var otpShape = new YubiKeyDevice(
+            "ykphysical:pid:0401",
+            smartCard: null,
+            hidFido: null,
+            new FakeSlot("hid:a", ConnectionType.HidOtp),
+            deviceInfo: null);
+        Assert.Equal(
+            YubiKeyDevice.PhysicalIdentityKeyFor(fidoShape),
+            YubiKeyDevice.PhysicalIdentityKeyFor(otpShape));
+        repository.UpdateCache([otpShape]);
+
+        Assert.Equal(2, events.Count);
+        Assert.Equal(DeviceAction.Removed, events[0].Action);
+        Assert.Same(fidoShape, events[0].Device);
+        Assert.Equal(DeviceAction.Added, events[1].Action);
+        Assert.Same(otpShape, events[1].Device);
+    }
+
+    // CONTRACT PIN (R1, trigger 3): a reinsertion observed across scans publishes a new object; the
+    // Removed event delivers the original retained object.
+    [Fact]
+    public void UpdateCache_ReinsertionObservedAcrossScans_PublishesNewObject()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        var beforeRemoval = Published("ykphysical:103", "pcsc:a", "hid-fido:a", deviceInfo: null);
+        repository.UpdateCache([beforeRemoval]);
+
+        var events = new List<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+
+        repository.UpdateCache([]);
+        var afterReinsertion = Published("ykphysical:103", "pcsc:a", "hid-fido:a", deviceInfo: null);
+        repository.UpdateCache([afterReinsertion]);
+
+        Assert.Equal(2, events.Count);
+        Assert.Equal(DeviceAction.Removed, events[0].Action);
+        Assert.Same(beforeRemoval, events[0].Device);
+        Assert.Equal(DeviceAction.Added, events[1].Action);
+        Assert.Same(afterReinsertion, events[1].Device);
+        Assert.NotSame(beforeRemoval, afterReinsertion);
+    }
+
     private const ushort FullKeyPid = 0x0407; // OTP + FIDO + CCID
 
     /// <summary>The three USB interfaces of one full-triple physical key, tagged so ids are per-key.</summary>

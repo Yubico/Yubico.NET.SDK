@@ -21,7 +21,6 @@ public sealed class SecureCredential : IMemoryOwner<byte>
 {
     /// <summary>Sentinel returned by the read helpers when the user abandoned the prompt.</summary>
     private const int Declined = -1;
-
     private readonly byte[] _buffer;
     private readonly int _length;
     private bool _disposed;
@@ -48,6 +47,17 @@ public sealed class SecureCredential : IMemoryOwner<byte>
         }
     }
 
+    /// <summary>
+    /// Encodes a non-empty string as UTF-8 and owns the resulting bytes until disposal.
+    /// </summary>
+    /// <param name="value">The non-empty credential text to encode.</param>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="value"/> is <see langword="null"/> or empty.
+    /// </exception>
+    /// <remarks>
+    /// Disposal clears the encoded bytes, but the source string cannot be cleared from managed
+    /// memory. Prefer an interactive prompt when the credential was not already supplied as text.
+    /// </remarks>
     public static SecureCredential FromUtf8String(string value)
     {
         if (string.IsNullOrEmpty(value))
@@ -60,13 +70,24 @@ public sealed class SecureCredential : IMemoryOwner<byte>
     }
 
     /// <summary>
-    /// Prompts for a credential, masking interactive input and reading a single line when
-    /// standard input is redirected.
+    /// Prompts for a credential, encoding interactive text as UTF-8 or reading raw bytes from
+    /// redirected standard input after removing line endings.
     /// </summary>
     /// <returns>
     /// The credential, or <see langword="null"/> if the user declined to supply one — either by
-    /// pressing Escape, or by supplying an empty line or end-of-input on redirected input.
+    /// pressing Escape, pressing Enter with an empty entry, or supplying an empty line or
+    /// end-of-input on redirected input.
     /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// The entered credential contains invalid Unicode text, or its UTF-8 encoding exceeds
+    /// <paramref name="maxByteLength"/> bytes.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="label"/> is <see langword="null"/>, empty, or consists only of white-space characters.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="maxByteLength"/> is less than one.
+    /// </exception>
     /// <remarks>
     /// <see langword="null"/> means exactly one thing: no credential was supplied. It never
     /// signals an input error. This mirrors the <c>ICredentialPrompt</c> contract so console
@@ -113,7 +134,9 @@ public sealed class SecureCredential : IMemoryOwner<byte>
 
     internal byte[] DangerousGetBufferForTesting() => _buffer;
 
-    internal static SecureCredential? FromConsoleKeysForTesting(IReadOnlyList<ConsoleKeyInfo> keys, int maxByteLength = 128)
+    internal static SecureCredential? FromConsoleKeysForTesting(
+        IReadOnlyList<ConsoleKeyInfo> keys,
+        int maxByteLength = 128)
     {
         var index = 0;
         var buffer = new byte[maxByteLength];
@@ -130,6 +153,18 @@ public sealed class SecureCredential : IMemoryOwner<byte>
         }
 
         return new SecureCredential(buffer, length);
+    }
+
+    internal static int ReadMaskedConsoleInputForTesting(
+        IReadOnlyList<ConsoleKeyInfo> keys,
+        byte[] buffer)
+    {
+        var index = 0;
+        return ReadMaskedConsoleInput(
+            label: string.Empty,
+            buffer,
+            () => keys[index++],
+            writePrompt: false);
     }
 
     /// <summary>
@@ -151,65 +186,115 @@ public sealed class SecureCredential : IMemoryOwner<byte>
         }
 
         var length = 0;
-        var characterCount = 0;
-        Span<int> byteCounts = stackalloc int[buffer.Length];
-        Span<char> chars = stackalloc char[1];
+        var pendingHighSurrogate = '\0';
 
-        while (true)
+        try
         {
-            var key = readKey();
-            if (key.Key is ConsoleKey.Enter)
+            while (true)
             {
-                if (writePrompt)
+                var key = readKey();
+                if (key.Key is ConsoleKey.Enter)
                 {
-                    Console.Error.WriteLine();
+                    if (pendingHighSurrogate is not '\0')
+                    {
+                        pendingHighSurrogate = '\0';
+                        throw new InvalidOperationException("Credential contains malformed UTF-16 input.");
+                    }
+
+                    if (writePrompt)
+                    {
+                        Console.Error.WriteLine();
+                    }
+
+                    return length;
                 }
 
-                return length;
-            }
-
-            if (key.Key is ConsoleKey.Escape)
-            {
-                buffer[..length].Clear();
-                if (writePrompt)
+                if (key.Key is ConsoleKey.Escape)
                 {
-                    Console.Error.WriteLine();
+                    pendingHighSurrogate = '\0';
+                    CryptographicOperations.ZeroMemory(buffer);
+                    if (writePrompt)
+                    {
+                        Console.Error.WriteLine();
+                    }
+
+                    return Declined;
                 }
 
-                return Declined;
-            }
-
-            if (key.Key is ConsoleKey.Backspace)
-            {
-                if (characterCount > 0)
+                if (key.Key is ConsoleKey.Backspace)
                 {
-                    var previousByteCount = byteCounts[--characterCount];
-                    buffer.Slice(length - previousByteCount, previousByteCount).Clear();
-                    length -= previousByteCount;
+                    if (pendingHighSurrogate is not '\0')
+                    {
+                        pendingHighSurrogate = '\0';
+                    }
+                    else if (length > 0)
+                    {
+                        var scalarStart = length - 1;
+                        while (scalarStart > 0 && IsUtf8ContinuationByte(buffer[scalarStart]))
+                        {
+                            scalarStart--;
+                        }
+
+                        CryptographicOperations.ZeroMemory(buffer[scalarStart..length]);
+                        length = scalarStart;
+                    }
+
+                    continue;
                 }
 
-                continue;
-            }
+                if (char.IsControl(key.KeyChar))
+                {
+                    // A control key interrupts a partially entered surrogate pair.
+                    pendingHighSurrogate = '\0';
+                    continue;
+                }
 
-            if (char.IsControl(key.KeyChar))
-            {
-                continue;
-            }
+                Rune scalar;
+                if (pendingHighSurrogate is not '\0')
+                {
+                    if (!Rune.TryCreate(pendingHighSurrogate, key.KeyChar, out scalar))
+                    {
+                        pendingHighSurrogate = '\0';
+                        throw new InvalidOperationException("Credential contains malformed UTF-16 input.");
+                    }
 
-            chars[0] = key.KeyChar;
-            var byteCount = Encoding.UTF8.GetByteCount(chars);
-            if (length + byteCount > buffer.Length)
-            {
-                throw new InvalidOperationException("Credential value is too long.");
-            }
+                    pendingHighSurrogate = '\0';
+                }
+                else if (char.IsHighSurrogate(key.KeyChar))
+                {
+                    pendingHighSurrogate = key.KeyChar;
+                    continue;
+                }
+                else if (char.IsLowSurrogate(key.KeyChar))
+                {
+                    pendingHighSurrogate = '\0';
+                    throw new InvalidOperationException("Credential contains malformed UTF-16 input.");
+                }
+                else
+                {
+                    scalar = new Rune(key.KeyChar);
+                }
 
-            length += Encoding.UTF8.GetBytes(chars, buffer[length..]);
-            byteCounts[characterCount++] = byteCount;
+                var byteCount = scalar.Utf8SequenceLength;
+                if (length + byteCount > buffer.Length)
+                {
+                    throw new InvalidOperationException("Credential value is too long.");
+                }
+
+                length += scalar.EncodeToUtf8(buffer[length..]);
+            }
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(buffer);
+            throw;
         }
     }
 
+    private static bool IsUtf8ContinuationByte(byte value) => (value & 0b1100_0000) == 0b1000_0000;
+
     /// <summary>
-    /// Reads one line of redirected input.
+    /// Reads raw bytes through the end of one line of redirected input.
     /// </summary>
     /// <remarks>
     /// <para>

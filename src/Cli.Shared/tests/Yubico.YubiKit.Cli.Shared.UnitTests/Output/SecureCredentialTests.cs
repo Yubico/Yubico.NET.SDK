@@ -62,6 +62,166 @@ public sealed class SecureCredentialTests
     }
 
     [Fact]
+    public void ReadMaskedConsoleInputForTesting_BackspaceZeroesRetractedMultiByteScalar()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('é', ConsoleKey.E, shift: false, alt: false, control: false),
+            new('\0', ConsoleKey.Backspace, shift: false, alt: false, control: false),
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
+            new('\r', ConsoleKey.Enter, shift: false, alt: false, control: false)
+        ];
+        var buffer = new byte[8];
+
+        var length = SecureCredential.ReadMaskedConsoleInputForTesting(keys, buffer);
+
+        Assert.Equal(1, length);
+        Assert.Equal((byte)'1', buffer[0]);
+        Assert.All(buffer[1..], value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_BackspaceToEmptyThenEnterDeclines()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
+            new('\0', ConsoleKey.Backspace, shift: false, alt: false, control: false),
+            new('\r', ConsoleKey.Enter, shift: false, alt: false, control: false)
+        ];
+
+        Assert.Null(SecureCredential.FromConsoleKeysForTesting(keys));
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_ValidSurrogatePairEncodesUnicodeScalar()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('\uD83D', ConsoleKey.NoName, shift: false, alt: false, control: false),
+            new('\uDE00', ConsoleKey.NoName, shift: false, alt: false, control: false),
+            new('\r', ConsoleKey.Enter, shift: false, alt: false, control: false)
+        ];
+
+        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);
+
+        Assert.NotNull(credential);
+        Assert.Equal(Encoding.UTF8.GetBytes("\U0001F600"), credential.Memory.ToArray());
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_BackspaceAfterSurrogatePairRemovesWholeScalar()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('\uD83D', ConsoleKey.NoName, shift: false, alt: false, control: false),
+            new('\uDE00', ConsoleKey.NoName, shift: false, alt: false, control: false),
+            new('\0', ConsoleKey.Backspace, shift: false, alt: false, control: false),
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
+            new('\r', ConsoleKey.Enter, shift: false, alt: false, control: false)
+        ];
+
+        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);
+
+        Assert.NotNull(credential);
+        Assert.Equal(Encoding.UTF8.GetBytes("1"), credential.Memory.ToArray());
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_BackspaceRemovesPendingHighSurrogate()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('\uD83D', ConsoleKey.NoName, shift: false, alt: false, control: false),
+            new('\0', ConsoleKey.Backspace, shift: false, alt: false, control: false),
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
+            new('\r', ConsoleKey.Enter, shift: false, alt: false, control: false)
+        ];
+
+        using var credential = SecureCredential.FromConsoleKeysForTesting(keys);
+
+        Assert.NotNull(credential);
+        Assert.Equal(Encoding.UTF8.GetBytes("1"), credential.Memory.ToArray());
+    }
+
+    [Theory]
+    [InlineData('\uD83D')]
+    [InlineData('\uDE00')]
+    public void ReadMaskedConsoleInputForTesting_UnmatchedSurrogateIsRejectedAndCleared(char surrogate)
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('9', ConsoleKey.D9, shift: false, alt: false, control: false),
+            new(surrogate, ConsoleKey.NoName, shift: false, alt: false, control: false),
+            new('\r', ConsoleKey.Enter, shift: false, alt: false, control: false)
+        ];
+        var buffer = new byte[16];
+
+        Assert.Throws<InvalidOperationException>(
+            () => SecureCredential.ReadMaskedConsoleInputForTesting(keys, buffer));
+        Assert.All(buffer, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public void ReadMaskedConsoleInputForTesting_HighSurrogateBeforeNonLowSurrogateIsRejectedAndCleared()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('9', ConsoleKey.D9, shift: false, alt: false, control: false),
+            new('\uD83D', ConsoleKey.NoName, shift: false, alt: false, control: false),
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false)
+        ];
+        var buffer = new byte[16];
+
+        Assert.Throws<InvalidOperationException>(
+            () => SecureCredential.ReadMaskedConsoleInputForTesting(keys, buffer));
+        Assert.All(buffer, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_ControlKeyInterruptsPendingSurrogate()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('\uD83D', ConsoleKey.NoName, shift: false, alt: false, control: false),
+            new('\0', ConsoleKey.Home, shift: false, alt: false, control: false),
+            new('\uDE00', ConsoleKey.NoName, shift: false, alt: false, control: false)
+        ];
+
+        Assert.Throws<InvalidOperationException>(() => SecureCredential.FromConsoleKeysForTesting(keys));
+    }
+
+    [Fact]
+    public void ReadMaskedConsoleInputForTesting_MultiByteScalarThatWouldExceedMaxLengthIsRejectedAndCleared()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('a', ConsoleKey.A, shift: false, alt: false, control: false),
+            new('é', ConsoleKey.E, shift: false, alt: false, control: false)
+        ];
+        var buffer = new byte[2];
+
+        Assert.Throws<InvalidOperationException>(
+            () => SecureCredential.ReadMaskedConsoleInputForTesting(keys, buffer));
+        Assert.All(buffer, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public void ReadMaskedConsoleInputForTesting_EscapeClearsPendingHighSurrogateAndBufferedBytes()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
+            new('\uD83D', ConsoleKey.NoName, shift: false, alt: false, control: false),
+            new('\u001b', ConsoleKey.Escape, shift: false, alt: false, control: false)
+        ];
+        var buffer = new byte[16];
+
+        Assert.Equal(-1, SecureCredential.ReadMaskedConsoleInputForTesting(keys, buffer));
+        Assert.All(buffer, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
     public void FromConsoleKeysForTesting_EscapeDeclines()
     {
         ConsoleKeyInfo[] keys =

@@ -21,51 +21,22 @@ namespace Yubico.YubiKit.Core.Devices;
 /// subscribers.
 /// </summary>
 /// <remarks>
-/// <para>
-/// This replaces the <c>System.Reactive</c> <c>Subject&lt;DeviceEvent&gt;</c> that previously backed
-/// <c>YubiKeyManager.DeviceChanges</c>, removing the SDK's only dependency-level Native AOT finding
-/// (<c>IL3058</c>). It implements exactly the behaviour the device-event pipeline relies on and
-/// nothing more: no schedulers, no replay, no error channel, no query operators. Consumers who want
-/// those can add <c>System.Reactive</c> themselves — every Rx operator is an extension method on
-/// <see cref="IObservable{T}"/> and composes with this type unchanged.
-/// </para>
-/// <para><strong>Write protection:</strong> this type deliberately does <em>not</em> implement
-/// <see cref="IObserver{T}"/>. Publishing is done through <see cref="Publish"/> and
-/// <see cref="Complete"/>, which are not reachable through any interface the type exposes, so a
-/// consumer holding the <see cref="IObservable{T}"/> cannot cast back to an observer and inject
-/// events. This is what Rx's <c>AsObservable()</c> wrapper was previously used for.</para>
-/// <para><strong>Delivery:</strong> <see cref="Publish"/> delivers synchronously and inline on the
-/// calling thread. The device monitor depends on this — its publish gate reasoning assumes a
-/// subscriber runs (and therefore completes or throws) before <c>UpdateCache</c> returns.</para>
-/// <para><strong>Subscriber exceptions propagate.</strong> An observer that throws from
-/// <see cref="IObserver{T}.OnNext"/> aborts the publish loop, so later observers do not receive that
-/// event and the exception surfaces to the publisher. This matches the previous
-/// <c>Subject&lt;T&gt;</c> behaviour and is pinned by existing monitor-service tests. Whether
-/// partial delivery is the right long-term contract is an open design question, deliberately left
-/// unchanged here.</para>
+/// <para><see cref="Publish"/> delivers synchronously on the calling thread and in subscription
+/// order. An exception from <see cref="IObserver{T}.OnNext"/> propagates to the publisher and stops
+/// delivery of that event to later observers.</para>
 /// <para><strong>Thread safety:</strong> all members are safe for concurrent use.
 /// <see cref="Publish"/> is lock-free: it reads an immutable snapshot of the observer list, so
 /// subscribing or unsubscribing from inside a handler cannot disturb an in-flight delivery.
 /// Mutations take a short lock and swap in a new array (copy-on-write).</para>
-/// <para><strong>Scope:</strong> this type is only responsible for multicast delivery — who is
-/// subscribed and in what order they are notified. Buffering a slow consumer is a separate concern
-/// handled by <see cref="DeviceEventStream"/>.</para>
-/// <para><strong>Notification serialisation is the producer's job.</strong> <see cref="Publish"/>
-/// deliberately does not synchronise against <see cref="Complete"/>. A <see cref="Publish"/> that
-/// has already captured its snapshot when <see cref="Complete"/> runs will finish delivering, so an
-/// observer can in principle see <see cref="IObserver{T}.OnNext"/> after
-/// <see cref="IObserver{T}.OnCompleted"/>. This matches the <see cref="IObservable{T}"/> contract
-/// (and Rx's own <c>Subject&lt;T&gt;</c>), which requires the producer to serialise notifications.
-/// In this SDK the producer already does: publications are mutually exclusive under the monitor's
-/// publish gate. The residual window is a publication abandoned after the shutdown drain times out,
-/// which is already an exceptional, logged condition.</para>
-/// <para>
-/// Closing that window here would mean holding a lock across arbitrary subscriber code, which would
-/// let a blocking subscriber wedge start/stop/dispose — the opposite of the guarantee documented in
-/// <c>src/Core/CLAUDE.md</c> ("a blocking <c>DeviceChanges</c> subscriber cannot wedge
-/// start/stop/dispose"). Liveness wins; a per-observer gate was implemented, deadlocked the
-/// blocking-subscriber tests, and was reverted.
-/// </para>
+/// <para><see cref="Complete"/> is idempotent. It notifies every current observer, isolates and logs
+/// exceptions from <see cref="IObserver{T}.OnCompleted"/>, and immediately completes later
+/// subscribers.</para>
+/// <para>Concurrent <see cref="Publish"/> and <see cref="Complete"/> calls are state-safe: the
+/// broadcaster does not corrupt its subscription list or deadlock itself. Producers that require
+/// strict observer grammar must still serialize those calls, because a publication already using
+/// its observer snapshot can finish concurrently with completion.</para>
+/// <para>This type provides multicast delivery only. Per-consumer buffering is handled by
+/// <see cref="DeviceEventStream"/>.</para>
 /// </remarks>
 internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDisposable
 {
@@ -84,18 +55,18 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     /// </summary>
     /// <param name="deviceEvent">The event to deliver.</param>
     /// <remarks>
-    /// No-op once <see cref="Complete"/> has been called. Exceptions thrown by a subscriber are not
-    /// caught — see the type-level remarks.
+    /// No-op once <see cref="Complete"/> has been called. Subscriber exceptions propagate to the
+    /// caller and stop delivery to later subscribers. The device monitor relies on this method
+    /// completing synchronously before a repository update returns.
     /// </remarks>
     public void Publish(DeviceEvent deviceEvent)
     {
-        // Lock-free: the array is immutable once published, so this snapshot is stable for the whole
-        // loop even if someone subscribes or unsubscribes while we are delivering.
         if (_completed)
         {
             return;
         }
 
+        // The immutable snapshot remains stable if subscriptions change during delivery.
         foreach (var observer in Volatile.Read(ref _observers))
         {
             observer.OnNext(deviceEvent);
@@ -126,21 +97,14 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
             _observers = [];
         }
 
-        // Notify outside the lock: an observer is arbitrary user code and must never run while we
-        // hold the gate, or a handler that subscribes/unsubscribes would deadlock.
+        // Never run arbitrary observer code while holding the subscription gate.
         foreach (var observer in snapshot)
         {
-            // Unlike OnNext - where a throwing subscriber deliberately propagates to the publisher -
-            // a terminal notification is isolated per observer. Completion runs during disposal,
-            // exactly when a subscriber is likely to be tearing down its own state and may throw
-            // ObjectDisposedException. Letting that escape would starve every later observer of its
-            // terminal signal (an async consumer would hang on a channel that never completes) and
-            // abort the caller's remaining cleanup.
             try
             {
                 observer.OnCompleted();
             }
-#pragma warning disable CA1031 // Terminal cleanup must not be derailed by arbitrary subscriber code.
+#pragma warning disable CA1031 // Terminal cleanup must not be derailed by observer callbacks.
             catch (Exception ex)
 #pragma warning restore CA1031
             {
@@ -152,10 +116,7 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     /// <inheritdoc/>
     /// <remarks>
     /// Subscribing after <see cref="Complete"/> delivers <see cref="IObserver{T}.OnCompleted"/>
-    /// immediately and returns a no-op subscription, rather than throwing. A completed sequence
-    /// completing its late subscribers is the conventional observable contract, and it keeps the
-    /// subscribe/complete race benign: whether a caller lands just before or just after completion,
-    /// it observes a clean terminal signal either way.
+    /// immediately and returns a no-op subscription.
     /// </remarks>
     public IDisposable Subscribe(IObserver<DeviceEvent> observer)
     {
@@ -170,7 +131,7 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
             }
         }
 
-        // Outside the lock, for the same reason as Complete().
+        // Never run arbitrary observer code while holding the subscription gate.
         observer.OnCompleted();
 
         return NoOpSubscription.Instance;
@@ -186,10 +147,7 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     {
         lock (_gate)
         {
-            // Deliberately ReferenceEquals rather than Array.IndexOf: IndexOf uses
-            // EqualityComparer<T>.Default, so an observer type that overrides Equals (a record
-            // implementing IObserver, say - and DeviceChanges is public API) could have a sibling
-            // subscription removed instead of its own. Subscriptions are identity-based.
+            // Each subscription removes its exact observer instance.
             var index = Array.FindIndex(_observers, o => ReferenceEquals(o, observer));
             if (index < 0)
             {

@@ -23,28 +23,15 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <see cref="IAsyncEnumerable{T}"/> that consumers can <c>await foreach</c> over.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Kept separate from <see cref="DeviceEventBroadcaster"/> on purpose. The broadcaster's job is
-/// multicast delivery — who is subscribed, and in what order they are notified. This type's job is
-/// buffering policy — how deep a slow consumer may fall behind and what happens when it does. Those
-/// change for different reasons, so they are different types.
-/// </para>
-/// <para>
-/// Deliberately concrete rather than a generic <c>IObservable&lt;T&gt;</c> adapter: the SDK has
-/// exactly one event stream and is not expected to grow another, so a generic version would be
-/// speculative surface with a single call site.
-/// </para>
+/// Each enumeration subscribes lazily and owns an independent bounded buffer. Source completion
+/// ends the sequence, cancellation throws <see cref="OperationCanceledException"/>, and overflow
+/// faults only the affected sequence.
 /// </remarks>
 internal static class DeviceEventStream
 {
     /// <summary>
     /// Per-consumer buffer depth.
     /// </summary>
-    /// <remarks>
-    /// Device events are driven by physical insertion and removal, so a realistic burst is a handful
-    /// of events. 256 is far beyond any human-generated burst: reaching it means the consumer has
-    /// stopped draining, which is reported rather than silently absorbed.
-    /// </remarks>
     internal const int BufferCapacity = 256;
 
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(DeviceEventStream));
@@ -53,36 +40,34 @@ internal static class DeviceEventStream
     /// Streams <paramref name="source"/> as an async sequence, with an independent buffer per call.
     /// </summary>
     /// <param name="source">The observable to adapt.</param>
-    /// <param name="cancellationToken">Stops the stream. Cancelling is the normal way to stop watching.</param>
-    /// <returns>A sequence that ends when <paramref name="cancellationToken"/> fires or the source completes.</returns>
+    /// <param name="cancellationToken">Cancels enumeration.</param>
+    /// <returns>A sequence that ends normally when the source completes.</returns>
+    /// <exception cref="OperationCanceledException">
+    /// Thrown from enumeration when <paramref name="cancellationToken"/> is canceled.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="source"/> is <see langword="null"/>.
+    /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown from the enumeration when the consumer falls more than <see cref="BufferCapacity"/>
-    /// events behind.
+    /// Thrown from enumeration when a new event arrives while the consumer's
+    /// <see cref="BufferCapacity"/>-event buffer is full.
     /// </exception>
     /// <remarks>
-    /// <para>
-    /// <strong>The subscription starts on first enumeration, not when this method is called.</strong>
+    /// <para><strong>The subscription starts on first enumeration, not when this method is called.</strong>
     /// This is an async iterator, so nothing is subscribed until the first <c>MoveNextAsync</c>. Begin
     /// the <c>await foreach</c> before performing an action that is expected to produce an event,
     /// otherwise events raised in the gap are not observed.
     /// </para>
-    /// <para>
-    /// <strong>Overflow faults instead of dropping.</strong> A <see cref="DeviceEvent"/> is a delta,
-    /// not a snapshot: consumers fold Added/Removed into their own view of what is connected.
-    /// Silently discarding one would permanently desynchronise that view — a removal for a device
-    /// never seen added, or a device pinned in the list forever. So an overflow ends the stream with
-    /// an exception, and the consumer should re-enumerate and resynchronise via
-    /// <c>YubiKeyManager.FindAllAsync</c>. Only the offending stream is affected; other subscribers
-    /// continue to receive events.
-    /// </para>
+    /// <para><strong>Overflow faults instead of dropping.</strong> Device events are deltas, so the
+    /// consumer must re-enumerate and resynchronize via <c>YubiKeyManager.FindAllAsync</c> after an
+    /// overflow. Other streams and subscribers continue receiving events.</para>
     /// <para>The stream ends normally, without an exception, if the source completes.</para>
     /// </remarks>
     internal static IAsyncEnumerable<DeviceEvent> From(
         IObservable<DeviceEvent> source,
         CancellationToken cancellationToken = default)
     {
-        // Validated here rather than in the iterator below: an async iterator body does not run
-        // until first enumeration, which would defer the guard past the call that caused it.
+        // Validate before returning the lazy iterator.
         ArgumentNullException.ThrowIfNull(source);
 
         return Iterate(source, cancellationToken);
@@ -98,12 +83,11 @@ internal static class DeviceEventStream
                 SingleReader = true,
                 SingleWriter = false,
 
-                // Keep reader continuations off the publishing thread; otherwise a consumer would run
-                // inline inside Publish and could stall the monitor - the very hazard this API avoids.
+                // Keep reader continuations off the publishing thread so a consumer cannot stall
+                // the monitor while it holds the repository publication gate.
                 AllowSynchronousContinuations = false,
 
-                // With Wait, TryWrite reports failure instead of blocking, which is what lets the
-                // publisher stay non-blocking while still detecting overflow.
+                // TryWrite reports a full buffer without blocking the publisher.
                 FullMode = BoundedChannelFullMode.Wait
             });
 
@@ -125,21 +109,16 @@ internal static class DeviceEventStream
                 return;
             }
 
-            // TryWrite also returns false for an ALREADY-COMPLETED channel, not just a full one, so
-            // the completion attempt is what distinguishes the two. Only a write that actually
-            // terminates the stream is a genuine overflow; otherwise this is a late event arriving
-            // after normal completion, or a repeat during the window before the consumer drains the
-            // buffer and observes the fault. Logging unconditionally here would emit a false
-            // "consumer too slow" warning on ordinary shutdown, and repeat it once per event.
+            // Completing distinguishes a full live channel from a channel already completed.
             var faulted = writer.TryComplete(new InvalidOperationException(
-                $"The device event stream fell more than {BufferCapacity} events behind and was " +
-                "terminated to avoid silently dropping events. Re-enumerate and resynchronise the " +
+                $"The device event stream's {BufferCapacity}-event buffer was full and the stream was " +
+                "terminated to avoid silently dropping events. Re-enumerate and resynchronize the " +
                 "device list via YubiKeyManager.FindAllAsync."));
 
+            // TryWrite also returns false after normal completion. Log only when this call actually
+            // terminates a live stream as an overflow.
             if (faulted)
             {
-                // Terminating a consumer's stream is a unilateral, hard-to-reproduce action, so it is
-                // logged as well as surfaced - otherwise "my app stopped seeing insertions" leaves no trace.
                 Logger.LogWarning(
                     "Device event stream overflowed its {Capacity}-event buffer; terminating that watcher. " +
                     "The consumer is not draining events fast enough.",

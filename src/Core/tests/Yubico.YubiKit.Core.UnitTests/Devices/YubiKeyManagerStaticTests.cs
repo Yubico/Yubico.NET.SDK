@@ -347,6 +347,18 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task YubiKeyManager_WatchAsync_WhenCancelled_ThrowsOperationCanceled()
+    {
+        using var cts = new CancellationTokenSource();
+        await using var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+
+        var moveNext = enumerator.MoveNextAsync().AsTask();
+        await cts.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => moveNext);
+    }
+
+    [Fact]
     public void YubiKeyManager_DeviceChanges_UnsubscribeDoesNotAffectMonitoring()
     {
         // Handle unsubscribe -> Does not affect other subscribers or monitoring

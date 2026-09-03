@@ -188,7 +188,8 @@ immutable `MonitorGeneration` bundling `{ Id, ScanGate, Signal, Cts }`, held in 
 
 - **Publication is gated, not coordinated.** All publications, from any generation, are mutually
   exclusive under the monitor service's single never-disposed `_publishGate`, held across the
-  admission check and `UpdateCache`.
+  admission check and `UpdateCache`. This currently relies on `UpdateCache` publishing
+  synchronously and finishing before it returns.
 - **Admission is the linearization point.** Under the small `_publishLock`, a snapshot is applied
   only if its generation is still `_current` and the service is not disposed. A superseded
   generation can never publish — including a scan hung in native I/O that returns long after its
@@ -282,10 +283,10 @@ than on taste.
 
 | # | Deferred | Why not now | Reopen when |
 |---|---|---|---|
-| 1 | `WaitForDeviceAsync(...)` convenience helper | Purely additive; `await foreach` over `WatchAsync` already expresses it in three lines | Consumers repeatedly hand-roll the same wait loop |
+| 1 | `WaitForDeviceAsync(...)` convenience helper | Purely additive; the existing `WatchAsync` examples already cover the pattern | Consumers repeatedly hand-roll the same wait loop |
 | 2 | Filtering overloads, e.g. `WatchAsync(DeviceAction)` | Additive; consumers filter inside the loop | The filter-in-loop boilerplate shows up across several consumers |
 | 3 | Classic `event EventHandler<DeviceEventArgs>` surface | Weakest of the three primitives: no cancellation, no composition, `async void` handlers, and a static event roots subscribers that forget `-=`. v1's `YubiKeyDeviceListener` had to hand-roll per-handler invocation and swallow exceptions to protect its background thread | v1 migrators ask for `Arrived`/`Removed` parity. Additive over the broadcaster; no door is closed |
 | 4 | Partial-delivery-on-throw for `OnNext` | A throwing observer aborts delivery to later observers. Inherited from Rx's `Subject<T>` and pinned by monitor-service tests; changing it is a behaviour change beyond the scope of a dependency removal | Someone deliberately revisits the delivery contract, with the pinning tests updated together |
-| 5 | Guaranteeing no `OnNext` after `OnCompleted` under concurrent publish/complete | Requires holding a lock across arbitrary subscriber code, which lets a blocking subscriber wedge start/stop/dispose. Implemented, deadlocked the blocking-subscriber tests, reverted. The `IObservable` contract puts serialisation on the producer, and the monitor's publish gate already provides it | The monitor stops serialising publications, or a non-blocking way to gate delivery is found |
+| 5 | Guaranteeing no `OnNext` after `OnCompleted` under concurrent publish/complete | The broadcaster is state-safe under concurrent publish/complete, but enforcing strict observer grammar inside it requires holding a lock across observer callbacks, which lets a blocking subscriber wedge start/stop/dispose. Implemented, deadlocked the blocking-subscriber tests, reverted. The `IObservable` contract puts serialisation on the producer, and the monitor's publish gate already provides it | The monitor stops serialising publications, or a non-blocking way to gate delivery is found |
 | 6 | Generic `Broadcaster<T>` / `ToAsyncEnumerable<T>` | One event stream, one call site — generalising it would be speculative surface. `DeviceEventStream` is concrete for the same reason | A second independent observable stream appears in the SDK. Two call sites is duplication; one is preference |
 | 7 | Re-adopting `System.Reactive` if it ever ships AOT metadata | The dependency is gone and nothing needs it back; consumers who want Rx add it themselves and it composes unchanged | Never, most likely — recorded so the decision is not relitigated. Rx would first need a `net10.0+` target, since `IsAotCompatible` was introduced in .NET 10 |

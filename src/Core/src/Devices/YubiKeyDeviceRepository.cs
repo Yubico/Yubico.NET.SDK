@@ -38,19 +38,18 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
 
     /// <inheritdoc/>
     /// <remarks>
-    /// Returning the broadcaster directly is safe: it exposes no <see cref="IObserver{T}"/> surface,
-    /// so a consumer cannot cast this back to something that can publish events.
+    /// Events are delivered synchronously in subscription order. Subscriber exceptions propagate
+    /// and stop delivery to later subscribers.
     /// </remarks>
     public IObservable<DeviceEvent> DeviceChanges => _deviceChanges;
 
     /// <summary>
     /// Async-sequence view of <see cref="DeviceChanges"/>, for <c>await foreach</c> consumers.
     /// </summary>
-    /// <param name="cancellationToken">Stops the stream.</param>
+    /// <param name="cancellationToken">Cancels enumeration.</param>
     /// <remarks>
-    /// Deliberately not on <see cref="IYubiKeyDeviceRepository"/>: that interface describes the pure
-    /// cache contract, and the only consumer reached through it needs just <see cref="UpdateCache"/>.
-    /// See <see cref="DeviceEventStream.From"/> for the buffering and overflow contract.
+    /// Subscription is lazy. Each enumeration has an independent bounded buffer; cancellation and
+    /// overflow fault the enumeration, while repository disposal completes it normally.
     /// </remarks>
     public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
         DeviceEventStream.From(_deviceChanges, cancellationToken);
@@ -170,8 +169,6 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
             return;
         }
 
-        // Complete() is idempotent and cannot throw ObjectDisposedException, so the defensive
-        // try/catch the Rx Subject required here is no longer reachable.
         _deviceChanges.Complete();
 
         _deviceCache.Clear();

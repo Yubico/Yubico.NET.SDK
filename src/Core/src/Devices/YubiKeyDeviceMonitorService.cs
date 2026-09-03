@@ -77,7 +77,8 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     // Shared, never-disposed publication gate held across admission + UpdateCache.
     // All publications, across all generations, are mutually exclusive and never
     // interleave; a successor's snapshot is serialized strictly after any
-    // in-flight predecessor's.
+    // in-flight predecessor's. This relies on UpdateCache publishing synchronously
+    // and completing before UpdateCache returns.
     private readonly SemaphoreSlim _publishGate = new(1, 1);
 
     // Tiny state lock guarding only the publication admission check and _current

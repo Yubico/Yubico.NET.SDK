@@ -313,7 +313,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Dispose_WhenSubscriberThrowsFromOnCompleted_DoesNotPropagate()
     {
-        // Disposal must not be derailed by arbitrary subscriber code.
+        // Disposal must not be derailed by observer callbacks.
         var broadcaster = new DeviceEventBroadcaster();
         using var subscription = broadcaster.Subscribe(new ThrowOnCompletedObserver());
 
@@ -325,13 +325,13 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_StartedAfterComplete_DeliversNothing()
     {
-        // Serialised producers - which is what the monitor's publish gate guarantees - never see
+        // Serialized producers - which is what the monitor's publish gate guarantees - never see
         // OnNext after OnCompleted. A publish that BEGINS after completion delivers nothing.
         //
-        // The unsynchronised case (a publish that captured its snapshot before Complete ran) is
-        // deliberately NOT defended against: doing so requires holding a lock across arbitrary
-        // subscriber code, which would let a blocking subscriber wedge start/stop/dispose. See the
-        // remarks on DeviceEventBroadcaster and src/Core/CLAUDE.md.
+        // The concurrent case is deliberately NOT forced into strict observer grammar inside the
+        // broadcaster: doing so requires holding a lock across observer callbacks, which would let
+        // a blocking subscriber wedge start/stop/dispose. See the remarks on DeviceEventBroadcaster
+        // and src/Core/CLAUDE.md.
         using var broadcaster = new DeviceEventBroadcaster();
         var observer = new GrammarCheckingObserver();
         using var subscription = broadcaster.Subscribe(observer);
@@ -367,6 +367,16 @@ public class DeviceEventBroadcasterTests
 
         release.Set();
         publish.Wait(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public void Broadcaster_DoesNotExposeObserverSurface()
+    {
+        var broadcasterType = typeof(DeviceEventBroadcaster);
+
+        Assert.False(typeof(IObserver<DeviceEvent>).IsAssignableFrom(broadcasterType));
+        Assert.Null(broadcasterType.GetMethod(nameof(IObserver<DeviceEvent>.OnNext), [typeof(DeviceEvent)]));
+        Assert.Null(broadcasterType.GetMethod(nameof(IObserver<DeviceEvent>.OnCompleted), Type.EmptyTypes));
     }
 
     // ---------- Subscription identity ----------

@@ -9,9 +9,7 @@
     <Description>OpenPGP support for YubiKey devices including key management, encryption, decryption, signing, and authentication operations.</Description>
     <PackageTags>yubikey;yubico;openpgp;pgp;gpg;encryption;signing;smartcard</PackageTags>
 
-    <!-- Native AOT: opts this SDK library into the shared AOT property block in
-         Directory.Build.props/Directory.Build.targets. See docs/NATIVE-AOT.md for the support
-         contract. -->
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
     <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 

@@ -110,10 +110,10 @@ Console.WriteLine(string.Join(", ", info.Versions));
 ## Native AOT
 
 All SDK library packages (`Core`, `Management`, `Piv`, `Fido2`, `WebAuthn`, `Oath`, `OpenPgp`,
-`SecurityDomain`, `YubiOtp`, `YubiHsm`) are Native AOT compatible and macOS-first officially
-supported. See [`docs/NATIVE-AOT.md`](docs/NATIVE-AOT.md) for the support contract, platform
-matrix, and deployment guidance. CLI tools and test projects are out of scope for Native AOT
-support.
+`SecurityDomain`, `YubiOtp`, `YubiHsm`) publish Native AOT compatibility metadata and participate in
+the repository's analyzer and link-verification gates. Runtime evidence varies by platform and
+module; see [`docs/NATIVE-AOT.md`](docs/NATIVE-AOT.md) for the evidence matrix and deployment
+guidance. CLI tools and test projects are outside the support surface.
 
 ## Documentation
 

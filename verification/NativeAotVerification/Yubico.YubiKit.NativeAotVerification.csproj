@@ -1,14 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Native AOT publish/link verification host. NOT an SDK library, NOT part of Cli.Shared/Cli.Commands,
-    NOT a test project — it exists solely so CI can run `dotnet publish -p:PublishAot=true` against a
-    real executable that references every in-scope SDK library and touches representative public API
-    surface, so the ILC (IL Compiler) trimming/AOT analysis has real code paths to walk.
+    Internal Native AOT publish/link verification host. It references every supported SDK library
+    so the Native AOT compiler processes reachable entry types from each assembly.
 
     This project is intentionally excluded from the main solution and from `dotnet toolchain.cs` package
     discovery (it lives outside `src/` and isn't named `Yubico.YubiKit.*`), and it is never packed or
-    published as a NuGet package. See docs/NATIVE-AOT.md for the support contract this verifies.
+    published as a NuGet package. See docs/NATIVE-AOT.md for the evidence this host provides.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>

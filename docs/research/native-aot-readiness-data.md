@@ -6,6 +6,8 @@
 > reverted with `git checkout` immediately after capturing output; `git status --short` was
 > clean of any `src/**/*.csproj` changes at the end of the session.
 
+**Assessment date:** 2026-08-26.
+
 ## Initial assessment environment
 
 - Host: macOS 15.7, Darwin 24.6.0, arm64 (Apple Silicon)
@@ -167,10 +169,6 @@ touched modules, deleted `/tmp/aot-probe` entirely. Verified `git status --short
 **Conclusion:** both of Core's live NativeShims P/Invoke surfaces (PC/SC and OpenSSL/ARKG) are now
 runtime-verified under real Native AOT publishes on macOS arm64, not just analyzer-clean. The third
 surface, `CmacPrimitivesOpenSsl.cs`, was found to be dead code and needs no further verification.
-
-This same `IL3058` warning appeared, unsurprisingly, in every downstream module's build once each
-module was independently given `IsAotCompatible=true` + `VerifyReferenceAotCompatibility=true`,
-since they all transitively reference Core (which references `System.Reactive` directly).
 
 ## Experiment 3 — Real Native AOT publish + runtime smoke test
 
@@ -370,18 +368,20 @@ be fixed from within the v2 SDK repository layout — it requires a `Yubico.Nati
 publishes static libraries. This is a *deployment ergonomics* limitation, not an AOT-compatibility
 defect: every AOT publish and hardware run recorded in Experiments 3-6 succeeded with the shim
 deployed alongside, which is the behaviour `docs/NATIVE-AOT.md` already documents under
-"Deployment guidance for consumers".
+"Consumer deployment".
 
 ## Experiment 8 — Device monitoring verified against hardware (macOS, JIT + Native AOT)
 
-**Motivation:** every automated hot-plug assertion in CI runs with zero YubiKeys attached, so the
-monitoring path — multicast fan-out, event coalescing, composite-key merging, Added/Removed
-correlation, and shutdown behaviour — had never been observed under a real AOT binary. This is the
-gap that closing AOT-B5 (removing `System.Reactive`) made it necessary to close: the replacement
-`DeviceEventBroadcaster` / `DeviceEventStream` pipeline is exactly the code CI never exercised.
+**Purpose:** record an operator-driven macOS run of multicast delivery, event coalescing,
+composite-key merging, unsubscribe behavior, and shutdown under a Native AOT binary. The recurring
+workflow has no attached hardware and does not exercise these paths.
 
 **Environment:** macOS, `osx-arm64`, .NET 10 SDK, branch `yubikit-aot`. Two physical YubiKey 5
 composite keys (serials 103 and 125) plus an HID Global OMNIKEY 5022 NFC reader. Operator-driven.
+
+**Host revision:** `839e3c05f276ed08ad42db8c7a85fd5591ce23c6`. Later revisions tightened
+the step 6 prompt and added activity assertions; the observations below apply to the recorded host
+revision rather than those later changes.
 
 **Method:** `verification/NativeAotVerification --monitor`, which attaches four consumer surfaces
 simultaneously — two `IObservable` subscribers, one `WatchAsync` (`IAsyncEnumerable`) consumer, and
@@ -390,7 +390,8 @@ once under JIT (`dotnet run`) and once against the self-contained Native AOT bin
 
 **AOT publish:** zero ILC/analyzer warnings.
 
-**Result — Native AOT run: PASS, all invariants held.** Observed sequence (8 events post-baseline):
+**Result — Native AOT run: the protocol's checks passed.** Observed sequence (8 events
+post-baseline):
 
 ```
 Added|ykphysical:pid:0407                                   <- key A, USB composite
@@ -398,7 +399,7 @@ Added|ykphysical:125                                        <- key B, USB compos
 Removed|ykphysical:pid:0407                                 <- key A removed
 Added|pcsc:HID Global OMNIKEY 5022 Smart Card Reader        <- key A via NFC
 Removed|ykphysical:125                                      <- key B, rapid-cycle
-Added|ykphysical:pid:0407                                   <- key B, rapid-cycle settled
+Added|ykphysical:pid:0407                                   <- key B, rapid-cycle arrival
 Removed|pcsc:HID Global OMNIKEY 5022 Smart Card Reader      <- key A off the reader
 Added|ykphysical:103                                        <- key A via USB
 ```
@@ -409,41 +410,30 @@ Verified:
 |---|---|
 | Composite USB key (CCID + HID FIDO + HID OTP) emits **one** event, not three | ✅ steps 2, 3 |
 | NFC key (SmartCard-only) emits one event — no over-merge/split vs composite | ✅ step 5 |
-| `Removed` correlates to the same device's `Added` while a sibling stays untouched | ✅ step 4 |
-| Remove/reinsert activity produces both event directions and an identical sequence across all sinks | ✅ step 6 + cross-sink consistency |
+| Recorded remove/reinsert activity produced both event directions and the same sequence across all sinks | ✅ |
 | Unsubscribed observer receives nothing further | ✅ step 7 |
 | All live sinks observe an **identical, identically-ordered** sequence | ✅ 8/8 events |
-| Every `Removed` correlates to a prior `Added` | ✅ |
 | Shutdown with a device attached: observers get `OnCompleted` | ✅ step 8 |
 | Shutdown with a device attached: `WatchAsync` exits cleanly, no hang | ✅ step 8 |
 | Monitoring restarts after shutdown (static state recreates) | ✅ step 9 |
 
-The cross-sink identity check is the load-bearing one: two observer subscribers and the async
-consumer agreed on all 8 events in the same order, across composite USB, NFC, transport transitions, and
-a transport transition. That is direct evidence the hand-rolled multicast replacing Rx's
-`Subject<T>` is correct, and step 8 exercises the C3 fix that isolates terminal notification per
-observer.
+The cross-sink sequence check showed that two observer subscribers and the async consumer received
+the same eight event records in the same order during this run. It does not establish physical-key
+correlation across removal and arrival events.
 
 **JIT run:** identical event semantics; reported three failures that were all artifacts of the
 first-draft protocol rather than SDK behaviour — the host was started with three keys already
-attached (so step 1's "expect 0 events" saw their removals, and those removals had no `Added`
-inside the observation window), and step 7 assumed a spare key rather than a two-key setup where a
-key moves from NFC to USB. The protocol was corrected to treat step 1 as a baseline reset, measure
-consistency and correlation from that baseline, and assert the unsubscribe invariant directly
-instead of via an event count. The AOT run above used the corrected protocol and passed cleanly.
+attached (so step 1's "expect 0 events" saw their removals), and step 7 assumed a spare key rather
+than a two-key setup where a key moves from NFC to USB. The protocol was corrected to treat step 1
+as a baseline reset and assert the unsubscribe behavior directly instead of via an event count. The
+Native AOT run above used that protocol.
 
 **Incidental observation (not a defect, worth recording).** A key's `DeviceId` reflects the
 evidence tier that resolved it and can differ between appearances of the same physical key — key B
 appeared as `ykphysical:125` (serial) and later as `ykphysical:pid:0407` (PID) after a rapid cycle,
-reproducibly in both runs. This is the documented tier model, and correlation is unaffected because
-the repository retains the object published in `Added` for an uninterrupted presence. It does imply
-that two same-model keys would share an identity key if both resolved via the PID tier
-simultaneously; that did not occur here (whenever two keys were present, at least one had a
-serial-tier id), and it is a discovery/merge concern rather than an event-delivery one. Flagged for
-the discovery owners rather than fixed here.
-
-Over NFC the identity is the reader (`pcsc:<reader name>`), since there is no HID interface or
-serial to correlate against — an inherent bound of NFC identity, not a defect.
+reproducibly in both runs. The observation demonstrates that `DeviceId` values cannot be used by
+this experiment to pair a removal with a later arrival. The NFC event used the reader-shaped
+identifier `pcsc:<reader name>` in this run.
 
 ## Experiment 9 — Proving GitHub #60 is fixable: static linking of NativeShims into an AOT binary
 

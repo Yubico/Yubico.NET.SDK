@@ -4,6 +4,8 @@
 in [`docs/NATIVE-AOT.md`](../NATIVE-AOT.md). This document preserves the original analysis and
 tracks how later implementation and cross-platform evidence closed its principal gaps.
 
+**Assessment date:** 2026-08-26.
+
 **Scope:** SDK libraries only — `Core`, `Management`, `Piv`, `Fido2`, `WebAuthn`, `Oath`,
 `OpenPgp`, `SecurityDomain`, `YubiOtp`, `YubiHsm`. CLI tools, example apps, and test
 infrastructure are out of scope as deliverables (though `Tests.TestProject` is used below as a
@@ -25,38 +27,25 @@ was finalized.
 
 ## Executive summary
 
-**The result is substantially better than the pre-assessment hypothesis.** Every in-scope SDK
-library builds with the Native AOT/trim/single-file analyzers fully enabled and produces **zero**
-warnings from its own code. The only warning found anywhere in the entire SDK is a single,
-well-understood, already-scoped one: `IL3058` against the `System.Reactive` dependency, used only
-for the optional `YubiKeyManager.DeviceChanges` observable stream. **That finding has since been
-closed by removing the dependency entirely — see AOT-B5 below.** A real Native AOT publish of a
-probe app referencing all ten in-scope libraries succeeded with zero additional link-time (ILC)
-warnings and produced genuine self-contained native binaries on macOS arm64, Windows x64, and Linux
-x64. All three platforms successfully performed physical-device discovery through their native
-platform paths. The macOS probe additionally covered `DeviceInfo` retrieval and a full PIV
-session/APDU-pipeline exchange at runtime.
+Every in-scope SDK library builds with the Native AOT, trimming, and single-file analyzers enabled.
+The audit initially found `IL3058` on the `System.Reactive` dependency; the dependency was removed
+before the compatibility properties were enabled permanently. A Native AOT host referencing all
+ten libraries published successfully on macOS Apple Silicon, Windows x64, and Linux x64. Core
+device discovery ran against physical YubiKeys on all three platforms. The macOS run additionally
+covered Management device information, a PIV session, and device monitoring.
 
-| Module | Build/Metadata | Code Patterns | Dependencies | Probe (macOS arm64) | Overall |
-|---|---|---|---|---|---|
-| Core | Compatible¹ | Compatible | At Risk (System.Reactive IL3058) | **Verified** (discovery) | **Ready — Verified*** |
-| Management | Compatible¹ | Compatible | At Risk (inherited) | **Verified** (DeviceInfo) | **Ready — Verified*** |
-| Piv | Compatible¹ | Compatible | At Risk (inherited) | **Verified** (APDU session) | **Ready — Verified*** |
-| Fido2 | Compatible¹ | Compatible | At Risk (inherited) | Ready — Static (link-only) | **Ready — Static*** |
-| WebAuthn | Compatible¹ | Compatible | At Risk (inherited) | Ready — Static (link-only) | **Ready — Static*** |
-| Oath | Compatible¹ | Compatible | At Risk (inherited) | Ready — Static (link-only) | **Ready — Static*** |
-| OpenPgp | Compatible¹ | Compatible | At Risk (inherited) | Ready — Static (link-only) | **Ready — Static*** |
-| SecurityDomain | Compatible¹ | Compatible | At Risk (inherited) | Ready — Static (link-only) | **Ready — Static*** |
-| YubiOtp | Compatible¹ | Compatible | At Risk (inherited) | Ready — Static (link-only) | **Ready — Static*** |
-| YubiHsm | Compatible¹ | Compatible | At Risk (inherited) | Ready — Static (link-only) | **Ready — Static*** |
-
-¹ "Compatible" means analyzer-clean with `IsAotCompatible=true`; all 10 libraries now opt in through
-the centralized AOT property model.
-
-`*` = capped below "Verified" everywhere by the unresolved `System.Reactive` dependency warning
-(Core) and, for every module except Core/Management/Piv, by the absence of a runtime smoke test on
-that module's own code paths (link-verified only). See [What's needed before an official
-claim](#whats-needed-before-an-official-claim).
+| Module | Analyzer-checked | Link-verified | Runtime evidence under Native AOT |
+|---|---|---|---|
+| Core | yes | yes | Device discovery on macOS, Windows, and Linux; monitoring on macOS |
+| Management | yes | yes | Device-information read on macOS |
+| Piv | yes | yes | PIV session and APDU exchange on macOS |
+| Fido2 | yes | yes | No representative protocol operation recorded |
+| WebAuthn | yes | yes | No representative protocol operation recorded |
+| Oath | yes | yes | No representative protocol operation recorded |
+| OpenPgp | yes | yes | No representative protocol operation recorded |
+| SecurityDomain | yes | yes | No representative protocol operation recorded |
+| YubiOtp | yes | yes | No representative protocol operation recorded |
+| YubiHsm | yes | yes | No representative protocol operation recorded |
 
 **Bottom line recommendation for this phase:** the SDK's own code is in excellent shape for Native
 AOT — no reflection-based activation, no dynamic proxies, no `Type.GetType`/`Activator.CreateInstance`,
@@ -72,17 +61,11 @@ cross-platform support claim and its exact boundaries are now documented in `doc
 
 ### Build & project metadata
 
-- All SDK library projects target `net10.0` by default (`Directory.Build.props:25`).
+- All SDK library projects target `net10.0` by default (`Directory.Build.props:35`).
 - All 10 SDK library projects now opt in through `IsYubiKitSdkLibrary=true`; the centralized build
   target sets `IsAotCompatible=true` and `VerifyReferenceAotCompatibility=true`.
-- The only project in the repo with `<PublishAot>true</PublishAot>` is
-  `src/Tests.TestProject/Yubico.YubiKit.Tests.TestProject.csproj` (an ASP.NET Core test host, out
-  of this assessment's scope), which exercises only `YubiKeyManager.FindAllAsync` +
-  `GetDeviceInfoAsync` — a small slice of what this assessment's probe additionally covered (PIV
-  APDU pipeline, plus link-verification of 7 more modules).
-- `docs/TESTING.md:464` states TestProject "targets .NET 9 with AOT" — stale relative to the
-  repo's actual `net10.0` default; flagged as a documentation fix (AOT-B6 below), independent of
-  the AOT findings themselves.
+- `verification/NativeAotVerification` is the dedicated publish host. `Tests.TestProject` also sets
+  `PublishAot` for its test-host configuration but is outside the SDK support surface.
 - **Turning on `IsAotCompatible=true` for all 10 modules, with zero code changes, produced zero
   warnings from SDK code** (see `native-aot-readiness-data.md` Experiment 1). This is a
   significant, directly actionable, low-risk finding: the property can be added today without
@@ -92,15 +75,14 @@ cross-platform support claim and its exact boundaries are now documented in `doc
 
 | Package | Used by | AOT finding |
 |---|---|---|
-| `System.Reactive` 6.0.1 | Core | **Confirmed IL3058** — not built with AOT-compatibility metadata. This is the sole dependency-level finding in the entire SDK. Used for `YubiKeyManager.DeviceChanges` (`IObservable<DeviceEvent>`) |
+| `System.Reactive` 6.0.1 | No current SDK library | Historical `IL3058` finding from the audit. The dependency was removed before Native AOT compatibility metadata was enabled permanently. |
 | `Yubico.NativeShims` 1.16.1 | Core | **Runtime-verified for its live code paths.** Ships only native binaries (`.dll`/`.dylib`/`.so`) + MSBuild targets, no managed assembly, so nothing for the managed dependency analyzer to check against the package itself. Core reaches it via 23 *live* P/Invoke declarations, all blittable (`int`, `IntPtr`, `byte[]` with explicit length; no strings/structs/delegates) — the AOT-safest interop shape, and a different/lower-risk pattern than the `dlopen`/`dlsym` + `Marshal.GetDelegateForFunctionPointer` dynamic resolution Core uses for OS-level APIs (Cfgmgr32, HidD, IOKit, udev): (1) `SCard.Interop.cs`, 11 `[LibraryImport]` PC/SC functions — runtime-verified via the Experiment 3 hardware probe; (2) `ArkgPrimitivesOpenSsl.cs`, 12 `[DllImport]` OpenSSL EC functions backing ARKG-P256 (`CryptographyProviders.ArkgPrimitivesCreator` default) — **runtime-verified in a follow-up Native AOT publish+run** that called `IsPointOnCurve`, `Derive`, and `ComputeEcdhSharedSecret` with real P-256 test vectors (see Experiment 4 in the data log). A 5-function `CmacPrimitivesOpenSsl.cs` DllImport set also exists but is **dead code** — `CryptographyProviders.CmacPrimitivesCreator` defaults to the built-in `System.Security.Cryptography.AesCmac`, and the OpenSSL CMAC class is referenced only in a comment (`Scp11X963Kdf.cs:222`, "This works in legacy code"). It is unreachable from any production code path and out of scope for AOT risk. |
 | `Microsoft.Extensions.Hosting.Abstractions`, `Microsoft.Extensions.Logging`, `Microsoft.Extensions.Logging.Abstractions` | Core, Fido2 | Not flagged by `VerifyReferenceAotCompatibility` in these builds |
 | `System.Formats.Cbor` | Fido2 | Not flagged |
 | `Spectre.Console(.Cli)` | Cli.Shared/Cli.Commands only | Out of scope (CLI, not a published library) |
 
-`System.Reactive` was the **one concrete, well-scoped blocker** standing between the state
-described here and a fully dependency-clean AOT story. It has since been removed (AOT-B5), so the
-dependency surface is now clean and reference verification runs unsuppressed.
+Managed reference verification now runs without a suppression. Native-only dependencies require
+separate publish and runtime evidence because they do not contain managed compatibility metadata.
 
 ### Code-pattern findings (confirmed, not estimated)
 
@@ -166,12 +148,8 @@ Real, reproducible evidence exists for:
   deployment behavior (same as any bundled native dependency), not specific to NativeShims, but is
   worth calling out explicitly in any packaging guidance for AOT consumers of this SDK.
 
-This is the honest current state: the SDK's code is remarkably AOT-friendly by construction, and
-the one real dependency issue (`System.Reactive`) is narrow — Core's own native dependency,
-`Yubico.NativeShims`, has now had both of its live P/Invoke surfaces (PC/SC and ARKG/OpenSSL)
-empirically confirmed to work under real Native AOT publishes. The *breadth* of runtime
-verification (platforms, transports, remaining protocol sessions) is still the main gap, not
-code-level compatibility.
+The evidence establishes analyzer compatibility, cross-platform linking, and the specific runtime
+paths listed above. It does not establish runtime behavior for every transport or applet session.
 
 ---
 
@@ -197,14 +175,8 @@ None of the above surfaced an architectural blocker in this assessment — they 
 
 ### P0 — Close the one confirmed compatibility gap
 
-**AOT-B1 — Add `IsAotCompatible=true` to all in-scope library `.csproj` files**
-- Modules: Core, Management, Piv, Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, YubiHsm
-- Fix: add `<IsAotCompatible>true</IsAotCompatible>` to each `src/*/src/*.csproj`. This assessment
-  confirmed doing so produces **zero warnings today** across all 10 modules — this is a
-  low-risk, high-value change that converts a one-time manual audit into permanent, everyday
-  analyzer coverage (every future PR that introduces an AOT-unsafe pattern will fail the build
-  immediately, since `TreatWarningsAsErrors=true` is already the repo default).
-- Validation: `dotnet toolchain.cs build` clean, no new warnings.
+**AOT-B1 — Enable compatibility metadata and analyzers for supported libraries**
+- Status: **Closed.** Each supported project opts into the central Native AOT property block.
 
 **AOT-B5 — Resolve the `System.Reactive` IL3058 finding**
 - Module: Core
@@ -222,18 +194,15 @@ None of the above surfaced an architectural blocker in this assessment — they 
 - Consequence: the proposed blanket `<NoWarn>IL3058</NoWarn>` was rejected, so
   `VerifyReferenceAotCompatibility` is introduced with genuine enforcement across all ten SDK
   libraries rather than being silently disabled for every future dependency.
-- Validation: `dotnet toolchain.cs build` is clean with zero `IL3058` and no suppression; 903 Core
-  tests and all 12 test projects pass; the `osx-arm64` AOT publish emits zero ILC warnings.
+- Validation: `dotnet toolchain.cs build` is clean with zero `IL3058` and no suppression; the
+  current verification run passed 905 Core tests with 3 skipped and all 12 unit-test projects; the
+  `osx-arm64` AOT publish emits zero ILC warnings.
 
 ### P1 — Broaden empirical verification
 
-**AOT-B3 — Build a permanent (not throwaway) Native AOT probe host in the repo**
-- Target: extend `src/Tests.TestProject/Program.cs` (already `PublishAot=true`) with project
-  references and minimal calls to Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and
-  YubiHsm — the throwaway `/tmp` probe used for this assessment proved the shape works; making it
-  permanent turns this from a one-off finding into regression-tested evidence.
-- Validation: `dotnet build src/Tests.TestProject/Yubico.YubiKit.Tests.TestProject.csproj -c
-  Release` succeeds with the new project references.
+**AOT-B3 — Add a permanent Native AOT verification host**
+- Status: **Closed.** `verification/NativeAotVerification` references reachable entry types from
+  all ten supported libraries and runs Core discovery in its default mode.
 
 **AOT-B4 — Run and record Windows + Linux Native AOT publishes**
 - Status: **Closed.** Both RIDs published and ran successfully against 2 physical YubiKeys each;
@@ -261,18 +230,12 @@ None of the above surfaced an architectural blocker in this assessment — they 
 ### P2 — Documentation and process
 
 **AOT-B6 — Correct stale AOT/target-framework documentation**
-- Target: `docs/TESTING.md:464` ("TestProject — ASP.NET Core with NSubstitute, targets .NET 9 with
-  AOT")
-- Fix: update to `net10.0` and cross-reference this readiness assessment.
-- Validation: doc review; consider `dotnet toolchain.cs -- docs-qa` if in the active documentation
-  set.
+- Status: **Closed.** TestProject documentation reflects the current target framework and remains
+  outside the SDK Native AOT support surface.
 
-**AOT-B10 — Add a CI Native AOT publish gate**
-- Fix: add a CI step publishing the permanent probe host (AOT-B3) with `PublishAot=true` on at
-  least one RID, so future regressions in the AOT-clean state confirmed here are caught
-  automatically rather than requiring another manual audit.
-- Validation: CI job passes on a clean branch; fails when a deliberately-introduced
-  `Activator.CreateInstance` call is added to confirm the gate actually works.
+**AOT-B10 — Add a recurring Native AOT publish gate**
+- Status: **Closed for macOS Apple Silicon.** The recurring workflow publishes and runs the
+  verification host without hardware. Windows and Linux remain recorded manual evidence.
 
 **AOT-B11 — `Yubico.NativeShims` cannot be statically linked into an AOT binary (GitHub
 [#60](https://github.com/Yubico/Yubico.NET.SDK/issues/60))**

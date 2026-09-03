@@ -189,6 +189,9 @@ dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerifi
   -c Release -r osx-arm64 --self-contained -p:PublishAot=true
 ```
 
+The normal `build` target also validates that the exact ten supported SDK projects opt in and that
+the verification host references and anchors each one.
+
 ## Code Coverage
 
 The `coverage` target picks a collector per project, because the two test platforms need different mechanisms:

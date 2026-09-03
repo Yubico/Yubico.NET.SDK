@@ -1,15 +1,11 @@
 name: Native AOT Publish Gate (2.0)
 
-# Publish-only verification that the in-scope SDK libraries (Core, Management, Piv, Fido2,
-# WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, YubiHsm) remain Native AOT compatible.
+# Publish-and-run verification for the macOS Native AOT host.
 #
-# This does NOT run tests and does NOT touch CLI projects — see docs/NATIVE-AOT.md for the
-# official support contract. verification/NativeAotVerification is a minimal internal publish
-# host (not a shipped package) that references every in-scope SDK library so the ILC (IL
-# Compiler) trimming/AOT analysis has real code to walk during publish.
-#
-# Phase 1 (current): macOS only, matching the macOS-first support rollout. Phase 2 will extend
-# the matrix to win-x64 and linux-x64 once their runtime verification matrix is closed.
+# The host references every supported SDK library, so publishing provides link evidence for all
+# ten libraries. Running it with no attached key provides process-startup and zero-device Core
+# discovery evidence. This workflow does not exercise hardware, monitoring, or applet operations.
+# See docs/NATIVE-AOT.md for the evidence matrix.
 
 on:
   push:
@@ -52,8 +48,12 @@ jobs:
           dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj
           -c Release -r ${{ matrix.rid }} --self-contained -p:PublishAot=true
 
-      - name: Run published Native AOT binary (device discovery only; no hardware required)
+      - name: Run published Native AOT binary (zero-device Core discovery)
+        working-directory: verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish
         run: |
-          BIN="verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish/Yubico.YubiKit.NativeAotVerification"
+          BIN="./Yubico.YubiKit.NativeAotVerification"
           chmod +x "$BIN"
-          "$BIN"
+          output="$($BIN)"
+          printf '%s\n' "$output"
+          test "$(printf '%s\n' "$output" | grep -c '^  Linked module entry type: ')" -eq 10
+          printf '%s\n' "$output" | grep -Fx 'Found 0 YubiKey(s).'

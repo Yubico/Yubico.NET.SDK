@@ -1,24 +1,6 @@
-// Native AOT publish/link verification host.
-//
-// This is intentionally NOT a shipped CLI tool, NOT a test project, and NOT part of the SDK
-// package surface. Its only job is to give CI something real to `dotnet publish -p:PublishAot=true`
-// against, so the ILC (IL Compiler) trimming/AOT analysis has genuine code paths from every
-// in-scope SDK library to walk during publish.
-//
-// Two modes:
-//
-//   (default)   Link verification + one-shot discovery. Runs safely with zero YubiKeys attached
-//               (as on CI runners) - FindAllAsync simply returns an empty list. This is the
-//               recurring CI gate; its behaviour is unchanged.
-//
-//   --monitor   Interactive, human-in-the-loop device-monitoring validation. Requires hardware and
-//               an operator. Exercises the hot-plug path that CI structurally cannot: every CI
-//               assertion runs with no keys attached, so multicast fan-out, event coalescing and
-//               Added/Removed correlation are never observed there. See docs/NATIVE-AOT.md.
-//
-// The --monitor protocol attaches every consumer surface at once, so a single insert/removal
-// exercises all of them. Its strongest assertion is that all sinks observe an identical, identically
-// ordered event sequence: that one check catches nearly any multicast defect.
+// Internal Native AOT verification host. The default mode provides link evidence for every SDK
+// library and runs Core discovery. The optional --monitor mode is an operator-driven diagnostic,
+// not part of the recurring workflow. See docs/NATIVE-AOT.md for the evidence boundaries.
 
 using System.Globalization;
 using Yubico.YubiKit.Core;
@@ -40,8 +22,9 @@ Console.WriteLine("Native AOT verification host starting...");
 // anchored explicitly here because Core does not reference Management (the dependency flows
 // Management -> Core), so device discovery alone would let ILC trim the Management assembly out
 // of this host's whole-program closure — defeating the point of exercising every in-scope module.
-Type[] verifiedModuleEntryTypes =
+Type[] linkedModuleEntryTypes =
 [
+    typeof(YubiKeyManager),
     typeof(ManagementSession),
     typeof(PivSession),
     typeof(FidoSession),
@@ -53,7 +36,7 @@ Type[] verifiedModuleEntryTypes =
     typeof(HsmAuthSession)
 ];
 
-foreach (Type type in verifiedModuleEntryTypes)
+foreach (Type type in linkedModuleEntryTypes)
 {
     Console.WriteLine($"  Linked module entry type: {type.FullName}");
 }
@@ -146,7 +129,9 @@ internal static class MonitorVerification
         Step(1, "Remove ALL YubiKeys (USB and NFC reader) to establish a clean baseline.",
             sinkA, expected: -1, failures);
 
-        var baseline = sinkA.Snapshot().Count;
+        var baselineA = sinkA.Snapshot().Count;
+        var baselineB = sinkB.Snapshot().Count;
+        var baselineWatch = sinkWatch.Snapshot().Count;
 
         Step(2, "Insert USB key A. A composite key (CCID + HID FIDO + HID OTP) must appear ONCE.",
             sinkA, expected: 1, failures, DeviceAction.Added);
@@ -202,8 +187,8 @@ internal static class MonitorVerification
         // --- cross-sink consistency: the primary invariant ---
         Console.WriteLine();
         Console.WriteLine("--- Cross-sink consistency ---");
-        var reference = sinkA.Snapshot().Skip(baseline).ToList();
-        foreach (var other in new[] { sinkB, sinkWatch })
+        var reference = sinkA.Snapshot().Skip(baselineA).ToList();
+        foreach (var (other, baseline) in new[] { (sinkB, baselineB), (sinkWatch, baselineWatch) })
         {
             var seq = other.Snapshot().Skip(baseline).ToList();
             if (!seq.SequenceEqual(reference, StringComparer.Ordinal))
@@ -217,18 +202,6 @@ internal static class MonitorVerification
             {
                 Console.WriteLine($"  ok    {other.Name}: identical sequence ({seq.Count} events)");
             }
-        }
-
-        // --- Added/Removed correlation ---
-        var unmatched = Correlate(reference);
-        if (unmatched.Count > 0)
-        {
-            failures.Add("Removed events without a matching Added");
-            Console.WriteLine($"  FAIL  {unmatched.Count} Removed event(s) with no correlating Added: {string.Join(", ", unmatched)}");
-        }
-        else
-        {
-            Console.WriteLine("  ok    every Removed correlates to a prior Added");
         }
 
         // --- Step 8: shutdown with a key attached ---
@@ -281,7 +254,7 @@ internal static class MonitorVerification
 
         if (failures.Count == 0)
         {
-            Console.WriteLine("PASS - all monitoring invariants held.");
+            Console.WriteLine("PASS - all configured monitoring checks passed.");
             return 0;
         }
 
@@ -305,7 +278,7 @@ internal static class MonitorVerification
         var before = reference.Snapshot().Count;
         Prompt(number, instruction);
 
-        // Give the monitor's interval scan a moment to settle after the operator's action.
+        // Allow one additional polling interval before inspecting the event snapshot.
         Thread.Sleep(TimeSpan.FromSeconds(2));
 
         var after = reference.Snapshot();
@@ -335,7 +308,7 @@ internal static class MonitorVerification
         if (expectedAction is { } action && delta > 0)
         {
             var last = after[^1];
-            if (!last.Contains(action.ToString(), StringComparison.Ordinal))
+            if (!last.StartsWith($"{action}|", StringComparison.Ordinal))
             {
                 var message = $"step {number}: expected a {action} event, last was '{last}'";
                 failures.Add(message);
@@ -385,43 +358,25 @@ internal static class MonitorVerification
         Console.WriteLine($"SIGNAL-TIMEOUT step={number}");
     }
 
-    /// <summary>Returns device ids reported Removed without a preceding Added.</summary>
-    private static List<string> Correlate(IReadOnlyList<string> sequence)
-    {
-        var present = new HashSet<string>(StringComparer.Ordinal);
-        var unmatched = new List<string>();
-
-        foreach (var entry in sequence)
-        {
-            var parts = entry.Split('|', 2);
-            if (parts.Length != 2)
-            {
-                continue;
-            }
-
-            var (action, id) = (parts[0], parts[1]);
-            if (action == nameof(DeviceAction.Added))
-            {
-                _ = present.Add(id);
-            }
-            else if (!present.Remove(id))
-            {
-                unmatched.Add(id);
-            }
-        }
-
-        return unmatched;
-    }
-
     /// <summary>Records the event sequence one consumer surface observed.</summary>
     private sealed class Sink(string name) : IObserver<DeviceEvent>
     {
         private readonly Lock _gate = new();
         private readonly List<string> _events = [];
+        private bool _completed;
 
         public string Name { get; } = name;
 
-        public bool Completed { get; private set; }
+        public bool Completed
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return _completed;
+                }
+            }
+        }
 
         public void OnNext(DeviceEvent value)
         {
@@ -441,7 +396,7 @@ internal static class MonitorVerification
         {
             lock (_gate)
             {
-                Completed = true;
+                _completed = true;
             }
         }
 

@@ -116,6 +116,19 @@ using static SimpleExec.Command;
 const string ProjectPrefix = "Yubico.YubiKit.";
 // Matches <TargetFramework> in Directory.Build.props; used to locate MTP test executables.
 const string TestTargetFramework = "net10.0";
+string[] nativeAotSdkProjects =
+[
+    "src/Core/src/Yubico.YubiKit.Core.csproj",
+    "src/Fido2/src/Yubico.YubiKit.Fido2.csproj",
+    "src/Management/src/Yubico.YubiKit.Management.csproj",
+    "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+    "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+    "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+    "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+    "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+    "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+    "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+];
 var repoRoot = GetRepoRoot();
 var solutionFile = "Yubico.YubiKit.sln";
 var configuration = "Release";
@@ -213,7 +226,26 @@ Target("test-infrastructure-qa", () =>
     PrintInfo("All [WithYubiKey] tests use [SkippableTheory] and declare the required package");
 });
 
-Target("build", DependsOn("test-infrastructure-qa"), () =>
+Target("native-aot-contract-qa", () =>
+{
+    PrintHeader("Validating Native AOT support contract");
+
+    var failures = ValidateNativeAotContract(nativeAotSdkProjects);
+    if (failures.Count > 0)
+    {
+        foreach (var failure in failures)
+        {
+            PrintColored($"  ✗ {failure}", ConsoleColor.Red);
+        }
+
+        throw new InvalidOperationException(
+            $"Native AOT support contract validation failed with {failures.Count} issue(s)");
+    }
+
+    PrintInfo("All 10 supported SDK libraries opt in and are anchored by the verification host");
+});
+
+Target("build", DependsOn("test-infrastructure-qa", "native-aot-contract-qa"), () =>
 {
     PrintHeader("Building");
 
@@ -1172,6 +1204,82 @@ string[] DiscoverProjects(string subdirectory, string nameFilter, string? additi
         .Select(p => Path.GetRelativePath(repoRoot, p))
         .OrderBy(p => p)
         .ToArray();
+
+List<string> ValidateNativeAotContract(string[] expectedProjects)
+{
+    var failures = new List<string>();
+    var actualSdkProjects = Directory.GetFiles(Path.Combine(repoRoot, "src"), "*.csproj", SearchOption.AllDirectories)
+        .Select(path => Path.GetRelativePath(repoRoot, path).Replace(Path.DirectorySeparatorChar, '/'))
+        .Where(path => path.Count(character => character == '/') == 3 &&
+                       path.StartsWith("src/", StringComparison.Ordinal) &&
+                       path.Contains("/src/", StringComparison.Ordinal) &&
+                       !path.Contains("/Cli.", StringComparison.Ordinal))
+        .OrderBy(path => path, StringComparer.Ordinal)
+        .ToArray();
+    var expected = expectedProjects.OrderBy(path => path, StringComparer.Ordinal).ToArray();
+
+    if (!actualSdkProjects.SequenceEqual(expected, StringComparer.Ordinal))
+    {
+        failures.Add(
+            $"supported project set differs: expected [{string.Join(", ", expected)}], " +
+            $"found [{string.Join(", ", actualSdkProjects)}]");
+    }
+
+    var verificationProjectPath = Path.Combine(
+        repoRoot,
+        "verification",
+        "NativeAotVerification",
+        "Yubico.YubiKit.NativeAotVerification.csproj");
+    var verificationProgramPath = Path.Combine(
+        repoRoot,
+        "verification",
+        "NativeAotVerification",
+        "Program.cs");
+    var verificationProject = File.ReadAllText(verificationProjectPath);
+    var verificationProgram = File.ReadAllText(verificationProgramPath);
+
+    foreach (var project in expectedProjects)
+    {
+        var projectPath = Path.Combine(repoRoot, project);
+        var projectContents = File.ReadAllText(projectPath);
+        if (!projectContents.Contains(
+                "<IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>",
+                StringComparison.Ordinal))
+        {
+            failures.Add($"{project}: missing IsYubiKitSdkLibrary opt-in");
+        }
+
+        var projectFileName = Path.GetFileName(project);
+        if (!verificationProject.Contains(projectFileName, StringComparison.Ordinal))
+        {
+            failures.Add($"verification host does not reference {projectFileName}");
+        }
+    }
+
+    string[] entryTypes =
+    [
+        "YubiKeyManager",
+        "ManagementSession",
+        "PivSession",
+        "FidoSession",
+        "WebAuthnClient",
+        "OathSession",
+        "OpenPgpSession",
+        "SecurityDomainSession",
+        "YubiOtpSession",
+        "HsmAuthSession"
+    ];
+
+    foreach (var entryType in entryTypes)
+    {
+        if (!verificationProgram.Contains($"typeof({entryType})", StringComparison.Ordinal))
+        {
+            failures.Add($"verification host does not anchor {entryType}");
+        }
+    }
+
+    return failures;
+}
 
 List<string> ValidateHardwareTestDeclarations(string[] projects)
 {

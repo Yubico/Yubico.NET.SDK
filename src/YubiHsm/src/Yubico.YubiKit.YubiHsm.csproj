@@ -9,9 +9,7 @@
     <Description>YubiHSM support for YubiKey devices including hardware security module operations, key management, and cryptographic operations.</Description>
     <PackageTags>yubikey;yubico;yubihsm;hsm;hardware-security-module;crypto</PackageTags>
 
-    <!-- Native AOT: opts this SDK library into the shared AOT property block in
-         Directory.Build.props/Directory.Build.targets. See docs/NATIVE-AOT.md for the support
-         contract. -->
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
     <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 

@@ -9,9 +9,7 @@
     <Description>Management interface for YubiKey devices including device info queries, firmware version detection, and capability management.</Description>
     <PackageTags>yubikey;yubico;management;device-info;configuration</PackageTags>
 
-    <!-- Native AOT: opts this SDK library into the shared AOT property block in
-         Directory.Build.props/Directory.Build.targets. See docs/NATIVE-AOT.md for the support
-         contract. -->
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
     <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 

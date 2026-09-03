@@ -12,31 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
 
 namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 
-/// <summary>
-/// Tests for <see cref="AsnUtilities"/>. This is an internal type; it is reachable from this
-/// assembly because <c>Directory.Build.targets</c> grants <c>InternalsVisibleTo</c> for
-/// <c>Yubico.YubiKit.Core.UnitTests</c>.
-/// </summary>
+/// <summary>Tests for <see cref="AsnUtilities"/>.</summary>
 /// <remarks>
-/// <para>
-/// <c>GetLeadingZeroCount</c> is <see langword="private"/> and is not directly reachable even with
-/// <c>InternalsVisibleTo</c>. It is exercised indirectly through both public overloads of
-/// <see cref="AsnUtilities.TrimLeadingZeroes"/>.
-/// </para>
-/// <para>
-/// ASN.1 INTEGER sign rule reminder: a value needs a leading <c>0x00</c> byte only when the
-/// high bit (0x80) of its first significant byte is set (which would otherwise make a DER
-/// INTEGER negative in two's-complement). <see cref="AsnUtilities.EnsurePositive"/> and
-/// <see cref="AsnUtilities.TrimLeadingZeroes(System.Span{byte})"/> are inverses only when the
-/// input already has at most one leading zero byte -- see
-/// <see cref="EnsurePositive_DoesNotStripExtraLeadingZeroes_UnlikeGetIntegerBytes"/> for the
-/// pinned divergence.
-/// </para>
+/// A positive ASN.1 INTEGER needs a leading <c>0x00</c> content octet only when the high bit of
+/// its first significant content octet is set; otherwise the signed value would be negative.
 /// </remarks>
 public class AsnUtilitiesTests
 {
@@ -72,9 +55,6 @@ public class AsnUtilitiesTests
         Assert.Equal<byte>([0x7F], result.ToArray());
     }
 
-    // Pinned: an all-zero input does NOT trim to an empty span. GetLeadingZeroCount's
-    // "reached the end" branch returns (data.Length - 1), i.e. the position of the LAST
-    // zero byte, so a single 0x00 byte survives.
     [Fact]
     public void TrimLeadingZeroes_ReadOnlySpan_AllZeroes_LeavesSingleZeroByte()
     {
@@ -96,10 +76,6 @@ public class AsnUtilitiesTests
     #endregion
 
     #region TrimLeadingZeroes(Span<byte>)
-
-    // Separate overload, same underlying private GetLeadingZeroCount helper. Exercised with
-    // its own explicit test data (not just delegating to the ReadOnlySpan cases above) so this
-    // overload is independently covered.
 
     [Fact]
     public void TrimLeadingZeroes_Span_NoLeadingZeroes_ReturnsUnchanged()
@@ -198,11 +174,6 @@ public class AsnUtilitiesTests
         Assert.Equal<byte>([0x00, 0x80, 0x01], result);
     }
 
-    // Pinned divergence from GetIntegerBytes: EnsurePositive only inspects value[0]. It does
-    // NOT strip pre-existing leading zero bytes, so an already-zero-padded-but-non-minimal
-    // input is returned unchanged (still non-minimal), whereas GetIntegerBytes trims first and
-    // would collapse this down to a single 0x7F byte. They are inverses only when the input
-    // has at most one leading zero already.
     [Fact]
     public void EnsurePositive_DoesNotStripExtraLeadingZeroes_UnlikeGetIntegerBytes()
     {
@@ -250,66 +221,11 @@ public class AsnUtilitiesTests
     [Fact]
     public void GetIntegerBytes_LeadingZeroesThenHighBitSet_TrimsThenPrependsOneZero()
     {
-        // Two leading zeroes, trims to {0x80}, high bit is set on the trimmed value, so exactly
-        // one zero is re-added (minimal DER INTEGER encoding), not the original two.
         byte[] value = [0x00, 0x00, 0x80];
 
         var result = AsnUtilities.GetIntegerBytes(value.AsSpan());
 
         Assert.Equal<byte>([0x00, 0x80], result.ToArray());
-    }
-
-    #endregion
-
-    #region VerifyX25519PrivateKey
-
-    // A validly clamped X25519 private key per RFC 7748 clamping: bits 0-2 of byte[0] clear,
-    // bit 7 of byte[31] clear, bit 6 of byte[31] set.
-    private static byte[] MakeClampedKey()
-    {
-        var key = new byte[32];
-        Array.Fill(key, (byte)0x11);
-        key[0] &= 0xF8; // clear low 3 bits
-        key[31] &= 0x7F; // clear high bit
-        key[31] |= 0x40; // set second-highest bit
-        return key;
-    }
-
-    [Fact]
-    public void VerifyX25519PrivateKey_ProperlyClampedKey_DoesNotThrow()
-    {
-        var key = MakeClampedKey();
-
-        var exception = Record.Exception(() => AsnUtilities.VerifyX25519PrivateKey(key));
-
-        Assert.Null(exception);
-    }
-
-    [Fact]
-    public void VerifyX25519PrivateKey_LowThreeBitsOfFirstByteSet_ThrowsCryptographicException()
-    {
-        var key = MakeClampedKey();
-        key[0] |= 0x01;
-
-        Assert.Throws<CryptographicException>(() => AsnUtilities.VerifyX25519PrivateKey(key));
-    }
-
-    [Fact]
-    public void VerifyX25519PrivateKey_HighBitOfLastByteSet_ThrowsCryptographicException()
-    {
-        var key = MakeClampedKey();
-        key[31] |= 0x80;
-
-        Assert.Throws<CryptographicException>(() => AsnUtilities.VerifyX25519PrivateKey(key));
-    }
-
-    [Fact]
-    public void VerifyX25519PrivateKey_SecondHighestBitOfLastByteClear_ThrowsCryptographicException()
-    {
-        var key = MakeClampedKey();
-        key[31] &= 0xBF; // clear bit 0x40, which must be set
-
-        Assert.Throws<CryptographicException>(() => AsnUtilities.VerifyX25519PrivateKey(key));
     }
 
     #endregion

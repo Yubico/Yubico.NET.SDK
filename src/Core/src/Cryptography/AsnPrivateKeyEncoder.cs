@@ -203,7 +203,7 @@ internal static class AsnPrivateKeyEncoder
     {
         if (privateKey.Length != 32)
         {
-            throw new ArgumentException("Curve25519 key must be 32 bytes.");
+            throw new ArgumentException("Curve25519 key must be 32 bytes.", nameof(privateKey));
         }
 
         if (algorithmOid is null)
@@ -214,11 +214,6 @@ internal static class AsnPrivateKeyEncoder
         if (!Oids.IsCurve25519Algorithm(algorithmOid))
         {
             throw new ArgumentException("Algorithm OID is not supported.", nameof(algorithmOid));
-        }
-
-        if (algorithmOid == Oids.X25519)
-        {
-            AsnUtilities.VerifyX25519PrivateKey(privateKey);
         }
 
         // Create the PKCS#8 PrivateKeyInfo structure

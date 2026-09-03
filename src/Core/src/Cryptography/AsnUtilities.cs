@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
-
 namespace Yubico.YubiKit.Core.Cryptography;
 
 internal static class AsnUtilities
@@ -74,21 +72,6 @@ internal static class AsnUtilities
         }
 
         return trimmedBytes;
-    }
-
-    /// <summary>
-    /// Verifies that the given X25519 private key meets the bit clamping requirements of RFC 7748.
-    /// </summary>
-    /// <param name="x25519PrivateKey">The X25519 private key to verify.</param>
-    /// <exception cref="CryptographicException">If the private key does not meet the bit clamping requirements.</exception>
-    public static void VerifyX25519PrivateKey(ReadOnlySpan<byte> x25519PrivateKey)
-    {
-        if ((x25519PrivateKey[0] & 0b111) != 0 || // Check that the 3 least significant bits are set
-            (x25519PrivateKey[31] & 0x80) != 0 || // Check most significant bit is set
-            (x25519PrivateKey[31] & 0x40) != 0x40) // Check second most significant bit not set
-        {
-            throw new CryptographicException("Invalid X25519 private key: improper bit clamping");
-        }
     }
 
     private static int GetLeadingZeroCount(ReadOnlySpan<byte> data)

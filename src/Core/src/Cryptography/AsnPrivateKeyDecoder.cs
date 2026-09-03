@@ -24,6 +24,9 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// </summary>
 internal class AsnPrivateKeyDecoder
 {
+    private const string Rfc5958Version1UnsupportedMessage =
+        "RFC 5958 version value 1 OneAsymmetricKey is valid but unsupported.";
+
     /// <summary>
     /// Creates an instance of <see cref="IPrivateKey"/> from a PKCS#8
     /// ASN.1 DER-encoded private key.
@@ -42,11 +45,7 @@ internal class AsnPrivateKeyDecoder
         var seqPrivateKeyInfo = reader.ReadSequence();
 
         // PKCS#8 starts with a version (integer 0)
-        var version = seqPrivateKeyInfo.ReadInteger();
-        if (version != 0)
-        {
-            throw new CryptographicException("Invalid PKCS#8 private key format: unexpected version");
-        }
+        ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
@@ -105,11 +104,7 @@ internal class AsnPrivateKeyDecoder
     {
         var reader = new AsnReader(pkcs8EncodedKey, AsnEncodingRules.DER);
         var seqPrivateKeyInfo = reader.ReadSequence();
-        var version = seqPrivateKeyInfo.ReadInteger();
-        if (version != 0)
-        {
-            throw new CryptographicException("Invalid PKCS#8 private key format: unexpected version");
-        }
+        ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         var algorithmOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
@@ -146,11 +141,7 @@ internal class AsnPrivateKeyDecoder
         var seqPrivateKeyInfo = reader.ReadSequence();
 
         // PKCS#8 starts with a version (integer 0)
-        var version = seqPrivateKeyInfo.ReadInteger();
-        if (version != 0)
-        {
-            throw new CryptographicException("Invalid PKCS#8 private key format: unexpected version");
-        }
+        ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
@@ -244,11 +235,7 @@ internal class AsnPrivateKeyDecoder
         var seqPrivateKeyInfo = reader.ReadSequence();
 
         // PKCS#8 starts with a version (integer 0)
-        var version = seqPrivateKeyInfo.ReadInteger();
-        if (version != 0)
-        {
-            throw new CryptographicException("Invalid PKCS#8 private key format: unexpected version");
-        }
+        ReadAndValidatePkcs8Version(seqPrivateKeyInfo);
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
@@ -295,5 +282,16 @@ internal class AsnPrivateKeyDecoder
         };
 
         return rsaParameters.NormalizeParameters();
+    }
+
+    private static void ReadAndValidatePkcs8Version(AsnReader privateKeyInfo)
+    {
+        var version = privateKeyInfo.ReadInteger();
+        if (version != 0)
+        {
+            throw new CryptographicException(version == 1
+                ? Rfc5958Version1UnsupportedMessage
+                : "Invalid PKCS#8 private key format: unexpected version");
+        }
     }
 }

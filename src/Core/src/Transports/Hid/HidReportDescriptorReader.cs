@@ -31,12 +31,8 @@ internal readonly record struct HidReportItem(int Type, int Tag, uint Value);
 /// = tag).
 /// </summary>
 /// <remarks>
-/// This does not implement HID long items (prefix 0xFE). A long-item prefix decodes through this
-/// short-item layout as size=2/type=3/tag=15, consuming its two length/tag bytes as an ordinary
-/// item value and desynchronizing the cursor for the remainder of the descriptor. YubiKeys do not
-/// emit long items in practice. This is a deliberate, pinned limitation inherited from the two
-/// original hand-rolled walkers this type replaces; do not add long-item handling here without a
-/// dedicated, reviewed change.
+/// HID long items (prefix 0xFE) have no standard tags in HID 1.11. Complete long items are skipped
+/// without being surfaced. A truncated long-item header or payload ends iteration.
 /// </remarks>
 internal static class HidReportDescriptorReader
 {
@@ -57,18 +53,25 @@ internal static class HidReportDescriptorReader
     internal const int TypeLocal = 2;
 
     /// <summary>
+    /// The reserved prefix byte identifying a HID long item: <c>0xFE</c>, followed by
+    /// <c>bDataSize</c>, <c>bLongItemTag</c>, and <c>bDataSize</c> bytes of data.
+    /// </summary>
+    private const byte LongItemPrefix = 0xFE;
+
+    /// <summary>
     /// Reads the next short item from <paramref name="descriptor"/>, advancing
     /// <paramref name="position"/> past it.
     /// </summary>
     /// <param name="descriptor">The raw HID report descriptor bytes.</param>
-    /// <param name="position">The read cursor. Advanced past the item just read on success;
-    /// left unspecified once this method returns <see langword="false"/>.</param>
+    /// <param name="position">The read cursor. On success, it is advanced past any skipped long
+    /// items and the decoded short item. Its value is unspecified when this method returns
+    /// <see langword="false"/>.</param>
     /// <param name="item">The decoded item, when this method returns <see langword="true"/>.</param>
     /// <returns><see langword="true"/> if an item was read; <see langword="false"/> once the
     /// descriptor is exhausted or the trailing item is truncated.</returns>
     /// <remarks>
-    /// A truncated item (fewer bytes remaining than its prefix declares) terminates the walk
-    /// rather than being clamped or skipped, matching the two hand-rolled walkers this replaces.
+    /// A truncated short item (fewer bytes remaining than its prefix declares) terminates the
+    /// walk rather than being clamped or skipped.
     /// An item declaring a size of zero still advances the cursor by its prefix byte and yields a
     /// <see cref="HidReportItem.Value"/> of zero.
     /// </remarks>
@@ -76,36 +79,59 @@ internal static class HidReportDescriptorReader
     {
         item = default;
 
-        if (position >= descriptor.Length)
+        while (true)
         {
-            return false;
+            if (position >= descriptor.Length)
+            {
+                return false;
+            }
+
+            byte prefix = descriptor[position];
+
+            if (prefix == LongItemPrefix)
+            {
+                if (position + 3 > descriptor.Length)
+                {
+                    return false;
+                }
+
+                byte dataSize = descriptor[position + 1];
+                int longItemLength = 3 + dataSize;
+
+                if (position + longItemLength > descriptor.Length)
+                {
+                    return false;
+                }
+
+                position += longItemLength;
+                continue;
+            }
+
+            int size = prefix & 0x03;
+            if (size == 3)
+            {
+                size = 4; // Size encoding: 0=0, 1=1, 2=2, 3=4
+            }
+
+            int type = (prefix >> 2) & 0x03;
+            int tag = (prefix >> 4) & 0x0F;
+
+            int cursor = position + 1; // Move past prefix
+
+            if (cursor + size > descriptor.Length)
+            {
+                return false;
+            }
+
+            uint value = 0;
+            for (int j = 0; j < size; j++)
+            {
+                value |= (uint)descriptor[cursor + j] << (8 * j);
+            }
+
+            item = new HidReportItem(type, tag, value);
+            position = cursor + size;
+            return true;
         }
-
-        byte prefix = descriptor[position];
-        int size = prefix & 0x03;
-        if (size == 3)
-        {
-            size = 4; // Size encoding: 0=0, 1=1, 2=2, 3=4
-        }
-
-        int type = (prefix >> 2) & 0x03;
-        int tag = (prefix >> 4) & 0x0F;
-
-        int cursor = position + 1; // Move past prefix
-
-        if (cursor + size > descriptor.Length)
-        {
-            return false;
-        }
-
-        uint value = 0;
-        for (int j = 0; j < size; j++)
-        {
-            value |= (uint)descriptor[cursor + j] << (8 * j);
-        }
-
-        item = new HidReportItem(type, tag, value);
-        position = cursor + size;
-        return true;
     }
 }

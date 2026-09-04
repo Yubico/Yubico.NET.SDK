@@ -81,6 +81,9 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         EnsureProtocolInitialized();
         var clientPin = new ClientPin(_session, _protocol!);
 
+        // ClientPin allocates and returns the decrypted token to this single caller and keeps no
+        // reference to it, so ownership passes straight to the session below. Copying it here (or
+        // in the session) would leave a second live plaintext token that nothing zeroes.
         byte[] token = method switch
         {
             PinUvAuthMethod.Pin when pinBytes is not null =>
@@ -97,6 +100,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
             _ => throw new ArgumentOutOfRangeException(nameof(method), method, "Invalid PIN/UV auth method")
         };
 
+        // Ownership transfer: the session zeroes this array when the caller disposes it.
         return new PinUvAuthTokenSession(_protocol!, token);
     }
 
@@ -125,6 +129,11 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         // Add PIN/UV auth if provided
         if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
         {
+            // The copy is load-bearing, not defensive: the finally below zeroes whatever is in
+            // options, and callers reuse one pinUvAuthParam across several backend calls (see
+            // ExcludeListPreflight's chunk loop). Zeroing the caller's buffer here would make
+            // every call after the first send an all-zero parameter. The caller zeroes the
+            // original when it is done with it.
             options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
             options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
         }
@@ -182,6 +191,9 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         // Add PIN/UV auth if provided
         if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
         {
+            // Load-bearing copy: see the note in MakeCredentialAsync. ExcludeListPreflight probes
+            // several exclude-list chunks with one pinUvAuthParam, so this method must not zero
+            // the caller's buffer.
             options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
             options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
         }

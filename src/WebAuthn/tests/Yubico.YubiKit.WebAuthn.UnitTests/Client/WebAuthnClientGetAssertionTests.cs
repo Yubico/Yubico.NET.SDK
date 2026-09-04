@@ -21,6 +21,7 @@ using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
@@ -328,29 +329,124 @@ public class WebAuthnClientGetAssertionTests
     }
 
     [Fact]
-    public async Task GetAssertion_PinTokenZeroedAfterMethodReturns()
+    public async Task GetAssertion_Success_ZeroesTheTokenSessionBuffer()
     {
         // Arrange
-        var credentialId = RandomNumberGenerator.GetBytes(32);
-        var pinBytes = "123456"u8.ToArray();
-        var options = new AuthenticationOptions
-        {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            RpId = "example.com"
-        };
+        var token = TokenBufferAssert.CreateSentinelToken();
+        ArrangePinTokenAcquisition(token);
 
+        var credentialId = RandomNumberGenerator.GetBytes(32);
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockGetAssertionResponse(credentialId));
 
         // Act
-        await _client.GetAssertionAsync(options, pinBytes: pinBytes, CancellationToken.None);
+        var result = await _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken);
 
-        // Assert - this test verifies the pattern exists via code inspection
-        // The actual zeroing is verified by grep in the checklist
-        Assert.True(true, "PIN lifecycle validated by code inspection");
+        // Assert
+        Assert.Single(result);
+        await AssertTokenWasAcquired();
+        TokenBufferAssert.Zeroed(token, "a successful ceremony must dispose the token session");
     }
+
+    [Fact]
+    public async Task GetAssertion_BackendThrows_ZeroesTheTokenSessionBuffer()
+    {
+        // Arrange
+        var token = TokenBufferAssert.CreateSentinelToken();
+        ArrangePinTokenAcquisition(token);
+
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ => throw new CtapException(CtapStatus.InvalidCbor));
+
+        // Act
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken));
+
+        // Assert
+        Assert.Equal(WebAuthnClientErrorCode.Unknown, ex.Code);
+        await AssertTokenWasAcquired();
+        TokenBufferAssert.Zeroed(token, "a failed ceremony must dispose the token session");
+    }
+
+    [Fact]
+    public async Task GetAssertion_Cancelled_ZeroesTheTokenSessionBuffer()
+    {
+        // Arrange
+        var token = TokenBufferAssert.CreateSentinelToken();
+        ArrangePinTokenAcquisition(token);
+
+        using var cts = new CancellationTokenSource();
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ =>
+            {
+                // Cancel once the token is minted and in use, which is the window the
+                // token session has to survive and then clean up.
+                cts.Cancel();
+                throw new OperationCanceledException(cts.Token);
+            });
+
+        // Act
+        _ = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            cts.Token));
+
+        // Assert
+        await AssertTokenWasAcquired();
+        TokenBufferAssert.Zeroed(token, "a cancelled ceremony must dispose the token session");
+    }
+
+    /// <summary>
+    /// Arranges an authenticator with a PIN set and hands the client a token session that owns
+    /// <paramref name="token"/>, so the test can inspect that buffer after the ceremony.
+    /// </summary>
+    /// <remarks>
+    /// The session does not copy the array, so <paramref name="token"/> is the session's owned
+    /// buffer and is also the buffer <c>ClientPin</c> would have returned in production.
+    /// </remarks>
+    private void ArrangePinTokenAcquisition(byte[] token)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), token));
+    }
+
+    /// <summary>
+    /// Guards the zeroing assertions against passing for the wrong reason: a ceremony that never
+    /// minted a token would never have had a buffer to clear.
+    /// </summary>
+    private async Task AssertTokenWasAcquired() =>
+        await _mockBackend.Received(1).GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>());
+
+    private static AuthenticationOptions CreateUvRequiredOptions() => new()
+    {
+        Challenge = RandomNumberGenerator.GetBytes(32),
+        RpId = "example.com",
+        UserVerification = UserVerificationPreference.Required
+    };
 
     private static GetAssertionResponse CreateMockGetAssertionResponse(
         byte[] credentialId,

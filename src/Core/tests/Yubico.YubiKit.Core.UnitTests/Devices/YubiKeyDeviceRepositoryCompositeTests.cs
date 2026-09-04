@@ -387,8 +387,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
             default(DeviceInfo) with { SerialNumber = existingSerial });
         repository.UpdateCache([fidoShape]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Same sole interface id, but it now reports the OTP connection type instead of FIDO.
         var otpShape = new YubiKeyDevice(
@@ -416,8 +416,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         var beforeRemoval = Published("ykphysical:103", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([beforeRemoval]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         repository.UpdateCache([]);
         var afterReinsertion = Published("ykphysical:103", "pcsc:a", "hid-fido:a", deviceInfo: null);

@@ -64,13 +64,13 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
 
         var removedTcs = new TaskCompletionSource<IYubiKey>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        using var subscription = YubiKeyManager.DeviceChanges.Subscribe(evt =>
+        using var subscription = YubiKeyManager.DeviceChanges.Subscribe(new DeviceEventObserver(evt =>
         {
             Note($"EVENT {evt.Action,-7} {evt.Device.DeviceId} connections={evt.Device.AvailableConnections} " +
                  $"serialAtEvent={evt.Device.SerialNumber?.ToString() ?? "null"} ref={evt.Device.GetHashCode():x8}");
             if (evt.Action == DeviceAction.Removed)
                 removedTcs.TrySetResult(evt.Device);
-        });
+        }));
 
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Note("monitoring started (1 s interval)");
@@ -158,5 +158,16 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         // Full captured timeline for the hardware-evidence record.
         output.WriteLine("Hot-plug protocol timeline:");
         output.WriteLine(Timeline());
+    }
+
+    private sealed class DeviceEventObserver(Action<DeviceEvent> onNext) : IObserver<DeviceEvent>
+    {
+        public void OnCompleted()
+        {
+        }
+
+        public void OnError(Exception error) => throw error;
+
+        public void OnNext(DeviceEvent value) => onNext(value);
     }
 }

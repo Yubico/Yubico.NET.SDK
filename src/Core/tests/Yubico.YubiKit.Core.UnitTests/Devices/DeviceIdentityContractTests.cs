@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -91,8 +92,8 @@ public class DeviceIdentityContractTests
         var firstScan = Published(deviceInfo: null);
         repository.UpdateCache([firstScan]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         repository.UpdateCache([Published(deviceInfo: WithSerial(103))]);
 
@@ -115,8 +116,8 @@ public class DeviceIdentityContractTests
             WithSerial(103));
         repository.UpdateCache([withSerial]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Same interface set, different connection set, no metadata on the fresh scan object.
         var republished = new YubiKeyDevice(
@@ -141,8 +142,8 @@ public class DeviceIdentityContractTests
         repository.UpdateCache([firstScan]);
         repository.UpdateCache([Published(deviceInfo: WithSerial(103))]); // late serial arrival
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         repository.UpdateCache([]);
 

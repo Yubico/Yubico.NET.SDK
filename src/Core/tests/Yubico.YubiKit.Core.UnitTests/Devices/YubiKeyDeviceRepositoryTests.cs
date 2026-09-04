@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
@@ -22,14 +23,15 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// </summary>
 public class YubiKeyDeviceRepositoryTests
 {
+    private static readonly TimeSpan Bound = TimeSpan.FromSeconds(30);
 
     [Fact]
-    public void UpdateCache_EmptyToDevices_EmitsAddedEvents()
+    public async Task UpdateCache_EmptyToDevices_EmitsAddedEvents()
     {
         // Arrange
         using var repository = new YubiKeyDeviceRepository();
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        using var cts = new CancellationTokenSource(Bound);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         var device1 = new FakeYubiKey("device-1", ConnectionType.SmartCard);
         var device2 = new FakeYubiKey("device-2", ConnectionType.HidFido);
@@ -38,6 +40,8 @@ public class YubiKeyDeviceRepositoryTests
         repository.UpdateCache([device1, device2]);
 
         // Assert
+        await watcher.WaitForCountAsync(2, "both arrivals did not reach the watcher", cts.Token);
+        var events = watcher.Events;
         Assert.Equal(2, events.Count);
         Assert.All(events, e => Assert.Equal(DeviceAction.Added, e.Action));
         Assert.Contains(events, e => e.Device.DeviceId == "device-1");
@@ -45,21 +49,23 @@ public class YubiKeyDeviceRepositoryTests
     }
 
     [Fact]
-    public void UpdateCache_DevicesToEmpty_EmitsRemovedEvents()
+    public async Task UpdateCache_DevicesToEmpty_EmitsRemovedEvents()
     {
         // Arrange
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var device1 = new FakeYubiKey("device-1", ConnectionType.SmartCard);
         var device2 = new FakeYubiKey("device-2", ConnectionType.HidFido);
         repository.UpdateCache([device1, device2]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Act
         repository.UpdateCache([]);
 
         // Assert
+        await watcher.WaitForCountAsync(2, "both removals did not reach the watcher", cts.Token);
+        var events = watcher.Events;
         Assert.Equal(2, events.Count);
         Assert.All(events, e => Assert.Equal(DeviceAction.Removed, e.Action));
         Assert.Contains(events, e => e.Device.DeviceId == "device-1");
@@ -67,16 +73,16 @@ public class YubiKeyDeviceRepositoryTests
     }
 
     [Fact]
-    public void UpdateCache_DifferentDevices_EmitsCorrectAddedAndRemoved()
+    public async Task UpdateCache_DifferentDevices_EmitsCorrectAddedAndRemoved()
     {
         // Arrange
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var deviceA = new FakeYubiKey("device-A", ConnectionType.SmartCard);
         var deviceB = new FakeYubiKey("device-B", ConnectionType.HidFido);
         repository.UpdateCache([deviceA, deviceB]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         var deviceC = new FakeYubiKey("device-C", ConnectionType.SmartCard);
         var deviceD = new FakeYubiKey("device-D", ConnectionType.HidOtp);
@@ -85,6 +91,8 @@ public class YubiKeyDeviceRepositoryTests
         repository.UpdateCache([deviceC, deviceD]);
 
         // Assert
+        await watcher.WaitForCountAsync(4, "the full swap did not reach the watcher", cts.Token);
+        var events = watcher.Events;
         Assert.Equal(4, events.Count);
 
         var removed = events.Where(e => e.Action == DeviceAction.Removed).ToList();
@@ -100,35 +108,35 @@ public class YubiKeyDeviceRepositoryTests
     }
 
     [Fact]
-    public void UpdateCache_SameDevices_NoEvents()
+    public async Task UpdateCache_SameDevices_NoEvents()
     {
         // Arrange
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var device1 = new FakeYubiKey("device-1", ConnectionType.SmartCard);
         repository.UpdateCache([device1]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Act: Update with same device ID
         var device1Updated = new FakeYubiKey("device-1", ConnectionType.SmartCard);
         repository.UpdateCache([device1Updated]);
 
         // Assert: No events since device ID hasn't changed
-        Assert.Empty(events);
+        Assert.Empty(await watcher.DrainAsync(repository, cts.Token));
     }
 
     [Fact]
-    public void UpdateCache_PartialOverlap_EmitsOnlyChanges()
+    public async Task UpdateCache_PartialOverlap_EmitsOnlyChanges()
     {
         // Arrange
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var deviceA = new FakeYubiKey("device-A", ConnectionType.SmartCard);
         var deviceB = new FakeYubiKey("device-B", ConnectionType.HidFido);
         repository.UpdateCache([deviceA, deviceB]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         var deviceC = new FakeYubiKey("device-C", ConnectionType.SmartCard);
 
@@ -136,9 +144,201 @@ public class YubiKeyDeviceRepositoryTests
         repository.UpdateCache([deviceB, deviceC]);
 
         // Assert
+        await watcher.WaitForCountAsync(2, "the partial swap did not reach the watcher", cts.Token);
+        var events = watcher.Events;
         Assert.Equal(2, events.Count);
         Assert.Single(events, e => e.Action == DeviceAction.Removed && e.Device.DeviceId == "device-A");
         Assert.Single(events, e => e.Action == DeviceAction.Added && e.Device.DeviceId == "device-C");
+    }
+
+    // ---------- WatchAsync delivery contract ----------
+
+    /// <summary>ISC-5: concurrent watchers are independent and see the same ordered sequence.</summary>
+    [Fact]
+    public async Task WatchAsync_TwoConcurrentWatchers_ReceiveTheSameOrderedSequence()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
+        await using var first = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+        await using var second = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+
+        Assert.Equal(2, repository.WatcherCount);
+
+        var deviceA = new FakeYubiKey("device-a", ConnectionType.SmartCard);
+        repository.UpdateCache([deviceA]);
+        repository.UpdateCache([]);
+        repository.UpdateCache([new FakeYubiKey("device-b", ConnectionType.SmartCard)]);
+
+        await first.WaitForCountAsync(3, "first watcher did not receive every event", cts.Token);
+        await second.WaitForCountAsync(3, "second watcher did not receive every event", cts.Token);
+
+        var expected = new[]
+        {
+            (DeviceAction.Added, "device-a"),
+            (DeviceAction.Removed, "device-a"),
+            (DeviceAction.Added, "device-b")
+        };
+
+        Assert.Equal(expected, first.Events.Select(e => (e.Action, e.Device.DeviceId)));
+        Assert.Equal(expected, second.Events.Select(e => (e.Action, e.Device.DeviceId)));
+    }
+
+    /// <summary>ISC-6: cancellation is per-watcher; it neither completes nor faults the others.</summary>
+    [Fact]
+    public async Task WatchAsync_CancellingOneWatcher_DoesNotDisturbAnother()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        using var survivorCts = new CancellationTokenSource(Bound);
+        using var doomedCts = new CancellationTokenSource();
+
+        await using var survivor = await DeviceEventWatcher.StartAsync(repository, survivorCts.Token);
+        var doomed = await DeviceEventWatcher.StartAsync(repository, doomedCts.Token);
+
+        await doomedCts.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => doomed.Completion);
+        await doomed.DisposeAsync();
+
+        repository.UpdateCache([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
+
+        await survivor.WaitForCountAsync(1, "the surviving watcher stopped receiving events", survivorCts.Token);
+        Assert.False(survivor.Completion.IsCompleted);
+    }
+
+    /// <summary>
+    /// ISC-7: overflow terminates only the watcher whose own buffer filled. The second watcher is
+    /// subscribed for the whole burst — not started afterwards — so it is the one that would also be
+    /// torn down if overflow were not isolated per watcher.
+    /// </summary>
+    [Fact]
+    public async Task WatchAsync_WhenOneWatcherOverflows_OnlyThatWatcherFaults()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
+        using var stall = new SemaphoreSlim(0, 1);
+
+        await using var healthy = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+
+        var overflowing = Task.Run(
+            async () =>
+            {
+                var stalled = false;
+                await foreach (var _ in repository.WatchAsync(cts.Token))
+                {
+                    if (!stalled)
+                    {
+                        stalled = true;
+                        await stall.WaitAsync(cts.Token);
+                    }
+                }
+            },
+            cts.Token);
+
+        await AsyncWait.WaitUntilAsync(
+            () => repository.WatcherCount == 2,
+            "the stalling watcher did not subscribe",
+            Bound,
+            cts.Token);
+
+        // Cycle 0 emits one Added; every later cycle emits Removed + Added, so cycle i leaves
+        // 1 + 2i events published in total, overrunning the 256-event buffer several times over.
+        // Paced so only the watcher that is genuinely not draining fills its buffer: an unpaced burst
+        // this size overflows any consumer, which would prove nothing about isolation.
+        const int cycles = DeviceEventHub.WatcherBufferCapacity;
+        for (var i = 0; i < cycles; i++)
+        {
+            repository.UpdateCache([new FakeYubiKey($"device-{i}", ConnectionType.SmartCard)]);
+            if (i % 32 == 31)
+            {
+                await healthy.WaitForCountAsync(1 + (2 * i), "the healthy watcher fell behind", cts.Token);
+            }
+        }
+
+        stall.Release();
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => overflowing);
+        Assert.Contains("FindAllAsync", ex.Message, StringComparison.Ordinal);
+
+        // The watcher that kept up lost nothing to its neighbour's fault and is still enumerating.
+        const int published = 1 + (2 * (cycles - 1));
+        await healthy.WaitForCountAsync(published, "the healthy watcher did not receive every event", cts.Token);
+        Assert.Equal(published, healthy.Count);
+        Assert.False(healthy.Completion.IsCompleted);
+
+        // The publisher is unharmed: the same watcher keeps receiving after the fault.
+        repository.UpdateCache([new FakeYubiKey("after-overflow", ConnectionType.SmartCard)]);
+        _ = await healthy.WaitForAsync(
+            e => e.Action == DeviceAction.Added && e.Device.DeviceId == "after-overflow",
+            "publication did not continue after an overflow",
+            cts.Token);
+    }
+
+    /// <summary>ISC-9: <c>WatchAsync</c> subscribes on first enumeration, not when it is called.</summary>
+    [Fact]
+    public void WatchAsync_WithoutEnumerating_CreatesNoSubscription()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+
+        _ = repository.WatchAsync(CancellationToken.None);
+        _ = repository.WatchAsync(CancellationToken.None);
+
+        Assert.Equal(0, repository.WatcherCount);
+    }
+
+    /// <summary>
+    /// ISC-10: the publication path is never handed to a consumer, so a stalled, abandoned, or
+    /// throwing watcher can neither block <see cref="YubiKeyDeviceRepository.UpdateCache"/> nor
+    /// interrupt it.
+    /// </summary>
+    [Fact]
+    public async Task UpdateCache_WithStalledAbandonedAndThrowingWatchers_IsNeitherBlockedNorInterrupted()
+    {
+        using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
+
+        // Abandoned: enumerated once to subscribe, then never pumped again.
+        var abandoned = repository.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+        var abandonedFirstMove = abandoned.MoveNextAsync();
+
+        // Throwing: the consumer's own loop body throws on its first event.
+        var throwing = Task.Run(
+            async () =>
+            {
+                await foreach (var _ in repository.WatchAsync(cts.Token))
+                {
+                    throw new InvalidOperationException("consumer bug");
+                }
+            },
+            cts.Token);
+
+        await AsyncWait.WaitUntilAsync(
+            () => repository.WatcherCount == 2,
+            "the misbehaving watchers did not subscribe",
+            Bound,
+            cts.Token);
+
+        // Far more events than either watcher's 256-event buffer can hold.
+        var elapsed = Stopwatch.StartNew();
+        for (var i = 0; i < DeviceEventHub.WatcherBufferCapacity + 50; i++)
+        {
+            repository.UpdateCache([new FakeYubiKey($"device-{i}", ConnectionType.SmartCard)]);
+        }
+
+        elapsed.Stop();
+
+        Assert.True(
+            elapsed.Elapsed < TimeSpan.FromSeconds(10),
+            $"UpdateCache was stalled by a misbehaving watcher for {elapsed.Elapsed}");
+
+        // The consumer's exception stayed inside the consumer.
+        var consumerFault = await Assert.ThrowsAsync<InvalidOperationException>(() => throwing);
+        Assert.Equal("consumer bug", consumerFault.Message);
+
+        // Publication is still healthy afterwards.
+        await using var healthy = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+        repository.UpdateCache([new FakeYubiKey("still-publishing", ConnectionType.SmartCard)]);
+        await healthy.WaitForCountAsync(2, "publication stopped after misbehaving watchers", cts.Token);
+
+        Assert.True(await abandonedFirstMove);
+        await abandoned.DisposeAsync();
     }
 
 
@@ -315,19 +515,24 @@ public class YubiKeyDeviceRepositoryTests
 
 
 
+    /// <summary>ISC-8: disposal ends active watchers normally — not faulted, not cancelled.</summary>
     [Fact]
-    public void Dispose_CompletesSubject()
+    public async Task Dispose_CompletesActiveWatchersNormally()
     {
         // Arrange
         var repository = new YubiKeyDeviceRepository();
-        var observer = new RecordingObserver<DeviceEvent>();
-        repository.DeviceChanges.Subscribe(observer);
+        using var cts = new CancellationTokenSource(Bound);
+        await using var first = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+        await using var second = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Act
         repository.Dispose();
 
         // Assert
-        Assert.True(observer.IsCompleted);
+        await first.Completion.WaitAsync(Bound, cts.Token);
+        await second.Completion.WaitAsync(Bound, cts.Token);
+        Assert.True(first.EndedNormally);
+        Assert.True(second.EndedNormally);
     }
 
     [Fact]
@@ -434,20 +639,20 @@ public class YubiKeyDeviceRepositoryTests
     }
 
     [Fact]
-    public void Clear_DoesNotEmitEvents()
+    public async Task Clear_DoesNotEmitEvents()
     {
         // Arrange
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         repository.UpdateCache([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Act
         repository.Clear();
 
         // Assert: Clear is silent (no events)
-        Assert.Empty(events);
+        Assert.Empty(await watcher.DrainAsync(repository, cts.Token));
     }
 
 

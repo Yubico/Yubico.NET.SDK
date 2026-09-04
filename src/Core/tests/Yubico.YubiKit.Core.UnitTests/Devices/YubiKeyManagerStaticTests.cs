@@ -269,15 +269,26 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     // Phase 4: Device Events Tests
 
     [Fact]
-    public void YubiKeyManager_DeviceChanges_StaticPropertyExists()
+    public void YubiKeyManager_WatchAsync_IsTheOnlyDeviceChangeStream()
     {
-        // YubiKeyManager should have static DeviceChanges property
-        var property = typeof(YubiKeyManager).GetProperty(
-            "DeviceChanges",
-            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+        var method = typeof(YubiKeyManager).GetMethod(
+            nameof(YubiKeyManager.WatchAsync),
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static,
+            [typeof(CancellationToken)]);
 
-        Assert.NotNull(property);
-        Assert.True(typeof(IObservable<DeviceEvent>).IsAssignableFrom(property.PropertyType));
+        Assert.NotNull(method);
+        Assert.Equal(typeof(IAsyncEnumerable<DeviceEvent>), method.ReturnType);
+
+        // The observable surface was removed outright; no obsolete shim, alias, or overload survives.
+        Assert.DoesNotContain(
+            typeof(YubiKeyManager).GetMembers(
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static),
+            m => m.Name.Contains("DeviceChanges", StringComparison.Ordinal));
+        Assert.DoesNotContain(
+            typeof(YubiKeyManager).GetMembers(
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static),
+            m => m is System.Reflection.PropertyInfo p &&
+                 typeof(IObservable<DeviceEvent>).IsAssignableFrom(p.PropertyType));
     }
 
     [Fact]
@@ -310,40 +321,45 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     }
 
     [Fact]
-    public void YubiKeyManager_DeviceChanges_CanSubscribe()
+    public async Task YubiKeyManager_WatchAsync_CanBeEnumeratedWithoutStartingMonitoring()
     {
-        // Can subscribe to DeviceChanges even when not monitoring
-        var observable = YubiKeyManager.DeviceChanges;
-        Assert.NotNull(observable);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-        // Subscribe and immediately unsubscribe (no events expected)
-        var subscription = observable.Subscribe(new RecordingObserver<DeviceEvent>());
-        subscription.Dispose();
+        // Enumerating (which is what actually subscribes) must not auto-start monitoring.
+        await using var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+        var pending = enumerator.MoveNextAsync();
 
-        // Monitoring should not have auto-started
         Assert.False(YubiKeyManager.IsMonitoring);
+
+        await cts.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await pending);
     }
 
     [Fact]
-    public void YubiKeyManager_DeviceChanges_MultipleSubscribersAllowed()
+    public async Task YubiKeyManager_WatchAsync_MultipleConcurrentWatchersAllowed()
     {
-        // Verify multiple subscribers receive the same events
-        var observable = YubiKeyManager.DeviceChanges;
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-        // Multiple subscriptions should be allowed
-        var subscription1 = observable.Subscribe(new RecordingObserver<DeviceEvent>());
-        var subscription2 = observable.Subscribe(new RecordingObserver<DeviceEvent>());
-        var subscription3 = observable.Subscribe(new RecordingObserver<DeviceEvent>());
+        var enumerators = new List<IAsyncEnumerator<DeviceEvent>>();
+        var pending = new List<ValueTask<bool>>();
+        for (var i = 0; i < 3; i++)
+        {
+            var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+            enumerators.Add(enumerator);
+            pending.Add(enumerator.MoveNextAsync());
+        }
 
-        // All subscriptions should be distinct
-        Assert.NotNull(subscription1);
-        Assert.NotNull(subscription2);
-        Assert.NotNull(subscription3);
+        // Each enumeration is independent; none of them rejected or displaced the others.
+        await cts.CancelAsync();
+        foreach (var move in pending)
+        {
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await move);
+        }
 
-        // Cleanup
-        subscription1.Dispose();
-        subscription2.Dispose();
-        subscription3.Dispose();
+        foreach (var enumerator in enumerators)
+        {
+            await enumerator.DisposeAsync();
+        }
     }
 
     [Fact]
@@ -359,19 +375,29 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     }
 
     [Fact]
-    public void YubiKeyManager_DeviceChanges_UnsubscribeDoesNotAffectMonitoring()
+    public async Task YubiKeyManager_WatchAsync_EndingAWatcherDoesNotAffectMonitoring()
     {
-        // Handle unsubscribe -> Does not affect other subscribers or monitoring
-        var observable = YubiKeyManager.DeviceChanges;
-        var subscription = observable.Subscribe(new RecordingObserver<DeviceEvent>());
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+        var pending = enumerator.MoveNextAsync();
 
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Assert.True(YubiKeyManager.IsMonitoring);
 
-        // Unsubscribe
-        subscription.Dispose();
+        // Ending the enumeration releases only that watcher. Whether an event landed first depends on
+        // what hardware happens to be attached, so only the release itself is asserted here.
+        await cts.CancelAsync();
+        try
+        {
+            _ = await pending;
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when no event arrived before cancellation.
+        }
 
-        // Monitoring should still be active (unsubscribe doesn't stop monitoring)
+        await enumerator.DisposeAsync();
+
         Assert.True(YubiKeyManager.IsMonitoring);
     }
 
@@ -464,16 +490,18 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task YubiKeyManager_DeviceChanges_AfterShutdown_AutoRecreatesContext()
+    public async Task YubiKeyManager_WatchAsync_AfterShutdown_AutoRecreatesContext()
     {
-        // DeviceChanges after shutdown should auto-recreate context
         await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
 
-        // Accessing DeviceChanges should work
-        var observable = YubiKeyManager.DeviceChanges;
-        Assert.NotNull(observable);
+        // Watching after shutdown must recreate the manager rather than hand back a dead sequence.
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        await using var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+        var pending = enumerator.MoveNextAsync();
 
-        var subscription = observable.Subscribe(new RecordingObserver<DeviceEvent>());
-        subscription.Dispose();
+        Assert.False(pending.IsCompleted);
+
+        await cts.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await pending);
     }
 }

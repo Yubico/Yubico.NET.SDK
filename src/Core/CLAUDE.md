@@ -201,39 +201,39 @@ initialization failure does not try another interface. Read-only metadata types 
 
 ### Device Event Delivery
 
-Two consumer surfaces over one pipeline, both BCL-typed:
+One public surface over one internal pipeline, both BCL-typed:
 
-- `YubiKeyManager.WatchAsync(ct)` — `IAsyncEnumerable<DeviceEvent>`, the ergonomic path.
-- `YubiKeyManager.DeviceChanges` — `IObservable<DeviceEvent>`, for observer-style consumers.
+- `YubiKeyManager.WatchAsync(ct)` — `IAsyncEnumerable<DeviceEvent>`. There is no observable surface;
+  `DeviceChanges` was removed outright and has no replacement shim.
 
-Two internal types back them, split by reason-to-change:
+One internal type backs it:
 
-- `DeviceEventBroadcaster` — multicast only: who is subscribed, and notification order.
-  Copy-on-write observer array; `Publish` reads a lock-free snapshot; mutations take a short lock.
-- `DeviceEventStream` — buffering only: one bounded channel (256) per `WatchAsync` consumer.
-  The publisher uses `TryWrite` and never blocks. Overflow **faults that one stream** rather than
-  dropping, because `DeviceEvent` is a delta and a dropped event permanently desynchronises the
-  consumer's device list.
+- `DeviceEventHub` — asynchronous fan-out, owned by `YubiKeyDeviceRepository`. Copy-on-write watcher
+  array; `Publish` reads a lock-free snapshot and only ever calls `TryWrite` on a per-watcher bounded
+  channel (256, `AllowSynchronousContinuations = false`). Mutations take a short lock.
+
+The load-bearing property is that **no consumer code ever runs on the publication path**. That is
+what lets the monitor hold `_publishGate` across `UpdateCache` without a slow, abandoned, or throwing
+watcher wedging device monitoring — and it is why the lifecycle tests that need an in-flight
+publication use the `PublishAdmittedForTest` seam rather than a blocking subscriber.
 
 Contracts worth knowing before editing:
 
-- **`OnNext` is synchronous and ordered.** Exceptions propagate to the publisher and abort delivery
-  to later observers.
-- **`OnCompleted` exceptions are isolated per observer** and logged.
-- **Concurrent `Publish`/`Complete` is state-safe, but grammar still belongs to the producer.**
-  `Publish` does not synchronise against `Complete`, so a publication already in flight can finish
-  after completion unless the producer serialises them. The monitor does during ordinary operation.
-  During bounded shutdown, a publication already using an observer snapshot may finish after
-  completion; repository disposal discards a late publication only when delivery has not begun.
-- **Subscribing after completion** delivers `OnCompleted` immediately rather than throwing.
-- **Subscriptions are identity-based.** Unsubscribe removes the exact observer instance.
-- **`WatchAsync` subscribes on first enumeration.** Each enumeration has an independent bounded
-  buffer. A write to a full buffer faults only that enumeration; cancellation throws
-  `OperationCanceledException`; source completion ends it normally.
+- **`WatchAsync` subscribes on first enumeration**, not when it is called. Events raised in the gap
+  are not observed.
+- **Every watcher is independent.** Overflow, cancellation, abandonment, and a consumer that throws
+  out of its own loop terminate only that watcher. The publisher and the other watchers continue.
+- **Overflow faults rather than drops**, because `DeviceEvent` is a delta and a dropped event
+  permanently desynchronises the consumer's device list. Recover by re-enumerating and calling
+  `FindAllAsync`.
+- **Repository disposal ends active watchers normally** — not faulted, not cancelled.
+- **Enumerating after completion** ends immediately rather than throwing or hanging.
+- **Ordering across concurrent `Publish` calls belongs to the producer.** The monitor's publication
+  gate provides it. `Publish` after `Complete` is a silent no-op.
 
 ### Listener Event Semantics
 
-HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diagnostic only and are never public physical-device truth. `YubiKeyManager.DeviceChanges` must remain repository-diffed output after a rescan. Unknown HID removals still trigger a rescan fallback rather than being suppressed, because the removed interface may be the only native signal for a physical-device diff.
+HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diagnostic only and are never public physical-device truth. `YubiKeyManager.WatchAsync` must remain repository-diffed output after a rescan. Unknown HID removals still trigger a rescan fallback rather than being suppressed, because the removed interface may be the only native signal for a physical-device diff.
 
 `YubiKeyDeviceMonitorService` logs hint details at ingress and carries only a capacity-one occurrence signal into its single-reader loop; payloads are not queued. Startup is best-effort and degrades gracefully: each listener is started independently, and a listener that throws or reports a post-`Start()` status other than `Started` is logged, individually stopped/disposed, and skipped — it never aborts the other listener or the monitoring loop. Monitoring always starts (worst case, with no listeners at all, it relies solely on the interval fallback rescan), because device truth comes from the full `FindAllAsync` + repository diff, not from listeners. When a transport's *service* is simply unavailable (for example, no PC/SC service, no PC/SC native library, or no readers), that transport enumerates to empty and the other transports are still scanned and diffed every interval, so a transport whose listener is unavailable is still detected. This mirrors canonical yubikit (Rust/Python), where a transport that fails to enumerate is skipped and discovery continues with the others. Listeners are therefore optional latency accelerators, not correctness dependencies. One narrower case is not yet fully isolated at the scan layer: if PC/SC *enumeration itself throws* (discovery-worker saturation, or an `SCardGetStatusChange` error), `FindYubiKeys.FindAllAsync` aborts that single scan before HID is enumerated — deliberately, so a failed PC/SC probe is never committed as a false-empty snapshot that would emit spurious removals — and the monitor's `RescanSafelyAsync` retries on the next interval. Making HID still enumerate when PC/SC enumeration throws (per-transport scan isolation, without reintroducing false removals) is tracked for the polling-migration follow-up. `StartMonitoring` does not throw for listener unavailability (only for an invalid interval or a disposed service). Individually failed listeners are still cleaned up so no partial resources leak, and each listener callback captures its attempt's signal so a detached/stale callback cannot enqueue into a later monitoring run. The loop consumes one occurrence per wake-up before checking debounce/max-coalesce time, so continuously refilled signals cannot starve the deadline check.
 
@@ -408,7 +408,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 - **The guard is protocol-instance scoped.** An SCP wrapper shares its base PC/SC guard, but independently created raw protocol instances over one connection are not coordinated. The supported contract prevents that shape by admitting one `ApplicationSession` per connection; connection-wide raw protocol ownership is a separate API decision.
 - **Discovery/connection ownership is atomic.** A connection to a grouped physical key claims every known stable member interface ID before native open. A second connection through any member throws `ConnectionInUseException` immediately. Claims are sorted, deduplicated, rolled back on failure, and released only after physical teardown. Standalone records use one-element scopes when discovery cannot prove grouping. Discovery remains per-interface and nonblocking; connections may wait cancellably for active discovery, while waiting connections retain priority. One level down, `ConnectionSessionGuard` allows one live `ApplicationSession` per connection and supports sequential reuse. In-process only — cross-process contention is not covered.
 - **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently. A hung native call is reused by later scans rather than multiplied; completion removes the single-flight entry so faults and cancellations can be retried. Cached identity expires with the hardware and the configuration, not only with scan-observed absence: the monitor forwards every listener event to `IFindYubiKeys.NotifyTransportActivity`, which discards that transport's cached identities (a same-slot swap between scans reuses the interface id and would otherwise attribute the departed key's serial to its successor), and each entry records the PID observed at read time so a hit under a different PID is a miss. Without monitoring running there are no listener events and staleness detection degrades to scan-observed absence — see the identity-cache section of `docs/architecture/device-discovery-guarantees.md`.
-- **Monitor lifecycle is an epoch model, not a state machine.** Each `StartMonitoring` builds an immutable `MonitorGeneration` (`{ Id, ScanGate, Signal, Cts }`) held in one field; the loop, manual rescans, and listener callbacks capture that reference once, so a torn gate/generation pair is not representable. Publication is where safety is enforced: all publications from all generations are mutually exclusive under the never-disposed `_publishGate`, held across the admission check and `UpdateCache`, and a snapshot is admitted only if its generation is still current and the service undisposed. Superseded snapshots — including a scan hung in native I/O that returns long after its generation was retired — are discarded. Because publications never interleave, a successor's snapshot is serialized strictly after any in-flight predecessor's, so newer truth always lands last. This currently relies on `UpdateCache` publishing synchronously and finishing before it returns. Lifecycle operations take only the small `_publishLock`, never `_publishGate`, so a blocking `DeviceChanges` subscriber cannot wedge start/stop/dispose, and restart after an abandoned stop always succeeds. Nothing disposes a semaphore anyone can still acquire: scan gates live in their generation and are never disposed, and an abandoned generation is unreachable garbage. `DisposeAsync` drains `_publishGate` with the shutdown bound and, on timeout, warns and abandons — a publication already admitted may then complete after `DisposeAsync` returns, which the manager's subsequent repository disposal silences. That is a documented contract, not an accident. When editing this file, keep the three primitives one-job-each; the design collapsed a four-concept state machine and re-merging their responsibilities is what previously produced the races.
+- **Monitor lifecycle is an epoch model, not a state machine.** Each `StartMonitoring` builds an immutable `MonitorGeneration` (`{ Id, ScanGate, Signal, Cts }`) held in one field; the loop, manual rescans, and listener callbacks capture that reference once, so a torn gate/generation pair is not representable. Publication is where safety is enforced: all publications from all generations are mutually exclusive under the never-disposed `_publishGate`, held across the admission check and `UpdateCache`, and a snapshot is admitted only if its generation is still current and the service undisposed. Superseded snapshots — including a scan hung in native I/O that returns long after its generation was retired — are discarded. Because publications never interleave, a successor's snapshot is serialized strictly after any in-flight predecessor's, so newer truth always lands last. This currently relies on `UpdateCache` publishing synchronously and finishing before it returns. Lifecycle operations take only the small `_publishLock`, never `_publishGate`, so a stalled publication cannot wedge start/stop/dispose, and restart after an abandoned stop always succeeds. Nothing disposes a semaphore anyone can still acquire: scan gates live in their generation and are never disposed, and an abandoned generation is unreachable garbage. `DisposeAsync` drains `_publishGate` with the shutdown bound and, on timeout, warns and abandons — a publication already admitted may then complete after `DisposeAsync` returns, which the manager's subsequent repository disposal silences. That is a documented contract, not an accident. When editing this file, keep the three primitives one-job-each; the design collapsed a four-concept state machine and re-merging their responsibilities is what previously produced the races.
   Safety is not liveness: after abandoning a hung scan, discovery *liveness* is owned by `FindYubiKeys` (its `_scanLock` wait takes the loop's token, so blocked generations do not accumulate) and recovers when the upstream time-bounds release. The epoch model neither causes nor cures a PC/SC enumeration hang.
 - **Registered connections dispose exactly once, and disposal implies disposed.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange; it disposes the inner connection and then releases the registry lease in a `finally`, publishing its completion. Every other caller observes that same completion — async callers await it, sync callers block on it — so any disposal call returning means teardown actually finished and all callers see the same outcome, including the same exception instance. A caller can therefore never reopen an interface whose physical handle is still being torn down.
 

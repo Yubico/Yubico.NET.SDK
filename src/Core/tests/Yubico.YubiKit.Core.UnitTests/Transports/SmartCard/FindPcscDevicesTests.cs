@@ -54,8 +54,9 @@ public class FindPcscDevicesTests
         var existingDevice = new FakeYubiKey("pcsc:existing", ConnectionType.SmartCard);
         repository.UpdateCache([existingDevice]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(
+            repository,
+            TestContext.Current.CancellationToken);
         var api = new StatusBlockingSCardApi("Yubico YubiKey OTP+FIDO+CCID");
         var finder = new FindYubiKeys(
             new FindPcscDevices(NullLogger<FindPcscDevices>.Instance, api),
@@ -70,7 +71,7 @@ public class FindPcscDevicesTests
 
         Assert.Equal(SaturatedMessage, exception.Message);
         Assert.Same(existingDevice, Assert.Single(repository.GetAll()));
-        Assert.Empty(events);
+        Assert.Empty(await watcher.DrainAsync(repository, TestContext.Current.CancellationToken));
         Assert.Equal(0, api.EstablishContextCalls);
     }
 

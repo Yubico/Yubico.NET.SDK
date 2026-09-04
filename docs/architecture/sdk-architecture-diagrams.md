@@ -381,9 +381,9 @@ flowchart TD
   the caller's connection; only convenience entry points own the hidden connection they create.
 - **Transport selection is single-shot:** each applet selects one supported transport from its default order
   or explicit override. Held and platform errors propagate without trying another interface.
-- **Monitoring:** `StartMonitoring()` exposes hot-plug events two ways — `await foreach` over
-  `YubiKeyManager.WatchAsync(ct)`, or `IObservable<DeviceEvent> DeviceChanges` for observer-style
-  consumers. No reactive dependency; both are BCL types. Good "advanced" slide if time allows.
+- **Monitoring:** `StartMonitoring()` exposes hot-plug events through one stream — `await foreach`
+  over `YubiKeyManager.WatchAsync(ct)`. No reactive dependency; `IAsyncEnumerable<T>` is a BCL type.
+  Good "advanced" slide if time allows.
 
 ---
 

@@ -85,7 +85,7 @@ metadata reads are cached while their member interfaces remain present. Retainin
 object preserves `DeviceId` event correlation, but also means a newly constructed equivalent object's
 refreshed cached metadata/member instances are not substituted when the physical interface set and
 `AvailableConnections` are unchanged. Request fresh Management data explicitly when current device
-configuration matters. `DeviceChanges` is emitted from repository diffs after a full rescan, not directly
+configuration matters. `WatchAsync` events are emitted from repository diffs after a full rescan, not directly
 from native listener hints. These APIs inherit the conservative grouping bounds in
 [Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
 

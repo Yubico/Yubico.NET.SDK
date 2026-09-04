@@ -12,7 +12,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// Simply call the static methods directly to discover and monitor devices.
 /// </para>
 /// <para><strong>Thread Safety:</strong> All methods are thread-safe and can be called from any thread.</para>
-/// <para><strong>UI Thread Marshaling:</strong> Events from <see cref="DeviceChanges"/> are raised on
+/// <para><strong>UI Thread Marshaling:</strong> Events from <see cref="WatchAsync"/> are delivered on
 /// background threads. UI applications must marshal to the UI thread for updates.</para>
 /// <para><strong>Testing Pattern:</strong> Call <see cref="ShutdownAsync"/> in test cleanup (e.g., xUnit
 /// <c>DisposeAsync</c> or <c>IAsyncLifetime.DisposeAsync</c>) to reset static state between tests.</para>
@@ -47,11 +47,9 @@ namespace Yubico.YubiKit.Core.Devices;
 /// }
 /// </code>
 /// <para>
-/// <see cref="DeviceChanges"/> exposes the same events as an <see cref="IObservable{T}"/> for
-/// consumers who prefer that model. Note the SDK itself has no reactive dependency: the
-/// <c>Subscribe(Action&lt;T&gt;)</c> overload and operators such as <c>Where</c> or <c>ObserveOn</c>
-/// come from the <c>System.Reactive</c> package, which a consumer must reference explicitly. Without
-/// it, <see cref="IObservable{T}"/> offers only <c>Subscribe(IObserver&lt;DeviceEvent&gt;)</c>.
+/// <see cref="WatchAsync"/> is the only device-change stream. Several watchers can run at once: each
+/// enumeration is independent, with its own buffer, and one watcher's cancellation or overflow does
+/// not disturb another.
 /// </para>
 /// </example>
 public static class YubiKeyManager
@@ -96,7 +94,7 @@ public static class YubiKeyManager
     /// <seealso cref="StartMonitoring(TimeSpan)"/>
     /// <seealso cref="StopMonitoring"/>
     /// <seealso cref="IsMonitoring"/>
-    /// <seealso cref="DeviceChanges"/>
+    /// <seealso cref="WatchAsync"/>
     public static void StartMonitoring() => StartMonitoring(YubiKeyDeviceManager.DefaultMonitoringInterval);
 
     /// <summary>
@@ -120,8 +118,8 @@ public static class YubiKeyManager
     /// <remarks>
     /// <para>This method is idempotent - calling it when monitoring is not active has no effect.</para>
     /// <para>Waits for any in-flight scan to complete (with a 10-second timeout).</para>
-    /// <para>Device listeners are disposed and events will no longer be emitted to <see cref="DeviceChanges"/>
-    /// until <see cref="StartMonitoring()"/> is called again.</para>
+    /// <para>Device listeners are disposed and events will no longer be emitted to <see cref="WatchAsync"/>
+    /// consumers until <see cref="StartMonitoring()"/> is called again.</para>
     /// </remarks>
     /// <seealso cref="StartMonitoring()"/>
     /// <seealso cref="IsMonitoring"/>
@@ -148,39 +146,8 @@ public static class YubiKeyManager
     }
 
     /// <summary>
-    /// Gets an observable sequence of device events (arrivals and removals).
-    /// </summary>
-    /// <remarks>
-    /// <para>Events are only emitted while monitoring is active (via <see cref="StartMonitoring()"/>).</para>
-    /// <para>Subscribing before starting monitoring will not auto-start monitoring; the subscriber
-    /// will simply receive events once monitoring is started.</para>
-    /// <para>Observers are called synchronously in subscription order. An exception from
-    /// <see cref="IObserver{T}.OnNext"/> propagates to the publisher and prevents later observers from
-    /// receiving that event. SDK shutdown completes all current subscriptions.</para>
-    /// <para>Concurrent publication and completion are state-safe, but strict observer grammar still
-    /// requires the producer to serialize them. The SDK's monitor publication gate provides that
-    /// serialization during ordinary operation. During bounded shutdown, a publication already
-    /// using an observer snapshot may finish after completion; repository disposal discards a late
-    /// publication only when delivery has not begun.</para>
-    /// <para><strong>UI Thread Marshaling:</strong> Events are raised on background threads.
-    /// UI applications must marshal to the UI thread (e.g., using <c>ObserveOn(SynchronizationContext.Current)</c>
-    /// with System.Reactive, or <c>Dispatcher.Invoke</c> in WPF).</para>
-    /// <para><strong>Implementation Note:</strong> Device listeners only signal that a change occurred;
-    /// they do not pass device objects directly. A full device scan is triggered on each signal
-    /// to determine which devices arrived or were removed.</para>
-    /// <para><strong>Physical-device semantics:</strong> A composite key normally appears as one event,
-    /// but ambiguous evidence can conservatively publish one physical key as multiple devices. For an
-    /// uninterrupted presence with unchanged interfaces, the repository retains the object originally
-    /// published in <see cref="DeviceAction.Added"/> so its <see cref="IYubiKey.DeviceId"/> correlates with
-    /// the eventual <see cref="DeviceAction.Removed"/> event.</para>
-    /// </remarks>
-    /// <seealso cref="StartMonitoring()"/>
-    /// <seealso cref="DeviceEvent"/>
-    public static IObservable<DeviceEvent> DeviceChanges => EnsureManager().DeviceChanges;
-
-    /// <summary>
-    /// Gets an async sequence of device events (arrivals and removals), for consumers that prefer
-    /// <c>await foreach</c> over subscribing an observer.
+    /// Gets an async sequence of device events (arrivals and removals), consumed with
+    /// <c>await foreach</c>. This is the only device-change stream.
     /// </summary>
     /// <param name="cancellationToken">Cancels enumeration.</param>
     /// <returns>A sequence that ends normally when the SDK shuts down.</returns>
@@ -225,7 +192,6 @@ public static class YubiKeyManager
     /// }
     /// </code>
     /// </example>
-    /// <seealso cref="DeviceChanges"/>
     /// <seealso cref="StartMonitoring()"/>
     public static IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
         EnsureManager().WatchAsync(cancellationToken);
@@ -295,11 +261,11 @@ public static class YubiKeyManager
     /// evidence can conservatively split one key into multiple results. See the device-discovery guarantees
     /// documentation for the exact platform bounds.</para>
     /// <para><strong>Race Condition Note:</strong> Results may be stale if devices connect or
-    /// disconnect during the scan. For real-time tracking, use <see cref="DeviceChanges"/>
+    /// disconnect during the scan. For real-time tracking, use <see cref="WatchAsync"/>
     /// with <see cref="StartMonitoring()"/>.</para>
     /// </remarks>
     /// <seealso cref="FindAllAsync(ConnectionType, bool, CancellationToken)"/>
-    /// <seealso cref="DeviceChanges"/>
+    /// <seealso cref="WatchAsync"/>
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(CancellationToken cancellationToken)
         => FindAllAsync(ConnectionType.All, forceRescan: false, cancellationToken);
 
@@ -332,7 +298,7 @@ public static class YubiKeyManager
     /// unconditional promise. When topology, serial, and PID evidence cannot safely correlate interfaces,
     /// discovery publishes conservative splits rather than risk merging different keys.</para>
     /// <para><strong>Race Condition Note:</strong> Results may be stale if devices connect or
-    /// disconnect during the scan. For real-time tracking, use <see cref="DeviceChanges"/>
+    /// disconnect during the scan. For real-time tracking, use <see cref="WatchAsync"/>
     /// with <see cref="StartMonitoring()"/>.</para>
     /// </remarks>
     /// <example>
@@ -354,7 +320,7 @@ public static class YubiKeyManager
     /// </example>
     /// <seealso cref="FindAllAsync(CancellationToken)"/>
     /// <seealso cref="ConnectionType"/>
-    /// <seealso cref="DeviceChanges"/>
+    /// <seealso cref="WatchAsync"/>
     public static Task<IReadOnlyList<IYubiKey>> FindAllAsync(
         ConnectionType type = ConnectionType.All,
         bool forceRescan = false,

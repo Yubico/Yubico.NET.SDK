@@ -61,14 +61,9 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets an observable sequence of device events (arrivals and removals).
-    /// </summary>
-    public IObservable<DeviceEvent> DeviceChanges => _repository.DeviceChanges;
-
-    /// <summary>
     /// Gets an async sequence of device events (arrivals and removals).
     /// </summary>
-    /// <param name="cancellationToken">Stops the stream.</param>
+    /// <param name="cancellationToken">Stops this enumeration.</param>
     public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
         _repository.WatchAsync(cancellationToken);
 

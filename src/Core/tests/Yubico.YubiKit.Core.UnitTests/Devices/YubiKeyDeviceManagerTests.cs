@@ -149,19 +149,23 @@ public class YubiKeyDeviceManagerTests
 
 
     [Fact]
-    public async Task DeviceChanges_EmitsEventsFromRepository()
+    public async Task WatchAsync_EmitsEventsFromRepository()
     {
         // Arrange
         var (manager, findYubiKeys, repository) = CreateManager();
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = manager.DeviceChanges.Subscribe(events);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        await using var watcher = await DeviceEventWatcher.StartAsync(
+            manager.WatchAsync,
+            () => repository.WatcherCount,
+            cts.Token);
 
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
         // Act
-        await manager.FindAllAsync(forceRescan: true, cancellationToken: TestContext.Current.CancellationToken);
+        await manager.FindAllAsync(forceRescan: true, cancellationToken: cts.Token);
 
         // Assert
+        var events = await watcher.DrainAsync(repository, cts.Token);
         Assert.Single(events);
         Assert.Equal(DeviceAction.Added, events[0].Action);
 

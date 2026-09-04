@@ -140,7 +140,7 @@ clean  (standalone — must be specified explicitly)
 
 ## Analyzers and Formatting
 
-- Scope `dotnet format` to your staged files via `--include` (never the whole solution for routine work) — see `CLAUDE.md` Pre-Commit Checklist for the exact command. In CI, or when a repo-wide `.editorconfig`/analyzer rule changes, run it unscoped with `--verify-no-changes`.
+- For routine development, run scoped `dotnet format` with `--include` so formatting fixes apply directly to staged files. For repository-wide rule changes and CI enforcement workflow, follow `docs/DEV-GUIDE.md`.
 - Analyzer configuration details live in `docs/DEV-GUIDE.md`; review that guide before introducing new rules or suppressions.
 
 ## Documentation QA

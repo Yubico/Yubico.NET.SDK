@@ -21,7 +21,7 @@ public class HsmAuthAsymmetricTests
 
     private static ReadOnlyMemory<byte> DefaultManagementKey => new byte[16];
     private const string TestLabel = "test-asymmetric";
-    private const string TestPassword = "password";
+    private static ReadOnlyMemory<byte> TestPassword => "password"u8.ToArray();
 
     // ─── Put Asymmetric Credential ──────────────────────────────────────────────
 
@@ -111,7 +111,8 @@ public class HsmAuthAsymmetricTests
                     NewToken());
                 Assert.Equal(65, epkOce.Length);
 
-                // Generate an ephemeral EC P256 key pair for EPK-SD
+                // This protocol-shape test generates EPK-SD locally. A real connector flow supplies
+                // EPK-SD and the card cryptogram from the YubiHSM 2 handshake.
                 using var ephemeral = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
                 var ephemeralParams = ephemeral.ExportParameters(includePrivateParameters: false);
                 var epkSd = new byte[65];

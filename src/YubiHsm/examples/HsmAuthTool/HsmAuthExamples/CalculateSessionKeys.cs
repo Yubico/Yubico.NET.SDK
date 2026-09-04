@@ -4,6 +4,7 @@
 using Spectre.Console;
 using System.Security.Cryptography;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
+using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
 
@@ -31,29 +32,70 @@ public static class CalculateSessionKeys
                 .Title("Select credential for session key calculation:")
                 .AddChoices(labels));
 
-        var credentialPassword = AnsiConsole.Prompt(
-            new TextPrompt<string>("Credential [green]password[/]:")
-                .Secret());
+        using var credentialPassword = SecureCredential.Prompt("Credential password");
+        if (credentialPassword is null)
+        {
+            OutputHelpers.WriteError("Credential password is required.");
+            return;
+        }
 
-        // Generate random context (host challenge + HSM challenge)
-        var context = RandomNumberGenerator.GetBytes(32);
-        OutputHelpers.WriteHex("Context (host[16] + HSM[16])", context);
+        var hostChallengeHex = AnsiConsole.Ask<string>(
+            "Host challenge from the YubiKey or caller ([grey]hex, 8 bytes[/]):");
+        var hsmChallengeHex = AnsiConsole.Ask<string>(
+            "HSM challenge from the connector ([grey]hex, 8 bytes[/]):");
+        var cardCryptogramHex = AnsiConsole.Prompt(
+            new TextPrompt<string>("Card cryptogram from the connector ([grey]hex, optional[/]):")
+                .AllowEmpty());
 
-        using var keys = await session.CalculateSessionKeysSymmetricAsync(
-            label,
-            context,
-            credentialPassword,
-            cancellationToken: cancellationToken);
+        byte[]? hostChallenge = null;
+        byte[]? hsmChallenge = null;
+        byte[]? cardCryptogram = null;
+        var context = new byte[16];
+        try
+        {
+            hostChallenge = Convert.FromHexString(hostChallengeHex);
+            hsmChallenge = Convert.FromHexString(hsmChallengeHex);
+            cardCryptogram = string.IsNullOrWhiteSpace(cardCryptogramHex)
+                ? null
+                : Convert.FromHexString(cardCryptogramHex);
 
-        AnsiConsole.WriteLine();
-        OutputHelpers.WriteSuccess("Session keys calculated successfully.");
+            if (hostChallenge.Length != 8 || hsmChallenge.Length != 8)
+            {
+                OutputHelpers.WriteError("Host and HSM challenges must each be 8 bytes.");
+                return;
+            }
 
-        // SECURITY NOTE: Session keys displayed for developer diagnostics only.
-        // Never display session key material in production applications.
-        OutputHelpers.WriteHex("S-ENC", keys.SEnc);
-        OutputHelpers.WriteHex("S-MAC", keys.SMac);
-        OutputHelpers.WriteHex("S-RMAC", keys.SRmac);
+            hostChallenge.CopyTo(context, 0);
+            hsmChallenge.CopyTo(context, 8);
+            ReadOnlyMemory<byte>? cardCryptogramMemory = cardCryptogram is null
+                ? null
+                : cardCryptogram.AsMemory();
 
-        CryptographicOperations.ZeroMemory(context);
+            using var keys = await session.CalculateSessionKeysSymmetricAsync(
+                label,
+                context,
+                credentialPassword.Memory,
+                cardCryptogramMemory,
+                cancellationToken: cancellationToken);
+
+            AnsiConsole.WriteLine();
+            OutputHelpers.WriteSuccess("Session keys calculated successfully.");
+
+            // SECURITY NOTE: Session keys displayed for developer diagnostics only.
+            // Never display session key material in production applications.
+            OutputHelpers.WriteHex("S-ENC", keys.SEnc);
+            OutputHelpers.WriteHex("S-MAC", keys.SMac);
+            OutputHelpers.WriteHex("S-RMAC", keys.SRmac);
+        }
+        finally
+        {
+            if (hostChallenge is not null)
+                CryptographicOperations.ZeroMemory(hostChallenge);
+            if (hsmChallenge is not null)
+                CryptographicOperations.ZeroMemory(hsmChallenge);
+            if (cardCryptogram is not null)
+                CryptographicOperations.ZeroMemory(cardCryptogram);
+            CryptographicOperations.ZeroMemory(context);
+        }
     }
 }

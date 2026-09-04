@@ -15,7 +15,6 @@
 using Spectre.Console;
 using SharedConfirm = Yubico.YubiKit.Cli.Shared.Output.ConfirmationPrompts;
 using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
-using SharedPin = Yubico.YubiKit.Cli.Shared.Output.PinPrompt;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.Cli.Output;
 
@@ -78,7 +77,4 @@ public static class OutputHelpers
     /// <inheritdoc cref="SharedConfirm.ConfirmDestructive"/>
     public static bool ConfirmDestructive(string action, string confirmationWord = "RESET") =>
         SharedConfirm.ConfirmDestructive(action, confirmationWord);
-
-    /// <inheritdoc cref="SharedPin.PromptForPin"/>
-    public static string PromptForPin(string label = "PIN") => SharedPin.PromptForPin(label);
 }

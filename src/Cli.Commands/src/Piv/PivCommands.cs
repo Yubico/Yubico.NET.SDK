@@ -3,6 +3,7 @@
 
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Buffers;
 using System.ComponentModel;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
@@ -233,10 +234,8 @@ public static class PivHelpers
         }
     }
 
-    public static SecureCredential GetCredential(string? provided, string promptLabel) =>
-        provided is null
-            ? PinPrompt.PromptForCredential(promptLabel)
-            : SecureCredential.FromUtf8String(provided);
+    public static IMemoryOwner<byte>? GetCredential(string? provided, string promptLabel) =>
+        PinPrompt.Resolve(provided, promptLabel);
 }
 
 // ── Commands ────────────────────────────────────────────────────────────────
@@ -352,6 +351,12 @@ public sealed class PivAccessChangePinCommand : YkCommandBase<PivPinSettings>
         using var pin = PivHelpers.GetCredential(settings.Pin, "Current PIN");
         using var newPin = PivHelpers.GetCredential(settings.NewPin, "New PIN");
 
+        if (pin is null || newPin is null)
+        {
+            OutputHelpers.WriteError("Current and new PINs are required.");
+            return ExitCode.GenericError;
+        }
+
         try
         {
             await using var session = await deviceContext.Device.CreatePivSessionAsync();
@@ -378,6 +383,12 @@ public sealed class PivAccessChangePukCommand : YkCommandBase<PivPukSettings>
         using var puk = PivHelpers.GetCredential(settings.Puk, "Current PUK");
         using var newPuk = PivHelpers.GetCredential(settings.NewPuk, "New PUK");
 
+        if (puk is null || newPuk is null)
+        {
+            OutputHelpers.WriteError("Current and new PUKs are required.");
+            return ExitCode.GenericError;
+        }
+
         try
         {
             await using var session = await deviceContext.Device.CreatePivSessionAsync();
@@ -403,6 +414,12 @@ public sealed class PivAccessUnblockPinCommand : YkCommandBase<PivUnblockPinSett
     {
         using var puk = PivHelpers.GetCredential(settings.Puk, "PUK");
         using var newPin = PivHelpers.GetCredential(settings.NewPin, "New PIN");
+
+        if (puk is null || newPin is null)
+        {
+            OutputHelpers.WriteError("PUK and new PIN are required.");
+            return ExitCode.GenericError;
+        }
 
         try
         {

@@ -4,6 +4,7 @@
 using Spectre.Console;
 using System.Security.Cryptography;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
+using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
 
@@ -14,9 +15,12 @@ public static class AddSymmetricCredential
         CancellationToken cancellationToken = default)
     {
         var label = AnsiConsole.Ask<string>("Credential [green]label[/]:");
-        var credentialPassword = AnsiConsole.Prompt(
-            new TextPrompt<string>("Credential [green]password[/]:")
-                .Secret());
+        using var credentialPassword = SecureCredential.Prompt("Credential password");
+        if (credentialPassword is null)
+        {
+            OutputHelpers.WriteError("Credential password is required.");
+            return;
+        }
 
         var mgmtKeyHex = AnsiConsole.Prompt(
             new TextPrompt<string>("Management key ([grey]hex, 16 bytes[/]):")
@@ -56,7 +60,7 @@ public static class AddSymmetricCredential
                 label,
                 keyEnc,
                 keyMac,
-                credentialPassword,
+                credentialPassword.Memory,
                 touchRequired,
                 cancellationToken);
 

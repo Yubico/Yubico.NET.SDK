@@ -6,6 +6,8 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Cli.Commands.HsmAuth;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Prompts;
+using PinPrompt = Yubico.YubiKit.Cli.Shared.Output.PinPrompt;
+using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 
@@ -93,17 +95,26 @@ internal static class CredentialsCommand
             return 1;
         }
 
-        var credentialPassword = CommandArgs.GetOption(args, "--credential-password")
-            ?? AnsiConsole.Prompt(new TextPrompt<string>("Credential password:").Secret());
-
         // Check for --derivation-password for PBKDF2-derived mode
-        var derivationPassword = CommandArgs.GetOption(args, "--derivation-password");
-
+        var derivationPasswordOption = CommandArgs.GetOption(args, "--derivation-password");
         var keyEncHex = CommandArgs.GetOption(args, "--key-enc");
         var keyMacHex = CommandArgs.GetOption(args, "--key-mac");
 
         try
         {
+            // Both secrets are resolved inside the try so that an aborted prompt, a declined
+            // prompt, or a rejected encoding still leaves mgmtKey zeroed by the finally below.
+            using var credentialPassword = PinPrompt.Resolve(
+                CommandArgs.GetOption(args, "--credential-password"), "Credential password");
+            using var derivationPassword = derivationPasswordOption is null
+                ? null
+                : SecureCredential.FromUtf8String(derivationPasswordOption);
+            if (credentialPassword is null)
+            {
+                OutputHelpers.WriteError("Credential password is required.");
+                return 1;
+            }
+
             var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
             if (selection is null)
             {
@@ -118,8 +129,8 @@ internal static class CredentialsCommand
                 await session.PutCredentialDerivedAsync(
                     mgmtKey,
                     label,
-                    derivationPassword,
-                    credentialPassword,
+                    derivationPassword.Memory,
+                    credentialPassword.Memory,
                     touchRequired,
                     cancellationToken);
 
@@ -152,7 +163,7 @@ internal static class CredentialsCommand
                         label,
                         keyEnc,
                         keyMac,
-                        credentialPassword,
+                        credentialPassword.Memory,
                         touchRequired,
                         cancellationToken);
 
@@ -188,9 +199,6 @@ internal static class CredentialsCommand
             return 1;
         }
 
-        var credentialPassword = CommandArgs.GetOption(args, "--credential-password")
-            ?? AnsiConsole.Prompt(new TextPrompt<string>("Credential password:").Secret());
-
         var privateKeyHex = CommandArgs.GetOption(args, "--private-key");
         if (privateKeyHex is null)
         {
@@ -210,6 +218,15 @@ internal static class CredentialsCommand
 
         try
         {
+            // Resolved inside the try so an aborted or rejected prompt still zeros mgmtKey.
+            using var credentialPassword = PinPrompt.Resolve(
+                CommandArgs.GetOption(args, "--credential-password"), "Credential password");
+            if (credentialPassword is null)
+            {
+                OutputHelpers.WriteError("Credential password is required.");
+                return 1;
+            }
+
             var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
             if (selection is null)
             {
@@ -223,7 +240,7 @@ internal static class CredentialsCommand
                 mgmtKey,
                 label,
                 privateKey,
-                credentialPassword,
+                credentialPassword.Memory,
                 touchRequired,
                 cancellationToken);
 
@@ -308,11 +325,17 @@ internal static class CredentialsCommand
             return 1;
         }
 
-        var credentialPassword = CommandArgs.GetOption(args, "--credential-password")
-            ?? AnsiConsole.Prompt(new TextPrompt<string>("Credential password:").Secret());
-
         try
         {
+            // Resolved inside the try so an aborted or rejected prompt still zeros mgmtKey.
+            using var credentialPassword = PinPrompt.Resolve(
+                CommandArgs.GetOption(args, "--credential-password"), "Credential password");
+            if (credentialPassword is null)
+            {
+                OutputHelpers.WriteError("Credential password is required.");
+                return 1;
+            }
+
             var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
             if (selection is null)
             {
@@ -325,7 +348,7 @@ internal static class CredentialsCommand
             await session.GenerateCredentialAsymmetricAsync(
                 mgmtKey,
                 label,
-                credentialPassword,
+                credentialPassword.Memory,
                 touchRequired,
                 cancellationToken);
 

@@ -59,7 +59,7 @@ public class TouchNotificationTests
         using var keys = await session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotEqual(-1, commandCountWhenNotified);
@@ -87,7 +87,7 @@ public class TouchNotificationTests
         using var keys = await session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.False(invoked);
@@ -109,7 +109,7 @@ public class TouchNotificationTests
         using var keys = await session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(2, connection.TransmittedCommands.Count); // SELECT + CALCULATE only
@@ -132,9 +132,9 @@ public class TouchNotificationTests
 
         using var keys = await session.CalculateSessionKeysAsymmetricAsync(
             "cred",
-            Sequence(0x40, 16),
+            Sequence(0x40, 130),
             Sequence(0x60, 8),
-            "pass",
+            "pass"u8.ToArray(),
             Sequence(0x70, 8),
             TestContext.Current.CancellationToken);
 
@@ -161,7 +161,7 @@ public class TouchNotificationTests
         using var keys = await session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(invoked);
@@ -194,7 +194,7 @@ public class TouchNotificationTests
             session.CalculateSessionKeysSymmetricAsync(
                 "cred",
                 Sequence(0x40, 16),
-                "pass",
+                "pass"u8.ToArray(),
                 cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("callback boom", thrown.Message);
@@ -218,7 +218,7 @@ public class TouchNotificationTests
         var operation = session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken);
 
         await connection.ListCommandReceived.WaitAsync(TestContext.Current.CancellationToken);
@@ -249,7 +249,7 @@ public class TouchNotificationTests
         var operation = session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass",
+            "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken);
 
         await connection.ListCommandReceived.WaitAsync(TestContext.Current.CancellationToken);

@@ -1,6 +1,7 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using System.Buffers;
 using System.Text;
 using Yubico.YubiKit.Cli.Commands.Oath;
 using Yubico.YubiKit.Cli.Shared.Output;
@@ -58,7 +59,7 @@ public sealed class OathHelpersTests
     {
         var session = new FakeOathSession();
         using var console = new ConsoleCapture();
-        using var prompted = SecureCredential.FromUtf8String("prompt-password");
+        var prompted = new TrackingCredential("prompt-password");
 
         var result = await OathHelpers.UnlockIfNeededAsync(
             session,
@@ -69,7 +70,7 @@ public sealed class OathHelpersTests
         Assert.DoesNotContain(OathHelpers.ArgvPasswordWarning, console.ErrorOutput);
         Assert.Empty(console.Output);
         Assert.Equal(Encoding.UTF8.GetBytes("prompt-password"), session.DerivedPasswordBytes);
-        Assert.All(GetOwnedBuffer(prompted), b => Assert.Equal(0, b));
+        Assert.True(prompted.WasDisposed);
     }
 
     [Fact]
@@ -77,7 +78,7 @@ public sealed class OathHelpersTests
     {
         var session = new FakeOathSession();
         using var console = new ConsoleCapture();
-        using var prompted = SecureCredential.FromUtf8String("prompt-password");
+        var prompted = new TrackingCredential("prompt-password");
 
         var result = await OathHelpers.UnlockIfNeededAsync(
             session,
@@ -88,16 +89,9 @@ public sealed class OathHelpersTests
         Assert.DoesNotContain(OathHelpers.ArgvPasswordWarning, console.ErrorOutput);
         Assert.Empty(console.Output);
         Assert.Equal(Encoding.UTF8.GetBytes("prompt-password"), session.DerivedPasswordBytes);
-        Assert.All(GetOwnedBuffer(prompted), b => Assert.Equal(0, b));
+        Assert.True(prompted.WasDisposed);
     }
 
-    private static byte[] GetOwnedBuffer(SecureCredential credential)
-    {
-        var field = typeof(SecureCredential).GetField("_buffer", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-            ?? throw new InvalidOperationException("SecureCredential buffer field not found.");
-
-        return (byte[])field.GetValue(credential)!;
-    }
 
     private sealed class FakeOathSession : IOathSession
     {
@@ -183,6 +177,38 @@ public sealed class OathHelpersTests
 
         public void Dispose() { }
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    [Fact]
+    public async Task UnlockIfNeededAsync_WhenUserDeclinesPrompt_FailsWithoutValidating()
+    {
+        var session = new FakeOathSession();
+        using var console = new ConsoleCapture();
+
+        var result = await OathHelpers.UnlockIfNeededAsync(
+            session,
+            password: null,
+            promptCredentialFactory: () => null);
+
+        Assert.False(result);
+        Assert.Empty(session.ValidatedKeys);
+        Assert.DoesNotContain(OathHelpers.ArgvPasswordWarning, console.ErrorOutput);
+    }
+
+    /// <summary>
+    /// Records disposal so tests can assert the consumer released the credential it was handed.
+    /// Zeroing itself is <see cref="SecureCredential"/>'s contract and is tested in
+    /// Cli.Shared.UnitTests, not here.
+    /// </summary>
+    private sealed class TrackingCredential(string value) : IMemoryOwner<byte>
+    {
+        private readonly byte[] _bytes = Encoding.UTF8.GetBytes(value);
+
+        public bool WasDisposed { get; private set; }
+
+        public Memory<byte> Memory => _bytes;
+
+        public void Dispose() => WasDisposed = true;
     }
 
     private sealed class ConsoleCapture : IDisposable

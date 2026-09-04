@@ -3,8 +3,6 @@
 
 using Spectre.Console.Cli;
 using System.ComponentModel;
-using System.Security.Cryptography;
-using System.Text;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Devices;
@@ -89,27 +87,20 @@ public sealed class OpenPgpAccessSetRetriesCommand : YkCommandBase<AccessSetRetr
     {
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
 
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        byte[]? adminPinBytes = null;
-
-        try
+        using var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
+        if (adminPin is null)
         {
-            adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
-            await session.VerifyAdminAsync(adminPinBytes);
-            await session.SetPinAttemptsAsync(settings.UserRetries, settings.ResetRetries, settings.AdminRetries);
+            OutputHelpers.WriteError("Admin PIN is required.");
+            return ExitCode.GenericError;
+        }
 
-            OutputHelpers.WriteSuccess(
-                $"PIN retry counts set to User={settings.UserRetries}, " +
-                $"Reset={settings.ResetRetries}, Admin={settings.AdminRetries}.");
-            return ExitCode.Success;
-        }
-        finally
-        {
-            if (adminPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(adminPinBytes);
-            }
-        }
+        await session.VerifyAdminAsync(adminPin.Memory);
+        await session.SetPinAttemptsAsync(settings.UserRetries, settings.ResetRetries, settings.AdminRetries);
+
+        OutputHelpers.WriteSuccess(
+            $"PIN retry counts set to User={settings.UserRetries}, " +
+            $"Reset={settings.ResetRetries}, Admin={settings.AdminRetries}.");
+        return ExitCode.Success;
     }
 }
 
@@ -122,42 +113,24 @@ public sealed class OpenPgpAccessChangePinCommand : YkCommandBase<AccessChangePi
     {
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
 
-        var currentPin = GetPin(settings.Pin, "Enter current User PIN");
-        var newPin = GetPin(settings.NewPin, "Enter new User PIN");
-
-        if (string.IsNullOrEmpty(settings.NewPin))
+        using var currentPin = GetPin(settings.Pin, "Enter current User PIN");
+        using var newPin = GetPin(settings.NewPin, "Enter new User PIN");
+        if (currentPin is null || newPin is null)
         {
-            var confirm = PinPrompt.PromptForPin("Confirm new User PIN");
-            if (!string.Equals(newPin, confirm, StringComparison.Ordinal))
-            {
-                OutputHelpers.WriteError("New PINs do not match.");
-                return ExitCode.GenericError;
-            }
+            OutputHelpers.WriteError("Current and new User PINs are required.");
+            return ExitCode.GenericError;
         }
 
-        byte[]? currentPinBytes = null;
-        byte[]? newPinBytes = null;
-
-        try
+        if (string.IsNullOrEmpty(settings.NewPin) &&
+            !PinPrompt.ConfirmMatches(newPin, "Confirm new User PIN"))
         {
-            currentPinBytes = Encoding.UTF8.GetBytes(currentPin);
-            newPinBytes = Encoding.UTF8.GetBytes(newPin);
-            await session.ChangePinAsync(currentPinBytes, newPinBytes);
-            OutputHelpers.WriteSuccess("User PIN has been changed.");
-            return ExitCode.Success;
+            OutputHelpers.WriteError("New PINs do not match.");
+            return ExitCode.GenericError;
         }
-        finally
-        {
-            if (currentPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(currentPinBytes);
-            }
 
-            if (newPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(newPinBytes);
-            }
-        }
+        await session.ChangePinAsync(currentPin.Memory, newPin.Memory);
+        OutputHelpers.WriteSuccess("User PIN has been changed.");
+        return ExitCode.Success;
     }
 }
 
@@ -170,42 +143,24 @@ public sealed class OpenPgpAccessChangeAdminPinCommand : YkCommandBase<AccessCha
     {
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
 
-        var currentPin = GetPin(settings.AdminPin, "Enter current Admin PIN");
-        var newPin = GetPin(settings.NewAdminPin, "Enter new Admin PIN");
-
-        if (string.IsNullOrEmpty(settings.NewAdminPin))
+        using var currentPin = GetPin(settings.AdminPin, "Enter current Admin PIN");
+        using var newPin = GetPin(settings.NewAdminPin, "Enter new Admin PIN");
+        if (currentPin is null || newPin is null)
         {
-            var confirm = PinPrompt.PromptForPin("Confirm new Admin PIN");
-            if (!string.Equals(newPin, confirm, StringComparison.Ordinal))
-            {
-                OutputHelpers.WriteError("New Admin PINs do not match.");
-                return ExitCode.GenericError;
-            }
+            OutputHelpers.WriteError("Current and new Admin PINs are required.");
+            return ExitCode.GenericError;
         }
 
-        byte[]? currentPinBytes = null;
-        byte[]? newPinBytes = null;
-
-        try
+        if (string.IsNullOrEmpty(settings.NewAdminPin) &&
+            !PinPrompt.ConfirmMatches(newPin, "Confirm new Admin PIN"))
         {
-            currentPinBytes = Encoding.UTF8.GetBytes(currentPin);
-            newPinBytes = Encoding.UTF8.GetBytes(newPin);
-            await session.ChangeAdminAsync(currentPinBytes, newPinBytes);
-            OutputHelpers.WriteSuccess("Admin PIN has been changed.");
-            return ExitCode.Success;
+            OutputHelpers.WriteError("New Admin PINs do not match.");
+            return ExitCode.GenericError;
         }
-        finally
-        {
-            if (currentPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(currentPinBytes);
-            }
 
-            if (newPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(newPinBytes);
-            }
-        }
+        await session.ChangeAdminAsync(currentPin.Memory, newPin.Memory);
+        OutputHelpers.WriteSuccess("Admin PIN has been changed.");
+        return ExitCode.Success;
     }
 }
 
@@ -218,43 +173,25 @@ public sealed class OpenPgpAccessSetResetCodeCommand : YkCommandBase<AccessSetRe
     {
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
 
-        var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
-        var resetCode = GetPin(settings.ResetCode, "Enter new Reset Code");
-
-        if (string.IsNullOrEmpty(settings.ResetCode))
+        using var adminPin = GetPin(settings.AdminPin, "Enter Admin PIN");
+        using var resetCode = GetPin(settings.ResetCode, "Enter new Reset Code");
+        if (adminPin is null || resetCode is null)
         {
-            var confirm = PinPrompt.PromptForPin("Confirm new Reset Code");
-            if (!string.Equals(resetCode, confirm, StringComparison.Ordinal))
-            {
-                OutputHelpers.WriteError("Reset Codes do not match.");
-                return ExitCode.GenericError;
-            }
+            OutputHelpers.WriteError("Admin PIN and Reset Code are required.");
+            return ExitCode.GenericError;
         }
 
-        byte[]? adminPinBytes = null;
-        byte[]? resetCodeBytes = null;
-
-        try
+        if (string.IsNullOrEmpty(settings.ResetCode) &&
+            !PinPrompt.ConfirmMatches(resetCode, "Confirm new Reset Code"))
         {
-            adminPinBytes = Encoding.UTF8.GetBytes(adminPin);
-            resetCodeBytes = Encoding.UTF8.GetBytes(resetCode);
-            await session.VerifyAdminAsync(adminPinBytes);
-            await session.SetResetCodeAsync(resetCodeBytes);
-            OutputHelpers.WriteSuccess("Reset Code has been set.");
-            return ExitCode.Success;
+            OutputHelpers.WriteError("Reset Codes do not match.");
+            return ExitCode.GenericError;
         }
-        finally
-        {
-            if (adminPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(adminPinBytes);
-            }
 
-            if (resetCodeBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(resetCodeBytes);
-            }
-        }
+        await session.VerifyAdminAsync(adminPin.Memory);
+        await session.SetResetCodeAsync(resetCode.Memory);
+        OutputHelpers.WriteSuccess("Reset Code has been set.");
+        return ExitCode.Success;
     }
 }
 
@@ -267,41 +204,23 @@ public sealed class OpenPgpAccessUnblockPinCommand : YkCommandBase<AccessUnblock
     {
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
 
-        var resetCode = GetPin(settings.ResetCode, "Enter Reset Code");
-        var newPin = GetPin(settings.NewPin, "Enter new User PIN");
-
-        if (string.IsNullOrEmpty(settings.NewPin))
+        using var resetCode = GetPin(settings.ResetCode, "Enter Reset Code");
+        using var newPin = GetPin(settings.NewPin, "Enter new User PIN");
+        if (resetCode is null || newPin is null)
         {
-            var confirm = PinPrompt.PromptForPin("Confirm new User PIN");
-            if (!string.Equals(newPin, confirm, StringComparison.Ordinal))
-            {
-                OutputHelpers.WriteError("New PINs do not match.");
-                return ExitCode.GenericError;
-            }
+            OutputHelpers.WriteError("Reset Code and new User PIN are required.");
+            return ExitCode.GenericError;
         }
 
-        byte[]? resetCodeBytes = null;
-        byte[]? newPinBytes = null;
-
-        try
+        if (string.IsNullOrEmpty(settings.NewPin) &&
+            !PinPrompt.ConfirmMatches(newPin, "Confirm new User PIN"))
         {
-            resetCodeBytes = Encoding.UTF8.GetBytes(resetCode);
-            newPinBytes = Encoding.UTF8.GetBytes(newPin);
-            await session.ResetPinAsync(resetCodeBytes, newPinBytes, useAdmin: false);
-            OutputHelpers.WriteSuccess("User PIN has been unblocked.");
-            return ExitCode.Success;
+            OutputHelpers.WriteError("New PINs do not match.");
+            return ExitCode.GenericError;
         }
-        finally
-        {
-            if (resetCodeBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(resetCodeBytes);
-            }
 
-            if (newPinBytes is not null)
-            {
-                CryptographicOperations.ZeroMemory(newPinBytes);
-            }
-        }
+        await session.ResetPinAsync(resetCode.Memory, newPin.Memory, useAdmin: false);
+        OutputHelpers.WriteSuccess("User PIN has been unblocked.");
+        return ExitCode.Success;
     }
 }

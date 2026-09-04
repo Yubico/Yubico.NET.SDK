@@ -34,7 +34,7 @@ public class HsmAuthSessionTests
     };
 
     private const string TestLabel = "test-credential";
-    private const string TestPassword = "password";
+    private static ReadOnlyMemory<byte> TestPassword => "password"u8.ToArray();
 
     // ─── Reset and List ──────────────────────────────────────────────────────────
 
@@ -105,7 +105,7 @@ public class HsmAuthSessionTests
                 await session.PutCredentialDerivedAsync(
                     DefaultManagementKey,
                     TestLabel,
-                    "my-derivation-password",
+                    "my-derivation-password"u8.ToArray(),
                     TestPassword,
                     cancellationToken: NewToken());
 
@@ -271,7 +271,7 @@ public class HsmAuthSessionTests
                         cancellationToken: NewToken());
 
                     // Change the password
-                    const string newPassword = "new-password";
+                    ReadOnlyMemory<byte> newPassword = "new-password"u8.ToArray();
                     await session.ChangeCredentialPasswordAsync(
                         TestLabel,
                         TestPassword,

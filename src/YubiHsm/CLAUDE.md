@@ -39,7 +39,7 @@ All firmware-gated operations use `EnsureSupports(Feature)` at method entry:
 | `FeatureHsmAuth` | 5.4.3 | Base applet support |
 | `FeatureAsymmetric` | 5.6.0 | `PutCredentialAsymmetricAsync`, `GenerateCredentialAsymmetricAsync`, `CalculateSessionKeysAsymmetricAsync`, `GetPublicKeyAsync` |
 | `FeatureGetChallenge` | 5.6.0 | `GetChallengeAsync` |
-| `FeatureGetChallengeNoPassword` | 5.7.1 | `GetChallengeAsync` without credential password |
+| `FeatureGetChallengeWithPassword` | 5.7.1 | `GetChallengeAsync` with credential password |
 | `FeaturePasswordChange` | 5.8.0 | `ChangeCredentialPasswordAsync`, `ChangeCredentialPasswordAdminAsync` |
 
 ## Wire Protocol
@@ -67,9 +67,35 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
 ## Security Patterns
 
 ### Credential Password Handling
-- String passwords are UTF-8 encoded and null-padded to 16 bytes via `ParseCredentialPassword()`
-- Password bytes are always zeroed in `finally` blocks
-- Never log password values — log operation metadata only
+
+Credential passwords cross the public API as **UTF-8 `ReadOnlyMemory<byte>`**, never `string`.
+.NET strings are immutable and cannot be wiped, so a `string` parameter makes it impossible for
+the caller to zero the secret. This matches Fido2/OpenPgp/Oath, and the `...Utf8` parameter
+naming convention they use.
+
+- **The caller owns the input buffer** and is responsible for zeroing it. The SDK never zeroes a
+  buffer it does not own.
+- `ValidateCredentialPassword(ReadOnlySpan<byte>)` is the single guard: **at most** 16 bytes.
+- `ParseCredentialPassword(ReadOnlySpan<byte>)` validates, then copies into a fresh 16-byte
+  buffer, null-padding the remainder.
+- The padded copy is always zeroed in a `finally` block.
+- Never log password values — log operation metadata only.
+
+```csharp
+// Caller side: own the bytes, zero them.
+var passwordUtf8 = Encoding.UTF8.GetBytes(password);
+try
+{
+    await session.PutCredentialSymmetricAsync(
+        managementKey, label, keyEnc, keyMac, passwordUtf8);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(passwordUtf8);
+}
+```
+
+`label` is **not** a secret — it is echoed back verbatim by the LIST command — and stays `string`.
 
 ### Management Key Verification
 - Failed management key attempts return SW 0x63Cx (x = remaining retries)
@@ -78,10 +104,16 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
 
 ### Session Keys Lifecycle
 ```csharp
-using var keys = await session.CalculateSessionKeysSymmetricAsync(label, context, password);
+using var keys = await session.CalculateSessionKeysSymmetricAsync(
+    label, context, credentialPasswordUtf8, cardCryptogram);
 // Use keys.SEnc, keys.SMac, keys.SRmac
 // All key material zeroed automatically on dispose
 ```
+
+The symmetric context is `hostChallenge[8] || hsmChallenge[8]`; the HSM challenge and optional
+card cryptogram come from the YubiHSM connector. The asymmetric context is
+`epkOce[65] || epkSd[65]`. Validate these exact lengths before any device I/O, and never generate
+the connector-owned half locally.
 
 ### EC Private Key Handling
 - Private keys are never generated or stored in managed memory longer than necessary
@@ -96,6 +128,9 @@ using var keys = await session.CalculateSessionKeysSymmetricAsync(label, context
 - Iterations: 10,000
 - Output: 32 bytes → K-ENC[0..16], K-MAC[16..32]
 - Derived key buffer zeroed in `finally`
+- `DeriveKeys(ReadOnlyMemory<byte>)` makes **no copy** of the derivation password — the caller
+  owns and zeros it. These constants are pinned by `Pbkdf2DerivationTests`, which recomputes the
+  known-answer vector independently; do not change them.
 
 ## Test Infrastructure
 

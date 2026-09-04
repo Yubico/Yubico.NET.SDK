@@ -4,7 +4,6 @@
 using Spectre.Console;
 using SharedConfirm = Yubico.YubiKit.Cli.Shared.Output.ConfirmationPrompts;
 using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
-using SharedPin = Yubico.YubiKit.Cli.Shared.Output.PinPrompt;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
@@ -63,9 +62,4 @@ public static class OutputHelpers
     /// <inheritdoc cref="SharedConfirm.ConfirmDestructive"/>
     public static bool ConfirmDestructive(string action, string confirmationWord = "RESET") =>
         SharedConfirm.ConfirmDestructive(action, confirmationWord);
-
-    /// <summary>
-    /// Prompts for a PIN with masked input.
-    /// </summary>
-    public static string PromptPin(string label) => SharedPin.PromptForPin(label);
 }

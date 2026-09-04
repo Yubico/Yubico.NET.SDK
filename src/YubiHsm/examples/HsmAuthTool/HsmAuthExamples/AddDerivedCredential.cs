@@ -4,6 +4,7 @@
 using Spectre.Console;
 using System.Security.Cryptography;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
+using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
 
@@ -14,12 +15,19 @@ public static class AddDerivedCredential
         CancellationToken cancellationToken = default)
     {
         var label = AnsiConsole.Ask<string>("Credential [green]label[/]:");
-        var derivationPassword = AnsiConsole.Prompt(
-            new TextPrompt<string>("Derivation [green]password[/] (used to derive K-ENC/K-MAC via PBKDF2):")
-                .Secret());
-        var credentialPassword = AnsiConsole.Prompt(
-            new TextPrompt<string>("Credential [green]password[/]:")
-                .Secret());
+        using var derivationPassword = SecureCredential.Prompt(
+            "Derivation password (used to derive K-ENC/K-MAC via PBKDF2)");
+        if (derivationPassword is null)
+        {
+            OutputHelpers.WriteError("Derivation password is required.");
+            return;
+        }
+        using var credentialPassword = SecureCredential.Prompt("Credential password");
+        if (credentialPassword is null)
+        {
+            OutputHelpers.WriteError("Credential password is required.");
+            return;
+        }
 
         var mgmtKeyHex = AnsiConsole.Prompt(
             new TextPrompt<string>("Management key ([grey]hex, 16 bytes[/]):")
@@ -33,8 +41,8 @@ public static class AddDerivedCredential
             await session.PutCredentialDerivedAsync(
                 managementKey,
                 label,
-                derivationPassword,
-                credentialPassword,
+                derivationPassword.Memory,
+                credentialPassword.Memory,
                 touchRequired,
                 cancellationToken);
 

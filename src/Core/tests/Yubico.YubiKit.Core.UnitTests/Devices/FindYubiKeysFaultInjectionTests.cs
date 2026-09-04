@@ -358,7 +358,7 @@ public class FindYubiKeysFaultInjectionTests
         {
             var scanTask = find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
             Assert.True(
-                await TryWaitForAsync(() => factory.TotalConnectCalls >= 4, TimeSpan.FromSeconds(5)),
+                await AsyncWait.TryWaitUntilAsync(() => factory.TotalConnectCalls >= 4),
                 "The identity reads never reached a connect; cannot stage the in-flight interleaving.");
 
             // Hotplug lands while all four identity reads are in flight; they complete afterwards.
@@ -411,7 +411,7 @@ public class FindYubiKeysFaultInjectionTests
         {
             var scanTask = find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
             Assert.True(
-                await TryWaitForAsync(() => factory.TotalConnectCalls >= 1, TimeSpan.FromSeconds(5)),
+                await AsyncWait.TryWaitUntilAsync(() => factory.TotalConnectCalls >= 1),
                 "The metadata read never reached a connect; cannot stage the in-flight interleaving.");
 
             find.NotifyTransportActivity(ConnectionType.Hid);

@@ -80,7 +80,8 @@ Build succeeded.
     1 Warning(s)
     0 Error(s)
 ```
-`System.Reactive` 6.0.1 (used for `YubiKeyManager.DeviceChanges` as `IObservable<DeviceEvent>`) is
+`System.Reactive` 6.0.1 (at the time, used for `YubiKeyManager.DeviceChanges` as
+`IObservable<DeviceEvent>`; both the dependency and that property have since been removed) is
 the **only** dependency flagged. `Yubico.NativeShims` 1.16.1 was not flagged — inspected the NuGet
 cache (`~/.nuget/packages/yubico.nativeshims/1.16.1/`) and confirmed it ships **only native
 `.dll`/`.dylib`/`.so` binaries plus MSBuild `.targets`, no managed assembly** — there is nothing for
@@ -381,7 +382,10 @@ composite keys (serials 103 and 125) plus an HID Global OMNIKEY 5022 NFC reader.
 
 **Host revision:** `839e3c05f276ed08ad42db8c7a85fd5591ce23c6`. Later revisions tightened
 the step 6 prompt and added activity assertions; the observations below apply to the recorded host
-revision rather than those later changes.
+revision rather than those later changes. The observable surface (`DeviceChanges`) has since been
+removed outright, so the host now attaches three concurrent `WatchAsync` watchers instead of two
+observers plus one async consumer. The fan-out invariants below still apply — they are now measured
+across watchers — but the sink names in this record no longer match the host.
 
 **Method:** `verification/NativeAotVerification --monitor`, which attaches four consumer surfaces
 simultaneously — two `IObservable` subscribers, one `WatchAsync` (`IAsyncEnumerable`) consumer, and

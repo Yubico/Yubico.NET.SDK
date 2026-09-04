@@ -26,6 +26,36 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// </summary>
 public class YubiKeyDeviceMonitorServiceTests
 {
+    private static readonly TimeSpan Bound = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// Parks the service's first admitted publication on the publication path and returns a task that
+    /// signals when it is parked, plus the release callback.
+    /// </summary>
+    /// <remarks>
+    /// Device events are delivered asynchronously into per-watcher buffers, so a consumer can no
+    /// longer hold a publication in flight the way a blocking observer used to. Lifecycle tests that
+    /// need an in-flight publication use this seam instead.
+    /// </remarks>
+    private static (Task Parked, Action Release) ParkFirstPublication(YubiKeyDeviceMonitorService service)
+    {
+        var parked = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var parkFirst = 1;
+
+        service.PublishAdmittedForTest = () =>
+        {
+            if (Interlocked.Exchange(ref parkFirst, 0) != 1)
+            {
+                return Task.CompletedTask;
+            }
+
+            parked.SetResult();
+            return release.Task;
+        };
+
+        return (parked.Task, () => release.TrySetResult());
+    }
 
     [Fact]
     public async Task RescanAsync_UpdatesRepository()
@@ -90,13 +120,14 @@ public class YubiKeyDeviceMonitorServiceTests
         var findYubiKeys = new FakeFindYubiKeys([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
         var service = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        using var cts = new CancellationTokenSource(Bound);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Act
-        await service.RescanAsync(TestContext.Current.CancellationToken);
+        await service.RescanAsync(cts.Token);
 
         // Assert
+        var events = await watcher.DrainAsync(repository, cts.Token);
         Assert.Single(events);
         Assert.Equal(DeviceAction.Added, events[0].Action);
         Assert.Equal("device-1", events[0].Device.DeviceId);
@@ -134,11 +165,11 @@ public class YubiKeyDeviceMonitorServiceTests
     {
         // Arrange
         var (service, repository, findYubiKeys, hidListener, _) = CreateService();
+        using var cts = new CancellationTokenSource(Bound);
         service.StartMonitoring(TimeSpan.FromSeconds(10));
         await AsyncWait.WaitUntilAsync(() => findYubiKeys.ScanCount >= 1, "Initial monitoring rescan did not run");
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
         var scanCount = findYubiKeys.ScanCount;
 
         // Act
@@ -149,10 +180,12 @@ public class YubiKeyDeviceMonitorServiceTests
 
         // Assert
         await AsyncWait.WaitUntilAsync(() => findYubiKeys.ScanCount > scanCount, "HID hint did not trigger rescan");
-        Assert.Empty(events);
         Assert.Empty(repository.GetAll());
 
+        // Stop first so the drain's sentinel is the only writer left touching the cache.
         service.StopMonitoring();
+        Assert.Empty(await watcher.DrainAsync(repository, cts.Token));
+
         await service.DisposeAsync();
         repository.Dispose();
     }
@@ -717,6 +750,7 @@ public class YubiKeyDeviceMonitorServiceTests
         // Arrange - a manual rescan hangs in discovery, capturing the pre-start
         // monitor generation.
         var (service, repository, findYubiKeys, _, _) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        using var cts = new CancellationTokenSource(Bound);
         findYubiKeys.HangIgnoringCancellation = true;
 
         var staleRescan = service.RescanAsync(TestContext.Current.CancellationToken);
@@ -727,8 +761,7 @@ public class YubiKeyDeviceMonitorServiceTests
         service.StartMonitoring(TimeSpan.FromHours(1));
         service.StopMonitoring();
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         findYubiKeys.SetDevices([new FakeYubiKey("stale-device", ConnectionType.SmartCard)]);
         findYubiKeys.ReleaseHungScans();
@@ -738,8 +771,8 @@ public class YubiKeyDeviceMonitorServiceTests
         await AsyncWait.WaitUntilAsync(() => findYubiKeys.ActiveScans == 0, "Hung scans never unwound");
 
         // Assert - the stale snapshot was discarded, not published as device truth.
-        Assert.Empty(events);
         Assert.Empty(repository.GetAll());
+        Assert.Empty(await watcher.DrainAsync(repository, cts.Token));
 
         await service.DisposeAsync();
         repository.Dispose();
@@ -772,18 +805,18 @@ public class YubiKeyDeviceMonitorServiceTests
 
         // The hung scan from the abandoned generation later returns - its snapshot
         // must fail admission and emit no device events.
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        using var cts = new CancellationTokenSource(Bound);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
         findYubiKeys.SetDevices([new FakeYubiKey("device-c", ConnectionType.SmartCard)]);
         findYubiKeys.ReleaseHungScans();
         await AsyncWait.WaitUntilAsync(() => findYubiKeys.ActiveScans == 0, "Abandoned scan never unwound");
-        await Task.Delay(200, TestContext.Current.CancellationToken);
 
-        Assert.Empty(events);
         Assert.DoesNotContain(repository.GetAll(), d => d.DeviceId == "device-c");
         Assert.Contains(repository.GetAll(), d => d.DeviceId == "device-b");
 
         service.StopMonitoring();
+        Assert.Empty(await watcher.DrainAsync(repository, cts.Token));
+
         await service.DisposeAsync();
         repository.Dispose();
     }
@@ -792,49 +825,43 @@ public class YubiKeyDeviceMonitorServiceTests
     [Trait("Category", "RuntimeResilience")]
     public async Task CrossGenerationPublications_SerializeAndSuccessorSnapshotLandsLast()
     {
-        // Arrange - a device-event subscriber blocks the first publication inside
-        // UpdateCache, holding the publication gate across a generation swap.
+        // Arrange - the first publication is parked after admission, holding the publication gate
+        // across a generation swap. (Device events are delivered asynchronously now, so a consumer
+        // can no longer hold a publication in flight; the seam is what replaces it.)
         var (service, repository, findYubiKeys, _, _) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        using var cts = new CancellationTokenSource(Bound);
         findYubiKeys.SetDevices([new FakeYubiKey("device-a", ConnectionType.SmartCard)]);
 
-        using var subscriberEntered = new ManualResetEventSlim();
-        using var subscriberRelease = new ManualResetEventSlim();
-        var blockOnce = 1;
-        var events = new List<DeviceEvent>();
-        var activeEmissions = 0;
-        var maxConcurrentEmissions = 0;
-        using var subscription = repository.DeviceChanges.Subscribe(new RecordingObserver<DeviceEvent>(deviceEvent =>
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+
+        var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var parkFirst = 1;
+        var activePublications = 0;
+        var maxConcurrentPublications = 0;
+        service.PublishAdmittedForTest = async () =>
         {
-            lock (events)
-            {
-                events.Add(deviceEvent);
-                activeEmissions++;
-                maxConcurrentEmissions = Math.Max(maxConcurrentEmissions, activeEmissions);
-            }
+            var active = Interlocked.Increment(ref activePublications);
+            InterlockedMax(ref maxConcurrentPublications, active);
 
             try
             {
-                if (Interlocked.Exchange(ref blockOnce, 0) == 1)
+                if (Interlocked.Exchange(ref parkFirst, 0) == 1)
                 {
-                    subscriberEntered.Set();
-                    subscriberRelease.Wait(TestContext.Current.CancellationToken);
+                    admitted.SetResult();
+                    await release.Task;
                 }
             }
             finally
             {
-                lock (events)
-                {
-                    activeEmissions--;
-                }
+                _ = Interlocked.Decrement(ref activePublications);
             }
-        }));
+        };
 
         service.StartMonitoring(TimeSpan.FromHours(1));
-        Assert.True(
-            subscriberEntered.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken),
-            "First publication never reached the subscriber");
+        await admitted.Task.WaitAsync(TimeSpan.FromSeconds(5), cts.Token);
 
-        // Act - restart while the old-generation publication is held inside UpdateCache.
+        // Act - restart while the old-generation publication holds the gate.
         service.StopMonitoring();
         findYubiKeys.SetDevices([new FakeYubiKey("device-b", ConnectionType.SmartCard)]);
         service.StartMonitoring(TimeSpan.FromHours(1));
@@ -843,30 +870,41 @@ public class YubiKeyDeviceMonitorServiceTests
         // behind the dead generation) but must not enter UpdateCache while the
         // old publication holds the publication gate.
         await AsyncWait.WaitUntilAsync(() => findYubiKeys.ScanCount >= 2, "Successor generation never scanned");
-        await Task.Delay(100, TestContext.Current.CancellationToken);
-        Assert.Contains(repository.GetAll(), d => d.DeviceId == "device-a");
-        Assert.DoesNotContain(repository.GetAll(), d => d.DeviceId == "device-b");
+        await Task.Delay(100, cts.Token);
+        Assert.Empty(repository.GetAll());
 
-        // Release the old publication: it completes first, then the successor's
+        // Release the old publication: it publishes first, then the successor's
         // snapshot lands last. Publications never interleave.
-        subscriberRelease.Set();
+        release.SetResult();
         await AsyncWait.WaitUntilAsync(
             () => repository.GetAll().Any(d => d.DeviceId == "device-b"),
             "Successor snapshot was never published");
 
         Assert.DoesNotContain(repository.GetAll(), d => d.DeviceId == "device-a");
-        lock (events)
-        {
-            Assert.Equal(1, maxConcurrentEmissions);
-            Assert.Equal(3, events.Count);
-            Assert.Equal((DeviceAction.Added, "device-a"), (events[0].Action, events[0].Device.DeviceId));
-            Assert.Equal((DeviceAction.Removed, "device-a"), (events[1].Action, events[1].Device.DeviceId));
-            Assert.Equal((DeviceAction.Added, "device-b"), (events[2].Action, events[2].Device.DeviceId));
-        }
+
+        await watcher.WaitForCountAsync(3, "the full cross-generation sequence never arrived", cts.Token);
+        var events = watcher.Events;
+        Assert.Equal(1, Volatile.Read(ref maxConcurrentPublications));
+        Assert.Equal(3, events.Count);
+        Assert.Equal((DeviceAction.Added, "device-a"), (events[0].Action, events[0].Device.DeviceId));
+        Assert.Equal((DeviceAction.Removed, "device-a"), (events[1].Action, events[1].Device.DeviceId));
+        Assert.Equal((DeviceAction.Added, "device-b"), (events[2].Action, events[2].Device.DeviceId));
 
         service.StopMonitoring();
         await service.DisposeAsync();
         repository.Dispose();
+    }
+
+    private static void InterlockedMax(ref int target, int candidate)
+    {
+        while (true)
+        {
+            var current = Volatile.Read(ref target);
+            if (candidate <= current || Interlocked.CompareExchange(ref target, candidate, current) == current)
+            {
+                return;
+            }
+        }
     }
 
     [Fact]
@@ -892,8 +930,8 @@ public class YubiKeyDeviceMonitorServiceTests
             return Task.CompletedTask;
         };
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        using var cts = new CancellationTokenSource(Bound);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         var staleRescan = service.RescanAsync(TestContext.Current.CancellationToken);
         await held.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
@@ -914,41 +952,32 @@ public class YubiKeyDeviceMonitorServiceTests
             () => repository.GetAll().Any(d => d.DeviceId == "device-b"),
             "Successor generation did not publish");
         Assert.DoesNotContain(repository.GetAll(), d => d.DeviceId == "stale-device");
-        Assert.DoesNotContain(events, e => e.Device.DeviceId == "stale-device");
 
         service.StopMonitoring();
+        Assert.DoesNotContain(
+            await watcher.DrainAsync(repository, cts.Token),
+            e => e.Device.DeviceId == "stale-device");
+
         await service.DisposeAsync();
         repository.Dispose();
     }
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
-    public async Task BlockedSubscriber_DoesNotBlockLifecycle_DisposeDrainBounded()
+    public async Task BlockedPublication_DoesNotBlockLifecycle_DisposeDrainBounded()
     {
-        // Arrange - a subscriber blocks a publication inside UpdateCache, holding
-        // the publication path. Lifecycle operations must stay bounded regardless.
+        // Arrange - a publication is parked mid-flight, holding the publication path.
+        // Lifecycle operations must stay bounded regardless.
         var (service, repository, findYubiKeys, _, _) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
         findYubiKeys.SetDevices([new FakeYubiKey("device-a", ConnectionType.SmartCard)]);
 
-        using var entered = new ManualResetEventSlim();
-        using var release = new ManualResetEventSlim();
-        var blockOnce = 1;
-        using var subscription = repository.DeviceChanges.Subscribe(new RecordingObserver<DeviceEvent>(_ =>
-        {
-            if (Interlocked.Exchange(ref blockOnce, 0) == 1)
-            {
-                entered.Set();
-                release.Wait(TestContext.Current.CancellationToken);
-            }
-        }));
+        var (parked, release) = ParkFirstPublication(service);
 
         service.StartMonitoring(TimeSpan.FromHours(1));
-        Assert.True(
-            entered.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken),
-            "Publication never reached the subscriber");
+        await parked.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         // Act & Assert - stop, restart, and dispose all complete bounded while the
-        // publication is still stuck inside UpdateCache.
+        // publication is still stuck on the publication path.
         service.StopMonitoring();
         Assert.False(service.IsMonitoring);
 
@@ -959,7 +988,7 @@ public class YubiKeyDeviceMonitorServiceTests
             .WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         // Cleanup - unblock the stuck publication; it unwinds against never-disposed gates.
-        release.Set();
+        release();
         repository.Dispose();
     }
 
@@ -997,24 +1026,24 @@ public class YubiKeyDeviceMonitorServiceTests
     {
         // Arrange - a slow scan exceeds the shutdown bound; StopMonitoring abandons it.
         var (service, repository, findYubiKeys, _, _) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        using var cts = new CancellationTokenSource(Bound);
         findYubiKeys.HangIgnoringCancellation = true;
         service.StartMonitoring(TimeSpan.FromHours(1));
         await AsyncWait.WaitUntilAsync(() => findYubiKeys.ActiveScans == 1, "Initial scan never started");
 
         service.StopMonitoring();
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Act - the slow scan completes after the stop timeout. Its snapshot must
         // be suppressed, not published.
         findYubiKeys.SetDevices([new FakeYubiKey("stale-device", ConnectionType.SmartCard)]);
         findYubiKeys.ReleaseHungScans();
         await AsyncWait.WaitUntilAsync(() => findYubiKeys.ActiveScans == 0, "Slow scan never completed");
-        await Task.Delay(200, TestContext.Current.CancellationToken);
 
-        Assert.Empty(events);
         Assert.Empty(repository.GetAll());
+        Assert.Empty(await watcher.DrainAsync(repository, cts.Token));
+        var afterDrain = watcher.Count;
 
         // The stop timeout is not terminal: a subsequent start publishes normally.
         findYubiKeys.HangIgnoringCancellation = false;
@@ -1023,9 +1052,13 @@ public class YubiKeyDeviceMonitorServiceTests
         await AsyncWait.WaitUntilAsync(
             () => repository.GetAll().Any(d => d.DeviceId == "device-b"),
             "Restart after an abandoned stop did not publish");
-        Assert.DoesNotContain(events, e => e.Device.DeviceId == "stale-device");
 
         service.StopMonitoring();
+        Assert.DoesNotContain(
+            await watcher.DrainAsync(repository, cts.Token),
+            e => e.Device.DeviceId == "stale-device");
+        Assert.True(watcher.Count > afterDrain, "the restarted generation published nothing");
+
         await service.DisposeAsync();
         repository.Dispose();
     }
@@ -1034,31 +1067,18 @@ public class YubiKeyDeviceMonitorServiceTests
     [Trait("Category", "RuntimeResilience")]
     public async Task DisposeAsync_PublicationInFlight_BoundedDrain_LatePublicationCompletesCleanly()
     {
-        // Arrange - an admitted publication is held inside UpdateCache when
+        // Arrange - an admitted publication is parked on the publication path when
         // disposal begins.
         var (service, repository, findYubiKeys, _, _) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
         findYubiKeys.SetDevices([new FakeYubiKey("device-a", ConnectionType.SmartCard)]);
 
-        using var entered = new ManualResetEventSlim();
-        using var release = new ManualResetEventSlim();
-        var blockOnce = 1;
-        using var subscription = repository.DeviceChanges.Subscribe(new RecordingObserver<DeviceEvent>(_ =>
-        {
-            if (Interlocked.Exchange(ref blockOnce, 0) == 1)
-            {
-                entered.Set();
-                release.Wait(TestContext.Current.CancellationToken);
-            }
-        }));
+        var (parked, release) = ParkFirstPublication(service);
 
-        // Run the rescan off the test thread: the fake completes synchronously, so
-        // the publication (and the blocking subscriber) would otherwise run inline
-        // on the test thread and deadlock against entered/release.
+        // Run the rescan off the test thread: the fake completes synchronously, so the
+        // parked publication would otherwise block the test thread itself.
         var rescanToken = TestContext.Current.CancellationToken;
         var rescan = Task.Run(() => service.RescanAsync(rescanToken), rescanToken);
-        Assert.True(
-            entered.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken),
-            "Publication never reached the subscriber");
+        await parked.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         // Act - dispose must bounded-drain the in-flight publication and abandon it
         // on timeout instead of hanging or disposing gates out from under it.
@@ -1067,7 +1087,7 @@ public class YubiKeyDeviceMonitorServiceTests
 
         // The admitted publication may complete after dispose (documented contract)
         // and must complete cleanly - no disposed-semaphore faults.
-        release.Set();
+        release();
         await rescan;
 
         Assert.Contains(repository.GetAll(), d => d.DeviceId == "device-a");
@@ -1079,38 +1099,20 @@ public class YubiKeyDeviceMonitorServiceTests
     public async Task DisposeAsync_LatePublication_AfterRepositoryDisposed_IsDiscardedNotThrown()
     {
         // Arrange - reproduces the manager's shutdown order: the monitor's bounded
-        // drain times out on a publication blocked in a subscriber, DisposeAsync
-        // returns, and the manager then disposes the repository. The blocked
-        // publication resumes afterwards against a disposed repository.
+        // drain times out on a parked publication, DisposeAsync returns, and the
+        // manager then disposes the repository. The parked publication resumes
+        // afterwards against a disposed repository.
         var (service, repository, findYubiKeys, _, _) = CreateService(shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        findYubiKeys.SetDevices([new FakeYubiKey("device-a", ConnectionType.SmartCard)]);
 
-        // Two devices, so UpdateCache emits twice. Blocking on the FIRST emission
-        // leaves a second OnNext still to come after the repository is disposed -
-        // that is the actual window, not the initial ThrowIfDisposed which has
-        // already passed by the time a subscriber can block.
-        findYubiKeys.SetDevices(
-        [
-            new FakeYubiKey("device-a", ConnectionType.SmartCard),
-            new FakeYubiKey("device-b", ConnectionType.SmartCard)
-        ]);
-
-        using var entered = new ManualResetEventSlim();
-        using var release = new ManualResetEventSlim();
-        var blockOnce = 1;
-        using var subscription = repository.DeviceChanges.Subscribe(new RecordingObserver<DeviceEvent>(_ =>
-        {
-            if (Interlocked.Exchange(ref blockOnce, 0) == 1)
-            {
-                entered.Set();
-                release.Wait(TestContext.Current.CancellationToken);
-            }
-        }));
+        // Parking after admission but before UpdateCache is the actual window: a
+        // publication already past the admission check is the only one that can still
+        // reach a repository the manager has since disposed.
+        var (parked, release) = ParkFirstPublication(service);
 
         var rescanToken = TestContext.Current.CancellationToken;
         var rescan = Task.Run(() => service.RescanAsync(rescanToken), rescanToken);
-        Assert.True(
-            entered.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken),
-            "Publication never reached the subscriber");
+        await parked.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         await service.DisposeAsync().AsTask()
             .WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
@@ -1118,28 +1120,27 @@ public class YubiKeyDeviceMonitorServiceTests
         // The manager disposes the repository immediately after the monitor.
         repository.Dispose();
 
-        // Act - release the blocked publication into the disposed repository.
-        release.Set();
+        // Act - release the parked publication into the disposed repository.
+        release();
 
         // Assert - it is discarded, not thrown. The type contract promises no device
-        // event escapes a disposed manager; UpdateCache and the subject both throw
-        // once disposed, so the publish path must absorb that rather than surface it.
+        // event escapes a disposed manager; UpdateCache throws once disposed, so the
+        // publish path must absorb that rather than surface it.
         await rescan.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
     }
 
     [Fact]
     [Trait("Category", "RuntimeResilience")]
-    public async Task Publish_SubscriberThrowsObjectDisposed_WhileNotDisposing_StillSurfaces()
+    public async Task Publish_ObjectDisposedFromUpdateCache_WhileNotDisposing_StillSurfaces()
     {
-        // Arrange - UpdateCache invokes subscribers synchronously, so a subscriber
-        // touching its own disposed state throws the same exception type the shutdown
-        // race produces. Outside monitor disposal that is a subscriber bug and must
-        // keep surfacing, not be absorbed by the late-publication guard.
+        // Arrange - the late-publication guard absorbs ObjectDisposedException only while the
+        // monitor itself is disposing. A repository disposed out from under a live monitor throws
+        // the same exception type and is a composition bug, so it must keep surfacing through the
+        // normal scan failure path rather than being misattributed to shutdown.
         var (service, repository, findYubiKeys, _, _) = CreateService();
         findYubiKeys.SetDevices([new FakeYubiKey("device-a", ConnectionType.SmartCard)]);
 
-        using var subscription = repository.DeviceChanges.Subscribe(
-            new RecordingObserver<DeviceEvent>(_ => throw new ObjectDisposedException("SubscriberOwnedResource")));
+        repository.Dispose();
 
         // Act + Assert - the monitor is not disposed, so the exception propagates.
         _ = await Assert.ThrowsAsync<ObjectDisposedException>(

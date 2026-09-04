@@ -97,7 +97,7 @@ mappings:
       - yubikit:src/Core/src/Devices/YubiKeyDeviceMonitorService.cs
       - yubikit:src/Core/src/Devices/YubiKeyDeviceRepository.cs
       - yubikit:src/Core/src/Devices/YubiKeyManager.cs
-    notes: V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> events with per-HID-device payloads, while v1 device-level consumers used YubiKeyDeviceListener.Arrived/Removed and YubiKeyDevice.FindAll() over the listener cache. V2 low-level HID DeviceEvent is only a diagnostic rescan hint (HidDeviceChangeKind plus optional platform id/path), not public physical-device truth. Use YubiKeyManager.DeviceChanges for repository-diffed Added/Removed events after YubiKeyDeviceRepository.UpdateCache.
+    notes: V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> events with per-HID-device payloads, while v1 device-level consumers used YubiKeyDeviceListener.Arrived/Removed and YubiKeyDevice.FindAll() over the listener cache. V2 low-level HID DeviceEvent is only a diagnostic rescan hint (HidDeviceChangeKind plus optional platform id/path), not public physical-device truth. Use YubiKeyManager.WatchAsync for repository-diffed Added/Removed events after YubiKeyDeviceRepository.UpdateCache.
     last_reviewed_commit: b1744cb36974ba8885fc7d9c007fe9fc5012b225
   - id: session-lifecycle
     status: manual

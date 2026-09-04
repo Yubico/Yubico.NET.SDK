@@ -24,40 +24,53 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <remarks>
 /// This class maintains a thread-safe cache of discovered devices and emits
 /// <see cref="DeviceEvent"/>s when the cache is updated via <see cref="UpdateCache"/>.
-/// It has no discovery capability - that responsibility belongs to the monitor service.
+/// It has no discovery capability - that responsibility belongs to
+/// <see cref="YubiKeyDeviceMonitorService"/>.
+/// The repository owns the <see cref="DeviceEventHub"/> that backs <see cref="WatchAsync"/>.
 /// </remarks>
-internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
+internal sealed class YubiKeyDeviceRepository : IDisposable
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyDeviceRepository>();
 
     private readonly ConcurrentDictionary<string, IYubiKey> _deviceCache = new();
-    private readonly DeviceEventBroadcaster _deviceChanges = new();
+    private readonly DeviceEventHub _events = new();
 
     private volatile bool _hasData;
     private int _disposed;
 
-    /// <inheritdoc/>
-    /// <remarks>
-    /// Events are delivered synchronously in subscription order. Subscriber exceptions propagate
-    /// and stop delivery to later subscribers.
-    /// </remarks>
-    public IObservable<DeviceEvent> DeviceChanges => _deviceChanges;
-
     /// <summary>
-    /// Async-sequence view of <see cref="DeviceChanges"/>, for <c>await foreach</c> consumers.
+    /// Async sequence of device change events (added/removed).
     /// </summary>
-    /// <param name="cancellationToken">Cancels enumeration.</param>
+    /// <param name="cancellationToken">Cancels this enumeration only.</param>
     /// <remarks>
-    /// Subscription is lazy. Each enumeration has an independent bounded buffer; cancellation and
-    /// overflow fault the enumeration, while repository disposal completes it normally.
+    /// Subscription is lazy, and each enumeration owns an independent bounded buffer. Cancellation and
+    /// overflow terminate only the affected enumeration; repository disposal ends every active
+    /// enumeration normally. Delivery is asynchronous, so no consumer can block or interrupt
+    /// <see cref="UpdateCache"/>.
     /// </remarks>
     public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
-        DeviceEventStream.From(_deviceChanges, cancellationToken);
+        _events.WatchAsync(cancellationToken);
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Number of live <see cref="WatchAsync"/> subscriptions. Diagnostic observability for the
+    /// lazy-subscription contract.
+    /// </summary>
+    internal int WatcherCount => _events.WatcherCount;
+
+    /// <summary>
+    /// Indicates whether the cache contains any data.
+    /// </summary>
     public bool HasData => _hasData;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets all cached devices, optionally filtered by connection type.
+    /// </summary>
+    /// <param name="type">The connection type to filter by, or <see cref="ConnectionType.All"/> for all devices. <see cref="ConnectionType.Hid"/> includes HID FIDO and HID OTP devices.</param>
+    /// <returns>A read-only list of cached devices matching the filter.</returns>
+    /// <remarks>
+    /// This is a synchronous operation that returns only cached data.
+    /// It does not trigger device discovery.
+    /// </remarks>
     public IReadOnlyList<IYubiKey> GetAll(ConnectionType type = ConnectionType.All)
     {
         ThrowIfDisposed();
@@ -65,7 +78,16 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         return [.. _deviceCache.Values.Where(d => type.Matches(d.AvailableConnections))];
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Updates the cache with a new set of discovered devices.
+    /// </summary>
+    /// <param name="devices">The complete set of currently connected devices.</param>
+    /// <remarks>
+    /// This method performs a diff between the current cache and the new set,
+    /// emitting <see cref="DeviceEvent"/>s for added and removed devices.
+    /// Publication is asynchronous fan-out into per-watcher buffers, so this method never runs
+    /// consumer code and cannot be blocked or interrupted by a watcher.
+    /// </remarks>
     public void UpdateCache(IEnumerable<IYubiKey> devices)
     {
         ThrowIfDisposed();
@@ -91,7 +113,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         {
             if (_deviceCache.TryRemove(identityKey, out var removedDevice))
             {
-                _deviceChanges.Publish(new DeviceEvent(DeviceAction.Removed, removedDevice));
+                _events.Publish(new DeviceEvent(DeviceAction.Removed, removedDevice));
                 Logger.LogDebug("Device removed: {DeviceId}", removedDevice.DeviceId);
             }
         }
@@ -101,7 +123,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         {
             var device = newDeviceMap[identityKey];
             _deviceCache[identityKey] = device;
-            _deviceChanges.Publish(new DeviceEvent(DeviceAction.Added, device));
+            _events.Publish(new DeviceEvent(DeviceAction.Added, device));
             Logger.LogDebug("Device added: {DeviceId}", device.DeviceId);
         }
 
@@ -118,8 +140,8 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
                 existing.AvailableConnections != updated.AvailableConnections)
             {
                 _deviceCache[identityKey] = updated;
-                _deviceChanges.Publish(new DeviceEvent(DeviceAction.Removed, existing));
-                _deviceChanges.Publish(new DeviceEvent(DeviceAction.Added, updated));
+                _events.Publish(new DeviceEvent(DeviceAction.Removed, existing));
+                _events.Publish(new DeviceEvent(DeviceAction.Added, updated));
                 changedCount++;
                 Logger.LogDebug(
                     "Device connections changed: {DeviceId} ({Old} -> {New})",
@@ -142,7 +164,12 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
             changedCount);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Clears all devices from the cache.
+    /// </summary>
+    /// <remarks>
+    /// Does not emit removal events. Use during shutdown only.
+    /// </remarks>
     public void Clear()
     {
         ThrowIfDisposed();
@@ -161,7 +188,10 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Ends every active <see cref="WatchAsync"/> enumeration normally and clears the cache.
+    /// Idempotent.
+    /// </summary>
     public void Dispose()
     {
         if (Interlocked.Exchange(ref _disposed, 1) == 1)
@@ -169,7 +199,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
             return;
         }
 
-        _deviceChanges.Complete();
+        _events.Complete();
 
         _deviceCache.Clear();
 

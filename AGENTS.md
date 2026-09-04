@@ -17,7 +17,7 @@
 - Never run a whole `Category=RequiresUserPresence` lane as one blocking command: it blocks for minutes, and aborting mid-ceremony leaves the authenticator holding a user-presence request that wedges the key until it is re-plugged. One narrowly filtered test per invocation, with the human ready.
 - Use `dotnet toolchain.cs -- --help` when arguments act strangely; every script long option, including `--project`, requires the preceding `--` separator.
 - CI runs `dotnet toolchain.cs build`, `dotnet toolchain.cs test`, then `dotnet toolchain.cs -- pack --package-version 2.0.0-alpha.2`.
-- Scope `dotnet format` to your staged files via `--include`, never the whole solution — see `CLAUDE.md` Pre-Commit Checklist for the exact command.
+- Follow root `CLAUDE.md` Pre-Commit Checklist for the scoped `dotnet format` workflow.
 
 ## Project Shape
 - Modules live under `src/` with directory names stripped of the `Yubico.YubiKit.` prefix; assembly, namespace, and package names keep the prefix.

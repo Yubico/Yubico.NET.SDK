@@ -30,7 +30,7 @@ This codebase uses a mix of xUnit v2 and xUnit v3 test projects that require dif
 - Modern C# 14 patterns (see `CLAUDE.md`)
 - Memory management with `Span<T>`, `Memory<T>`, `ArrayPool<T>`
 - Security: zero sensitive data, use `CryptographicOperations.ZeroMemory()`
-- EditorConfig compliance: scope `dotnet format` to staged files via `--include` before commit (never the whole solution) — see `CLAUDE.md` Pre-Commit Checklist
+- EditorConfig compliance: follow the root `CLAUDE.md` Pre-Commit Checklist formatting step.
 
 ### Git Discipline
 

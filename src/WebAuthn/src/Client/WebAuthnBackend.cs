@@ -27,7 +27,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <remarks>
 /// This adapter owns the FidoSession lifetime and manages the PinUvAuthProtocolV2 instance.
 /// </remarks>
-internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
+internal sealed class WebAuthnBackend : IWebAuthnBackend
 {
     private readonly IFidoSession _session;
     private PinUvAuthProtocolV2? _protocol;
@@ -35,10 +35,10 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     private bool _disposed;
 
     /// <summary>
-    /// Initializes a new instance of <see cref="FidoSessionWebAuthnBackend"/>.
+    /// Initializes a new instance of <see cref="WebAuthnBackend"/>.
     /// </summary>
     /// <param name="session">The FIDO session (ownership transferred to this backend).</param>
-    public FidoSessionWebAuthnBackend(IFidoSession session)
+    public WebAuthnBackend(IFidoSession session)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
     }

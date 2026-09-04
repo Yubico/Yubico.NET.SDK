@@ -76,7 +76,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(fidoSession);
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
         ArgumentNullException.ThrowIfNull(isPublicSuffix);
-        _backend = new FidoSessionWebAuthnBackend(fidoSession);
+        _backend = new WebAuthnBackend(fidoSession);
         _isPublicSuffix = domain => isPublicSuffix(domain);
         _options = options ?? new WebAuthnClientOptions();
     }

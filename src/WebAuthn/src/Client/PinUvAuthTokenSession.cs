@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// This session owns the token bytes and zeroes them on disposal.
 /// The protocol instance is NOT disposed by this session (owned by backend).
 /// </remarks>
-public sealed class PinUvAuthTokenSession : IDisposable
+internal sealed class PinUvAuthTokenSession : IDisposable
 {
     private readonly byte[] _token;
     private bool _disposed;

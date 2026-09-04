@@ -242,9 +242,11 @@ internal class AsnPrivateKeyDecoder
                 }
                 else
                 {
-                    // Earlier releases of this SDK wrote the field with a primitive, implicitly
-                    // tagged BIT STRING. Those keys stay readable; the point below is validated
-                    // identically either way.
+                    // Deliberately permissive. Earlier releases of this SDK wrote the field as a
+                    // primitive, implicitly tagged BIT STRING (0x81), which RFC 5915 does not
+                    // allow. Keys already stored in that form stay readable, so this decoder
+                    // accepts the legacy tag on input even though the encoder only ever emits the
+                    // explicit form above. The point itself is validated identically either way.
                     publicKeyBytes = seqEcPrivateKey.ReadBitString(out unusedBits, tag);
                 }
 
@@ -255,7 +257,7 @@ internal class AsnPrivateKeyDecoder
 
                 AsnUtilities.ValidateDecodedEcPoint(publicKeyBytes.Span, curveOid);
 
-                var coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
+                var coordinateSize = AsnUtilities.GetDecodedCoordinateSize(curveOid);
                 var xCoordinate = new byte[coordinateSize];
                 var yCoordinate = new byte[coordinateSize];
 

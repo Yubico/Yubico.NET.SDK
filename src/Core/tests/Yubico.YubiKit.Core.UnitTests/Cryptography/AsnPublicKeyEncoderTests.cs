@@ -243,6 +243,27 @@ public class AsnPublicKeyEncoderTests
         Assert.Throws<ArgumentException>(() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(parameters));
     }
 
+    /// <summary>
+    /// The curve OID is caller-supplied. X25519 has a 32-byte key definition, so a general OID
+    /// lookup would accept P-256 sized coordinates and emit them as an id-ecPublicKey key on a
+    /// curve that is not an EC prime curve at all.
+    /// </summary>
+    [Theory]
+    [InlineData(Oids.X25519)]
+    [InlineData(Oids.Ed25519)]
+    [InlineData(Oids.AES256Cbc)]
+    [InlineData("1.3.132.0.10")] // secp256k1
+    public void EncodeToSubjectPublicKeyInfo_EcParametersNotASupportedPrimeCurve_ThrowsArgumentException(string oid)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(oid),
+            Q = new ECPoint { X = new byte[32], Y = new byte[32] }
+        };
+
+        Assert.Throws<ArgumentException>(() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(parameters));
+    }
+
     private static byte[] BuildUncompressedPoint(byte[] x, byte[] y)
     {
         var point = new byte[1 + x.Length + y.Length];

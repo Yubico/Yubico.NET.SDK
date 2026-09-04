@@ -117,7 +117,7 @@ internal class AsnPublicKeyDecoder
         // 0x04 || X coordinate || Y coordinate.
         AsnUtilities.ValidateDecodedEcPoint(subjectPublicKey, curveOid);
 
-        var coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
+        var coordinateSize = AsnUtilities.GetDecodedCoordinateSize(curveOid);
         var xCoordinate = new byte[coordinateSize];
         var yCoordinate = new byte[coordinateSize];
 

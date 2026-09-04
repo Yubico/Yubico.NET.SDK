@@ -180,6 +180,146 @@ public class AsnPrivateKeyEncoderTests
         Assert.Equal(full.D, actual.D);
     }
 
+    #endregion
+
+    #region EncodeToPkcs8(ECParameters) - optional RFC 5915 publicKey field
+
+    /// <summary>
+    /// True when the RFC 5915 ECPrivateKey carries the optional <c>[1] publicKey</c> field.
+    /// </summary>
+    private static bool HasPublicKeyField(byte[] pkcs8)
+    {
+        var seqEcPrivateKey = new AsnReader(ReadPkcs8PrivateKeyOctets(pkcs8), AsnEncodingRules.BER)
+            .ReadSequence();
+        _ = seqEcPrivateKey.ReadInteger();
+        _ = seqEcPrivateKey.ReadOctetString();
+
+        while (seqEcPrivateKey.HasData)
+        {
+            if (seqEcPrivateKey.PeekTag() is { TagValue: 1, TagClass: TagClass.ContextSpecific })
+            {
+                return true;
+            }
+
+            _ = seqEcPrivateKey.ReadEncodedValue();
+        }
+
+        return false;
+    }
+
+    [Fact]
+    public void EncodeToPkcs8_EcParametersBothCoordinatesPresent_EmitsPublicKeyField()
+    {
+        using var bcl = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var parameters = bcl.ExportParameters(includePrivateParameters: true);
+
+        var ourPkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(parameters);
+
+        Assert.True(HasPublicKeyField(ourPkcs8));
+    }
+
+    [Fact]
+    public void EncodeToPkcs8_EcParametersBothCoordinatesNull_OmitsPublicKeyField()
+    {
+        using var bcl = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var full = bcl.ExportParameters(includePrivateParameters: true);
+        var withoutQ = new ECParameters
+        {
+            Curve = full.Curve,
+            D = full.D,
+            Q = new ECPoint { X = null, Y = null }
+        };
+
+        var ourPkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(withoutQ);
+
+        Assert.False(HasPublicKeyField(ourPkcs8));
+    }
+
+    /// <summary>
+    /// A half-supplied point is caller error, not an instruction to drop the public key. Silently
+    /// omitting <c>[1]</c> would return a valid encoding that has quietly discarded key material.
+    /// </summary>
+    [Theory]
+    [InlineData(true, false)] // X supplied, Y missing
+    [InlineData(false, true)] // Y supplied, X missing
+    public void EncodeToPkcs8_EcParametersPartialPublicPoint_ThrowsArgumentException(
+        bool includeX, bool includeY)
+    {
+        using var bcl = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var full = bcl.ExportParameters(includePrivateParameters: true);
+        var partial = new ECParameters
+        {
+            Curve = full.Curve,
+            D = full.D,
+            Q = new ECPoint
+            {
+                X = includeX ? full.Q.X : null,
+                Y = includeY ? full.Q.Y : null
+            }
+        };
+
+        var exception = Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(partial));
+
+        Assert.DoesNotContain(Convert.ToHexString(full.D!), exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    #endregion
+
+    #region EncodeToPkcs8(ECParameters) - curve OID must be a supported prime curve
+
+    /// <summary>
+    /// The curve OID comes straight from the caller. Resolving it through a general OID lookup
+    /// would let a non-EC algorithm OID through and emit it as an id-ecPublicKey curve parameter.
+    /// </summary>
+    [Theory]
+    [InlineData(Oids.X25519)]
+    [InlineData(Oids.Ed25519)]
+    [InlineData(Oids.AES256Cbc)]
+    public void EncodeToPkcs8_EcParametersNonEcCurveOid_ThrowsArgumentException(string oid)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(oid),
+            D = new byte[32],
+            Q = new ECPoint { X = new byte[32], Y = new byte[32] }
+        };
+
+        Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(parameters));
+    }
+
+    [Theory]
+    [InlineData("1.3.132.0.10")] // secp256k1
+    [InlineData("1.2.840.10045.3.1.1")] // secp192r1
+    public void EncodeToPkcs8_EcParametersUnsupportedCurveOid_ThrowsArgumentException(string oid)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(oid),
+            D = new byte[32],
+            Q = new ECPoint { X = new byte[32], Y = new byte[32] }
+        };
+
+        Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(parameters));
+    }
+
+    /// <summary>
+    /// Without a public point there is no point-shape check to catch the curve, but emitting
+    /// id-ecPublicKey with an unsupported curve parameter is just as wrong.
+    /// </summary>
+    [Theory]
+    [InlineData(Oids.X25519)]
+    [InlineData("1.3.132.0.10")] // secp256k1
+    public void EncodeToPkcs8_EcParametersUnsupportedCurveOidWithoutPublicPoint_ThrowsArgumentException(string oid)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(oid),
+            D = new byte[32]
+        };
+
+        Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(parameters));
+    }
+
     [Theory]
     [InlineData(Oids.ECP256, 31, 32)] // X one byte short
     [InlineData(Oids.ECP256, 32, 31)] // Y one byte short

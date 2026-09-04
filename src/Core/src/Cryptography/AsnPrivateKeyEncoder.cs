@@ -137,7 +137,10 @@ internal static class AsnPrivateKeyEncoder
     /// </summary>
     /// <param name="parameters">The EC parameters including private key value.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
-    /// <exception cref="ArgumentException">Thrown when the private key parameter D is null.</exception>
+    /// <exception cref="ArgumentException">
+    /// The private key parameter D is null, the curve is not one of P-256, P-384 or P-521, or the
+    /// public point is half supplied (exactly one of <c>Q.X</c> and <c>Q.Y</c> is null).
+    /// </exception>
     public static byte[] EncodeToPkcs8(ECParameters parameters)
     {
         if (parameters.D is null)
@@ -151,9 +154,24 @@ internal static class AsnPrivateKeyEncoder
         ReadOnlyMemory<byte> privateKey = parameters.D;
         var curveOid = parameters.Curve.Oid.Value;
 
-        // Create public point if Q coordinates are available
+        // Gate the curve here, at the boundary where the untrusted OID arrives, rather than
+        // relying on the point-shape check: a key with no public point never reaches that check.
+        AsnUtilities.ValidateEcCurveArgument(curveOid, nameof(parameters));
+
+        // The optional RFC 5915 publicKey field is omitted only when the caller supplied no point
+        // at all. Half a point is caller error: silently dropping it would return a valid encoding
+        // that has quietly discarded key material the caller asked to include.
+        if ((parameters.Q.X is null) != (parameters.Q.Y is null))
+        {
+            throw new ArgumentException(
+                parameters.Q.X is null
+                    ? "EC public point is incomplete: Q.Y was supplied but Q.X is null. Supply both coordinates or neither."
+                    : "EC public point is incomplete: Q.X was supplied but Q.Y is null. Supply both coordinates or neither.",
+                nameof(parameters));
+        }
+
         ReadOnlyMemory<byte>? publicPoint = null;
-        if (parameters.Q is { X: not null, Y: not null })
+        if (parameters.Q.X is not null && parameters.Q.Y is not null)
         {
             publicPoint = AsnUtilities.BuildUncompressedEcPoint(
                 parameters.Q.X,

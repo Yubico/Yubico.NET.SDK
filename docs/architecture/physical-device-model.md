@@ -12,7 +12,8 @@ per-interface-handle model.
 > environment requires an elevated process. See
 > [Platform Support For HID Discovery](#platform-support-for-hid-discovery).
 
-See also: [event-driven device discovery](./event-driven-device-discovery.md) and the
+See also: [device identity and physical-device correlation](./device-identity.md),
+[event-driven device discovery](./event-driven-device-discovery.md), and the
 [Core module README](../../src/Core/README.md).
 
 ## One IYubiKey Per Physical Device
@@ -26,7 +27,7 @@ See also: [event-driven device discovery](./event-driven-device-discovery.md) an
   the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
   (`ykphysical:topology:*`, `ykphysical:{serial}`, or `ykphysical:pid:*`) different from an earlier scan;
   do not treat independently created scan objects as durable identity records. The repository correlates
-  physical presence by interface set (`CompositeYubiKey.PhysicalIdentityKeyFor`).
+  physical presence by interface set (`YubiKeyDevice.PhysicalIdentityKeyFor`, internal).
 - `ConnectionType AvailableConnections` — the concrete interfaces this device exposes, any combination of
   `SmartCard`, `HidFido`, and `HidOtp`. It never contains the `Hid` group flag or `All`.
   This is the union of observed transport interfaces, not proof that every applet is enabled on every
@@ -81,12 +82,15 @@ distinct keys, so one physical key can surface as more than one row.
 
 `FindAllAsync(forceRescan: false)` returns the repository cache after its first populated scan;
 `forceRescan: true` performs discovery and reconciles the result into that cache. Successful identity and
-metadata reads are cached while their member interfaces remain present. Retaining the originally published
-object preserves `DeviceId` event correlation, but also means a newly constructed equivalent object's
-refreshed cached metadata/member instances are not substituted when the physical interface set and
-`AvailableConnections` are unchanged. Request fresh Management data explicitly when current device
-configuration matters. `DeviceChanges` is emitted from repository diffs after a full rescan, not directly
-from native listener hints. These APIs inherit the conservative grouping bounds in
+metadata reads are cached while their interface set remains present, but activity observed on any transport
+globally invalidates both caches; the observed transport is diagnostic context, not an eviction scope.
+Discovery populates best-effort metadata for every published device shape, including one-interface USB and
+NFC records. Grouping does not depend on those metadata results, but the bounded reads are awaited and may
+delay scan completion by up to their budget. When a later scan obtains metadata for an otherwise unchanged
+physical device, the repository copies it onto the object it originally published without emitting `Added`
+or `Removed`. Request fresh Management data explicitly when current device configuration matters.
+`DeviceChanges` is emitted from repository diffs after a full rescan, not directly from native listener
+hints. These APIs inherit the conservative grouping bounds in
 [Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
 
 ### Platform Support For HID Discovery

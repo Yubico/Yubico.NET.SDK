@@ -112,7 +112,7 @@ public class SessionTransportTests
         var creationFailure = new InvalidOperationException("initialization failed");
         var cleanupFailure = new IOException("cleanup failed");
         var leaseId = $"cleanup-failure-{Guid.NewGuid():N}";
-        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync(leaseId, Ct);
+        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync([leaseId], Ct);
         var innerConnection = new RecordingConnection(ConnectionType.SmartCard)
         {
             DisposeAsyncException = cleanupFailure
@@ -138,7 +138,7 @@ public class SessionTransportTests
         var creationFailure = new InvalidOperationException("initialization failed");
         var cleanupFailure = new IOException("cleanup failed");
         var leaseId = $"cleanup-logging-failure-{Guid.NewGuid():N}";
-        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync(leaseId, Ct);
+        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync([leaseId], Ct);
         var innerConnection = new RecordingConnection(ConnectionType.SmartCard)
         {
             DisposeAsyncException = cleanupFailure

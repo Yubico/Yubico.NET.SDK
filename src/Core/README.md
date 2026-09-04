@@ -58,7 +58,10 @@ var fidoDevices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
 `YubiKeyManager.StartMonitoring()` starts platform listeners and performs an initial repository rescan. Listener
 notifications are only rescan hints; public `YubiKeyManager.DeviceChanges` events are emitted after discovery
 updates the repository and computes an `Added` or `Removed` diff. This means an OS-level HID notification does
-not by itself mean a public YubiKey device was added or removed.
+not by itself mean a public YubiKey device was added or removed. Unchanged interface and connection sets retain
+their published object unless a fresh known serial proves that different hardware occupies the same interfaces;
+that substitution emits `Removed` for the predecessor followed by `Added` for the successor. Without a listener
+event or a scan that observes absence, same-interface cached identity cannot distinguish a replacement.
 
 ### Opening a Connection
 
@@ -261,6 +264,9 @@ finally
 A physical `IYubiKey` exposes one or more concrete interfaces; a typed `ConnectAsync<TConnection>()` routes
 to the requested interface.
 
+Discovery first represents each live enumerated PC/SC or HID handle as an internal raw connection slot,
+then merges those slots into the single production `YubiKeyDevice` shape exposed as `IYubiKey`.
+
 ```
 IYubiKey (one physical device)
     │  AvailableConnections / SupportsConnection(...)
@@ -293,7 +299,7 @@ ApduResponse
 - **One connection per grouped physical key.** A connection atomically claims every known member interface ID before native open. Discovery skips claimed members, and a connect waits cancellably for active discovery. Conservative standalone records retain one-element scopes when grouping cannot be proven.
 - **One live session per connection.** A second session is refused before any wire operation. Sequential reuse is supported: dispose session A, then create session B over the same caller-owned connection.
 - **Connection ownership follows creation.** A direct `Session.CreateAsync(connection)` borrows the connection and does not dispose it. A `device.Create<App>SessionAsync()` convenience method owns its hidden connection and closes it with the returned session. Always use `await using`; leaking a caller-created connection can retain the physical-device lease and block later opens. There is no finalizer backstop.
-- **Discovery work is bounded independently from caller waits.** Each caller has its own timeout/cancellation, while repeated scans share at most one underlying read per stable interface and connection type. Completion removes the single-flight entry for later retry; a permanently hung native call remains one operation rather than accumulating one operation per scan.
+- **Discovery work is bounded independently from caller waits.** Each caller has its own timeout/cancellation, while repeated scans on one finder share at most one underlying read per stable interface and connection type. Grouping does not depend on best-effort metadata, but bounded metadata reads are awaited and may delay scan completion by up to their budget. Activity observed on any transport atomically replaces that finder's identity cache, metadata cache, and read scope; old writes remain in unreachable evidence, and a replacement manager cannot join reads from its predecessor. The reported transport is diagnostic context, not an eviction scope. Completion removes a single-flight entry for later retry; a permanently hung native call remains one operation in its finder scope rather than accumulating one operation per scan.
 - **Monitor hints are bounded occurrence signals.** Concurrent HID/SmartCard callbacks share one capacity-one wake-up signal; storms cannot build a payload queue, while quiet-period debounce, maximum coalescing, and periodic fallback scans remain intact. HID and SmartCard listeners start independently as best-effort latency accelerators; unavailable listeners are cleaned up without aborting monitoring, which can fall back to interval-only rescans.
 - **A monitor generation may do anything except publish stale truth.** Monitor lifecycle is an epoch model, not a state machine: each `StartMonitoring` creates an immutable generation that the loop, manual rescans, and listener callbacks capture once. Every device-snapshot publication is mutually exclusive under one never-disposed gate and is admitted only if its generation is still current, so a scan hung in native I/O can return long after its generation was retired and simply be discarded. Start, stop, and dispose take only a small state lock, so a blocking `DeviceChanges` subscriber cannot wedge them, and restart after an abandoned stop always succeeds. Dispose drains in-flight publication with a bounded timeout; a publication that outlives the bound may complete afterwards, which the manager's repository disposal silences.
 - **Connections are disposed exactly once, and disposal means disposed.** The registered-connection wrappers run teardown through a one-shot gate: the first caller disposes the inner connection and then releases the ownership lease, and every other caller — sync or async, concurrent or later — observes that same completion. Any disposal call returning therefore implies teardown finished, so a caller cannot reopen an interface whose physical handle is still closing.

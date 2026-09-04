@@ -39,7 +39,8 @@ internal static class CompositeMetadataReader
         IYubiKey device,
         TimeSpan totalBudget,
         ILogger logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        ProtocolDeviceInfo.ReadScope? scope = null)
     {
         var clock = Stopwatch.StartNew();
 
@@ -72,7 +73,7 @@ internal static class CompositeMetadataReader
             try
             {
                 return await ProtocolDeviceInfo
-                    .ReadBoundedAsync(device, connection, remaining, logger, cancellationToken)
+                    .ReadBoundedAsync(device, connection, remaining, logger, cancellationToken, scope: scope)
                     .ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -91,4 +92,5 @@ internal static class CompositeMetadataReader
 
         return null;
     }
+
 }

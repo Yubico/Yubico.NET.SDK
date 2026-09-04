@@ -64,22 +64,21 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
 
         return [.. _deviceCache.Values.Where(d => type.Matches(d.AvailableConnections))];
     }
-
     /// <inheritdoc/>
     public void UpdateCache(IEnumerable<IYubiKey> devices)
     {
         ThrowIfDisposed();
 
-        // Diffing is keyed by PHYSICAL identity — the set of interface paths a key occupies — and never by
-        // IYubiKey.DeviceId. A composite's DeviceId names the evidence tier that resolved the merge, so it
-        // flips when the surrounding evidence changes even though the key never moved (see
-        // CompositeYubiKey.PhysicalIdentityKeyFor). Diffing on it reported an unmoved key as Removed+Added.
+        // Diffing is keyed by physical identity — the set of interface paths a key occupies — and never by
+        // IYubiKey.DeviceId. DeviceId names the evidence tier that resolved the merge and may change while
+        // the interface set remains unchanged; the repository retains the existing object across those
+        // evidence changes so later removal remains correlated (see YubiKeyDevice.PhysicalIdentityKeyFor).
         var currentKeys = _deviceCache.Keys.ToHashSet();
         var newDeviceMap = new Dictionary<string, IYubiKey>();
 
         foreach (var device in devices)
         {
-            newDeviceMap[CompositeYubiKey.PhysicalIdentityKeyFor(device)] = device;
+            newDeviceMap[YubiKeyDevice.PhysicalIdentityKeyFor(device)] = device;
         }
 
         var newKeys = newDeviceMap.Keys.ToHashSet();
@@ -106,26 +105,41 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         }
 
         // Update existing devices in cache. A physical device's available connections can change while it
-        // stays present. DeviceAction has only Added/Removed, so model a capability change as Removed+Added
-        // rather than overwriting silently (ISC-17). An interface appearing or disappearing changes the
-        // interface set itself, so it is already reported as Removed+Added by the two loops above; this loop
-        // covers the same interface set reporting different connections.
+        // stays present, and a different known serial on the same interface set proves a substitution.
+        // DeviceAction has only Added/Removed, so model either change as Removed+Added rather than overwriting
+        // silently. An interface appearing or disappearing changes the interface set itself, so it is already
+        // reported as Removed+Added by the two loops above.
         var changedCount = 0;
         foreach (var identityKey in newKeys.Intersect(currentKeys))
         {
             var updated = newDeviceMap[identityKey];
-            if (_deviceCache.TryGetValue(identityKey, out var existing) &&
-                existing.AvailableConnections != updated.AvailableConnections)
+            if (!_deviceCache.TryGetValue(identityKey, out var existing))
+                continue;
+
+            var serialContradiction = existing.SerialNumber is { } existingSerial &&
+                updated.SerialNumber is { } updatedSerial &&
+                existingSerial != updatedSerial;
+            if (existing.AvailableConnections != updated.AvailableConnections || serialContradiction)
             {
                 _deviceCache[identityKey] = updated;
                 _deviceChanges.Publish(new DeviceEvent(DeviceAction.Removed, existing));
                 _deviceChanges.Publish(new DeviceEvent(DeviceAction.Added, updated));
                 changedCount++;
                 Logger.LogDebug(
-                    "Device connections changed: {DeviceId} ({Old} -> {New})",
+                    "Device republished: {OldDeviceId} -> {NewDeviceId}, connections {OldConnections} -> " +
+                    "{NewConnections}, serial {OldSerial} -> {NewSerial}",
+                    existing.DeviceId,
                     updated.DeviceId,
                     existing.AvailableConnections,
-                    updated.AvailableConnections);
+                    updated.AvailableConnections,
+                    existing.SerialNumber,
+                    updated.SerialNumber);
+            }
+            else if (existing is YubiKeyDevice retained &&
+                updated is YubiKeyDevice latest &&
+                latest.DeviceInfo is { } metadata)
+            {
+                retained.DeviceInfo = metadata;
             }
 
             // Otherwise retain the object whose DeviceId was published in Added, so a later Removed event
@@ -135,7 +149,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         _hasData = true;
 
         Logger.LogDebug(
-            "Cache updated: {Total} devices, {Added} added, {Removed} removed, {Changed} connection-changed",
+            "Cache updated: {Total} devices, {Added} added, {Removed} removed, {Changed} republished",
             newDeviceMap.Count,
             addedKeys.Count,
             removedKeys.Count,

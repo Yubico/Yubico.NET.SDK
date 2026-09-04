@@ -35,7 +35,7 @@ public class FindYubiKeysPidMergeTests
                 new FakePcscDevice("Yubico YubiKey OTP+FIDO+CCID 01", PscsConnectionKind.Usb)
             ]),
             new FakeFindHidDevices([]),
-            factory);
+            factory.Create);
 
         IReadOnlyList<IYubiKey> result;
         var stopwatch = Stopwatch.StartNew();
@@ -48,10 +48,9 @@ public class FindYubiKeysPidMergeTests
         {
             factory.FailAllReads();
         }
-
         Assert.True(
             stopwatch.Elapsed < TimeSpan.FromSeconds(3),
-            $"Independent 2s identity budgets accumulated sequentially for {stopwatch.Elapsed}.");
+            $"The scan waited beyond its single bounded identity pass: {stopwatch.Elapsed}.");
         Assert.Equal(2, result.Count);
         Assert.Equal(2, factory.TotalConnectCalls);
         Assert.All(result, device => Assert.Equal(ConnectionType.SmartCard, device.AvailableConnections));
@@ -65,7 +64,7 @@ public class FindYubiKeysPidMergeTests
         var find = new FindYubiKeys(
             new FakeFindPcscDevices([new FakePcscDevice("Yubico YubiKey OTP+FIDO+CCID 00 00", PscsConnectionKind.Usb)]),
             new FakeFindHidDevices([new FakeHidDevice(0x0407, HidInterfaceType.Fido), new FakeHidDevice(0x0407, HidInterfaceType.Otp)]),
-            new ThrowingFactory());
+            ThrowingFactory.Create);
 
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
@@ -82,12 +81,12 @@ public class FindYubiKeysPidMergeTests
         var find = new FindYubiKeys(
             new FakeFindPcscDevices([]),
             new FakeFindHidDevices([new FakeHidDevice(0, HidInterfaceType.Fido), new FakeHidDevice(0, HidInterfaceType.Otp)]),
-            new ThrowingFactory());
+            ThrowingFactory.Create);
 
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, result.Count);
-        Assert.DoesNotContain(result, d => d is CompositeYubiKey);
+        Assert.All(result, d => Assert.Single(Assert.IsType<YubiKeyDevice>(d).InterfaceIds));
     }
 
     private sealed class FakeFindPcscDevices(IReadOnlyList<IPcscDevice> devices) : IFindPcscDevices
@@ -118,9 +117,9 @@ public class FindYubiKeysPidMergeTests
         public IHidConnection ConnectToIOReports() => throw new NotSupportedException();
     }
 
-    private sealed class ThrowingFactory : IYubiKeyFactory
+    private static class ThrowingFactory
     {
-        public IYubiKey Create(IDevice device) => device switch
+        public static IYubiKeyConnectionSlot Create(IDevice device) => device switch
         {
             IPcscDevice p => new ThrowingYubiKey($"pcsc:{p.ReaderName}", ConnectionType.SmartCard),
             IHidDevice h => new ThrowingYubiKey(
@@ -129,13 +128,13 @@ public class FindYubiKeysPidMergeTests
         };
     }
 
-    private sealed class BlockingIdentityFactory : IYubiKeyFactory
+    private sealed class BlockingIdentityFactory
     {
         private readonly List<BlockingIdentityYubiKey> _devices = [];
 
         public int TotalConnectCalls => _devices.Sum(device => device.ConnectCalls);
 
-        public IYubiKey Create(IDevice device)
+        public IYubiKeyConnectionSlot Create(IDevice device)
         {
             var pcscDevice = Assert.IsAssignableFrom<IPcscDevice>(device);
             var yubiKey = new BlockingIdentityYubiKey($"pcsc:{pcscDevice.ReaderName}");
@@ -150,7 +149,7 @@ public class FindYubiKeysPidMergeTests
         }
     }
 
-    private sealed class BlockingIdentityYubiKey(string deviceId) : IYubiKey, IDiscoveryConnectionProvider
+    private sealed class BlockingIdentityYubiKey(string deviceId) : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
     {
         private readonly TaskCompletionSource<IConnection> _connection =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -158,15 +157,11 @@ public class FindYubiKeysPidMergeTests
 
         public int ConnectCalls => Volatile.Read(ref _connectCalls);
 
-        public string DeviceId { get; } = deviceId;
+        public string InterfaceId { get; } = deviceId;
 
-        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+        public ConnectionType ConnectionType => ConnectionType.SmartCard;
 
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection =>
-            Task.FromException<TConnection>(new InvalidOperationException("Public connect must not be used by discovery."));
-
-        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+        public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType connection,
             CancellationToken cancellationToken)
         {
@@ -174,17 +169,18 @@ public class FindYubiKeysPidMergeTests
             return _connection.Task;
         }
 
+        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken) =>
+            OpenRawConnectionAsync(connection, cancellationToken);
+
         public void FailRead() =>
             _connection.TrySetException(new InvalidOperationException("Expected identity-read cleanup failure."));
     }
 
-    private sealed class ThrowingYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey
+    private sealed class ThrowingYubiKey(string deviceId, ConnectionType connectionType) : IYubiKeyConnectionSlot
     {
-        public string DeviceId { get; } = deviceId;
-        public ConnectionType AvailableConnections { get; } = connectionType;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-            => throw new InvalidOperationException("connection unavailable (simulated exclusive holder).");
+        public string InterfaceId { get; } = deviceId;
+        public ConnectionType ConnectionType { get; } = connectionType;
     }
 }

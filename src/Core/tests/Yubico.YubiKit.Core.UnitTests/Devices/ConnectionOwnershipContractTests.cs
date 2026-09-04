@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
@@ -67,7 +66,6 @@ public class ConnectionOwnershipContractTests
         AssertExclusiveInterfaceRefusal(refusal, device.DeviceId);
         Assert.Equal(1, factory.CreateCalls); // refused before a second physical handle was opened
     }
-
     /// <summary>
     ///     Exclusive is not permanent: the interface is reusable the moment the holder is disposed. Sequential
     ///     use is the supported pattern, so the refusal above must not become a one-shot device.
@@ -167,12 +165,13 @@ public class ConnectionOwnershipContractTests
     public async Task ConnectAsync_CcidHeld_GroupedKeysHidInterfaceIsRefused()
     {
         var factory = new CountingFactory();
-        var smartCard = CreateSmartCardDevice(factory);
+        var smartCard = CreateSmartCardSlot(factory);
         var hidDevice = new FakeHidDevice(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
-        var hid = CreateHidDevice(hidDevice);
-        var composite = new CompositeYubiKey($"composite:{Guid.NewGuid():N}", [smartCard, hid], null);
+        var hid = CreateHidSlot(hidDevice);
+        var composite = new YubiKeyDevice(
+            $"composite:{Guid.NewGuid():N}", smartCard, hid, hidOtp: null, deviceInfo: null);
 
         await using var ccid = await composite.ConnectAsync<ISmartCardConnection>(Ct);
         var refusal = await Assert.ThrowsAsync<ConnectionInUseException>(
@@ -180,8 +179,8 @@ public class ConnectionOwnershipContractTests
 
         Assert.Matches("held interface: '[^']+'", refusal.Message);
         Assert.True(
-            refusal.Message.Contains(smartCard.DeviceId, StringComparison.Ordinal)
-            || refusal.Message.Contains(hid.DeviceId, StringComparison.Ordinal),
+            refusal.Message.Contains(smartCard.InterfaceId, StringComparison.Ordinal)
+            || refusal.Message.Contains(hid.InterfaceId, StringComparison.Ordinal),
             "The refusal should identify a held member of the grouped physical key.");
         Assert.Contains("one live connection at a time across all interfaces", refusal.Message,
             StringComparison.Ordinal);
@@ -198,29 +197,35 @@ public class ConnectionOwnershipContractTests
     public async Task ConnectAsync_AliasedMembersRegroupedLater_OlderCompositeScopeRemainsStable()
     {
         var firstSmartCardFactory = new CountingFactory();
-        var firstSmartCard = CreateSmartCardDevice(firstSmartCardFactory);
+        var firstSmartCard = CreateSmartCardSlot(firstSmartCardFactory);
         var firstHidDevice = new FakeHidDevice(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
-        var firstHid = CreateHidDevice(firstHidDevice);
-        var olderComposite = new CompositeYubiKey(
+        var firstHid = CreateHidSlot(firstHidDevice);
+        var olderComposite = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}",
-            [firstSmartCard, firstHid],
-            null);
+            firstSmartCard,
+            firstHid,
+            hidOtp: null,
+            deviceInfo: null);
 
-        var laterHid = CreateHidDevice(new FakeHidDevice(
+        var laterHid = CreateHidSlot(new FakeHidDevice(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido));
-        _ = new CompositeYubiKey(
+        _ = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}",
-            [firstSmartCard, laterHid],
-            null);
+            firstSmartCard,
+            laterHid,
+            hidOtp: null,
+            deviceInfo: null);
 
-        var laterSmartCard = CreateSmartCardDevice(new CountingFactory());
-        _ = new CompositeYubiKey(
+        var laterSmartCard = CreateSmartCardSlot(new CountingFactory());
+        _ = new YubiKeyDevice(
             $"composite:{Guid.NewGuid():N}",
-            [laterSmartCard, firstHid],
-            null);
+            laterSmartCard,
+            firstHid,
+            hidOtp: null,
+            deviceInfo: null);
 
         await using var ccid = await olderComposite.ConnectAsync<ISmartCardConnection>(Ct);
 
@@ -334,14 +339,32 @@ public class ConnectionOwnershipContractTests
         Assert.DoesNotContain("CCID", refusal.Message, StringComparison.Ordinal);
     }
 
-    private static PcscYubiKey CreateSmartCardDevice(ISmartCardConnectionFactory factory) =>
+    private static YubiKeyDevice CreateSmartCardDevice(ISmartCardConnectionFactory factory)
+    {
+        var slot = CreateSmartCardSlot(factory);
+        return new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+    }
+
+    private static PcscConnectionSlot CreateSmartCardSlot(ISmartCardConnectionFactory factory) =>
         new(
             new PcscDevice { ReaderName = $"ownership-reader-{Guid.NewGuid():N}", Atr = null },
-            factory,
-            NullLogger<PcscYubiKey>.Instance);
+            factory);
 
-    private static HidYubiKey CreateHidDevice(IHidDevice hidDevice) =>
-        new(hidDevice, NullLogger<HidYubiKey>.Instance);
+    private static YubiKeyDevice CreateHidDevice(IHidDevice hidDevice)
+    {
+        var slot = CreateHidSlot(hidDevice);
+        return slot.ConnectionType switch
+        {
+            ConnectionType.HidFido => new YubiKeyDevice(
+                slot.InterfaceId, smartCard: null, slot, hidOtp: null, deviceInfo: null),
+            ConnectionType.HidOtp => new YubiKeyDevice(
+                slot.InterfaceId, smartCard: null, hidFido: null, slot, deviceInfo: null),
+            _ => throw new InvalidOperationException("Expected one concrete HID connection.")
+        };
+    }
+
+    private static HidConnectionSlot CreateHidSlot(IHidDevice hidDevice) =>
+        new(hidDevice);
 
     private sealed class CountingFactory : ISmartCardConnectionFactory
     {

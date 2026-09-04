@@ -27,13 +27,14 @@ public class DeviceConnectionOwnershipTests
     public async Task ConnectAsync_OwnsInterfaceBeforePhysicalConnectionCreation()
     {
         var factory = new BlockingCreationFactory();
-        var device = CreateDevice(factory);
+        var slot = CreateSlot(factory);
+        var device = CreateDevice(slot);
 
         var sessionTask = device.ConnectAsync<ISmartCardConnection>(TestContext.Current.CancellationToken);
         await factory.FirstCreateStarted.Task.WaitAsync(TestContext.Current.CancellationToken);
 
         var discoveryTask = DiscoveryIdentityReader.TryReadAsync(
-            device,
+            slot,
             ConnectionType.SmartCard,
             NullLogger.Instance,
             TestContext.Current.CancellationToken);
@@ -88,10 +89,10 @@ public class DeviceConnectionOwnershipTests
 
         using var canceledWaiterToken = new CancellationTokenSource();
         var canceledWaiter = DeviceConnectionRegistry
-            .AcquireConnectionAsync(deviceId, canceledWaiterToken.Token)
+            .AcquireConnectionAsync([deviceId], canceledWaiterToken.Token)
             .AsTask();
         var remainingWaiter = DeviceConnectionRegistry
-            .AcquireConnectionAsync(deviceId, TestContext.Current.CancellationToken)
+            .AcquireConnectionAsync([deviceId], TestContext.Current.CancellationToken)
             .AsTask();
 
         canceledWaiterToken.Cancel();
@@ -154,11 +155,18 @@ public class DeviceConnectionOwnershipTests
         Assert.Equal(1, secondFactory.CreateCalls);
     }
 
-    private static PcscYubiKey CreateDevice(ISmartCardConnectionFactory factory) =>
+    private static YubiKeyDevice CreateDevice(ISmartCardConnectionFactory factory) =>
+        CreateDevice(CreateSlot(factory));
+
+    private static PcscConnectionSlot CreateSlot(ISmartCardConnectionFactory factory) =>
         new(
             new PcscDevice { ReaderName = $"test-reader-{Guid.NewGuid():N}", Atr = null },
-            factory,
-            NullLogger<PcscYubiKey>.Instance);
+            factory);
+
+    private static YubiKeyDevice CreateDevice(PcscConnectionSlot slot)
+    {
+        return new YubiKeyDevice(slot.InterfaceId, slot, hidFido: null, hidOtp: null, deviceInfo: null);
+    }
 
     private sealed class BlockingCreationFactory : ISmartCardConnectionFactory
     {

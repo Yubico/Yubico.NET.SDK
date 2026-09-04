@@ -61,11 +61,10 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         var device = Assert.Single(result);
-        var composite = Assert.IsType<CompositeYubiKey>(device);
-        Assert.Equal($"ykphysical:pid:{pid:X4}", composite.DeviceId);
-        Assert.Equal(Triple, composite.AvailableConnections);
+        Assert.Equal($"ykphysical:pid:{pid:X4}", device.DeviceId);
+        Assert.Equal(Triple, device.AvailableConnections);
+        Assert.Equal(3, InterfaceIdsOf(device).Count);
     }
-
     [Theory]
     [InlineData((ushort)0x0403, ConnectionType.HidOtp, ConnectionType.HidFido)]
     [InlineData((ushort)0x0405, ConnectionType.HidOtp, ConnectionType.SmartCard)]
@@ -82,26 +81,25 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         var device = Assert.Single(result);
-        var composite = Assert.IsType<CompositeYubiKey>(device);
-        Assert.Equal($"ykphysical:pid:{pid:X4}", composite.DeviceId);
-        Assert.Equal(first | second, composite.AvailableConnections);
+        Assert.Equal($"ykphysical:pid:{pid:X4}", device.DeviceId);
+        Assert.Equal(first | second, device.AvailableConnections);
+        Assert.Equal(2, InterfaceIdsOf(device).Count);
     }
-
     [Theory]
     [InlineData((ushort)0x0401, ConnectionType.HidOtp)]
     [InlineData((ushort)0x0402, ConnectionType.HidFido)]
     [InlineData((ushort)0x0404, ConnectionType.SmartCard)]
     [InlineData((ushort)0x0120, ConnectionType.HidFido)] // SKY
-    public void Merge_SingleInterfacePid_StandsAloneWithoutCompositeWrapper_Pin(
+    public void Merge_SingleInterfacePid_PublishesOneSlotWithTransportShapedDeviceId_Pin(
         ushort pid,
         ConnectionType connection)
     {
         var result = CompositeDeviceMerger.Merge([Descriptor("only", connection, pid)]);
 
         var device = Assert.Single(result);
-        Assert.IsNotType<CompositeYubiKey>(device);
         Assert.Equal("only", device.DeviceId);
         Assert.Equal(connection, device.AvailableConnections);
+        Assert.Single(InterfaceIdsOf(device));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -122,12 +120,12 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(2, result.Count);
-        var keyA = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:111"));
-        var keyB = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:222"));
+        var keyA = Assert.Single(result, d => d.DeviceId == "ykphysical:111");
+        var keyB = Assert.Single(result, d => d.DeviceId == "ykphysical:222");
         Assert.Equal(Triple, keyA.AvailableConnections);
         Assert.Equal(Triple, keyB.AvailableConnections);
-        Assert.Equal(["ccid-a", "fido-a", "otp-a"], keyA.MemberDeviceIds);
-        Assert.Equal(["ccid-b", "fido-b", "otp-b"], keyB.MemberDeviceIds);
+        Assert.Equal(["ccid-a", "fido-a", "otp-a"], InterfaceIdsOf(keyA));
+        Assert.Equal(["ccid-b", "fido-b", "otp-b"], InterfaceIdsOf(keyB));
     }
 
     [Fact]
@@ -142,7 +140,7 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(2, result.Count);
-        Assert.All(result, d => Assert.IsType<CompositeYubiKey>(d));
+        Assert.All(result, d => Assert.Equal(2, InterfaceIdsOf(d).Count));
         Assert.Contains(result, d => d.DeviceId == "ykphysical:111");
         Assert.Contains(result, d => d.DeviceId == "ykphysical:222");
         Assert.All(result, d => Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, d.AvailableConnections));
@@ -168,7 +166,7 @@ public class CompositeDeviceMergerVectorTests
             Descriptor("otp-keyB", ConnectionType.HidOtp, 0x0407)
         ]);
 
-        var composites = result.OfType<CompositeYubiKey>().ToList();
+        var composites = result.Where(d => InterfaceIdsOf(d).Count > 1).ToList();
         Assert.True(
             composites.Count == 0,
             "Cross-key transient shape B (premise 4b): the merger fused key A's FIDO and key B's OTP " +
@@ -247,12 +245,12 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(4, result.Count);
-        var composites = result.OfType<CompositeYubiKey>().ToList();
+        var composites = result.Where(d => InterfaceIdsOf(d).Count > 1).ToList();
         Assert.Equal(2, composites.Count);
         Assert.All(
             composites,
             c => Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidFido, c.AvailableConnections));
-        var orphans = result.Where(d => d is not CompositeYubiKey).ToList();
+        var orphans = result.Where(d => InterfaceIdsOf(d).Count == 1).ToList();
         Assert.Equal(2, orphans.Count);
         Assert.All(orphans, o => Assert.Equal(ConnectionType.HidOtp, o.AvailableConnections));
     }
@@ -283,10 +281,9 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         var device = Assert.Single(result);
-        var composite = Assert.IsType<CompositeYubiKey>(device);
-        Assert.Equal("ykphysical:pid:0403", composite.DeviceId);
-        Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, composite.AvailableConnections);
-        Assert.Equal(["fido-keyB", "otp-keyA"], composite.MemberDeviceIds);
+        Assert.Equal("ykphysical:pid:0403", device.DeviceId);
+        Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, device.AvailableConnections);
+        Assert.Equal(["fido-keyB", "otp-keyA"], InterfaceIdsOf(device));
     }
 
     [Fact]
@@ -309,10 +306,9 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         var device = Assert.Single(result);
-        var composite = Assert.IsType<CompositeYubiKey>(device);
-        Assert.Equal("ykphysical:pid:0407", composite.DeviceId);
-        Assert.Equal(Triple, composite.AvailableConnections);
-        Assert.Equal(["ccid-keyB", "fido-keyA", "otp-keyA"], composite.MemberDeviceIds);
+        Assert.Equal("ykphysical:pid:0407", device.DeviceId);
+        Assert.Equal(Triple, device.AvailableConnections);
+        Assert.Equal(["ccid-keyB", "fido-keyA", "otp-keyA"], InterfaceIdsOf(device));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -337,7 +333,7 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(6, result.Count);
-        Assert.DoesNotContain(result, d => d is CompositeYubiKey);
+        Assert.All(result, d => Assert.Single(InterfaceIdsOf(d)));
 
         // TODO(Phase 3 — A′ Windows topology): when the merger accepts optional topology evidence
         // (Windows Container ID per interface), add the RED→GREEN vector:
@@ -363,7 +359,7 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(4, result.Count);
-        Assert.DoesNotContain(result, d => d is CompositeYubiKey);
+        Assert.All(result, d => Assert.Single(InterfaceIdsOf(d)));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -384,9 +380,8 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         var device = Assert.Single(result);
-        var composite = Assert.IsType<CompositeYubiKey>(device);
-        Assert.Equal("ykphysical:pid:0403", composite.DeviceId);
-        Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, composite.AvailableConnections);
+        Assert.Equal("ykphysical:pid:0403", device.DeviceId);
+        Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, device.AvailableConnections);
     }
 
     [Fact]
@@ -405,8 +400,8 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(2, result.Count);
-        var keyA = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:pid:0407"));
-        var keyB = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:pid:0403"));
+        var keyA = Assert.Single(result, d => d.DeviceId == "ykphysical:pid:0407");
+        var keyB = Assert.Single(result, d => d.DeviceId == "ykphysical:pid:0403");
         Assert.Equal(Triple, keyA.AvailableConnections);
         Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, keyB.AvailableConnections);
     }
@@ -438,14 +433,12 @@ public class CompositeDeviceMergerVectorTests
             result.Count == 2,
             $"Topology tier must group the serial-less pair into two complete keys; got {result.Count} " +
             $"device(s): {Describe(result)}.");
-        var keyA = Assert.IsType<CompositeYubiKey>(
-            Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-A"));
-        var keyB = Assert.IsType<CompositeYubiKey>(
-            Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-B"));
+        var keyA = Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-A");
+        var keyB = Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-B");
         Assert.Equal(Triple, keyA.AvailableConnections);
         Assert.Equal(Triple, keyB.AvailableConnections);
-        Assert.Equal(["ccid-a", "fido-a", "otp-a"], keyA.MemberDeviceIds);
-        Assert.Equal(["ccid-b", "fido-b", "otp-b"], keyB.MemberDeviceIds);
+        Assert.Equal(["ccid-a", "fido-a", "otp-a"], InterfaceIdsOf(keyA));
+        Assert.Equal(["ccid-b", "fido-b", "otp-b"], InterfaceIdsOf(keyB));
     }
 
     [Fact]
@@ -468,7 +461,7 @@ public class CompositeDeviceMergerVectorTests
             result.Count == 2,
             "Topology evidence must split complementary partials from two physical keys; got " +
             $"{result.Count} device(s): {Describe(result)}.");
-        Assert.DoesNotContain(result, d => d is CompositeYubiKey);
+        Assert.All(result, d => Assert.Single(InterfaceIdsOf(d)));
         Assert.Equal(["fido-keyB", "otp-keyA"], result.Select(d => d.DeviceId).Order(StringComparer.Ordinal));
     }
 
@@ -490,7 +483,7 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(6, seriallessPair.Count);
-        Assert.DoesNotContain(seriallessPair, d => d is CompositeYubiKey);
+        Assert.All(seriallessPair, d => Assert.Single(InterfaceIdsOf(d)));
 
         var complementaryPartials = CompositeDeviceMerger.Merge(
         [
@@ -498,7 +491,7 @@ public class CompositeDeviceMergerVectorTests
             Descriptor("fido-keyB", ConnectionType.HidFido, 0x0403)
         ]);
 
-        var bounded = Assert.IsType<CompositeYubiKey>(Assert.Single(complementaryPartials));
+        var bounded = Assert.Single(complementaryPartials);
         Assert.Equal("ykphysical:pid:0403", bounded.DeviceId);
     }
 
@@ -518,11 +511,10 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(2, result.Count);
-        var keyA = Assert.IsType<CompositeYubiKey>(
-            Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-A"));
+        var keyA = Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-A");
         Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidFido, keyA.AvailableConnections);
-        Assert.DoesNotContain("otp-unresolved", keyA.MemberDeviceIds);
-        var unkeyed = Assert.Single(result, d => d is not CompositeYubiKey);
+        Assert.DoesNotContain("otp-unresolved", InterfaceIdsOf(keyA));
+        var unkeyed = Assert.Single(result, d => InterfaceIdsOf(d).Count == 1);
         Assert.Equal("otp-unresolved", unkeyed.DeviceId);
     }
 
@@ -548,22 +540,19 @@ public class CompositeDeviceMergerVectorTests
         var result = CompositeDeviceMerger.Merge(descriptors);
 
         Assert.Equal(4, result.Count);
-        var keyA = Assert.IsType<CompositeYubiKey>(
-            Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-A"));
+        var keyA = Assert.Single(result, d => d.DeviceId == "ykphysical:topology:container-A");
         Assert.Equal(Triple, keyA.AvailableConnections);
-        var keyB = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:222"));
+        var keyB = Assert.Single(result, d => d.DeviceId == "ykphysical:222");
         Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, keyB.AvailableConnections);
-        var keyC = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:333"));
+        var keyC = Assert.Single(result, d => d.DeviceId == "ykphysical:333");
         Assert.Equal(ConnectionType.HidOtp | ConnectionType.HidFido, keyC.AvailableConnections);
         Assert.Single(result, d => d.DeviceId == "nfc-reader");
 
         // Conservation: each input interface id appears exactly once across all returned devices.
-        var attributed = result
-            .SelectMany(d => d is CompositeYubiKey composite ? composite.MemberDeviceIds : [d.DeviceId])
-            .ToList();
+        var attributed = result.SelectMany(InterfaceIdsOf).ToList();
         Assert.Equal(descriptors.Length, attributed.Count);
         Assert.Equal(
-            descriptors.Select(d => d.Device.DeviceId).Order(StringComparer.Ordinal),
+            descriptors.Select(d => d.Device.InterfaceId).Order(StringComparer.Ordinal),
             attributed.Order(StringComparer.Ordinal));
     }
 
@@ -588,16 +577,36 @@ public class CompositeDeviceMergerVectorTests
             Descriptor("otp-b", ConnectionType.HidOtp, 0x0407) // different physical key, also null serial
         ]);
 
-        var duplicated = result
-            .OfType<CompositeYubiKey>()
-            .Where(c => c.Members.GroupBy(m => m.AvailableConnections).Any(g => g.Count() > 1))
-            .ToList();
-        Assert.True(
-            duplicated.Count == 0,
-            "Type-count closure: two null-serial OTP orphans were both attributed to the single anchored " +
-            $"key, producing a composite holding two OTP interfaces from different physical keys: {Describe(result)}.");
         Assert.Equal(3, result.Count);
-        Assert.All(result, d => Assert.IsNotType<CompositeYubiKey>(d));
+        Assert.All(result, d => Assert.Single(InterfaceIdsOf(d)));
+    }
+
+    [Fact]
+    public void Merge_SerialFallbackWithDuplicateSlots_PreservesBothAsStandalone()
+    {
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-old", ConnectionType.SmartCard, 0x0407, serial: 500),
+            Descriptor("ccid-new", ConnectionType.SmartCard, 0x0407, serial: 500)
+        ], pidCorrelationUntrusted: true);
+
+        Assert.Equal(2, result.Count);
+        Assert.All(result, device => Assert.Single(InterfaceIdsOf(device)));
+        Assert.Equal(2, result.SelectMany(InterfaceIdsOf).Distinct(StringComparer.Ordinal).Count());
+    }
+
+    [Fact]
+    public void Merge_TopologyGroupWithDuplicateSlots_PreservesBothAsStandalone()
+    {
+        var result = CompositeDeviceMerger.Merge(
+        [
+            Descriptor("ccid-old", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A"),
+            Descriptor("ccid-new", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A")
+        ]);
+
+        Assert.Equal(2, result.Count);
+        Assert.All(result, device => Assert.Single(InterfaceIdsOf(device)));
+        Assert.Equal(2, result.SelectMany(InterfaceIdsOf).Distinct(StringComparer.Ordinal).Count());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -605,9 +614,8 @@ public class CompositeDeviceMergerVectorTests
     //
     // A serial observed under more than one PID in a single scan is one physical key caught
     // mid-reconfiguration (serial is globally unique per key; PID changes with configuration). The
-    // groups must NOT be merged into one composite: the members would then contain two interfaces of
-    // the same connection type, AvailableConnections' flags-union would hide that, and
-    // TryResolveMember's first-match would route sessions to an arbitrary (possibly dying) member.
+    // groups must NOT be merged into one published device: the flat shape has one slot per connection
+    // type, and AvailableConnections' flags-union would hide a duplicate candidate.
     // Instead, at most ONE group may carry the durable ykphysical:{serial} id — the group whose
     // anchored census exactly matches its PID's expected interface set — and every other contested
     // group's interfaces publish standalone. Zero or multiple complete groups is ambiguity, and
@@ -634,9 +642,8 @@ public class CompositeDeviceMergerVectorTests
             Descriptor("fido-new", ConnectionType.HidFido, 0x0403, serial: 500)
         ]);
 
-        var winner = Assert.IsType<CompositeYubiKey>(
-            Assert.Single(result, d => d.DeviceId == "ykphysical:500"));
-        Assert.Equal(new[] { "fido-new", "otp-new" }, winner.MemberDeviceIds);
+        var winner = Assert.Single(result, d => d.DeviceId == "ykphysical:500");
+        Assert.Equal(new[] { "fido-new", "otp-new" }, InterfaceIdsOf(winner));
         Assert.Single(result, d => d.DeviceId == "ccid-old");
         Assert.Single(result, d => d.DeviceId == "otp-old");
         Assert.Equal(3, result.Count);
@@ -662,7 +669,7 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(4, result.Count);
-        Assert.All(result, d => Assert.IsNotType<CompositeYubiKey>(d));
+        Assert.All(result, d => Assert.Single(InterfaceIdsOf(d)));
         Assert.DoesNotContain(result, d => d.DeviceId.StartsWith("ykphysical:", StringComparison.Ordinal));
     }
 
@@ -686,7 +693,7 @@ public class CompositeDeviceMergerVectorTests
         ]);
 
         Assert.Equal(5, result.Count);
-        Assert.All(result, d => Assert.IsNotType<CompositeYubiKey>(d));
+        Assert.All(result, d => Assert.Single(InterfaceIdsOf(d)));
     }
 
     /// <summary>
@@ -711,9 +718,8 @@ public class CompositeDeviceMergerVectorTests
             Descriptor("fido-new", ConnectionType.HidFido, 0x0403, serial: 500)
         ]);
 
-        var winner = Assert.IsType<CompositeYubiKey>(
-            Assert.Single(result, d => d.DeviceId == "ykphysical:500"));
-        Assert.Equal(new[] { "fido-new", "otp-new" }, winner.MemberDeviceIds);
+        var winner = Assert.Single(result, d => d.DeviceId == "ykphysical:500");
+        Assert.Equal(new[] { "fido-new", "otp-new" }, InterfaceIdsOf(winner));
         Assert.Single(result, d => d.DeviceId == "ccid-old");
         Assert.Single(result, d => d.DeviceId == "otp-old");
         Assert.Single(result, d => d.DeviceId == "fido-orphan");
@@ -748,8 +754,8 @@ public class CompositeDeviceMergerVectorTests
         // The orphan stays standalone: with the contested key's OTP unaccounted-for, attributing it to
         // key 111 would be a guess between two plausible owners.
         Assert.Single(result, d => d.DeviceId == "otp-orphan");
-        var clean = Assert.IsType<CompositeYubiKey>(Assert.Single(result, d => d.DeviceId == "ykphysical:111"));
-        Assert.Equal(new[] { "ccid-clean", "fido-clean" }, clean.MemberDeviceIds);
+        var clean = Assert.Single(result, d => d.DeviceId == "ykphysical:111");
+        Assert.Equal(new[] { "ccid-clean", "fido-clean" }, InterfaceIdsOf(clean));
         Assert.Single(result, d => d.DeviceId == "otp-contested");
         Assert.Single(result, d => d.DeviceId == "ccid-contested");
         Assert.Equal(4, result.Count);
@@ -803,10 +809,19 @@ public class CompositeDeviceMergerVectorTests
         int? serial = null,
         bool isUsb = true,
         string? topologyKey = null) =>
-        new(new FakeYubiKey(deviceId, connection), connection, isUsb, pid, serial, DeviceInfo: null, topologyKey);
+        new(new FakeSlot(deviceId, connection), connection, isUsb, pid, serial, DeviceInfo: null, topologyKey);
+
+    private static IReadOnlyList<string> InterfaceIdsOf(IYubiKey device) =>
+        Assert.IsType<YubiKeyDevice>(device).InterfaceIds;
 
     private static string Describe(IReadOnlyList<IYubiKey> result) =>
-        string.Join("; ", result.Select(d => d is CompositeYubiKey c
-            ? $"{c.DeviceId}=[{string.Join("|", c.MemberDeviceIds)}]"
-            : $"{d.DeviceId}({d.AvailableConnections})"));
+        string.Join("; ", result.Select(d =>
+            $"{d.DeviceId}=[{string.Join("|", InterfaceIdsOf(d))}]"));
+
+    private sealed class FakeSlot(string deviceId, ConnectionType connection) : IYubiKeyConnectionSlot
+    {
+        public string InterfaceId { get; } = deviceId;
+
+        public ConnectionType ConnectionType { get; } = connection;
+    }
 }

@@ -3,8 +3,9 @@ name: Native AOT Publish Gate (2.0)
 # Publish-and-run verification for the macOS Native AOT host.
 #
 # The host references every supported SDK library, so publishing provides link evidence for all
-# ten libraries. Running it with no attached key provides process-startup and zero-device Core
-# discovery evidence. This workflow does not exercise hardware, monitoring, or applet operations.
+# ten libraries. Running it with no attached key provides process-startup evidence and exercises
+# the ordinary Core discovery entry point. It cannot prove that every discovery transport loaded.
+# This workflow does not exercise hardware, monitoring, or applet operations.
 # See docs/NATIVE-AOT.md for the evidence matrix.
 
 on:
@@ -48,7 +49,7 @@ jobs:
           dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj
           -c Release -r ${{ matrix.rid }} --self-contained -p:PublishAot=true
 
-      - name: Run published Native AOT binary (zero-device Core discovery)
+      - name: Run published Native AOT binary (Core discovery entry point)
         working-directory: verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish
         run: |
           BIN="./Yubico.YubiKit.NativeAotVerification"

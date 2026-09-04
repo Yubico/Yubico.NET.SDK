@@ -43,7 +43,7 @@ The research records preserve the environment, commands, and observations behind
 
 | Platform | Runtime identifier | Analyzer-checked | All libraries link | Core discovery on hardware | Deeper hardware evidence | Recurring coverage |
 |---|---|---|---|---|---|---|
-| macOS Apple Silicon | `osx-arm64` | yes | yes | yes | Management device information, PIV session, device monitoring | publish and zero-device discovery |
+| macOS Apple Silicon | `osx-arm64` | yes | yes | yes | Management device information, PIV session, device monitoring | publish and Core discovery entry point |
 | Windows x64 | `win-x64` | yes | yes | yes | none recorded | no |
 | Linux x64 | `linux-x64` | yes | yes | yes | none recorded | no |
 
@@ -88,8 +88,10 @@ non-packable console host. Its default mode:
 
 The recurring workflow [`.github/workflows/native-aot.yml`](../.github/workflows/native-aot.yml)
 publishes and runs this default mode on macOS Apple Silicon. It proves publish, link, process
-startup, and zero-device Core discovery. It does not exercise hardware, device events, or applet
-sessions.
+startup, and successful execution of the ordinary Core discovery entry point with no attached key.
+Because discovery can continue when a transport is unavailable, the empty result does not prove
+that every native transport loaded. The workflow does not exercise hardware, device events, or
+applet sessions.
 
 The host also provides an operator-driven `--monitor` mode. Its recorded evidence is macOS-only and
 belongs to the research record. It is not run by continuous integration.

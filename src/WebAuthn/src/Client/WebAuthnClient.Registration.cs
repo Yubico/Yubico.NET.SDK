@@ -27,6 +27,7 @@ using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Client.Validation;
 using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Util;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -223,7 +224,7 @@ public sealed partial class WebAuthnClient
         }
         finally
         {
-            ZeroMemory(request.PinUvAuthParam);
+            SensitiveMemory.Zero(request.PinUvAuthParam);
         }
     }
 

@@ -14,7 +14,6 @@
 
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using System.Formats.Cbor;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Fido2.Cose;
@@ -69,7 +68,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -121,7 +120,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act (should not throw)
         await client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -153,7 +152,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act (should not throw)
         await client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -181,7 +180,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -208,7 +207,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse(expectedGuid));
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse(expectedGuid));
 
         // Act
         var response = await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -236,7 +235,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -284,7 +283,7 @@ public class WebAuthnClientMakeCredentialTests
                     throw new CtapException(CtapStatus.PuatRequired);
                 }
 
-                return CreateMockResponse();
+                return MockFido2Responses.CreateMockMakeCredentialResponse();
             });
 
         // Act
@@ -339,7 +338,7 @@ public class WebAuthnClientMakeCredentialTests
                     throw new CtapException(CtapStatus.PuatRequired);
                 }
 
-                return CreateMockResponse();
+                return MockFido2Responses.CreateMockMakeCredentialResponse();
             });
 
         // Act
@@ -369,7 +368,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         _ = await _client.MakeCredentialAsync(
@@ -419,7 +418,7 @@ public class WebAuthnClientMakeCredentialTests
                 callCount++;
                 return callCount == 1
                     ? throw new CtapException(CtapStatus.PuatRequired)
-                    : CreateMockResponse();
+                    : MockFido2Responses.CreateMockMakeCredentialResponse();
             });
 
         // Act - UV is left unspecified so the PuatRequired retry path is the one taken.
@@ -566,117 +565,4 @@ public class WebAuthnClientMakeCredentialTests
 
     private static RegistrationOptions CreateExcludeListUvRequiredOptions() =>
         CreateExcludeListOptions(UserVerificationPreference.Required);
-
-    private static MakeCredentialResponse CreateMockResponse(Guid? aaguid = null)
-    {
-        var guid = aaguid ?? Guid.NewGuid();
-        var authData = BuildAuthDataWithAttestedCredential(guid);
-        var cborBytes = BuildMakeCredentialResponseCbor(authData, "none");
-        return MakeCredentialResponse.Decode(cborBytes);
-    }
-
-    private static byte[] BuildAuthDataWithAttestedCredential(Guid aaguid)
-    {
-        // rpIdHash (32) + flags (1) + signCount (4) + AAGUID (16) + credIdLen (2) + credId + publicKey
-        var data = new List<byte>();
-
-        // rpIdHash (32 bytes)
-        var rpIdHash = new byte[32];
-        SHA256.HashData("example.com"u8, rpIdHash);
-        data.AddRange(rpIdHash);
-
-        // flags = UP | UV | AT (0x45)
-        data.Add(0x45);
-
-        // signCount (4 bytes, big-endian)
-        data.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x01 });
-
-        // AAGUID (16 bytes, big-endian network byte order)
-        data.AddRange(EncodeAaguidBigEndian(aaguid));
-
-        // Credential ID length (2 bytes, big-endian) = 32
-        data.AddRange(new byte[] { 0x00, 0x20 });
-
-        // Credential ID (32 bytes)
-        var credId = new byte[32];
-        RandomNumberGenerator.Fill(credId);
-        data.AddRange(credId);
-
-        // COSE public key (minimal EC2 key in CBOR)
-        var keyWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        keyWriter.WriteStartMap(5);
-
-        // kty = 2 (EC2)
-        keyWriter.WriteInt32(1);
-        keyWriter.WriteInt32(2);
-
-        // alg = -7 (ES256)
-        keyWriter.WriteInt32(3);
-        keyWriter.WriteInt32(-7);
-
-        // crv = 1 (P-256)
-        keyWriter.WriteInt32(-1);
-        keyWriter.WriteInt32(1);
-
-        // x coordinate (32 bytes)
-        keyWriter.WriteInt32(-2);
-        keyWriter.WriteByteString(new byte[32]);
-
-        // y coordinate (32 bytes)
-        keyWriter.WriteInt32(-3);
-        keyWriter.WriteByteString(new byte[32]);
-
-        keyWriter.WriteEndMap();
-        data.AddRange(keyWriter.Encode());
-
-        return data.ToArray();
-    }
-
-    private static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format)
-    {
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-
-        writer.WriteStartMap(3);
-
-        // 0x01: fmt
-        writer.WriteInt32(1);
-        writer.WriteTextString(format);
-
-        // 0x02: authData
-        writer.WriteInt32(2);
-        writer.WriteByteString(authData);
-
-        // 0x03: attStmt (empty for "none" format)
-        writer.WriteInt32(3);
-        writer.WriteStartMap(0);
-        writer.WriteEndMap();
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
-    }
-
-    private static byte[] EncodeAaguidBigEndian(Guid guid)
-    {
-        // AAGUID must be in big-endian (network byte order)
-        // .NET Guid.ToByteArray() gives little-endian on little-endian systems
-        Span<byte> bytes = stackalloc byte[16];
-        guid.TryWriteBytes(bytes);
-
-        // Convert first 3 components from little-endian to big-endian
-        if (BitConverter.IsLittleEndian)
-        {
-            // Reverse Data1 (4 bytes)
-            (bytes[0], bytes[1], bytes[2], bytes[3]) =
-                (bytes[3], bytes[2], bytes[1], bytes[0]);
-
-            // Reverse Data2 (2 bytes)
-            (bytes[4], bytes[5]) = (bytes[5], bytes[4]);
-
-            // Reverse Data3 (2 bytes)
-            (bytes[6], bytes[7]) = (bytes[7], bytes[6]);
-        }
-
-        return bytes.ToArray();
-    }
 }

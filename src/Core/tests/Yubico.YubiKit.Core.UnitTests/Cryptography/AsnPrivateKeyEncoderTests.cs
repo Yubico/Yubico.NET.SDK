@@ -25,14 +25,6 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 /// </remarks>
 public class AsnPrivateKeyEncoderTests
 {
-    private static ECCurve GetNamedCurve(string curveOid) => curveOid switch
-    {
-        Oids.ECP256 => ECCurve.NamedCurves.nistP256,
-        Oids.ECP384 => ECCurve.NamedCurves.nistP384,
-        Oids.ECP521 => ECCurve.NamedCurves.nistP521,
-        _ => throw new ArgumentOutOfRangeException(nameof(curveOid))
-    };
-
     private static KeyType GetKeyType(string curveOid) => curveOid switch
     {
         Oids.ECP256 => KeyType.ECP256,
@@ -91,7 +83,7 @@ public class AsnPrivateKeyEncoderTests
     [InlineData(Oids.ECP521)]
     public void EncodeToPkcs8_EcParametersWithPublicPoint_BclImportsAndRoundTrips(string curveOid)
     {
-        using var bcl = ECDsa.Create(GetNamedCurve(curveOid));
+        using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
         var expected = bcl.ExportParameters(includePrivateParameters: true);
 
         var ourPkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(expected);
@@ -114,7 +106,7 @@ public class AsnPrivateKeyEncoderTests
     public void EncodeToPkcs8_EcParametersWithPublicPoint_EmitsExplicitlyTaggedBitString(
         string curveOid, int coordinateSize)
     {
-        using var bcl = ECDsa.Create(GetNamedCurve(curveOid));
+        using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
         var parameters = bcl.ExportParameters(includePrivateParameters: true);
 
         var ourPkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(parameters);
@@ -122,7 +114,7 @@ public class AsnPrivateKeyEncoderTests
 
         // RFC 5915 defines publicKey as EXPLICIT [1] BIT STRING, so the encoding is a constructed
         // [1] wrapper (0xA1) around a universal BIT STRING (0x03) with zero unused bits.
-        var point = BuildUncompressedPoint(parameters.Q.X!, parameters.Q.Y!);
+        var point = EcTestSupport.UncompressedPoint(parameters.Q.X!, parameters.Q.Y!);
         Assert.Equal(1 + (2 * coordinateSize), point.Length);
 
         // BIT STRING: 03 <len> 00 || point, where the 00 is the unused-bit count.
@@ -149,15 +141,6 @@ public class AsnPrivateKeyEncoderTests
         _ = privateKeyInfo.ReadInteger();
         _ = privateKeyInfo.ReadSequence();
         return privateKeyInfo.ReadOctetString();
-    }
-
-    private static byte[] BuildUncompressedPoint(byte[] x, byte[] y)
-    {
-        var point = new byte[1 + x.Length + y.Length];
-        point[0] = 0x04;
-        x.CopyTo(point, 1);
-        y.CopyTo(point, 1 + x.Length);
-        return point;
     }
 
     [Fact]
@@ -367,9 +350,9 @@ public class AsnPrivateKeyEncoderTests
     [InlineData(Oids.ECP521)]
     public void EncodeToPkcs8_RawEcKeyWithPublicPoint_BclImportsAndRoundTrips(string curveOid)
     {
-        using var bcl = ECDsa.Create(GetNamedCurve(curveOid));
+        using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
         var expected = bcl.ExportParameters(includePrivateParameters: true);
-        var point = BuildUncompressedPoint(expected.Q.X!, expected.Q.Y!);
+        var point = EcTestSupport.UncompressedPoint(expected.Q.X!, expected.Q.Y!);
 
         var ourPkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(expected.D!, point, GetKeyType(curveOid));
 

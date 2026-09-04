@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using NSubstitute;
-using System.Formats.Cbor;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Fido2.Credentials;
@@ -66,7 +65,7 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Do<BackendGetAssertionRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId));
 
         // Act
         await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
@@ -112,7 +111,7 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId, numberOfCredentials: 1));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId, numberOfCredentials: 1));
 
         // Act
         var result = await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
@@ -141,13 +140,13 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(cred1, numberOfCredentials: 3));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(cred1, numberOfCredentials: 3));
 
         // GetNextAssertion called twice
         _mockBackend.GetNextAssertionAsync(Arg.Any<CancellationToken>())
             .Returns(
-                CreateMockGetAssertionResponse(cred2),
-                CreateMockGetAssertionResponse(cred3));
+                MockFido2Responses.CreateMockGetAssertionResponse(cred2),
+                MockFido2Responses.CreateMockGetAssertionResponse(cred3));
 
         // Act
         var result = await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
@@ -171,7 +170,7 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId));
 
         // Act
         var result = await _client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
@@ -205,7 +204,7 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId, signature: signature));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId, signature: signature));
 
         // Act
         var result = await _client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
@@ -250,7 +249,7 @@ public class WebAuthnClientGetAssertionTests
                     throw new CtapException(CtapStatus.PuatRequired);
                 }
 
-                return CreateMockGetAssertionResponse(credentialId);
+                return MockFido2Responses.CreateMockGetAssertionResponse(credentialId);
             });
 
         // Act
@@ -339,7 +338,7 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId));
 
         // Act
         var result = await _client.GetAssertionAsync(
@@ -448,92 +447,6 @@ public class WebAuthnClientGetAssertionTests
         UserVerification = UserVerificationPreference.Required
     };
 
-    private static GetAssertionResponse CreateMockGetAssertionResponse(
-        byte[] credentialId,
-        int? numberOfCredentials = null,
-        byte[]? signature = null,
-        PublicKeyCredentialUserEntity? user = null)
-    {
-        signature ??= RandomNumberGenerator.GetBytes(64);
-        var authData = BuildAuthData();
-        var cborBytes = BuildGetAssertionResponseCbor(credentialId, authData, signature, user, numberOfCredentials);
-        return GetAssertionResponse.Decode(cborBytes);
-    }
-
-    private static byte[] BuildAuthData()
-    {
-        // rpIdHash (32) + flags (1) + signCount (4)
-        var data = new List<byte>();
-
-        // rpIdHash (32 bytes)
-        var rpIdHash = new byte[32];
-        SHA256.HashData("example.com"u8, rpIdHash);
-        data.AddRange(rpIdHash);
-
-        // flags = UP | UV (0x05)
-        data.Add(0x05);
-
-        // signCount (4 bytes, big-endian)
-        data.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x01 });
-
-        return data.ToArray();
-    }
-
-    private static byte[] BuildGetAssertionResponseCbor(
-        byte[] credentialId,
-        byte[] authData,
-        byte[] signature,
-        PublicKeyCredentialUserEntity? user,
-        int? numberOfCredentials)
-    {
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-
-        // Count keys: credential (1) + authData (2) + signature (3) + optional user (4) + optional numberOfCredentials (5)
-        int keyCount = 3;
-        if (user is not null) keyCount++;
-        if (numberOfCredentials is not null) keyCount++;
-
-        writer.WriteStartMap(keyCount);
-
-        // 0x01: credential
-        writer.WriteInt32(1);
-        writer.WriteStartMap(2);
-        writer.WriteTextString("id");
-        writer.WriteByteString(credentialId);
-        writer.WriteTextString("type");
-        writer.WriteTextString("public-key");
-        writer.WriteEndMap();
-
-        // 0x02: authData
-        writer.WriteInt32(2);
-        writer.WriteByteString(authData);
-
-        // 0x03: signature
-        writer.WriteInt32(3);
-        writer.WriteByteString(signature);
-
-        // 0x04: user (optional)
-        if (user is not null)
-        {
-            writer.WriteInt32(4);
-            writer.WriteStartMap(1);
-            writer.WriteTextString("id");
-            writer.WriteByteString(user.Id.Span);
-            writer.WriteEndMap();
-        }
-
-        // 0x05: numberOfCredentials (optional)
-        if (numberOfCredentials is not null)
-        {
-            writer.WriteInt32(5);
-            writer.WriteInt32(numberOfCredentials.Value);
-        }
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
-    }
-
     [Fact(Timeout = 5000)]
     public async Task MatchedCredential_SelectAsync_HonorsCancellationToken()
     {
@@ -541,7 +454,7 @@ public class WebAuthnClientGetAssertionTests
         var credentialId = RandomNumberGenerator.GetBytes(32);
         var tcs = new TaskCompletionSource<AuthenticationResponse>();
 
-        var rawAuthData = BuildAuthData();
+        var rawAuthData = MockFido2Responses.BuildAuthData();
         var mockResponse = new AuthenticationResponse
         {
             CredentialId = credentialId,

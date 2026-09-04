@@ -61,7 +61,7 @@ public class AsnPublicKeyEncoderTests
         var curve = ECCurve.CreateFromValue(curveOid);
         using var ecdsa = ECDsa.Create(curve);
         var original = ecdsa.ExportParameters(includePrivateParameters: false);
-        var publicPoint = BuildUncompressedPoint(original.Q.X!, original.Q.Y!);
+        var publicPoint = EcTestSupport.UncompressedPoint(original.Q.X!, original.Q.Y!);
 
         var spki = AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(publicPoint, keyType);
 
@@ -262,14 +262,5 @@ public class AsnPublicKeyEncoderTests
         };
 
         Assert.Throws<ArgumentException>(() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(parameters));
-    }
-
-    private static byte[] BuildUncompressedPoint(byte[] x, byte[] y)
-    {
-        var point = new byte[1 + x.Length + y.Length];
-        point[0] = 0x04;
-        x.CopyTo(point, 1);
-        y.CopyTo(point, 1 + x.Length);
-        return point;
     }
 }

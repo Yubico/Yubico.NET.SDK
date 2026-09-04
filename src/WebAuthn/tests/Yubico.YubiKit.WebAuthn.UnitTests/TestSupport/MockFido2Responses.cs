@@ -32,12 +32,24 @@ internal static class MockFido2Responses
         return MakeCredentialResponse.Decode(cborBytes);
     }
 
-    public static GetAssertionResponse CreateMockGetAssertionResponse(byte[]? credentialId = null)
+    public static GetAssertionResponse CreateMockGetAssertionResponse(
+        byte[]? credentialId = null,
+        int? numberOfCredentials = null,
+        byte[]? signature = null,
+        PublicKeyCredentialUserEntity? user = null)
     {
         credentialId ??= RandomNumberGenerator.GetBytes(32);
+        signature ??= RandomNumberGenerator.GetBytes(64);
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(3);
+
+        // credential (1) + authData (2) + signature (3) + optional user (4) + optional
+        // numberOfCredentials (5)
+        var keyCount = 3;
+        if (user is not null) keyCount++;
+        if (numberOfCredentials is not null) keyCount++;
+
+        writer.WriteStartMap(keyCount);
 
         // 0x01: credential
         writer.WriteInt32(1);
@@ -48,21 +60,47 @@ internal static class MockFido2Responses
         writer.WriteTextString("public-key");
         writer.WriteEndMap();
 
-        // 0x02: authData - rpIdHash (32) + flags UP|UV (1) + signCount (4)
-        var authData = new byte[37];
-        SHA256.HashData("example.com"u8, authData.AsSpan(0, 32));
-        authData[32] = 0x05;
-        authData[36] = 0x01;
+        // 0x02: authData
         writer.WriteInt32(2);
-        writer.WriteByteString(authData);
+        writer.WriteByteString(BuildAuthData());
 
         // 0x03: signature
         writer.WriteInt32(3);
-        writer.WriteByteString(RandomNumberGenerator.GetBytes(64));
+        writer.WriteByteString(signature);
+
+        // 0x04: user (optional)
+        if (user is not null)
+        {
+            writer.WriteInt32(4);
+            writer.WriteStartMap(1);
+            writer.WriteTextString("id");
+            writer.WriteByteString(user.Id.Span);
+            writer.WriteEndMap();
+        }
+
+        // 0x05: numberOfCredentials (optional)
+        if (numberOfCredentials is not null)
+        {
+            writer.WriteInt32(5);
+            writer.WriteInt32(numberOfCredentials.Value);
+        }
 
         writer.WriteEndMap();
 
         return GetAssertionResponse.Decode(writer.Encode());
+    }
+
+    /// <summary>
+    /// Bare authenticator data: rpIdHash (32) + flags UP|UV (1) + signCount (4), with no attested
+    /// credential data.
+    /// </summary>
+    public static byte[] BuildAuthData()
+    {
+        var authData = new byte[37];
+        SHA256.HashData("example.com"u8, authData.AsSpan(0, 32));
+        authData[32] = 0x05;
+        authData[36] = 0x01;
+        return authData;
     }
 
     public static AuthenticatorInfo CreateMockAuthenticatorInfo(

@@ -14,7 +14,6 @@
 
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -79,7 +78,7 @@ public class ExcludeListPreflightTests
 
         // Mock backend to return success (actual response content doesn't matter
         // because chunk.Count == 1 short-circuits to return chunk[0])
-        var mockResponse = BuildMockGetAssertionResponse(credentialId);
+        var mockResponse = MockFido2Responses.CreateMockGetAssertionResponse(credentialId);
         backend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
@@ -152,7 +151,7 @@ public class ExcludeListPreflightTests
 
         // Descriptor #5 (index 5, first item in second chunk) will match
         var matchingCredentialId = new byte[] { 0x05 };
-        var matchingResponse = BuildMockGetAssertionResponse(matchingCredentialId);
+        var matchingResponse = MockFido2Responses.CreateMockGetAssertionResponse(matchingCredentialId);
 
         var callCount = 0;
         backend.GetAssertionAsync(
@@ -184,39 +183,5 @@ public class ExcludeListPreflightTests
         Assert.NotNull(result);
         Assert.Equal(matchingCredentialId, result.Id.ToArray());
         Assert.Equal(2, callCount);
-    }
-
-    // Helper to build a minimal GetAssertionResponse mock
-    private static GetAssertionResponse BuildMockGetAssertionResponse(byte[] credentialId)
-    {
-        // Build minimal CBOR response for GetAssertion
-        // Key 1 = credential { id, type }
-        // Key 2 = authData (minimal 37 bytes)
-        // Key 3 = signature
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(3);
-
-        // Key 1: credential
-        writer.WriteInt32(1);
-        writer.WriteStartMap(2);
-        writer.WriteTextString("id");
-        writer.WriteByteString(credentialId);
-        writer.WriteTextString("type");
-        writer.WriteTextString("public-key");
-        writer.WriteEndMap();
-
-        // Key 2: authData (37 bytes minimum)
-        writer.WriteInt32(2);
-        var authData = new byte[37];
-        writer.WriteByteString(authData);
-
-        // Key 3: signature (dummy)
-        writer.WriteInt32(3);
-        writer.WriteByteString(new byte[64]);
-
-        writer.WriteEndMap();
-
-        var responseBytes = writer.Encode();
-        return GetAssertionResponse.Decode(responseBytes);
     }
 }

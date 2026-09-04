@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.WebAuthn.Util;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -156,7 +154,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         }
         finally
         {
-            ZeroMemory(options.PinUvAuthParam);
+            SensitiveMemory.Zero(options.PinUvAuthParam);
         }
     }
 
@@ -214,27 +212,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         }
         finally
         {
-            ZeroMemory(options.PinUvAuthParam);
-        }
-    }
-
-    private static void ZeroMemory(ReadOnlyMemory<byte>? memory)
-    {
-        if (memory is null || memory.Value.IsEmpty)
-        {
-            return;
-        }
-
-        // A zeroing helper that quietly skips is a secret left in memory, so make the only
-        // unreachable case loud rather than silent. Callers here always pass array-backed memory;
-        // this cannot throw instead because every call site is a finally block, where throwing
-        // would swallow the exception already in flight.
-        var isArrayBacked = MemoryMarshal.TryGetArray(memory.Value, out var segment) && segment.Array is not null;
-        Debug.Assert(isArrayBacked, "pinUvAuthParam must be array-backed so it can be zeroed");
-
-        if (isArrayBacked)
-        {
-            CryptographicOperations.ZeroMemory(segment.AsSpan());
+            SensitiveMemory.Zero(options.PinUvAuthParam);
         }
     }
 

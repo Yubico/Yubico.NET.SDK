@@ -25,14 +25,6 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 /// </remarks>
 public class AsnPrivateKeyDecoderTests
 {
-    private static ECCurve GetNamedCurve(string curveOid) => curveOid switch
-    {
-        Oids.ECP256 => ECCurve.NamedCurves.nistP256,
-        Oids.ECP384 => ECCurve.NamedCurves.nistP384,
-        Oids.ECP521 => ECCurve.NamedCurves.nistP521,
-        _ => throw new ArgumentOutOfRangeException(nameof(curveOid))
-    };
-
     private static void AssertEcParametersMatch(ECParameters expected, ECParameters actual, string expectedCurveOid)
     {
         Assert.Equal(expectedCurveOid, actual.Curve.Oid.Value);
@@ -49,7 +41,7 @@ public class AsnPrivateKeyDecoderTests
     [InlineData(Oids.ECP521)]
     public void CreateECParameters_BclEncodedKey_MatchesBclExportedParameters(string curveOid)
     {
-        using var bcl = ECDsa.Create(GetNamedCurve(curveOid));
+        using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
         var pkcs8 = bcl.ExportPkcs8PrivateKey();
         var expected = bcl.ExportParameters(includePrivateParameters: true);
 

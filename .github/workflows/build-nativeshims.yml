@@ -431,82 +431,19 @@ jobs:
             throw "Version must use canonical three-component SemVer: $env:PACKAGE_VERSION"
           }
           "package-version=$env:PACKAGE_VERSION" >> $env:GITHUB_OUTPUT
-          mv nuspec/*.nuspec .
-          mv nuspec/readme.md .
-          $nuspec = [xml](gc Yubico.NativeShims.nuspec)
-          $repo = $nuspec.CreateElement("repository")
+          Move-Item nuspec/*.nuspec .
+          Move-Item nuspec/readme.md .
+          $nuspec = [xml](Get-Content Yubico.NativeShims.nuspec -Raw)
+          $repo = $nuspec.CreateElement("repository", $nuspec.DocumentElement.NamespaceURI)
           $repo.SetAttribute("url","$env:GITHUB_REPO_URL")
           $repo.SetAttribute("type","git")
           $nuspec.package.metadata.AppendChild($repo)
           $nuspec.package.metadata.version = "$env:PACKAGE_VERSION"
           $nuspec.Save("Yubico.NativeShims.nuspec")
-          cat Yubico.NativeShims.nuspec
+          Get-Content Yubico.NativeShims.nuspec
       - name: Verify static archives and pack
         shell: pwsh
         run: |
-          $packageRoot = Join-Path $PWD 'package'
-          $runtimesRoot = Join-Path $packageRoot 'runtimes'
-          $staticRoot = Join-Path $packageRoot 'buildTransitive/static'
-          $ridDirectories = @(Get-ChildItem -Directory | Where-Object {
-            $_.Name -match '^(win|linux|osx)-'
-          })
-          if ($ridDirectories.Count -eq 0) {
-            throw 'No runtime artifacts were downloaded.'
-          }
-
-          $nuspec = [xml](Get-Content Yubico.NativeShims.nuspec -Raw)
-          $ns = New-Object System.Xml.XmlNamespaceManager($nuspec.NameTable)
-          $ns.AddNamespace('n', $nuspec.DocumentElement.NamespaceURI)
-          $filesNode = $nuspec.SelectSingleNode('//n:files', $ns)
-
-          function Add-NuspecFile([string]$Source, [string]$Target) {
-            $fileNode = $nuspec.CreateElement('file', $nuspec.DocumentElement.NamespaceURI)
-            $fileNode.SetAttribute('src', $Source)
-            $fileNode.SetAttribute('target', $Target)
-            $filesNode.AppendChild($fileNode) | Out-Null
-          }
-
-          $archives = @()
-          foreach ($ridDirectory in $ridDirectories) {
-            $rid = $ridDirectory.Name
-            $sharedLibraries = @(Get-ChildItem -LiteralPath $ridDirectory.FullName -File | Where-Object {
-              $_.Extension -in @('.dll', '.so', '.dylib')
-            })
-            $archiveDirectory = Join-Path $ridDirectory.FullName 'static'
-            $ridArchives = if (Test-Path -LiteralPath $archiveDirectory -PathType Container) {
-              @(Get-ChildItem -LiteralPath $archiveDirectory -File | Where-Object {
-                $_.Extension -in @('.a', '.lib')
-              })
-            } else {
-              @()
-            }
-
-            if ($sharedLibraries.Count -ne 1) {
-              throw "Expected exactly one shared library for $rid, found $($sharedLibraries.Count)."
-            }
-            if ($ridArchives.Count -ne 1) {
-              throw "Expected exactly one static archive for $rid, found $($ridArchives.Count)."
-            }
-
-            $runtimeTarget = Join-Path $runtimesRoot "$rid/native"
-            $staticTarget = Join-Path $staticRoot $rid
-            New-Item -ItemType Directory -Force -Path $runtimeTarget, $staticTarget | Out-Null
-            Copy-Item -LiteralPath $sharedLibraries[0].FullName -Destination $runtimeTarget
-            Copy-Item -LiteralPath $ridArchives[0].FullName -Destination $staticTarget
-            $archives += $ridArchives[0]
-
-            # Explicit, non-wildcard <file> entries: classic nuget.exe pack
-            # does not strip the literal source-directory prefix from
-            # recursive "**" globs the way "dotnet pack" does, which would
-            # otherwise nest these assets one level too deep and break
-            # RID-based asset resolution.
-            Add-NuspecFile "package/runtimes/$rid/native/$($sharedLibraries[0].Name)" "runtimes/$rid/native/$($sharedLibraries[0].Name)"
-            Add-NuspecFile "package/buildTransitive/static/$rid/$($ridArchives[0].Name)" "buildTransitive/static/$rid/$($ridArchives[0].Name)"
-          }
-
-          $nuspec.Save("Yubico.NativeShims.nuspec")
-          cat Yubico.NativeShims.nuspec
-
           nuget pack Yubico.NativeShims.nuspec
           if ($LASTEXITCODE -ne 0) { throw "nuget pack failed with exit code $LASTEXITCODE." }
 
@@ -521,30 +458,39 @@ jobs:
           Copy-Item -LiteralPath $package.FullName -Destination $packageZip
           Expand-Archive -LiteralPath $packageZip -DestinationPath $packageContents
 
-          $runtimeArchives = @(Get-ChildItem -LiteralPath (Join-Path $packageContents 'runtimes') -Recurse -File | Where-Object {
-            $_.Extension -in @('.a', '.lib')
-          })
-          if ($runtimeArchives.Count -ne 0) {
-            throw "Static archives must not be NuGet runtime assets: $($runtimeArchives.FullName -join ', ')"
+          $expectedNativeFiles = @(
+            'runtimes/linux-arm64/native/libYubico.NativeShims.so'
+            'runtimes/linux-x64/native/libYubico.NativeShims.so'
+            'runtimes/osx-arm64/native/libYubico.NativeShims.dylib'
+            'runtimes/osx-x64/native/libYubico.NativeShims.dylib'
+            'runtimes/win-arm64/native/Yubico.NativeShims.dll'
+            'runtimes/win-x64/native/Yubico.NativeShims.dll'
+            'runtimes/win-x86/native/Yubico.NativeShims.dll'
+            'buildTransitive/static/linux-arm64/libYubico.NativeShims.a'
+            'buildTransitive/static/linux-x64/libYubico.NativeShims.a'
+            'buildTransitive/static/osx-arm64/libYubico.NativeShims.a'
+            'buildTransitive/static/osx-x64/libYubico.NativeShims.a'
+            'buildTransitive/static/win-arm64/Yubico.NativeShims.lib'
+            'buildTransitive/static/win-x64/Yubico.NativeShims.lib'
+            'buildTransitive/static/win-x86/Yubico.NativeShims.lib'
+          ) | Sort-Object
+          $actualNativeFiles = @(
+            Get-ChildItem -LiteralPath (Join-Path $packageContents 'runtimes') -Recurse -File
+            Get-ChildItem -LiteralPath (Join-Path $packageContents 'buildTransitive/static') -Recurse -File
+          ) | ForEach-Object {
+            [IO.Path]::GetRelativePath($packageContents, $_.FullName).Replace('\', '/')
+          } | Sort-Object
+
+          $nativeManifestDiff = @(Compare-Object $expectedNativeFiles $actualNativeFiles)
+          if ($nativeManifestDiff.Count -ne 0) {
+            throw "Native package manifest mismatch:`n$($nativeManifestDiff | Out-String)"
           }
 
-          $packagedArchives = @(Get-ChildItem -LiteralPath (Join-Path $packageContents 'buildTransitive/static') -Recurse -File | Where-Object {
-            $_.Extension -in @('.a', '.lib')
-          })
-          if ($packagedArchives.Count -ne $archives.Count) {
-            throw "Expected $($archives.Count) packaged static archives, found $($packagedArchives.Count)."
-          }
-
-          foreach ($ridDirectory in $ridDirectories) {
-            $rid = $ridDirectory.Name
-            $ridArchives = @($packagedArchives | Where-Object {
-              $_.Directory.Name -eq $rid
+          $archives = @(Get-ChildItem -Directory | Where-Object {
+              $_.Name -match '^(win|linux|osx)-'
+            } | ForEach-Object {
+              Get-ChildItem -LiteralPath (Join-Path $_.FullName 'static') -File
             })
-            if ($ridArchives.Count -ne 1) {
-              throw "Expected exactly one packaged static archive for $rid, found $($ridArchives.Count)."
-            }
-          }
-
           "### NativeShims package measurements" >> $env:GITHUB_STEP_SUMMARY
           "| Artifact | Bytes |" >> $env:GITHUB_STEP_SUMMARY
           "| --- | ---: |" >> $env:GITHUB_STEP_SUMMARY
@@ -617,6 +563,13 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Install x86 .NET runtime for framework-dependent checks
+        if: ${{ matrix.rid == 'win-x86' }}
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: global.json
+          architecture: x86
+
       - name: Install Linux Native AOT prerequisites
         if: ${{ matrix.os == 'linux' }}
         run: |
@@ -629,131 +582,18 @@ jobs:
           name: NuGet Package NativeShims
           path: artifacts/package-source
 
-      - name: Restore exact package and publish probe
+      - name: Verify exact package in all consumer modes
         shell: pwsh
         env:
           NATIVE_SHIMS_VERSION: ${{ needs.pack.outputs.package-version }}
         run: |
-          $project = Join-Path $env:GITHUB_WORKSPACE 'Yubico.NativeShims/tests/NativeAotProbe/NativeAotProbe.csproj'
-          $packageSource = (Resolve-Path (Join-Path $env:GITHUB_WORKSPACE 'artifacts/package-source')).Path
-          $packagesPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/packages/${{ matrix.rid }}'
-          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}'
-          $nugetConfig = Join-Path (Split-Path $project) 'package-sources.config'
-          $nupkgs = @(Get-ChildItem -LiteralPath $packageSource -File -Filter '*.nupkg')
-
-          if ($nupkgs.Count -ne 1) {
-            throw "Expected exactly one current-run package, found $($nupkgs.Count)."
-          }
-
-          $expectedPackageName = "Yubico.NativeShims.$env:NATIVE_SHIMS_VERSION.nupkg"
-          if ($nupkgs[0].Name -cne $expectedPackageName) {
-            throw "Expected package '$expectedPackageName', found '$($nupkgs[0].Name)'."
-          }
-
-          # First verify that ordinary consumers retain the shared library and do
-          # not receive build-only static archives.
-          dotnet restore $project `
-            -r '${{ matrix.rid }}' `
-            --packages $packagesPath `
-            --no-cache `
-            --configfile $nugetConfig `
-            -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION
-          if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed with exit code $LASTEXITCODE." }
-
-          $assets = Get-Content (Join-Path (Split-Path $project) 'obj/project.assets.json') -Raw | ConvertFrom-Json
-          $resolvedPackages = @($assets.libraries.PSObject.Properties.Name | Where-Object {
-              $_.StartsWith('Yubico.NativeShims/', [StringComparison]::OrdinalIgnoreCase)
-            })
-          $expectedPackage = "Yubico.NativeShims/$env:NATIVE_SHIMS_VERSION"
-          if ($resolvedPackages.Count -ne 1 -or
-              -not $resolvedPackages[0].Equals($expectedPackage, [StringComparison]::OrdinalIgnoreCase)) {
-            throw "Expected exact package '$expectedPackage'; resolved '$($resolvedPackages -join ', ')'."
-          }
-
-          $expectedHash = [Convert]::ToBase64String(
-            [Security.Cryptography.SHA512]::HashData([IO.File]::ReadAllBytes($nupkgs[0].FullName)))
-          $installedHashPath = Join-Path $packagesPath "yubico.nativeshims/$($env:NATIVE_SHIMS_VERSION.ToLowerInvariant())/yubico.nativeshims.$($env:NATIVE_SHIMS_VERSION.ToLowerInvariant()).nupkg.sha512"
-          $installedHash = (Get-Content -LiteralPath $installedHashPath -Raw).Trim()
-          if ($installedHash -cne $expectedHash) {
-            throw "Restored NativeShims package does not match the current-run package artifact."
-          }
-
-          $normalOutputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/build/${{ matrix.rid }}'
-          dotnet build $project `
-            -c Release `
-            -r '${{ matrix.rid }}' `
-            --no-restore `
-            -o $normalOutputPath `
-            -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
-            -p:RestorePackagesPath=$packagesPath
-          if ($LASTEXITCODE -ne 0) { throw "dotnet build failed with exit code $LASTEXITCODE." }
-
-          $sharedName = switch ('${{ matrix.os }}') {
-            'windows' { 'Yubico.NativeShims.dll' }
-            'linux' { 'libYubico.NativeShims.so' }
-            'macos' { 'libYubico.NativeShims.dylib' }
-          }
-          $normalSharedLibraries = @(Get-ChildItem -LiteralPath $normalOutputPath -Recurse -File | Where-Object {
-            $_.Name.Equals($sharedName, [StringComparison]::OrdinalIgnoreCase)
-          })
-          if ($normalSharedLibraries.Count -ne 1) {
-            throw "Expected one ordinary-build NativeShims shared library, found $($normalSharedLibraries.Count)."
-          }
-          $normalArchives = @(Get-ChildItem -LiteralPath $normalOutputPath -Recurse -File | Where-Object {
-            $_.Extension -in @('.a', '.lib')
-          })
-          if ($normalArchives.Count -ne 0) {
-            throw "Static archives leaked into ordinary build output: $($normalArchives.FullName -join ', ')"
-          }
-
-          # Prime the Native AOT runtime packs and evaluate the package's AOT assets.
-          dotnet restore $project `
-            -r '${{ matrix.rid }}' `
-            --packages $packagesPath `
-            --no-cache `
-            --configfile $nugetConfig `
-            -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
-            -p:PublishAot=true
-          if ($LASTEXITCODE -ne 0) { throw "Native AOT restore failed with exit code $LASTEXITCODE." }
-
-          $publishOutput = @(dotnet publish $project `
-            -c Release `
-            -r '${{ matrix.rid }}' `
-            --no-restore `
-            -o $outputPath `
-            -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
-            -p:RestorePackagesPath=$packagesPath `
-            -p:PublishAot=true `
-            -p:ContinuousIntegrationBuild=true 2>&1)
-          $publishExitCode = $LASTEXITCODE
-          $publishOutput | ForEach-Object { Write-Host $_ }
-          if ($publishExitCode -ne 0) { throw "dotnet publish failed with exit code $publishExitCode." }
-
-      - name: Verify native output
-        shell: pwsh
-        run: |
-          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}'
-          $isWindowsTarget = '${{ matrix.os }}' -eq 'windows'
-          $executable = Join-Path $outputPath $(if ($isWindowsTarget) { 'NativeAotProbe.exe' } else { 'NativeAotProbe' })
-
-          if (-not (Test-Path -LiteralPath $executable -PathType Leaf)) {
-            throw "Native AOT executable is missing: $executable"
-          }
-
-          $nativeSidecars = @(Get-ChildItem -LiteralPath $outputPath -Recurse -File | Where-Object {
-              $_.Name -match '(?i)(Yubico\.NativeShims|libcrypto|libssl)'
-            })
-          if ($nativeSidecars.Count -ne 0) {
-            throw "NativeShims or OpenSSL sidecars remain in AOT publish output: $($nativeSidecars.FullName -join ', ')"
-          }
-
-          if (Test-Path -LiteralPath (Join-Path $outputPath 'NativeAotProbe.dll')) {
-            throw "Managed NativeAotProbe.dll was published; package targets did not enable Native AOT."
-          }
-
-          "### Native AOT ${{ matrix.rid }}" >> $env:GITHUB_STEP_SUMMARY
-          "* Executable bytes: $((Get-Item -LiteralPath $executable).Length)" >> $env:GITHUB_STEP_SUMMARY
-          "* NativeShims/OpenSSL sidecars: $($nativeSidecars.Count)" >> $env:GITHUB_STEP_SUMMARY
+          & Yubico.NativeShims/tests/verify_package.ps1 `
+            -PackageSource artifacts/package-source `
+            -PackageVersion $env:NATIVE_SHIMS_VERSION `
+            -RuntimeIdentifier '${{ matrix.rid }}' `
+            -TargetOS '${{ matrix.os }}' `
+            -PackagesPath "artifacts/packages/${{ matrix.rid }}" `
+            -ArtifactsRoot artifacts
 
       - name: Inspect dynamic dependencies
         shell: pwsh
@@ -793,6 +633,9 @@ jobs:
           if ($dependencies -match '(?i)(Yubico\.NativeShims|lib(?:crypto|ssl))') {
             throw "Published executable dynamically depends on NativeShims or OpenSSL."
           }
+          "### Native AOT ${{ matrix.rid }}" >> $env:GITHUB_STEP_SUMMARY
+          "* Executable bytes: $((Get-Item -LiteralPath $executable).Length)" >> $env:GITHUB_STEP_SUMMARY
+          "* NativeShims/OpenSSL dynamic dependencies: 0" >> $env:GITHUB_STEP_SUMMARY
 
       - name: Verify hardened Linux dynamic exports
         if: ${{ matrix.os == 'linux' }}
@@ -837,14 +680,6 @@ jobs:
           if ($leakedSymbols.Count -ne 0) {
             throw "Static archive symbols remain dynamically exported:`n$($leakedSymbols -join [Environment]::NewLine)"
           }
-
-      - name: Execute package-only probe
-        shell: pwsh
-        run: |
-          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}'
-          $executable = Join-Path $outputPath $(if ('${{ matrix.os }}' -eq 'windows') { 'NativeAotProbe.exe' } else { 'NativeAotProbe' })
-          & $executable
-          if ($LASTEXITCODE -ne 0) { throw "Native AOT probe failed with exit code $LASTEXITCODE." }
 
   publish-internal:
     name: Publish to internal NuGet

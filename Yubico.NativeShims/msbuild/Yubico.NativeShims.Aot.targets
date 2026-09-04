@@ -5,6 +5,9 @@
         <_YubicoNativeShimsPlatform Condition="$(RuntimeIdentifier.StartsWith('win-'))">windows</_YubicoNativeShimsPlatform>
         <_YubicoNativeShimsPlatform Condition="$(RuntimeIdentifier.StartsWith('linux-'))">linux</_YubicoNativeShimsPlatform>
         <_YubicoNativeShimsPlatform Condition="$(RuntimeIdentifier.StartsWith('osx-'))">macos</_YubicoNativeShimsPlatform>
+        <_YubicoNativeShimsSharedLibrary Condition="'$(_YubicoNativeShimsPlatform)' == 'windows'">Yubico.NativeShims.dll</_YubicoNativeShimsSharedLibrary>
+        <_YubicoNativeShimsSharedLibrary Condition="'$(_YubicoNativeShimsPlatform)' == 'linux'">libYubico.NativeShims.so</_YubicoNativeShimsSharedLibrary>
+        <_YubicoNativeShimsSharedLibrary Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'">libYubico.NativeShims.dylib</_YubicoNativeShimsSharedLibrary>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(PublishAot)' == 'true' AND '$(RuntimeIdentifier)' != ''">
@@ -44,13 +47,13 @@
         </ItemGroup>
     </Target>
 
-    <Target Name="_YubicoNativeShimsRemoveAotRuntimeAssets"
-            AfterTargets="ResolvePackageAssets"
-            BeforeTargets="ResolveLockFileCopyLocalFiles"
+    <Target Name="_YubicoNativeShimsRemoveSharedLibraryFromAotPublish"
+            AfterTargets="ComputeResolvedFilesToPublishList"
+            BeforeTargets="CopyFilesToPublishDirectory"
             Condition="'$(PublishAot)' == 'true'">
         <ItemGroup>
-            <NativeCopyLocalItems Remove="@(NativeCopyLocalItems)"
-                Condition="'%(NativeCopyLocalItems.NuGetPackageId)' == 'Yubico.NativeShims'" />
+            <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+                Condition="'%(ResolvedFileToPublish.NuGetPackageId)' == 'Yubico.NativeShims' AND '%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == '$(_YubicoNativeShimsSharedLibrary)'" />
         </ItemGroup>
     </Target>
 </Project>

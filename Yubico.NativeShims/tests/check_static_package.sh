@@ -56,6 +56,49 @@ assert_msbuild_fails() {
     grep -Fq "$expected_message" "$TEMP_DIR/$log_name.log"
 }
 
+validate_asset_filters() {
+    local rid="$1"
+    local sidecar_name="$2"
+    local fake_sidecar="$TEMP_DIR/$rid/$sidecar_name"
+    local fake_same_name_other_asset="$TEMP_DIR/other/$rid/$sidecar_name"
+    local fake_other_asset="$TEMP_DIR/other/$rid/keep.native"
+
+    # Regression tripwire: PublishAot enables analyzers during ordinary builds,
+    # so it must not remove the shared library needed by the CoreCLR path.
+    dotnet msbuild "$TEST_PROJECT" \
+        -nologo \
+        -t:ValidateAotBuildAssets \
+        -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
+        -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
+        -p:PublishAot=true \
+        -p:RuntimeIdentifier="$rid" \
+        -p:FakeSidecar="$fake_sidecar" \
+        -p:FakeSameNameOtherAsset="$fake_same_name_other_asset" \
+        -p:FakeOtherAsset="$fake_other_asset"
+
+    dotnet msbuild "$TEST_PROJECT" \
+        -nologo \
+        -t:ValidatePublishAssets \
+        -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
+        -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
+        -p:PublishAot=true \
+        -p:RuntimeIdentifier="$rid" \
+        -p:FakeSidecar="$fake_sidecar" \
+        -p:FakeSameNameOtherAsset="$fake_same_name_other_asset" \
+        -p:FakeOtherAsset="$fake_other_asset"
+
+    dotnet msbuild "$TEST_PROJECT" \
+        -nologo \
+        -t:ValidateNonAotPublishAssets \
+        -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
+        -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
+        -p:PublishAot=false \
+        -p:RuntimeIdentifier="$rid" \
+        -p:FakeSidecar="$fake_sidecar" \
+        -p:FakeSameNameOtherAsset="$fake_same_name_other_asset" \
+        -p:FakeOtherAsset="$fake_other_asset"
+}
+
 mkdir -p "$TEMP_DIR/package/build" "$TEMP_DIR/package/buildTransitive"
 cp "$TARGETS_SOURCE" "$TEMP_DIR/package/build/Yubico.NativeShims.targets"
 cp "$TARGETS_SOURCE" "$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets"
@@ -84,27 +127,9 @@ validate_rid osx-x64 libYubico.NativeShims.a
 validate_rid osx-arm64 libYubico.NativeShims.a
 validate_rid linux-riscv64 libYubico.NativeShims.future.a
 
-dotnet msbuild "$TEST_PROJECT" \
-    -nologo \
-    -t:ValidatePublishAssets \
-    -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
-    -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
-    -p:PublishAot=true \
-    -p:RuntimeIdentifier=osx-arm64 \
-    -p:FakeSidecar="$TEMP_DIR/libYubico.NativeShims.dylib" \
-    -p:FakeSameNameOtherAsset="$TEMP_DIR/other/libYubico.NativeShims.dylib" \
-    -p:FakeOtherAsset="$TEMP_DIR/keep.dylib"
-
-dotnet msbuild "$TEST_PROJECT" \
-    -nologo \
-    -t:ValidateNonAotPublishAssets \
-    -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
-    -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
-    -p:PublishAot=false \
-    -p:RuntimeIdentifier=osx-arm64 \
-    -p:FakeSidecar="$TEMP_DIR/libYubico.NativeShims.dylib" \
-    -p:FakeSameNameOtherAsset="$TEMP_DIR/other/libYubico.NativeShims.dylib" \
-    -p:FakeOtherAsset="$TEMP_DIR/keep.dylib"
+validate_asset_filters win-x64 Yubico.NativeShims.dll
+validate_asset_filters linux-x64 libYubico.NativeShims.so
+validate_asset_filters osx-arm64 libYubico.NativeShims.dylib
 
 assert_msbuild_fails \
     missing-rid \
@@ -136,8 +161,7 @@ assert_no_nuspec_glob() {
     # Classic nuget.exe pack does not strip the literal source-directory
     # prefix from recursive "**" globs the way "dotnet pack" does, which
     # silently nests runtime assets one level too deep and breaks RID-based
-    # asset resolution. Per-RID <file> entries must be explicit and
-    # generated dynamically by the packing workflow instead.
+    # asset resolution. Per-RID <file> entries must remain explicit.
     if grep -Eq '<file[^>]*\*\*' "$NUSPEC"; then
         echo "ERROR: nuspec must not contain wildcard glob file entries" >&2
         exit 1
@@ -145,6 +169,33 @@ assert_no_nuspec_glob() {
 }
 
 assert_no_nuspec_glob
+
+for rid in win-x64 win-x86 win-arm64; do
+    assert_nuspec_entry \
+        "$rid/Yubico.NativeShims.dll" \
+        "runtimes/$rid/native/Yubico.NativeShims.dll"
+    assert_nuspec_entry \
+        "$rid/static/Yubico.NativeShims.lib" \
+        "buildTransitive/static/$rid/Yubico.NativeShims.lib"
+done
+
+for rid in linux-x64 linux-arm64; do
+    assert_nuspec_entry \
+        "$rid/libYubico.NativeShims.so" \
+        "runtimes/$rid/native/libYubico.NativeShims.so"
+    assert_nuspec_entry \
+        "$rid/static/libYubico.NativeShims.a" \
+        "buildTransitive/static/$rid/libYubico.NativeShims.a"
+done
+
+for rid in osx-x64 osx-arm64; do
+    assert_nuspec_entry \
+        "$rid/libYubico.NativeShims.dylib" \
+        "runtimes/$rid/native/libYubico.NativeShims.dylib"
+    assert_nuspec_entry \
+        "$rid/static/libYubico.NativeShims.a" \
+        "buildTransitive/static/$rid/libYubico.NativeShims.a"
+done
 
 assert_nuspec_entry \
     "msbuild/Yubico.NativeShims.Aot.targets" \

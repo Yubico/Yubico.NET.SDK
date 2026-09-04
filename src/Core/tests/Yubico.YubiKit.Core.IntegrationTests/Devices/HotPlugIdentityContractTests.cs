@@ -46,6 +46,13 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
     [Trait(TestCategories.Category, TestCategories.Slow)]
     public async Task RemoveAndReinsert_RemovalRetainsSerial_ReinsertionPublishesNewCorrelatedObject()
     {
+        var authorized = AuthorizedDevices.GetAll();
+        if (authorized is not [{ SerialNumber: { } authorizedSerial, IsUsbTransport: true }])
+        {
+            throw new Xunit.SkipException(
+                "This hot-plug protocol requires exactly one authorized USB device with a readable serial number.");
+        }
+
         var clock = Stopwatch.StartNew();
         var timeline = new List<string>();
         void Note(string message)
@@ -94,6 +101,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
             "Baseline failed: expected exactly one attached YubiKey with a readable serial within 20 s. " +
             $"Run this protocol on a single-key USB rig.{Environment.NewLine}{Timeline()}");
         var originalSerial = original.SerialNumber!.Value;
+        Assert.Equal(authorizedSerial, originalSerial);
         Note($"BASELINE {original.DeviceId} connections={original.AvailableConnections} serial={originalSerial}");
 
         // The operator unplugs the key. Poll the repository snapshot alongside the event

@@ -178,12 +178,15 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     public async Task FindAllAsync_RepeatedScans_EventuallyExposeSerialNumberWithoutASession()
     {
         // IYubiKey.SerialNumber surfaces the discovery-read serial with no session or Management
-        // dependency. Non-SKY rig keys report serials, so every retained device must
-        // eventually expose a non-null value purely through the public interface member.
-        var devices = await ScanUntilAsync(scan => scan.All(d => d.SerialNumber is not null));
+        // dependency. Assert only the authorized serial-bearing fixtures: other attached devices may
+        // legitimately be serial-less and remain null forever.
+        var expectedSerials = AuthorizedSerialsOrSkip();
+        var devices = await ScanUntilAsync(scan =>
+            expectedSerials.All(serial => scan.Any(device => device.SerialNumber == serial)));
 
         Assert.NotEmpty(devices);
-        Assert.All(devices, device => Assert.NotNull(device.SerialNumber));
+        Assert.All(expectedSerials, serial =>
+            Assert.Contains(devices, device => device.SerialNumber == serial));
     }
 
     [Fact]
@@ -192,19 +195,26 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     {
         // Conservative grouping can publish several objects for one physical key. Correlation follows
         // their known serials rather than assuming one published object per key.
-        var scan1 = await ScanUntilAsync(scan => scan.All(d => d.SerialNumber is not null));
-        var scan2 = await ScanUntilAsync(scan => scan.All(d => d.SerialNumber is not null));
-        Assert.NotEmpty(scan1);
-        Assert.NotEmpty(scan2);
-        Assert.All(scan1, device => Assert.NotNull(device.SerialNumber));
-        Assert.All(scan2, device => Assert.NotNull(device.SerialNumber));
-        Assert.Equal(
-            scan1.Select(device => device.SerialNumber!.Value).Distinct().Order(),
-            scan2.Select(device => device.SerialNumber!.Value).Distinct().Order());
+        var expectedSerials = AuthorizedSerialsOrSkip();
+        var scan1 = await ScanUntilAsync(scan =>
+            expectedSerials.All(serial => scan.Any(device => device.SerialNumber == serial)));
+        var scan2 = await ScanUntilAsync(scan =>
+            expectedSerials.All(serial => scan.Any(device => device.SerialNumber == serial)));
+        var known1 = scan1.Where(device => device.SerialNumber is { } serial && expectedSerials.Contains(serial)).ToList();
+        var known2 = scan2.Where(device => device.SerialNumber is { } serial && expectedSerials.Contains(serial)).ToList();
 
-        foreach (var device in scan1)
+        Assert.NotEmpty(known1);
+        Assert.NotEmpty(known2);
+        Assert.Equal(
+            expectedSerials.Order(),
+            known1.Select(device => device.SerialNumber!.Value).Distinct().Order());
+        Assert.Equal(
+            expectedSerials.Order(),
+            known2.Select(device => device.SerialNumber!.Value).Distinct().Order());
+
+        foreach (var device in known1)
         {
-            foreach (var other in scan2)
+            foreach (var other in known2)
             {
                 var expected = device.SerialNumber == other.SerialNumber
                     ? DeviceCorrelation.Same
@@ -230,6 +240,21 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         }
 
         return devices;
+    }
+
+    private static HashSet<int> AuthorizedSerialsOrSkip()
+    {
+        var serials = AuthorizedDevices.GetAll()
+            .Select(device => device.SerialNumber)
+            .OfType<int>()
+            .ToHashSet();
+        if (serials.Count == 0)
+        {
+            throw new Xunit.SkipException(
+                "This identity contract requires at least one authorized device with a readable serial number.");
+        }
+
+        return serials;
     }
 
     [Fact]

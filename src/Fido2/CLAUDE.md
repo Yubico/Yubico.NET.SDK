@@ -255,6 +255,20 @@ Key rules:
 - Use `.WithValue(key, writer => ...)` for complex values or sensitive byte spans that should be written directly instead of copied through `.WithBytes(...)`
 - Keep operation-level request builders as pure encoding helpers; do not introduce operation-specific CTAP command classes
 
+## Forward compatibility and escape hatches
+
+Valid authenticator response data that is not yet modeled must remain usable without relaxing malformed or security-critical data checks. The FIDO2 and WebAuthn response escape hatches are:
+
+- `RawData` on non-secret response owners such as `AuthenticatorInfo`, credential metadata, relying-party information, `FingerprintSensorInfo`, and `EnrollmentSampleResult` preserves the complete response envelope.
+- `AttestedCredentialData.CredentialPublicKey`, with `CoseOtherKey.RawCbor` when an unmodeled key type is not claimed by a modeled algorithm. COSE keys must still report an algorithm.
+- `ExtensionOutput.TryGetRawExtension` and `WebAuthnAuthenticatorData.ParsedExtensions` for extension outputs.
+- `IFidoSession.SendCborRequestAsync` for explicitly constructed raw CTAP CBOR requests and responses.
+
+PIN/UV key agreement is a separate security-critical boundary: forward-compatible response handling must not relax its required P-256 key type, curve, coordinates, or protocol structure. Raw response access is not a bypass, and unknown response fields must not be blindly copied into requests.
+
+Add `RawData` to models that own a complete, non-secret authenticator response. Do not duplicate the same buffer on nested entities or add another retained copy of envelopes containing material the SDK should zero.
+Use `RawCbor` only for an encoded nested CBOR structure, such as an attestation statement or unsupported COSE key; it may be a slice of its parent buffer rather than a separately owned copy.
+
 ## Security Requirements
 
 ### Memory Handling

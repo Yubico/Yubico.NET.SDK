@@ -23,6 +23,11 @@ namespace Yubico.YubiKit.Fido2.CredentialManagement;
 public sealed class CredentialMetadata
 {
     /// <summary>
+    /// Gets the complete original CBOR-encoded authenticator response.
+    /// </summary>
+    public ReadOnlyMemory<byte> RawData { get; }
+
+    /// <summary>
     /// Gets the number of existing discoverable credentials on the authenticator.
     /// </summary>
     public int ExistingResidentCredentialsCount { get; }
@@ -32,8 +37,9 @@ public sealed class CredentialMetadata
     /// </summary>
     public int MaxPossibleRemainingResidentCredentialsCount { get; }
 
-    private CredentialMetadata(int existingCount, int maxRemaining)
+    private CredentialMetadata(ReadOnlyMemory<byte> rawData, int existingCount, int maxRemaining)
     {
+        RawData = rawData;
         ExistingResidentCredentialsCount = existingCount;
         MaxPossibleRemainingResidentCredentialsCount = maxRemaining;
     }
@@ -45,7 +51,8 @@ public sealed class CredentialMetadata
     /// <returns>The decoded credential metadata.</returns>
     public static CredentialMetadata Decode(ReadOnlyMemory<byte> data)
     {
-        var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
+        ReadOnlyMemory<byte> rawData = data.ToArray();
+        var reader = new CborReader(rawData, CborConformanceMode.Ctap2Canonical);
 
         var existingCount = 0;
         var maxRemaining = 0;
@@ -69,7 +76,7 @@ public sealed class CredentialMetadata
         }
         reader.ReadEndMap();
 
-        return new CredentialMetadata(existingCount, maxRemaining);
+        return new CredentialMetadata(rawData, existingCount, maxRemaining);
     }
 }
 
@@ -78,6 +85,11 @@ public sealed class CredentialMetadata
 /// </summary>
 public sealed class RelyingPartyInfo
 {
+    /// <summary>
+    /// Gets the complete original CBOR-encoded authenticator response.
+    /// </summary>
+    public ReadOnlyMemory<byte> RawData { get; }
+
     /// <summary>
     /// Gets the relying party entity information.
     /// </summary>
@@ -93,8 +105,13 @@ public sealed class RelyingPartyInfo
     /// </summary>
     public int? TotalRpCount { get; }
 
-    private RelyingPartyInfo(PublicKeyCredentialRpEntity rp, ReadOnlyMemory<byte> rpIdHash, int? totalRpCount)
+    private RelyingPartyInfo(
+        ReadOnlyMemory<byte> rawData,
+        PublicKeyCredentialRpEntity rp,
+        ReadOnlyMemory<byte> rpIdHash,
+        int? totalRpCount)
     {
+        RawData = rawData;
         RelyingParty = rp;
         RpIdHash = rpIdHash;
         TotalRpCount = totalRpCount;
@@ -107,7 +124,8 @@ public sealed class RelyingPartyInfo
     /// <returns>The decoded relying party info.</returns>
     public static RelyingPartyInfo Decode(ReadOnlyMemory<byte> data)
     {
-        var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
+        ReadOnlyMemory<byte> rawData = data.ToArray();
+        var reader = new CborReader(rawData, CborConformanceMode.Ctap2Canonical);
 
         PublicKeyCredentialRpEntity? rp = null;
         byte[]? rpIdHash = null;
@@ -140,7 +158,7 @@ public sealed class RelyingPartyInfo
             throw new InvalidOperationException("Invalid RP info response: missing required fields.");
         }
 
-        return new RelyingPartyInfo(rp, rpIdHash, totalRpCount);
+        return new RelyingPartyInfo(rawData, rp, rpIdHash, totalRpCount);
     }
 
     private static PublicKeyCredentialRpEntity DecodeRpEntity(CborReader reader)

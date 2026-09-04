@@ -228,25 +228,18 @@ await foreach (var status in client.MakeCredentialStreamAsync(options, cancellat
 
 ### RP ID Validation
 
-`WebAuthnClient` validates RP IDs against `WebAuthnOrigin` before CTAP operations. Public suffixes such as `com` and `co.uk` must be rejected for suffix matches, so production callers must provide a `PublicSuffixChecker` backed by Public Suffix List data.
-
-Cross-SDK alignment:
-- Swift uses the same caller-supplied public-suffix checker pattern for `WebAuthn.Client`.
-- Python `python-fido2` ships bundled PSL data and validates with `verify_rp_id`.
-- Android accepts caller-supplied `effectiveDomain`; .NET intentionally keeps the safer explicit suffix-checker model.
+`WebAuthnClient` enforces RP ID validity through `Client/Validation/RpIdValidator.cs` before CTAP
+operations. Public suffixes such as `com` and `co.uk` must be rejected for suffix matches, so
+production callers must provide a `PublicSuffixChecker` backed by Public Suffix List data. The
+explicit suffix checker is required; a caller-supplied effective-domain shortcut is not a substitute.
 
 ### Extension Adapter Pattern
 
-Extensions are implemented as `IExtensionAdapter<TInput, TOutput>`:
-
-```csharp
-public interface IExtensionAdapter<in TInput, out TOutput>
-{
-    string ExtensionIdentifier { get; }
-    void EncodeInput(TInput input, IDictionary<string, object> extensionsMap);
-    TOutput DecodeOutput(IDictionary<string, object> extensionsMap);
-}
-```
+Extensions use internal static adapters coordinated by `ExtensionPipeline`. Input methods are named
+`ApplyToBuilder` or `ApplyToBuilderForRegistration`/`ApplyToBuilderForAuthentication`. Output methods
+are generally named `ParseRegistrationOutput` and `ParseAuthenticationOutput`; `MinPinLengthAdapter`
+uses `ParseOutput`, and client-derived `CredPropsAdapter` uses `DeriveOutput`. Add each supported
+ceremony to `Extensions/ExtensionPipeline.cs` and cover its encoded map and parsed output.
 
 **previewSign Example:**
 ```csharp
@@ -384,7 +377,7 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 ## Known Gotchas
 
 1. **previewSign auth is single-credential only for now** — multi-credential probe-selection is not implemented yet
-2. **Extension passthrough bug (fixed in commit `95abc0c5`)** — Extensions were silently dropped at backend; now wired correctly
+2. **Extension inputs must reach the backend** — Assert on encoded extension maps because a missing adapter call can silently omit an extension
 3. **`flags` optional in previewSign registration output** — Some authenticators return only key 3 (algorithm)
 4. **No LoggingFactory** — Use `YubiKitLogging.CreateLogger<T>()` from Core
 5. **Status stream must be consumed** — `IAsyncEnumerable` won't advance unless caller enumerates

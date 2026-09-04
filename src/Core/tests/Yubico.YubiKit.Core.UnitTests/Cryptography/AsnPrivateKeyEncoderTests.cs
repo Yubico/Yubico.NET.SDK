@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Formats.Asn1;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
 
@@ -88,18 +89,75 @@ public class AsnPrivateKeyEncoderTests
     [InlineData(Oids.ECP256)]
     [InlineData(Oids.ECP384)]
     [InlineData(Oids.ECP521)]
-    public void EncodeToPkcs8_EcParametersWithPublicPoint_BclImportThrowsCryptographicException(
-        string curveOid)
+    public void EncodeToPkcs8_EcParametersWithPublicPoint_BclImportsAndRoundTrips(string curveOid)
     {
-        // Known limitation: the optional public-key field uses implicit tagging, so a
-        // standards-compliant importer rejects the encoded key.
         using var bcl = ECDsa.Create(GetNamedCurve(curveOid));
         var expected = bcl.ExportParameters(includePrivateParameters: true);
 
         var ourPkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(expected);
 
         using var check = ECDsa.Create();
-        Assert.Throws<CryptographicException>(() => check.ImportPkcs8PrivateKey(ourPkcs8, out _));
+        check.ImportPkcs8PrivateKey(ourPkcs8, out var bytesRead);
+        Assert.Equal(ourPkcs8.Length, bytesRead);
+
+        var actual = check.ExportParameters(includePrivateParameters: true);
+        Assert.Equal(curveOid, actual.Curve.Oid.Value);
+        Assert.Equal(expected.D, actual.D);
+        Assert.Equal(expected.Q.X, actual.Q.X);
+        Assert.Equal(expected.Q.Y, actual.Q.Y);
+    }
+
+    [Theory]
+    [InlineData(Oids.ECP256, 32)]
+    [InlineData(Oids.ECP384, 48)]
+    [InlineData(Oids.ECP521, 66)]
+    public void EncodeToPkcs8_EcParametersWithPublicPoint_EmitsExplicitlyTaggedBitString(
+        string curveOid, int coordinateSize)
+    {
+        using var bcl = ECDsa.Create(GetNamedCurve(curveOid));
+        var parameters = bcl.ExportParameters(includePrivateParameters: true);
+
+        var ourPkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(parameters);
+        var ecPrivateKeyDer = ReadPkcs8PrivateKeyOctets(ourPkcs8);
+
+        // RFC 5915 defines publicKey as EXPLICIT [1] BIT STRING, so the encoding is a constructed
+        // [1] wrapper (0xA1) around a universal BIT STRING (0x03) with zero unused bits.
+        var point = BuildUncompressedPoint(parameters.Q.X!, parameters.Q.Y!);
+        Assert.Equal(1 + (2 * coordinateSize), point.Length);
+
+        // BIT STRING: 03 <len> 00 || point, where the 00 is the unused-bit count.
+        byte[] bitString = [0x03, .. DerLength(point.Length + 1), 0x00, .. point];
+
+        // EXPLICIT [1]: A1 <len> || BIT STRING.
+        byte[] expectedTail = [0xA1, .. DerLength(bitString.Length), .. bitString];
+
+        Assert.Equal(expectedTail, ecPrivateKeyDer[^expectedTail.Length..]);
+    }
+
+    /// <summary>DER definite-length octets for lengths below 256, which covers every case here.</summary>
+    private static byte[] DerLength(int length)
+    {
+        Assert.InRange(length, 0, 255);
+        return length < 0x80 ? [(byte)length] : [0x81, (byte)length];
+    }
+
+    /// <summary>Returns the PKCS#8 privateKey OCTET STRING contents (the RFC 5915 ECPrivateKey DER).</summary>
+    private static byte[] ReadPkcs8PrivateKeyOctets(byte[] pkcs8)
+    {
+        var reader = new AsnReader(pkcs8, AsnEncodingRules.DER);
+        var privateKeyInfo = reader.ReadSequence();
+        _ = privateKeyInfo.ReadInteger();
+        _ = privateKeyInfo.ReadSequence();
+        return privateKeyInfo.ReadOctetString();
+    }
+
+    private static byte[] BuildUncompressedPoint(byte[] x, byte[] y)
+    {
+        var point = new byte[1 + x.Length + y.Length];
+        point[0] = 0x04;
+        x.CopyTo(point, 1);
+        y.CopyTo(point, 1 + x.Length);
+        return point;
     }
 
     [Fact]
@@ -120,6 +178,26 @@ public class AsnPrivateKeyEncoderTests
         var actual = check.ExportParameters(includePrivateParameters: true);
 
         Assert.Equal(full.D, actual.D);
+    }
+
+    [Theory]
+    [InlineData(Oids.ECP256, 31, 32)] // X one byte short
+    [InlineData(Oids.ECP256, 32, 31)] // Y one byte short
+    [InlineData(Oids.ECP256, 33, 33)] // both oversized but self-consistent
+    [InlineData(Oids.ECP256, 48, 48)] // P-384 sized coordinates on a P-256 curve
+    [InlineData(Oids.ECP384, 32, 32)] // P-256 sized coordinates on a P-384 curve
+    [InlineData(Oids.ECP521, 65, 66)] // P-521 coordinates are 66 bytes each
+    public void EncodeToPkcs8_EcParametersCoordinateSizeMismatch_ThrowsArgumentException(
+        string curveOid, int xLength, int yLength)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(curveOid),
+            D = new byte[32],
+            Q = new ECPoint { X = new byte[xLength], Y = new byte[yLength] }
+        };
+
+        Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(parameters));
     }
 
     [Fact]
@@ -147,23 +225,60 @@ public class AsnPrivateKeyEncoderTests
     [InlineData(Oids.ECP256)]
     [InlineData(Oids.ECP384)]
     [InlineData(Oids.ECP521)]
-    public void EncodeToPkcs8_RawEcKeyWithPublicPoint_BclImportThrowsCryptographicException(
-        string curveOid)
+    public void EncodeToPkcs8_RawEcKeyWithPublicPoint_BclImportsAndRoundTrips(string curveOid)
     {
-        // Known limitation: the optional public-key field uses implicit tagging, so a
-        // standards-compliant importer rejects the encoded key.
         using var bcl = ECDsa.Create(GetNamedCurve(curveOid));
         var expected = bcl.ExportParameters(includePrivateParameters: true);
-        var point = new byte[1 + expected.Q.X!.Length + expected.Q.Y!.Length];
-        point[0] = 0x04;
-        expected.Q.X.CopyTo(point, 1);
-        expected.Q.Y.CopyTo(point, 1 + expected.Q.X.Length);
+        var point = BuildUncompressedPoint(expected.Q.X!, expected.Q.Y!);
 
         var ourPkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(expected.D!, point, GetKeyType(curveOid));
 
         using var check = ECDsa.Create();
-        Assert.Throws<CryptographicException>(() => check.ImportPkcs8PrivateKey(ourPkcs8, out _));
+        check.ImportPkcs8PrivateKey(ourPkcs8, out var bytesRead);
+        Assert.Equal(ourPkcs8.Length, bytesRead);
+
+        var actual = check.ExportParameters(includePrivateParameters: true);
+        Assert.Equal(curveOid, actual.Curve.Oid.Value);
+        Assert.Equal(expected.D, actual.D);
+        Assert.Equal(expected.Q.X, actual.Q.X);
+        Assert.Equal(expected.Q.Y, actual.Q.Y);
     }
+
+    [Theory]
+    [InlineData(0x00)]
+    [InlineData(0x02)] // compressed, even Y
+    [InlineData(0x03)] // compressed, odd Y
+    [InlineData(0x06)] // hybrid
+    [InlineData(0x40)]
+    public void EncodeToPkcs8_RawEcKeyPublicPointWrongPrefix_ThrowsArgumentException(byte prefix)
+    {
+        var point = new byte[65]; // correct P-256 length, wrong prefix
+        point[0] = prefix;
+
+        Assert.Throws<ArgumentException>(() =>
+            AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], point, KeyType.ECP256));
+    }
+
+    [Theory]
+    [InlineData(KeyType.ECP256, 64)] // one byte short
+    [InlineData(KeyType.ECP256, 66)] // one byte long
+    [InlineData(KeyType.ECP256, 97)] // a P-384 point on a P-256 key
+    [InlineData(KeyType.ECP384, 65)] // a P-256 point on a P-384 key
+    [InlineData(KeyType.ECP521, 97)] // a P-384 point on a P-521 key
+    public void EncodeToPkcs8_RawEcKeyPublicPointWrongLength_ThrowsArgumentException(
+        KeyType keyType, int pointLength)
+    {
+        var point = new byte[pointLength];
+        point[0] = 0x04;
+
+        Assert.Throws<ArgumentException>(() =>
+            AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], point, keyType));
+    }
+
+    [Fact]
+    public void EncodeToPkcs8_RawEcKeyEmptyPublicPoint_ThrowsArgumentException() =>
+        Assert.Throws<ArgumentException>(() =>
+            AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], ReadOnlyMemory<byte>.Empty, KeyType.ECP256));
 
     [Fact]
     public void EncodeToPkcs8_UnsupportedKeyType_ThrowsNotSupportedException() =>

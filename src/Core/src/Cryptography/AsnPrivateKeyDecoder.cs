@@ -229,29 +229,33 @@ internal class AsnPrivateKeyDecoder
             var tag = seqEcPrivateKey.PeekTag();
             if (tag is { TagValue: 1, TagClass: TagClass.ContextSpecific })
             {
-                ReadOnlyMemory<byte> publicKeyBytes = seqEcPrivateKey.ReadBitString(out var unusedBits, tag);
+                ReadOnlyMemory<byte> publicKeyBytes;
+                int unusedBits;
+                if (tag.IsConstructed)
+                {
+                    // RFC 5915 defines publicKey as EXPLICIT [1] BIT STRING, so the constructed
+                    // [1] wrapper holds a universal BIT STRING. This is what every standards
+                    // compliant producer, including .NET, emits.
+                    var seqPublicKey = seqEcPrivateKey.ReadSequence(tag);
+                    publicKeyBytes = seqPublicKey.ReadBitString(out unusedBits);
+                    seqPublicKey.ThrowIfNotEmpty();
+                }
+                else
+                {
+                    // Earlier releases of this SDK wrote the field with a primitive, implicitly
+                    // tagged BIT STRING. Those keys stay readable; the point below is validated
+                    // identically either way.
+                    publicKeyBytes = seqEcPrivateKey.ReadBitString(out unusedBits, tag);
+                }
+
                 if (unusedBits != 0)
                 {
                     throw new CryptographicException("Invalid EC public key encoding");
                 }
 
-                // Process the public key point
-                if (publicKeyBytes.Length == 0)
-                {
-                    throw new CryptographicException("Invalid EC public key encoding");
-                }
-
-                if (publicKeyBytes.Span[0] != 0x04) // Uncompressed point format
-                {
-                    throw new CryptographicException("Unsupported EC point format");
-                }
+                AsnUtilities.ValidateDecodedEcPoint(publicKeyBytes.Span, curveOid);
 
                 var coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
-                if (publicKeyBytes.Length != (2 * coordinateSize) + 1) // Format: 0x04 + X + Y
-                {
-                    throw new CryptographicException("Invalid EC public key encoding");
-                }
-
                 var xCoordinate = new byte[coordinateSize];
                 var yCoordinate = new byte[coordinateSize];
 

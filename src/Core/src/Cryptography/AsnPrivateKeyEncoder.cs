@@ -149,22 +149,19 @@ internal static class AsnPrivateKeyEncoder
             throw new ArgumentException("Curve OID is null.");
 
         ReadOnlyMemory<byte> privateKey = parameters.D;
+        var curveOid = parameters.Curve.Oid.Value;
 
         // Create public point if Q coordinates are available
         ReadOnlyMemory<byte>? publicPoint = null;
         if (parameters.Q is { X: not null, Y: not null })
         {
-            var xCoordinate = parameters.Q.X;
-            var yCoordinate = parameters.Q.Y;
-
-            Memory<byte> uncompressedPoint = new byte[1 + xCoordinate.Length + yCoordinate.Length];
-            uncompressedPoint.Span[0] = 0x04; // Uncompressed point format
-            xCoordinate.CopyTo(uncompressedPoint[1..]);
-            yCoordinate.CopyTo(uncompressedPoint[(1 + xCoordinate.Length)..]);
-            publicPoint = uncompressedPoint;
+            publicPoint = AsnUtilities.BuildUncompressedEcPoint(
+                parameters.Q.X,
+                parameters.Q.Y,
+                curveOid,
+                nameof(parameters));
         }
 
-        var curveOid = parameters.Curve.Oid.Value;
         return EncodeECKey(privateKey, curveOid, publicPoint);
     }
 
@@ -176,6 +173,11 @@ internal static class AsnPrivateKeyEncoder
         string curveOid,
         ReadOnlyMemory<byte>? publicPoint)
     {
+        if (publicPoint.HasValue)
+        {
+            AsnUtilities.ValidateEcPointArgument(publicPoint.Value.Span, curveOid, nameof(publicPoint));
+        }
+
         var ecKeyWriter = new AsnWriter(AsnEncodingRules.DER);
 
         // Start ECPrivateKey SEQUENCE (RFC 5915)
@@ -189,14 +191,17 @@ internal static class AsnPrivateKeyEncoder
 
         // [0] parameters (optional) - omitted since we include the OID in the AlgorithmIdentifier
 
-        // [1] Public key (optional)
+        // [1] Public key (optional). RFC 5915 uses EXPLICIT tags, so this is a constructed [1]
+        // wrapper around a universal BIT STRING. An implicitly tagged BIT STRING here is rejected
+        // by standards-compliant importers, including ECDsa.ImportPkcs8PrivateKey.
         if (publicPoint.HasValue)
         {
-            ecKeyWriter.WriteBitString(
-                publicPoint.Value.Span,
-                0,
-                new Asn1Tag(TagClass.ContextSpecific, 1));
+            var publicKeyTag = new Asn1Tag(TagClass.ContextSpecific, 1, isConstructed: true);
+            _ = ecKeyWriter.PushSequence(publicKeyTag);
+            ecKeyWriter.WriteBitString(publicPoint.Value.Span);
+            ecKeyWriter.PopSequence(publicKeyTag);
         }
+
         ecKeyWriter.PopSequence();
         using var ecPrivateKeyHandle = new DisposableBufferHandle(ecKeyWriter.Encode());
 

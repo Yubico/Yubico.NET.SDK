@@ -190,7 +190,7 @@ internal class AsnPrivateKeyDecoder
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "Expected an ECDSA private key, but the algorithm OID was '{0}'.",
+                    "Expected an EC private key using id-ecPublicKey, but the algorithm OID was '{0}'.",
                     oidAlgorithm));
         }
 

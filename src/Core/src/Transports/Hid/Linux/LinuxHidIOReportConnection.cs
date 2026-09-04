@@ -41,10 +41,11 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
         _handle = LibcNativeMethods.open(devNode, LibcNativeMethods.OpenFlags.O_RDWR);
         if (_handle.IsInvalid)
         {
+            int errorCode = Marshal.GetLastPInvokeError();
             throw new PlatformApiException(
                 nameof(LibcNativeMethods.open),
-                Marshal.GetLastWin32Error(),
-                $"Failed to open HID device: {devNode}. {LibcHelpers.GetErrnoString()}");
+                errorCode,
+                $"Failed to open HID device: {devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
         }
 
         // Get the report sizes from the HID descriptor
@@ -63,10 +64,11 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
 
         if (bytesRead < 0)
         {
+            int errorCode = Marshal.GetLastPInvokeError();
             throw new PlatformApiException(
                 nameof(LibcNativeMethods.read),
-                Marshal.GetLastWin32Error(),
-                $"Failed to read from HID device: {_devNode}. {LibcHelpers.GetErrnoString()}");
+                errorCode,
+                $"Failed to read from HID device: {_devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
         }
 
         // Return only the bytes actually read
@@ -95,10 +97,11 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
 
         if (bytesWritten < 0)
         {
+            int errorCode = Marshal.GetLastPInvokeError();
             throw new PlatformApiException(
                 nameof(LibcNativeMethods.write),
-                Marshal.GetLastWin32Error(),
-                $"Failed to write to HID device: {_devNode}. {LibcHelpers.GetErrnoString()}");
+                errorCode,
+                $"Failed to write to HID device: {_devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
         }
 
         if (bytesWritten != reportWithId.Length)

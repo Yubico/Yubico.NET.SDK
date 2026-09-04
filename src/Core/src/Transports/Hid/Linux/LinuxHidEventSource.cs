@@ -156,7 +156,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
         {
             Logger.LogWarning(
                 "Failed to create Linux HID listener shutdown event fd: {Error}",
-                Marshal.GetLastWin32Error());
+                Marshal.GetLastPInvokeError());
             return false;
         }
 
@@ -192,7 +192,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
         var pollResult = LibcNativeMethods.poll(pollFds, pollFds.Length, -1);
         if (pollResult < 0)
         {
-            var error = Marshal.GetLastWin32Error();
+            var error = Marshal.GetLastPInvokeError();
             if (error == LibcNativeMethods.EINTR)
             {
                 return LinuxHidPollOutcome.Retry;
@@ -263,7 +263,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
             var signal = BitConverter.GetBytes(1UL);
             WriteShutdownSignal(
                 () => LibcNativeMethods.write(handle, signal, signal.Length),
-                Marshal.GetLastWin32Error,
+                Marshal.GetLastPInvokeError,
                 (result, error) =>
                 {
                     if (result < 0)
@@ -403,7 +403,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
                 return;
             }
 
-            var error = Marshal.GetLastWin32Error();
+            var error = Marshal.GetLastPInvokeError();
             if (error != LibcNativeMethods.EAGAIN && error != LibcNativeMethods.EINTR)
             {
                 Logger.LogDebug("Failed to drain Linux HID listener shutdown fd: {Error}", error);

@@ -63,7 +63,7 @@ internal sealed class LinuxHidDevice : IHidDevice
         {
             throw new PlatformApiException(
                 nameof(UdevNativeMethods.udev_new),
-                Marshal.GetLastWin32Error(),
+                Marshal.GetLastPInvokeError(),
                 "Failed to create udev context.");
         }
 
@@ -72,7 +72,7 @@ internal sealed class LinuxHidDevice : IHidDevice
         {
             throw new PlatformApiException(
                 nameof(UdevNativeMethods.udev_enumerate_new),
-                Marshal.GetLastWin32Error(),
+                Marshal.GetLastPInvokeError(),
                 "Failed to create udev enumerate context.");
         }
 

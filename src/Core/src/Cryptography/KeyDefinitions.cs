@@ -64,7 +64,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// <returns>
         /// The key definition for the specified key type.
         /// </returns>
-        /// <exception cref="InvalidOperationException">
+        /// <exception cref="ArgumentException">
         /// When the key type is not supported.
         /// </exception>
         public static KeyDefinition GetByKeyType(KeyType type)
@@ -173,7 +173,7 @@ namespace Yubico.YubiKit.Core.Cryptography
             if (string.Equals(oid, Oids.ECDSA, StringComparison.OrdinalIgnoreCase))
             {
                 throw new NotSupportedException(
-                    "All ECDSA keys (P-256, P-384, P-521) share the same OID. Use the Curve OID instead.");
+                    "The id-ecPublicKey algorithm OID does not identify a curve. Use the curve OID instead.");
             }
 
             var keyDefinition = AllDefinitions.Values.FirstOrDefault(d => d.AlgorithmOid == oid || d.CurveOid == oid);

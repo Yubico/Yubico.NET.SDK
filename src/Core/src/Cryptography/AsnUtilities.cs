@@ -74,6 +74,27 @@ internal static class AsnUtilities
         return trimmedBytes;
     }
 
+    /// <summary>
+    /// Returns a newly allocated buffer containing the minimal positive ASN.1 INTEGER content octets.
+    /// </summary>
+    /// <remarks>
+    /// Unlike <see cref="GetIntegerBytes(Span{byte})"/>, this method never aliases the input.
+    /// The caller owns the returned buffer and is responsible for zeroing it when it contains
+    /// sensitive material.
+    /// </remarks>
+    public static byte[] GetOwnedIntegerContentOctets(ReadOnlySpan<byte> value)
+    {
+        if (value.IsEmpty)
+        {
+            return [0x00];
+        }
+
+        var trimmedBytes = TrimLeadingZeroes(value);
+        var paddingLength = (trimmedBytes[0] & 0x80) != 0 ? 1 : 0;
+        var ownedBytes = new byte[trimmedBytes.Length + paddingLength];
+        trimmedBytes.CopyTo(ownedBytes.AsSpan(paddingLength));
+        return ownedBytes;
+    }
     private static int GetLeadingZeroCount(ReadOnlySpan<byte> data)
     {
         if (data.IsEmpty)

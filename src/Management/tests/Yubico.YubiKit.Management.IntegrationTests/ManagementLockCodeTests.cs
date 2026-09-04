@@ -55,7 +55,7 @@ public class ManagementLockCodeTests
                     .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
                     .Build();
 
-                await mgmt.SetDeviceConfigAsync(configToLock, false, newLockCode: lockCode);
+                await mgmt.SetDeviceConfigAsync(configToLock, new SetDeviceConfigOptions { NewLockCode = lockCode });
 
                 // Verify the device is now locked
                 var lockedInfo = await mgmt.GetDeviceInfoAsync();
@@ -67,14 +67,14 @@ public class ManagementLockCodeTests
                     .Build();
 
                 await Assert.ThrowsAnyAsync<Exception>(async () =>
-                    await mgmt.SetDeviceConfigAsync(configWithoutCode, false));
+                    await mgmt.SetDeviceConfigAsync(configWithoutCode));
 
                 // Verify that a config change WITH the lock code succeeds
                 var configWithCode = DeviceConfig.CreateBuilder()
                     .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
                     .Build();
 
-                await mgmt.SetDeviceConfigAsync(configWithCode, false, currentLockCode: lockCode);
+                await mgmt.SetDeviceConfigAsync(configWithCode, new SetDeviceConfigOptions { CurrentLockCode = lockCode });
             }
             finally
             {
@@ -84,9 +84,8 @@ public class ManagementLockCodeTests
                     .Build();
 
                 await mgmt.SetDeviceConfigAsync(
-                    unlockConfig, false,
-                    currentLockCode: lockCode,
-                    newLockCode: clearCode);
+                    unlockConfig,
+                    new SetDeviceConfigOptions { CurrentLockCode = lockCode, NewLockCode = clearCode });
 
                 // Verify the device is no longer locked
                 var unlockedInfo = await mgmt.GetDeviceInfoAsync();
@@ -124,7 +123,7 @@ public class ManagementLockCodeTests
                     .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
                     .Build();
 
-                await mgmt.SetDeviceConfigAsync(lockConfig, false, newLockCode: lockCode);
+                await mgmt.SetDeviceConfigAsync(lockConfig, new SetDeviceConfigOptions { NewLockCode = lockCode });
 
                 // Change auto-eject timeout with lock code
                 var changeConfig = DeviceConfig.CreateBuilder()
@@ -132,7 +131,7 @@ public class ManagementLockCodeTests
                     .WithAutoEjectTimeout(newAutoEject)
                     .Build();
 
-                await mgmt.SetDeviceConfigAsync(changeConfig, false, currentLockCode: lockCode);
+                await mgmt.SetDeviceConfigAsync(changeConfig, new SetDeviceConfigOptions { CurrentLockCode = lockCode });
 
                 // Verify the change took effect
                 var updatedInfo = await mgmt.GetDeviceInfoAsync();
@@ -147,9 +146,8 @@ public class ManagementLockCodeTests
                     .Build();
 
                 await mgmt.SetDeviceConfigAsync(
-                    restoreConfig, false,
-                    currentLockCode: lockCode,
-                    newLockCode: clearCode);
+                    restoreConfig,
+                    new SetDeviceConfigOptions { CurrentLockCode = lockCode, NewLockCode = clearCode });
 
                 CryptographicOperations.ZeroMemory(lockCode);
             }

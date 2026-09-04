@@ -132,11 +132,20 @@ await using var session = await yubiKey.CreateHsmAuthSessionAsync(
 // Directly from a SmartCard connection, optionally over SCP
 await using var scpSession = await HsmAuthSession.CreateAsync(
     connection,
-    scpKeyParams: scpParams,
+    new SessionCreationOptions { ScpKeyParameters = scpParams },
     cancellationToken: cancellationToken);
 ```
 
-For dependency injection, `services.AddHsmAuth()` is available.
+Applet dependency-injection registration is intentionally absent. Call `HsmAuthSession.CreateAsync` or
+`CreateHsmAuthSessionAsync` directly.
+
+The one-shot credential listing method also accepts `SessionCreationOptions`:
+
+```csharp
+var credentials = await yubiKey.ListHsmAuthCredentialsAsync(
+    new SessionCreationOptions { ScpKeyParameters = scpParams },
+    cancellationToken);
+```
 
 ### Storing credentials
 
@@ -307,7 +316,6 @@ Yubico.YubiKit.YubiHsm/
 │   ├── HsmAuthAlgorithm.cs        # Algorithm enum + extension properties
 │   ├── HsmAuthCredential.cs       # LIST response record
 │   ├── HsmAuthRetryException.cs   # Typed retry-count exception
-│   ├── DependencyInjection.cs     # AddHsmAuth()
 │   └── IYubiKeyExtensions.cs      # CreateHsmAuthSessionAsync()
 ├── examples/HsmAuthTool/          # Interactive CLI example
 └── tests/

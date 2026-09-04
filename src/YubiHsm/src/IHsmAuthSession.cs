@@ -22,6 +22,13 @@ namespace Yubico.YubiKit.YubiHsm;
 /// </summary>
 public interface IHsmAuthSession : IApplicationSession
 {
+    /// <summary>Gets or sets a parameterless callback invoked before an operation may require touch.</summary>
+    /// <remarks>
+    ///     The callback intentionally receives no operation context so it cannot disclose the credential or
+    ///     algorithm involved. It must not call back into this session.
+    /// </remarks>
+    Action? OnTouchRequired { get; set; }
+
     /// <summary>
     ///     Lists all credentials stored in the YubiHSM Auth applet.
     /// </summary>

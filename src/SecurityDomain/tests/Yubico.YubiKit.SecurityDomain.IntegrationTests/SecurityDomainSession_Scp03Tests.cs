@@ -143,8 +143,40 @@ public class SecurityDomainSession_Scp03Tests
         await state.WithSecurityDomainSessionAsync(true,
             async session =>
             {
-                var result = await session.GetCaIdentifiersAsync(true, true);
+                var result = await session.GetCaIdentifiersAsync(CaIdentifierType.Kloc | CaIdentifierType.Klcc);
                 Assert.True(result.Count > 0);
+            },
+            scpKeyParams: Scp03KeyParameters.Default,
+            configuration: new ProtocolConfiguration { ForceShortApdus = true },
+            cancellationToken: CancellationTokenSource.Token);
+
+    /// <summary>
+    ///     Validates that each returned CA identifier carries the decoded two-byte key-reference
+    ///     value rather than the surrounding TLV header.
+    /// </summary>
+    /// <remarks>
+    ///     The key reference arrives as TLV <c>83 02 KID KVN</c>. Reading the whole TLV instead of its
+    ///     value yields <c>Kid = 0x83</c> and <c>Kvn = 0x02</c> for every entry, which still produces a
+    ///     non-empty list and therefore passes a count-only assertion. Pinning the key identifier to the
+    ///     SCP11 set is what makes that decoding regression observable on hardware.
+    /// </remarks>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
+    public async Task GetCaIdentifiersAsync_DecodesKeyReferenceValue(YubiKeyTestState state) =>
+        await state.WithSecurityDomainSessionAsync(true,
+            async session =>
+            {
+                var identifiers =
+                    await session.GetCaIdentifiersAsync(CaIdentifierType.Kloc | CaIdentifierType.Klcc);
+
+                Assert.NotEmpty(identifiers);
+                Assert.All(identifiers, identifier =>
+                {
+                    Assert.Contains(
+                        identifier.KeyReference.Kid,
+                        new[] { ScpKid.SCP11a, ScpKid.SCP11b, ScpKid.SCP11c });
+                    Assert.NotEqual(0, identifier.Identifier.Length);
+                });
             },
             scpKeyParams: Scp03KeyParameters.Default,
             configuration: new ProtocolConfiguration { ForceShortApdus = true },

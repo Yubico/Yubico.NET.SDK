@@ -23,6 +23,8 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
 {
     public FirmwareVersion() { }
 
+    // Existing alpha convenience constructors intentionally support both byte and validated int inputs.
+#pragma warning disable RS0026
     public FirmwareVersion(byte major, byte minor = 0, byte patch = 0)
     {
         Major = major;
@@ -35,6 +37,7 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
             ByteUtils.ValidateByte(patch, nameof(patch)))
     {
     }
+#pragma warning restore RS0026
 
     public byte Major { get; }
     public byte Minor { get; }

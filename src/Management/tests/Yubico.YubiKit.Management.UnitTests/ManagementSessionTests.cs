@@ -95,8 +95,7 @@ public class ManagementSessionTests
 
         await session.SetDeviceConfigAsync(
             config,
-            reboot: false,
-            currentLockCode: lockCode,
+            new SetDeviceConfigOptions { CurrentLockCode = lockCode },
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(backend.SawNonZeroConfig);
@@ -148,7 +147,6 @@ public class ManagementSessionTests
                 {
                     EnabledCapabilities = new Dictionary<Transport, int> { [Transport.Usb] = 1 }
                 },
-                reboot: false,
                 cancellationToken: TestContext.Current.CancellationToken));
     }
 

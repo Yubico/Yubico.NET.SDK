@@ -4,6 +4,7 @@
 using Yubico.YubiKit.Cli.Shared.Device;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Cli.Commands.Infrastructure;
@@ -41,6 +42,11 @@ public sealed class YkDeviceContext
     ///     to use each applet's default transport order.
     /// </summary>
     public ConnectionType? PreferredConnection { get; init; }
+
+    /// <summary>
+    ///     Gets fresh session creation options carrying the command's selected transport.
+    /// </summary>
+    public SessionCreationOptions SessionOptions => new() { PreferredConnectionType = PreferredConnection };
 
     /// <summary>
     ///     Returns a human-readable device banner line, preferring the part number from

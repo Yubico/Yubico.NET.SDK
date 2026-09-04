@@ -6,7 +6,7 @@ This directory contains unit and integration tests for the Security Domain modul
 
 | Project | Purpose | Hardware Required |
 |---------|---------|-------------------|
-| `UnitTests` | DI registration, parsing, internal logic | No |
+| `UnitTests` | Session behavior, parsing, internal logic | No |
 | `IntegrationTests` | Session creation, SCP protocols, key operations | Yes |
 
 ## Running Tests
@@ -62,29 +62,13 @@ public async Task MyTest(YubiKeyTestState state) =>
         cancellationToken: ct);
 ```
 
-### Testing with DI Factory
-
-```csharp
-[SkippableTheory]
-[WithYubiKey(MinFirmware = "5.4.3")]
-public async Task DIFactory_Test(YubiKeyTestState state) =>
-    await state.WithSecurityDomainSessionFromDIAsync(
-        resetBeforeUse: true,
-        async session =>
-        {
-            Assert.True(session.IsAuthenticated);
-        },
-        scpKeyParams: Scp03KeyParameters.Default,
-        cancellationToken: ct);
-```
-
 ## Test Extensions
 
 Implementation lives in `Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs`.
 
 ### WithSecurityDomainSessionAsync
 
-Creates a session directly via `Device.CreateSecurityDomainSessionAsync()`.
+Borrows one SmartCard connection and creates each session with `SecurityDomainSession.CreateAsync()`.
 
 ```csharp
 await state.WithSecurityDomainSessionAsync(
@@ -94,37 +78,6 @@ await state.WithSecurityDomainSessionAsync(
     scpKeyParams: Scp03KeyParameters.Default,  // SCP authentication
     cancellationToken: ct);
 ```
-
-### WithSecurityDomainSessionFromDIAsync
-
-Creates a session via the DI-registered `SecurityDomainSessionFactory`.
-
-```csharp
-// Simple form - builds ServiceProvider internally with:
-//   services.AddYubiKeySecurityDomain();
-await state.WithSecurityDomainSessionFromDIAsync(
-    resetBeforeUse: true,
-    async session => { },
-    configuration: null,
-    scpKeyParams: Scp03KeyParameters.Default,
-    cancellationToken: ct);
-
-// Custom ServiceProvider (for additional service registrations)
-var services = new ServiceCollection();
-services.AddYubiKeySecurityDomain();
-services.AddSingleton<IMyService, MyService>(); // your services
-await using var provider = services.BuildServiceProvider();
-
-await state.WithSecurityDomainSessionFromDIAsync(
-    resetBeforeUse: true,
-    async session => { },
-    serviceProvider: provider,
-    configuration: null,
-    scpKeyParams: Scp03KeyParameters.Default,
-    cancellationToken: ct);
-```
-
-**Note:** `AddYubiKeySecurityDomain()` only registers the session factory. Core device discovery uses the static `YubiKeyManager` and does not require DI registration.
 
 ## Automatic SD Reset
 
@@ -142,9 +95,9 @@ Integration tests use an automatic reset mechanism that factory-resets the Secur
 
 ### Unit Tests
 
-- DI registration mechanics (no hardware)
-- Factory delegate signature validation
-- Service collection integration
+- Session factory behavior (no hardware)
+- Protocol response parsing
+- Internal wire and validation logic
 
 ### Integration Tests
 
@@ -152,4 +105,4 @@ Integration tests use an automatic reset mechanism that factory-resets the Secur
 - SCP03 authentication
 - SCP11 protocols (firmware 5.7.2+)
 - Key import/export operations
-- DI factory end-to-end validation
+- Direct session factory end-to-end validation

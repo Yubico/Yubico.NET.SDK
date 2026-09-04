@@ -41,6 +41,8 @@ public sealed class RawSmartCardSession : ApplicationSession
         _usesScp = usesScp;
     }
 
+    // Existing alpha overload family: preserve the simple and SCP-specific raw-session entry points.
+#pragma warning disable RS0026
     /// <summary>Creates a raw APDU session that borrows <paramref name="connection" />.</summary>
     /// <remarks>No APDU is transmitted and no application is selected during creation.</remarks>
     public static Task<RawSmartCardSession> CreateAsync(
@@ -75,6 +77,7 @@ public sealed class RawSmartCardSession : ApplicationSession
             configuration,
             cancellationToken);
     }
+#pragma warning restore RS0026
 
     private static async Task<RawSmartCardSession> CreateCoreAsync(
         ISmartCardConnection connection,

@@ -62,12 +62,10 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <summary>
     ///     Retrieves the supported CA identifiers (KLOC/KLCC) exposed by the Security Domain.
     /// </summary>
-    /// <param name="includeKloc">Whether to include Key Loading OCE Certificate identifiers.</param>
-    /// <param name="includeKlcc">Whether to include Key Loading Card Certificate identifiers.</param>
+    /// <param name="identifierTypes">The identifier groups to retrieve.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task<IReadOnlyList<CaIdentifier>> GetCaIdentifiersAsync(
-        bool includeKloc,
-        bool includeKlcc,
+        CaIdentifierType identifierTypes,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -88,6 +86,8 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <param name="staticKeys">Static ENC/MAC/DEK values to load.</param>
     /// <param name="replaceKvn">Optional key version number to replace.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    // The overloads represent distinct SCP03, EC public-key, and EC private-key payloads.
+#pragma warning disable RS0026
     Task PutKeyAsync(
         KeyReference keyReference,
         StaticKeys staticKeys,
@@ -119,6 +119,7 @@ public interface ISecurityDomainSession : IApplicationSession
         ECPrivateKey privateKey,
         int replaceKvn = 0,
         CancellationToken cancellationToken = default);
+#pragma warning restore RS0026
 
     /// <summary>
     ///     Generates a new SCP11 key pair on the device and returns the public point.

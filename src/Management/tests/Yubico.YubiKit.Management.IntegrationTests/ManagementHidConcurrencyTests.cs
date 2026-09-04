@@ -51,7 +51,7 @@ public class ManagementHidConcurrencyTests
             // SmartCard satisfies a HID request. Without an explicit preferredConnection this test ran
             // over SmartCard on every composite key and proved nothing about HID. Assert the transport
             // so the test cannot silently stop testing what its name claims.
-            Assert.Equal(state.ConnectionType, mgmt.Transport);
+            Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
 
             const int iterations = 5;
 

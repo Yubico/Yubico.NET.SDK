@@ -5,6 +5,7 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Fido2.UnitTests;
@@ -88,8 +89,8 @@ public class FidoSessionTests
             [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00]);
         var device = new SingleConnectionYubiKey(connection);
         var session = await device.CreateFidoSessionAsync(
-            preferredConnection: ConnectionType.SmartCard,
-            cancellationToken: TestContext.Current.CancellationToken);
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },
+            TestContext.Current.CancellationToken);
 
         await session.DisposeAsync();
         await session.DisposeAsync();
@@ -110,8 +111,8 @@ public class FidoSessionTests
         };
         var device = new SingleConnectionYubiKey(connection);
         var session = await device.CreateFidoSessionAsync(
-            preferredConnection: ConnectionType.SmartCard,
-            cancellationToken: TestContext.Current.CancellationToken);
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },
+            TestContext.Current.CancellationToken);
 
         Exception? first = await Record.ExceptionAsync(async () => await session.DisposeAsync());
         Exception? second = await Record.ExceptionAsync(async () => await session.DisposeAsync());
@@ -135,8 +136,8 @@ public class FidoSessionTests
         };
         var device = new SingleConnectionYubiKey(connection);
         var session = await device.CreateFidoSessionAsync(
-            preferredConnection: ConnectionType.SmartCard,
-            cancellationToken: TestContext.Current.CancellationToken);
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },
+            TestContext.Current.CancellationToken);
 
         Task disposal = session.DisposeAsync().AsTask();
         await connection.AsyncDisposalStarted.WaitAsync(TestContext.Current.CancellationToken);

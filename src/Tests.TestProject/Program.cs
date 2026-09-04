@@ -7,9 +7,6 @@ using Yubico.YubiKit.Management;
 var builder = WebApplication.CreateSlimBuilder(args);
 AddJsonOptions(builder);
 
-// Register YubiKey services with DI
-builder.Services.AddYubiKeyManager();
-
 // Register controllers for the DiTestController
 #pragma warning disable IL2026 // MVC does not support trimming; this project is not AOT-deployed
 builder.Services.AddControllers();

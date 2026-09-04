@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.Tests.Shared;
@@ -173,7 +174,14 @@ public static class FidoTestStateExtensions
             try
             {
                 session = await state.Device
-                    .CreateFidoSessionAsync(scpKeyParams, configuration, preferredConnection, cancellationToken)
+                    .CreateFidoSessionAsync(
+                        new SessionCreationOptions
+                        {
+                            ScpKeyParameters = scpKeyParams,
+                            ProtocolConfiguration = configuration,
+                            PreferredConnectionType = preferredConnection
+                        },
+                        cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException ex) when (OperatingSystem.IsWindows())
@@ -223,7 +231,14 @@ public static class FidoTestStateExtensions
             try
             {
                 session = await state.Device
-                    .CreateFidoSessionAsync(scpKeyParams, configuration, preferredConnection, cancellationToken)
+                    .CreateFidoSessionAsync(
+                        new SessionCreationOptions
+                        {
+                            ScpKeyParameters = scpKeyParams,
+                            ProtocolConfiguration = configuration,
+                            PreferredConnectionType = preferredConnection
+                        },
+                        cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException ex) when (OperatingSystem.IsWindows())

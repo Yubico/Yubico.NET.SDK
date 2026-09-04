@@ -15,6 +15,7 @@
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -57,7 +58,8 @@ public class IYubiKeyExtensionsTransportTests
         var device = new SelectionProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidOtp);
 
         await Assert.ThrowsAsync<ConnectProbeException>(
-            () => device.CreateYubiOtpSessionAsync(preferredConnection: ConnectionType.HidOtp, cancellationToken: Ct));
+            () => device.CreateYubiOtpSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }, Ct));
 
         Assert.Equal(typeof(IOtpHidConnection), device.RequestedConnection);
     }
@@ -69,7 +71,8 @@ public class IYubiKeyExtensionsTransportTests
         var device = new SelectionProbeYubiKey(ConnectionType.HidOtp);
 
         await Assert.ThrowsAsync<NotSupportedException>(
-            () => device.CreateYubiOtpSessionAsync(preferredConnection: ConnectionType.SmartCard, cancellationToken: Ct));
+            () => device.CreateYubiOtpSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }, Ct));
 
         Assert.Null(device.RequestedConnection);
     }
@@ -85,7 +88,8 @@ public class IYubiKeyExtensionsTransportTests
         var device = new SelectionProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidOtp);
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => device.CreateYubiOtpSessionAsync(preferredConnection: invalid, cancellationToken: Ct));
+            () => device.CreateYubiOtpSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = invalid }, Ct));
 
         Assert.Null(device.RequestedConnection);
     }
@@ -97,7 +101,8 @@ public class IYubiKeyExtensionsTransportTests
         var device = new SelectionProbeYubiKey(ConnectionType.SmartCard | ConnectionType.HidFido);
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => device.CreateYubiOtpSessionAsync(preferredConnection: ConnectionType.HidFido, cancellationToken: Ct));
+            () => device.CreateYubiOtpSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido }, Ct));
 
         Assert.Null(device.RequestedConnection);
     }
@@ -139,7 +144,8 @@ public class IYubiKeyExtensionsTransportTests
             .Returns(ConnectionType.HidOtp, new FailingOtpConnection());
 
         await Assert.ThrowsAsync<SCardException>(() =>
-            device.CreateYubiOtpSessionAsync(preferredConnection: ConnectionType.SmartCard, cancellationToken: Ct));
+            device.CreateYubiOtpSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }, Ct));
 
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }

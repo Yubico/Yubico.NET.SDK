@@ -86,24 +86,28 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     ///     Creates and initializes an OpenPGP session on the given SmartCard connection.
     /// </summary>
     /// <param name="connection">An open SmartCard connection to a YubiKey.</param>
-    /// <param name="configuration">Optional protocol configuration overrides.</param>
-    /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
+    /// <param name="options">Optional cross-cutting session creation settings.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>An initialized <see cref="OpenPgpSession" />.</returns>
     public static async Task<OpenPgpSession> CreateAsync(
         ISmartCardConnection connection,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
+        SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(connection);
+
+        var configuration = options?.ProtocolConfiguration;
+        var scpKeyParams = options?.ScpKeyParameters;
+        var firmwareVersionOverride = options?.FirmwareVersionOverride;
+
+        ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new OpenPgpSession(connection));
         try
         {
-            await session.InitializeAsync(configuration, scpKeyParams, cancellationToken)
+            await session.InitializeAsync(configuration, scpKeyParams, firmwareVersionOverride, cancellationToken)
                 .ConfigureAwait(false);
             return session;
         }
@@ -119,6 +123,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         ScpKeyParameters? scpKeyParams,
+        FirmwareVersion? firmwareVersionOverride,
         CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
@@ -135,7 +140,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
         var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
                 protocol,
-                firmwareVersion,
+                firmwareVersionOverride ?? firmwareVersion,
                 configuration,
                 scpKeyParams,
                 cancellationToken)

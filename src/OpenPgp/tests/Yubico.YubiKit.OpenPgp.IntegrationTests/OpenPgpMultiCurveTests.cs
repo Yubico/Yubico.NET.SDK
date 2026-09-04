@@ -24,7 +24,7 @@ public class OpenPgpMultiCurveTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateEcKeyAsync(KeyRef.Sig, CurveOid.Secp384R1);
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp384R1));
 
                 // Verify algorithm attributes were updated
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
@@ -53,7 +53,7 @@ public class OpenPgpMultiCurveTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateEcKeyAsync(KeyRef.Sig, CurveOid.BrainpoolP256R1);
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.BrainpoolP256R1));
 
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
                 Assert.IsType<EcAttributes>(attrs);

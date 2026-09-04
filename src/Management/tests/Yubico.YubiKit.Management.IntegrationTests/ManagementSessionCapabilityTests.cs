@@ -61,7 +61,7 @@ public class ManagementSessionCapabilityTests
                     .WithCapabilities(Transport.Usb, (int)withoutOath)
                     .Build();
 
-                await mgmt.SetDeviceConfigAsync(configWithoutOath, false);
+                await mgmt.SetDeviceConfigAsync(configWithoutOath);
 
                 // Read back and verify OATH is now disabled
                 var updatedInfo = await mgmt.GetDeviceInfoAsync();
@@ -74,7 +74,7 @@ public class ManagementSessionCapabilityTests
                     .WithCapabilities(Transport.Usb, (int)originalUsbEnabled)
                     .Build();
 
-                await mgmt.SetDeviceConfigAsync(restoreConfig, false);
+                await mgmt.SetDeviceConfigAsync(restoreConfig);
 
                 // Verify restoration
                 var restoredInfo = await mgmt.GetDeviceInfoAsync();
@@ -113,7 +113,7 @@ public class ManagementSessionCapabilityTests
                     .WithNfcRestricted(true)
                     .Build();
 
-                await mgmt.SetDeviceConfigAsync(config, false);
+                await mgmt.SetDeviceConfigAsync(config);
 
                 // Read back and verify the flag is set
                 var updatedInfo = await mgmt.GetDeviceInfoAsync();
@@ -129,7 +129,7 @@ public class ManagementSessionCapabilityTests
                     .WithNfcRestricted(originalNfcRestricted)
                     .Build();
 
-                await mgmt.SetDeviceConfigAsync(restoreConfig, false);
+                await mgmt.SetDeviceConfigAsync(restoreConfig);
             }
         });
     }

@@ -433,7 +433,7 @@ public class ManagementSessionAdvancedTests
             // below all three rows ran over SmartCard and this test's premise — consistency ACROSS
             // transports — was never actually exercised. Assert the transport so it cannot regress
             // to that silently.
-            Assert.Equal(state.ConnectionType, mgmt.Transport);
+            Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
 
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
 

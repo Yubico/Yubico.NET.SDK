@@ -219,7 +219,7 @@ public sealed class OpenPgpAccessUnblockPinCommand : YkCommandBase<AccessUnblock
             return ExitCode.GenericError;
         }
 
-        await session.ResetPinAsync(resetCode.Memory, newPin.Memory, useAdmin: false);
+        await session.ResetPinUsingResetCodeAsync(resetCode.Memory, newPin.Memory);
         OutputHelpers.WriteSuccess("User PIN has been unblocked.");
         return ExitCode.Success;
     }

@@ -234,7 +234,8 @@ public sealed class OtpInfoCommand : YkCommandBase<GlobalSettings>
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, GlobalSettings settings, YkDeviceContext deviceContext)
     {
-        await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+        await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+            deviceContext.SessionOptions);
 
         var state = session.GetConfigState();
 
@@ -296,7 +297,8 @@ public sealed class OtpSwapCommand : YkCommandBase<OtpSwapSettings>
             }
         }
 
-        await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+        await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+            deviceContext.SessionOptions);
         await session.SwapSlotsAsync();
 
         OutputHelpers.WriteSuccess("Slot 1 and slot 2 configurations swapped.");
@@ -326,7 +328,8 @@ public sealed class OtpDeleteCommand : YkCommandBase<OtpSlotSettings>
                 }
             }
 
-            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+                deviceContext.SessionOptions);
             await session.DeleteSlotAsync(slot, accessCode);
 
             OutputHelpers.WriteSuccess($"Slot {OtpHelpers.FormatSlot(slot)} configuration deleted.");
@@ -374,7 +377,8 @@ public sealed class OtpChalRespCommand : YkCommandBase<OtpChalRespSettings>
                 }
             }
 
-            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+                deviceContext.SessionOptions);
 
             using var config = new HmacSha1SlotConfiguration(hmacKey);
 
@@ -437,7 +441,8 @@ public sealed class OtpHotpCommand : YkCommandBase<OtpHotpSettings>
                 }
             }
 
-            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+                deviceContext.SessionOptions);
 
             using var config = new HotpSlotConfiguration(hmacKey, settings.Imf ?? 0);
 
@@ -502,7 +507,8 @@ public sealed class OtpStaticCommand : YkCommandBase<OtpStaticSettings>
                 }
             }
 
-            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+                deviceContext.SessionOptions);
 
             using var config = new StaticPasswordSlotConfiguration(scanCodes);
 
@@ -589,12 +595,13 @@ public sealed class OtpYubiOtpCommand : YkCommandBase<OtpYubiOtpSettings>
                 }
             }
 
-            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+                deviceContext.SessionOptions);
 
             // Resolve serial-based public ID
             if (settings.SerialPublicId)
             {
-                int serial = await session.GetSerialAsync();
+                int serial = await session.GetSerialNumberAsync();
                 publicId = OtpHelpers.EncodeSerialAsPublicId(serial);
                 OutputHelpers.WriteHex("Serial-based public ID", publicId);
             }
@@ -636,7 +643,8 @@ public sealed class OtpCalculateCommand : YkCommandBase<OtpCalculateSettings>
 
         try
         {
-            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+                deviceContext.SessionOptions);
 
             var response = await session.CalculateHmacSha1Async(slot, challenge);
 
@@ -684,7 +692,8 @@ public sealed class OtpNdefCommand : YkCommandBase<OtpNdefSettings>
                 }
             }
 
-            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+                deviceContext.SessionOptions);
 
             await session.SetNdefConfigurationAsync(slot, settings.Prefix, accessCode, ndefType);
 
@@ -721,7 +730,8 @@ public sealed class OtpSettingsCommand : YkCommandBase<OtpSettingsSettings>
                 }
             }
 
-            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+            await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
+                deviceContext.SessionOptions);
 
             using var config = new UpdateConfiguration();
 

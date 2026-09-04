@@ -71,18 +71,26 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// </summary>
     public static async Task<OathSession> CreateAsync(
         ISmartCardConnection connection,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
+        SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(connection);
+
+        var configuration = options?.ProtocolConfiguration;
+        var scpKeyParams = options?.ScpKeyParameters;
+        var firmwareVersionOverride = options?.FirmwareVersionOverride;
+
+        ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new OathSession(connection, scpKeyParams));
         try
         {
-            await session.InitializeAsync(CreateOathProtocolConfiguration(configuration), cancellationToken)
+            await session.InitializeAsync(
+                    CreateOathProtocolConfiguration(configuration),
+                    firmwareVersionOverride,
+                    cancellationToken)
                 .ConfigureAwait(false);
             return session;
         }
@@ -98,6 +106,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
+        FirmwareVersion? firmwareVersionOverride,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
@@ -108,7 +117,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         IOathBackend backend = new OathBackend(protocol);
 
         var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        ApplyInitialization(initialization);
+        ApplyInitialization(initialization, firmwareVersionOverride);
 
         if (_scpKeyParams is not null)
         {
@@ -139,9 +148,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
         _logger.LogDebug("OATH session initialized, DeviceId={DeviceId}, IsLocked={IsLocked}", DeviceId, IsLocked);
     }
 
-    private void ApplyInitialization(OathInitialization initialization)
+    private void ApplyInitialization(OathInitialization initialization, FirmwareVersion? firmwareVersionOverride)
     {
-        FirmwareVersion = initialization.FirmwareVersion;
+        FirmwareVersion = firmwareVersionOverride ?? initialization.FirmwareVersion;
 
         CryptographicOperations.ZeroMemory(_salt);
         _salt = initialization.Salt;
@@ -221,7 +230,6 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <inheritdoc />
     public async Task PutCredentialAsync(
         CredentialData credentialData,
-        bool requireTouch = false,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -243,7 +251,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 data = EncodePutCredentialPayload(
                     credId,
                     keyValue,
-                    requireTouch,
+                    credentialData.RequireTouch,
                     credentialData.OathType == OathType.Hotp ? credentialData.Counter : 0);
                 var command = new ApduCommand(0x00, OathConstants.InsPut, 0x00, 0x00, data);
                 await SendAsync(command, cancellationToken).ConfigureAwait(false);
@@ -449,7 +457,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <inheritdoc />
-    public async Task<Dictionary<Credential, Code?>> CalculateAllAsync(
+    public async Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(
         long? timestamp = null,
         CancellationToken cancellationToken = default)
     {
@@ -522,7 +530,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         // Re-select and re-parse to get new state
         var initialization = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        ApplyInitialization(initialization);
+        // Preserve the effective version selected at creation; reset refreshes applet state, not caller policy.
+        ApplyInitialization(initialization, FirmwareVersion);
 
         _logger.LogInformation("OATH application reset, new DeviceId={DeviceId}", DeviceId);
     }
@@ -683,6 +692,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <inheritdoc />
+    // Generic and non-generic forms preserve the established task-operation ergonomics.
+#pragma warning disable RS0026
     public async Task<T> AuthenticateAndRetryAsync<T>(
         Func<CancellationToken, Task<T>> operation,
         Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
@@ -751,6 +762,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             passwordProvider,
             cancellationToken).ConfigureAwait(false);
     }
+#pragma warning restore RS0026
 
     protected override void Dispose(bool disposing)
     {

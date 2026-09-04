@@ -336,7 +336,8 @@ public sealed class OathAccountsAddCommand : YkCommandBase<OathAccountsAddSettin
             Secret = secretBytes,
             Digits = settings.Digits,
             Period = settings.Period,
-            Issuer = settings.Issuer
+            Issuer = settings.Issuer,
+            RequireTouch = settings.Touch
         };
 
         var displayName = FormatCredentialName(credentialData.Issuer, credentialData.Name);
@@ -357,7 +358,7 @@ public sealed class OathAccountsAddCommand : YkCommandBase<OathAccountsAddSettin
             return ExitCode.AuthenticationFailed;
         }
 
-        await session.PutCredentialAsync(credentialData, settings.Touch);
+        await session.PutCredentialAsync(credentialData);
         OutputHelpers.WriteSuccess($"Credential added: {displayName}");
         return ExitCode.Success;
     }
@@ -507,10 +508,10 @@ public sealed class OathAccountsUriCommand : YkCommandBase<OathAccountsUriSettin
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, OathAccountsUriSettings settings, YkDeviceContext deviceContext)
     {
-        CredentialData credentialData;
+        CredentialData parsedCredentialData;
         try
         {
-            credentialData = CredentialData.ParseUri(settings.Uri);
+            parsedCredentialData = CredentialData.ParseUri(settings.Uri, settings.Touch);
         }
         catch (Exception ex)
         {
@@ -518,13 +519,13 @@ public sealed class OathAccountsUriCommand : YkCommandBase<OathAccountsUriSettin
             return ExitCode.GenericError;
         }
 
-        using (credentialData)
+        using (parsedCredentialData)
         {
-            var displayName = FormatCredentialName(credentialData.Issuer, credentialData.Name);
+            var displayName = FormatCredentialName(parsedCredentialData.Issuer, parsedCredentialData.Name);
 
             if (!settings.Force)
             {
-                if (!ConfirmationPrompts.ConfirmDangerous($"add credential {displayName} ({credentialData.OathType})"))
+                if (!ConfirmationPrompts.ConfirmDangerous($"add credential {displayName} ({parsedCredentialData.OathType})"))
                 {
                     OutputHelpers.WriteInfo("Add cancelled.");
                     return ExitCode.UserCancelled;
@@ -538,7 +539,7 @@ public sealed class OathAccountsUriCommand : YkCommandBase<OathAccountsUriSettin
                 return ExitCode.AuthenticationFailed;
             }
 
-            await session.PutCredentialAsync(credentialData, settings.Touch);
+            await session.PutCredentialAsync(parsedCredentialData);
             OutputHelpers.WriteSuccess($"Credential added: {displayName}");
             return ExitCode.Success;
         }

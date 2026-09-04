@@ -18,6 +18,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
+using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 /// <summary>
@@ -32,7 +33,7 @@ public class TouchNotificationTests
         var connection = CreateInitializedConnection();
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Null(session.OnTouchRequired);
@@ -50,7 +51,7 @@ public class TouchNotificationTests
             SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var commandCountWhenNotified = -1;
@@ -78,7 +79,7 @@ public class TouchNotificationTests
             SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var invoked = false;
@@ -103,7 +104,7 @@ public class TouchNotificationTests
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         using var keys = await session.CalculateSessionKeysSymmetricAsync(
@@ -124,7 +125,7 @@ public class TouchNotificationTests
             SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var invoked = false;
@@ -152,7 +153,7 @@ public class TouchNotificationTests
             SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var invoked = false;
@@ -180,7 +181,7 @@ public class TouchNotificationTests
             SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var invocationCount = 0;
@@ -209,7 +210,7 @@ public class TouchNotificationTests
         var connection = new GatedListSmartCardConnection(OkResponse(), SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var invocationCount = 0;
@@ -239,7 +240,7 @@ public class TouchNotificationTests
         var connection = new GatedListSmartCardConnection(OkResponse(), SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var originalInvocationCount = 0;

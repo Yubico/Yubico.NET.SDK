@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
+using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.YubiOtp.IntegrationTests;
 
 public class YubiOtpSessionIntegrationTests
@@ -26,7 +27,7 @@ public class YubiOtpSessionIntegrationTests
     {
         await using var session = await state.Device.CreateYubiOtpSessionAsync();
 
-        var serial = await session.GetSerialAsync();
+        var serial = await session.GetSerialNumberAsync();
 
         // Serial may be 0 if serial API visibility is disabled on the device
         Assert.True(serial >= 0);
@@ -76,7 +77,7 @@ public class YubiOtpSessionIntegrationTests
         // [WithYubiKey] filters the device; it does not select the session transport. Pin HidOtp so
         // this test cannot silently run over the default SmartCard path while claiming HID coverage.
         await using var session = await state.Device.CreateYubiOtpSessionAsync(
-            preferredConnection: state.ConnectionType);
+            new SessionCreationOptions { PreferredConnectionType = state.ConnectionType });
 
         // Program slot 2 with a known HMAC-SHA1 key
         byte[] key = new byte[20];

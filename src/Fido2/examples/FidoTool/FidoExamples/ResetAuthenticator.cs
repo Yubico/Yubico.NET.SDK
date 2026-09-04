@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Fido2.Ctap;
 
 namespace Yubico.YubiKit.Fido2.Examples.FidoTool.FidoExamples;
@@ -79,7 +80,7 @@ public static class ResetAuthenticator
         try
         {
             await using var session = await yubiKey.CreateFidoSessionAsync(
-                preferredConnection: preferredConnection,
+                new SessionCreationOptions { PreferredConnectionType = preferredConnection },
                 cancellationToken: cancellationToken);
 
             var info = await session.GetInfoAsync(cancellationToken);
@@ -114,7 +115,7 @@ public static class ResetAuthenticator
         try
         {
             await using var session = await yubiKey.CreateFidoSessionAsync(
-                preferredConnection: preferredConnection,
+                new SessionCreationOptions { PreferredConnectionType = preferredConnection },
                 cancellationToken: cancellationToken);
 
             await session.ResetAsync(cancellationToken);

@@ -76,7 +76,7 @@ public class PivSessionContentionTests
     {
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(firmware));
-        _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, PivPinPolicy.Once);
+        _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
     }
 
@@ -184,7 +184,7 @@ public class PivSessionContentionTests
         // handle must both be permitted and actually reach the card.
         await using (var management = await ManagementSession.CreateAsync(connection))
         {
-            Assert.Equal(ConnectionType.SmartCard, management.Transport);
+            Assert.Equal(ConnectionType.SmartCard, management.ConnectionType);
 
             var info = await management.GetDeviceInfoAsync();
             Assert.Equal(state.SerialNumber, info.SerialNumber);

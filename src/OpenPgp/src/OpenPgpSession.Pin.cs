@@ -123,11 +123,29 @@ public sealed partial class OpenPgpSession
     }
 
     /// <inheritdoc />
-    public async Task ResetPinAsync(
+    public async Task ResetPinUsingResetCodeAsync(
         ReadOnlyMemory<byte> resetCode,
         ReadOnlyMemory<byte> newPin,
-        bool useAdmin = false,
         CancellationToken cancellationToken = default)
+    {
+        await ResetPinCoreAsync(resetCode, newPin, useAdmin: false, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task ResetPinUsingAdminAuthenticationAsync(
+        ReadOnlyMemory<byte> newPin,
+        CancellationToken cancellationToken = default)
+    {
+        await ResetPinCoreAsync(ReadOnlyMemory<byte>.Empty, newPin, useAdmin: true, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task ResetPinCoreAsync(
+        ReadOnlyMemory<byte> resetCode,
+        ReadOnlyMemory<byte> newPin,
+        bool useAdmin,
+        CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
 

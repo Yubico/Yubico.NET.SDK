@@ -1,0 +1,1206 @@
+#nullable enable
+
+Yubico.YubiKit.Core.Abstractions.IApplicationSession
+Yubico.YubiKit.Core.Abstractions.IApplicationSession.ConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Abstractions.IApplicationSession.EnsureSupports(Yubico.YubiKit.Core.Devices.Feature feature) -> void
+Yubico.YubiKit.Core.Abstractions.IApplicationSession.FirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+Yubico.YubiKit.Core.Abstractions.IApplicationSession.IsAuthenticated.get -> bool
+Yubico.YubiKit.Core.Abstractions.IApplicationSession.IsInitialized.get -> bool
+Yubico.YubiKit.Core.Abstractions.IApplicationSession.IsSupported(Yubico.YubiKit.Core.Devices.Feature feature) -> bool
+Yubico.YubiKit.Core.Abstractions.DeviceCorrelation
+Yubico.YubiKit.Core.Abstractions.DeviceCorrelation.Different = 2 -> Yubico.YubiKit.Core.Abstractions.DeviceCorrelation
+Yubico.YubiKit.Core.Abstractions.DeviceCorrelation.Same = 1 -> Yubico.YubiKit.Core.Abstractions.DeviceCorrelation
+Yubico.YubiKit.Core.Abstractions.DeviceCorrelation.Unknown = 0 -> Yubico.YubiKit.Core.Abstractions.DeviceCorrelation
+Yubico.YubiKit.Core.Abstractions.IConnection
+Yubico.YubiKit.Core.Abstractions.IConnection.Type.get -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Abstractions.IDevice
+Yubico.YubiKit.Core.Abstractions.IDevice.ReaderName.get -> string!
+Yubico.YubiKit.Core.Abstractions.IYubiKey
+Yubico.YubiKit.Core.Abstractions.IYubiKey.AvailableConnections.get -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Abstractions.IYubiKey.ConnectAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Abstractions.IConnection!>!
+Yubico.YubiKit.Core.Abstractions.IYubiKey.ConnectAsync<TConnection>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TConnection!>!
+Yubico.YubiKit.Core.Abstractions.IYubiKey.DeviceId.get -> string!
+Yubico.YubiKit.Core.Abstractions.IYubiKey.SameDeviceAs(Yubico.YubiKit.Core.Abstractions.IYubiKey! other) -> Yubico.YubiKit.Core.Abstractions.DeviceCorrelation
+Yubico.YubiKit.Core.Abstractions.IYubiKey.SerialNumber.get -> int?
+Yubico.YubiKit.Core.Abstractions.IYubiKey.SupportsConnection(Yubico.YubiKit.Core.Devices.ConnectionType connectionType) -> bool
+Yubico.YubiKit.Core.BadResponseException
+Yubico.YubiKit.Core.BadResponseException.BadResponseException(string! message) -> void
+Yubico.YubiKit.Core.CoreCompatSwitches
+Yubico.YubiKit.Core.Credentials.ConsoleCredentialReader
+Yubico.YubiKit.Core.Credentials.ConsoleCredentialReader.ConsoleCredentialReader() -> void
+Yubico.YubiKit.Core.Credentials.ConsoleCredentialReader.ReadCredential(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Buffers.IMemoryOwner<byte>?
+Yubico.YubiKit.Core.Credentials.ConsoleCredentialReader.ReadCredentialWithConfirmation(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Buffers.IMemoryOwner<byte>?
+Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialKind.ManagementKey = 3 -> Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialKind.NewPassword = 6 -> Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialKind.NewPin = 4 -> Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialKind.NewPuk = 5 -> Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialKind.Password = 2 -> Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialKind.Pin = 0 -> Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialKind.Puk = 1 -> Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialKind.ResetCode = 7 -> Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.CredentialPromptContext() -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.CredentialPromptContext(Yubico.YubiKit.Core.Credentials.CredentialPromptContext! original) -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.IsRetry.get -> bool
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.IsRetry.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.Kind.get -> Yubico.YubiKit.Core.Credentials.CredentialKind
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.Kind.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.MaxLengthBytes.get -> int
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.MaxLengthBytes.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.MinLengthCodePoints.get -> int
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.MinLengthCodePoints.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.RequiresConfirmation.get -> bool
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.RequiresConfirmation.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.RetriesRemaining.get -> int?
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.RetriesRemaining.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.Scope.get -> string?
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.Scope.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.<Clone>$() -> Yubico.YubiKit.Core.Credentials.CredentialReaderOptions!
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.CharacterFilter.get -> System.Func<char, bool>?
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.CharacterFilter.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.ConfirmPrompt.get -> string!
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.ConfirmPrompt.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.CredentialReaderOptions() -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.Encoding.get -> System.Text.Encoding!
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.Encoding.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.Equals(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions? other) -> bool
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.ExpectedByteLength.get -> int?
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.ExpectedByteLength.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.IsHexMode.get -> bool
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.IsHexMode.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.MaskCharacter.get -> char
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.MaskCharacter.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.MaxLength.get -> int
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.MaxLength.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.MinLength.get -> int
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.MinLength.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.Prompt.get -> string!
+Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.Prompt.init -> void
+Yubico.YubiKit.Core.Credentials.ICredentialPrompt
+Yubico.YubiKit.Core.Credentials.ICredentialPrompt.RequestSecretAsync(Yubico.YubiKit.Core.Credentials.CredentialPromptContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<System.Buffers.IMemoryOwner<byte>?>
+Yubico.YubiKit.Core.Credentials.ISecureCredentialReader
+Yubico.YubiKit.Core.Credentials.ISecureCredentialReader.ReadCredential(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Buffers.IMemoryOwner<byte>?
+Yubico.YubiKit.Core.Credentials.ISecureCredentialReader.ReadCredentialWithConfirmation(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Buffers.IMemoryOwner<byte>?
+Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm
+Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm.Aes128 = 1 -> Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm
+Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm.Aes192 = 2 -> Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm
+Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm.Aes256 = 3 -> Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm
+Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm.Unknown = 0 -> Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm
+Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithmExtensions
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.ECDHwHKDF256 = -25 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.ES256 = -7 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.ES384 = -35 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.ES512 = -36 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.EdDSA = -8 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.None = 0 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier.RS256 = -257 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.Ed25519 = 6 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.Ed448 = 7 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.P256 = 1 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.P384 = 2 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.P521 = 3 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.Unknown = 0 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.X25519 = 4 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve.X448 = 5 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType.Ec2 = 2 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType.Okp = 1 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType.Symmetric = 4 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
+Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType.Unknown = 0 -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
+Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition
+Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.AlgorithmIdentifier.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.AlgorithmIdentifier.set -> void
+Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.CoseKeyDefinition() -> void
+Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.CurveIdentifier.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve
+Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.CurveIdentifier.set -> void
+Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.Type.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseKeyType
+Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition.Type.set -> void
+Yubico.YubiKit.Core.Cryptography.CryptographyProviders
+Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey
+Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.PrivateKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey
+Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey.PublicPoint.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Cryptography.ECParametersExtensions
+Yubico.YubiKit.Core.Cryptography.ECParametersExtensions.extension(System.Security.Cryptography.ECParameters)
+Yubico.YubiKit.Core.Cryptography.ECParametersExtensions.extension(System.Security.Cryptography.ECParameters).DeepCopy() -> System.Security.Cryptography.ECParameters
+Yubico.YubiKit.Core.Cryptography.ECParametersExtensions.extension(System.Security.Cryptography.ECParameters).ToUncompressedPoint() -> byte[]!
+Yubico.YubiKit.Core.Cryptography.ECPrivateKey
+Yubico.YubiKit.Core.Cryptography.ECPrivateKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+Yubico.YubiKit.Core.Cryptography.ECPrivateKey.Parameters.get -> System.Security.Cryptography.ECParameters
+Yubico.YubiKit.Core.Cryptography.ECPrivateKey.ToECDiffieHellman() -> System.Security.Cryptography.ECDiffieHellman!
+Yubico.YubiKit.Core.Cryptography.ECPublicKey
+Yubico.YubiKit.Core.Cryptography.ECPublicKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+Yubico.YubiKit.Core.Cryptography.ECPublicKey.Parameters.get -> System.Security.Cryptography.ECParameters
+Yubico.YubiKit.Core.Cryptography.ECPublicKey.PublicPoint.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Cryptography.ECPublicKey.ToECDiffieHellmanPublicKey() -> System.Security.Cryptography.ECDiffieHellmanPublicKey!
+Yubico.YubiKit.Core.Cryptography.IKeyBase
+Yubico.YubiKit.Core.Cryptography.IKeyBase.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.IPrivateKey
+Yubico.YubiKit.Core.Cryptography.IPrivateKey.Clear() -> void
+Yubico.YubiKit.Core.Cryptography.IPrivateKey.ExportPkcs8PrivateKey() -> byte[]!
+Yubico.YubiKit.Core.Cryptography.IPrivateKeyExtensions
+Yubico.YubiKit.Core.Cryptography.IPublicKey
+Yubico.YubiKit.Core.Cryptography.IPublicKey.ExportSubjectPublicKeyInfo() -> byte[]!
+Yubico.YubiKit.Core.Cryptography.IPublicKeyExtensions
+Yubico.YubiKit.Core.Cryptography.KeyDefinition
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.AlgorithmOid.get -> string!
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.AlgorithmOid.init -> void
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.CoseKeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.CoseKeyDefinition?
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.CoseKeyDefinition.init -> void
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.CurveOid.get -> string?
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.CurveOid.init -> void
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.IsAsymmetric.get -> bool
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.IsEllipticCurve.get -> bool
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.IsRSA.get -> bool
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.IsSymmetric.get -> bool
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.KeyDefinition() -> void
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.KeyType.init -> void
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.LengthInBits.get -> int
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.LengthInBits.init -> void
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.LengthInBytes.get -> int
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.LengthInBytes.init -> void
+Yubico.YubiKit.Core.Cryptography.KeyDefinition.Name.get -> string!
+Yubico.YubiKit.Core.Cryptography.KeyDefinitions
+Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.AES128 = 11 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.AES192 = 12 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.AES256 = 13 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.ECP256 = 1 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.ECP384 = 2 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.ECP521 = 3 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.Ed25519 = 5 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.None = 0 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.RSA1024 = 6 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.RSA2048 = 7 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.RSA3072 = 8 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.RSA4096 = 9 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.TripleDES = 10 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyType.X25519 = 4 -> Yubico.YubiKit.Core.Cryptography.KeyType
+Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions
+Yubico.YubiKit.Core.Cryptography.Oids
+Yubico.YubiKit.Core.Cryptography.PrivateKey
+Yubico.YubiKit.Core.Cryptography.PrivateKey.Dispose() -> void
+Yubico.YubiKit.Core.Cryptography.PrivateKey.PrivateKey() -> void
+Yubico.YubiKit.Core.Cryptography.PrivateKey.ThrowIfDisposed() -> void
+Yubico.YubiKit.Core.Cryptography.PublicKey
+Yubico.YubiKit.Core.Cryptography.PublicKey.PublicKey() -> void
+Yubico.YubiKit.Core.Cryptography.RSAParametersExtensions
+Yubico.YubiKit.Core.Cryptography.RSAPrivateKey
+Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.Parameters.get -> System.Security.Cryptography.RSAParameters
+Yubico.YubiKit.Core.Cryptography.RSAPublicKey
+Yubico.YubiKit.Core.Cryptography.RSAPublicKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+Yubico.YubiKit.Core.Cryptography.RSAPublicKey.Parameters.get -> System.Security.Cryptography.RSAParameters
+Yubico.YubiKit.Core.Cryptography.RandomNumberGeneratorExt
+Yubico.YubiKit.Core.DeviceAction
+Yubico.YubiKit.Core.DeviceAction.Added = 0 -> Yubico.YubiKit.Core.DeviceAction
+Yubico.YubiKit.Core.DeviceAction.Removed = 1 -> Yubico.YubiKit.Core.DeviceAction
+Yubico.YubiKit.Core.DeviceEvent
+Yubico.YubiKit.Core.DeviceEvent.Action.get -> Yubico.YubiKit.Core.DeviceAction
+Yubico.YubiKit.Core.DeviceEvent.Device.get -> Yubico.YubiKit.Core.Abstractions.IYubiKey!
+Yubico.YubiKit.Core.DeviceEvent.DeviceEvent(Yubico.YubiKit.Core.DeviceAction action, Yubico.YubiKit.Core.Abstractions.IYubiKey! device) -> void
+Yubico.YubiKit.Core.DeviceEvent.Timestamp.get -> System.DateTime
+Yubico.YubiKit.Core.DeviceListenerStatus
+Yubico.YubiKit.Core.DeviceListenerStatus.Error = 2 -> Yubico.YubiKit.Core.DeviceListenerStatus
+Yubico.YubiKit.Core.DeviceListenerStatus.Started = 1 -> Yubico.YubiKit.Core.DeviceListenerStatus
+Yubico.YubiKit.Core.DeviceListenerStatus.Stopped = 0 -> Yubico.YubiKit.Core.DeviceListenerStatus
+Yubico.YubiKit.Core.Devices.ConnectionInUseException
+Yubico.YubiKit.Core.Devices.ConnectionInUseException.ConnectionInUseException() -> void
+Yubico.YubiKit.Core.Devices.ConnectionInUseException.ConnectionInUseException(string! message) -> void
+Yubico.YubiKit.Core.Devices.ConnectionInUseException.ConnectionInUseException(string! message, System.Exception! innerException) -> void
+Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Devices.ConnectionType.All = Yubico.YubiKit.Core.Devices.ConnectionType.Hid | Yubico.YubiKit.Core.Devices.ConnectionType.HidFido | Yubico.YubiKit.Core.Devices.ConnectionType.HidOtp | Yubico.YubiKit.Core.Devices.ConnectionType.SmartCard -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Devices.ConnectionType.Hid = 1 -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Devices.ConnectionType.HidFido = 2 -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Devices.ConnectionType.HidOtp = 4 -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Devices.ConnectionType.SmartCard = 8 -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Devices.ConnectionType.Unknown = 0 -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Devices.ConnectionTypeMapper
+Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceCapabilities.All = Yubico.YubiKit.Core.Devices.DeviceCapabilities.Otp | Yubico.YubiKit.Core.Devices.DeviceCapabilities.U2f | Yubico.YubiKit.Core.Devices.DeviceCapabilities.OpenPgp | Yubico.YubiKit.Core.Devices.DeviceCapabilities.Piv | Yubico.YubiKit.Core.Devices.DeviceCapabilities.Oath | Yubico.YubiKit.Core.Devices.DeviceCapabilities.HsmAuth | Yubico.YubiKit.Core.Devices.DeviceCapabilities.Fido2 -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceCapabilities.Fido2 = 512 -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceCapabilities.HsmAuth = 256 -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceCapabilities.None = 0 -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceCapabilities.Oath = 32 -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceCapabilities.OpenPgp = 8 -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceCapabilities.Otp = 1 -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceCapabilities.Piv = 16 -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceCapabilities.U2f = 2 -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceFlags
+Yubico.YubiKit.Core.Devices.DeviceFlags.None = 0 -> Yubico.YubiKit.Core.Devices.DeviceFlags
+Yubico.YubiKit.Core.Devices.DeviceFlags.RemoteWakeup = 64 -> Yubico.YubiKit.Core.Devices.DeviceFlags
+Yubico.YubiKit.Core.Devices.DeviceFlags.TouchEject = 128 -> Yubico.YubiKit.Core.Devices.DeviceFlags
+Yubico.YubiKit.Core.Devices.DeviceInfo
+Yubico.YubiKit.Core.Devices.DeviceInfo.AutoEjectTimeout.get -> ushort
+Yubico.YubiKit.Core.Devices.DeviceInfo.AutoEjectTimeout.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.ChallengeResponseTimeout.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Devices.DeviceInfo.ChallengeResponseTimeout.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.DeviceFlags.get -> Yubico.YubiKit.Core.Devices.DeviceFlags
+Yubico.YubiKit.Core.Devices.DeviceInfo.DeviceFlags.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.DeviceInfo() -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.Equals(Yubico.YubiKit.Core.Devices.DeviceInfo other) -> bool
+Yubico.YubiKit.Core.Devices.DeviceInfo.FipsApproved.get -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceInfo.FipsApproved.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.FipsCapabilities.get -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceInfo.FipsCapabilities.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.FirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+Yubico.YubiKit.Core.Devices.DeviceInfo.FirmwareVersion.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.FormFactor.get -> Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.DeviceInfo.FormFactor.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.FpsVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion?
+Yubico.YubiKit.Core.Devices.DeviceInfo.FpsVersion.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.HasPinComplexity.get -> bool
+Yubico.YubiKit.Core.Devices.DeviceInfo.HasPinComplexity.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.IsFips.get -> bool
+Yubico.YubiKit.Core.Devices.DeviceInfo.IsFips.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.IsLocked.get -> bool
+Yubico.YubiKit.Core.Devices.DeviceInfo.IsLocked.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.IsNfcRestricted.get -> bool
+Yubico.YubiKit.Core.Devices.DeviceInfo.IsNfcRestricted.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.IsSky.get -> bool
+Yubico.YubiKit.Core.Devices.DeviceInfo.IsSky.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.NfcEnabled.get -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceInfo.NfcEnabled.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.NfcSupported.get -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceInfo.NfcSupported.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.PartNumber.get -> string?
+Yubico.YubiKit.Core.Devices.DeviceInfo.PartNumber.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.ResetBlocked.get -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceInfo.ResetBlocked.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.SerialNumber.get -> int?
+Yubico.YubiKit.Core.Devices.DeviceInfo.SerialNumber.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.StmVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion?
+Yubico.YubiKit.Core.Devices.DeviceInfo.StmVersion.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.UsbEnabled.get -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceInfo.UsbEnabled.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.UsbSupported.get -> Yubico.YubiKit.Core.Devices.DeviceCapabilities
+Yubico.YubiKit.Core.Devices.DeviceInfo.UsbSupported.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.VersionName.get -> string!
+Yubico.YubiKit.Core.Devices.DeviceInfo.VersionQualifier.get -> Yubico.YubiKit.Core.Devices.VersionQualifier!
+Yubico.YubiKit.Core.Devices.DeviceInfo.VersionQualifier.init -> void
+Yubico.YubiKit.Core.Devices.Feature
+Yubico.YubiKit.Core.Devices.Feature.Equals(Yubico.YubiKit.Core.Devices.Feature other) -> bool
+Yubico.YubiKit.Core.Devices.Feature.Feature() -> void
+Yubico.YubiKit.Core.Devices.Feature.Feature(string! name, int versionMajor, int versionMinor, int versionRevision) -> void
+Yubico.YubiKit.Core.Devices.Feature.IsSupportedByFirmware(Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion) -> bool
+Yubico.YubiKit.Core.Devices.Feature.Name.get -> string!
+Yubico.YubiKit.Core.Devices.Feature.Name.init -> void
+Yubico.YubiKit.Core.Devices.Feature.Version.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+Yubico.YubiKit.Core.Devices.Feature.VersionMajor.get -> int
+Yubico.YubiKit.Core.Devices.Feature.VersionMajor.init -> void
+Yubico.YubiKit.Core.Devices.Feature.VersionMinor.get -> int
+Yubico.YubiKit.Core.Devices.Feature.VersionMinor.init -> void
+Yubico.YubiKit.Core.Devices.Feature.VersionRevision.get -> int
+Yubico.YubiKit.Core.Devices.Feature.VersionRevision.init -> void
+Yubico.YubiKit.Core.Devices.FindYubiKeys
+Yubico.YubiKit.Core.Devices.FindYubiKeys.FindAllAsync(Yubico.YubiKit.Core.Devices.ConnectionType type = Yubico.YubiKit.Core.Devices.ConnectionType.All, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!>!
+Yubico.YubiKit.Core.Devices.FindYubiKeys.NotifyTransportActivity(Yubico.YubiKit.Core.Devices.ConnectionType transport) -> void
+Yubico.YubiKit.Core.Devices.FirmwareVersion
+Yubico.YubiKit.Core.Devices.FirmwareVersion.CompareTo(Yubico.YubiKit.Core.Devices.FirmwareVersion? other) -> int
+Yubico.YubiKit.Core.Devices.FirmwareVersion.CompareTo(object? obj) -> int
+Yubico.YubiKit.Core.Devices.FirmwareVersion.Equals(Yubico.YubiKit.Core.Devices.FirmwareVersion? other) -> bool
+Yubico.YubiKit.Core.Devices.FirmwareVersion.FirmwareVersion() -> void
+Yubico.YubiKit.Core.Devices.FirmwareVersion.FirmwareVersion(byte major, byte minor = 0, byte patch = 0) -> void
+Yubico.YubiKit.Core.Devices.FirmwareVersion.FirmwareVersion(int major, int minor = 0, int patch = 0) -> void
+Yubico.YubiKit.Core.Devices.FirmwareVersion.IsAlphaOrBeta.get -> bool
+Yubico.YubiKit.Core.Devices.FirmwareVersion.IsAtLeast(Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion) -> bool
+Yubico.YubiKit.Core.Devices.FirmwareVersion.IsAtLeast(int major, int minor, int patch) -> bool
+Yubico.YubiKit.Core.Devices.FirmwareVersion.IsLessThan(Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion) -> bool
+Yubico.YubiKit.Core.Devices.FirmwareVersion.IsLessThan(int major, int minor, int patch) -> bool
+Yubico.YubiKit.Core.Devices.FirmwareVersion.Major.get -> byte
+Yubico.YubiKit.Core.Devices.FirmwareVersion.Minor.get -> byte
+Yubico.YubiKit.Core.Devices.FirmwareVersion.Patch.get -> byte
+Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.FormFactor.Unknown = 0 -> Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.FormFactor.UsbABiometricKeychain = 6 -> Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.FormFactor.UsbAKeychain = 1 -> Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.FormFactor.UsbANano = 2 -> Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.FormFactor.UsbCBiometricKeychain = 7 -> Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.FormFactor.UsbCKeychain = 3 -> Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.FormFactor.UsbCLightning = 5 -> Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.FormFactor.UsbCNano = 4 -> Yubico.YubiKit.Core.Devices.FormFactor
+Yubico.YubiKit.Core.Devices.IFindYubiKeys
+Yubico.YubiKit.Core.Devices.IFindYubiKeys.FindAllAsync(Yubico.YubiKit.Core.Devices.ConnectionType type, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!>!
+Yubico.YubiKit.Core.Devices.IFindYubiKeys.NotifyTransportActivity(Yubico.YubiKit.Core.Devices.ConnectionType transport) -> void
+Yubico.YubiKit.Core.Devices.VersionQualifier
+Yubico.YubiKit.Core.Devices.VersionQualifier.FirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+Yubico.YubiKit.Core.Devices.VersionQualifier.Iteration.get -> long
+Yubico.YubiKit.Core.Devices.VersionQualifier.Type.get -> Yubico.YubiKit.Core.Devices.VersionQualifierType
+Yubico.YubiKit.Core.Devices.VersionQualifier.VersionQualifier() -> void
+Yubico.YubiKit.Core.Devices.VersionQualifier.VersionQualifier(Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion, Yubico.YubiKit.Core.Devices.VersionQualifierType type, long iteration) -> void
+Yubico.YubiKit.Core.Devices.VersionQualifierType
+Yubico.YubiKit.Core.Devices.VersionQualifierType.Alpha = 0 -> Yubico.YubiKit.Core.Devices.VersionQualifierType
+Yubico.YubiKit.Core.Devices.VersionQualifierType.Beta = 1 -> Yubico.YubiKit.Core.Devices.VersionQualifierType
+Yubico.YubiKit.Core.Devices.VersionQualifierType.Final = 2 -> Yubico.YubiKit.Core.Devices.VersionQualifierType
+Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions
+Yubico.YubiKit.Core.Devices.YubiKeyManager
+Yubico.YubiKit.Core.Native.Desktop.SCard.SCardException
+Yubico.YubiKit.Core.Native.Desktop.SCard.SCardException.SCardException() -> void
+Yubico.YubiKit.Core.Native.Desktop.SCard.SCardException.SCardException(string! message) -> void
+Yubico.YubiKit.Core.Native.Desktop.SCard.SCardException.SCardException(string! message, System.Exception! innerException) -> void
+Yubico.YubiKit.Core.Native.Desktop.SCard.SCardException.SCardException(string! message, long errorCode) -> void
+Yubico.YubiKit.Core.Native.Linux.Libc.LibcFcntlConstants
+Yubico.YubiKit.Core.Native.Linux.Libc.LibcHelpers
+Yubico.YubiKit.Core.Native.PlatformApiException
+Yubico.YubiKit.Core.Native.PlatformApiException.PlatformApiException() -> void
+Yubico.YubiKit.Core.Native.PlatformApiException.PlatformApiException(string! message) -> void
+Yubico.YubiKit.Core.Native.PlatformApiException.PlatformApiException(string! message, System.Exception! innerException) -> void
+Yubico.YubiKit.Core.Native.PlatformApiException.PlatformApiException(string! source, int errorCode, string! message) -> void
+Yubico.YubiKit.Core.Native.SdkPlatform
+Yubico.YubiKit.Core.Native.SdkPlatform.Linux = 3 -> Yubico.YubiKit.Core.Native.SdkPlatform
+Yubico.YubiKit.Core.Native.SdkPlatform.MacOS = 2 -> Yubico.YubiKit.Core.Native.SdkPlatform
+Yubico.YubiKit.Core.Native.SdkPlatform.Unknown = 0 -> Yubico.YubiKit.Core.Native.SdkPlatform
+Yubico.YubiKit.Core.Native.SdkPlatform.Windows = 1 -> Yubico.YubiKit.Core.Native.SdkPlatform
+Yubico.YubiKit.Core.Native.SdkPlatformInfo
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.Children() -> System.Collections.Generic.IList<Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice!>!
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.Class.get -> string!
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.ClassGuid.get -> System.Guid
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.CmDevice(int deviceInstance) -> void
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.CmDevice(string! devicePath) -> void
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.ContainerId.get -> System.Guid
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.FindFirstChild(System.Guid classGuid) -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice!
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.GetProperty<T>(Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty property) -> T
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.HidUsageId.get -> short
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.HidUsagePage.get -> short
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.Instance.get -> int
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.InstanceId.get -> string!
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.InterfacePath.get -> string?
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.OpenDevice() -> Microsoft.Win32.SafeHandles.SafeFileHandle!
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.Parent() -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice?
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.Path.get -> string!
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.TryGetProperty<T>(Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty property, out T? value) -> bool
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.Children = 16 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.Class = 4 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.ClassGuid = 5 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.CompatibleIds = 2 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.ContainerId = 19 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.DevNodeStatus = 13 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.DeviceDescription = 0 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.Driver = 6 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.FriendlyName = 8 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.HardwareIds = 1 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.InstanceId = 12 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.LocationInfo = 9 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.LocationPaths = 11 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.Manufacturer = 7 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.Model = 18 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.Parent = 15 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.PdoName = 10 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.ProblemCode = 14 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.Service = 3 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty.Siblings = 17 -> Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDeviceProperty
+Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmInterfaceGuid
+Yubico.YubiKit.Core.PlatformInteropException
+Yubico.YubiKit.Core.PlatformInteropException.PlatformInteropException() -> void
+Yubico.YubiKit.Core.PlatformInteropException.PlatformInteropException(string! message) -> void
+Yubico.YubiKit.Core.PlatformInteropException.PlatformInteropException(string! message, System.Exception! innerException) -> void
+Yubico.YubiKit.Core.ProductAtrs
+Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection
+Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.PacketSize.get -> int
+Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.SendAsync(System.ReadOnlyMemory<byte> packet, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Core.Protocols.Otp.Hid.ChecksumUtils
+Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset.AnswerToReset(System.ReadOnlySpan<byte> bytes) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.ApduCommand() -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.ApduCommand(int cla, int ins, int p1, int p2, System.ReadOnlyMemory<byte> data = default(System.ReadOnlyMemory<byte>), int le = 0) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Cla.get -> byte
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Cla.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Data.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Data.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand other) -> bool
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Ins.get -> byte
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Ins.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Le.get -> int
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Le.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.P1.get -> byte
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.P1.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.P2.get -> byte
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.P2.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.ApduException() -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.ApduException(string! message) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.ApduException(string! message, System.Exception! innerException) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.Cla.get -> byte?
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.Cla.set -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.Ins.get -> byte?
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.Ins.set -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.P1.get -> byte?
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.P1.set -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.P2.get -> byte?
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.P2.set -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.SW.get -> short?
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.SW.set -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.ApduResponse() -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.ApduResponse(System.ReadOnlyMemory<byte> data) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.ApduResponse(byte[]! dataWithoutSW, short sw) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Data.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse other) -> bool
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.IsOK() -> bool
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.RawData.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.SW.get -> short
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.SW1.get -> byte
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.SW2.get -> byte
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduFormatter
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduFormatter.Format(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand apdu) -> System.Memory<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduFormatter.Format(byte cla, byte ins, byte p1, byte p2, System.ReadOnlyMemory<byte> data, int le) -> System.Memory<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduProcessor
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduProcessor.Formatter.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduFormatter!
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.IApduProcessor.TransmitAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand command, bool useScp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse>!
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration other) -> bool
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.ForceShortApdus.get -> bool
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.ForceShortApdus.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.InsSendRemaining.get -> byte?
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.InsSendRemaining.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.ProtocolConfiguration() -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants
+Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SmartCardMaxApduSizes
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.DataEncryptor
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.AsMemory() -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.AsSpan() -> System.ReadOnlySpan<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.Deconstruct(out byte Kid, out byte Kvn) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference other) -> bool
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.KeyReference() -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.KeyReference(byte Kid, byte Kvn) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.Kid.get -> byte
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.Kid.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.Kvn.get -> byte
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.Kvn.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters? other) -> bool
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.Keys.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys!
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.Scp03KeyParameters(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys! keys) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.Certificates.get -> System.Collections.Generic.IReadOnlyList<System.Security.Cryptography.X509Certificates.X509Certificate2!>!
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters? other) -> bool
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.OceKeyRef.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference?
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.PkSdEcka.get -> Yubico.YubiKit.Core.Cryptography.ECPublicKey!
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.Scp11KeyParameters(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, Yubico.YubiKit.Core.Cryptography.ECPublicKey! pkSdEcka) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.Scp11KeyParameters(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, Yubico.YubiKit.Core.Cryptography.ECPublicKey! pkSdEcka, Yubico.YubiKit.Core.Cryptography.ECPrivateKey? skOceEcka, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference? oceKeyRef, System.Collections.Generic.IEnumerable<System.Security.Cryptography.X509Certificates.X509Certificate2!>? certificates) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.SkOceEcka.get -> Yubico.YubiKit.Core.Cryptography.ECPrivateKey?
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.KeyReference.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.KeyReference.init -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.ScpKeyParameters() -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.ScpKeyParameters(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters! original) -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKid
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.Dek.get -> System.ReadOnlySpan<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.Dispose() -> void
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.Enc.get -> System.ReadOnlySpan<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.Mac.get -> System.ReadOnlySpan<byte>
+Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.StaticKeys(System.ReadOnlySpan<byte> enc, System.ReadOnlySpan<byte> mac, System.ReadOnlySpan<byte> dek = default(System.ReadOnlySpan<byte>)) -> void
+Yubico.YubiKit.Core.ServiceLocator
+Yubico.YubiKit.Core.Sessions.ApplicationIds
+Yubico.YubiKit.Core.Sessions.ApplicationIds.ApplicationIds() -> void
+Yubico.YubiKit.Core.Sessions.ApplicationIds.ApplicationIds(Yubico.YubiKit.Core.Sessions.ApplicationIds! original) -> void
+Yubico.YubiKit.Core.Sessions.ApplicationSession
+Yubico.YubiKit.Core.Sessions.ApplicationSession.ApplicationSession(Yubico.YubiKit.Core.Abstractions.IConnection! connection) -> void
+Yubico.YubiKit.Core.Sessions.ApplicationSession.Connection.get -> Yubico.YubiKit.Core.Abstractions.IConnection!
+Yubico.YubiKit.Core.Sessions.ApplicationSession.ConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType
+Yubico.YubiKit.Core.Sessions.ApplicationSession.Dispose() -> void
+Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAfterInitializationFailure() -> void
+Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Yubico.YubiKit.Core.Sessions.ApplicationSession.EnsureSupports(Yubico.YubiKit.Core.Devices.Feature feature) -> void
+Yubico.YubiKit.Core.Sessions.ApplicationSession.FirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+Yubico.YubiKit.Core.Sessions.ApplicationSession.FirmwareVersion.set -> void
+Yubico.YubiKit.Core.Sessions.ApplicationSession.IsAuthenticated.get -> bool
+Yubico.YubiKit.Core.Sessions.ApplicationSession.IsAuthenticated.set -> void
+Yubico.YubiKit.Core.Sessions.ApplicationSession.IsDisposalStarted.get -> bool
+Yubico.YubiKit.Core.Sessions.ApplicationSession.IsInitialized.get -> bool
+Yubico.YubiKit.Core.Sessions.ApplicationSession.IsInitialized.set -> void
+Yubico.YubiKit.Core.Sessions.ApplicationSession.IsSupported(Yubico.YubiKit.Core.Devices.Feature feature) -> bool
+Yubico.YubiKit.Core.Sessions.ApplicationSession.Logger.get -> Microsoft.Extensions.Logging.ILogger!
+Yubico.YubiKit.Core.Sessions.ApplicationSession.ThrowIfDisposed() -> void
+Yubico.YubiKit.Core.Sessions.RawFidoHidSession
+Yubico.YubiKit.Core.Sessions.RawFidoHidSession.SendAndReceiveAsync(byte command, System.ReadOnlyMemory<byte> payload, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Sessions.RawOtpHidSession
+Yubico.YubiKit.Core.Sessions.RawOtpHidSession.SendAndReceiveAsync(byte command, System.ReadOnlyMemory<byte> payload, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Sessions.RawSmartCardSession
+Yubico.YubiKit.Core.Sessions.RawSmartCardSession.Configure(Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration? configuration = null) -> void
+Yubico.YubiKit.Core.Sessions.RawSmartCardSession.SelectAsync(System.ReadOnlyMemory<byte> applicationId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Sessions.RawSmartCardSession.TransmitAndReceiveAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand command, bool throwOnError = true, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse>!
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion?
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride.init -> void
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.PreferredConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType?
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.PreferredConnectionType.init -> void
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ProtocolConfiguration.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration?
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ProtocolConfiguration.init -> void
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ScpKeyParameters.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters?
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ScpKeyParameters.init -> void
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.SessionCreationOptions() -> void
+Yubico.YubiKit.Core.Transport
+Yubico.YubiKit.Core.Transport.All = Yubico.YubiKit.Core.Transport.Usb | Yubico.YubiKit.Core.Transport.Nfc -> Yubico.YubiKit.Core.Transport
+Yubico.YubiKit.Core.Transport.Nfc = 2 -> Yubico.YubiKit.Core.Transport
+Yubico.YubiKit.Core.Transport.None = 0 -> Yubico.YubiKit.Core.Transport
+Yubico.YubiKit.Core.Transport.Usb = 1 -> Yubico.YubiKit.Core.Transport
+Yubico.YubiKit.Core.Transports.Hid.FindHidDevices
+Yubico.YubiKit.Core.Transports.Hid.FindHidDevices.FindAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Transports.Hid.IHidDevice!>!>!
+Yubico.YubiKit.Core.Transports.Hid.FindHidDevices.FindHidDevices(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.Hid.FindHidDevices!>! logger) -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.<Clone>$() -> Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo!
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.DevicePath.get -> string!
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.DevicePath.init -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.Equals(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? other) -> bool
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.HidDescriptorInfo() -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.ProductId.get -> short
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.ProductId.init -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.Usage.get -> ushort
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.Usage.init -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.UsagePage.get -> ushort
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.UsagePage.init -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.VendorId.get -> short
+Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.VendorId.init -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind.Added = 1 -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind.Removed = 2 -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind.Unknown = 0 -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent.get -> System.Action<Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint!>?
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent.set -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Dispose() -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.HidDeviceListener() -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.OnDeviceEvent(Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint! hint) -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Status.get -> Yubico.YubiKit.Core.DeviceListenerStatus
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Status.set -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.<Clone>$() -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint!
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.ChangeKind.get -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.ChangeKind.init -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.Deconstruct(out Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind ChangeKind, out string? PlatformDeviceId, out string? DevicePath) -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.DevicePath.get -> string?
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.DevicePath.init -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.Equals(Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? other) -> bool
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.HidDeviceRescanHint(Yubico.YubiKit.Core.Transports.Hid.HidDeviceChangeKind ChangeKind, string? PlatformDeviceId = null, string? DevicePath = null) -> void
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.PlatformDeviceId.get -> string?
+Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.PlatformDeviceId.init -> void
+Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier
+Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
+Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType.Fido = 1 -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
+Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType.Otp = 2 -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
+Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType.Unknown = 0 -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
+Yubico.YubiKit.Core.Transports.Hid.HidReportType
+Yubico.YubiKit.Core.Transports.Hid.HidReportType.Feature = 1 -> Yubico.YubiKit.Core.Transports.Hid.HidReportType
+Yubico.YubiKit.Core.Transports.Hid.HidReportType.InputOutput = 0 -> Yubico.YubiKit.Core.Transports.Hid.HidReportType
+Yubico.YubiKit.Core.Transports.Hid.IFindHidDevices
+Yubico.YubiKit.Core.Transports.Hid.IFindHidDevices.FindAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Transports.Hid.IHidDevice!>!>!
+Yubico.YubiKit.Core.Transports.Hid.IHidConnection
+Yubico.YubiKit.Core.Transports.Hid.IHidConnection.GetReport() -> byte[]!
+Yubico.YubiKit.Core.Transports.Hid.IHidConnection.InputReportSize.get -> int
+Yubico.YubiKit.Core.Transports.Hid.IHidConnection.OutputReportSize.get -> int
+Yubico.YubiKit.Core.Transports.Hid.IHidConnection.SetReport(byte[]! report) -> void
+Yubico.YubiKit.Core.Transports.Hid.IHidDevice
+Yubico.YubiKit.Core.Transports.Hid.IHidDevice.ConnectToFeatureReports() -> Yubico.YubiKit.Core.Transports.Hid.IHidConnection!
+Yubico.YubiKit.Core.Transports.Hid.IHidDevice.ConnectToIOReports() -> Yubico.YubiKit.Core.Transports.Hid.IHidConnection!
+Yubico.YubiKit.Core.Transports.Hid.IHidDevice.DescriptorInfo.get -> Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo!
+Yubico.YubiKit.Core.Transports.Hid.IHidDevice.InterfaceType.get -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
+Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection
+Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.FeatureReportSize.get -> int
+Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.SendAsync(System.ReadOnlyMemory<byte> report, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetCharacters(byte[]! hidCodes) -> System.Collections.Generic.IEnumerable<char>!
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetHidCodes(System.Collections.Generic.IEnumerable<char>! characters) -> byte[]!
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetHidCodes(string! value) -> byte[]!
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetString(byte[]! hidCodes) -> string!
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.Layout.get -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.SupportedCharacters.get -> System.Collections.Generic.IEnumerable<char>!
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.SupportedCharactersString.get -> string!
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.SupportedHidCodes.get -> byte[]!
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.this[byte hidCode].get -> char
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.this[char ch].get -> byte
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.ModHex = 0 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.de_DE = 3 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.en_UK = 2 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.en_US = 1 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.es_US = 6 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.fr_FR = 4 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.it_IT = 5 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout.sv_SE = 7 -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.DesktopSmartCardDeviceListener() -> void
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.DeviceEvent.get -> System.Action?
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.DeviceEvent.set -> void
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Dispose() -> void
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Start() -> void
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Status.get -> Yubico.YubiKit.Core.DeviceListenerStatus
+Yubico.YubiKit.Core.Transports.SmartCard.DesktopSmartCardDeviceListener.Stop() -> void
+Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices
+Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices.FindAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice!>!>!
+Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices.FindPcscDevices(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices!>! logger) -> void
+Yubico.YubiKit.Core.Transports.SmartCard.IFindPcscDevices
+Yubico.YubiKit.Core.Transports.SmartCard.IFindPcscDevices.FindAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice!>!>!
+Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice
+Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice.Atr.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset?
+Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice.Kind.get -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.BeginTransaction(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.IDisposable!
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.SupportsExtendedApdu() -> bool
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.TransmitAndReceiveAsync(System.ReadOnlyMemory<byte> command, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.Transport.get -> Yubico.YubiKit.Core.Transport
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnectionFactory
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnectionFactory.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice! smartCardDevice, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection!>!
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.DeviceEvent.get -> System.Action?
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.DeviceEvent.set -> void
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.Start() -> void
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.Status.get -> Yubico.YubiKit.Core.DeviceListenerStatus
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardDeviceListener.Stop() -> void
+Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice
+Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice.Atr.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset?
+Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice.Atr.init -> void
+Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice.Kind.get -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
+Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice.Kind.init -> void
+Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice.PcscDevice() -> void
+Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice.ReaderName.get -> string!
+Yubico.YubiKit.Core.Transports.SmartCard.PcscDevice.ReaderName.init -> void
+Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
+Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind.Any = 0 -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
+Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind.Nfc = 3 -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
+Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind.Unknown = 1 -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
+Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind.Usb = 2 -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice! smartCardDevice, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection!>!
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.SmartCardConnectionFactory(Microsoft.Extensions.Logging.ILoggerFactory! loggerFactory) -> void
+Yubico.YubiKit.Core.Utilities.BerLength
+Yubico.YubiKit.Core.Utilities.ByteUtils
+Yubico.YubiKit.Core.Utilities.Crc13239
+Yubico.YubiKit.Core.Utilities.DisposableArrayPoolBuffer
+Yubico.YubiKit.Core.Utilities.DisposableArrayPoolBuffer.DisposableArrayPoolBuffer(int size, bool clearOnCreate = true) -> void
+Yubico.YubiKit.Core.Utilities.DisposableArrayPoolBuffer.Dispose() -> void
+Yubico.YubiKit.Core.Utilities.DisposableArrayPoolBuffer.Length.get -> int
+Yubico.YubiKit.Core.Utilities.DisposableArrayPoolBuffer.Memory.get -> System.Memory<byte>
+Yubico.YubiKit.Core.Utilities.DisposableArrayPoolBuffer.Span.get -> System.Span<byte>
+Yubico.YubiKit.Core.Utilities.DisposableBufferHandle
+Yubico.YubiKit.Core.Utilities.DisposableBufferHandle.Count.get -> int
+Yubico.YubiKit.Core.Utilities.DisposableBufferHandle.Data.get -> System.Memory<byte>
+Yubico.YubiKit.Core.Utilities.DisposableBufferHandle.DisposableBufferHandle(System.Memory<byte> data) -> void
+Yubico.YubiKit.Core.Utilities.DisposableBufferHandle.Dispose() -> void
+Yubico.YubiKit.Core.Utilities.DisposableBufferHandle.Length.get -> int
+Yubico.YubiKit.Core.Utilities.DisposableBufferHandle.~DisposableBufferHandle() -> void
+Yubico.YubiKit.Core.Utilities.DisposableTlvList
+Yubico.YubiKit.Core.Utilities.DisposableTlvList.AsSpan() -> System.ReadOnlySpan<Yubico.YubiKit.Core.Utilities.Tlv!>
+Yubico.YubiKit.Core.Utilities.DisposableTlvList.Count.get -> int
+Yubico.YubiKit.Core.Utilities.DisposableTlvList.DisposableTlvList(System.Collections.Generic.IEnumerable<Yubico.YubiKit.Core.Utilities.Tlv!>! tlvs) -> void
+Yubico.YubiKit.Core.Utilities.DisposableTlvList.DisposableTlvList(params Yubico.YubiKit.Core.Utilities.Tlv![]! tlvs) -> void
+Yubico.YubiKit.Core.Utilities.DisposableTlvList.Dispose() -> void
+Yubico.YubiKit.Core.Utilities.DisposableTlvList.GetEnumerator() -> System.Collections.Generic.IEnumerator<Yubico.YubiKit.Core.Utilities.Tlv!>!
+Yubico.YubiKit.Core.Utilities.DisposableTlvList.this[int index].get -> Yubico.YubiKit.Core.Utilities.Tlv!
+Yubico.YubiKit.Core.Utilities.MemoryExtensions
+Yubico.YubiKit.Core.Utilities.MultiString
+Yubico.YubiKit.Core.Utilities.Tlv
+Yubico.YubiKit.Core.Utilities.Tlv.AsMemory() -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Utilities.Tlv.AsSpan() -> System.ReadOnlySpan<byte>
+Yubico.YubiKit.Core.Utilities.Tlv.Dispose() -> void
+Yubico.YubiKit.Core.Utilities.Tlv.Length.get -> int
+Yubico.YubiKit.Core.Utilities.Tlv.Tag.get -> int
+Yubico.YubiKit.Core.Utilities.Tlv.Tlv(int tag, System.Memory<byte> value) -> void
+Yubico.YubiKit.Core.Utilities.Tlv.Tlv(int tag, System.ReadOnlyMemory<byte> value) -> void
+Yubico.YubiKit.Core.Utilities.Tlv.Tlv(int tag, System.ReadOnlySpan<byte> value) -> void
+Yubico.YubiKit.Core.Utilities.Tlv.TotalLength.get -> int
+Yubico.YubiKit.Core.Utilities.Tlv.Value.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Utilities.TlvHelper
+Yubico.YubiKit.Core.YubiKitLogging
+abstract Yubico.YubiKit.Core.Cryptography.PrivateKey.Clear() -> void
+abstract Yubico.YubiKit.Core.Cryptography.PrivateKey.ExportPkcs8PrivateKey() -> byte[]!
+abstract Yubico.YubiKit.Core.Cryptography.PrivateKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+abstract Yubico.YubiKit.Core.Cryptography.PublicKey.ExportSubjectPublicKeyInfo() -> byte[]!
+abstract Yubico.YubiKit.Core.Cryptography.PublicKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+abstract Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.<Clone>$() -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters!
+abstract Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.Dispose() -> void
+abstract Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Start() -> void
+abstract Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Stop() -> void
+const Yubico.YubiKit.Core.CoreCompatSwitches.OpenSmartCardHandlesExclusively = "OpenSmartCardHandlesExclusively" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.AES128Cbc = "2.16.840.1.101.3.4.1.2" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.AES192Cbc = "2.16.840.1.101.3.4.1.22" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.AES256Cbc = "2.16.840.1.101.3.4.1.42" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.ECDSA = "1.2.840.10045.2.1" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.ECP256 = "1.2.840.10045.3.1.7" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.ECP384 = "1.3.132.0.34" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.ECP521 = "1.3.132.0.35" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.Ed25519 = "1.3.101.112" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.RSA = "1.2.840.113549.1.1.1" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.TripleDESCbc = "1.2.840.113549.3.7" -> string!
+const Yubico.YubiKit.Core.Cryptography.Oids.X25519 = "1.3.101.110" -> string!
+const Yubico.YubiKit.Core.Native.Linux.Libc.LibcFcntlConstants.F_GETFL = 3 -> int
+const Yubico.YubiKit.Core.Native.Linux.Libc.LibcFcntlConstants.F_SETFL = 4 -> int
+const Yubico.YubiKit.Core.Native.Linux.Libc.LibcFcntlConstants.O_NONBLOCK = 2048 -> int
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.ChecksumUtils.ValidResidue = 61624 -> ushort
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.CmdDeviceConfig = 17 -> byte
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.CmdYk4Capabilities = 19 -> byte
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.CmdYk4SetDeviceInfo = 21 -> byte
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.ConfigSlotsProgrammedMask = 3 -> byte
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.DummyReportWrite = 143 -> byte
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.FeatureReportDataSize = 7 -> int
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.FeatureReportSize = 8 -> int
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.FrameSize = 70 -> int
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.ResponseCrcOffset = 65 -> int
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.ResponseLengthOffset = 64 -> int
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.ResponsePendingFlag = 64 -> byte
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.ResponseTimeoutWaitFlag = 32 -> byte
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.SequenceMask = 31 -> byte
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.SlotDataSize = 64 -> int
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.SlotWriteFlag = 128 -> byte
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.StatusOffsetProgSeq = 4 -> int
+const Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants.StatusOffsetTouchLow = 5 -> int
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.AuthenticationMethodBlocked = 27011 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.ClaNotSupported = 28160 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.CommandChainingNotSupported = 26756 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.CommandNotAllowed = 26880 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.CommandNotAllowedNoEF = 27014 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.ConditionsNotSatisfied = 27013 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.DFNameAlreadyExists = 27274 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.DataNotFound = 27272 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.EOFReached = 25218 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.ErrorNvmChanged = 25856 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.ExecutionError = 25600 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.FileAlreadyExists = 27273 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.FileDeactivated = 25219 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.FileOrApplicationNotFound = 27266 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.FileTerminated = 25221 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.FunctionError = 26624 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.FunctionNotSupported = 27265 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.IncompatibleCommand = 27009 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.InconsistentLengthWithP1P2 = 27271 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.InconsistentLengthWithTlv = 27269 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.IncorrectP1orP2 = 27270 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.InsNotSupported = 27904 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.InvalidCommandDataParameter = 27264 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.InvalidFileFormat = 25220 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.InvalidParameter = 27136 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.LastCommandOfChainExpected = 26755 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.LogicalChannelNotSupported = 26753 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.MemoryFailure = 25985 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.NoMoreSpaceInFile = 25473 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.NoPreciseDiagnosis = 28416 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.NoSensorData = 25222 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.NotEnoughSpace = 27268 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.PartialCorruption = 25217 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.RecordNotFound = 27267 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.ReferenceDataUnusable = 27012 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.ResponseRequired = 25601 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.SecureMessageDataMissing = 27015 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.SecureMessageMalformed = 27016 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.SecureMessagingNotSupported = 26754 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.SecurityStatusNotSatisfied = 27010 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.Success = -28672 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.VerifyFail = 25536 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.WarningNvmChanged = 25344 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.WarningNvmUnchanged = 25088 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.WrongLength = 26368 -> short
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SmartCardMaxApduSizes.Neo = 1390 -> int
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SmartCardMaxApduSizes.ShortApduMaxChunkSize = 255 -> int
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SmartCardMaxApduSizes.Yk4 = 2038 -> int
+const Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SmartCardMaxApduSizes.Yk43 = 3062 -> int
+const Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKid.SCP03 = 1 -> byte
+const Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKid.SCP11a = 17 -> byte
+const Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKid.SCP11b = 19 -> byte
+const Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKid.SCP11c = 21 -> byte
+override Yubico.YubiKit.Core.Credentials.CredentialPromptContext.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Credentials.CredentialPromptContext.GetHashCode() -> int
+override Yubico.YubiKit.Core.Credentials.CredentialPromptContext.ToString() -> string!
+override Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.GetHashCode() -> int
+override Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.ToString() -> string!
+override Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.Clear() -> void
+override Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.ExportPkcs8PrivateKey() -> byte[]!
+override Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+override Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey.ExportSubjectPublicKeyInfo() -> byte[]!
+override Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+override Yubico.YubiKit.Core.Cryptography.ECPrivateKey.Clear() -> void
+override Yubico.YubiKit.Core.Cryptography.ECPrivateKey.ExportPkcs8PrivateKey() -> byte[]!
+override Yubico.YubiKit.Core.Cryptography.ECPrivateKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+override Yubico.YubiKit.Core.Cryptography.ECPublicKey.ExportSubjectPublicKeyInfo() -> byte[]!
+override Yubico.YubiKit.Core.Cryptography.ECPublicKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+override Yubico.YubiKit.Core.Cryptography.KeyDefinition.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Cryptography.KeyDefinition.GetHashCode() -> int
+override Yubico.YubiKit.Core.Cryptography.KeyDefinition.ToString() -> string!
+override Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.Clear() -> void
+override Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.ExportPkcs8PrivateKey() -> byte[]!
+override Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+override Yubico.YubiKit.Core.Cryptography.RSAPublicKey.ExportSubjectPublicKeyInfo() -> byte[]!
+override Yubico.YubiKit.Core.Cryptography.RSAPublicKey.KeyType.get -> Yubico.YubiKit.Core.Cryptography.KeyType
+~override Yubico.YubiKit.Core.Devices.DeviceInfo.Equals(object obj) -> bool
+override Yubico.YubiKit.Core.Devices.DeviceInfo.GetHashCode() -> int
+~override Yubico.YubiKit.Core.Devices.DeviceInfo.ToString() -> string
+~override Yubico.YubiKit.Core.Devices.Feature.Equals(object obj) -> bool
+override Yubico.YubiKit.Core.Devices.Feature.GetHashCode() -> int
+~override Yubico.YubiKit.Core.Devices.Feature.ToString() -> string
+override Yubico.YubiKit.Core.Devices.FirmwareVersion.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Devices.FirmwareVersion.GetHashCode() -> int
+override Yubico.YubiKit.Core.Devices.FirmwareVersion.ToString() -> string!
+override Yubico.YubiKit.Core.Devices.VersionQualifier.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Devices.VersionQualifier.GetHashCode() -> int
+override Yubico.YubiKit.Core.Devices.VersionQualifier.ToString() -> string!
+override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset.GetHashCode() -> int
+override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset.ToString() -> string!
+~override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.Equals(object obj) -> bool
+override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.GetHashCode() -> int
+override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.ToString() -> string!
+~override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Equals(object obj) -> bool
+override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.GetHashCode() -> int
+override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.ToString() -> string!
+~override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.Equals(object obj) -> bool
+override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.GetHashCode() -> int
+~override Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.ToString() -> string
+~override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.Equals(object obj) -> bool
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.GetHashCode() -> int
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.ToString() -> string!
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.<Clone>$() -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters!
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.Dispose() -> void
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.GetHashCode() -> int
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.ToString() -> string!
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.<Clone>$() -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters!
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.Dispose() -> void
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.GetHashCode() -> int
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.ToString() -> string!
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.GetHashCode() -> int
+override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.ToString() -> string!
+override Yubico.YubiKit.Core.Sessions.ApplicationIds.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Sessions.ApplicationIds.GetHashCode() -> int
+override Yubico.YubiKit.Core.Sessions.ApplicationIds.ToString() -> string!
+override Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.GetHashCode() -> int
+override Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.ToString() -> string!
+override Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.GetHashCode() -> int
+override Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.ToString() -> string!
+override Yubico.YubiKit.Core.Utilities.Tlv.ToString() -> string!
+override sealed Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? other) -> bool
+override sealed Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? other) -> bool
+static Yubico.YubiKit.Core.Credentials.CredentialPromptContext.operator !=(Yubico.YubiKit.Core.Credentials.CredentialPromptContext? left, Yubico.YubiKit.Core.Credentials.CredentialPromptContext? right) -> bool
+static Yubico.YubiKit.Core.Credentials.CredentialPromptContext.operator ==(Yubico.YubiKit.Core.Credentials.CredentialPromptContext? left, Yubico.YubiKit.Core.Credentials.CredentialPromptContext? right) -> bool
+static Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.ForHexKey(int byteLength) -> Yubico.YubiKit.Core.Credentials.CredentialReaderOptions!
+static Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.ForPassphrase() -> Yubico.YubiKit.Core.Credentials.CredentialReaderOptions!
+static Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.ForPin() -> Yubico.YubiKit.Core.Credentials.CredentialReaderOptions!
+static Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.ForPuk() -> Yubico.YubiKit.Core.Credentials.CredentialReaderOptions!
+static Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.operator !=(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions? left, Yubico.YubiKit.Core.Credentials.CredentialReaderOptions? right) -> bool
+static Yubico.YubiKit.Core.Credentials.CredentialReaderOptions.operator ==(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions? left, Yubico.YubiKit.Core.Credentials.CredentialReaderOptions? right) -> bool
+static Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithmExtensions.KeyLength(this Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm algorithm) -> int
+static Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithmExtensions.MacLength(this Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm algorithm) -> int
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.AesCreator.get -> System.Func<System.Security.Cryptography.Aes!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.AesCreator.set -> void
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.RngCreator.get -> System.Func<System.Security.Cryptography.RandomNumberGenerator!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.RngCreator.set -> void
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.Sha1Creator.get -> System.Func<System.Security.Cryptography.SHA1!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.Sha1Creator.set -> void
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.Sha256Creator.get -> System.Func<System.Security.Cryptography.SHA256!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.Sha256Creator.set -> void
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.Sha384Creator.get -> System.Func<System.Security.Cryptography.SHA384!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.Sha384Creator.set -> void
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.Sha512Creator.get -> System.Func<System.Security.Cryptography.SHA512!>!
+static Yubico.YubiKit.Core.Cryptography.CryptographyProviders.Sha512Creator.set -> void
+static Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.CreateFromPkcs8(System.ReadOnlyMemory<byte> pkcs8EncodedKey) -> Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey!
+static Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey.CreateFromValue(System.ReadOnlyMemory<byte> privateKey, Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.Curve25519PrivateKey!
+static Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey.CreateFromSubjectPublicKeyInfo(System.ReadOnlyMemory<byte> subjectPublicKeyInfo) -> Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey!
+static Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey.CreateFromValue(System.ReadOnlyMemory<byte> publicPoint, Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.Curve25519PublicKey!
+static Yubico.YubiKit.Core.Cryptography.ECParametersExtensions.DeepCopy(this System.Security.Cryptography.ECParameters original) -> System.Security.Cryptography.ECParameters
+static Yubico.YubiKit.Core.Cryptography.ECParametersExtensions.ToUncompressedPoint(this System.Security.Cryptography.ECParameters original) -> byte[]!
+static Yubico.YubiKit.Core.Cryptography.ECPrivateKey.CreateFromEcdh(System.Security.Cryptography.ECDiffieHellman! ecdh) -> Yubico.YubiKit.Core.Cryptography.ECPrivateKey!
+static Yubico.YubiKit.Core.Cryptography.ECPrivateKey.CreateFromParameters(System.Security.Cryptography.ECParameters parameters) -> Yubico.YubiKit.Core.Cryptography.ECPrivateKey!
+static Yubico.YubiKit.Core.Cryptography.ECPrivateKey.CreateFromPkcs8(System.ReadOnlyMemory<byte> encodedKey) -> Yubico.YubiKit.Core.Cryptography.ECPrivateKey!
+static Yubico.YubiKit.Core.Cryptography.ECPrivateKey.CreateFromValue(System.ReadOnlyMemory<byte> privateValue, Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.ECPrivateKey!
+static Yubico.YubiKit.Core.Cryptography.ECPublicKey.CreateFromEcdh(System.Security.Cryptography.ECDiffieHellman! ecdh) -> Yubico.YubiKit.Core.Cryptography.ECPublicKey!
+static Yubico.YubiKit.Core.Cryptography.ECPublicKey.CreateFromEcdh(System.Security.Cryptography.ECDiffieHellmanPublicKey! publicKey) -> Yubico.YubiKit.Core.Cryptography.ECPublicKey!
+static Yubico.YubiKit.Core.Cryptography.ECPublicKey.CreateFromParameters(System.Security.Cryptography.ECParameters parameters) -> Yubico.YubiKit.Core.Cryptography.ECPublicKey!
+static Yubico.YubiKit.Core.Cryptography.ECPublicKey.CreateFromSubjectPublicKeyInfo(System.ReadOnlyMemory<byte> subjectPublicKeyInfo) -> Yubico.YubiKit.Core.Cryptography.ECPublicKey!
+static Yubico.YubiKit.Core.Cryptography.ECPublicKey.CreateFromValue(System.ReadOnlyMemory<byte> publicPoint, Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.ECPublicKey!
+static Yubico.YubiKit.Core.Cryptography.IPrivateKeyExtensions.Cast<T>(this Yubico.YubiKit.Core.Cryptography.IPrivateKey! key) -> T!
+static Yubico.YubiKit.Core.Cryptography.IPublicKeyExtensions.Cast<T>(this Yubico.YubiKit.Core.Cryptography.IPublicKey! key) -> T!
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.All.get -> System.Collections.Generic.IReadOnlyDictionary<Yubico.YubiKit.Core.Cryptography.KeyType, Yubico.YubiKit.Core.Cryptography.KeyDefinition!>!
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByCoseCurve(Yubico.YubiKit.Core.Cryptography.Cose.CoseEcCurve curve) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByKeyType(Yubico.YubiKit.Core.Cryptography.KeyType type) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByOid(System.Security.Cryptography.Oid! oid) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByOid(string? oid) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByRSALength(int keySizeBits) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetByRSAModulusLength(byte[]! modulus) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetEcKeyDefinitions() -> System.Collections.Generic.IReadOnlyCollection<Yubico.YubiKit.Core.Cryptography.KeyDefinition!>!
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetKeyTypeByOid(System.Security.Cryptography.Oid! algorithmOid) -> Yubico.YubiKit.Core.Cryptography.KeyType
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetKeyTypeByOid(string? algorithmOid) -> Yubico.YubiKit.Core.Cryptography.KeyType
+static Yubico.YubiKit.Core.Cryptography.KeyDefinitions.GetRsaKeyDefinitions() -> System.Collections.Generic.IReadOnlyCollection<Yubico.YubiKit.Core.Cryptography.KeyDefinition!>!
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetAlgorithmOid(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> string!
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetCurveOid(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> string?
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetKeyDefinition(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetKeySizeBits(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> int
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.GetKeySizeBytes(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> int
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsAsymmetric(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsCoseKey(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsCurve25519(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsECDsa(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsEllipticCurve(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsRSA(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.KeyTypeExtensions.IsSymmetric(this Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> bool
+static Yubico.YubiKit.Core.Cryptography.Oids.GetOidsByKeyType(Yubico.YubiKit.Core.Cryptography.KeyType keyType) -> (string! AlgorithmOid, string? Curveoid)
+static Yubico.YubiKit.Core.Cryptography.Oids.IsCurve25519Algorithm(string? algorithmOid) -> bool
+static Yubico.YubiKit.Core.Cryptography.Oids.IsECDsaCurve(string? curveOid) -> bool
+static Yubico.YubiKit.Core.Cryptography.RSAParametersExtensions.DeepCopy(this System.Security.Cryptography.RSAParameters original) -> System.Security.Cryptography.RSAParameters
+static Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.CreateFromParameters(System.Security.Cryptography.RSAParameters parameters) -> Yubico.YubiKit.Core.Cryptography.RSAPrivateKey!
+static Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.CreateFromPkcs8(System.ReadOnlyMemory<byte> encodedKey) -> Yubico.YubiKit.Core.Cryptography.RSAPrivateKey!
+static Yubico.YubiKit.Core.Cryptography.RSAPublicKey.CreateFromParameters(System.Security.Cryptography.RSAParameters parameters) -> Yubico.YubiKit.Core.Cryptography.RSAPublicKey!
+static Yubico.YubiKit.Core.Cryptography.RSAPublicKey.CreateFromSubjectPublicKeyInfo(System.ReadOnlyMemory<byte> subjectPublicKeyInfo) -> Yubico.YubiKit.Core.Cryptography.RSAPublicKey!
+static Yubico.YubiKit.Core.Cryptography.RandomNumberGeneratorExt.Fill(this System.Security.Cryptography.RandomNumberGenerator! rng, System.Span<byte> data) -> void
+static Yubico.YubiKit.Core.Cryptography.RandomNumberGeneratorExt.GetByte(this System.Security.Cryptography.RandomNumberGenerator! rng, int fromInclusive, int toExclusive) -> byte
+static Yubico.YubiKit.Core.Cryptography.RandomNumberGeneratorExt.GetInt32(this System.Security.Cryptography.RandomNumberGenerator! rng, int fromInclusive, int toExclusive) -> int
+static Yubico.YubiKit.Core.Devices.ConnectionTypeMapper.SupportsConnectionType(Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType interfaceType, Yubico.YubiKit.Core.Devices.ConnectionType connectionType) -> bool
+static Yubico.YubiKit.Core.Devices.ConnectionTypeMapper.ToConnectionType(Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType interfaceType) -> Yubico.YubiKit.Core.Devices.ConnectionType
+static Yubico.YubiKit.Core.Devices.DeviceInfo.CreateFromTlvs(System.Collections.Generic.IReadOnlyCollection<Yubico.YubiKit.Core.Utilities.Tlv!>! tlvs, Yubico.YubiKit.Core.Devices.FirmwareVersion? defaultVersion) -> Yubico.YubiKit.Core.Devices.DeviceInfo
+static Yubico.YubiKit.Core.Devices.DeviceInfo.operator !=(Yubico.YubiKit.Core.Devices.DeviceInfo left, Yubico.YubiKit.Core.Devices.DeviceInfo right) -> bool
+static Yubico.YubiKit.Core.Devices.DeviceInfo.operator ==(Yubico.YubiKit.Core.Devices.DeviceInfo left, Yubico.YubiKit.Core.Devices.DeviceInfo right) -> bool
+static Yubico.YubiKit.Core.Devices.Feature.operator !=(Yubico.YubiKit.Core.Devices.Feature left, Yubico.YubiKit.Core.Devices.Feature right) -> bool
+static Yubico.YubiKit.Core.Devices.Feature.operator ==(Yubico.YubiKit.Core.Devices.Feature left, Yubico.YubiKit.Core.Devices.Feature right) -> bool
+static Yubico.YubiKit.Core.Devices.FindYubiKeys.Create() -> Yubico.YubiKit.Core.Devices.FindYubiKeys!
+static Yubico.YubiKit.Core.Devices.FirmwareVersion.FromBytes(System.ReadOnlySpan<byte> bytes) -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+static Yubico.YubiKit.Core.Devices.FirmwareVersion.FromString(string! version) -> Yubico.YubiKit.Core.Devices.FirmwareVersion?
+static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator !=(Yubico.YubiKit.Core.Devices.FirmwareVersion? left, Yubico.YubiKit.Core.Devices.FirmwareVersion? right) -> bool
+static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator <(Yubico.YubiKit.Core.Devices.FirmwareVersion? left, Yubico.YubiKit.Core.Devices.FirmwareVersion? right) -> bool
+static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator <=(Yubico.YubiKit.Core.Devices.FirmwareVersion? left, Yubico.YubiKit.Core.Devices.FirmwareVersion? right) -> bool
+static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator ==(Yubico.YubiKit.Core.Devices.FirmwareVersion? left, Yubico.YubiKit.Core.Devices.FirmwareVersion? right) -> bool
+static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator >(Yubico.YubiKit.Core.Devices.FirmwareVersion? left, Yubico.YubiKit.Core.Devices.FirmwareVersion? right) -> bool
+static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator >=(Yubico.YubiKit.Core.Devices.FirmwareVersion? left, Yubico.YubiKit.Core.Devices.FirmwareVersion? right) -> bool
+static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateRawFidoHidSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawFidoHidSession!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateRawOtpHidSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawOtpHidSession!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateRawSmartCardSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateRawSmartCardSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters! scpKeyParameters, Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration? configuration = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateSessionOverTransportAsync<TResult>(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Devices.ConnectionType transport, System.Func<Yubico.YubiKit.Core.Abstractions.IConnection!, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResult>!>! createAsync, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>!
+static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.ResolvePreferredConnection(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, params Yubico.YubiKit.Core.Devices.ConnectionType[]! preferenceOrder) -> Yubico.YubiKit.Core.Devices.ConnectionType
+static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.ResolveSessionTransport(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Devices.ConnectionType? preferredConnection, string! sessionName, params Yubico.YubiKit.Core.Devices.ConnectionType[]! defaultOrder) -> Yubico.YubiKit.Core.Devices.ConnectionType
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.DeviceChanges.get -> System.IObservable<Yubico.YubiKit.Core.DeviceEvent!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindAllAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.FindAllAsync(Yubico.YubiKit.Core.Devices.ConnectionType type = Yubico.YubiKit.Core.Devices.ConnectionType.All, bool forceRescan = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Abstractions.IYubiKey!>!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.IsMonitoring.get -> bool
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.Shutdown() -> void
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.ShutdownAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.StartMonitoring() -> void
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.StartMonitoring(System.TimeSpan interval) -> void
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.StopMonitoring() -> void
+static Yubico.YubiKit.Core.Devices.YubiKeyManager.WatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.Core.DeviceEvent!>!
+static Yubico.YubiKit.Core.Native.Linux.Libc.LibcHelpers.GetErrnoString() -> string!
+static Yubico.YubiKit.Core.Native.SdkPlatformInfo.CharSize.get -> int
+static Yubico.YubiKit.Core.Native.SdkPlatformInfo.DwordSize.get -> int
+static Yubico.YubiKit.Core.Native.SdkPlatformInfo.Encoding.get -> System.Text.Encoding!
+static Yubico.YubiKit.Core.Native.SdkPlatformInfo.IsElevated.get -> bool
+static Yubico.YubiKit.Core.Native.SdkPlatformInfo.OperatingSystem.get -> Yubico.YubiKit.Core.Native.SdkPlatform
+static Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice.GetList(System.Guid classGuid) -> System.Collections.Generic.IList<Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmDevice!>!
+static Yubico.YubiKit.Core.ProductAtrs.AllYubiKeys.get -> System.Collections.Generic.IList<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!>!
+static Yubico.YubiKit.Core.ProductAtrs.NfcYubiKeys.get -> System.Collections.Generic.IList<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!>!
+static Yubico.YubiKit.Core.ProductAtrs.UsbYubiKeys.get -> System.Collections.Generic.IList<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!>!
+static Yubico.YubiKit.Core.Protocols.Otp.Hid.ChecksumUtils.CalculateCrc(System.ReadOnlySpan<byte> data, int length) -> ushort
+static Yubico.YubiKit.Core.Protocols.Otp.Hid.ChecksumUtils.CheckCrc(System.ReadOnlySpan<byte> data, int length) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset! l, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset! r) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset! l, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset! r) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.FromResponse(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse response, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand? command = null, string? additionalContext = null) -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException!
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException.FromStatusWord(short sw, string? additionalContext = null) -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException!
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration left, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.ExtractRetryCount(short sw) -> int?
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.GetStatusMessage(short sw) -> string!
+static Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.SWConstants.IsVerifyFailWithRetries(short sw) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.Default.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference left, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference left, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.Default.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters!
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters? left, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters? right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters? left, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp03KeyParameters? right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters? left, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters? right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters? left, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters? right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.operator !=(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? left, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.operator ==(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? left, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? right) -> bool
+static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.GetDefaultKeys() -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys!
+static Yubico.YubiKit.Core.ServiceLocator.GetService<T>() -> T
+static Yubico.YubiKit.Core.ServiceLocator.SetLocatorProvider(System.IServiceProvider! serviceProvider) -> void
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.operator !=(Yubico.YubiKit.Core.Sessions.ApplicationIds? left, Yubico.YubiKit.Core.Sessions.ApplicationIds? right) -> bool
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.operator ==(Yubico.YubiKit.Core.Sessions.ApplicationIds? left, Yubico.YubiKit.Core.Sessions.ApplicationIds? right) -> bool
+static Yubico.YubiKit.Core.Sessions.ApplicationSession.Construct<TSession>(Yubico.YubiKit.Core.Abstractions.IConnection! connection, System.Func<TSession!>! create) -> TSession!
+static Yubico.YubiKit.Core.Sessions.RawFidoHidSession.CreateAsync(Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawFidoHidSession!>!
+static Yubico.YubiKit.Core.Sessions.RawOtpHidSession.CreateAsync(Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawOtpHidSession!>!
+static Yubico.YubiKit.Core.Sessions.RawSmartCardSession.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!
+static Yubico.YubiKit.Core.Sessions.RawSmartCardSession.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection! connection, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters! scpKeyParameters, Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration? configuration = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!
+static Yubico.YubiKit.Core.Transports.Hid.FindHidDevices.Create(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.Hid.FindHidDevices!>? logger = null) -> Yubico.YubiKit.Core.Transports.Hid.FindHidDevices!
+static Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.operator !=(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? left, Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? right) -> bool
+static Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.operator ==(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? left, Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? right) -> bool
+static Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Create() -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener!
+static Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.Unknown.get -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint!
+static Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.operator !=(Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? left, Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? right) -> bool
+static Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint.operator ==(Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? left, Yubico.YubiKit.Core.Transports.Hid.HidDeviceRescanHint? right) -> bool
+static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.Classify(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo! descriptorInfo) -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
+static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.GetReportType(Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType interfaceType) -> Yubico.YubiKit.Core.Transports.Hid.HidReportType
+static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.IsSupported(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo! descriptorInfo) -> bool
+static Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetInstance(Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout layout) -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator!
+static Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices.Create(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices!>? logger = null) -> Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices!
+static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.CreateDefault(Microsoft.Extensions.Logging.ILoggerFactory? loggerFactory = null) -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory!
+static Yubico.YubiKit.Core.Utilities.BerLength.EncodingSize(int length) -> int
+static Yubico.YubiKit.Core.Utilities.BerLength.Write(System.Span<byte> destination, int length) -> int
+static Yubico.YubiKit.Core.Utilities.ByteUtils.ValidateByte(int byteInt, string! name) -> byte
+static Yubico.YubiKit.Core.Utilities.Crc13239.Calculate(System.ReadOnlySpan<byte> buffer) -> short
+static Yubico.YubiKit.Core.Utilities.DisposableArrayPoolBuffer.CreateFromSpan(System.ReadOnlySpan<byte> source) -> Yubico.YubiKit.Core.Utilities.DisposableArrayPoolBuffer!
+static Yubico.YubiKit.Core.Utilities.MemoryExtensions.GetMemory<TKey, TValue>(this System.Collections.Generic.IDictionary<TKey, System.ReadOnlyMemory<TValue>>! dictionary, TKey key) -> System.ReadOnlyMemory<TValue>
+static Yubico.YubiKit.Core.Utilities.MemoryExtensions.GetSpan<TKey, TValue>(this System.Collections.Generic.IDictionary<TKey, System.ReadOnlyMemory<TValue>>! dictionary, TKey key) -> System.ReadOnlySpan<TValue>
+static Yubico.YubiKit.Core.Utilities.MemoryExtensions.TryGetSpan<TKey, TValue>(this System.Collections.Generic.IDictionary<TKey, System.ReadOnlyMemory<TValue>>! dictionary, TKey key, out System.ReadOnlySpan<TValue> span) -> bool
+static Yubico.YubiKit.Core.Utilities.MultiString.GetBytes(string![]! value, System.Text.Encoding! encoding) -> byte[]!
+static Yubico.YubiKit.Core.Utilities.MultiString.GetStrings(byte[]! value, System.Text.Encoding! encoding) -> string![]!
+static Yubico.YubiKit.Core.Utilities.Tlv.Create(System.ReadOnlySpan<byte> data) -> Yubico.YubiKit.Core.Utilities.Tlv!
+static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlyMemory<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.ReadOnlyMemory<byte>>!
+static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlySpan<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.ReadOnlyMemory<byte>>!
+static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeList(System.ReadOnlyMemory<byte> tlvData) -> Yubico.YubiKit.Core.Utilities.DisposableTlvList!
+static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeList(System.ReadOnlySpan<byte> tlvData) -> Yubico.YubiKit.Core.Utilities.DisposableTlvList!
+static Yubico.YubiKit.Core.Utilities.TlvHelper.EncodeAndDisposeList(params Yubico.YubiKit.Core.Utilities.Tlv![]! tlvData) -> System.Memory<byte>
+static Yubico.YubiKit.Core.Utilities.TlvHelper.EncodeDictionary(System.Collections.Generic.IReadOnlyDictionary<int, byte[]?>! tlvData) -> System.Memory<byte>
+static Yubico.YubiKit.Core.Utilities.TlvHelper.EncodeList(Yubico.YubiKit.Core.Utilities.Tlv![]! tlvData) -> System.Memory<byte>
+static Yubico.YubiKit.Core.Utilities.TlvHelper.GetValue(int expectedTag, System.ReadOnlySpan<byte> tlvData) -> System.Memory<byte>
+static Yubico.YubiKit.Core.Utilities.TlvHelper.TryFindValue(int tag, System.ReadOnlySpan<byte> tlvData, out System.Memory<byte> value) -> bool
+static Yubico.YubiKit.Core.YubiKitLogging.Configure(Microsoft.Extensions.Logging.ILoggerFactory? loggerFactory) -> void
+static Yubico.YubiKit.Core.YubiKitLogging.LoggerFactory.get -> Microsoft.Extensions.Logging.ILoggerFactory!
+static Yubico.YubiKit.Core.YubiKitLogging.LoggerFactory.set -> void
+static Yubico.YubiKit.Core.YubiKitLogging.UseTemporary(Microsoft.Extensions.Logging.ILoggerFactory! factory) -> System.IDisposable!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.AES128 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.AES192 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.AES256 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.Ed25519 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.P256 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.P384 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.P521 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.RSA1024 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.RSA2048 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.RSA3072 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.RSA4096 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.TripleDes -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Cryptography.KeyDefinitions.X25519 -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
+static readonly Yubico.YubiKit.Core.Devices.FirmwareVersion.Default -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+static readonly Yubico.YubiKit.Core.Devices.FirmwareVersion.V5_3_0 -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+static readonly Yubico.YubiKit.Core.Devices.FirmwareVersion.V5_4_3 -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+static readonly Yubico.YubiKit.Core.Devices.FirmwareVersion.V5_7_2 -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+static readonly Yubico.YubiKit.Core.Devices.FirmwareVersion.V5_8_0 -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Adapter -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.ApmSupport -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Avc -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Battery -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Biometric -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Bluetootch -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Camera -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Cdrom -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Computer -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Decoder -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.DiskDrive -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Display -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Dot4 -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Dot4Print -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.EhStoreSilo -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Enum1394 -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Extension -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Fdc -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Firmware -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.FloppyDisk -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Gps -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Hdc -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.HidClass -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Holographic -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Iec61883 -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Ieee1394 -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Ieee1394Debug -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Image -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Infiniband -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Infrared -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Keyboard -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.LegacyDriver -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Media -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.MediumChanger -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Memory -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Modem -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Monitor -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Mouse -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Mtd -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.MultiFunction -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.MultiPortSerial -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Net -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.NetClient -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.NetDriver -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.NetService -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.NetTrans -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.NoDriver -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Pcmcia -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.PnpPrinters -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Ports -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.PrintQueue -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Printer -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.PrinterUpgrade -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Processor -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Sbp2 -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.ScmDisk -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.ScmVolume -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.ScsiAdapter -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.SecurityAccelerator -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Sensor -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Sideshow -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.SmartCard -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.SmartCardReader -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.SmrDisk -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.SmrVolume -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.SoftwareComponent -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Sound -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.System -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.TapeDrive -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Ucm -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Unknown -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Usb -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Volume -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.VolumeSnapshot -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.WceUsbs -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmClassGuid.Wpd -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmInterfaceGuid.Hid -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmInterfaceGuid.Keyboard -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmInterfaceGuid.SmartCardReader -> System.Guid
+static readonly Yubico.YubiKit.Core.Native.Windows.Cfgmgr32.CmInterfaceGuid.UsbDevice -> System.Guid
+static readonly Yubico.YubiKit.Core.ProductAtrs.YubiKey4Usb -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!
+static readonly Yubico.YubiKit.Core.ProductAtrs.YubiKey5Nfc -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!
+static readonly Yubico.YubiKit.Core.ProductAtrs.YubiKey5Usb -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!
+static readonly Yubico.YubiKit.Core.ProductAtrs.YubiKeyNeoNfc -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!
+static readonly Yubico.YubiKit.Core.ProductAtrs.YubiKeyNeoUsb -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!
+static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Fido2 -> byte[]!
+static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.FidoU2f -> byte[]!
+static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Management -> byte[]!
+static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Oath -> byte[]!
+static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.OpenPgp -> byte[]!
+static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Otp -> byte[]!
+static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Piv -> byte[]!
+static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.SecurityDomain -> byte[]!
+static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.YubiHsmAuth -> byte[]!
+virtual Yubico.YubiKit.Core.Credentials.CredentialPromptContext.<Clone>$() -> Yubico.YubiKit.Core.Credentials.CredentialPromptContext!
+virtual Yubico.YubiKit.Core.Credentials.CredentialPromptContext.EqualityContract.get -> System.Type!
+virtual Yubico.YubiKit.Core.Credentials.CredentialPromptContext.Equals(Yubico.YubiKit.Core.Credentials.CredentialPromptContext? other) -> bool
+virtual Yubico.YubiKit.Core.Credentials.CredentialPromptContext.PrintMembers(System.Text.StringBuilder! builder) -> bool
+virtual Yubico.YubiKit.Core.Protocols.SmartCard.Scp.DataEncryptor.Invoke(System.ReadOnlySpan<byte> data) -> byte[]!
+virtual Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.EqualityContract.get -> System.Type!
+virtual Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? other) -> bool
+virtual Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.PrintMembers(System.Text.StringBuilder! builder) -> bool
+virtual Yubico.YubiKit.Core.Sessions.ApplicationIds.<Clone>$() -> Yubico.YubiKit.Core.Sessions.ApplicationIds!
+virtual Yubico.YubiKit.Core.Sessions.ApplicationIds.EqualityContract.get -> System.Type!
+virtual Yubico.YubiKit.Core.Sessions.ApplicationIds.Equals(Yubico.YubiKit.Core.Sessions.ApplicationIds? other) -> bool
+virtual Yubico.YubiKit.Core.Sessions.ApplicationIds.PrintMembers(System.Text.StringBuilder! builder) -> bool
+virtual Yubico.YubiKit.Core.Sessions.ApplicationSession.Dispose(bool disposing) -> void
+virtual Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAsyncCore() -> System.Threading.Tasks.ValueTask
+virtual Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Dispose(bool disposing) -> void

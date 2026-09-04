@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Oath.IntegrationTests.TestExtensions;
@@ -46,7 +47,13 @@ public static class OathTestStateExtensions
             CancellationToken cancellationToken = default)
         {
             await using var session = await state.Device
-                .CreateOathSessionAsync(scpKeyParams, configuration, cancellationToken)
+                .CreateOathSessionAsync(
+                    new SessionCreationOptions
+                    {
+                        ScpKeyParameters = scpKeyParams,
+                        ProtocolConfiguration = configuration
+                    },
+                    cancellationToken)
                 .ConfigureAwait(false);
 
             if (resetBeforeUse)

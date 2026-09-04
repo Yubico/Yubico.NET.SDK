@@ -15,6 +15,8 @@
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Piv;
@@ -24,42 +26,48 @@ namespace Yubico.YubiKit.Piv;
 /// </summary>
 public static class IYubiKeyExtensions
 {
-    /// <summary>
-    /// Creates a PIV session with the YubiKey.
-    /// </summary>
-    /// <param name="yubiKey">The YubiKey device.</param>
-    /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
-    /// <param name="configuration">Optional protocol configuration.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An initialized PIV session.</returns>
-    /// <exception cref="ArgumentNullException">If yubiKey is null.</exception>
-    /// <exception cref="NotSupportedException">If the YubiKey does not support PIV or SmartCard connections.</exception>
-    public static async Task<PivSession> CreatePivSessionAsync(
-        this IYubiKey yubiKey,
-        ScpKeyParameters? scpKeyParams = null,
-        ProtocolConfiguration? configuration = null,
-        CancellationToken cancellationToken = default)
+    extension(IYubiKey yubiKey)
     {
-        ArgumentNullException.ThrowIfNull(yubiKey);
-
-        var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-            .ConfigureAwait(false);
-
-        try
+        /// <summary>
+        /// Creates a PIV session with the YubiKey.
+        /// </summary>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>An initialized PIV session.</returns>
+        /// <exception cref="NotSupportedException">If the YubiKey does not support PIV or SmartCard connections.</exception>
+        public async Task<PivSession> CreatePivSessionAsync(
+            SessionCreationOptions? options = null,
+            CancellationToken cancellationToken = default)
         {
-            var session = await PivSession
-                .CreateAsync(connection, configuration, scpKeyParams, cancellationToken)
+            var configuration = options?.ProtocolConfiguration;
+            var scpKeyParams = options?.ScpKeyParameters;
+            var preferredConnectionType = options?.PreferredConnectionType;
+            var firmwareVersionOverride = options?.FirmwareVersionOverride;
+            var transport = yubiKey.ResolveSessionTransport(
+                preferredConnectionType,
+                "PIV",
+                ConnectionType.SmartCard);
+
+            return await yubiKey.CreateSessionOverTransportAsync(
+                    transport,
+                    async (connection, ct) =>
+                    {
+                        var session = await PivSession.CreateAsync(
+                                (ISmartCardConnection)connection,
+                                new SessionCreationOptions
+                                {
+                                    ProtocolConfiguration = configuration,
+                                    ScpKeyParameters = scpKeyParams,
+                                    PreferredConnectionType = transport,
+                                    FirmwareVersionOverride = firmwareVersionOverride
+                                },
+                                ct)
+                            .ConfigureAwait(false);
+                        session.OwnConnection();
+                        return session;
+                    },
+                    cancellationToken)
                 .ConfigureAwait(false);
-
-            // This entry point created the connection, so the session it returns is the only thing that can
-            // close it. A caller-created connection is never owned this way.
-            session.OwnConnection();
-            return session;
-        }
-        catch
-        {
-            await connection.DisposeAsync().ConfigureAwait(false);
-            throw;
         }
     }
 }

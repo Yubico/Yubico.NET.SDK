@@ -454,6 +454,18 @@ jobs:
             throw 'No runtime artifacts were downloaded.'
           }
 
+          $nuspec = [xml](Get-Content Yubico.NativeShims.nuspec -Raw)
+          $ns = New-Object System.Xml.XmlNamespaceManager($nuspec.NameTable)
+          $ns.AddNamespace('n', $nuspec.DocumentElement.NamespaceURI)
+          $filesNode = $nuspec.SelectSingleNode('//n:files', $ns)
+
+          function Add-NuspecFile([string]$Source, [string]$Target) {
+            $fileNode = $nuspec.CreateElement('file', $nuspec.DocumentElement.NamespaceURI)
+            $fileNode.SetAttribute('src', $Source)
+            $fileNode.SetAttribute('target', $Target)
+            $filesNode.AppendChild($fileNode) | Out-Null
+          }
+
           $archives = @()
           foreach ($ridDirectory in $ridDirectories) {
             $rid = $ridDirectory.Name
@@ -482,7 +494,18 @@ jobs:
             Copy-Item -LiteralPath $sharedLibraries[0].FullName -Destination $runtimeTarget
             Copy-Item -LiteralPath $ridArchives[0].FullName -Destination $staticTarget
             $archives += $ridArchives[0]
+
+            # Explicit, non-wildcard <file> entries: classic nuget.exe pack
+            # does not strip the literal source-directory prefix from
+            # recursive "**" globs the way "dotnet pack" does, which would
+            # otherwise nest these assets one level too deep and break
+            # RID-based asset resolution.
+            Add-NuspecFile "package/runtimes/$rid/native/$($sharedLibraries[0].Name)" "runtimes/$rid/native/$($sharedLibraries[0].Name)"
+            Add-NuspecFile "package/buildTransitive/static/$rid/$($ridArchives[0].Name)" "buildTransitive/static/$rid/$($ridArchives[0].Name)"
           }
+
+          $nuspec.Save("Yubico.NativeShims.nuspec")
+          cat Yubico.NativeShims.nuspec
 
           nuget pack Yubico.NativeShims.nuspec
           if ($LASTEXITCODE -ne 0) { throw "nuget pack failed with exit code $LASTEXITCODE." }

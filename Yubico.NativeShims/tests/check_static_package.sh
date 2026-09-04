@@ -132,8 +132,19 @@ assert_msbuild_fails \
     -p:RuntimeIdentifier=osx-arm64 \
     -p:ExpectedArchive=unused
 
-assert_nuspec_entry "package/runtimes/**" "runtimes"
-assert_nuspec_entry "package/buildTransitive/static/**" "buildTransitive/static"
+assert_no_nuspec_glob() {
+    # Classic nuget.exe pack does not strip the literal source-directory
+    # prefix from recursive "**" globs the way "dotnet pack" does, which
+    # silently nests runtime assets one level too deep and breaks RID-based
+    # asset resolution. Per-RID <file> entries must be explicit and
+    # generated dynamically by the packing workflow instead.
+    if grep -Eq '<file[^>]*\*\*' "$NUSPEC"; then
+        echo "ERROR: nuspec must not contain wildcard glob file entries" >&2
+        exit 1
+    fi
+}
+
+assert_no_nuspec_glob
 
 assert_nuspec_entry \
     "msbuild/Yubico.NativeShims.Aot.targets" \

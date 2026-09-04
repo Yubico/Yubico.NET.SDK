@@ -18,8 +18,16 @@
     </metadata>
 
     <files>
-        <file src="package/runtimes/**" target="runtimes" />
-        <file src="package/buildTransitive/static/**" target="buildTransitive/static" />
+        <!--
+          Per-RID runtime shared libraries and build-only static archives are
+          appended here as explicit, non-wildcard <file> entries by the
+          "Verify static archives and pack" workflow step. Wildcard globs are
+          intentionally avoided: classic nuget.exe pack does not strip the
+          literal source-directory prefix from recursive "**" matches the
+          way "dotnet pack" does, which silently nests the runtime assets
+          one level too deep (e.g. runtimes/package/runtimes/<rid>/...)
+          and breaks RID-based asset resolution.
+        -->
 
         <!-- Support files -->
         <file src="msbuild/Yubico.NativeShims.targets" target="build/net472/Yubico.NativeShims.targets" />

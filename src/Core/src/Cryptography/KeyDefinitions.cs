@@ -64,7 +64,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// <returns>
         /// The key definition for the specified key type.
         /// </returns>
-        /// <exception cref="InvalidOperationException">
+        /// <exception cref="ArgumentException">
         /// When the key type is not supported.
         /// </exception>
         public static KeyDefinition GetByKeyType(KeyType type)
@@ -74,7 +74,9 @@ namespace Yubico.YubiKit.Core.Cryptography
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        "ExceptionMessages.UnsupportedAlgorithm),nameof(type)"));
+                        "Unsupported key type '{0}'.",
+                        type),
+                    nameof(type));
             }
 
             return definition;
@@ -126,7 +128,8 @@ namespace Yubico.YubiKit.Core.Cryptography
             ?? throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm,curve"));
+                    "Unsupported COSE EC curve '{0}'.",
+                    curve));
 
         /// <summary>
         /// Gets a key definition by its object identifier (OID).
@@ -170,14 +173,15 @@ namespace Yubico.YubiKit.Core.Cryptography
             if (string.Equals(oid, Oids.ECDSA, StringComparison.OrdinalIgnoreCase))
             {
                 throw new NotSupportedException(
-                    "All ECDSA keys (P-256, P-384, P-521) share the same OID. Use the Curve OID instead.");
+                    "The id-ecPublicKey algorithm OID does not identify a curve. Use the curve OID instead.");
             }
 
             var keyDefinition = AllDefinitions.Values.FirstOrDefault(d => d.AlgorithmOid == oid || d.CurveOid == oid);
             return keyDefinition ?? throw new NotSupportedException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm));)"));
+                    "Unsupported algorithm or curve OID '{0}'.",
+                    oid));
         }
 
         public static KeyType GetKeyTypeByOid(Oid algorithmOid) => GetKeyTypeByOid(algorithmOid.Value);

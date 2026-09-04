@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Core.Cryptography
         public const string RSA = "1.2.840.113549.1.1.1";
 
         /// <summary>
-        /// Represents the general Elliptic Curve public key algorithm OID (ANSI X9.62)
+        /// Represents the id-ecPublicKey algorithm identifier for elliptic-curve keys (ANSI X9.62).
         /// </summary>
         public const string ECDSA = "1.2.840.10045.2.1";
 

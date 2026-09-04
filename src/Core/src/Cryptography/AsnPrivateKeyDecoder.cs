@@ -75,7 +75,8 @@ internal class AsnPrivateKeyDecoder
         throw new InvalidOperationException(
             string.Format(
                 CultureInfo.CurrentCulture,
-                "ExceptionMessages.UnsupportedAlgorithm));"));
+                "Unsupported private key algorithm OID '{0}'.",
+                oidAlgorithm));
     }
 
     /// <summary>
@@ -189,7 +190,8 @@ internal class AsnPrivateKeyDecoder
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm));"));
+                    "Expected an EC private key using id-ecPublicKey, but the algorithm OID was '{0}'.",
+                    oidAlgorithm));
         }
 
         var curveOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
@@ -201,7 +203,8 @@ internal class AsnPrivateKeyDecoder
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm));"));
+                    "Unsupported EC curve OID '{0}'. Supported curves are P-256, P-384 and P-521.",
+                    curveOid));
         }
 
         using var privateKeyInfoHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());
@@ -233,25 +236,33 @@ internal class AsnPrivateKeyDecoder
                 }
 
                 // Process the public key point
-                if (publicKeyBytes.Span[0] == 0x04) // Uncompressed point format
+                if (publicKeyBytes.Length == 0)
                 {
-                    var coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
-                    var sizeIsValid = publicKeyBytes.Length == (2 * coordinateSize) + 1;
-                    if (sizeIsValid) // Format: 0x04 + X + Y
-                    {
-                        var xCoordinate = new byte[coordinateSize];
-                        var yCoordinate = new byte[coordinateSize];
-
-                        publicKeyBytes.Slice(1, coordinateSize).CopyTo(xCoordinate);
-                        publicKeyBytes.Slice(1 + coordinateSize, coordinateSize).CopyTo(yCoordinate);
-
-                        point = new ECPoint
-                        {
-                            X = xCoordinate,
-                            Y = yCoordinate
-                        };
-                    }
+                    throw new CryptographicException("Invalid EC public key encoding");
                 }
+
+                if (publicKeyBytes.Span[0] != 0x04) // Uncompressed point format
+                {
+                    throw new CryptographicException("Unsupported EC point format");
+                }
+
+                var coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
+                if (publicKeyBytes.Length != (2 * coordinateSize) + 1) // Format: 0x04 + X + Y
+                {
+                    throw new CryptographicException("Invalid EC public key encoding");
+                }
+
+                var xCoordinate = new byte[coordinateSize];
+                var yCoordinate = new byte[coordinateSize];
+
+                publicKeyBytes.Slice(1, coordinateSize).CopyTo(xCoordinate);
+                publicKeyBytes.Slice(1 + coordinateSize, coordinateSize).CopyTo(yCoordinate);
+
+                point = new ECPoint
+                {
+                    X = xCoordinate,
+                    Y = yCoordinate
+                };
             }
             else
             {
@@ -301,7 +312,8 @@ internal class AsnPrivateKeyDecoder
             throw new InvalidOperationException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "ExceptionMessages.UnsupportedAlgorithm));"));
+                    "Expected an RSA private key, but the algorithm OID was '{0}'.",
+                    oidAlgorithm));
         }
 
         using var privateKeyDataHandle = new DisposableBufferHandle(seqPrivateKeyInfo.ReadOctetString());

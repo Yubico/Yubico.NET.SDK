@@ -40,10 +40,11 @@ internal sealed class LinuxHidFeatureReportConnection : IHidConnection
         _handle = LibcNativeMethods.open(devNode, LibcNativeMethods.OpenFlags.O_RDWR);
         if (_handle.IsInvalid)
         {
+            int errorCode = Marshal.GetLastPInvokeError();
             throw new PlatformApiException(
                 nameof(LibcNativeMethods.open),
-                Marshal.GetLastWin32Error(),
-                $"Failed to open HID device: {devNode}. {LibcHelpers.GetErrnoString()}");
+                errorCode,
+                $"Failed to open HID device: {devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
         }
 
         // Feature reports typically use a fixed size for YubiKey OTP
@@ -73,10 +74,11 @@ internal sealed class LinuxHidFeatureReportConnection : IHidConnection
 
             if (result < 0)
             {
+                int errorCode = Marshal.GetLastPInvokeError();
                 throw new PlatformApiException(
                     "ioctl(HIDIOCGFEATURE)",
-                    Marshal.GetLastWin32Error(),
-                    $"Failed to get feature report from HID device: {_devNode}. {LibcHelpers.GetErrnoString()}");
+                    errorCode,
+                    $"Failed to get feature report from HID device: {_devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
             }
 
             // Copy the result back, excluding the report ID byte
@@ -112,10 +114,11 @@ internal sealed class LinuxHidFeatureReportConnection : IHidConnection
 
             if (result < 0)
             {
+                int errorCode = Marshal.GetLastPInvokeError();
                 throw new PlatformApiException(
                     "ioctl(HIDIOCSFEATURE)",
-                    Marshal.GetLastWin32Error(),
-                    $"Failed to set feature report on HID device: {_devNode}. {LibcHelpers.GetErrnoString()}");
+                    errorCode,
+                    $"Failed to set feature report on HID device: {_devNode}. {LibcHelpers.GetErrnoString(errorCode)}");
             }
         }
         finally

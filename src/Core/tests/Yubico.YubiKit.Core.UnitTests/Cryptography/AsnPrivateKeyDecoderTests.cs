@@ -173,9 +173,8 @@ public class AsnPrivateKeyDecoderTests
     }
 
     [Fact]
-    public void CreateECParameters_CompressedPointPrefix_LeavesQDefault()
+    public void CreateECParameters_CompressedPointPrefix_ThrowsCryptographicException()
     {
-        // Known limitation: unsupported point formats currently leave Q unset instead of throwing.
         var compressedPoint = new byte[33];
         compressedPoint[0] = 0x02;
         var privateKeyValue = new byte[32];
@@ -184,17 +183,13 @@ public class AsnPrivateKeyDecoderTests
             Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue,
             publicKeyPointBytes: compressedPoint);
 
-        var result = AsnPrivateKeyDecoder.CreateECParameters(pkcs8);
-
-        Assert.Equal(privateKeyValue, result.D);
-        Assert.Null(result.Q.X);
-        Assert.Null(result.Q.Y);
+        var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
+        Assert.Equal("Unsupported EC point format", exception.Message);
     }
 
     [Fact]
-    public void CreateECParameters_WrongLengthPublicPoint_LeavesQDefault()
+    public void CreateECParameters_WrongLengthPublicPoint_ThrowsCryptographicException()
     {
-        // Known limitation: an invalid point length currently leaves Q unset instead of throwing.
         var wrongLengthPoint = new byte[11];
         wrongLengthPoint[0] = 0x04;
         var privateKeyValue = new byte[32];
@@ -203,22 +198,19 @@ public class AsnPrivateKeyDecoderTests
             Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue,
             publicKeyPointBytes: wrongLengthPoint);
 
-        var result = AsnPrivateKeyDecoder.CreateECParameters(pkcs8);
-
-        Assert.Equal(privateKeyValue, result.D);
-        Assert.Null(result.Q.X);
-        Assert.Null(result.Q.Y);
+        var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
+        Assert.Equal("Invalid EC public key encoding", exception.Message);
     }
 
     [Fact]
-    public void CreateECParameters_ZeroLengthPublicKeyBitString_ThrowsIndexOutOfRangeException()
+    public void CreateECParameters_ZeroLengthPublicKeyBitString_ThrowsCryptographicException()
     {
-        // Known limitation: an empty public-key BIT STRING currently exposes an indexing exception.
         var pkcs8 = BuildEcPkcs8(
             Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue: new byte[32],
             publicKeyPointBytes: []);
 
-        Assert.Throws<IndexOutOfRangeException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
+        var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
+        Assert.Equal("Invalid EC public key encoding", exception.Message);
     }
 
     [Fact]

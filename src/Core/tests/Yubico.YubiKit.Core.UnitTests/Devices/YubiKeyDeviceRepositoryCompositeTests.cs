@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -29,8 +30,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         using var repository = new YubiKeyDeviceRepository();
         repository.UpdateCache([new FakeYubiKey("ykphysical:103", ConnectionType.SmartCard)]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Same physical device id, but a HID interface appeared (capabilities changed).
         repository.UpdateCache([
@@ -50,8 +51,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         using var repository = new YubiKeyDeviceRepository();
         repository.UpdateCache([new FakeYubiKey("ykphysical:103", ConnectionType.SmartCard | ConnectionType.HidOtp)]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         repository.UpdateCache([new FakeYubiKey("ykphysical:103", ConnectionType.SmartCard | ConnectionType.HidOtp)]);
 
@@ -62,8 +63,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
     public void UpdateCache_OnePhysicalDevice_EmitsSingleAddedNotPerInterface()
     {
         using var repository = new YubiKeyDeviceRepository();
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // A merged composite device is a single cache entry keyed by physical identity.
         repository.UpdateCache([
@@ -84,8 +85,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         var second = Composite("ykphysical:pid:0407", "pcsc:key-b", "hid:key-b");
         repository.UpdateCache([first]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         repository.UpdateCache([second]);
 
@@ -121,8 +122,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         using var repository = new YubiKeyDeviceRepository();
         repository.UpdateCache(CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]));
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Key B unplugged. Key A did not move — same three interfaces, same interface paths — but its
         // composite DeviceId flips from the serial tier to the PID tier.
@@ -139,8 +140,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         using var repository = new YubiKeyDeviceRepository();
         repository.UpdateCache(CompositeDeviceMerger.Merge(KeyInterfaces("a", null)));
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Key B plugged in. Key A did not move, but its DeviceId flips back from the PID tier to the
         // serial tier.
@@ -155,8 +156,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
     public void UpdateCache_TierFlipThenFinalRemoval_RemovalUsesPreviouslyAddedDeviceId()
     {
         using var repository = new YubiKeyDeviceRepository();
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         repository.UpdateCache(CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]));
         repository.UpdateCache(CompositeDeviceMerger.Merge(KeyInterfaces("a", null)));
@@ -180,8 +181,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         var key = Composite("ykphysical:pid:0407", "pcsc:a", "hid-fido:a");
         repository.UpdateCache([key]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         repository.UpdateCache([]);
 
@@ -197,8 +198,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
         using var repository = new YubiKeyDeviceRepository();
         repository.UpdateCache([]);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         var key = Composite("ykphysical:pid:0407", "pcsc:a", "hid-fido:a");
         repository.UpdateCache([key]);

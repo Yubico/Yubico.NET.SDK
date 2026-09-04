@@ -31,6 +31,8 @@ Review code that assumes:
 
 V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived` and `Removed` events (`EventHandler<HidDeviceEventArgs>`) carrying the affected `IHidDevice`. V1 YubiKey-level monitoring used `YubiKeyDeviceListener.Arrived`/`Removed` and the `YubiKeyDevice.FindAll()` cache. In v2, the low-level `Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent` callback is `Action<HidDeviceRescanHint>?`: a diagnostic rescan hint with `HidDeviceChangeKind` plus optional platform identifier/path. It is not authoritative physical-device state. Applications that need real YubiKey arrivals and removals should use `YubiKeyManager.DeviceChanges`, which is emitted after the device repository rescans and diffs the discovered device set.
 
+Earlier v2 alphas could make Rx-style `Subscribe(Action<T>)` and query operators appear transitively. Current builds expose only the BCL `IObservable<T>` surface. If your migration code uses lambda subscriptions or operators such as `Where`, add a direct `System.Reactive` reference.
+
 ### Secure Channel (SCP) Session Construction
 
 `ProtocolFactory`, `ISmartCardProtocol`, and `PcscProtocolScp` are internal implementation machinery in v2.

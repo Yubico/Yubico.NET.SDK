@@ -148,8 +148,15 @@ YubiKeyDeviceMonitorService ──TrySignal──► DeviceMonitorSignal (capaci
 Single reader ──consume one occurrence──► 200ms quiet period (re-arms on new hints)
 Single reader ──cap reached or quiet period elapsed──► RescanCoreAsync()
 RescanCoreAsync() ──FindAllAsync snapshot──► YubiKeyDeviceRepository.UpdateCache()
-YubiKeyDeviceRepository ──diff──► DeviceChanges (DeviceAction.Added/Removed)
-Application subscription ◄──DeviceEvent── YubiKeyManager.DeviceChanges
+YubiKeyDeviceRepository ──diff──► DeviceEventBroadcaster (multicast)
+                                        │
+              ┌─────────────────────────┴─────────────────────────┐
+              ▼                                                   ▼
+   YubiKeyManager.DeviceChanges                    DeviceEventStream (bounded buffer)
+   (IObservable<DeviceEvent>)                                     │
+              │                                                   ▼
+              ▼                                      YubiKeyManager.WatchAsync(ct)
+   Application observer                              (IAsyncEnumerable<DeviceEvent>)
 ```
 
 ---
@@ -181,7 +188,8 @@ immutable `MonitorGeneration` bundling `{ Id, ScanGate, Signal, Cts }`, held in 
 
 - **Publication is gated, not coordinated.** All publications, from any generation, are mutually
   exclusive under the monitor service's single never-disposed `_publishGate`, held across the
-  admission check and `UpdateCache`.
+  admission check and `UpdateCache`. This currently relies on `UpdateCache` publishing
+  synchronously and finishing before it returns.
 - **Admission is the linearization point.** Under the small `_publishLock`, a snapshot is applied
   only if its generation is still `_current` and the service is not disposed. A superseded
   generation can never publish — including a scan hung in native I/O that returns long after its

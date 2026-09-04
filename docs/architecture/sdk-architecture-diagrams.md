@@ -289,7 +289,7 @@ flowchart TD
     Start(["YubiKeyManager.FindAllAsync(type=All)"])
     Mgr["YubiKeyDeviceManager<br/><i>composition root (lazy)</i>"]
     Repo["YubiKeyDeviceRepository<br/><i>cache</i>"]
-    Mon["YubiKeyDeviceMonitorService<br/><i>Rx hot-plug events</i>"]
+    Mon["YubiKeyDeviceMonitorService<br/><i>hot-plug events</i>"]
     Find["FindYubiKeys.FindAllAsync"]
 
     FPcsc["IFindPcscDevices<br/>(PC/SC readers)"]
@@ -381,8 +381,9 @@ flowchart TD
   the caller's connection; only convenience entry points own the hidden connection they create.
 - **Transport selection is single-shot:** each applet selects one supported transport from its default order
   or explicit override. Held and platform errors propagate without trying another interface.
-- **Monitoring:** `StartMonitoring()` gives an `IObservable<DeviceEvent> DeviceChanges`
-  (System.Reactive) for hot-plug — good "advanced" slide if time allows.
+- **Monitoring:** `StartMonitoring()` exposes hot-plug events two ways — `await foreach` over
+  `YubiKeyManager.WatchAsync(ct)`, or `IObservable<DeviceEvent> DeviceChanges` for observer-style
+  consumers. No reactive dependency; both are BCL types. Good "advanced" slide if time allows.
 
 ---
 

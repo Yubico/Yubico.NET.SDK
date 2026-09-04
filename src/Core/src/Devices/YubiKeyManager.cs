@@ -24,7 +24,6 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <para><strong>Simple Device Discovery:</strong></para>
 /// <code>
 /// using System;
-/// using System.Reactive.Linq;
 /// using Yubico.YubiKit.Core;
 /// using Yubico.YubiKit.Core.Devices;
 ///
@@ -40,14 +39,20 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </code>
 /// <para><strong>Device Monitoring:</strong></para>
 /// <code>
-/// using var subscription = YubiKeyManager.DeviceChanges.Subscribe(e =>
+/// YubiKeyManager.StartMonitoring();
+///
+/// await foreach (var e in YubiKeyManager.WatchAsync())
 /// {
 ///     Console.WriteLine($"{e.Action}: {e.Device.DeviceId} ({e.Device.AvailableConnections})");
-/// });
-/// YubiKeyManager.StartMonitoring();
-/// // ... application runs ...
-/// await YubiKeyManager.ShutdownAsync();
+/// }
 /// </code>
+/// <para>
+/// <see cref="DeviceChanges"/> exposes the same events as an <see cref="IObservable{T}"/> for
+/// consumers who prefer that model. Note the SDK itself has no reactive dependency: the
+/// <c>Subscribe(Action&lt;T&gt;)</c> overload and operators such as <c>Where</c> or <c>ObserveOn</c>
+/// come from the <c>System.Reactive</c> package, which a consumer must reference explicitly. Without
+/// it, <see cref="IObservable{T}"/> offers only <c>Subscribe(IObserver&lt;DeviceEvent&gt;)</c>.
+/// </para>
 /// </example>
 public static class YubiKeyManager
 {
@@ -149,6 +154,14 @@ public static class YubiKeyManager
     /// <para>Events are only emitted while monitoring is active (via <see cref="StartMonitoring()"/>).</para>
     /// <para>Subscribing before starting monitoring will not auto-start monitoring; the subscriber
     /// will simply receive events once monitoring is started.</para>
+    /// <para>Observers are called synchronously in subscription order. An exception from
+    /// <see cref="IObserver{T}.OnNext"/> propagates to the publisher and prevents later observers from
+    /// receiving that event. SDK shutdown completes all current subscriptions.</para>
+    /// <para>Concurrent publication and completion are state-safe, but strict observer grammar still
+    /// requires the producer to serialize them. The SDK's monitor publication gate provides that
+    /// serialization during ordinary operation. During bounded shutdown, a publication already
+    /// using an observer snapshot may finish after completion; repository disposal discards a late
+    /// publication only when delivery has not begun.</para>
     /// <para><strong>UI Thread Marshaling:</strong> Events are raised on background threads.
     /// UI applications must marshal to the UI thread (e.g., using <c>ObserveOn(SynchronizationContext.Current)</c>
     /// with System.Reactive, or <c>Dispatcher.Invoke</c> in WPF).</para>
@@ -164,6 +177,58 @@ public static class YubiKeyManager
     /// <seealso cref="StartMonitoring()"/>
     /// <seealso cref="DeviceEvent"/>
     public static IObservable<DeviceEvent> DeviceChanges => EnsureManager().DeviceChanges;
+
+    /// <summary>
+    /// Gets an async sequence of device events (arrivals and removals), for consumers that prefer
+    /// <c>await foreach</c> over subscribing an observer.
+    /// </summary>
+    /// <param name="cancellationToken">Cancels enumeration.</param>
+    /// <returns>A sequence that ends normally when the SDK shuts down.</returns>
+    /// <exception cref="OperationCanceledException">
+    /// Thrown from enumeration when <paramref name="cancellationToken"/> is canceled.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown from enumeration when a new event arrives while the consumer's 256-event buffer is
+    /// full. Re-enumerate and resynchronize via <see cref="FindAllAsync(CancellationToken)"/>.
+    /// </exception>
+    /// <remarks>
+    /// <para>Events only flow while monitoring is active (see <see cref="StartMonitoring()"/>).</para>
+    /// <para><strong>Subscription starts on first enumeration, not when this method is called.</strong>
+    /// Begin the <c>await foreach</c> before performing an action expected to produce an event —
+    /// events raised between calling this method and entering the loop are not observed. In practice
+    /// this means iterating directly, as in the example below, rather than storing the sequence and
+    /// enumerating it later.</para>
+    /// <para>Each enumeration gets an independent bounded buffer, so concurrent watchers do not
+    /// interfere and a slow consumer cannot stall device monitoring. Overflow faults only the
+    /// affected enumeration.</para>
+    /// </remarks>
+    /// <example>
+    /// <para><strong>Wait for the next YubiKey to be inserted, with a timeout:</strong></para>
+    /// <code>
+    /// using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+    /// YubiKeyManager.StartMonitoring();
+    ///
+    /// try
+    /// {
+    ///     await foreach (var e in YubiKeyManager.WatchAsync(cts.Token))
+    ///     {
+    ///         if (e.Action == DeviceAction.Added)
+    ///         {
+    ///             Console.WriteLine($"Inserted: {e.Device.DeviceId}");
+    ///             break;
+    ///         }
+    ///     }
+    /// }
+    /// catch (OperationCanceledException) when (cts.IsCancellationRequested)
+    /// {
+    ///     Console.WriteLine("Timed out waiting for a YubiKey.");
+    /// }
+    /// </code>
+    /// </example>
+    /// <seealso cref="DeviceChanges"/>
+    /// <seealso cref="StartMonitoring()"/>
+    public static IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
+        EnsureManager().WatchAsync(cancellationToken);
 
     /// <summary>
     /// Shuts down all YubiKeyManager resources asynchronously.

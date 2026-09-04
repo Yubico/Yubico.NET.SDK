@@ -17,6 +17,7 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
@@ -89,8 +90,8 @@ public class YubiKeyDeviceMonitorServiceTests
         var findYubiKeys = new FakeFindYubiKeys([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
         var service = new YubiKeyDeviceMonitorService(repository, findYubiKeys);
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Act
         await service.RescanAsync(TestContext.Current.CancellationToken);
@@ -136,8 +137,8 @@ public class YubiKeyDeviceMonitorServiceTests
         service.StartMonitoring(TimeSpan.FromSeconds(10));
         await WaitUntilAsync(() => findYubiKeys.ScanCount >= 1, "Initial monitoring rescan did not run");
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
         var scanCount = findYubiKeys.ScanCount;
 
         // Act
@@ -726,8 +727,8 @@ public class YubiKeyDeviceMonitorServiceTests
         service.StartMonitoring(TimeSpan.FromHours(1));
         service.StopMonitoring();
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         findYubiKeys.SetDevices([new FakeYubiKey("stale-device", ConnectionType.SmartCard)]);
         findYubiKeys.ReleaseHungScans();
@@ -771,8 +772,8 @@ public class YubiKeyDeviceMonitorServiceTests
 
         // The hung scan from the abandoned generation later returns - its snapshot
         // must fail admission and emit no device events.
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
         findYubiKeys.SetDevices([new FakeYubiKey("device-c", ConnectionType.SmartCard)]);
         findYubiKeys.ReleaseHungScans();
         await WaitUntilAsync(() => findYubiKeys.ActiveScans == 0, "Abandoned scan never unwound");
@@ -802,7 +803,7 @@ public class YubiKeyDeviceMonitorServiceTests
         var events = new List<DeviceEvent>();
         var activeEmissions = 0;
         var maxConcurrentEmissions = 0;
-        using var subscription = repository.DeviceChanges.Subscribe(deviceEvent =>
+        using var subscription = repository.DeviceChanges.Subscribe(new RecordingObserver<DeviceEvent>(deviceEvent =>
         {
             lock (events)
             {
@@ -826,7 +827,7 @@ public class YubiKeyDeviceMonitorServiceTests
                     activeEmissions--;
                 }
             }
-        });
+        }));
 
         service.StartMonitoring(TimeSpan.FromHours(1));
         Assert.True(
@@ -891,8 +892,8 @@ public class YubiKeyDeviceMonitorServiceTests
             return Task.CompletedTask;
         };
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         var staleRescan = service.RescanAsync(TestContext.Current.CancellationToken);
         await held.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
@@ -932,14 +933,14 @@ public class YubiKeyDeviceMonitorServiceTests
         using var entered = new ManualResetEventSlim();
         using var release = new ManualResetEventSlim();
         var blockOnce = 1;
-        using var subscription = repository.DeviceChanges.Subscribe(_ =>
+        using var subscription = repository.DeviceChanges.Subscribe(new RecordingObserver<DeviceEvent>(_ =>
         {
             if (Interlocked.Exchange(ref blockOnce, 0) == 1)
             {
                 entered.Set();
                 release.Wait(TestContext.Current.CancellationToken);
             }
-        });
+        }));
 
         service.StartMonitoring(TimeSpan.FromHours(1));
         Assert.True(
@@ -1002,8 +1003,8 @@ public class YubiKeyDeviceMonitorServiceTests
 
         service.StopMonitoring();
 
-        var events = new List<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events.Add);
+        var events = new RecordingObserver<DeviceEvent>();
+        using var subscription = repository.DeviceChanges.Subscribe(events);
 
         // Act - the slow scan completes after the stop timeout. Its snapshot must
         // be suppressed, not published.
@@ -1041,14 +1042,14 @@ public class YubiKeyDeviceMonitorServiceTests
         using var entered = new ManualResetEventSlim();
         using var release = new ManualResetEventSlim();
         var blockOnce = 1;
-        using var subscription = repository.DeviceChanges.Subscribe(_ =>
+        using var subscription = repository.DeviceChanges.Subscribe(new RecordingObserver<DeviceEvent>(_ =>
         {
             if (Interlocked.Exchange(ref blockOnce, 0) == 1)
             {
                 entered.Set();
                 release.Wait(TestContext.Current.CancellationToken);
             }
-        });
+        }));
 
         // Run the rescan off the test thread: the fake completes synchronously, so
         // the publication (and the blocking subscriber) would otherwise run inline
@@ -1096,14 +1097,14 @@ public class YubiKeyDeviceMonitorServiceTests
         using var entered = new ManualResetEventSlim();
         using var release = new ManualResetEventSlim();
         var blockOnce = 1;
-        using var subscription = repository.DeviceChanges.Subscribe(_ =>
+        using var subscription = repository.DeviceChanges.Subscribe(new RecordingObserver<DeviceEvent>(_ =>
         {
             if (Interlocked.Exchange(ref blockOnce, 0) == 1)
             {
                 entered.Set();
                 release.Wait(TestContext.Current.CancellationToken);
             }
-        });
+        }));
 
         var rescanToken = TestContext.Current.CancellationToken;
         var rescan = Task.Run(() => service.RescanAsync(rescanToken), rescanToken);
@@ -1138,7 +1139,7 @@ public class YubiKeyDeviceMonitorServiceTests
         findYubiKeys.SetDevices([new FakeYubiKey("device-a", ConnectionType.SmartCard)]);
 
         using var subscription = repository.DeviceChanges.Subscribe(
-            _ => throw new ObjectDisposedException("SubscriberOwnedResource"));
+            new RecordingObserver<DeviceEvent>(_ => throw new ObjectDisposedException("SubscriberOwnedResource")));
 
         // Act + Assert - the monitor is not disposed, so the exception propagates.
         _ = await Assert.ThrowsAsync<ObjectDisposedException>(

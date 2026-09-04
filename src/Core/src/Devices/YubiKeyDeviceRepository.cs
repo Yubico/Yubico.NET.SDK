@@ -14,8 +14,6 @@
 
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using Yubico.YubiKit.Core.Abstractions;
 
 namespace Yubico.YubiKit.Core.Devices;
@@ -33,13 +31,28 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyDeviceRepository>();
 
     private readonly ConcurrentDictionary<string, IYubiKey> _deviceCache = new();
-    private readonly Subject<DeviceEvent> _deviceChanges = new();
+    private readonly DeviceEventBroadcaster _deviceChanges = new();
 
     private volatile bool _hasData;
     private int _disposed;
 
     /// <inheritdoc/>
-    public IObservable<DeviceEvent> DeviceChanges => _deviceChanges.AsObservable();
+    /// <remarks>
+    /// Events are delivered synchronously in subscription order. Subscriber exceptions propagate
+    /// and stop delivery to later subscribers.
+    /// </remarks>
+    public IObservable<DeviceEvent> DeviceChanges => _deviceChanges;
+
+    /// <summary>
+    /// Async-sequence view of <see cref="DeviceChanges"/>, for <c>await foreach</c> consumers.
+    /// </summary>
+    /// <param name="cancellationToken">Cancels enumeration.</param>
+    /// <remarks>
+    /// Subscription is lazy. Each enumeration has an independent bounded buffer; cancellation and
+    /// overflow fault the enumeration, while repository disposal completes it normally.
+    /// </remarks>
+    public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
+        DeviceEventStream.From(_deviceChanges, cancellationToken);
 
     /// <inheritdoc/>
     public bool HasData => _hasData;
@@ -78,7 +91,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         {
             if (_deviceCache.TryRemove(identityKey, out var removedDevice))
             {
-                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, removedDevice));
+                _deviceChanges.Publish(new DeviceEvent(DeviceAction.Removed, removedDevice));
                 Logger.LogDebug("Device removed: {DeviceId}", removedDevice.DeviceId);
             }
         }
@@ -88,7 +101,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
         {
             var device = newDeviceMap[identityKey];
             _deviceCache[identityKey] = device;
-            _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, device));
+            _deviceChanges.Publish(new DeviceEvent(DeviceAction.Added, device));
             Logger.LogDebug("Device added: {DeviceId}", device.DeviceId);
         }
 
@@ -105,8 +118,8 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
                 existing.AvailableConnections != updated.AvailableConnections)
             {
                 _deviceCache[identityKey] = updated;
-                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Removed, existing));
-                _deviceChanges.OnNext(new DeviceEvent(DeviceAction.Added, updated));
+                _deviceChanges.Publish(new DeviceEvent(DeviceAction.Removed, existing));
+                _deviceChanges.Publish(new DeviceEvent(DeviceAction.Added, updated));
                 changedCount++;
                 Logger.LogDebug(
                     "Device connections changed: {DeviceId} ({Old} -> {New})",
@@ -156,15 +169,7 @@ internal sealed class YubiKeyDeviceRepository : IYubiKeyDeviceRepository
             return;
         }
 
-        try
-        {
-            _deviceChanges.OnCompleted();
-            _deviceChanges.Dispose();
-        }
-        catch (ObjectDisposedException)
-        {
-            // Already disposed, ignore
-        }
+        _deviceChanges.Complete();
 
         _deviceCache.Clear();
 

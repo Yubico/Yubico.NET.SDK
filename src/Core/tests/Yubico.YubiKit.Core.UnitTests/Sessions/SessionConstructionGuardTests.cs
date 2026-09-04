@@ -94,7 +94,7 @@ public class SessionConstructionGuardTests
 
         await Task.WhenAll(racers);
 
-        Assert.Single(sessions.Where(s => s is not null));
+        Assert.Single(sessions, s => s is not null);
         var loser = Assert.Single(failures.Where(f => f is not null));
         _ = Assert.IsType<ConnectionInUseException>(loser);
 

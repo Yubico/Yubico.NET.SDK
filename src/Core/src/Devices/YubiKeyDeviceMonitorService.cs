@@ -77,7 +77,8 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     // Shared, never-disposed publication gate held across admission + UpdateCache.
     // All publications, across all generations, are mutually exclusive and never
     // interleave; a successor's snapshot is serialized strictly after any
-    // in-flight predecessor's.
+    // in-flight predecessor's. This relies on UpdateCache publishing synchronously
+    // and completing before UpdateCache returns.
     private readonly SemaphoreSlim _publishGate = new(1, 1);
 
     // Tiny state lock guarding only the publication admission check and _current
@@ -237,7 +238,9 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 // was admitted before disposal, outlived DisposeAsync's bounded drain,
                 // and resumed after the manager disposed the repository. Discarding it
                 // here is what makes "the repository silences any later emission" true -
-                // UpdateCache and the underlying subject both throw once disposed.
+                // UpdateCache throws once disposed. (The broadcaster underneath does not:
+                // publishing after completion is a silent no-op, so UpdateCache's own
+                // ThrowIfDisposed is the single source of that behaviour.)
                 // Nothing is lost: the repository is being torn down.
                 //
                 // The _disposed guard matters: UpdateCache invokes DeviceChanges

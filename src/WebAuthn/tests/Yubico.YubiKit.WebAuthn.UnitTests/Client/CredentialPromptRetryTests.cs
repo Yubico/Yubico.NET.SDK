@@ -177,6 +177,45 @@ public class CredentialPromptRetryTests
     }
 
     [Fact(Timeout = 10000)]
+    public async Task PromptContext_ReportsMinimumInCodePointsAndMaximumInBytes()
+    {
+        var backend = CreateBackend();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+                clientPinSupported: true, uvSupported: false, minPinLength: 8));
+        var prompt = new ScriptedPrompt(CorrectPin);
+        await using var client = new WebAuthnClient(
+            backend, Origin(), _ => false, prompt: prompt);
+
+        await client.MakeCredentialAsync(
+            CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken);
+
+        var context = Assert.Single(prompt.Contexts);
+        Assert.Equal(8, context.MinLengthCodePoints);
+        Assert.Equal(63, context.MaxLengthBytes);
+    }
+
+    [Fact(Timeout = 10000)]
+    public async Task RetryCounterFailure_DoesNotReplacePinRejection()
+    {
+        var backend = CreateBackend();
+        backend.GetPinRetriesAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<int?>(new IOException("transport failed")));
+        var prompt = new ScriptedPrompt(WrongPin, WrongPin, WrongPin);
+        await using var client = new WebAuthnClient(
+            backend, Origin(), _ => false, prompt: prompt);
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+            client.MakeCredentialAsync(
+                CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
+        Assert.Equal("PIN was incorrect.", error.Message);
+        Assert.Equal(WebAuthnClient.MaxPromptAttempts, prompt.Contexts.Count);
+        Assert.Null(prompt.Contexts[1].RetriesRemaining);
+    }
+
+    [Fact(Timeout = 10000)]
     public async Task NeverResubmitsCachedSecret_EachAttemptComesFromAFreshPrompt()
     {
         var submitted = new List<byte[]?>();

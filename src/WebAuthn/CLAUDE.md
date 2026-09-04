@@ -166,8 +166,8 @@ Contract:
   never completes; implementations must honor cancellation.
 
 `CredentialPromptContext` carries `Kind`, `Scope` (the RP ID), `RetriesRemaining`, `IsRetry`,
-`MinLengthBytes`, `MaxLengthBytes`, and `RequiresConfirmation`. Note lengths here are **bytes**,
-not characters.
+`MinLengthCodePoints`, `MaxLengthBytes`, and `RequiresConfirmation`. CTAP reports its minimum in
+Unicode code points while its encoded PIN limit is expressed in UTF-8 bytes.
 
 ### User Verification Decision
 

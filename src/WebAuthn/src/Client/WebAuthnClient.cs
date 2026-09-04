@@ -54,8 +54,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// </remarks>
     public const int MaxPromptAttempts = 3;
 
-    /// <summary>CTAP 2.1 minimum PIN length in bytes, used when the authenticator reports none.</summary>
-    private const int Ctap2MinPinLengthBytes = 4;
+    /// <summary>CTAP 2.1 minimum PIN length in Unicode code points.</summary>
+    private const int Ctap2MinPinLengthCodePoints = 4;
 
     /// <summary>CTAP 2.1 maximum PIN length in bytes.</summary>
     private const int Ctap2MaxPinLengthBytes = 63;
@@ -920,7 +920,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         var prompt = _prompt ?? throw new InvalidOperationException("No credential prompt configured.");
 
         var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
-        var minPinLength = info.MinPinLength ?? Ctap2MinPinLengthBytes;
+        var minPinLength = info.MinPinLength ?? Ctap2MinPinLengthCodePoints;
         int? retriesRemaining = null;
 
         for (var attempt = 0; attempt < MaxPromptAttempts; attempt++)
@@ -933,7 +933,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 Scope = rpId,
                 IsRetry = attempt > 0,
                 RetriesRemaining = retriesRemaining,
-                MinLengthBytes = minPinLength,
+                MinLengthCodePoints = minPinLength,
                 MaxLengthBytes = Ctap2MaxPinLengthBytes
             };
 
@@ -1023,7 +1023,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// Purely informational: a failure to read the counter must not replace the PIN rejection
-    /// the caller is actually dealing with, so all errors collapse to <c>null</c>.
+    /// the caller is actually dealing with, so failures collapse to <c>null</c>. Caller cancellation
+    /// still propagates.
     /// </remarks>
     private async Task<int?> TryGetPinRetriesAsync(CancellationToken cancellationToken)
     {
@@ -1031,11 +1032,11 @@ public sealed class WebAuthnClient : IAsyncDisposable
         {
             return await _backend.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch (CtapException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            return null;
+            throw;
         }
-        catch (InvalidOperationException)
+        catch
         {
             return null;
         }

@@ -27,6 +27,13 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// when it needs a secret it was not given explicitly, so an application that
 /// passes secrets directly never needs an implementation.
 /// </para>
+/// <para>
+/// This is an SDK-to-application callback with protocol context and asynchronous cancellation.
+/// It is distinct from <see cref="ISecureCredentialReader"/>, which is a synchronous,
+/// application-initiated terminal input helper with display and encoding options. An implementation
+/// may delegate to any credential acquisition mechanism, including a secure reader, provided it
+/// returns promptly without blocking the calling thread and honors the cancellation token.
+/// </para>
 /// <para><b>Contract</b></para>
 /// <list type="bullet">
 /// <item>
@@ -177,14 +184,13 @@ public record CredentialPromptContext
     public bool IsRetry { get; init; }
 
     /// <summary>
-    /// Gets the minimum acceptable secret length, measured in encoded bytes.
+    /// Gets the minimum acceptable secret length, measured in Unicode code points.
     /// </summary>
     /// <remarks>
-    /// Lengths are expressed in bytes rather than characters because protocol
-    /// limits are defined over the encoded form; a multi-byte character can
-    /// consume more than one byte of the allowance.
+    /// Protocols that define their minimum over encoded bytes should set this only
+    /// when every accepted code point encodes to one byte.
     /// </remarks>
-    public int MinLengthBytes { get; init; }
+    public int MinLengthCodePoints { get; init; }
 
     /// <summary>
     /// Gets the maximum acceptable secret length, measured in encoded bytes.

@@ -26,6 +26,11 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// to ensure credentials are cleared as soon as possible.
 /// </para>
 /// <para>
+/// This is a synchronous, application-initiated terminal input helper with display and encoding
+/// options. It is distinct from <see cref="ICredentialPrompt"/>, which is an asynchronous
+/// SDK-to-application callback carrying protocol context for secrets requested during an operation.
+/// </para>
+/// <para>
 /// Example usage:
 /// <code>
 /// var reader = new ConsoleCredentialReader();

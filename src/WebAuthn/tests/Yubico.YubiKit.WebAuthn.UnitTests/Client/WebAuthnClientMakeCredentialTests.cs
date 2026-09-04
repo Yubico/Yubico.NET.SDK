@@ -49,7 +49,7 @@ public class WebAuthnClientMakeCredentialTests
             _mockBackend,
             _origin,
             isPublicSuffix: domain => domain == "com",
-            enterpriseRpIds: new HashSet<string>());
+            new WebAuthnClientOptions());
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public class WebAuthnClientMakeCredentialTests
             _mockBackend,
             origin!,
             isPublicSuffix: domain => domain == "com",
-            enterpriseRpIds: new HashSet<string>());
+            new WebAuthnClientOptions());
 
         var options = new RegistrationOptions
         {
@@ -140,7 +140,7 @@ public class WebAuthnClientMakeCredentialTests
             _mockBackend,
             _origin,
             isPublicSuffix: domain => domain == "com",
-            enterpriseRpIds: new HashSet<string> { "partner.test" });
+            new WebAuthnClientOptions { EnterpriseRpIds = new HashSet<string> { "partner.test" } });
 
         var options = new RegistrationOptions
         {

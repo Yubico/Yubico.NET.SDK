@@ -44,16 +44,6 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </remarks>
 public sealed class WebAuthnClient : IAsyncDisposable
 {
-    /// <summary>
-    /// The maximum number of times the client asks an <see cref="ICredentialPrompt"/>
-    /// for a PIN during a single operation.
-    /// </summary>
-    /// <remarks>
-    /// Reaching the cap fails the operation. The authenticator independently enforces its own
-    /// retry limit and may report a terminal PIN state before this cap is reached.
-    /// </remarks>
-    public const int MaxPromptAttempts = 3;
-
     /// <summary>CTAP 2.1 minimum PIN length in Unicode code points.</summary>
     private const int Ctap2MinPinLengthCodePoints = 4;
 
@@ -63,8 +53,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
     private readonly IWebAuthnBackend _backend;
     private readonly WebAuthnOrigin _origin;
     private readonly Func<string, bool> _isPublicSuffix;
-    private readonly IReadOnlySet<string> _enterpriseRpIds;
-    private readonly ICredentialPrompt? _prompt;
+    private readonly WebAuthnClientOptions _options;
     private bool _disposed;
 
     /// <summary>
@@ -73,52 +62,42 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// <param name="fidoSession">The FIDO2 session that performs CTAP2 operations (ownership transferred).</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
     /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
-    /// <param name="enterpriseRpIds">Optional set of enterprise-allowed RP IDs.</param>
-    /// <param name="prompt">
-    /// Optional prompt used to obtain a PIN when an operation needs one and the caller
-    /// did not supply it. When omitted, such operations fail with
-    /// <see cref="WebAuthnClientErrorCode.NotAllowed"/> rather than prompting.
+    /// <param name="options">
+    /// Optional client configuration. When omitted, <see cref="WebAuthnClientOptions"/> defaults
+    /// apply: no enterprise RP IDs, no credential prompt, and
+    /// <see cref="WebAuthnClientOptions.DefaultMaxPromptAttempts"/> prompt attempts.
     /// </param>
     public WebAuthnClient(
         IFidoSession fidoSession,
         WebAuthnOrigin origin,
         PublicSuffixChecker isPublicSuffix,
-        IReadOnlySet<string>? enterpriseRpIds = null,
-        ICredentialPrompt? prompt = null)
+        WebAuthnClientOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(fidoSession);
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
         ArgumentNullException.ThrowIfNull(isPublicSuffix);
         _backend = new FidoSessionWebAuthnBackend(fidoSession);
         _isPublicSuffix = domain => isPublicSuffix(domain);
-        _enterpriseRpIds = enterpriseRpIds ?? new HashSet<string>();
-        _prompt = prompt;
+        _options = options ?? new WebAuthnClientOptions();
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="WebAuthnClient"/>.
+    /// Initializes a new instance of <see cref="WebAuthnClient"/> over an explicit backend.
     /// </summary>
     /// <param name="backend">The backend that performs CTAP2 operations (ownership transferred).</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
     /// <param name="isPublicSuffix">Predicate to determine if a domain is a public suffix.</param>
-    /// <param name="enterpriseRpIds">Optional set of enterprise-allowed RP IDs.</param>
-    /// <param name="prompt">
-    /// Optional prompt used to obtain a PIN when an operation needs one and the caller
-    /// did not supply it. When omitted, such operations fail with
-    /// <see cref="WebAuthnClientErrorCode.NotAllowed"/> rather than prompting.
-    /// </param>
-    public WebAuthnClient(
+    /// <param name="options">Optional client configuration.</param>
+    internal WebAuthnClient(
         IWebAuthnBackend backend,
         WebAuthnOrigin origin,
         Func<string, bool> isPublicSuffix,
-        IReadOnlySet<string>? enterpriseRpIds = null,
-        ICredentialPrompt? prompt = null)
+        WebAuthnClientOptions? options = null)
     {
         _backend = backend ?? throw new ArgumentNullException(nameof(backend));
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
         _isPublicSuffix = isPublicSuffix ?? throw new ArgumentNullException(nameof(isPublicSuffix));
-        _enterpriseRpIds = enterpriseRpIds ?? new HashSet<string>();
-        _prompt = prompt;
+        _options = options ?? new WebAuthnClientOptions();
     }
 
     /// <summary>
@@ -368,7 +347,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ValidateRegistrationOptions(options);
 
         // Validate RP ID against origin
-        RpIdValidator.EnsureValid(options.Rp.Id, _origin, _enterpriseRpIds, _isPublicSuffix);
+        RpIdValidator.EnsureValid(options.Rp.Id, _origin, _options.EnterpriseRpIds, _isPublicSuffix);
 
         // Build client data
         var clientData = WebAuthnClientData.Create(
@@ -385,7 +364,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         var uvDecision = UvDecisionLogic.Decide(
             info,
             options.UserVerification,
-            pinAvailable: callerPinBytes is not null || _prompt is not null,
+            pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
             requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion);
 
         // Acquire PIN/UV token with retry on PinAuthInvalid
@@ -430,7 +409,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 uvDecision = UvDecisionLogic.Decide(
                     info,
                     Preferences.UserVerificationPreference.Required,
-                    pinAvailable: callerPinBytes is not null || _prompt is not null,
+                    pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
                     requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion);
 
                 (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
@@ -510,7 +489,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ValidateAuthenticationOptions(options);
 
         // Validate RP ID against origin
-        RpIdValidator.EnsureValid(options.RpId, _origin, _enterpriseRpIds, _isPublicSuffix);
+        RpIdValidator.EnsureValid(options.RpId, _origin, _options.EnterpriseRpIds, _isPublicSuffix);
 
         // Build client data
         var clientData = WebAuthnClientData.Create(
@@ -527,7 +506,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         var uvDecision = UvDecisionLogic.Decide(
             info,
             options.UserVerification,
-            pinAvailable: callerPinBytes is not null || _prompt is not null,
+            pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
             requestedPermissions: PinUvAuthTokenPermissions.GetAssertion);
 
         // Acquire PIN/UV token with retry on PinAuthInvalid
@@ -561,7 +540,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 uvDecision = UvDecisionLogic.Decide(
                     info,
                     Preferences.UserVerificationPreference.Required,
-                    pinAvailable: callerPinBytes is not null || _prompt is not null,
+                    pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
                     requestedPermissions: PinUvAuthTokenPermissions.GetAssertion);
 
                 (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
@@ -785,7 +764,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
         if (uvDecision.Method == PinUvAuthMethod.Pin && pinBytes is null)
         {
-            if (_prompt is null)
+            if (_options.CredentialPrompt is null)
             {
                 throw new WebAuthnClientError(
                     WebAuthnClientErrorCode.NotAllowed,
@@ -901,13 +880,13 @@ public sealed class WebAuthnClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// Acquires a PIN/UV auth token by asking <see cref="_prompt"/> for the PIN, re-prompting
-    /// after a rejected attempt.
+    /// Acquires a PIN/UV auth token by asking <see cref="WebAuthnClientOptions.CredentialPrompt"/>
+    /// for the PIN, re-prompting after a rejected attempt.
     /// </summary>
     /// <remarks>
     /// Every attempt comes from a fresh prompt call; a rejected secret is zeroed immediately and
     /// never resubmitted. The loop stops when the prompt declines, when the authenticator reports
-    /// a terminal PIN state, or when <see cref="MaxPromptAttempts"/> is reached.
+    /// a terminal PIN state, or when <see cref="WebAuthnClientOptions.MaxPromptAttempts"/> is reached.
     /// </remarks>
     /// <returns>
     /// The token session and the accepted secret, whose ownership passes to the caller.
@@ -917,13 +896,14 @@ public sealed class WebAuthnClient : IAsyncDisposable
         string rpId,
         CancellationToken cancellationToken)
     {
-        var prompt = _prompt ?? throw new InvalidOperationException("No credential prompt configured.");
+        var prompt = _options.CredentialPrompt ?? throw new InvalidOperationException("No credential prompt configured.");
 
         var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
         var minPinLength = info.MinPinLength ?? Ctap2MinPinLengthCodePoints;
+        var maxAttempts = _options.MaxPromptAttempts;
         int? retriesRemaining = null;
 
-        for (var attempt = 0; attempt < MaxPromptAttempts; attempt++)
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -971,7 +951,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
             {
                 ZeroAndDispose(secret);
 
-                if (attempt + 1 >= MaxPromptAttempts)
+                if (attempt + 1 >= maxAttempts)
                 {
                     throw MapPinRejection(ex);
                 }

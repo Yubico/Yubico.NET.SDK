@@ -46,7 +46,7 @@ public class WebAuthnClientGetAssertionTests
             _mockBackend,
             _origin,
             isPublicSuffix: domain => domain == "com",
-            enterpriseRpIds: new HashSet<string>());
+            new WebAuthnClientOptions());
     }
 
     [Fact]

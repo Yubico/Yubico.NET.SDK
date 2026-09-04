@@ -33,7 +33,10 @@ public static class IYubiKeyExtensions
         /// </summary>
         /// <param name="origin">The WebAuthn origin for client data JSON.</param>
         /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
-        /// <param name="enterpriseRpIds">Optional set of enterprise-allowed RP IDs.</param>
+        /// <param name="options">
+        /// Optional client configuration (enterprise RP IDs, credential prompt, prompt-attempt
+        /// limit) forwarded to the created <see cref="WebAuthnClient"/>.
+        /// </param>
         /// <param name="scpKeyParams">Optional SCP key parameters for SmartCard FIDO2 sessions.</param>
         /// <param name="configuration">Optional FIDO2 protocol configuration.</param>
         /// <param name="preferredConnection">
@@ -53,7 +56,7 @@ public static class IYubiKeyExtensions
         public async Task<WebAuthnClient> CreateWebAuthnClientAsync(
             WebAuthnOrigin origin,
             PublicSuffixChecker isPublicSuffix,
-            IReadOnlySet<string>? enterpriseRpIds = null,
+            WebAuthnClientOptions? options = null,
             ScpKeyParameters? scpKeyParams = null,
             ProtocolConfiguration? configuration = null,
             ConnectionType? preferredConnection = null,
@@ -71,7 +74,7 @@ public static class IYubiKeyExtensions
 
             try
             {
-                return new WebAuthnClient(fidoSession, origin, isPublicSuffix, enterpriseRpIds);
+                return new WebAuthnClient(fidoSession, origin, isPublicSuffix, options);
             }
             catch
             {
@@ -79,27 +82,5 @@ public static class IYubiKeyExtensions
                 throw;
             }
         }
-
-        /// <summary>
-        /// Source-compatibility overload preserving the pre-Phase-38 positional shape
-        /// (ending in <c>scpKeyParams, configuration, cancellationToken</c>); forwards using the FIDO2 default
-        /// transport order.
-        /// </summary>
-        /// <param name="origin">The WebAuthn origin for client data JSON.</param>
-        /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
-        /// <param name="enterpriseRpIds">Optional set of enterprise-allowed RP IDs.</param>
-        /// <param name="scpKeyParams">Optional SCP key parameters for SmartCard FIDO2 sessions.</param>
-        /// <param name="configuration">Optional FIDO2 protocol configuration.</param>
-        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-        /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying FIDO2 session.</returns>
-        public Task<WebAuthnClient> CreateWebAuthnClientAsync(
-            WebAuthnOrigin origin,
-            PublicSuffixChecker isPublicSuffix,
-            IReadOnlySet<string>? enterpriseRpIds,
-            ScpKeyParameters? scpKeyParams,
-            ProtocolConfiguration? configuration,
-            CancellationToken cancellationToken) =>
-            yubiKey.CreateWebAuthnClientAsync(
-                origin, isPublicSuffix, enterpriseRpIds, scpKeyParams, configuration, null, cancellationToken);
     }
 }

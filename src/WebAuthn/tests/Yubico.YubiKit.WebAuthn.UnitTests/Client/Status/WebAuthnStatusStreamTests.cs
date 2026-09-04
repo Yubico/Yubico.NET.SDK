@@ -167,7 +167,7 @@ public class WebAuthnStatusStreamTests
     {
         var prompt = new FixedPrompt(Encoding.UTF8.GetBytes("123456"));
         await using var client = new WebAuthnClient(
-            CreateBackend(pinSupported: true), Origin(), _ => false, prompt: prompt);
+            CreateBackend(pinSupported: true), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         var statuses = new List<WebAuthnStatus>();
         await foreach (var status in client.MakeCredentialStreamAsync(
@@ -204,7 +204,7 @@ public class WebAuthnStatusStreamTests
     public async Task Stream_ConsumerBreaksWhileWaitingOnPrompt_DisposalCompletes()
     {
         await using var client = new WebAuthnClient(
-            CreateBackend(pinSupported: true), Origin(), _ => false, prompt: new StuckPrompt());
+            CreateBackend(pinSupported: true), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = new StuckPrompt() });
 
         var enumeration = Task.Run(async () =>
         {
@@ -232,7 +232,7 @@ public class WebAuthnStatusStreamTests
     public async Task Stream_ExternalCancellationWhileWaitingOnPrompt_Terminates()
     {
         await using var client = new WebAuthnClient(
-            CreateBackend(pinSupported: true), Origin(), _ => false, prompt: new StuckPrompt());
+            CreateBackend(pinSupported: true), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = new StuckPrompt() });
 
         using var cts = new CancellationTokenSource();
 

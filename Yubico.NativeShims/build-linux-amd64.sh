@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Get version parameter (empty string if not provided)
 VERSION="${1:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Set environment variables
 export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
@@ -34,8 +35,12 @@ echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://ap
 sudo apt-get update -qq
 sudo apt-get install cmake -yq
 
-# Install VCPKG from the last revision validated by this build.
-VCPKG_COMMIT=827a2e1203bc19941126c657166da44f2623acc4
+# Install the exact vcpkg revision declared by the manifest.
+VCPKG_COMMIT="$(sed -nE 's/^[[:space:]]*"builtin-baseline":[[:space:]]*"([0-9a-f]{40})".*/\1/p' "$SCRIPT_DIR/vcpkg.json")"
+if [ -z "$VCPKG_COMMIT" ]; then
+    echo "ERROR: vcpkg.json does not contain a valid builtin-baseline" >&2
+    exit 1
+fi
 git clone https://github.com/Microsoft/vcpkg.git "$VCPKG_INSTALLATION_ROOT"
 git -C "$VCPKG_INSTALLATION_ROOT" checkout --detach "$VCPKG_COMMIT"
 "$VCPKG_INSTALLATION_ROOT/bootstrap-vcpkg.sh"
@@ -44,9 +49,6 @@ git -C "$VCPKG_INSTALLATION_ROOT" checkout --detach "$VCPKG_COMMIT"
 if [ ! -f ./CMakeLists.txt ]; then
     cd ~/Yubico.NativeShims
 fi
-
-# Get absolute path for toolchain file
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 build_dir="linux-x64"
 rm -rf "$build_dir"
@@ -68,7 +70,7 @@ echo "============================="
 echo ""
 
 echo "Building for x64-linux with Zig targeting glibc 2.23..."
-CMAKE_ARGS="-S . -B $build_dir -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$SCRIPT_DIR/cmake/x86_64-linux-gnu.toolchain.cmake -DYUBICO_BUILD_STATIC=ON"
+CMAKE_ARGS="-S . -B $build_dir -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$SCRIPT_DIR/cmake/x86_64-linux-gnu.toolchain.cmake"
 if [ ! -z "$VERSION" ]; then
     CMAKE_ARGS="$CMAKE_ARGS -DPROJECT_VERSION=$VERSION"
 fi

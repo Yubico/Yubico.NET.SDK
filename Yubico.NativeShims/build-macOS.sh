@@ -1,16 +1,24 @@
 #!/bin/bash
+set -euo pipefail
 
 # Get version parameter
-VERSION=$1
+VERSION="${1:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VCPKG_COMMIT="$(sed -nE 's/^[[:space:]]*"builtin-baseline":[[:space:]]*"([0-9a-f]{40})".*/\1/p' "$SCRIPT_DIR/vcpkg.json")"
+if [ -z "$VCPKG_COMMIT" ]; then
+    echo "ERROR: vcpkg.json does not contain a valid builtin-baseline" >&2
+    exit 1
+fi
 
 rm -rf build64 buildarm osx-arm64 osx-x64
 
-pushd $VCPKG_INSTALLATION_ROOT
-git checkout master
+pushd "$VCPKG_INSTALLATION_ROOT"
+git fetch origin "$VCPKG_COMMIT"
+git checkout --detach "$VCPKG_COMMIT"
 ./bootstrap-vcpkg.sh
 popd
 
-CMAKE_ARGS="-S . -B ./build64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_OVERLAY_TRIPLETS=$PWD/triplets -DVCPKG_TARGET_TRIPLET=x64-osx-12 -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 -DYUBICO_BUILD_STATIC=ON"
+CMAKE_ARGS="-S . -B ./build64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_OVERLAY_TRIPLETS=$PWD/triplets -DVCPKG_TARGET_TRIPLET=x64-osx-12 -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0"
 if [ ! -z "$VERSION" ]; then
     CMAKE_ARGS="$CMAKE_ARGS -DPROJECT_VERSION=$VERSION"
 fi
@@ -22,7 +30,7 @@ cp ./build64/libYubico.NativeShims.dylib ./osx-x64
 mkdir -p osx-x64/static
 cp ./build64/static/libYubico.NativeShims.a ./osx-x64/static
 
-CMAKE_ARGS="-S . -B ./buildarm -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_OVERLAY_TRIPLETS=$PWD/triplets -DVCPKG_TARGET_TRIPLET=arm64-osx-12 -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 -DYUBICO_BUILD_STATIC=ON"
+CMAKE_ARGS="-S . -B ./buildarm -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_OVERLAY_TRIPLETS=$PWD/triplets -DVCPKG_TARGET_TRIPLET=arm64-osx-12 -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0"
 if [ ! -z "$VERSION" ]; then
     CMAKE_ARGS="$CMAKE_ARGS -DPROJECT_VERSION=$VERSION"
 fi

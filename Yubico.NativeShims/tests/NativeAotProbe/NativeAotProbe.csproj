@@ -4,10 +4,14 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NativeShimsVersion Condition="'$(NativeShimsVersion)' == ''">1.17.2</NativeShimsVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Yubico.NativeShims" Version="[$(NativeShimsVersion)]" />
   </ItemGroup>
+
+  <Target Name="ValidateNativeShimsVersion" BeforeTargets="CollectPackageReferences">
+    <Error Condition="'$(NativeShimsVersion)' == ''"
+           Text="NativeShimsVersion is required so the probe restores the package produced by the current build." />
+  </Target>
 </Project>

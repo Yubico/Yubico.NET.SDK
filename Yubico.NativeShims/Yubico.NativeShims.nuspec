@@ -18,25 +18,8 @@
     </metadata>
 
     <files>
-        <!-- macOS -->
-        <file src="osx-x64/libYubico.NativeShims.dylib" target="runtimes/osx-x64/native/libYubico.NativeShims.dylib" />
-        <file src="osx-arm64/libYubico.NativeShims.dylib" target="runtimes/osx-arm64/native/libYubico.NativeShims.dylib" />
-        <file src="osx-x64/static/libYubico.NativeShims.a" target="runtimes/osx-x64/native/static/libYubico.NativeShims.a" />
-        <file src="osx-arm64/static/libYubico.NativeShims.a" target="runtimes/osx-arm64/native/static/libYubico.NativeShims.a" />
-        
-        <!-- Windows -->
-        <file src="win-x64/Yubico.NativeShims.dll" target="runtimes/win-x64/native/Yubico.NativeShims.dll" />
-        <file src="win-x86/Yubico.NativeShims.dll" target="runtimes/win-x86/native/Yubico.NativeShims.dll" />
-        <file src="win-arm64/Yubico.NativeShims.dll" target="runtimes/win-arm64/native/Yubico.NativeShims.dll" />
-        <file src="win-x64/static/Yubico.NativeShims.lib" target="runtimes/win-x64/native/static/Yubico.NativeShims.lib" />
-        <file src="win-x86/static/Yubico.NativeShims.lib" target="runtimes/win-x86/native/static/Yubico.NativeShims.lib" />
-        <file src="win-arm64/static/Yubico.NativeShims.lib" target="runtimes/win-arm64/native/static/Yubico.NativeShims.lib" />
-
-        <!-- Linux -->
-        <file src="linux-x64/libYubico.NativeShims.so" target="runtimes/linux-x64/native/libYubico.NativeShims.so" />
-        <file src="linux-arm64/libYubico.NativeShims.so" target="runtimes/linux-arm64/native/libYubico.NativeShims.so" />
-        <file src="linux-x64/static/libYubico.NativeShims.a" target="runtimes/linux-x64/native/static/libYubico.NativeShims.a" />
-        <file src="linux-arm64/static/libYubico.NativeShims.a" target="runtimes/linux-arm64/native/static/libYubico.NativeShims.a" />
+        <file src="package/runtimes/**" target="runtimes" />
+        <file src="package/buildTransitive/static/**" target="buildTransitive/static" />
 
         <!-- Support files -->
         <file src="msbuild/Yubico.NativeShims.targets" target="build/net472/Yubico.NativeShims.targets" />
@@ -44,7 +27,7 @@
         <file src="msbuild/Yubico.NativeShims.Aot.targets" target="build/Yubico.NativeShims.targets" />
         <file src="msbuild/Yubico.NativeShims.Aot.targets" target="buildTransitive/Yubico.NativeShims.targets" />
         <file src="msbuild/_._" target="lib/net472/_._" />
-        <file src="msbuild/_._" target="lib/netstandard20/_._" />
+        <file src="msbuild/_._" target="lib/netstandard2.0/_._" />
         <file src="readme.md" target="docs/" />
     </files>
 </package>

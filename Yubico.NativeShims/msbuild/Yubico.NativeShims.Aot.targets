@@ -2,18 +2,18 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup Condition="'$(PublishAot)' == 'true'">
         <_YubicoNativeShimsPackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))</_YubicoNativeShimsPackageRoot>
-        <_YubicoNativeShimsStaticArchive Condition="'$(RuntimeIdentifier)' == 'win-x64' OR '$(RuntimeIdentifier)' == 'win-x86' OR '$(RuntimeIdentifier)' == 'win-arm64'">$(_YubicoNativeShimsPackageRoot)/runtimes/$(RuntimeIdentifier)/native/static/Yubico.NativeShims.lib</_YubicoNativeShimsStaticArchive>
-        <_YubicoNativeShimsStaticArchive Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64' OR '$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'">$(_YubicoNativeShimsPackageRoot)/runtimes/$(RuntimeIdentifier)/native/static/libYubico.NativeShims.a</_YubicoNativeShimsStaticArchive>
-        <_YubicoNativeShimsSharedLibrary Condition="$(RuntimeIdentifier.StartsWith('win-'))">Yubico.NativeShims.dll</_YubicoNativeShimsSharedLibrary>
-        <_YubicoNativeShimsSharedLibrary Condition="$(RuntimeIdentifier.StartsWith('linux-'))">libYubico.NativeShims.so</_YubicoNativeShimsSharedLibrary>
-        <_YubicoNativeShimsSharedLibrary Condition="$(RuntimeIdentifier.StartsWith('osx-'))">libYubico.NativeShims.dylib</_YubicoNativeShimsSharedLibrary>
+        <_YubicoNativeShimsPlatform Condition="$(RuntimeIdentifier.StartsWith('win-'))">windows</_YubicoNativeShimsPlatform>
+        <_YubicoNativeShimsPlatform Condition="$(RuntimeIdentifier.StartsWith('linux-'))">linux</_YubicoNativeShimsPlatform>
+        <_YubicoNativeShimsPlatform Condition="$(RuntimeIdentifier.StartsWith('osx-'))">macos</_YubicoNativeShimsPlatform>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(PublishAot)' == 'true'">
+    <ItemGroup Condition="'$(PublishAot)' == 'true' AND '$(RuntimeIdentifier)' != ''">
+        <_YubicoNativeShimsStaticArchive
+            Include="$(_YubicoNativeShimsPackageRoot)/buildTransitive/static/$(RuntimeIdentifier)/*.a;$(_YubicoNativeShimsPackageRoot)/buildTransitive/static/$(RuntimeIdentifier)/*.lib"
+            Exclude="@(_YubicoNativeShimsStaticArchive)" />
         <DirectPInvoke Include="Yubico.NativeShims" Exclude="@(DirectPInvoke)" />
-        <NativeLibrary Include="$(_YubicoNativeShimsStaticArchive)"
-                       Exclude="@(NativeLibrary)"
-                       Condition="'$(_YubicoNativeShimsStaticArchive)' != ''" />
+        <NativeLibrary Include="@(_YubicoNativeShimsStaticArchive)"
+                       Exclude="@(NativeLibrary)" />
     </ItemGroup>
 
     <Target Name="_YubicoNativeShimsConfigureAot"
@@ -21,34 +21,36 @@
             Condition="'$(PublishAot)' == 'true'">
         <Error Condition="'$(RuntimeIdentifier)' == ''"
                Text="Yubico.NativeShims requires RuntimeIdentifier when PublishAot is true." />
-        <Error Condition="'$(_YubicoNativeShimsStaticArchive)' == ''"
+        <Error Condition="'$(RuntimeIdentifier)' != '' AND '$(_YubicoNativeShimsPlatform)' == ''"
+               Text="Yubico.NativeShims does not support the platform for RuntimeIdentifier '$(RuntimeIdentifier)'." />
+        <Error Condition="'$(RuntimeIdentifier)' != '' AND '@(_YubicoNativeShimsStaticArchive->Count())' == '0'"
                Text="Yubico.NativeShims does not provide a static archive for RuntimeIdentifier '$(RuntimeIdentifier)'." />
-        <Error Condition="'$(_YubicoNativeShimsStaticArchive)' != '' AND !Exists('$(_YubicoNativeShimsStaticArchive)')"
-               Text="Yubico.NativeShims static archive is missing for RuntimeIdentifier '$(RuntimeIdentifier)': $(_YubicoNativeShimsStaticArchive)" />
+        <Error Condition="'@(_YubicoNativeShimsStaticArchive->Count())' &gt; '1'"
+               Text="Yubico.NativeShims expected exactly one static archive for RuntimeIdentifier '$(RuntimeIdentifier)', found @(_YubicoNativeShimsStaticArchive->Count())." />
 
         <!-- SetupOSSpecificProps has already placed NativeLibrary items on the
              linker command line. Append system dependencies after the archive. -->
         <ItemGroup>
             <LinkerArg Include="winscard.lib"
-                       Condition="'$(RuntimeIdentifier)' == 'win-x64' OR '$(RuntimeIdentifier)' == 'win-x86' OR '$(RuntimeIdentifier)' == 'win-arm64'" />
+                        Condition="'$(_YubicoNativeShimsPlatform)' == 'windows'" />
             <LinkerArg Include="-lpcsclite"
-                       Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64'" />
-            <LinkerArg Include="-Wl,--exclude-libs,libYubico.NativeShims.a"
-                       Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64'" />
+                        Condition="'$(_YubicoNativeShimsPlatform)' == 'linux'" />
+            <LinkerArg Include="@(_YubicoNativeShimsStaticArchive->'-Wl,--exclude-libs,%(Filename)%(Extension)')"
+                        Condition="'$(_YubicoNativeShimsPlatform)' == 'linux'" />
             <LinkerArg Include="-framework"
-                       Condition="'$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'" />
+                        Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
             <LinkerArg Include="PCSC"
-                       Condition="'$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'" />
+                        Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
         </ItemGroup>
     </Target>
 
-    <Target Name="_YubicoNativeShimsRemoveAotSharedLibrary"
-            AfterTargets="_ResolveCopyLocalAssetsForPublish"
-            BeforeTargets="ComputeResolvedFilesToPublishList"
-            Condition="'$(PublishAot)' == 'true' AND '$(_YubicoNativeShimsSharedLibrary)' != ''">
+    <Target Name="_YubicoNativeShimsRemoveAotRuntimeAssets"
+            AfterTargets="ResolvePackageAssets"
+            BeforeTargets="ResolveLockFileCopyLocalFiles"
+            Condition="'$(PublishAot)' == 'true'">
         <ItemGroup>
-            <_ResolvedCopyLocalPublishAssets Remove="@(_ResolvedCopyLocalPublishAssets)"
-                Condition="'%(_ResolvedCopyLocalPublishAssets.Filename)%(_ResolvedCopyLocalPublishAssets.Extension)' == '$(_YubicoNativeShimsSharedLibrary)'" />
+            <NativeCopyLocalItems Remove="@(NativeCopyLocalItems)"
+                Condition="'%(NativeCopyLocalItems.NuGetPackageId)' == 'Yubico.NativeShims'" />
         </ItemGroup>
     </Target>
 </Project>

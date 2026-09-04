@@ -22,7 +22,7 @@ assert_nuspec_entry() {
 validate_rid() {
     local rid="$1"
     local archive_name="$2"
-    local archive="$TEMP_DIR/package/runtimes/$rid/native/static/$archive_name"
+    local archive="$TEMP_DIR/package/buildTransitive/static/$rid/$archive_name"
 
     mkdir -p "$(dirname "$archive")"
     : > "$archive"
@@ -37,6 +37,25 @@ validate_rid() {
         -p:ExpectedArchive="$archive"
 }
 
+assert_msbuild_fails() {
+    local log_name="$1"
+    local expected_message="$2"
+    shift 2
+
+    if dotnet msbuild "$TEST_PROJECT" \
+        -nologo \
+        -t:Validate \
+        -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
+        -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
+        -p:PublishAot=true \
+        "$@" > "$TEMP_DIR/$log_name.log" 2>&1; then
+        echo "ERROR: $log_name validation unexpectedly succeeded" >&2
+        exit 1
+    fi
+
+    grep -Fq "$expected_message" "$TEMP_DIR/$log_name.log"
+}
+
 mkdir -p "$TEMP_DIR/package/build" "$TEMP_DIR/package/buildTransitive"
 cp "$TARGETS_SOURCE" "$TEMP_DIR/package/build/Yubico.NativeShims.targets"
 cp "$TARGETS_SOURCE" "$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets"
@@ -46,7 +65,15 @@ dotnet msbuild "$TEST_PROJECT" \
     -t:ValidateNonAot \
     -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
     -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
-    -p:PublishAot=false
+    -p:PublishAot=false \
+    -p:RuntimeIdentifier=osx-arm64
+
+dotnet msbuild "$TEST_PROJECT" \
+    -nologo \
+    -t:ValidateNonAot \
+    -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
+    -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
+    -p:RuntimeIdentifier=osx-arm64
 
 validate_rid win-x64 Yubico.NativeShims.lib
 validate_rid win-x86 Yubico.NativeShims.lib
@@ -55,6 +82,7 @@ validate_rid linux-x64 libYubico.NativeShims.a
 validate_rid linux-arm64 libYubico.NativeShims.a
 validate_rid osx-x64 libYubico.NativeShims.a
 validate_rid osx-arm64 libYubico.NativeShims.a
+validate_rid linux-riscv64 libYubico.NativeShims.future.a
 
 dotnet msbuild "$TEST_PROJECT" \
     -nologo \
@@ -64,58 +92,48 @@ dotnet msbuild "$TEST_PROJECT" \
     -p:PublishAot=true \
     -p:RuntimeIdentifier=osx-arm64 \
     -p:FakeSidecar="$TEMP_DIR/libYubico.NativeShims.dylib" \
+    -p:FakeSameNameOtherAsset="$TEMP_DIR/other/libYubico.NativeShims.dylib" \
     -p:FakeOtherAsset="$TEMP_DIR/keep.dylib"
 
-if dotnet msbuild "$TEST_PROJECT" \
+dotnet msbuild "$TEST_PROJECT" \
     -nologo \
-    -t:Validate \
+    -t:ValidateNonAotPublishAssets \
     -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
     -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
-    -p:PublishAot=true \
-    -p:ExpectedArchive=unused > "$TEMP_DIR/missing-rid.log" 2>&1; then
-    echo "ERROR: PublishAot without a RID unexpectedly succeeded" >&2
-    exit 1
-fi
-grep -Fq "requires RuntimeIdentifier when PublishAot is true" "$TEMP_DIR/missing-rid.log"
-
-if dotnet msbuild "$TEST_PROJECT" \
-    -nologo \
-    -t:Validate \
-    -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
-    -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
-    -p:PublishAot=true \
-    -p:RuntimeIdentifier=linux-musl-x64 \
-    -p:ExpectedArchive=unused > "$TEMP_DIR/unsupported.log" 2>&1; then
-    echo "ERROR: unsupported PublishAot RID unexpectedly succeeded" >&2
-    exit 1
-fi
-grep -Fq "does not provide a static archive for RuntimeIdentifier 'linux-musl-x64'" "$TEMP_DIR/unsupported.log"
-
-rm "$TEMP_DIR/package/runtimes/osx-arm64/native/static/libYubico.NativeShims.a"
-if dotnet msbuild "$TEST_PROJECT" \
-    -nologo \
-    -t:Validate \
-    -p:TargetsPath="$TEMP_DIR/package/build/Yubico.NativeShims.targets" \
-    -p:TransitiveTargetsPath="$TEMP_DIR/package/buildTransitive/Yubico.NativeShims.targets" \
-    -p:PublishAot=true \
+    -p:PublishAot=false \
     -p:RuntimeIdentifier=osx-arm64 \
-    -p:ExpectedArchive=unused > "$TEMP_DIR/missing.log" 2>&1; then
-    echo "ERROR: missing PublishAot archive unexpectedly succeeded" >&2
-    exit 1
-fi
-grep -Fq "static archive is missing for RuntimeIdentifier 'osx-arm64'" "$TEMP_DIR/missing.log"
+    -p:FakeSidecar="$TEMP_DIR/libYubico.NativeShims.dylib" \
+    -p:FakeSameNameOtherAsset="$TEMP_DIR/other/libYubico.NativeShims.dylib" \
+    -p:FakeOtherAsset="$TEMP_DIR/keep.dylib"
 
-for rid in win-x64 win-x86 win-arm64; do
-    assert_nuspec_entry \
-        "$rid/static/Yubico.NativeShims.lib" \
-        "runtimes/$rid/native/static/Yubico.NativeShims.lib"
-done
+assert_msbuild_fails \
+    missing-rid \
+    "requires RuntimeIdentifier when PublishAot is true" \
+    -p:ExpectedArchive=unused
 
-for rid in linux-x64 linux-arm64 osx-x64 osx-arm64; do
-    assert_nuspec_entry \
-        "$rid/static/libYubico.NativeShims.a" \
-        "runtimes/$rid/native/static/libYubico.NativeShims.a"
-done
+assert_msbuild_fails \
+    unsupported-platform \
+    "does not support the platform for RuntimeIdentifier 'freebsd-x64'" \
+    -p:RuntimeIdentifier=freebsd-x64 \
+    -p:ExpectedArchive=unused
+
+: > "$TEMP_DIR/package/buildTransitive/static/linux-x64/duplicate.a"
+assert_msbuild_fails \
+    duplicate \
+    "expected exactly one static archive for RuntimeIdentifier 'linux-x64'" \
+    -p:RuntimeIdentifier=linux-x64 \
+    -p:ExpectedArchive=unused
+rm "$TEMP_DIR/package/buildTransitive/static/linux-x64/duplicate.a"
+
+rm "$TEMP_DIR/package/buildTransitive/static/osx-arm64/libYubico.NativeShims.a"
+assert_msbuild_fails \
+    missing \
+    "does not provide a static archive for RuntimeIdentifier 'osx-arm64'" \
+    -p:RuntimeIdentifier=osx-arm64 \
+    -p:ExpectedArchive=unused
+
+assert_nuspec_entry "package/runtimes/**" "runtimes"
+assert_nuspec_entry "package/buildTransitive/static/**" "buildTransitive/static"
 
 assert_nuspec_entry \
     "msbuild/Yubico.NativeShims.Aot.targets" \

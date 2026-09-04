@@ -87,7 +87,10 @@ jobs:
           $failed = $false
           foreach ($arch in @('win-x64', 'win-x86', 'win-arm64')) {
               Write-Host "=== Checking $arch\Yubico.NativeShims.dll ==="
-              & $script "$PWD\Yubico.NativeShims\$arch\Yubico.NativeShims.dll"
+              & pwsh -NoProfile -File $script "$PWD\Yubico.NativeShims\$arch\Yubico.NativeShims.dll"
+              if ($LASTEXITCODE -ne 0) { $failed = $true }
+              Write-Host "=== Checking $arch\static\Yubico.NativeShims.lib ==="
+              & pwsh -NoProfile -File $script "$PWD\Yubico.NativeShims\$arch\static\Yubico.NativeShims.lib"
               if ($LASTEXITCODE -ne 0) { $failed = $true }
           }
           if ($failed) { exit 1 }
@@ -133,66 +136,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - name: Install Zig (pinned version)
-        run: |
-          ZIG_VERSION="0.15.2"
-          ZIG_ARCH="x86_64-linux"
-          ZIG_TARBALL="zig-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz"
-          ZIG_URL="https://ziglang.org/download/${ZIG_VERSION}/${ZIG_TARBALL}"
-          ZIG_MINISIG_URL="${ZIG_URL}.minisig"
-          # Official Zig minisign public key
-          ZIG_PUBKEY="RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U"
-
-          echo "Installing minisign for signature verification..."
-          sudo apt-get update -qq
-          sudo apt-get install -y minisign
-
-          echo "Downloading Zig ${ZIG_VERSION}..."
-          wget -q "${ZIG_URL}"
-          wget -q "${ZIG_MINISIG_URL}"
-
-          echo "Verifying signature with minisign..."
-          minisign -Vm "${ZIG_TARBALL}" -P "${ZIG_PUBKEY}"
-
-          echo "✅ Signature verified! Extracting and installing..."
-          tar -xf "${ZIG_TARBALL}"
-          sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
-          echo "/usr/local/zig" >> $GITHUB_PATH
-
-          echo "Zig installed successfully:"
-          /usr/local/zig/zig version
-      - name: Setup Zig CC wrappers
-        run: |
-          echo 'Creating Zig CC wrapper scripts'
-          mkdir -p $HOME/zig-wrappers
-
-          # Create x86_64 C compiler wrapper
-          cat > $HOME/zig-wrappers/zig-cc << 'EOF'
-          #!/bin/bash
-          exec zig cc -target x86_64-linux-gnu.2.23 -O2 -s "$@"
-          EOF
-
-          # Create x86_64 C++ compiler wrapper
-          cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
-          #!/bin/bash
-          exec zig c++ -target x86_64-linux-gnu.2.23 -O2 -s "$@"
-          EOF
-
-          chmod +x $HOME/zig-wrappers/zig-cc
-          chmod +x $HOME/zig-wrappers/zig-c++
-
-          echo "CC=$HOME/zig-wrappers/zig-cc" >> $GITHUB_ENV
-          echo "CXX=$HOME/zig-wrappers/zig-c++" >> $GITHUB_ENV
-      - name: Verify Zig wrappers
-        run: |
-          echo "Verifying Zig wrapper scripts..."
-          test -x $HOME/zig-wrappers/zig-cc || { echo "ERROR: zig-cc not executable"; exit 1; }
-          test -x $HOME/zig-wrappers/zig-c++ || { echo "ERROR: zig-c++ not executable"; exit 1; }
-
-          echo "Testing zig-cc wrapper:"
-          $HOME/zig-wrappers/zig-cc --version | grep -q "zig" || { echo "ERROR: zig-cc not using Zig"; exit 1; }
-
-          echo "✅ Zig wrappers verified successfully"
+      - name: Install and configure Zig
+        run: bash Yubico.NativeShims/ci/setup-zig.sh x86_64-linux-gnu.2.23
       - run: |
           echo 'Running build script: Linux (amd64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
@@ -277,6 +222,7 @@ jobs:
         working-directory: Yubico.NativeShims
         run: |
           bash tests/check_exports.sh linux-x64/libYubico.NativeShims.so
+          bash tests/check_exports.sh linux-x64/static/libYubico.NativeShims.a
       - name: Verify >= 64 KB page alignment of LOAD segments
         working-directory: Yubico.NativeShims
         run: |
@@ -300,66 +246,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - name: Install Zig (pinned version)
-        run: |
-          ZIG_VERSION="0.15.2"
-          ZIG_ARCH="x86_64-linux"
-          ZIG_TARBALL="zig-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz"
-          ZIG_URL="https://ziglang.org/download/${ZIG_VERSION}/${ZIG_TARBALL}"
-          ZIG_MINISIG_URL="${ZIG_URL}.minisig"
-          # Official Zig minisign public key
-          ZIG_PUBKEY="RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U"
-
-          echo "Installing minisign for signature verification..."
-          sudo apt-get update -qq
-          sudo apt-get install -y minisign
-
-          echo "Downloading Zig ${ZIG_VERSION}..."
-          wget -q "${ZIG_URL}"
-          wget -q "${ZIG_MINISIG_URL}"
-
-          echo "Verifying signature with minisign..."
-          minisign -Vm "${ZIG_TARBALL}" -P "${ZIG_PUBKEY}"
-
-          echo "✅ Signature verified! Extracting and installing..."
-          tar -xf "${ZIG_TARBALL}"
-          sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
-          echo "/usr/local/zig" >> $GITHUB_PATH
-
-          echo "Zig installed successfully:"
-          /usr/local/zig/zig version
-      - name: Setup Zig CC wrappers
-        run: |
-          echo 'Creating Zig CC wrapper scripts for ARM64 cross-compilation'
-          mkdir -p $HOME/zig-wrappers
-
-          # Create aarch64 C compiler wrapper
-          cat > $HOME/zig-wrappers/zig-cc << 'EOF'
-          #!/bin/bash
-          exec zig cc -target aarch64-linux-gnu.2.23 -O2 -s "$@"
-          EOF
-
-          # Create aarch64 C++ compiler wrapper
-          cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
-          #!/bin/bash
-          exec zig c++ -target aarch64-linux-gnu.2.23 -O2 -s "$@"
-          EOF
-
-          chmod +x $HOME/zig-wrappers/zig-cc
-          chmod +x $HOME/zig-wrappers/zig-c++
-
-          echo "CC=$HOME/zig-wrappers/zig-cc" >> $GITHUB_ENV
-          echo "CXX=$HOME/zig-wrappers/zig-c++" >> $GITHUB_ENV
-      - name: Verify Zig wrappers
-        run: |
-          echo "Verifying Zig wrapper scripts..."
-          test -x $HOME/zig-wrappers/zig-cc || { echo "ERROR: zig-cc not executable"; exit 1; }
-          test -x $HOME/zig-wrappers/zig-c++ || { echo "ERROR: zig-c++ not executable"; exit 1; }
-
-          echo "Testing zig-cc wrapper:"
-          $HOME/zig-wrappers/zig-cc --version | grep -q "zig" || { echo "ERROR: zig-cc not using Zig"; exit 1; }
-
-          echo "✅ Zig wrappers verified successfully"
+      - name: Install and configure Zig
+        run: bash Yubico.NativeShims/ci/setup-zig.sh aarch64-linux-gnu.2.23
       - run: |
           echo 'Running build script: Linux (arm64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
@@ -449,6 +337,7 @@ jobs:
         run: |
           # nm reads ELF metadata regardless of target arch — works on x86_64 host inspecting aarch64 .so
           bash tests/check_exports.sh linux-arm64/libYubico.NativeShims.so
+          bash tests/check_exports.sh linux-arm64/static/libYubico.NativeShims.a
       - name: Verify 16 KB/64 KB page alignment of LOAD segments
         working-directory: Yubico.NativeShims
         run: |
@@ -481,9 +370,9 @@ jobs:
           cd Yubico.NativeShims
           if [ ! -z "${{ github.event.inputs.version }}" ]; then
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
-            sh ./build-macOS.sh "$BASE_VERSION"
+            bash ./build-macOS.sh "$BASE_VERSION"
           else
-            sh ./build-macOS.sh "0.0.0"
+            bash ./build-macOS.sh "0.0.0"
           fi
       - name: Validate static package targets
         working-directory: Yubico.NativeShims
@@ -495,6 +384,9 @@ jobs:
           for arch in osx-x64 osx-arm64; do
               echo "=== Checking $arch/libYubico.NativeShims.dylib ==="
               bash tests/check_exports.sh "$arch/libYubico.NativeShims.dylib"
+              echo "=== Checking $arch/static/libYubico.NativeShims.a ==="
+              bash tests/check_exports.sh "$arch/static/libYubico.NativeShims.a"
+              bash tests/check_macos_archive.sh "$arch/static/libYubico.NativeShims.a" 12.0
           done
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
@@ -552,20 +444,44 @@ jobs:
       - name: Verify static archives and pack
         shell: pwsh
         run: |
-          $archives = @(
-            'win-x64/static/Yubico.NativeShims.lib',
-            'win-x86/static/Yubico.NativeShims.lib',
-            'win-arm64/static/Yubico.NativeShims.lib',
-            'linux-x64/static/libYubico.NativeShims.a',
-            'linux-arm64/static/libYubico.NativeShims.a',
-            'osx-x64/static/libYubico.NativeShims.a',
-            'osx-arm64/static/libYubico.NativeShims.a'
-          )
+          $packageRoot = Join-Path $PWD 'package'
+          $runtimesRoot = Join-Path $packageRoot 'runtimes'
+          $staticRoot = Join-Path $packageRoot 'buildTransitive/static'
+          $ridDirectories = @(Get-ChildItem -Directory | Where-Object {
+            $_.Name -match '^(win|linux|osx)-'
+          })
+          if ($ridDirectories.Count -eq 0) {
+            throw 'No runtime artifacts were downloaded.'
+          }
 
-          foreach ($archive in $archives) {
-            if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
-              throw "Expected static archive is missing: $archive"
+          $archives = @()
+          foreach ($ridDirectory in $ridDirectories) {
+            $rid = $ridDirectory.Name
+            $sharedLibraries = @(Get-ChildItem -LiteralPath $ridDirectory.FullName -File | Where-Object {
+              $_.Extension -in @('.dll', '.so', '.dylib')
+            })
+            $archiveDirectory = Join-Path $ridDirectory.FullName 'static'
+            $ridArchives = if (Test-Path -LiteralPath $archiveDirectory -PathType Container) {
+              @(Get-ChildItem -LiteralPath $archiveDirectory -File | Where-Object {
+                $_.Extension -in @('.a', '.lib')
+              })
+            } else {
+              @()
             }
+
+            if ($sharedLibraries.Count -ne 1) {
+              throw "Expected exactly one shared library for $rid, found $($sharedLibraries.Count)."
+            }
+            if ($ridArchives.Count -ne 1) {
+              throw "Expected exactly one static archive for $rid, found $($ridArchives.Count)."
+            }
+
+            $runtimeTarget = Join-Path $runtimesRoot "$rid/native"
+            $staticTarget = Join-Path $staticRoot $rid
+            New-Item -ItemType Directory -Force -Path $runtimeTarget, $staticTarget | Out-Null
+            Copy-Item -LiteralPath $sharedLibraries[0].FullName -Destination $runtimeTarget
+            Copy-Item -LiteralPath $ridArchives[0].FullName -Destination $staticTarget
+            $archives += $ridArchives[0]
           }
 
           nuget pack Yubico.NativeShims.nuspec
@@ -582,20 +498,27 @@ jobs:
           Copy-Item -LiteralPath $package.FullName -Destination $packageZip
           Expand-Archive -LiteralPath $packageZip -DestinationPath $packageContents
 
-          $packagedArchives = @(
-            'runtimes/win-x64/native/static/Yubico.NativeShims.lib',
-            'runtimes/win-x86/native/static/Yubico.NativeShims.lib',
-            'runtimes/win-arm64/native/static/Yubico.NativeShims.lib',
-            'runtimes/linux-x64/native/static/libYubico.NativeShims.a',
-            'runtimes/linux-arm64/native/static/libYubico.NativeShims.a',
-            'runtimes/osx-x64/native/static/libYubico.NativeShims.a',
-            'runtimes/osx-arm64/native/static/libYubico.NativeShims.a'
-          )
+          $runtimeArchives = @(Get-ChildItem -LiteralPath (Join-Path $packageContents 'runtimes') -Recurse -File | Where-Object {
+            $_.Extension -in @('.a', '.lib')
+          })
+          if ($runtimeArchives.Count -ne 0) {
+            throw "Static archives must not be NuGet runtime assets: $($runtimeArchives.FullName -join ', ')"
+          }
 
-          foreach ($archive in $packagedArchives) {
-            $packagePath = Join-Path $packageContents $archive
-            if (-not (Test-Path -LiteralPath $packagePath -PathType Leaf)) {
-              throw "Expected packaged static archive is missing: $archive"
+          $packagedArchives = @(Get-ChildItem -LiteralPath (Join-Path $packageContents 'buildTransitive/static') -Recurse -File | Where-Object {
+            $_.Extension -in @('.a', '.lib')
+          })
+          if ($packagedArchives.Count -ne $archives.Count) {
+            throw "Expected $($archives.Count) packaged static archives, found $($packagedArchives.Count)."
+          }
+
+          foreach ($ridDirectory in $ridDirectories) {
+            $rid = $ridDirectory.Name
+            $ridArchives = @($packagedArchives | Where-Object {
+              $_.Directory.Name -eq $rid
+            })
+            if ($ridArchives.Count -ne 1) {
+              throw "Expected exactly one packaged static archive for $rid, found $($ridArchives.Count)."
             }
           }
 
@@ -604,8 +527,7 @@ jobs:
           "| --- | ---: |" >> $env:GITHUB_STEP_SUMMARY
           "| $($package.Name) | $($package.Length) |" >> $env:GITHUB_STEP_SUMMARY
           foreach ($archive in $archives) {
-            $item = Get-Item -LiteralPath $archive
-            "| $archive | $($item.Length) |" >> $env:GITHUB_STEP_SUMMARY
+            "| $($archive.FullName) | $($archive.Length) |" >> $env:GITHUB_STEP_SUMMARY
           }
 
       - name: Upload Nuget Package
@@ -705,14 +627,14 @@ jobs:
             throw "Expected package '$expectedPackageName', found '$($nupkgs[0].Name)'."
           }
 
-          # Prime the Native AOT runtime packs and evaluate the package's AOT assets.
+          # First verify that ordinary consumers retain the shared library and do
+          # not receive build-only static archives.
           dotnet restore $project `
             -r '${{ matrix.rid }}' `
             --packages $packagesPath `
             --no-cache `
             --configfile $nugetConfig `
-            -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
-            -p:PublishAot=true
+            -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION
           if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed with exit code $LASTEXITCODE." }
 
           $assets = Get-Content (Join-Path (Split-Path $project) 'obj/project.assets.json') -Raw | ConvertFrom-Json
@@ -733,6 +655,44 @@ jobs:
             throw "Restored NativeShims package does not match the current-run package artifact."
           }
 
+          $normalOutputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/build/${{ matrix.rid }}'
+          dotnet build $project `
+            -c Release `
+            -r '${{ matrix.rid }}' `
+            --no-restore `
+            -o $normalOutputPath `
+            -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
+            -p:RestorePackagesPath=$packagesPath
+          if ($LASTEXITCODE -ne 0) { throw "dotnet build failed with exit code $LASTEXITCODE." }
+
+          $sharedName = switch ('${{ matrix.os }}') {
+            'windows' { 'Yubico.NativeShims.dll' }
+            'linux' { 'libYubico.NativeShims.so' }
+            'macos' { 'libYubico.NativeShims.dylib' }
+          }
+          $normalSharedLibraries = @(Get-ChildItem -LiteralPath $normalOutputPath -Recurse -File | Where-Object {
+            $_.Name.Equals($sharedName, [StringComparison]::OrdinalIgnoreCase)
+          })
+          if ($normalSharedLibraries.Count -ne 1) {
+            throw "Expected one ordinary-build NativeShims shared library, found $($normalSharedLibraries.Count)."
+          }
+          $normalArchives = @(Get-ChildItem -LiteralPath $normalOutputPath -Recurse -File | Where-Object {
+            $_.Extension -in @('.a', '.lib')
+          })
+          if ($normalArchives.Count -ne 0) {
+            throw "Static archives leaked into ordinary build output: $($normalArchives.FullName -join ', ')"
+          }
+
+          # Prime the Native AOT runtime packs and evaluate the package's AOT assets.
+          dotnet restore $project `
+            -r '${{ matrix.rid }}' `
+            --packages $packagesPath `
+            --no-cache `
+            --configfile $nugetConfig `
+            -p:NativeShimsVersion=$env:NATIVE_SHIMS_VERSION `
+            -p:PublishAot=true
+          if ($LASTEXITCODE -ne 0) { throw "Native AOT restore failed with exit code $LASTEXITCODE." }
+
           $publishOutput = @(dotnet publish $project `
             -c Release `
             -r '${{ matrix.rid }}' `
@@ -745,10 +705,6 @@ jobs:
           $publishExitCode = $LASTEXITCODE
           $publishOutput | ForEach-Object { Write-Host $_ }
           if ($publishExitCode -ne 0) { throw "dotnet publish failed with exit code $publishExitCode." }
-          if ('${{ matrix.os }}' -eq 'macos' -and
-              $publishOutput -match "built for newer.*macOS.*version") {
-            throw "Static archive contains objects built for a newer macOS deployment target."
-          }
 
       - name: Verify native output
         shell: pwsh
@@ -756,21 +712,16 @@ jobs:
           $outputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}'
           $isWindowsTarget = '${{ matrix.os }}' -eq 'windows'
           $executable = Join-Path $outputPath $(if ($isWindowsTarget) { 'NativeAotProbe.exe' } else { 'NativeAotProbe' })
-          $sharedName = switch ('${{ matrix.os }}') {
-            'windows' { 'Yubico.NativeShims.dll' }
-            'linux' { 'libYubico.NativeShims.so' }
-            'macos' { 'libYubico.NativeShims.dylib' }
-          }
 
           if (-not (Test-Path -LiteralPath $executable -PathType Leaf)) {
             throw "Native AOT executable is missing: $executable"
           }
 
-          $sharedCopies = @(Get-ChildItem -LiteralPath $outputPath -Recurse -File | Where-Object {
-              $_.Name.Equals($sharedName, [StringComparison]::OrdinalIgnoreCase)
+          $nativeSidecars = @(Get-ChildItem -LiteralPath $outputPath -Recurse -File | Where-Object {
+              $_.Name -match '(?i)(Yubico\.NativeShims|libcrypto|libssl)'
             })
-          if ($sharedCopies.Count -ne 0) {
-            throw "Shared NativeShims library remains in AOT publish output: $($sharedCopies.FullName -join ', ')"
+          if ($nativeSidecars.Count -ne 0) {
+            throw "NativeShims or OpenSSL sidecars remain in AOT publish output: $($nativeSidecars.FullName -join ', ')"
           }
 
           if (Test-Path -LiteralPath (Join-Path $outputPath 'NativeAotProbe.dll')) {
@@ -779,7 +730,7 @@ jobs:
 
           "### Native AOT ${{ matrix.rid }}" >> $env:GITHUB_STEP_SUMMARY
           "* Executable bytes: $((Get-Item -LiteralPath $executable).Length)" >> $env:GITHUB_STEP_SUMMARY
-          "* Shared shim copies: $($sharedCopies.Count)" >> $env:GITHUB_STEP_SUMMARY
+          "* NativeShims/OpenSSL sidecars: $($nativeSidecars.Count)" >> $env:GITHUB_STEP_SUMMARY
 
       - name: Inspect dynamic dependencies
         shell: pwsh
@@ -823,19 +774,45 @@ jobs:
       - name: Verify hardened Linux dynamic exports
         if: ${{ matrix.os == 'linux' }}
         shell: pwsh
+        env:
+          NATIVE_SHIMS_VERSION: ${{ needs.pack.outputs.package-version }}
         run: |
           $executable = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}/NativeAotProbe'
-          $dynamicSymbols = @(& nm -D --defined-only $executable 2>&1)
-          if ($LASTEXITCODE -ne 0) {
-            throw "nm failed with exit code $LASTEXITCODE.`n$($dynamicSymbols -join [Environment]::NewLine)"
+          $packageRoot = Join-Path $env:GITHUB_WORKSPACE "artifacts/packages/${{ matrix.rid }}/yubico.nativeshims/$($env:NATIVE_SHIMS_VERSION.ToLowerInvariant())"
+          $archiveDirectory = Join-Path $packageRoot 'buildTransitive/static/${{ matrix.rid }}'
+          $archives = @(Get-ChildItem -LiteralPath $archiveDirectory -File -Filter '*.a')
+          if ($archives.Count -ne 1) {
+            throw "Expected exactly one installed static archive, found $($archives.Count)."
           }
 
-          $opensslSymbols = @($dynamicSymbols | Where-Object {
-              $_ -match '\b(EVP_|BN_|OPENSSL_|CRYPTO_)'
-            })
-          "* OpenSSL-style dynamic exports: $($opensslSymbols.Count)" >> $env:GITHUB_STEP_SUMMARY
-          if ($opensslSymbols.Count -ne 0) {
-            throw "OpenSSL-style dynamic exports remain:`n$($opensslSymbols -join [Environment]::NewLine)"
+          $archiveOutput = @(& nm -g --defined-only $archives[0].FullName 2>&1)
+          if ($LASTEXITCODE -ne 0) {
+            throw "nm failed for the static archive with exit code $LASTEXITCODE.`n$($archiveOutput -join [Environment]::NewLine)"
+          }
+          $dynamicOutput = @(& nm -D --defined-only $executable 2>&1)
+          if ($LASTEXITCODE -ne 0) {
+            throw "nm failed for the executable with exit code $LASTEXITCODE.`n$($dynamicOutput -join [Environment]::NewLine)"
+          }
+
+          $archiveSymbols = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+          foreach ($line in $archiveOutput) {
+            if ($line -match '\s[A-Za-z]\s+(\S+)$') {
+              [void]$archiveSymbols.Add(($Matches[1] -replace '@.*$', ''))
+            }
+          }
+          $leakedSymbols = @()
+          foreach ($line in $dynamicOutput) {
+            if ($line -match '\s[A-Za-z]\s+(\S+)$') {
+              $symbol = $Matches[1] -replace '@.*$', ''
+              if ($archiveSymbols.Contains($symbol)) {
+                $leakedSymbols += $symbol
+              }
+            }
+          }
+          $leakedSymbols = @($leakedSymbols | Sort-Object -Unique)
+          "* Static archive symbols exported dynamically: $($leakedSymbols.Count)" >> $env:GITHUB_STEP_SUMMARY
+          if ($leakedSymbols.Count -ne 0) {
+            throw "Static archive symbols remain dynamically exported:`n$($leakedSymbols -join [Environment]::NewLine)"
           }
 
       - name: Execute package-only probe

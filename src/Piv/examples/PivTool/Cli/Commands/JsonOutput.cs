@@ -15,7 +15,7 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples.Results;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;

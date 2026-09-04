@@ -18,8 +18,7 @@ using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-/// White-box tests for <see cref="DeviceEventBroadcaster"/>, the multicast primitive that replaced
-/// the <c>System.Reactive</c> <c>Subject&lt;DeviceEvent&gt;</c>.
+/// White-box tests for <see cref="DeviceEventBroadcaster"/>.
 /// </summary>
 /// <remarks>
 /// These test the primitive itself and are deliberately not written as usage examples — consumer-
@@ -163,7 +162,7 @@ public class DeviceEventBroadcasterTests
         Assert.Single(second.Items);
     }
 
-    // ---------- Exception propagation (matches previous Subject<T> behaviour) ----------
+    // ---------- Exception propagation ----------
 
     [Fact]
     public void Publish_SubscriberThrows_PropagatesToPublisher()
@@ -179,8 +178,6 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_SubscriberThrows_LaterSubscribersDoNotReceiveThatEvent()
     {
-        // Pins the inherited Subject<T> partial-delivery contract. Recorded as a deferred design
-        // question; changing it is deliberately out of scope for the Rx removal.
         using var broadcaster = new DeviceEventBroadcaster();
         var later = new RecordingObserver<DeviceEvent>();
         var throwing = new RecordingObserver<DeviceEvent>(_ => throw new InvalidOperationException("boom"));
@@ -239,9 +236,6 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Subscribe_AfterComplete_CompletesImmediatelyAndDoesNotThrow()
     {
-        // Decision pin: a completed sequence completes late subscribers rather than throwing
-        // ObjectDisposedException (which is what the Rx Subject did). This behaviour was previously
-        // unspecified and untested.
         using var broadcaster = new DeviceEventBroadcaster();
         broadcaster.Complete();
 

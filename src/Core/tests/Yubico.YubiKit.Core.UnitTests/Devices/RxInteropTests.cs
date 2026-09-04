@@ -19,19 +19,14 @@ using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-/// Guards the compatibility promise made when <c>System.Reactive</c> was removed from the SDK: the
-/// SDK no longer <em>forces</em> Rx on consumers, but a consumer who adds the package themselves
-/// still gets the full operator surface over <see cref="YubiKeyManager.DeviceChanges"/>.
+/// Verifies that consumers who reference <c>System.Reactive</c> get its operator surface over
+/// <see cref="YubiKeyManager.DeviceChanges"/> while the shipping SDK has no reactive dependency.
 /// </summary>
 /// <remarks>
 /// <para>
 /// <c>System.Reactive</c> is referenced by this test project only — never by a shipping SDK library.
 /// Rx's operators are extension methods on <see cref="IObservable{T}"/>, so they compose with the
 /// SDK's own broadcaster without it knowing anything about Rx.
-/// </para>
-/// <para>
-/// This is also the migration example for consumers upgrading from a build where Rx arrived
-/// transitively: add one <c>PackageReference</c> and existing code compiles unchanged.
 /// </para>
 /// </remarks>
 public class RxInteropTests

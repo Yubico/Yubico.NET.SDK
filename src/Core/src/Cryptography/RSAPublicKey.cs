@@ -108,9 +108,4 @@ public sealed class RSAPublicKey : PublicKey
         AsnPublicKeyDecoder
             .CreatePublicKey(subjectPublicKeyInfo)
             .Cast<RSAPublicKey>();
-
-
-    [Obsolete("Use CreateFromSubjectPublicKeyInfo instead", false)]
-    public static RSAPublicKey CreateFromPkcs8(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
-        CreateFromSubjectPublicKeyInfo(subjectPublicKeyInfo);
 }

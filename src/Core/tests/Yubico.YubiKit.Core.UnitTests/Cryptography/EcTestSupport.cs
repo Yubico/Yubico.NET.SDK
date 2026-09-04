@@ -35,6 +35,19 @@ internal static class EcTestSupport
         _ => throw new ArgumentOutOfRangeException(nameof(curveOid))
     };
 
+    /// <summary>
+    /// The coordinate size of each supported prime curve, restated from the curve definitions rather
+    /// than looked up through <c>KeyDefinitions</c>, for the same reason as
+    /// <see cref="UncompressedPoint"/>. The private scalar is the same width.
+    /// </summary>
+    public static int CoordinateSize(string curveOid) => curveOid switch
+    {
+        Oids.ECP256 => 32,
+        Oids.ECP384 => 48,
+        Oids.ECP521 => 66,
+        _ => throw new ArgumentOutOfRangeException(nameof(curveOid))
+    };
+
     public static byte[] UncompressedPoint(byte[] x, byte[] y)
     {
         var point = new byte[1 + x.Length + y.Length];

@@ -61,9 +61,15 @@ internal sealed class DeviceEventHub
     private bool _completed;
 
     /// <summary>
-    /// Number of live subscriptions. Diagnostic observability for the lazy-subscription and
+    /// Number of registered watchers. Diagnostic observability for the lazy-subscription and
     /// unsubscribe-on-exit contracts.
     /// </summary>
+    /// <remarks>
+    /// Registered, not live: a watcher terminated by overflow stays in the array until its
+    /// enumeration is disposed, and is counted until then. That is deliberate — an abandoned
+    /// enumeration is a leak, and a count that quietly excluded it would hide exactly the leak this
+    /// number exists to expose.
+    /// </remarks>
     internal int WatcherCount => Volatile.Read(ref _watchers).Length;
 
     /// <summary>

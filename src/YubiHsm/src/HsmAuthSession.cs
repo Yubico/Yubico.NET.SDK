@@ -199,17 +199,24 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     ///     Validates a UTF-8 encoded credential password.
     /// </summary>
     /// <param name="password">The UTF-8 encoded password bytes.</param>
+    /// <param name="paramName">
+    ///     The name of the public parameter <paramref name="password" /> was supplied through. The
+    ///     public surface spells this parameter three different ways —
+    ///     <c>credentialPassword</c>, <c>currentPassword</c> and <c>newPassword</c> — so the caller
+    ///     has to name its own, otherwise <see cref="ArgumentException.ParamName" /> would report
+    ///     this helper's local name, which matches nothing a caller can filter on.
+    /// </param>
     /// <remarks>
     ///     The applet wire format carries a fixed 16-byte credential password. The SDK accepts at
     ///     most 16 bytes and null-pads shorter values in <see cref="ParseCredentialPassword" />.
     /// </remarks>
     /// <exception cref="ArgumentException">Thrown when the password exceeds 16 bytes.</exception>
-    internal static void ValidateCredentialPassword(ReadOnlySpan<byte> password)
+    internal static void ValidateCredentialPassword(ReadOnlySpan<byte> password, string paramName)
     {
         if (password.Length > CredentialPasswordLength)
             throw new ArgumentException(
                 $"Credential password UTF-8 encoding ({password.Length} bytes) exceeds maximum of {CredentialPasswordLength} bytes.",
-                nameof(password));
+                paramName);
     }
 
     /// <summary>
@@ -217,14 +224,18 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     ///     null-padding any remaining bytes.
     /// </summary>
     /// <param name="password">The UTF-8 encoded password bytes (at most 16).</param>
+    /// <param name="paramName">
+    ///     The name of the public parameter <paramref name="password" /> was supplied through; see
+    ///     <see cref="ValidateCredentialPassword" />.
+    /// </param>
     /// <returns>
     ///     A newly allocated 16-byte array containing the padded password. The caller owns the
     ///     buffer and must zero it with <see cref="CryptographicOperations.ZeroMemory(Span{byte})" />.
     /// </returns>
     /// <exception cref="ArgumentException">Thrown when the password exceeds 16 bytes.</exception>
-    internal static byte[] ParseCredentialPassword(ReadOnlySpan<byte> password)
+    internal static byte[] ParseCredentialPassword(ReadOnlySpan<byte> password, string paramName)
     {
-        ValidateCredentialPassword(password);
+        ValidateCredentialPassword(password, paramName);
 
         var buffer = new byte[CredentialPasswordLength];
         password.CopyTo(buffer);
@@ -331,7 +342,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span);
+            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
 
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
@@ -438,7 +449,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span);
+            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
 
             var tlvs = new List<Tlv>
             {
@@ -559,7 +570,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span);
+            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
 
             // APDU payload order matches Python canonical SDK:
             // TAG_LABEL, TAG_CONTEXT, TAG_PUBLIC_KEY, TAG_RESPONSE, TAG_CREDENTIAL_PASSWORD
@@ -621,7 +632,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             if (credentialPassword is { } suppliedPassword &&
                 IsSupported(FeatureGetChallengeWithPassword))
             {
-                credPwBytes = ParseCredentialPassword(suppliedPassword.Span);
+                credPwBytes = ParseCredentialPassword(suppliedPassword.Span, nameof(credentialPassword));
                 tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
             }
 
@@ -666,7 +677,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span);
+            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
 
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
@@ -706,7 +717,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span);
+            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
 
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
             // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
@@ -771,8 +782,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            currentPwBytes = ParseCredentialPassword(currentPassword.Span);
-            newPwBytes = ParseCredentialPassword(newPassword.Span);
+            currentPwBytes = ParseCredentialPassword(currentPassword.Span, nameof(currentPassword));
+            newPwBytes = ParseCredentialPassword(newPassword.Span, nameof(newPassword));
 
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
@@ -810,7 +821,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         Memory<byte> data = default;
         try
         {
-            newPwBytes = ParseCredentialPassword(newPassword.Span);
+            newPwBytes = ParseCredentialPassword(newPassword.Span, nameof(newPassword));
 
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),

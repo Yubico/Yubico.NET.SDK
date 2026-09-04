@@ -44,10 +44,18 @@ internal static class AsnUtilities
     /// <c>0x04 || X || Y</c> with both coordinates exactly the curve's coordinate size.
     /// </summary>
     /// <remarks>
-    /// This mirrors the strictness of the Rust <c>yubikit</c> crate. Compressed and hybrid point
-    /// formats are deliberately rejected rather than decompressed. Callers translate the result
-    /// into the exception type their layer owes: <see cref="CryptographicException"/> for malformed
-    /// encoded key data, and <see cref="ArgumentException"/> for bad caller-supplied input.
+    /// <para>This mirrors the strictness of the Rust <c>yubikit</c> crate. Compressed and hybrid
+    /// point formats are deliberately rejected rather than decompressed. Callers translate the
+    /// result into the exception type their layer owes: <see cref="CryptographicException"/> for
+    /// malformed encoded key data, and <see cref="ArgumentException"/> for bad caller-supplied
+    /// input.</para>
+    /// <para>That split governs <em>point shape</em> only. Whether a curve is supported at all is
+    /// each decoder's own concern and each rejects it before reaching this file:
+    /// <c>AsnPublicKeyDecoder</c> throws <see cref="NotSupportedException"/> and
+    /// <c>AsnPrivateKeyDecoder</c> throws <see cref="InvalidOperationException"/>. The
+    /// <see cref="CryptographicException"/> that <see cref="GetDecodedCoordinateSize"/> raises for
+    /// an unsupported curve is therefore a defensive backstop, not a taxonomy this file imposes on
+    /// its callers.</para>
     /// </remarks>
     public static EcPointDefect InspectUncompressedEcPoint(ReadOnlySpan<byte> point, int coordinateSize)
     {
@@ -169,18 +177,45 @@ internal static class AsnUtilities
     }
 
     /// <summary>
-    /// Validates that a caller-supplied curve OID names one of the EC prime curves this SDK
-    /// supports, before it is written into an <c>id-ecPublicKey</c> AlgorithmIdentifier.
+    /// Validates a caller-supplied EC private scalar against the curve it will be encoded under,
+    /// and in doing so gates the curve OID itself before it is written into an
+    /// <c>id-ecPublicKey</c> AlgorithmIdentifier.
     /// </summary>
-    /// <exception cref="ArgumentException">The curve is not a supported prime curve.</exception>
-    public static void ValidateEcCurveArgument(string curveOid, string paramName)
+    /// <remarks>
+    /// The scalar of an RFC 5915 <c>ECPrivateKey</c> is a fixed-width, left-padded integer of the
+    /// curve's coordinate size. Any other width contradicts the curve parameter sitting in the same
+    /// structure. The message reports lengths only: the value being rejected is key material.
+    /// </remarks>
+    /// <exception cref="ArgumentException">
+    /// The scalar does not match the curve, or the curve is not a supported prime curve.
+    /// </exception>
+    public static void ValidateEcPrivateScalarArgument(
+        ReadOnlySpan<byte> privateScalar,
+        string curveOid,
+        string paramName)
     {
-        _ = GetCoordinateSizeArgument(curveOid, paramName);
+        var coordinateSize = GetCoordinateSizeArgument(curveOid, paramName);
+        if (privateScalar.Length != coordinateSize)
+        {
+            throw new ArgumentException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    "EC private scalar does not match curve '{0}'. Expected {1} bytes, but got {2}.",
+                    curveOid,
+                    coordinateSize,
+                    privateScalar.Length),
+                paramName);
+        }
     }
 
     /// <summary>
     /// Resolves the coordinate size of an EC point read out of encoded key data.
     /// </summary>
+    /// <remarks>
+    /// Both decoders reject an unsupported curve before calling in here, each with its own
+    /// exception type, so the throwing branch is a backstop that no production caller reaches. See
+    /// the remarks on <see cref="InspectUncompressedEcPoint"/>.
+    /// </remarks>
     /// <exception cref="CryptographicException">The curve is not a supported prime curve.</exception>
     public static int GetDecodedCoordinateSize(string curveOid) =>
         TryGetCoordinateSize(curveOid, out var coordinateSize)

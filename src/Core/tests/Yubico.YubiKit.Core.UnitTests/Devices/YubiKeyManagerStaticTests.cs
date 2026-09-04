@@ -17,6 +17,23 @@ using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
+/// <summary>
+/// Static-lifecycle assertions for the <see cref="YubiKeyManager"/> facade: which members exist,
+/// what shape they have, and how <c>StartMonitoring</c> / <c>StopMonitoring</c> / <c>ShutdownAsync</c>
+/// compose. Behaviour that belongs to the pieces behind the facade is asserted on those pieces,
+/// where fakes can stand in for hardware: watcher delivery on <c>DeviceEventHubTests</c> and
+/// <c>YubiKeyDeviceRepositoryTests</c>, and monitoring on <c>YubiKeyDeviceManagerTests</c>.
+/// </summary>
+/// <remarks>
+/// The facade has no injection seam by design — being usable without DI is the point of it — so the
+/// lifecycle assertions that remain here do reach the real listeners and the real device scan.
+/// That makes them consumers of the process-wide four-slot discovery-worker pool, which is what
+/// <see cref="DiscoveryWorkerAdmissionCollection"/> serializes. Without that membership they ran
+/// concurrently with the tests that deliberately saturate the pool, and either side could then fail
+/// with "PC/SC device enumeration could not start because discovery worker capacity is saturated".
+/// Anything here that does not genuinely need the facade's own lifecycle belongs on a seam instead.
+/// </remarks>
+[Collection(DiscoveryWorkerAdmissionCollection.Name)]
 public class YubiKeyManagerStaticTests : IAsyncLifetime
 {
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
@@ -374,32 +391,11 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => moveNext);
     }
 
-    [Fact]
-    public async Task YubiKeyManager_WatchAsync_EndingAWatcherDoesNotAffectMonitoring()
-    {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
-        var pending = enumerator.MoveNextAsync();
-
-        YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
-        Assert.True(YubiKeyManager.IsMonitoring);
-
-        // Ending the enumeration releases only that watcher. Whether an event landed first depends on
-        // what hardware happens to be attached, so only the release itself is asserted here.
-        await cts.CancelAsync();
-        try
-        {
-            _ = await pending;
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected when no event arrived before cancellation.
-        }
-
-        await enumerator.DisposeAsync();
-
-        Assert.True(YubiKeyManager.IsMonitoring);
-    }
+    // Watcher independence while monitoring runs is asserted on the manager seam, in
+    // YubiKeyDeviceManagerTests.WatchAsync_EndingOneWatcher_LeavesMonitoringAndTheOtherWatcherRunning.
+    // Asserting it here meant starting real HID and PC/SC listeners from a unit test, which
+    // contends for the process-wide discovery-worker pool and made unrelated tests fail with
+    // "discovery worker capacity is saturated".
 
     // Phase 5: Shutdown Tests
 
@@ -489,17 +485,29 @@ public class YubiKeyManagerStaticTests : IAsyncLifetime
         Assert.NotNull(result);
     }
 
+    /// <summary>
+    /// After shutdown the static facade must build a new manager rather than hand back the disposed
+    /// one, whose repository would end every enumeration immediately.
+    /// </summary>
+    /// <remarks>
+    /// The liveness assertion is "cancelling it raises <see cref="OperationCanceledException"/>",
+    /// not "it had not completed yet". A dead sequence ends normally with no elements, so it never
+    /// reaches the cancellation; the previous form asserted <c>pending.IsCompleted == false</c>
+    /// immediately after starting it, which is a statement about how fast the machine happened to
+    /// be rather than about the facade. Nothing here starts monitoring, so the fresh repository has
+    /// no publisher and cannot deliver an element that would make the wait complete for real
+    /// reasons. The same recreation is asserted for the other entry points by
+    /// <see cref="YubiKeyManager_AfterShutdown_FindAllAsync_Works"/> and
+    /// <see cref="YubiKeyManager_AfterShutdown_StartMonitoring_Works"/>.
+    /// </remarks>
     [Fact]
     public async Task YubiKeyManager_WatchAsync_AfterShutdown_AutoRecreatesContext()
     {
         await YubiKeyManager.ShutdownAsync(TestContext.Current.CancellationToken);
 
-        // Watching after shutdown must recreate the manager rather than hand back a dead sequence.
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         await using var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
         var pending = enumerator.MoveNextAsync();
-
-        Assert.False(pending.IsCompleted);
 
         await cts.CancelAsync();
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await pending);

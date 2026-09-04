@@ -178,8 +178,13 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
         // 2. Dispose monitor service
         await _monitorService.DisposeAsync().ConfigureAwait(false);
 
-        // 3. Clear and dispose repository
-        _repository.Clear();
+        // 3. Dispose the repository. Disposal already clears the cache, and it must be the first
+        //    thing done to the repository: a publication that outlived the monitor's bounded drain
+        //    and resumes here would find a live-but-emptied repository if the cache were cleared
+        //    separately first, diff against an empty cache, and emit Added for every attached
+        //    device after DisposeAsync had already returned. Disposing first makes that publication
+        //    throw ObjectDisposedException instead, which is what upholds the documented guarantee
+        //    that no device event escapes a disposed manager.
         _repository.Dispose();
 
         // 4. Dispose synchronization primitives

@@ -151,6 +151,14 @@ public class AsnUtilitiesTests
         Assert.Equal(expectedSize, size);
     }
 
+    // The two theories below exercise a backstop, not a reachable production path. Both decoders
+    // reject an unsupported curve before they call into AsnUtilities — AsnPublicKeyDecoder with
+    // NotSupportedException, AsnPrivateKeyDecoder with InvalidOperationException — so nothing in
+    // the SDK can make these throw. They are kept deliberately: the branch exists, and if a future
+    // decoder does start routing its curve gate through here, this is the record of what it will
+    // get. Do not read them as evidence that a decode of an unsupported curve surfaces a
+    // CryptographicException; it does not.
+
     [Theory]
     [MemberData(nameof(NonEcCurveOids))]
     [MemberData(nameof(UnsupportedCurveOids))]
@@ -191,6 +199,39 @@ public class AsnUtilitiesTests
     {
         var exception = Assert.Throws<ArgumentException>(
             () => AsnUtilities.BuildUncompressedEcPoint(new byte[32], new byte[32], oid, "parameters"));
+
+        Assert.Equal("parameters", exception.ParamName);
+    }
+
+    [Theory]
+    [MemberData(nameof(NonEcCurveOids))]
+    [MemberData(nameof(UnsupportedCurveOids))]
+    public void ValidateEcPrivateScalarArgument_NotASupportedPrimeCurve_ThrowsArgumentException(string oid)
+    {
+        // 32 bytes is right for P-256 and is also X25519's key-definition length, so the scalar
+        // check has to gate the curve rather than trust the length alone.
+        var exception = Assert.Throws<ArgumentException>(
+            () => AsnUtilities.ValidateEcPrivateScalarArgument(new byte[32], oid, "parameters"));
+
+        Assert.Equal("parameters", exception.ParamName);
+    }
+
+    [Theory]
+    [InlineData(Oids.ECP256, 32)]
+    [InlineData(Oids.ECP384, 48)]
+    [InlineData(Oids.ECP521, 66)]
+    public void ValidateEcPrivateScalarArgument_CurveSizedScalar_DoesNotThrow(string curveOid, int scalarSize) =>
+        AsnUtilities.ValidateEcPrivateScalarArgument(new byte[scalarSize], curveOid, "parameters");
+
+    [Theory]
+    [InlineData(Oids.ECP256, 48)]
+    [InlineData(Oids.ECP384, 32)]
+    [InlineData(Oids.ECP521, 48)]
+    public void ValidateEcPrivateScalarArgument_ScalarSizedForAnotherCurve_ThrowsArgumentException(
+        string curveOid, int scalarSize)
+    {
+        var exception = Assert.Throws<ArgumentException>(
+            () => AsnUtilities.ValidateEcPrivateScalarArgument(new byte[scalarSize], curveOid, "parameters"));
 
         Assert.Equal("parameters", exception.ParamName);
     }

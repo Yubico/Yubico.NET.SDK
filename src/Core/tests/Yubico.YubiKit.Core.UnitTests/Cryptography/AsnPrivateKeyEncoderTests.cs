@@ -316,7 +316,8 @@ public class AsnPrivateKeyEncoderTests
         var parameters = new ECParameters
         {
             Curve = ECCurve.CreateFromValue(curveOid),
-            D = new byte[32],
+            // Curve-correct, so the point is the only thing wrong with these parameters.
+            D = new byte[EcTestSupport.CoordinateSize(curveOid)],
             Q = new ECPoint { X = new byte[xLength], Y = new byte[yLength] }
         };
 
@@ -329,6 +330,87 @@ public class AsnPrivateKeyEncoderTests
         var parameters = new ECParameters { Curve = ECCurve.NamedCurves.nistP256 };
 
         Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(parameters));
+    }
+
+    /// <summary>
+    /// D is the key. The curve OID and the public point are both checked strictly, so leaving the
+    /// private scalar unchecked emitted an RFC 5915 <c>ECPrivateKey</c> whose <c>privateKey</c>
+    /// OCTET STRING was the wrong width for the curve named right next to it in the same structure:
+    /// malformed, but plausible enough that the caller got no signal at all.
+    /// </summary>
+    [Theory]
+    [InlineData(Oids.ECP256, 31)] // one byte short
+    [InlineData(Oids.ECP256, 33)] // one byte long
+    [InlineData(Oids.ECP256, 48)] // a P-384 scalar on a P-256 curve
+    [InlineData(Oids.ECP384, 32)] // a P-256 scalar on a P-384 curve
+    [InlineData(Oids.ECP384, 66)] // a P-521 scalar on a P-384 curve
+    [InlineData(Oids.ECP521, 32)] // a P-256 scalar on a P-521 curve
+    [InlineData(Oids.ECP521, 65)] // one byte short of P-521's 66
+    [InlineData(Oids.ECP256, 0)] // empty
+    public void EncodeToPkcs8_EcParametersPrivateScalarWrongLength_ThrowsArgumentException(
+        string curveOid, int dLength)
+    {
+        var coordinateSize = EcTestSupport.CoordinateSize(curveOid);
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(curveOid),
+            D = new byte[dLength],
+            // A well-formed point, so the scalar is the only thing wrong.
+            Q = new ECPoint { X = new byte[coordinateSize], Y = new byte[coordinateSize] }
+        };
+
+        Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(parameters));
+    }
+
+    /// <summary>
+    /// The scalar check must not need a public point to run: a private key encoded without the
+    /// optional RFC 5915 <c>publicKey</c> field is exactly where a bad D has nothing else to trip on.
+    /// </summary>
+    [Theory]
+    [InlineData(Oids.ECP256, 48)]
+    [InlineData(Oids.ECP384, 32)]
+    [InlineData(Oids.ECP521, 48)]
+    public void EncodeToPkcs8_EcParametersPrivateScalarWrongLengthWithoutPublicPoint_ThrowsArgumentException(
+        string curveOid, int dLength)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(curveOid),
+            D = new byte[dLength]
+        };
+
+        Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(parameters));
+    }
+
+    [Theory]
+    [InlineData(Oids.ECP256)]
+    [InlineData(Oids.ECP384)]
+    [InlineData(Oids.ECP521)]
+    public void EncodeToPkcs8_EcParametersPrivateScalarCurveSized_IsAccepted(string curveOid)
+    {
+        using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
+        var expected = bcl.ExportParameters(includePrivateParameters: true);
+        Assert.Equal(EcTestSupport.CoordinateSize(curveOid), expected.D!.Length);
+
+        var ourPkcs8 = AsnPrivateKeyEncoder.EncodeToPkcs8(expected);
+
+        using var check = ECDsa.Create();
+        check.ImportPkcs8PrivateKey(ourPkcs8, out _);
+        Assert.Equal(expected.D, check.ExportParameters(includePrivateParameters: true).D);
+    }
+
+    /// <summary>
+    /// The message must not leak the private scalar it just rejected.
+    /// </summary>
+    [Fact]
+    public void EncodeToPkcs8_EcParametersPrivateScalarWrongLength_MessageDoesNotContainD()
+    {
+        var d = Convert.FromHexString("00112233445566778899AABBCCDDEEFF");
+        var parameters = new ECParameters { Curve = ECCurve.NamedCurves.nistP256, D = d };
+
+        var exception = Assert.Throws<ArgumentException>(() => AsnPrivateKeyEncoder.EncodeToPkcs8(parameters));
+
+        Assert.DoesNotContain(Convert.ToHexString(d), exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

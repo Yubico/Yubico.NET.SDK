@@ -30,6 +30,14 @@ internal static class AsnPrivateKeyEncoder
     /// <param name="publicPoint">The public key point as a byte array (optional).</param>
     /// <param name="keyType">The type of the key.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key.</returns>
+    /// <remarks>
+    /// Unlike <see cref="EncodeToPkcs8(ECParameters)"/>, the EC branch here does not length-check
+    /// <paramref name="privateKey"/> against the curve. It takes raw values rather than a structure
+    /// that names its own curve, and Curve25519 — the only key types any production caller reaches
+    /// this overload with — is checked exactly in <c>EncodeCurve25519Key</c>. The EC branch is
+    /// exercised only by tests today; if a production caller appears, it should be brought under
+    /// the same scalar check as the <see cref="ECParameters"/> path.
+    /// </remarks>
     public static byte[] EncodeToPkcs8(
         ReadOnlyMemory<byte> privateKey,
         ReadOnlyMemory<byte>? publicPoint,
@@ -138,8 +146,9 @@ internal static class AsnPrivateKeyEncoder
     /// <param name="parameters">The EC parameters including private key value.</param>
     /// <returns>A byte array containing the ASN.1 DER encoded private key in PKCS#8 format.</returns>
     /// <exception cref="ArgumentException">
-    /// The private key parameter D is null, the curve is not one of P-256, P-384 or P-521, or the
-    /// public point is half supplied (exactly one of <c>Q.X</c> and <c>Q.Y</c> is null).
+    /// The private key parameter D is null or is not the curve's coordinate size, the curve is not
+    /// one of P-256, P-384 or P-521, or the public point is half supplied (exactly one of
+    /// <c>Q.X</c> and <c>Q.Y</c> is null).
     /// </exception>
     public static byte[] EncodeToPkcs8(ECParameters parameters)
     {
@@ -154,9 +163,12 @@ internal static class AsnPrivateKeyEncoder
         ReadOnlyMemory<byte> privateKey = parameters.D;
         var curveOid = parameters.Curve.Oid.Value;
 
-        // Gate the curve here, at the boundary where the untrusted OID arrives, rather than
-        // relying on the point-shape check: a key with no public point never reaches that check.
-        AsnUtilities.ValidateEcCurveArgument(curveOid, nameof(parameters));
+        // Checks D against the curve and, in doing so, gates the untrusted curve OID at the boundary
+        // where it arrives. Neither can be left to the point-shape check: a key with no public point
+        // never reaches that check, and the point says nothing about D's width in any case. An
+        // unchecked D emits an RFC 5915 ECPrivateKey whose privateKey OCTET STRING contradicts the
+        // curve named beside it — malformed, but plausible enough to give the caller no signal.
+        AsnUtilities.ValidateEcPrivateScalarArgument(privateKey.Span, curveOid, nameof(parameters));
 
         // The optional RFC 5915 publicKey field is omitted only when the caller supplied no point
         // at all. Half a point is caller error: silently dropping it would return a valid encoding

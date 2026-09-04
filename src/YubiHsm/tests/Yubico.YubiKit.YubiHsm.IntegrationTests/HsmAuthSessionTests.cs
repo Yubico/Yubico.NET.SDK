@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -270,7 +271,9 @@ public class HsmAuthSessionTests
                         TestPassword,
                         cancellationToken: NewToken());
 
-                    // Change the password
+                    // Change the password. Requires YubiHSM Auth applet 5.8.0+ (INS 0x0B). An
+                    // alpha/beta applet is assumed to have it; a device that answers SW=0x6D00 is
+                    // missing the instruction and should fail here rather than be worked around.
                     ReadOnlyMemory<byte> newPassword = "new-password"u8.ToArray();
                     await session.ChangeCredentialPasswordAsync(
                         TestLabel,

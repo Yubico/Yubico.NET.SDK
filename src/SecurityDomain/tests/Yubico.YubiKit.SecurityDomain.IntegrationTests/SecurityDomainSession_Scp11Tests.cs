@@ -16,7 +16,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 /// <summary>
 ///     Integration coverage for establishing a Security Domain session using SCP11.
 /// </summary>
-public class SecurityDomainSession_Scp11Tests
+public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTests
 {
     private const byte OceKid = 0x010;
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
@@ -28,6 +28,8 @@ public class SecurityDomainSession_Scp11Tests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_GenerateEcKeyAsync_GeneratesValidKeyAndAuthenticates(YubiKeyTestState state)
     {
+        Track(state);
+
         var keyReference = new KeyReference(ScpKid.SCP11b, 0x03);
 
         await state.WithSecurityDomainSessionAsync(true, async session =>
@@ -81,6 +83,8 @@ public class SecurityDomainSession_Scp11Tests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11a_WithAllowList_AllowsApprovedSerials(YubiKeyTestState state)
     {
+        Track(state);
+
         const byte kvn = 0x05;
         var oceKeyRef = new KeyReference(OceKid, kvn);
 
@@ -116,6 +120,8 @@ public class SecurityDomainSession_Scp11Tests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_Import_Succeeds(YubiKeyTestState state)
     {
+        Track(state);
+
         var keyReference = new KeyReference(ScpKid.SCP11b, 0x02);
         Scp11KeyParameters? keyParameters = null;
 
@@ -144,6 +150,8 @@ public class SecurityDomainSession_Scp11Tests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_EstablishSecureConnection_Succeeds(YubiKeyTestState state)
     {
+        Track(state);
+
         var keyReference = new KeyReference(ScpKid.SCP11b, 0x01);
         IReadOnlyList<X509Certificate2>? certificateList = null;
         await state.WithSecurityDomainSessionAsync(true, async session =>
@@ -181,7 +189,10 @@ public class SecurityDomainSession_Scp11Tests
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
-    public async Task Scp11b_GetCertificates_IsNotEmpty(YubiKeyTestState state) =>
+    public async Task Scp11b_GetCertificates_IsNotEmpty(YubiKeyTestState state)
+    {
+        Track(state);
+
         await state.WithSecurityDomainSessionAsync(true,
             async session =>
             {
@@ -191,13 +202,17 @@ public class SecurityDomainSession_Scp11Tests
             },
             scpKeyParams: Scp03KeyParameters.Default,
             cancellationToken: CancellationTokenSource.Token);
+    }
 
     /// <summary>
     ///     Verifies that StoreCertificatesAsync successfully stores certificates that can be retrieved.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
-    public async Task Scp11b_StoreCertificates_CanBeRetrieved(YubiKeyTestState state) =>
+    public async Task Scp11b_StoreCertificates_CanBeRetrieved(YubiKeyTestState state)
+    {
+        Track(state);
+
         await state.WithSecurityDomainSessionAsync(true,
             async session =>
             {
@@ -217,6 +232,7 @@ public class SecurityDomainSession_Scp11Tests
             },
             scpKeyParams: Scp03KeyParameters.Default,
             cancellationToken: CancellationTokenSource.Token);
+    }
 
     private static async Task<Scp11KeyParameters> LoadKeys(
         SecurityDomainSession session,

@@ -67,43 +67,53 @@ public class SecurityDomainSession_Scp03Tests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutKeyAsync_WithStaticKeys_ImportsAndAuthenticates(YubiKeyTestState state)
     {
-        // Custom key set (non-default) for testing
-        byte[] keyBytes =
-        [
-            0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
-            0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
-        ];
-
-        using var newStaticKeys = new StaticKeys(keyBytes, keyBytes, keyBytes);
-        var newKeyReference = new KeyReference(0x01, 0x01);
-        var newKeyParams = new Scp03KeyParameters(newKeyReference, newStaticKeys);
-
-        // Step 1: Authenticate with default keys and import new keys
-        await state.WithSecurityDomainSessionAsync(true,
-            async session =>
-            {
-                await session.PutKeyAsync(newKeyReference, newStaticKeys, 0,
-                    CancellationTokenSource.Token);
-            }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
-
-        // Step 2: Verify new keys work
-        await state.WithSecurityDomainSessionAsync(false,
-            session =>
-            {
-                Assert.NotNull(session);
-                return Task.CompletedTask;
-            }, scpKeyParams: newKeyParams, cancellationToken: CancellationTokenSource.Token);
-
-        // Step 3: Verify default keys no longer work. The default KVN was superseded on the
-        // device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
-        // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
-        var ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+        try
         {
+            // Custom key set (non-default) for testing
+            byte[] keyBytes =
+            [
+                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+                0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
+            ];
+
+            using var newStaticKeys = new StaticKeys(keyBytes, keyBytes, keyBytes);
+            var newKeyReference = new KeyReference(0x01, 0x01);
+            var newKeyParams = new Scp03KeyParameters(newKeyReference, newStaticKeys);
+
+            // Step 1: Authenticate with default keys and import new keys
+            await state.WithSecurityDomainSessionAsync(true,
+                async session =>
+                {
+                    await session.PutKeyAsync(newKeyReference, newStaticKeys, 0,
+                        CancellationTokenSource.Token);
+                }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
+
+            // Step 2: Verify new keys work
             await state.WithSecurityDomainSessionAsync(false,
-                session => Task.CompletedTask, scpKeyParams: Scp03KeyParameters.Default,
-                cancellationToken: CancellationTokenSource.Token);
-        });
-        Assert.IsType<ApduException>(ex.InnerException);
+                session =>
+                {
+                    Assert.NotNull(session);
+                    return Task.CompletedTask;
+                }, scpKeyParams: newKeyParams, cancellationToken: CancellationTokenSource.Token);
+
+            // Step 3: Verify default keys no longer work. The default KVN was superseded on the
+            // device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
+            // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
+            var ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+            {
+                await state.WithSecurityDomainSessionAsync(false,
+                    session => Task.CompletedTask, scpKeyParams: Scp03KeyParameters.Default,
+                    cancellationToken: CancellationTokenSource.Token);
+            });
+            Assert.IsType<ApduException>(ex.InnerException);
+        }
+        finally
+        {
+            // This test deliberately supersedes the default SCP03 keys and asserts they stop
+            // working. Restore factory defaults so later tests and suites can still authenticate
+            // with Scp03KeyParameters.Default.
+            await state.ResetSecurityDomainAsync(CancellationTokenSource.Token);
+        }
     }
 
     [SkippableTheory]

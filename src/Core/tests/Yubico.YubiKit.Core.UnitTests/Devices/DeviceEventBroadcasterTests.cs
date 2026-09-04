@@ -178,7 +178,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Publish_SubscriberThrows_LaterSubscribersDoNotReceiveThatEvent()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         var later = new RecordingObserver<DeviceEvent>();
         var throwing = new RecordingObserver<DeviceEvent>(_ => throw new InvalidOperationException("boom"));
         using var s1 = broadcaster.Subscribe(throwing);
@@ -245,7 +245,7 @@ public class DeviceEventBroadcasterTests
     [Fact]
     public void Subscribe_AfterComplete_CompletesImmediatelyAndDoesNotThrow()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         broadcaster.Complete();
 
         var observer = new RecordingObserver<DeviceEvent>();

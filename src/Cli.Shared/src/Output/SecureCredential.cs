@@ -21,14 +21,17 @@ public sealed class SecureCredential : IMemoryOwner<byte>
 {
     /// <summary>Sentinel returned by the read helpers when the user abandoned the prompt.</summary>
     private const int Declined = -1;
-    private readonly byte[] _buffer;
+    private byte[]? _buffer;
     private readonly int _length;
-    private bool _disposed;
+    private readonly ArrayPool<byte>? _pool;
 
-    private SecureCredential(byte[] buffer, int length)
+    private delegate int CredentialReader(Span<byte> buffer);
+
+    private SecureCredential(byte[] buffer, int length, ArrayPool<byte>? pool = null)
     {
         _buffer = buffer;
         _length = length;
+        _pool = pool;
     }
 
     /// <summary>
@@ -42,8 +45,9 @@ public sealed class SecureCredential : IMemoryOwner<byte>
     {
         get
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
-            return _buffer.AsMemory(0, _length);
+            var buffer = _buffer;
+            ObjectDisposedException.ThrowIf(buffer is null, this);
+            return buffer.AsMemory(0, _length);
         }
     }
 
@@ -98,61 +102,49 @@ public sealed class SecureCredential : IMemoryOwner<byte>
         ArgumentException.ThrowIfNullOrWhiteSpace(label);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxByteLength);
 
-        var buffer = new byte[maxByteLength];
-
-        try
-        {
-            var length = Console.IsInputRedirected
+        return ReadWithPooledBuffer(
+            maxByteLength,
+            ArrayPool<byte>.Shared,
+            buffer => Console.IsInputRedirected
                 ? ReadRedirectedInput(buffer, Console.OpenStandardInput())
-                : ReadMaskedConsoleInput(label, buffer, () => Console.ReadKey(intercept: true));
-
-            if (length <= 0)
-            {
-                CryptographicOperations.ZeroMemory(buffer);
-                return null;
-            }
-
-            return new SecureCredential(buffer, length);
-        }
-        catch
-        {
-            CryptographicOperations.ZeroMemory(buffer);
-            throw;
-        }
+                : ReadMaskedConsoleInput(
+                    label,
+                    buffer,
+                    () => Console.ReadKey(intercept: true)));
     }
 
     public void Dispose()
     {
-        if (_disposed)
+        var buffer = Interlocked.Exchange(ref _buffer, null);
+        if (buffer is null)
         {
             return;
         }
 
-        CryptographicOperations.ZeroMemory(_buffer);
-        _disposed = true;
+        CryptographicOperations.ZeroMemory(buffer);
+        _pool?.Return(buffer);
     }
 
-    internal byte[] DangerousGetBufferForTesting() => _buffer;
+    internal byte[] DangerousGetBufferForTesting() =>
+        _buffer ?? throw new ObjectDisposedException(nameof(SecureCredential));
 
     internal static SecureCredential? FromConsoleKeysForTesting(
         IReadOnlyList<ConsoleKeyInfo> keys,
-        int maxByteLength = 128)
+        int maxByteLength = 128,
+        ArrayPool<byte>? pool = null)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxByteLength);
+
         var index = 0;
-        var buffer = new byte[maxByteLength];
-        var length = ReadMaskedConsoleInput(
-            label: string.Empty,
-            buffer,
-            () => keys[index++],
-            writePrompt: false);
-
-        if (length <= 0)
-        {
-            CryptographicOperations.ZeroMemory(buffer);
-            return null;
-        }
-
-        return new SecureCredential(buffer, length);
+        pool ??= ArrayPool<byte>.Shared;
+        return ReadWithPooledBuffer(
+            maxByteLength,
+            pool,
+            buffer => ReadMaskedConsoleInput(
+                label: string.Empty,
+                buffer,
+                () => keys[index++],
+                writePrompt: false));
     }
 
     internal static int ReadMaskedConsoleInputForTesting(
@@ -292,6 +284,41 @@ public sealed class SecureCredential : IMemoryOwner<byte>
     }
 
     private static bool IsUtf8ContinuationByte(byte value) => (value & 0b1100_0000) == 0b1000_0000;
+
+    private static SecureCredential? ReadWithPooledBuffer(
+        int maxByteLength,
+        ArrayPool<byte> pool,
+        CredentialReader readCredential)
+    {
+        var buffer = pool.Rent(maxByteLength);
+        var ownershipTransferred = false;
+
+        try
+        {
+            var length = readCredential(buffer.AsSpan(0, maxByteLength));
+            if (length <= 0)
+            {
+                return null;
+            }
+
+            var credential = new SecureCredential(buffer, length, pool);
+            ownershipTransferred = true;
+            return credential;
+        }
+        finally
+        {
+            if (!ownershipTransferred)
+            {
+                ClearAndReturn(buffer, pool);
+            }
+        }
+    }
+
+    private static void ClearAndReturn(byte[] buffer, ArrayPool<byte> pool)
+    {
+        CryptographicOperations.ZeroMemory(buffer);
+        pool.Return(buffer);
+    }
 
     /// <summary>
     /// Reads raw bytes through the end of one line of redirected input.

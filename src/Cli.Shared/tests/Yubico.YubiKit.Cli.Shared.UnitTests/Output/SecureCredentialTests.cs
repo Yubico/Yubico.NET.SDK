@@ -9,6 +9,37 @@ namespace Yubico.YubiKit.Cli.Shared.UnitTests.Output;
 
 public sealed class SecureCredentialTests
 {
+    private sealed class TrackingArrayPool(int bufferLength) : ArrayPool<byte>
+    {
+        private readonly byte[] _buffer = new byte[bufferLength];
+
+        public int RequestedLength { get; private set; }
+
+        public int ReturnCount { get; private set; }
+
+        public bool ReturnedCleared { get; private set; }
+
+        public override byte[] Rent(int minimumLength)
+        {
+            if (minimumLength > _buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(minimumLength),
+                    minimumLength,
+                    "Test pool buffer is too small.");
+            }
+
+            RequestedLength = minimumLength;
+            return _buffer;
+        }
+
+        public override void Return(byte[] array, bool clearArray = false)
+        {
+            ReturnCount++;
+            ReturnedCleared = array.AsSpan().IndexOfAnyExcept((byte)0) < 0;
+        }
+    }
+
     [Fact]
     public void FromUtf8String_ExposesUtf8Bytes()
     {
@@ -333,7 +364,74 @@ public sealed class SecureCredentialTests
 
         Assert.NotNull(credential);
         Assert.Equal(1, credential.Memory.Length);
-        Assert.Equal(128, credential.DangerousGetBufferForTesting().Length);
+        Assert.True(credential.DangerousGetBufferForTesting().Length >= 128);
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_DisposeReturnsClearedBufferToPool()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
+            new('\r', ConsoleKey.Enter, shift: false, alt: false, control: false)
+        ];
+        var pool = new TrackingArrayPool(bufferLength: 256);
+
+        var credential = SecureCredential.FromConsoleKeysForTesting(
+            keys,
+            maxByteLength: 128,
+            pool);
+
+        Assert.NotNull(credential);
+        Assert.Equal(128, pool.RequestedLength);
+        Assert.Equal(0, pool.ReturnCount);
+
+        credential.Dispose();
+
+        Assert.Equal(1, pool.ReturnCount);
+        Assert.True(pool.ReturnedCleared);
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_DeclineReturnsClearedBufferToPool()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('9', ConsoleKey.D9, shift: false, alt: false, control: false),
+            new('\u001b', ConsoleKey.Escape, shift: false, alt: false, control: false)
+        ];
+        var pool = new TrackingArrayPool(bufferLength: 16);
+
+        var credential = SecureCredential.FromConsoleKeysForTesting(
+            keys,
+            maxByteLength: 4,
+            pool);
+
+        Assert.Null(credential);
+        Assert.Equal(1, pool.ReturnCount);
+        Assert.True(pool.ReturnedCleared);
+    }
+
+    [Fact]
+    public void FromConsoleKeysForTesting_InputCannotUsePoolSlack()
+    {
+        ConsoleKeyInfo[] keys =
+        [
+            new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
+            new('2', ConsoleKey.D2, shift: false, alt: false, control: false),
+            new('3', ConsoleKey.D3, shift: false, alt: false, control: false),
+            new('4', ConsoleKey.D4, shift: false, alt: false, control: false),
+            new('5', ConsoleKey.D5, shift: false, alt: false, control: false)
+        ];
+        var pool = new TrackingArrayPool(bufferLength: 16);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            SecureCredential.FromConsoleKeysForTesting(
+                keys,
+                maxByteLength: 4,
+                pool));
+        Assert.Equal(1, pool.ReturnCount);
+        Assert.True(pool.ReturnedCleared);
     }
 
     [Fact]

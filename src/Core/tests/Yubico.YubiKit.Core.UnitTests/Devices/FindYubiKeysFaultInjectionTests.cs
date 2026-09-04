@@ -771,8 +771,8 @@ public class FindYubiKeysFaultInjectionTests
     /// <summary>
     ///     Creates scripted per-interface slots whose discovery connects follow a
     ///     per-interface script keyed by the underlying device name. DeviceIds carry a per-factory prefix so
-    ///     the process-wide registries (DeviceConnectionRegistry, ProtocolDeviceInfo single-flight) never
-    ///     collide across tests, while staying stable across scans within one test.
+    ///     the process-wide connection registry never collides across tests, while staying stable across
+    ///     scans within one finder-owned single-flight scope.
     /// </summary>
     private sealed class ScriptedIdentityFactory
     {

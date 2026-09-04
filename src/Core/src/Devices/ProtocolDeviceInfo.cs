@@ -32,24 +32,80 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </remarks>
 internal static class ProtocolDeviceInfo
 {
-    private static readonly ConcurrentDictionary<ReadKey, SharedRead> InFlightReads = new();
+    private static readonly ReadScope DefaultScope = new();
 
-    // Current transport epoch. Generation and supersede token live in ONE immutable object swapped by CAS,
-    // so a reader can never observe a torn pair (old generation with the new epoch's token): whatever epoch
-    // it captures, that epoch's own token is cancelled when the epoch is replaced. Single-flight reads are
-    // keyed by reusable interface identifiers, so a timed-out native read that survives a removal +
-    // same-slot replacement would otherwise be JOINED by the replacement's scan, which then consumes the
-    // departed key's device info; the epoch generation in ReadKey detaches post-hotplug reads from any
-    // in-flight read started against the previous physical topology, while the abandoned read still
-    // completes and removes itself under its own key.
-    private static TransportEpoch _currentEpoch = new(generation: 0);
+    // A finder owns one read scope, so its single-flight reads cannot be joined by a replacement manager.
+    // Within that scope, generation and supersede token live in one immutable transport epoch captured under
+    // a short lock. Transport activity either advances the default direct-call scope or terminally retires a
+    // finder scope; a read admitted after retirement fails before worker admission or hardware open.
+    internal sealed class ReadScope
+    {
+        private readonly Lock _gate = new();
+        private readonly ConcurrentDictionary<ReadKey, SharedRead> _inFlightReads = new();
+        private TransportEpoch _currentEpoch = new(generation: 0);
+        private bool _retired;
+
+        internal bool TryCaptureEpoch(out TransportEpoch epoch)
+        {
+            lock (_gate)
+            {
+                epoch = _currentEpoch;
+                return !_retired;
+            }
+        }
+
+        internal SharedRead GetOrAdd(ReadKey key, Func<ReadKey, SharedRead> create) =>
+            _inFlightReads.GetOrAdd(key, create);
+
+        internal void Remove(ReadKey key, SharedRead read) =>
+            _ = _inFlightReads.TryRemove(KeyValuePair.Create(key, read));
+
+        internal bool IsCurrent(TransportEpoch epoch)
+        {
+            lock (_gate)
+                return !_retired && ReferenceEquals(_currentEpoch, epoch);
+        }
+
+        internal void Advance()
+        {
+            TransportEpoch retired;
+            lock (_gate)
+            {
+                if (_retired)
+                    return;
+
+                retired = _currentEpoch;
+                _currentEpoch = new TransportEpoch(retired.Generation + 1);
+            }
+
+            retired.MarkSuperseded();
+        }
+
+        internal void Retire()
+        {
+            TransportEpoch retired;
+            lock (_gate)
+            {
+                if (_retired)
+                    return;
+
+                _retired = true;
+                retired = _currentEpoch;
+            }
+
+            retired.MarkSuperseded();
+        }
+
+    }
+
+    internal static ReadScope CreateScope() => new();
 
     /// <summary>
     ///     One immutable hotplug epoch: a generation and the cancellation source that fires when this
     ///     epoch is superseded. The retired CTS is only cancelled, never disposed, because detached
     ///     waiters may still be observing it (a cancelled timer-less CTS is plain collectible garbage).
     /// </summary>
-    private sealed class TransportEpoch(long generation)
+    internal sealed class TransportEpoch(long generation)
     {
         private readonly CancellationTokenSource _superseded = new();
 
@@ -68,21 +124,14 @@ internal static class ProtocolDeviceInfo
     ///     whose wait is cancelled so they cannot accumulate behind hung workers). Called from the same
     ///     place <see cref="FindYubiKeys" /> invalidates its identity/metadata caches.
     /// </summary>
-    internal static void NotifyTransportActivity()
+    internal static void NotifyTransportActivity(ReadScope? scope = null)
     {
-        // Swap first, cancel after: a reader that captured the retired epoch either already registered on
-        // its token (cancel wakes it) or checks it later (already cancelled). Concurrent notifiers each
-        // cancel exactly the epoch they retired, so no epoch in the chain is left uncancelled.
-        TransportEpoch retired;
-        TransportEpoch next;
-        do
-        {
-            retired = Volatile.Read(ref _currentEpoch);
-            next = new TransportEpoch(retired.Generation + 1);
-        } while (!ReferenceEquals(Interlocked.CompareExchange(ref _currentEpoch, next, retired), retired));
+        scope ??= DefaultScope;
 
-        retired.MarkSuperseded();
+        scope.Advance();
     }
+
+    internal static void Retire(ReadScope scope) => scope.Retire();
 
     /// <summary>
     ///     Opens a short-lived connection over the given interface and reads <see cref="DeviceInfo" />,
@@ -112,7 +161,8 @@ internal static class ProtocolDeviceInfo
         TimeSpan budget,
         ILogger logger,
         CancellationToken cancellationToken,
-        bool waitForWorkerSlot = false)
+        bool waitForWorkerSlot = false,
+        ReadScope? scope = null)
     {
         var interfaceId = DeviceConnectionRegistry.ResolveInterfaceId(device, connection);
         var provider = device as IDiscoveryConnectionProvider;
@@ -124,18 +174,20 @@ internal static class ProtocolDeviceInfo
                 budget,
                 logger,
                 cancellationToken,
-                waitForWorkerSlot)
+                waitForWorkerSlot,
+                scope ?? DefaultScope)
             .ConfigureAwait(false);
     }
 
-    public static Task<DeviceInfo> ReadSlotBoundedAsync(
+    public static async Task<DeviceInfo> ReadSlotBoundedAsync(
         IYubiKeyConnectionSlot slot,
         ConnectionType connection,
         TimeSpan budget,
         ILogger logger,
         CancellationToken cancellationToken,
-        bool waitForWorkerSlot = false) =>
-        ReadBoundedCoreAsync(
+        bool waitForWorkerSlot = false,
+        ReadScope? scope = null) =>
+        await ReadBoundedCoreAsync(
             slot.InterfaceId,
             slot.InterfaceId,
             slot as IDiscoveryConnectionProvider,
@@ -143,7 +195,8 @@ internal static class ProtocolDeviceInfo
             budget,
             logger,
             cancellationToken,
-            waitForWorkerSlot);
+            waitForWorkerSlot,
+            scope ?? DefaultScope).ConfigureAwait(false);
 
     private static async Task<DeviceInfo> ReadBoundedCoreAsync(
         string interfaceId,
@@ -153,16 +206,19 @@ internal static class ProtocolDeviceInfo
         TimeSpan budget,
         ILogger logger,
         CancellationToken cancellationToken,
-        bool waitForWorkerSlot)
+        bool waitForWorkerSlot,
+        ReadScope scope)
     {
         // One atomic epoch capture: the key's generation and the supersede token used while queued are
         // guaranteed to belong to the same hotplug epoch, so a read created against an already-retired
         // epoch always holds a token that has been (or is about to be) cancelled.
-        var epoch = Volatile.Read(ref _currentEpoch);
+        if (!scope.TryCaptureEpoch(out var epoch))
+            throw Superseded(new ReadKey(interfaceId, connection, Generation: -1));
+
         var key = new ReadKey(interfaceId, connection, epoch.Generation);
-        var sharedRead = InFlightReads.GetOrAdd(
+        var sharedRead = scope.GetOrAdd(
             key,
-            _ => new SharedRead(key, epoch, deviceId, provider, connection, logger, waitForWorkerSlot));
+            _ => new SharedRead(scope, key, epoch, deviceId, provider, connection, logger, waitForWorkerSlot));
 
         try
         {
@@ -180,10 +236,11 @@ internal static class ProtocolDeviceInfo
         }
     }
 
-    private readonly record struct ReadKey(string InterfaceId, ConnectionType Connection, long Generation);
+    internal readonly record struct ReadKey(string InterfaceId, ConnectionType Connection, long Generation);
 
-    private sealed class SharedRead
+    internal sealed class SharedRead
     {
+        private readonly ReadScope _scope;
         private readonly ReadKey _key;
         private readonly string _deviceId;
         private readonly ConnectionType _connection;
@@ -192,6 +249,7 @@ internal static class ProtocolDeviceInfo
         private int _abandonedWaiterCount;
 
         public SharedRead(
+            ReadScope scope,
             ReadKey key,
             TransportEpoch epoch,
             string deviceId,
@@ -200,6 +258,7 @@ internal static class ProtocolDeviceInfo
             ILogger logger,
             bool waitForWorkerSlot)
         {
+            _scope = scope;
             _key = key;
             _deviceId = deviceId;
             _connection = connection;
@@ -218,7 +277,7 @@ internal static class ProtocolDeviceInfo
             IDiscoveryConnectionProvider? provider,
             bool waitForWorkerSlot)
         {
-            var task = StartSharedRead(_key, epoch, provider, waitForWorkerSlot);
+            var task = StartSharedRead(_scope, _key, epoch, provider, waitForWorkerSlot);
             _ = task.ContinueWith(
                 Complete,
                 CancellationToken.None,
@@ -231,7 +290,7 @@ internal static class ProtocolDeviceInfo
         private void Complete(Task<DeviceInfo> task)
         {
             var exception = task.Exception?.GetBaseException();
-            _ = InFlightReads.TryRemove(KeyValuePair.Create(_key, this));
+            _scope.Remove(_key, this);
 
             var abandonedWaiterCount = Volatile.Read(ref _abandonedWaiterCount);
             if (abandonedWaiterCount > 0)
@@ -248,6 +307,7 @@ internal static class ProtocolDeviceInfo
     }
 
     private static Task<DeviceInfo> StartSharedRead(
+        ReadScope scope,
         ReadKey key,
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
@@ -262,7 +322,7 @@ internal static class ProtocolDeviceInfo
             // bounds the wait, and the admission bound itself is preserved: at most
             // MaximumConcurrentWorkers native reads run concurrently, so a hung native call still cannot
             // multiply workers.
-            return StartQueuedSharedRead(key, epoch, provider);
+            return StartQueuedSharedRead(scope, key, epoch, provider);
         }
 
         if (!DiscoveryWorkerAdmission.TryAcquire(out var admission))
@@ -277,7 +337,7 @@ internal static class ProtocolDeviceInfo
             // WaitAsync. Saturation skips instead of queuing or allocating another worker (best-effort
             // metadata path). Supersession is validated inside the worker, immediately before the
             // hardware open (see ConnectAndReadAsync).
-            return StartWorker(key, epoch, provider, admission);
+            return StartWorker(scope, key, epoch, provider, admission);
         }
         catch
         {
@@ -287,6 +347,7 @@ internal static class ProtocolDeviceInfo
     }
 
     private static async Task<DeviceInfo> StartQueuedSharedRead(
+        ReadScope scope,
         ReadKey key,
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider)
@@ -309,7 +370,7 @@ internal static class ProtocolDeviceInfo
 
         try
         {
-            return await StartWorker(key, epoch, provider, admission).ConfigureAwait(false);
+            return await StartWorker(scope, key, epoch, provider, admission).ConfigureAwait(false);
         }
         catch
         {
@@ -320,9 +381,9 @@ internal static class ProtocolDeviceInfo
         }
     }
 
-    private static void ThrowIfSuperseded(ReadKey key, TransportEpoch epoch)
+    private static void ThrowIfSuperseded(ReadScope scope, ReadKey key, TransportEpoch epoch)
     {
-        if (!ReferenceEquals(Volatile.Read(ref _currentEpoch), epoch))
+        if (!scope.IsCurrent(epoch))
             throw Superseded(key);
     }
 
@@ -330,6 +391,7 @@ internal static class ProtocolDeviceInfo
         new(key.InterfaceId, DiscoveryReadSkipCause.SupersededByTransportActivity);
 
     private static Task<DeviceInfo> StartWorker(
+        ReadScope scope,
         ReadKey key,
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
@@ -339,7 +401,7 @@ internal static class ProtocolDeviceInfo
                 {
                     using (admission)
                     {
-                        return await ConnectAndReadAsync(key, epoch, provider, CancellationToken.None)
+                        return await ConnectAndReadAsync(scope, key, epoch, provider, CancellationToken.None)
                             .ConfigureAwait(false);
                     }
                 },
@@ -349,6 +411,7 @@ internal static class ProtocolDeviceInfo
             .Unwrap();
 
     private static async Task<DeviceInfo> ConnectAndReadAsync(
+        ReadScope scope,
         ReadKey key,
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
@@ -366,9 +429,10 @@ internal static class ProtocolDeviceInfo
         // START a new open against hardware its evidence no longer names. An epoch flip landing after this
         // check is inherently racy with the open itself and is accepted as residual: the delivered
         // invariants are (a) a read holding an old epoch can never wait forever un-cancelled, and (b) it
-        // cannot begin a hardware open once supersession is observable. Its RESULT is still discarded by
-        // the caller's generation-checked cache writes (see FindYubiKeys.PublishUnlessSuperseded).
-        ThrowIfSuperseded(key, epoch);
+        // cannot begin a hardware open once supersession is observable. A finder also stores cache writes in
+        // the same captured EvidenceEpoch as this scope, so results completing after retirement cannot reach
+        // the replacement epoch's caches.
+        ThrowIfSuperseded(scope, key, epoch);
 
         // Discovery creates this connection, so discovery disposes it. Protocols are pure users of the
         // connection they are handed, so the protocol disposal inside ReadAsync does not release the handle.

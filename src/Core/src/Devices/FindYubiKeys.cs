@@ -62,6 +62,7 @@ public class FindYubiKeys : IFindYubiKeys
     private readonly IFindPcscDevices findPcscService;
     private readonly IFindHidDevices findHidService;
     private readonly Func<IDevice, IYubiKeyConnectionSlot> createSlot;
+    private readonly Lock _evidenceLock = new();
 
     // Tier-1 evidence source. Optional by contract: the no-topology resolver on macOS/Linux, and on Windows
     // any per-interface read failure simply yields no key for that interface.
@@ -97,7 +98,7 @@ public class FindYubiKeys : IFindYubiKeys
     //    same-slot swap completing BETWEEN scans reuses the slot-derived interface id, so the old key's
     //    serial would be attributed to the new key - key substitution. Hotplug events are the signal that
     //    hardware changed; NotifyTransportActivity discards all cached evidence.
-    private readonly ConcurrentDictionary<string, CachedIdentity> _identityCache = new();
+    private EvidenceEpoch _evidence = new();
 
     /// <summary>A successful identity read plus the evidence context that makes it reusable.</summary>
     private readonly record struct CachedIdentity(DeviceInfo Info, ushort? Pid);
@@ -105,13 +106,12 @@ public class FindYubiKeys : IFindYubiKeys
     // Best-effort metadata cache, keyed by the published device's stable interface-set key
     // (YubiKeyDevice.PhysicalIdentityKey, NOT DeviceId, which can flip between pid- and
     // serial-forms). Evicted when any member interface disappears.
-    private readonly ConcurrentDictionary<string, MetadataCacheEntry> _metadataCache = new();
-
-    // Monotonic hotplug generation. Captured before a cache-feeding read starts and validated when the
-    // result is written: a read that STARTED before hotplug activity can COMPLETE after the caches were
-    // cleared, and without the write-time check it would repopulate them with the departed key's data,
-    // which every later scan would then trust. See ReadIdentityAsync / PopulateMetadataAsync.
-    private long _cacheGeneration;
+    private sealed class EvidenceEpoch
+    {
+        internal ConcurrentDictionary<string, CachedIdentity> IdentityCache { get; } = new();
+        internal ConcurrentDictionary<string, MetadataCacheEntry> MetadataCache { get; } = new();
+        internal ProtocolDeviceInfo.ReadScope ReadScope { get; } = ProtocolDeviceInfo.CreateScope();
+    }
 
     // Serializes discovery so two concurrent scans do not open connections to the same interface at once.
     private readonly SemaphoreSlim _scanLock = new(1, 1);
@@ -126,13 +126,17 @@ public class FindYubiKeys : IFindYubiKeys
         await _scanLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
+            EvidenceEpoch evidence;
+            lock (_evidenceLock)
+                evidence = _evidence;
+
             // Enumerate all transports regardless of the requested filter so per-interface devices can be
             // merged into physical devices; the filter is applied to the merged capability set at the end.
             var pcscDevices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
             var hidDevices = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
 
             var interfaces = BuildInterfaces(pcscDevices, hidDevices);
-            EvictAbsentIdentities(interfaces);
+            EvictAbsentIdentities(evidence, interfaces);
 
             // Reader-name drift: if any USB CCID reader name failed to parse to a known PID, PID correlation
             // is untrustworthy this scan; degrade to serial-based merge for all USB interfaces (ISC-11).
@@ -156,14 +160,14 @@ public class FindYubiKeys : IFindYubiKeys
                         || NeedsSerialForAmbiguousPartialPid(interfaces, iface));
 
                 var info = needsSerial
-                    ? await ReadIdentityAsync(iface, cancellationToken).ConfigureAwait(false)
+                    ? await ReadIdentityAsync(evidence, iface, cancellationToken).ConfigureAwait(false)
                     : null;
 
                 return iface.ToDescriptor(info, needsSerial);
             })).ConfigureAwait(false);
 
             var merged = CompositeDeviceMerger.Merge(descriptors, pidCorrelationUntrusted);
-            await PopulateMetadataAsync(merged, interfaces, cancellationToken).ConfigureAwait(false);
+            await PopulateMetadataAsync(evidence, merged, interfaces, cancellationToken).ConfigureAwait(false);
 
             return [.. merged.Where(d => type.Matches(d.AvailableConnections))];
         }
@@ -258,46 +262,26 @@ public class FindYubiKeys : IFindYubiKeys
         return observed.SupportsConnection(ConnectionType.SmartCard) && observed != expected;
     }
 
-    private async Task<DeviceInfo?> ReadIdentityAsync(InterfaceCandidate iface, CancellationToken cancellationToken)
+    private async Task<DeviceInfo?> ReadIdentityAsync(
+        EvidenceEpoch evidence,
+        InterfaceCandidate iface,
+        CancellationToken cancellationToken)
     {
         // A hit is valid only for the configuration it was read under: the PID is part of the evidence,
         // not incidental metadata. A mismatch is a miss, and a successful re-read overwrites below.
-        if (_identityCache.TryGetValue(iface.Device.InterfaceId, out var cached) && cached.Pid == iface.Pid)
+        if (evidence.IdentityCache.TryGetValue(iface.Device.InterfaceId, out var cached) && cached.Pid == iface.Pid)
             return cached.Info;
 
-        // Capture the hotplug generation BEFORE the read starts: a read that outlives a hotplug event
-        // read hardware that may no longer exist, and its result must not repopulate the cache.
-        var generation = Volatile.Read(ref _cacheGeneration);
         var info = await DiscoveryIdentityReader
-            .TryReadAsync(iface.Device, iface.Connection, Logger, cancellationToken)
+            .TryReadAsync(iface.Device, iface.Connection, Logger, cancellationToken, evidence.ReadScope)
             .ConfigureAwait(false);
 
-        // Cache only successful reads so a transient failure is retried on the next scan (not poisoned).
+        // Cache only successful reads in the captured epoch. If transport activity replaced the epoch while
+        // this read was running, this write lands in unreachable old evidence and cannot affect later scans.
         if (info is { } identity)
-            PublishUnlessSuperseded(_identityCache, iface.Device.InterfaceId, new CachedIdentity(identity, iface.Pid), generation);
+            evidence.IdentityCache[iface.Device.InterfaceId] = new CachedIdentity(identity, iface.Pid);
 
         return info;
-    }
-
-    /// <summary>
-    ///     Publishes a cache entry only if no hotplug activity happened since <paramref name="generation" />
-    ///     was captured. The write-then-recheck closes the race with <see cref="NotifyTransportActivity" />:
-    ///     the invalidator bumps the generation before clearing, so a stale writer either published before
-    ///     the clear (and is cleared) or observes the bumped generation here and removes exactly its own
-    ///     entry (never a fresh one written concurrently under the new generation).
-    /// </summary>
-    private void PublishUnlessSuperseded<TValue>(
-        ConcurrentDictionary<string, TValue> cache,
-        string key,
-        TValue value,
-        long generation)
-    {
-        if (Volatile.Read(ref _cacheGeneration) != generation)
-            return;
-
-        cache[key] = value;
-        if (Volatile.Read(ref _cacheGeneration) != generation)
-            _ = cache.TryRemove(KeyValuePair.Create(key, value));
     }
 
     /// <inheritdoc />
@@ -310,26 +294,25 @@ public class FindYubiKeys : IFindYubiKeys
         // replacement key into phantoms. Hotplug is rare and identity/metadata reads are budgeted, so
         // re-reading on the next scan is the proportionate price for never mixing two keys' evidence.
         //
-        // Order matters: bump the generation BEFORE clearing so a concurrent read completing right now
-        // either published before the clear (cleared here) or sees the new generation at write time and
-        // discards its own write (see PublishUnlessSuperseded).
-        _ = Interlocked.Increment(ref _cacheGeneration);
-        _identityCache.Clear();
-        _metadataCache.Clear();
-
-        // Detach in-flight single-flight device-info reads too: without this, a read started against the
-        // departed key could be joined - and its result consumed - by the replacement's scan, and queued
-        // reads would open hardware their evidence no longer names.
-        ProtocolDeviceInfo.NotifyTransportActivity();
+        // Replace caches and read scope as one atomic evidence epoch. Scans already in flight keep only the
+        // retired object, so their writes cannot repopulate current caches; scans starting afterward cannot
+        // join reads started against the departed topology.
+        lock (_evidenceLock)
+        {
+            var retired = _evidence;
+            ProtocolDeviceInfo.Retire(retired.ReadScope);
+            _evidence = new EvidenceEpoch();
+        }
     }
 
     private async Task PopulateMetadataAsync(
+        EvidenceEpoch evidence,
         IReadOnlyList<YubiKeyDevice> merged,
         IReadOnlyList<InterfaceCandidate> interfaces,
         CancellationToken cancellationToken)
     {
         // Always evict stale metadata once per scan, including scans with no published devices.
-        EvictAbsentMetadata(interfaces);
+        EvictAbsentMetadata(evidence, interfaces);
 
         var devices = merged.Where(device => device.DeviceInfo is null).ToList();
         if (devices.Count == 0)
@@ -337,14 +320,12 @@ public class FindYubiKeys : IFindYubiKeys
 
         // Read best-effort metadata for each published key concurrently. Grouping is already computed and
         // does not depend on these results, but the bounded reads are awaited and may delay scan completion
-        // by up to the metadata budget. The hotplug generation is captured before the reads start so a read
-        // outliving a hotplug event cannot repopulate the just-cleared cache (the scan still publishes what
-        // it read; only the cached copy is dropped and re-read next scan).
-        var generation = Volatile.Read(ref _cacheGeneration);
+        // by up to the metadata budget. Reads and cache writes remain in the captured evidence epoch; if
+        // transport activity swaps it out, stale completion cannot reach current scans.
         var reads = devices.Select(async device =>
         {
             var key = device.PhysicalIdentityKey;
-            if (_metadataCache.TryGetValue(key, out var cached))
+            if (evidence.MetadataCache.TryGetValue(key, out var cached))
             {
                 device.DeviceInfo = cached.Info;
                 return;
@@ -357,12 +338,12 @@ public class FindYubiKeys : IFindYubiKeys
                 return;
 
             var info = await CompositeMetadataReader
-                .TryReadAsync(device, MetadataReadBudget, Logger, cancellationToken)
+                .TryReadAsync(device, MetadataReadBudget, Logger, cancellationToken, evidence.ReadScope)
                 .ConfigureAwait(false);
 
             if (info is { } metadata)
             {
-                PublishUnlessSuperseded(_metadataCache, key, new MetadataCacheEntry(metadata, device.InterfaceIds), generation);
+                evidence.MetadataCache[key] = new MetadataCacheEntry(metadata, device.InterfaceIds);
                 device.DeviceInfo = metadata;
             }
         });
@@ -370,21 +351,21 @@ public class FindYubiKeys : IFindYubiKeys
         await Task.WhenAll(reads).ConfigureAwait(false);
     }
 
-    private void EvictAbsentIdentities(IReadOnlyList<InterfaceCandidate> interfaces)
+    private static void EvictAbsentIdentities(EvidenceEpoch evidence, IReadOnlyList<InterfaceCandidate> interfaces)
     {
         var present = interfaces.Select(i => i.Device.InterfaceId).ToHashSet();
-        foreach (var staleKey in _identityCache.Keys.Where(k => !present.Contains(k)).ToList())
-            _ = _identityCache.TryRemove(staleKey, out _);
+        foreach (var staleKey in evidence.IdentityCache.Keys.Where(k => !present.Contains(k)).ToList())
+            _ = evidence.IdentityCache.TryRemove(staleKey, out _);
     }
 
-    private void EvictAbsentMetadata(IReadOnlyList<InterfaceCandidate> interfaces)
+    private static void EvictAbsentMetadata(EvidenceEpoch evidence, IReadOnlyList<InterfaceCandidate> interfaces)
     {
         var present = interfaces.Select(i => i.Device.InterfaceId).ToHashSet();
-        foreach (var entry in _metadataCache)
+        foreach (var entry in evidence.MetadataCache)
         {
             // An entry is kept only while all of its member interface ids are still enumerated.
             if (entry.Value.InterfaceIds.Any(id => !present.Contains(id)))
-                _ = _metadataCache.TryRemove(entry.Key, out _);
+                _ = evidence.MetadataCache.TryRemove(entry.Key, out _);
         }
     }
 

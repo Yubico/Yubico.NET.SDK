@@ -44,7 +44,8 @@ internal static class DiscoveryIdentityReader
         IYubiKeyConnectionSlot device,
         ConnectionType connection,
         ILogger logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        ProtocolDeviceInfo.ReadScope? scope = null)
     {
         if (DeviceConnectionRegistry.IsInUse(device.InterfaceId))
         {
@@ -60,7 +61,14 @@ internal static class DiscoveryIdentityReader
             try
             {
                 return await ProtocolDeviceInfo
-                    .ReadSlotBoundedAsync(device, connection, PerAttemptBudget, logger, cancellationToken, waitForWorkerSlot: true)
+                    .ReadSlotBoundedAsync(
+                        device,
+                        connection,
+                        PerAttemptBudget,
+                        logger,
+                        cancellationToken,
+                        waitForWorkerSlot: true,
+                        scope)
                     .ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -112,4 +120,5 @@ internal static class DiscoveryIdentityReader
             }
         }
     }
+
 }

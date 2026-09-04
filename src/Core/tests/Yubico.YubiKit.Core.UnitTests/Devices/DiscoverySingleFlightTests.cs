@@ -335,6 +335,67 @@ public class DiscoverySingleFlightTests
     }
 
     [Fact]
+    public async Task ReadBoundedAsync_DifferentFinderScopes_DoNotJoinInFlightRead()
+    {
+        var device = new ControllableConnectYubiKey(cancelConnectWithCaller: false);
+        var retiringManagerScope = ProtocolDeviceInfo.CreateScope();
+        var replacementManagerScope = ProtocolDeviceInfo.CreateScope();
+
+        try
+        {
+            using var firstWaiter = new CancellationTokenSource();
+            var firstRead = ProtocolDeviceInfo.ReadBoundedAsync(
+                device,
+                ConnectionType.SmartCard,
+                TimeSpan.FromSeconds(5),
+                NullLogger.Instance,
+                firstWaiter.Token,
+                scope: retiringManagerScope);
+            await device.ConnectStarted.Task.WaitAsync(TestContext.Current.CancellationToken);
+            firstWaiter.Cancel();
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => firstRead);
+            Assert.Equal(1, device.ConnectCalls);
+
+            var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
+                ProtocolDeviceInfo.ReadBoundedAsync(
+                    device,
+                    ConnectionType.SmartCard,
+                    TimeSpan.FromMilliseconds(50),
+                    NullLogger.Instance,
+                    CancellationToken.None,
+                    scope: replacementManagerScope));
+
+            Assert.Equal(DiscoveryReadSkipCause.InterfaceLeaseHeld, exception.Cause);
+            Assert.Equal(1, device.ConnectCalls);
+        }
+        finally
+        {
+            device.FailConnect();
+            await device.ConnectFinished.Task.WaitAsync(TestContext.Current.CancellationToken);
+        }
+    }
+
+    [Fact]
+    public async Task ReadBoundedAsync_RetiredFinderScope_RejectsLateReadWithoutConnecting()
+    {
+        var scope = ProtocolDeviceInfo.CreateScope();
+        var device = new ControllableConnectYubiKey(cancelConnectWithCaller: false);
+        ProtocolDeviceInfo.Retire(scope);
+
+        var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
+            ProtocolDeviceInfo.ReadBoundedAsync(
+                device,
+                ConnectionType.SmartCard,
+                TimeSpan.FromSeconds(1),
+                NullLogger.Instance,
+                CancellationToken.None,
+                scope: scope));
+
+        Assert.Equal(DiscoveryReadSkipCause.SupersededByTransportActivity, exception.Cause);
+        Assert.Equal(0, device.ConnectCalls);
+    }
+
+    [Fact]
     [Trait("Category", "RuntimeResilience")]
     public async Task ReadBoundedAsync_TransportActivityWhileQueuedForAdmission_FailsFastWithoutConnecting()
     {

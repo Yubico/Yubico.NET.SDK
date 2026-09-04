@@ -291,7 +291,7 @@ public class AsnPrivateKeyDecoderTests
 
         var writer = new AsnWriter(AsnEncodingRules.DER);
         writer.PushSequence();
-        writer.WriteInteger(1); // invalid version
+        writer.WriteInteger(1); // Valid RFC 5958 version value not supported by this decoder.
         writer.WriteEncodedValue(algSeq.Span);
         writer.WriteOctetString(keyOctets);
         writer.PopSequence();

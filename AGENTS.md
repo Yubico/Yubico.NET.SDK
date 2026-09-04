@@ -1,65 +1,11 @@
 # AGENTS.md
 
-## First Reads
-- Root `CLAUDE.md` is the canonical detailed agent guide; this file is only the compact OpenCode ramp-up sheet.
-- If touching `src/<Module>/`, read that module's `CLAUDE.md` first when present. Tests subfolders may also have their own `CLAUDE.md`.
-- Prefer executable truth over prose: `toolchain.cs`, `Directory.Build.props`, `Directory.Packages.props`, `.github/workflows/build.yml`, and test `.csproj` files settle command and runner questions.
+## Source of Truth
 
-## Toolchain Commands
-- Use .NET 10 SDK. The repo defaults to `net10.0`, C# 14, nullable enabled, central package management, and warnings-as-errors for non-test projects.
-- Do not run `dotnet build` directly. Use `dotnet toolchain.cs build` or `dotnet toolchain.cs -- build --project Piv`.
-- Do not run `dotnet test` directly. Unit tests mix xUnit v3/Microsoft Testing Platform and xUnit v2; `dotnet toolchain.cs test` detects and invokes the right runner.
-- Focus tests with both module and filter when possible: `dotnet toolchain.cs -- test --project Fido2 --filter "Method~Sign"`. The toolchain normalises `Method~`/`Name~` to `FullyQualifiedName~` for the xUnit v2 integration projects, which have no `Method` property; use `FullyQualifiedName~` directly if you want to be explicit.
-- A filter matching zero tests fails the target (`No tests matched the specified filter`). Do not judge a run by the closing `Passed: N | ... | Total: N` line — that counts **projects**, not tests. Read the per-project `total:` figure.
-- When touching Core runtime loops, polling paths, recovery logic, or listener lifecycle cleanup, also run `dotnet toolchain.cs -- resilience --fast`.
-- `--integration` requires `--project`: `dotnet toolchain.cs -- test --integration --project Piv --smoke`.
-- `--smoke` skips `Slow` and `RequiresUserPresence`; agents should not run touch/insert/remove tests unless a human explicitly coordinates hardware. It can thin coverage sharply — on WebAuthn it leaves a single SmartCard test — so check `total:` before calling a smoke pass validation.
-- Never run a whole `Category=RequiresUserPresence` lane as one blocking command: it blocks for minutes, and aborting mid-ceremony leaves the authenticator holding a user-presence request that wedges the key until it is re-plugged. One narrowly filtered test per invocation, with the human ready.
-- Use `dotnet toolchain.cs -- --help` when arguments act strangely; every script long option, including `--project`, requires the preceding `--` separator.
-- CI runs `dotnet toolchain.cs build`, `dotnet toolchain.cs test`, then `dotnet toolchain.cs -- pack --package-version 2.0.0-alpha.2`.
-- Follow root `CLAUDE.md` Pre-Commit Checklist for the scoped `dotnet format` workflow.
+- Root [`CLAUDE.md`](./CLAUDE.md) is canonical for all agent behavior, commands, and guardrails.
+- If working in `src/<Module>/` (or module tests), read that module's `CLAUDE.md` after root `CLAUDE.md`.
 
-## Project Shape
-- Modules live under `src/` with directory names stripped of the `Yubico.YubiKit.` prefix; assembly, namespace, and package names keep the prefix.
-- `Core` owns device discovery, connection abstractions, APDU processing, SCP support, platform interop, crypto utilities, and TLV utilities.
-- App modules are `Management`, `Piv`, `Fido2`, `WebAuthn`, `Oath`, `YubiOtp`, `OpenPgp`, `SecurityDomain`, and `YubiHsm`.
-- `WebAuthn` is a higher-level surface over `Fido2`; do not duplicate CTAP/FIDO behavior there.
-- Broad exploration shortcut: run `codemapper .` to generate gitignored API maps in `codebase_ast/`.
-- Core device discovery uses the static `YubiKeyManager`; no Core DI registration is required.
+## Scope of This File
 
-## Architecture Gotchas
-- APDU flow is a decorator pipeline: command chaining, short/extended APDU formatting, `ISmartCardConnection.TransmitAsync()`, then chained response reassembly.
-- `ApplicationSession` centralizes firmware, initialization, authentication, and protocol ownership; prefer `IsSupported(...)` / `EnsureSupports(...)` over duplicating firmware gates.
-- Platform interop belongs under `src/Core/src/PlatformInterop/{Windows,MacOS,Linux,Desktop}` with safe handles and `SdkPlatformInfo` platform selection.
-- FIDO2 over USB primarily uses HID FIDO. SmartCard/CCID FIDO2 is supported over NFC and over USB when the FIDO2 AID is exposed; USB SmartCard FIDO2 requires firmware 5.8.0+.
-- `Tlv` and `DisposableTlvList` must be disposed. `TlvHelper.EncodeList` does not dispose its inputs; `EncodeAndDisposeList` does.
-- Listener/native retry loops must block, back off, exit, or throttle on every failure path; add no-hardware fault-injection tests for persistent native errors.
-
-## Hardware And Integration Tests
-- Integration tests require authorized YubiKey hardware. The shared test infrastructure reads `YubiKeyTests:AllowedSerialNumbers` from `appsettings.json`; an empty/missing allow list can hard-fail with `Environment.Exit(-1)`, and unauthorized devices are filtered out.
-- Linux hardware tests need PC/SC pieces like `pcscd`, `libpcsclite-dev`, and `libudev-dev`; CI starts `pcscd` manually before build/test.
-- `[WithYubiKey]`/`YubiKeyTestState` tests discover devices lazily at execution, not discovery. Devices must already be connected before the test runner starts.
-- Security Domain integration helpers reset the Security Domain by default before each test; pass `resetBeforeUse: false` only when preserving state is intentional.
-- PIV tests commonly need manual application reset to defaults at the start of the test unless a helper documents otherwise.
-
-## Security And Memory Rules
-- Small synchronous byte buffers: `Span<byte>` with `stackalloc` up to 512 bytes. Larger temporary buffers: `ArrayPool<byte>.Shared.Rent()` with `try/finally` return.
-- Async byte data crossing awaits should use `Memory<byte>`, `ReadOnlyMemory<byte>`, or `IMemoryOwner<byte>`, not `Span<byte>`.
-- Avoid `.ToArray()` and LINQ on byte data unless data must escape the current scope.
-- Always zero PINs, PUKs, keys, SCP material, and secret-derived buffers with `CryptographicOperations.ZeroMemory()`.
-- Classify YubiKey-returned data by semantics: device metadata/status does not need special zeroing; authentication material, token material, decrypted plaintext, and secret-derived output does.
-- Use `CryptographicOperations.FixedTimeEquals` for secret-derived comparisons; do not use `SequenceEqual` on secrets.
-- Never store a privately cloned sensitive `byte[]` in a struct; struct copies keep references you cannot reliably zero. Use a sealed disposable class for owned sensitive buffers.
-- Logging is static via `YubiKitLogging.CreateLogger<T>()`; do not add SDK constructors that require `ILogger`/`ILoggerFactory`.
-- Never log PINs, keys, credentials, challenge/response secrets, or sensitive payloads. Log lengths, algorithm IDs, status, and non-secret metadata only.
-
-## Tests Worth Writing
-- Do not add validation-only tests that just prove `ArgumentNullException.ThrowIfNull` or framework type checks work.
-- Do not add skipped placeholder tests. If behavior cannot be unit-tested, document the limitation and point to an integration path.
-- Use fake connections, queued APDU responses, and byte/vector assertions for protocol behavior; use integration tests only for real hardware behavior.
-- Runtime resilience tests should use fakes/seams and must not self-skip because PC/SC, HID, or YubiKey hardware is unavailable.
-
-## Git And Release Notes
-- The workflow file currently triggers on `yubikit` and `yubikit-applets`; verify the active plan/branch before assuming a PR base.
-- Only stage files you changed explicitly; never use `git add .`, `git add -A`, or `git commit -a`.
-- Package signing is `sign.cs` and is Windows-only because it depends on `signtool.exe`, Windows certificate store, NuGet CLI, GitHub CLI, and a signing smart card.
+- This file is intentionally minimal and only routes to canonical `CLAUDE.md`.
+- Do not duplicate operational policy here.

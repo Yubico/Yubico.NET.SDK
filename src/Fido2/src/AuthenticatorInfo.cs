@@ -63,6 +63,15 @@ public sealed class AuthenticatorInfo
     private const int KeyAuthenticatorConfigCommands = 0x1F;
 
     /// <summary>
+    /// Gets the complete original CBOR-encoded authenticatorGetInfo response.
+    /// </summary>
+    /// <remarks>
+    /// This is populated by <see cref="Decode(ReadOnlyMemory{byte})"/> and preserves fields that
+    /// are valid but not modeled by this SDK version. It is empty on caller-constructed instances.
+    /// </remarks>
+    public ReadOnlyMemory<byte> RawCbor { get; init; }
+
+    /// <summary>
     /// Gets the CTAP versions supported by the authenticator.
     /// </summary>
     /// <remarks>
@@ -279,14 +288,15 @@ public sealed class AuthenticatorInfo
     /// <returns>The decoded AuthenticatorInfo.</returns>
     public static AuthenticatorInfo Decode(ReadOnlyMemory<byte> data)
     {
-        var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
-        return Parse(reader);
+        byte[] rawCbor = data.ToArray();
+        var reader = new CborReader(rawCbor, CborConformanceMode.Ctap2Canonical);
+        return Parse(reader, rawCbor);
     }
 
     /// <summary>
     /// Parses an AuthenticatorInfo from a CBOR reader.
     /// </summary>
-    internal static AuthenticatorInfo Parse(CborReader reader)
+    private static AuthenticatorInfo Parse(CborReader reader, ReadOnlyMemory<byte> rawCbor)
     {
         var mapLength = reader.ReadStartMap();
 
@@ -465,6 +475,7 @@ public sealed class AuthenticatorInfo
 
         return new AuthenticatorInfo
         {
+            RawCbor = rawCbor,
             Versions = versions ?? [],
             Extensions = extensions ?? [],
             Aaguid = aaguid ?? [],
@@ -539,8 +550,7 @@ public sealed class AuthenticatorInfo
         for (var i = 0; i < length; i++)
         {
             var key = reader.ReadTextString();
-            var value = reader.ReadBoolean();
-            result[key] = value;
+            result[key] = reader.ReadBoolean();
         }
 
         reader.ReadEndMap();

@@ -87,6 +87,56 @@ public class AuthenticatorInfoTests
     }
 
     [Fact]
+    public void Decode_WithUnknownBooleanOptionAndUnknownTopLevelKey_ParsesKnownFieldsAndPreservesRawCbor()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+        writer.WriteInt32(0x01);
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x04);
+        writer.WriteStartMap(2);
+        writer.WriteTextString("rk");
+        writer.WriteBoolean(true);
+        writer.WriteTextString("vendor");
+        writer.WriteBoolean(false);
+        writer.WriteEndMap();
+        writer.WriteInt32(0x7F);
+        writer.WriteStartMap(1);
+        writer.WriteTextString("future");
+        writer.WriteBoolean(true);
+        writer.WriteEndMap();
+        writer.WriteEndMap();
+        byte[] data = writer.Encode();
+        byte[] expectedRawCbor = data.ToArray();
+
+        var info = AuthenticatorInfo.Decode(data);
+        data[0] = 0;
+
+        info.Versions.Should().ContainSingle().Which.Should().Be("FIDO_2_1");
+        info.Options.Should().HaveCount(2);
+        info.Options["rk"].Should().BeTrue();
+        info.Options["vendor"].Should().BeFalse();
+        info.RawCbor.ToArray().Should().Equal(expectedRawCbor);
+    }
+
+    [Fact]
+    public void Decode_WithNonBooleanOption_Throws()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(1);
+        writer.WriteInt32(0x04);
+        writer.WriteStartMap(1);
+        writer.WriteTextString("rk");
+        writer.WriteInt32(1);
+        writer.WriteEndMap();
+        writer.WriteEndMap();
+
+        Assert.Throws<InvalidOperationException>(() => AuthenticatorInfo.Decode(writer.Encode()));
+    }
+
+    [Fact]
     public void Decode_WithMaxMsgSize_ParsesInteger()
     {
         // Arrange

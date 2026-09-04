@@ -43,37 +43,51 @@ public abstract record CoseKey
     public static CoseKey Decode(ReadOnlyMemory<byte> coseEncoded)
     {
         var reader = new CborReader(coseEncoded, CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap();
 
-        // Read map header
-        int? mapSize = reader.ReadStartMap();
+        int? keyType = null;
+        int? algorithmValue = null;
         var parameters = new Dictionary<int, object?>();
 
-        int entriesRead = 0;
         while (reader.PeekState() != CborReaderState.EndMap)
         {
-            int key = reader.ReadInt32();
-            object? value = reader.PeekState() switch
+            int? label = ReadKnownLabel(reader);
+            if (label is null)
             {
-                CborReaderState.ByteString => reader.ReadByteString(),
-                CborReaderState.UnsignedInteger or CborReaderState.NegativeInteger => reader.ReadInt32(),
-                CborReaderState.StartMap => reader.ReadEncodedValue().ToArray(), // nested COSE_Key as raw CBOR
-                _ => throw new InvalidOperationException($"Unsupported CBOR type for COSE key parameter {key}")
-            };
-            parameters[key] = value;
-            entriesRead++;
+                reader.SkipValue();
+            }
+            else if (label is 1 or 3)
+            {
+                int? value = ReadInt32IfRepresentable(reader);
+                if (value is not null)
+                {
+                    if (label == 1)
+                    {
+                        keyType = value;
+                    }
+                    else
+                    {
+                        algorithmValue = value;
+                    }
+                }
+            }
+            else if (label is -1 or -2 or -3)
+            {
+                parameters[label.Value] = ReadModeledParameterValue(reader);
+            }
+            else
+            {
+                reader.SkipValue();
+            }
         }
         reader.ReadEndMap();
 
-        // Extract common parameters
-        int kty = parameters.TryGetValue(1, out var ktyValue) && ktyValue is int k ? k :
+        int kty = keyType ??
             throw new InvalidOperationException("Missing required kty parameter");
-        int alg = parameters.TryGetValue(3, out var algValue) && algValue is int a ? a :
+        int alg = algorithmValue ??
             throw new InvalidOperationException("Missing required alg parameter");
-
         CoseAlgorithm algorithm = new(alg);
 
-        // Dispatch on alg first for ARKG seed keys. They use a sentinel kty that is not in
-        // the standard COSE kty registry, so the regular kty switch cannot route them.
         if (alg == -65700)
         {
             return CoseArkgP256SeedKey.Decode(parameters, algorithm);
@@ -86,6 +100,70 @@ public abstract record CoseKey
             3 => DecodeRsa(parameters, algorithm),
             _ => new CoseOtherKey(kty, algorithm, coseEncoded.ToArray())
         };
+    }
+
+    private static int? ReadKnownLabel(CborReader reader) => reader.PeekState() switch
+    {
+        CborReaderState.UnsignedInteger => ReadKnownUnsignedLabel(reader),
+        CborReaderState.NegativeInteger => ReadKnownNegativeLabel(reader),
+        _ => SkipLabel(reader)
+    };
+
+    private static int? ReadKnownUnsignedLabel(CborReader reader)
+    {
+        ulong label = reader.ReadUInt64();
+        return label is 1 or 3 ? (int)label : null;
+    }
+
+    private static int? ReadKnownNegativeLabel(CborReader reader)
+    {
+        ulong representation = reader.ReadCborNegativeIntegerRepresentation();
+        return representation <= 2 ? -1 - (int)representation : null;
+    }
+
+    private static int? SkipLabel(CborReader reader)
+    {
+        reader.SkipValue();
+        return null;
+    }
+
+    private static int? ReadInt32IfRepresentable(CborReader reader) => reader.PeekState() switch
+    {
+        CborReaderState.UnsignedInteger => ReadUnsignedInt32IfRepresentable(reader),
+        CborReaderState.NegativeInteger => ReadNegativeInt32IfRepresentable(reader),
+        _ => SkipInt32Value(reader)
+    };
+
+    private static int? ReadUnsignedInt32IfRepresentable(CborReader reader)
+    {
+        ulong value = reader.ReadUInt64();
+        return value <= int.MaxValue ? (int)value : null;
+    }
+
+    private static int? ReadNegativeInt32IfRepresentable(CborReader reader)
+    {
+        ulong representation = reader.ReadCborNegativeIntegerRepresentation();
+        return representation <= int.MaxValue ? -1 - (int)representation : null;
+    }
+
+    private static int? SkipInt32Value(CborReader reader)
+    {
+        reader.SkipValue();
+        return null;
+    }
+
+    private static object? ReadModeledParameterValue(CborReader reader) => reader.PeekState() switch
+    {
+        CborReaderState.ByteString => reader.ReadByteString(),
+        CborReaderState.UnsignedInteger or CborReaderState.NegativeInteger => ReadInt32IfRepresentable(reader),
+        CborReaderState.StartMap => reader.ReadEncodedValue().ToArray(),
+        _ => SkipParameterValue(reader)
+    };
+
+    private static object? SkipParameterValue(CborReader reader)
+    {
+        reader.SkipValue();
+        return null;
     }
 
     private static CoseEc2Key DecodeEc2(Dictionary<int, object?> parameters, CoseAlgorithm algorithm)

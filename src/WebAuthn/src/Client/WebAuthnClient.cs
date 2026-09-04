@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2;
@@ -121,7 +122,14 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
             return;
         }
 
-        if (MemoryMarshal.TryGetArray(memory.Value, out var segment) && segment.Array is not null)
+        // A zeroing helper that quietly skips is a secret left in memory, so make the only
+        // unreachable case loud rather than silent. Callers here always pass array-backed memory;
+        // this cannot throw instead because every call site is a finally block, where throwing
+        // would swallow the exception already in flight.
+        var isArrayBacked = MemoryMarshal.TryGetArray(memory.Value, out var segment) && segment.Array is not null;
+        Debug.Assert(isArrayBacked, "pinUvAuthParam must be array-backed so it can be zeroed");
+
+        if (isArrayBacked)
         {
             CryptographicOperations.ZeroMemory(segment.AsSpan());
         }

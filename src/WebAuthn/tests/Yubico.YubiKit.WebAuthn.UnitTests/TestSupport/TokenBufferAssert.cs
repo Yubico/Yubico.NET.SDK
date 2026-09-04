@@ -43,9 +43,17 @@ internal static class TokenBufferAssert
     /// <summary>
     /// Asserts every byte was cleared.
     /// </summary>
+    /// <remarks>
+    /// An empty buffer is rejected rather than accepted: "no byte is non-zero" is trivially true
+    /// of a zero-length array, so passing one would make this assertion prove nothing.
+    /// </remarks>
     public static void Zeroed(byte[] buffer, string? because = null)
     {
         ArgumentNullException.ThrowIfNull(buffer);
+
+        Assert.True(
+            buffer.Length > 0,
+            "expected a token-sized buffer to inspect, but it was empty, which would make the zeroing assertion vacuous");
 
         var firstLiveByte = Array.FindIndex(buffer, b => b != 0);
         Assert.True(

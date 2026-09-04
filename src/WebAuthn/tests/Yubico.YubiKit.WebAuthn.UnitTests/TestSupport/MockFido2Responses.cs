@@ -32,6 +32,39 @@ internal static class MockFido2Responses
         return MakeCredentialResponse.Decode(cborBytes);
     }
 
+    public static GetAssertionResponse CreateMockGetAssertionResponse(byte[]? credentialId = null)
+    {
+        credentialId ??= RandomNumberGenerator.GetBytes(32);
+
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+
+        // 0x01: credential
+        writer.WriteInt32(1);
+        writer.WriteStartMap(2);
+        writer.WriteTextString("id");
+        writer.WriteByteString(credentialId);
+        writer.WriteTextString("type");
+        writer.WriteTextString("public-key");
+        writer.WriteEndMap();
+
+        // 0x02: authData - rpIdHash (32) + flags UP|UV (1) + signCount (4)
+        var authData = new byte[37];
+        SHA256.HashData("example.com"u8, authData.AsSpan(0, 32));
+        authData[32] = 0x05;
+        authData[36] = 0x01;
+        writer.WriteInt32(2);
+        writer.WriteByteString(authData);
+
+        // 0x03: signature
+        writer.WriteInt32(3);
+        writer.WriteByteString(RandomNumberGenerator.GetBytes(64));
+
+        writer.WriteEndMap();
+
+        return GetAssertionResponse.Decode(writer.Encode());
+    }
+
     public static AuthenticatorInfo CreateMockAuthenticatorInfo(
         bool clientPinSupported = false,
         bool uvSupported = false,

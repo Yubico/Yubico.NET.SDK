@@ -40,7 +40,7 @@ static async Task UseSymmetricCredentialAsync(
     string label,
     ReadOnlyMemory<byte> hostChallenge,
     ReadOnlyMemory<byte> hsmChallenge,
-    ReadOnlyMemory<byte> credentialPasswordUtf8,
+    ReadOnlyMemory<byte> credentialPassword,
     ReadOnlyMemory<byte>? cardCryptogram,
     CancellationToken cancellationToken)
 {
@@ -56,7 +56,7 @@ static async Task UseSymmetricCredentialAsync(
         using var sessionKeys = await session.CalculateSessionKeysSymmetricAsync(
             label,
             context,
-            credentialPasswordUtf8,
+            credentialPassword,
             cardCryptogram,
             cancellationToken);
 
@@ -143,19 +143,19 @@ For dependency injection, `services.AddHsmAuth()` is available.
 ```csharp
 // Symmetric, explicit keys
 await session.PutCredentialSymmetricAsync(
-    managementKey, label, keyEnc, keyMac, credentialPasswordUtf8, touchRequired: false);
+    managementKey, label, keyEnc, keyMac, credentialPassword, touchRequired: false);
 
 // Symmetric, PBKDF2-derived keys
 await session.PutCredentialDerivedAsync(
-    managementKey, label, derivationPasswordUtf8, credentialPasswordUtf8);
+    managementKey, label, derivationPassword, credentialPassword);
 
 // Asymmetric, explicit private key (fw 5.6.0+)
 await session.PutCredentialAsymmetricAsync(
-    managementKey, label, privateKey, credentialPasswordUtf8);
+    managementKey, label, privateKey, credentialPassword);
 
 // Asymmetric, generated on-device — the private key never leaves the YubiKey (fw 5.6.0+)
 await session.GenerateCredentialAsymmetricAsync(
-    managementKey, label, credentialPasswordUtf8);
+    managementKey, label, credentialPassword);
 ```
 
 ### Listing and deleting
@@ -180,7 +180,7 @@ static async Task<SessionKeys> CalculateSymmetricSessionKeysAsync(
     string label,
     ReadOnlyMemory<byte> hostChallenge,
     ReadOnlyMemory<byte> hsmChallenge,
-    ReadOnlyMemory<byte> credentialPasswordUtf8,
+    ReadOnlyMemory<byte> credentialPassword,
     ReadOnlyMemory<byte>? cardCryptogram,
     CancellationToken cancellationToken)
 {
@@ -193,7 +193,7 @@ static async Task<SessionKeys> CalculateSymmetricSessionKeysAsync(
         hostChallenge.CopyTo(context);
         hsmChallenge.CopyTo(context.AsMemory(8));
         return await session.CalculateSessionKeysSymmetricAsync(
-            label, context, credentialPasswordUtf8, cardCryptogram, cancellationToken);
+            label, context, credentialPassword, cardCryptogram, cancellationToken);
     }
     finally
     {
@@ -207,7 +207,7 @@ static async Task<SessionKeys> CalculateAsymmetricSessionKeysAsync(
     ReadOnlyMemory<byte> epkOce,
     ReadOnlyMemory<byte> epkSd,
     ReadOnlyMemory<byte> hsmPublicKey,
-    ReadOnlyMemory<byte> credentialPasswordUtf8,
+    ReadOnlyMemory<byte> credentialPassword,
     ReadOnlyMemory<byte> cardCryptogram,
     CancellationToken cancellationToken)
 {
@@ -220,7 +220,7 @@ static async Task<SessionKeys> CalculateAsymmetricSessionKeysAsync(
         epkOce.CopyTo(context);
         epkSd.CopyTo(context.AsMemory(65));
         return await session.CalculateSessionKeysAsymmetricAsync(
-            label, context, hsmPublicKey, credentialPasswordUtf8, cardCryptogram, cancellationToken);
+            label, context, hsmPublicKey, credentialPassword, cardCryptogram, cancellationToken);
     }
     finally
     {
@@ -265,10 +265,10 @@ await session.ResetAsync();
 
 ```csharp
 // Authenticated with the current credential password
-await session.ChangeCredentialPasswordAsync(label, currentPasswordUtf8, newPasswordUtf8);
+await session.ChangeCredentialPasswordAsync(label, currentPassword, newPassword);
 
 // Admin override, authorized by the management key
-await session.ChangeCredentialPasswordAdminAsync(managementKey, label, newPasswordUtf8);
+await session.ChangeCredentialPasswordAdminAsync(managementKey, label, newPassword);
 ```
 
 ## PBKDF2 Key Derivation

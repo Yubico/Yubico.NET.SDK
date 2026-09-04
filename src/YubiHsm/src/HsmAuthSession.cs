@@ -38,7 +38,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public static readonly Feature FeatureAsymmetric = new("Asymmetric credentials", 5, 6, 0);
     public static readonly Feature FeatureGetChallenge = new("Get challenge", 5, 6, 0);
     public static readonly Feature FeaturePasswordChange = new("Credential password change", 5, 8, 0);
-    public static readonly Feature FeatureGetChallengeNoPassword = new("Get challenge without password", 5, 7, 1);
+    public static readonly Feature FeatureGetChallengeWithPassword = new("Get challenge with password", 5, 7, 1);
+
+    /// <summary>
+    /// Compatibility alias for <see cref="FeatureGetChallengeWithPassword"/>.
+    /// </summary>
+    [Obsolete("Use FeatureGetChallengeWithPassword. Firmware 5.7.1 added password support; earlier firmware already allowed GetChallenge without a password.")]
+    public static readonly Feature FeatureGetChallengeNoPassword = FeatureGetChallengeWithPassword;
 
     // APDU instruction bytes
     internal const byte InsPut = 0x01;
@@ -612,18 +618,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             var tlvs = new List<Tlv> { new(TagLabel, labelBytes) };
 
-            // Firmware >= 5.7.1 does not require credential password.
-            // Older firmware requires it.
-            if (credentialPasswordUtf8 is { } credentialPassword)
+            if (credentialPasswordUtf8 is { } credentialPassword &&
+                IsSupported(FeatureGetChallengeWithPassword))
             {
                 credPwBytes = ParseCredentialPassword(credentialPassword.Span);
                 tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
-            }
-            else if (!IsSupported(FeatureGetChallengeNoPassword) && !FirmwareVersion.IsAlphaOrBeta)
-            {
-                throw new ArgumentException(
-                    "Credential password is required for firmware versions before 5.7.1.",
-                    nameof(credentialPasswordUtf8));
             }
 
             data = TlvHelper.EncodeAndDisposeList([.. tlvs]);

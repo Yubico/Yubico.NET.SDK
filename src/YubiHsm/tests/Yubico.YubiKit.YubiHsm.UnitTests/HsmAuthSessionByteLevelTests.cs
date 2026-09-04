@@ -155,6 +155,64 @@ public class HsmAuthSessionByteLevelTests
     }
 
     [Fact]
+    public async Task GetChallengeAsync_Firmware560WithoutPassword_TransmitsOnlyLabel()
+    {
+        var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var challenge = await session.GetChallengeAsync(
+            "cred",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(Sequence(0x40, 8), challenge.ToArray());
+        Assert.Equal([
+            0x71, 0x04, (byte)'c', (byte)'r', (byte)'e', (byte)'d'
+        ], CommandData(LastCommand(connection)).ToArray());
+    }
+
+    [Fact]
+    public async Task GetChallengeAsync_Firmware560WithPassword_DoesNotTransmitPassword()
+    {
+        var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.GetChallengeAsync(
+            "cred",
+            "pass"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([
+            0x71, 0x04, (byte)'c', (byte)'r', (byte)'e', (byte)'d'
+        ], CommandData(LastCommand(connection)).ToArray());
+    }
+
+    [Fact]
+    public async Task GetChallengeAsync_Firmware571WithPassword_TransmitsPassword()
+    {
+        var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            firmwareVersion: new FirmwareVersion(5, 7, 1),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.GetChallengeAsync(
+            "cred",
+            "pass"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([
+            0x71, 0x04, (byte)'c', (byte)'r', (byte)'e', (byte)'d',
+            0x73, 0x10, (byte)'p', (byte)'a', (byte)'s', (byte)'s', .. new byte[12]
+        ], CommandData(LastCommand(connection)).ToArray());
+    }
+
+    [Fact]
     public async Task DeleteCredentialAsync_WhenManagementKeyRetryFailure_ThrowsHsmAuthRetryException()
     {
         // SW 63C2 is the YubiHSM Auth retry-counter failure response with 2 attempts left.

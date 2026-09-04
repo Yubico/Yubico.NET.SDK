@@ -40,7 +40,7 @@ public static class CalculateSessionKeys
         }
 
         var hostChallengeHex = AnsiConsole.Ask<string>(
-            "Host challenge from the YubiKey ([grey]hex, 8 bytes[/]):");
+            "Host challenge from the YubiKey or caller ([grey]hex, 8 bytes[/]):");
         var hsmChallengeHex = AnsiConsole.Ask<string>(
             "HSM challenge from the connector ([grey]hex, 8 bytes[/]):");
         var cardCryptogramHex = AnsiConsole.Prompt(

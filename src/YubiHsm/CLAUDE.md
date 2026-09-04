@@ -39,7 +39,7 @@ All firmware-gated operations use `EnsureSupports(Feature)` at method entry:
 | `FeatureHsmAuth` | 5.4.3 | Base applet support |
 | `FeatureAsymmetric` | 5.6.0 | `PutCredentialAsymmetricAsync`, `GenerateCredentialAsymmetricAsync`, `CalculateSessionKeysAsymmetricAsync`, `GetPublicKeyAsync` |
 | `FeatureGetChallenge` | 5.6.0 | `GetChallengeAsync` |
-| `FeatureGetChallengeNoPassword` | 5.7.1 | `GetChallengeAsync` without credential password |
+| `FeatureGetChallengeWithPassword` | 5.7.1 | `GetChallengeAsync` with credential password |
 | `FeaturePasswordChange` | 5.8.0 | `ChangeCredentialPasswordAsync`, `ChangeCredentialPasswordAdminAsync` |
 
 ## Wire Protocol

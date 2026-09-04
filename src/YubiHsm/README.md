@@ -22,7 +22,7 @@ management — it produces the session keys you then use to talk to the HSM.
 
 - **Minimum firmware**: YubiKey 5.4.3
 - **Asymmetric credentials / `GetChallengeAsync`**: 5.6.0+
-- **`GetChallengeAsync` without a credential password**: 5.7.1+
+- **`GetChallengeAsync` with a credential password**: 5.7.1+
 - **Credential password change**: 5.8.0+
 - **Transport**: SmartCard only (USB CCID or NFC). There is no HID or OTP path.
 

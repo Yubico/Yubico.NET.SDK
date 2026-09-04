@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Using Include="Xunit"/>
+    <Using Include="Yubico.YubiKit.Tests.Shared.Infrastructure" />
   </ItemGroup>
 
   <ItemGroup>

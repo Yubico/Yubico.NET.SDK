@@ -1,7 +1,7 @@
 // Copyright 2026 Yubico AB
 //
-// Licensed under the Apache License, Version 2.0 (the "License").
-// You may not use this file except in compliance with the License.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
@@ -13,18 +13,10 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
-namespace Yubico.YubiKit.Core.IntegrationTests;
+namespace Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
-/// <summary>
-///     Pins the narrowness of <see cref="TransientScanRetry" />.
-/// </summary>
-/// <remarks>
-///     These need no hardware — they exist because the helper's whole value depends on its catch being
-///     unable to swallow anything but the one transient condition. A retry that hides a real regression
-///     is worse than the flake it was added to fix, so that boundary is asserted rather than asserted
-///     about in a comment.
-/// </remarks>
 public class TransientScanRetryTests
 {
     private static InvalidOperationException Saturation() =>
@@ -34,17 +26,25 @@ public class TransientScanRetryTests
     public async Task ScanAsync_WhenSaturationClears_RetriesAndReturnsResult()
     {
         var attempts = 0;
+        var delays = new List<TimeSpan>();
 
-        var result = await TransientScanRetry.ScanAsync(() =>
-        {
-            attempts++;
-            return attempts < 3
-                ? throw Saturation()
-                : Task.FromResult("scanned");
-        });
+        var result = await TransientScanRetry.ScanAsync(
+            () =>
+            {
+                attempts++;
+                return attempts < 3
+                    ? throw Saturation()
+                    : Task.FromResult("scanned");
+            },
+            duration =>
+            {
+                delays.Add(duration);
+                return Task.CompletedTask;
+            });
 
         Assert.Equal("scanned", result);
         Assert.Equal(3, attempts);
+        Assert.Equal([TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(400)], delays);
     }
 
     [Fact]
@@ -61,11 +61,6 @@ public class TransientScanRetryTests
         Assert.Equal(1, attempts);
     }
 
-    /// <summary>
-    ///     The regression this file exists for. <see cref="ObjectDisposedException" /> derives from
-    ///     <see cref="InvalidOperationException" /> and carries a caller-supplied message, so without an
-    ///     exact-type check a disposal defect wearing the saturation message would be retried away.
-    /// </summary>
     [Fact]
     public async Task ScanAsync_DerivedExceptionCarryingSaturationMessage_PropagatesImmediately()
     {
@@ -97,39 +92,68 @@ public class TransientScanRetryTests
         Assert.Equal(1, attempts);
     }
 
+    public static IEnumerable<object[]> NearMissMessages()
+    {
+        var message = FindPcscDevices.WorkerSaturationMessage;
+        yield return [$" {message}"];
+        yield return [$"{message} "];
+        yield return [message.ToUpperInvariant()];
+        yield return [message[..30]];
+    }
+
     [Theory]
-    [InlineData(" PC/SC device enumeration could not start because discovery worker capacity is saturated; retry the scan.")]
-    [InlineData("PC/SC device enumeration could not start because discovery worker capacity is saturated; retry the scan. ")]
-    [InlineData("PC/SC DEVICE ENUMERATION COULD NOT START BECAUSE DISCOVERY WORKER CAPACITY IS SATURATED; RETRY THE SCAN.")]
-    [InlineData("PC/SC device enumeration could not start")]
-    public async Task ScanAsync_NearMissMessage_PropagatesImmediately(string message)
+    [MemberData(nameof(NearMissMessages))]
+    public async Task ScanAsync_NearMissMessage_PropagatesImmediately(string nearMiss)
     {
         var attempts = 0;
-
         _ = await Assert.ThrowsAsync<InvalidOperationException>(
             () => TransientScanRetry.ScanAsync<string>(() =>
             {
                 attempts++;
-                throw new InvalidOperationException(message);
+                throw new InvalidOperationException(nearMiss);
             }));
 
         Assert.Equal(1, attempts);
     }
 
     [Fact]
-    public async Task ScanAsync_WhenSaturationPersists_ReportsItRatherThanRetryingForever()
+    public void IsExhaustion_UnrelatedInvalidOperationExceptions_ReturnsFalse()
+    {
+        Assert.False(TransientScanRetry.IsExhaustion(Saturation()));
+        Assert.False(TransientScanRetry.IsExhaustion(
+            new ObjectDisposedException(null, FindPcscDevices.WorkerSaturationMessage)));
+    }
+
+    [Fact]
+    public async Task ScanAsync_WhenSaturationPersists_ReportsAttemptsAndDelaySchedule()
     {
         var attempts = 0;
+        var delays = new List<TimeSpan>();
 
-        var thrown = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => TransientScanRetry.ScanAsync<string>(() =>
-            {
-                attempts++;
-                throw Saturation();
-            }));
+        var thrown = await Assert.ThrowsAnyAsync<InvalidOperationException>(() =>
+            TransientScanRetry.ScanAsync<string>(
+                () =>
+                {
+                    attempts++;
+                    throw Saturation();
+                },
+                duration =>
+                {
+                    delays.Add(duration);
+                    return Task.CompletedTask;
+                }));
 
         Assert.Equal(5, attempts);
+        Assert.Equal(
+            [
+                TimeSpan.FromMilliseconds(200),
+                TimeSpan.FromMilliseconds(400),
+                TimeSpan.FromMilliseconds(800),
+                TimeSpan.FromMilliseconds(1600)
+            ],
+            delays);
         Assert.Contains("5 scan attempts", thrown.Message, StringComparison.Ordinal);
         Assert.Equal(FindPcscDevices.WorkerSaturationMessage, thrown.InnerException?.Message);
+        Assert.True(TransientScanRetry.IsExhaustion(thrown));
     }
 }

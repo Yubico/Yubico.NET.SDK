@@ -191,7 +191,10 @@ internal static class YubiKeyTestInfrastructure
         try
         {
             // Discover all devices
-            var allDevices = YubiKeyManager.FindAllAsync().GetAwaiter().GetResult();
+            var allDevices = TransientScanRetry
+                .ScanAsync(() => YubiKeyManager.FindAllAsync())
+                .GetAwaiter()
+                .GetResult();
             Console.WriteLine($"[YubiKey Infrastructure] Found {allDevices.Count} device(s)");
 
             if (allDevices.Count == 0)
@@ -289,8 +292,14 @@ internal static class YubiKeyTestInfrastructure
 
             return authorizedDevices;
         }
+        catch (InvalidOperationException ex) when (TransientScanRetry.IsExhaustion(ex))
+        {
+            // Exhausted worker-admission retries must fail the run rather than cache an empty device list.
+            throw;
+        }
         catch (Exception ex)
         {
+            // Other initialization failures retain the existing degraded no-device behavior.
             Console.Error.WriteLine($"[YubiKey Infrastructure] FATAL: Device initialization failed: {ex.Message}");
             Console.Error.WriteLine(ex.StackTrace);
             return []; // Return empty list - tests will be skipped during discovery

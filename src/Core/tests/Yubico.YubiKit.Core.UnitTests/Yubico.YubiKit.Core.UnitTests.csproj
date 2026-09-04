@@ -31,6 +31,10 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Yubico.YubiKit.Core.csproj"/>
+    <!-- Compile the xUnit-free shared helper directly so this xUnit v3 project does not reference
+         the xUnit v2-based Tests.Shared assembly or its Management dependency. -->
+    <Compile Include="../../../Tests.Shared/Infrastructure/TransientScanRetry.cs"
+             Link="Infrastructure/TransientScanRetry.cs" />
   </ItemGroup>
 
 </Project>

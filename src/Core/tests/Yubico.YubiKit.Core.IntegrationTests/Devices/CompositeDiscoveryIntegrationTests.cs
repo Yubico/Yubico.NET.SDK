@@ -132,9 +132,6 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     {
         // Stability: two consecutive scans on one manager (identity cache shared) must produce the same
         // grouping — same device count, same interface-set multiset, same device identities.
-        // Both scans are retried, not just one: the assertions compare two SUCCESSFUL consecutive scans on
-        // one manager, and a saturated attempt returns nothing to compare. Retrying either side preserves
-        // scan1-then-scan2 ordering and the shared identity cache, so it cannot change what is asserted.
         var scan1 = await TransientScanRetry.ScanAsync(
             () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
         var scan2 = await TransientScanRetry.ScanAsync(
@@ -219,8 +216,6 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     {
         var pcscDevices = await TransientScanRetry.ScanAsync(() => FindPcscDevices.Create().FindAllAsync());
 
-        // Not retried: HID enumeration never acquires a DiscoveryWorkerAdmission slot, so it cannot raise
-        // the saturation transient. Wrapping it would be unreachable code that implies a risk it does not have.
         var hidDevices = await FindHidDevices.Create().FindAllAsync();
 
         var interfaces = new List<RawUsbInterface>();

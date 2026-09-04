@@ -14,10 +14,16 @@ Tests.Shared provides the foundation for all YubiKit integration tests. It imple
 **Key Implementation Files:**
 - `Infrastructure/WithYubiKeyAttribute.cs` - xUnit DataAttribute for device-parameterized tests
 - `Infrastructure/YubiKeyTestInfrastructure.cs` - Device discovery and caching
+- `Infrastructure/TransientScanRetry.cs` - Finite PC/SC worker-admission retry for integration scans
 - `Infrastructure/AllowList.cs` - Security layer preventing unauthorized testing
 - `YubiKeyTestState.cs` - Device wrapper implementing `IXunitSerializable`
 - `YubiKeyTestStateExtensions.cs` - Application-specific session helpers
 - `RecordingSmartCardConnection.cs` - xUnit-free SmartCard APDU recorder for byte-level unit tests
+
+`Core.UnitTests` links `Infrastructure/TransientScanRetry.cs` as source so its xUnit v3 project does
+not reference this xUnit v2-based utility assembly or the Management dependency. Keep the helper
+xUnit-free, and do not add a Tests.Shared project reference to Core.UnitTests because that would
+compile the same type twice.
 
 ## Critical Design Patterns
 

@@ -13,9 +13,7 @@ public interface IFindPcscDevices
 public class FindPcscDevices : IFindPcscDevices
 {
     /// <summary>
-    ///     Message of the transient <see cref="InvalidOperationException" /> thrown when no discovery worker
-    ///     slot is free. Internal rather than private so tests match this exact string by reference instead of
-    ///     copying it: a copy would silently stop matching if the wording here ever changed.
+    ///     Message of the <see cref="InvalidOperationException" /> thrown when no discovery worker slot is free.
     /// </summary>
     internal const string WorkerSaturationMessage =
         "PC/SC device enumeration could not start because discovery worker capacity is saturated; retry the scan.";

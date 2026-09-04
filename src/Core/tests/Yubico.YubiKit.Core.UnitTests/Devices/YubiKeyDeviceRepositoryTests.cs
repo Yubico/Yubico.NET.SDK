@@ -570,19 +570,6 @@ public class YubiKeyDeviceRepositoryTests
     }
 
     [Fact]
-    public void Clear_AfterDispose_ThrowsObjectDisposedException()
-    {
-        // Arrange
-        var repository = new YubiKeyDeviceRepository();
-        repository.Dispose();
-
-        // Act & Assert
-        Assert.Throws<ObjectDisposedException>(() => repository.Clear());
-    }
-
-
-
-    [Fact]
     public void HasData_InitiallyFalse()
     {
         // Arrange & Act
@@ -605,54 +592,24 @@ public class YubiKeyDeviceRepositoryTests
         Assert.True(repository.HasData);
     }
 
+    /// <summary>
+    /// Disposal discards the cache, so the "a scan has populated this cache" flag has to go with it.
+    /// Leaving it set makes a disposed repository report a valid cache it no longer holds, which is the
+    /// signal <see cref="YubiKeyDeviceManager.FindAllAsync"/> reads to decide whether a scan is needed.
+    /// </summary>
     [Fact]
-    public void HasData_FalseAfterClear()
+    public void HasData_FalseAfterDispose()
     {
         // Arrange
-        using var repository = new YubiKeyDeviceRepository();
+        var repository = new YubiKeyDeviceRepository();
         repository.UpdateCache([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
+        Assert.True(repository.HasData);
 
         // Act
-        repository.Clear();
+        repository.Dispose();
 
         // Assert
         Assert.False(repository.HasData);
-    }
-
-
-
-    [Fact]
-    public void Clear_RemovesAllDevices()
-    {
-        // Arrange
-        using var repository = new YubiKeyDeviceRepository();
-        repository.UpdateCache([
-            new FakeYubiKey("device-1", ConnectionType.SmartCard),
-            new FakeYubiKey("device-2", ConnectionType.HidFido)
-        ]);
-
-        // Act
-        repository.Clear();
-
-        // Assert
-        Assert.Empty(repository.GetAll());
-    }
-
-    [Fact]
-    public async Task Clear_DoesNotEmitEvents()
-    {
-        // Arrange
-        using var repository = new YubiKeyDeviceRepository();
-        using var cts = new CancellationTokenSource(Bound);
-        repository.UpdateCache([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
-
-        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
-
-        // Act
-        repository.Clear();
-
-        // Assert: Clear is silent (no events)
-        Assert.Empty(await watcher.DrainAsync(repository, cts.Token));
     }
 
 

@@ -45,6 +45,20 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     private int _disposed;
 
     /// <summary>
+    /// Test seam: invoked by <see cref="DisposeAsync"/> immediately before the repository is disposed,
+    /// after every other teardown step has run. Never set in production.
+    /// </summary>
+    /// <remarks>
+    /// This is the instant the disposal contract turns on. Any repository teardown step the manager
+    /// performs before disposing it happens before this hook, so a test that resumes a publication here
+    /// observes whatever intermediate repository state that step left behind. The contract is that
+    /// there is no such state: a publication resuming at this point must not be able to emit a device
+    /// event. Pinning it needs a hook because the window lives entirely inside <see cref="DisposeAsync"/>
+    /// and closes before it returns.
+    /// </remarks>
+    internal Func<Task>? RepositoryTeardownReachedForTest;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="YubiKeyDeviceManager"/> class.
     /// </summary>
     /// <param name="repository">The device repository.</param>
@@ -185,6 +199,12 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
         //    device after DisposeAsync had already returned. Disposing first makes that publication
         //    throw ObjectDisposedException instead, which is what upholds the documented guarantee
         //    that no device event escapes a disposed manager.
+        var teardownHook = RepositoryTeardownReachedForTest;
+        if (teardownHook is not null)
+        {
+            await teardownHook().ConfigureAwait(false);
+        }
+
         _repository.Dispose();
 
         // 4. Dispose synchronization primitives

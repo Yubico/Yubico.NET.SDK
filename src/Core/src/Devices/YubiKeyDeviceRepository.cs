@@ -58,8 +58,16 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
     internal int WatcherCount => _events.WatcherCount;
 
     /// <summary>
-    /// Indicates whether the cache contains any data.
+    /// Indicates whether the cache holds the result of a completed scan.
     /// </summary>
+    /// <remarks>
+    /// This is a cache-validity flag, not a count. A scan that legitimately found no devices sets it,
+    /// so <see langword="true"/> with an empty <see cref="GetAll"/> means "scanned, nothing attached"
+    /// rather than "never scanned" - which is exactly the distinction
+    /// <see cref="YubiKeyDeviceManager.FindAllAsync"/> needs to avoid rescanning on every call when no
+    /// key is plugged in. It returns to <see langword="false"/> on <see cref="Dispose"/>, which
+    /// discards the cache it describes.
+    /// </remarks>
     public bool HasData => _hasData;
 
     /// <summary>
@@ -164,22 +172,6 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
             changedCount);
     }
 
-    /// <summary>
-    /// Clears all devices from the cache.
-    /// </summary>
-    /// <remarks>
-    /// Does not emit removal events. Use during shutdown only.
-    /// </remarks>
-    public void Clear()
-    {
-        ThrowIfDisposed();
-
-        _deviceCache.Clear();
-        _hasData = false;
-
-        Logger.LogDebug("Cache cleared");
-    }
-
     private void ThrowIfDisposed()
     {
         if (_disposed == 1)
@@ -189,9 +181,15 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
     }
 
     /// <summary>
-    /// Ends every active <see cref="WatchAsync"/> enumeration normally and clears the cache.
-    /// Idempotent.
+    /// Ends every active <see cref="WatchAsync"/> enumeration normally, clears the cache, and resets
+    /// <see cref="HasData"/> so the discarded cache is no longer reported as valid. Idempotent.
     /// </summary>
+    /// <remarks>
+    /// The disposed flag is set before the cache is emptied, so a concurrent <see cref="UpdateCache"/>
+    /// either completes in full beforehand or is rejected outright. There is no instant at which the
+    /// repository is live and emptied, which is what stops a late publication from diffing an attached
+    /// device against an empty cache and reporting it as newly added.
+    /// </remarks>
     public void Dispose()
     {
         if (Interlocked.Exchange(ref _disposed, 1) == 1)
@@ -202,6 +200,7 @@ internal sealed class YubiKeyDeviceRepository : IDisposable
         _events.Complete();
 
         _deviceCache.Clear();
+        _hasData = false;
 
         Logger.LogDebug("YubiKeyDeviceRepository disposed");
 

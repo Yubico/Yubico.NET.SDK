@@ -306,15 +306,85 @@ public class YubiKeyDeviceManagerTests
     }
 
     /// <summary>
-    /// The disposal contract is absolute: no device event escapes a disposed manager. A publication
-    /// admitted before disposal can outlive the monitor's bounded drain and resume after
-    /// <see cref="YubiKeyDeviceManager.DisposeAsync"/> has already returned, so the repository has to
-    /// be disposed — not merely emptied — by the time that happens. An emptied-but-live repository
-    /// would accept the late snapshot, diff it against an empty cache, and report every attached
-    /// device as newly Added.
+    /// The load-bearing half of the disposal contract, pinned at the instant it applies. A publication
+    /// admitted before disposal outlives the monitor's bounded drain and is resumed at the point where
+    /// the manager is about to dispose the repository — after every other teardown step it performs.
+    /// The repository must still be intact there. If any teardown step empties it first, this snapshot
+    /// diffs an attached device against an empty cache and reports it as newly Added, which is the
+    /// event the contract says can never escape.
     /// </summary>
+    /// <remarks>
+    /// The publication is driven by an explicit <c>RescanAsync</c> whose task the test holds, so the
+    /// hook can await the resumed <c>UpdateCache</c> to completion before disposal proceeds. Releasing
+    /// it without awaiting would let the repository be disposed underneath the publication and turn any
+    /// emission into a silently swallowed <see cref="ObjectDisposedException"/> — the race that made the
+    /// post-return variant below unable to distinguish the two orderings.
+    /// </remarks>
     [Fact]
-    public async Task DisposeAsync_WithAPublicationParkedPastTheBoundedDrain_EmitsNothing()
+    public async Task DisposeAsync_ResumingAParkedPublicationAtRepositoryTeardown_EmitsNothing()
+    {
+        var repository = new YubiKeyDeviceRepository();
+        var device = new FakeYubiKey("device-1", ConnectionType.SmartCard);
+        var findYubiKeys = new FakeFindYubiKeys([device]);
+        var monitorService = new YubiKeyDeviceMonitorService(
+            repository,
+            findYubiKeys,
+            static () => new FakeHidDeviceListener(),
+            static () => new FakeSmartCardDeviceListener(),
+            shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        var manager = new YubiKeyDeviceManager(repository, monitorService);
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+        // Populate the cache first, then start watching, so the steady state is "device-1 present and
+        // already reported" and any further event can only come from the disposal window.
+        await monitorService.RescanAsync(cts.Token);
+        Assert.Single(repository.GetAll());
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+
+        var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        monitorService.PublishAdmittedForTest = async () =>
+        {
+            admitted.SetResult();
+            await release.Task;
+        };
+
+        // Admitted while the service is live; then parked, holding the publication gate.
+        var parkedPublication = monitorService.RescanAsync(cts.Token);
+        await admitted.Task.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+
+        manager.RepositoryTeardownReachedForTest = async () =>
+        {
+            release.SetResult();
+            await parkedPublication.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+        };
+
+        // The parked publication holds the publication gate, so the monitor's bounded drain times out
+        // and disposal walks on to repository teardown with the publication still in flight.
+        await manager.DisposeAsync();
+
+        // Ended normally at repository disposal, having received nothing: the resumed snapshot found
+        // the cache exactly as it left it and had nothing to report.
+        await watcher.Completion.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+        Assert.True(watcher.EndedNormally);
+        Assert.Empty(watcher.Events);
+    }
+
+    /// <summary>
+    /// The companion case: a publication that outlives the monitor's bounded drain and does not resume
+    /// until <see cref="YubiKeyDeviceManager.DisposeAsync"/> has already returned. By then the
+    /// repository is disposed, so the late snapshot is refused outright rather than published and
+    /// merely unobserved.
+    /// </summary>
+    /// <remarks>
+    /// This pins the post-return path only. It cannot distinguish disposing the repository from
+    /// emptying and then disposing it, because both orderings finish before the publication resumes;
+    /// the disposal window itself is pinned by
+    /// <see cref="DisposeAsync_ResumingAParkedPublicationAtRepositoryTeardown_EmitsNothing"/> above.
+    /// </remarks>
+    [Fact]
+    public async Task DisposeAsync_WithAPublicationResumingAfterDisposeReturned_EmitsNothing()
     {
         var repository = new YubiKeyDeviceRepository();
         var findYubiKeys = new FakeFindYubiKeys([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);

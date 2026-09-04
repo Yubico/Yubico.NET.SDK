@@ -69,7 +69,7 @@ public sealed class AuthenticatorInfo
     /// This is populated by <see cref="Decode(ReadOnlyMemory{byte})"/> and preserves fields that
     /// are valid but not modeled by this SDK version. It is empty on caller-constructed instances.
     /// </remarks>
-    public ReadOnlyMemory<byte> RawCbor { get; init; }
+    public ReadOnlyMemory<byte> RawData { get; private init; }
 
     /// <summary>
     /// Gets the CTAP versions supported by the authenticator.
@@ -475,7 +475,7 @@ public sealed class AuthenticatorInfo
 
         return new AuthenticatorInfo
         {
-            RawCbor = rawCbor,
+            RawData = rawCbor,
             Versions = versions ?? [],
             Extensions = extensions ?? [],
             Aaguid = aaguid ?? [],

@@ -87,7 +87,7 @@ public class AuthenticatorInfoTests
     }
 
     [Fact]
-    public void Decode_WithUnknownBooleanOptionAndUnknownTopLevelKey_ParsesKnownFieldsAndPreservesRawCbor()
+    public void Decode_WithUnknownBooleanOptionAndUnknownTopLevelKey_ParsesKnownFieldsAndPreservesRawData()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
@@ -109,7 +109,7 @@ public class AuthenticatorInfoTests
         writer.WriteEndMap();
         writer.WriteEndMap();
         byte[] data = writer.Encode();
-        byte[] expectedRawCbor = data.ToArray();
+        byte[] expectedRawData = data.ToArray();
 
         var info = AuthenticatorInfo.Decode(data);
         data[0] = 0;
@@ -118,7 +118,7 @@ public class AuthenticatorInfoTests
         info.Options.Should().HaveCount(2);
         info.Options["rk"].Should().BeTrue();
         info.Options["vendor"].Should().BeFalse();
-        info.RawCbor.ToArray().Should().Equal(expectedRawCbor);
+        info.RawData.ToArray().Should().Equal(expectedRawData);
     }
 
     [Fact]

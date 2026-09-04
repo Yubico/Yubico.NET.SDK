@@ -112,6 +112,11 @@ public enum FingerprintSampleStatus
 public sealed class FingerprintSensorInfo
 {
     /// <summary>
+    /// Gets the complete original CBOR-encoded authenticator response.
+    /// </summary>
+    public ReadOnlyMemory<byte> RawData { get; private init; }
+
+    /// <summary>
     /// Gets the fingerprint kind (touch or swipe).
     /// </summary>
     public FingerprintKind FingerprintKind { get; private init; }
@@ -137,7 +142,8 @@ public sealed class FingerprintSensorInfo
     /// <returns>The decoded sensor info.</returns>
     public static FingerprintSensorInfo Decode(ReadOnlyMemory<byte> data)
     {
-        var reader = new CborReader(data, CborConformanceMode.Lax);
+        ReadOnlyMemory<byte> rawData = data.ToArray();
+        var reader = new CborReader(rawData, CborConformanceMode.Lax);
 
         var fingerprintKind = FingerprintKind.Touch;
         var maxSamples = 0;
@@ -173,6 +179,7 @@ public sealed class FingerprintSensorInfo
 
         return new FingerprintSensorInfo
         {
+            RawData = rawData,
             FingerprintKind = fingerprintKind,
             MaxCaptureSamplesRequiredForEnroll = maxSamples,
             MaxTemplateCount = maxTemplates
@@ -201,6 +208,11 @@ public enum FingerprintKind
 /// </summary>
 public sealed class EnrollmentSampleResult
 {
+    /// <summary>
+    /// Gets the complete original CBOR-encoded authenticator response.
+    /// </summary>
+    public ReadOnlyMemory<byte> RawData { get; private init; }
+
     /// <summary>
     /// Gets the current template ID for this enrollment.
     /// </summary>
@@ -231,7 +243,8 @@ public sealed class EnrollmentSampleResult
     /// <returns>The decoded enrollment result.</returns>
     public static EnrollmentSampleResult Decode(ReadOnlyMemory<byte> data)
     {
-        var reader = new CborReader(data, CborConformanceMode.Lax);
+        ReadOnlyMemory<byte> rawData = data.ToArray();
+        var reader = new CborReader(rawData, CborConformanceMode.Lax);
 
         ReadOnlyMemory<byte> templateId = default;
         var lastStatus = FingerprintSampleStatus.Good;
@@ -267,6 +280,7 @@ public sealed class EnrollmentSampleResult
 
         return new EnrollmentSampleResult
         {
+            RawData = rawData,
             TemplateId = templateId,
             LastSampleStatus = lastStatus,
             RemainingSamples = remaining

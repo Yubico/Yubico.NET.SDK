@@ -26,7 +26,7 @@ public class YubiKeyManagerTests : IAsyncLifetime
     public async Task FindAllAsync_HasAtLeastOneDevice()
     {
         // Use static API (no DI setup needed)
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync());
         Assert.NotEmpty(devices);
     }
 }

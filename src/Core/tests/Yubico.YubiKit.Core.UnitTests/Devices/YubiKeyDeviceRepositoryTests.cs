@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.UnitTests.Infrastructure;
 
@@ -504,19 +503,5 @@ public class YubiKeyDeviceRepositoryTests
 
         // Assert
         Assert.Empty(exceptions);
-    }
-
-
-    /// <summary>
-    /// Minimal fake IYubiKey implementation for testing.
-    /// </summary>
-    private sealed class FakeYubiKey(string deviceId, ConnectionType connectionType) : IYubiKey
-    {
-        public string DeviceId { get; } = deviceId;
-        public ConnectionType AvailableConnections { get; } = connectionType;
-
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-            => throw new NotSupportedException("FakeYubiKey does not support connections.");
     }
 }

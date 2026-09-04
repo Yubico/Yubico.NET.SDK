@@ -38,7 +38,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <para>This type provides multicast delivery only. Per-consumer buffering is handled by
 /// <see cref="DeviceEventStream"/>.</para>
 /// </remarks>
-internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDisposable
+internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DeviceEventBroadcaster>();
 
@@ -47,25 +47,21 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     /// <summary>Immutable snapshot; only ever replaced, never mutated in place.</summary>
     private IObserver<DeviceEvent>[] _observers = [];
 
-    /// <summary>Guarded by <see cref="_gate"/>; read without the lock only in <see cref="Subscribe"/>'s fast path.</summary>
-    private volatile bool _completed;
+    /// <summary>Guarded by <see cref="_gate"/>.</summary>
+    private bool _completed;
 
     /// <summary>
     /// Delivers an event to every current subscriber, synchronously and in subscription order.
     /// </summary>
     /// <param name="deviceEvent">The event to deliver.</param>
     /// <remarks>
-    /// No-op once <see cref="Complete"/> has been called. Subscriber exceptions propagate to the
+    /// No-op once <see cref="Complete"/> has been called because completion empties the observer
+    /// array and <see cref="Subscribe"/> never refills it. Subscriber exceptions propagate to the
     /// caller and stop delivery to later subscribers. The device monitor relies on this method
     /// completing synchronously before a repository update returns.
     /// </remarks>
     public void Publish(DeviceEvent deviceEvent)
     {
-        if (_completed)
-        {
-            return;
-        }
-
         // The immutable snapshot remains stable if subscriptions change during delivery.
         foreach (var observer in Volatile.Read(ref _observers))
         {
@@ -116,32 +112,31 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
     /// <inheritdoc/>
     /// <remarks>
     /// Subscribing after <see cref="Complete"/> delivers <see cref="IObserver{T}.OnCompleted"/>
-    /// immediately and returns a no-op subscription.
+    /// immediately and returns an inert subscription.
     /// </remarks>
     public IDisposable Subscribe(IObserver<DeviceEvent> observer)
     {
         ArgumentNullException.ThrowIfNull(observer);
 
+        bool alreadyCompleted;
+
         lock (_gate)
         {
-            if (!_completed)
+            alreadyCompleted = _completed;
+            if (!alreadyCompleted)
             {
                 _observers = [.. _observers, observer];
-                return new Subscription(this, observer);
             }
         }
 
-        // Never run arbitrary observer code while holding the subscription gate.
-        observer.OnCompleted();
+        if (alreadyCompleted)
+        {
+            // Never run observer callbacks while holding the subscription gate.
+            observer.OnCompleted();
+        }
 
-        return NoOpSubscription.Instance;
+        return new Subscription(this, observer);
     }
-
-    /// <summary>
-    /// Terminates the sequence. Equivalent to <see cref="Complete"/>; provided so the broadcaster can
-    /// participate in the owning type's disposal chain.
-    /// </summary>
-    public void Dispose() => Complete();
 
     private void Unsubscribe(IObserver<DeviceEvent> observer)
     {
@@ -173,21 +168,6 @@ internal sealed class DeviceEventBroadcaster : IObservable<DeviceEvent>, IDispos
             {
                 owner.Unsubscribe(target);
             }
-        }
-    }
-
-    /// <summary>Returned to subscribers that arrived after completion; there is nothing to release.</summary>
-    private sealed class NoOpSubscription : IDisposable
-    {
-        internal static readonly NoOpSubscription Instance = new();
-
-        private NoOpSubscription()
-        {
-        }
-
-        public void Dispose()
-        {
-            // Intentionally empty.
         }
     }
 }

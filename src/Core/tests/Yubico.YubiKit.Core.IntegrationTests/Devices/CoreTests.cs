@@ -5,45 +5,67 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
 public class CoreTests : IAsyncLifetime
 {
-    public Task InitializeAsync()
-    {
-        YubiKeyManager.StartMonitoring();
-        return Task.CompletedTask;
-    }
+    /// <summary>Resets the static manager so each test starts with an empty device cache.</summary>
+    public async Task InitializeAsync() => await YubiKeyManager.ShutdownAsync();
 
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
 
+    /// <summary>Verifies observable delivery of the initial device scan against real hardware.</summary>
+    /// <remarks>
+    /// <see cref="YubiKeyManager.DeviceChanges"/> invokes observers inline on the monitor's publish
+    /// path. The subscription is established before monitoring starts so it observes the initial
+    /// scan.
+    /// </remarks>
     [Fact]
-    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
-    [Trait(TestCategories.Category, TestCategories.Slow)]
-    public async Task DeviceEvents_ArePublished()
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task DeviceChanges_PublishesToObservableSubscribers()
     {
-        var events = new List<DeviceEvent>();
+        var observer = new FirstEventObserver();
 
-        // Plug in or remove a YubiKey to trigger events. You have 10 seconds to do this.
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var subscription = YubiKeyManager.DeviceChanges.Subscribe(observer);
+        YubiKeyManager.StartMonitoring();
 
-        try
-        {
-            await foreach (var deviceEvent in YubiKeyManager.WatchAsync(cts.Token))
-            {
-                events.Add(deviceEvent);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected: the window closed. Whatever arrived in the meantime is what we assert on.
-        }
+        var observed = await observer.WaitForFirstAsync(TimeSpan.FromSeconds(10));
 
-        Assert.True(events.Count > 0, $"Expected at least one device event to be published, but got {events.Count}.");
+        Assert.True(observed, "Expected at least one device event to reach the observable subscriber.");
     }
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     public async Task GetPcscDevices()
     {
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCard);
+        var devices = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindAllAsync(ConnectionType.SmartCard));
         var device = devices.FirstOrDefault();
         Assert.NotNull(device);
+    }
+
+    /// <summary>Signals as soon as the first device event arrives.</summary>
+    private sealed class FirstEventObserver : IObserver<DeviceEvent>
+    {
+        private readonly TaskCompletionSource _first = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public void OnNext(DeviceEvent value) => _first.TrySetResult();
+
+        public void OnCompleted()
+        {
+        }
+
+        public void OnError(Exception error)
+        {
+        }
+
+        public async Task<bool> WaitForFirstAsync(TimeSpan timeout)
+        {
+            try
+            {
+                await _first.Task.WaitAsync(timeout).ConfigureAwait(false);
+                return true;
+            }
+            catch (TimeoutException)
+            {
+                return false;
+            }
+        }
     }
 }

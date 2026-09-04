@@ -28,6 +28,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Yubico.YubiKit" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Core.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Tests.Shared" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Fido2" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Management" />
   </ItemGroup>

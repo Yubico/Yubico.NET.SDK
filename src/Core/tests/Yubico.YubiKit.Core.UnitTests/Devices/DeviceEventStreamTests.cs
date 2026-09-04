@@ -23,13 +23,19 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// </summary>
 public class DeviceEventStreamTests
 {
+    /// <summary>
+    /// Subscription bookkeeping happens on a background task; give it a generous bound because a
+    /// miss here is a hang, not a slow assert.
+    /// </summary>
+    private static readonly TimeSpan SubscriptionTimeout = TimeSpan.FromSeconds(10);
+
     private static DeviceEvent Added(string deviceId) =>
-        new(DeviceAction.Added, new StubYubiKey(deviceId));
+        new(DeviceAction.Added, new FakeYubiKey(deviceId));
 
     [Fact]
     public async Task WatchAsync_YieldsPublishedEventsInOrder()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var collected = new List<string>();
@@ -59,7 +65,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_WhenBroadcasterCompletes_StreamEndsWithoutError()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var count = 0;
@@ -83,7 +89,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_AfterComplete_EndsImmediately()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         broadcaster.Complete();
 
         var count = 0;
@@ -98,7 +104,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_WhenCancelled_ThrowsOperationCanceled()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource();
 
         var consumer = Task.Run(async () =>
@@ -118,7 +124,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_WhenEnumerationStops_UnsubscribesFromBroadcaster()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var consumer = Task.Run(async () =>
@@ -134,16 +140,17 @@ public class DeviceEventStreamTests
         await consumer;
 
         // Breaking out disposes the enumerator, which must release the underlying subscription.
-        await WaitForConditionAsync(
+        await AsyncWait.WaitUntilAsync(
             () => CountSubscribers(broadcaster) == 0,
-            cts.Token,
-            "watcher did not unsubscribe after enumeration stopped");
+            "watcher did not unsubscribe after enumeration stopped",
+            SubscriptionTimeout,
+            cts.Token);
     }
 
     [Fact]
     public async Task WatchAsync_MultipleConsumers_EachReceiveEveryEvent()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         async Task<List<string>> ConsumeTwoAsync()
@@ -164,10 +171,11 @@ public class DeviceEventStreamTests
         var first = Task.Run(ConsumeTwoAsync, cts.Token);
         var second = Task.Run(ConsumeTwoAsync, cts.Token);
 
-        await WaitForConditionAsync(
+        await AsyncWait.WaitUntilAsync(
             () => CountSubscribers(broadcaster) == 2,
-            cts.Token,
-            "both watchers did not subscribe");
+            "both watchers did not subscribe",
+            SubscriptionTimeout,
+            cts.Token);
 
         broadcaster.Publish(Added("a"));
         broadcaster.Publish(Added("b"));
@@ -179,7 +187,7 @@ public class DeviceEventStreamTests
     [Fact]
     public async Task WatchAsync_WhenConsumerFallsTooFarBehind_FaultsRatherThanDroppingSilently()
     {
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var gate = new SemaphoreSlim(0, 1);
@@ -217,7 +225,7 @@ public class DeviceEventStreamTests
     {
         // The overflow path must fault only the offending stream. An observer subscribed alongside
         // it has to keep receiving everything.
-        using var broadcaster = new DeviceEventBroadcaster();
+        var broadcaster = new DeviceEventBroadcaster();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         var healthy = new RecordingObserver<DeviceEvent>();
@@ -237,10 +245,11 @@ public class DeviceEventStreamTests
             }
         }, cts.Token);
 
-        await WaitForConditionAsync(
+        await AsyncWait.WaitUntilAsync(
             () => CountSubscribers(broadcaster) == 2,
-            cts.Token,
-            "watcher did not subscribe");
+            "watcher did not subscribe",
+            SubscriptionTimeout,
+            cts.Token);
 
         const int total = DeviceEventStream.BufferCapacity + 50;
         for (var i = 0; i < total; i++)
@@ -260,23 +269,11 @@ public class DeviceEventStreamTests
     /// Subscription happens on a background task, so publishing immediately would race it.
     /// </summary>
     private static Task WaitForSubscriberAsync(DeviceEventBroadcaster broadcaster, CancellationToken token) =>
-        WaitForConditionAsync(() => CountSubscribers(broadcaster) > 0, token, "watcher did not subscribe");
-
-    private static async Task WaitForConditionAsync(Func<bool> condition, CancellationToken token, string message)
-    {
-        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
-        while (DateTime.UtcNow < deadline)
-        {
-            if (condition())
-            {
-                return;
-            }
-
-            await Task.Delay(10, token);
-        }
-
-        Assert.Fail(message);
-    }
+        AsyncWait.WaitUntilAsync(
+            () => CountSubscribers(broadcaster) > 0,
+            "watcher did not subscribe",
+            SubscriptionTimeout,
+            token);
 
     /// <summary>
     /// Probes the live subscriber count by publishing to a counting observer is not possible without

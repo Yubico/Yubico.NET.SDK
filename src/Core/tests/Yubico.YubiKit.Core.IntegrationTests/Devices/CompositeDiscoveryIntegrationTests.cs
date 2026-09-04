@@ -58,7 +58,8 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         var raw = await EnumerateRawUsbInterfacesAsync();
         Assert.NotEmpty(raw);
 
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+        var devices = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
 
         foreach (var type in ConcreteTypes)
         {
@@ -73,7 +74,7 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         // Per-connection filters must return exactly the devices from the same snapshot exposing the type.
         foreach (var type in ConcreteTypes)
         {
-            var filtered = await YubiKeyManager.FindAllAsync(type);
+            var filtered = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync(type));
             Assert.Equal(
                 devices.Where(d => Supports(d, type)).Select(d => d.DeviceId).Order(StringComparer.Ordinal),
                 filtered.Select(d => d.DeviceId).Order(StringComparer.Ordinal));
@@ -91,7 +92,8 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         Assert.NotEmpty(raw);
         var expectedKeyCount = KeyCountPerPid(raw).Values.Sum();
 
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+        var devices = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
 
         Assert.True(
             devices.Count == expectedKeyCount,
@@ -113,7 +115,8 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
             .OrderBy(c => (int)c)
             .ToList();
 
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+        var devices = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
         var actualShapes = devices.Select(d => d.AvailableConnections).OrderBy(c => (int)c).ToList();
 
         Assert.True(
@@ -129,8 +132,10 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     {
         // Stability: two consecutive scans on one manager (identity cache shared) must produce the same
         // grouping — same device count, same interface-set multiset, same device identities.
-        var scan1 = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
-        var scan2 = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+        var scan1 = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
+        var scan2 = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
 
         Assert.True(
             scan1.Count == scan2.Count,
@@ -150,7 +155,8 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     {
         // Every returned device must honor its advertised interface set with a working typed connect
         // (no touch required for opening and closing a connection).
-        var devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+        var devices = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true));
         Assert.NotEmpty(devices);
 
         foreach (var device in devices)
@@ -208,7 +214,8 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
 
     private static async Task<IReadOnlyList<RawUsbInterface>> EnumerateRawUsbInterfacesAsync()
     {
-        var pcscDevices = await FindPcscDevices.Create().FindAllAsync();
+        var pcscDevices = await TransientScanRetry.ScanAsync(() => FindPcscDevices.Create().FindAllAsync());
+
         var hidDevices = await FindHidDevices.Create().FindAllAsync();
 
         var interfaces = new List<RawUsbInterface>();

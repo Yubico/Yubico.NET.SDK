@@ -31,7 +31,7 @@ public class YubiKeyTests : IAsyncLifetime
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     public async Task FindAllAsync_ReturnsAtLeastOne()
     {
-        var devices = await YubiKeyManager.FindAllAsync();
+        var devices = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync());
         Assert.NotEmpty(devices);
     }
 

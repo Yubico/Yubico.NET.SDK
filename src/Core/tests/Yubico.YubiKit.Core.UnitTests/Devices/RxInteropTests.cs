@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 public class RxInteropTests
 {
     private static DeviceEvent Event(DeviceAction action, string deviceId) =>
-        new(action, new StubYubiKey(deviceId));
+        new(action, new FakeYubiKey(deviceId));
 
     [Fact]
     public void RxSubscribeActionOverload_WorksAgainstTheSdkObservable()
@@ -43,7 +43,7 @@ public class RxInteropTests
         // ObservableExtensions.Subscribe(Action<T>) comes from System.Reactive, not the BCL.
         using var subscription = repository.DeviceChanges.Subscribe(e => seen.Add(e.Device.DeviceId));
 
-        repository.UpdateCache([new StubYubiKey("device-1")]);
+        repository.UpdateCache([new FakeYubiKey("device-1")]);
 
         Assert.Equal(["device-1"], seen);
     }
@@ -59,8 +59,8 @@ public class RxInteropTests
             .Select(e => e.Device.DeviceId)
             .Subscribe(added.Add);
 
-        repository.UpdateCache([new StubYubiKey("device-1"), new StubYubiKey("device-2")]);
-        repository.UpdateCache([new StubYubiKey("device-1")]);
+        repository.UpdateCache([new FakeYubiKey("device-1"), new FakeYubiKey("device-2")]);
+        repository.UpdateCache([new FakeYubiKey("device-1")]);
 
         // Two arrivals; the removal is filtered out by Where.
         Assert.Equal(2, added.Count);
@@ -78,8 +78,8 @@ public class RxInteropTests
             .Take(1)
             .Subscribe(onNext: _ => received++, onCompleted: () => completed = true);
 
-        repository.UpdateCache([new StubYubiKey("device-1")]);
-        repository.UpdateCache([new StubYubiKey("device-1"), new StubYubiKey("device-2")]);
+        repository.UpdateCache([new FakeYubiKey("device-1")]);
+        repository.UpdateCache([new FakeYubiKey("device-1"), new FakeYubiKey("device-2")]);
 
         Assert.Equal(1, received);
         Assert.True(completed);

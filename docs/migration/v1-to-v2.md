@@ -31,7 +31,11 @@ Review code that assumes:
 
 V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived` and `Removed` events (`EventHandler<HidDeviceEventArgs>`) carrying the affected `IHidDevice`. V1 YubiKey-level monitoring used `YubiKeyDeviceListener.Arrived`/`Removed` and the `YubiKeyDevice.FindAll()` cache. In v2, the low-level `Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent` callback is `Action<HidDeviceRescanHint>?`: a diagnostic rescan hint with `HidDeviceChangeKind` plus optional platform identifier/path. It is not authoritative physical-device state. Applications that need real YubiKey arrivals and removals should use `YubiKeyManager.DeviceChanges`, which is emitted after the device repository rescans and diffs the discovered device set.
 
-Earlier v2 alphas could make Rx-style `Subscribe(Action<T>)` and query operators appear transitively. Current builds expose only the BCL `IObservable<T>` surface. If your migration code uses lambda subscriptions or operators such as `Where`, add a direct `System.Reactive` reference.
+Earlier v2 alphas could make Rx-style `Subscribe(Action<T>)` and query operators appear transitively. Current builds expose only the BCL `IObservable<T>` surface. If your migration code uses lambda subscriptions or operators such as `Where`, add a direct `System.Reactive` reference. `YubiKeyManager.WatchAsync(cancellationToken)` (`IAsyncEnumerable<DeviceEvent>`) is available as an ergonomic alternative to `DeviceChanges`; both are backed by the same dependency-free broadcaster. See `hid-listener-rescan-hints` in `v1-to-v2-map.yml`.
+
+### HID Interface Type Classification
+
+V1's `IHidDevice.UsagePage` (`HidUsagePage`: `Unknown`, `Fido`, `Keyboard`) classified a device from the HID UsagePage field alone; `Keyboard = 1` was actually the Generic Desktop usage page, not specifically a keyboard, so v1 code paired it with `Usage` to detect the YubiKey OTP interface. V2 classifies from the full UsagePage+Usage pair through `IHidDevice.InterfaceType` (`HidInterfaceType`: `Unknown`, `Fido`, `Otp`). Migrate `UsagePage == HidUsagePage.Fido` to `InterfaceType == HidInterfaceType.Fido`, and `UsagePage == HidUsagePage.Keyboard` (v1's OTP-interface check) to `InterfaceType == HidInterfaceType.Otp`. See `hid-usage-page-to-interface-type` in `v1-to-v2-map.yml`. Most applications should prefer `YubiKeyManager`/`IYubiKey` discovery and `ConnectionType` over raw `IHidDevice` interface classification.
 
 ### Secure Channel (SCP) Session Construction
 
@@ -444,6 +448,10 @@ PIN-only management-key mode (`IPivSession.GetPinOnlyModeAsync`/`SetPinOnlyModeA
 
 Use `Yubico.YubiKit.Fido2` for FIDO2/WebAuthn operations. Review transport selection, PIN/UV flows, credential management, and authenticator state assumptions manually.
 
+### WebAuthn
+
+Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new package built on top of `Yubico.YubiKit.Fido2` (`IFidoSession`); v1 had no equivalent package. `WebAuthnClient` accepts an optional `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) that supplies a PIN on demand instead of requiring `pinBytes` up front, and owns a bounded retry loop instead of v1 FIDO2 code's global, unbounded `KeyCollector` pattern; see `webauthn-credential-prompt` in `v1-to-v2-map.yml`.
+
 ### OATH
 
 Use `Yubico.YubiKit.Oath` for TOTP/HOTP credential management and code calculation. Review credential naming, secret handling, password flows, and time-source assumptions manually.
@@ -473,6 +481,8 @@ Secure-channel handshake/authentication failures (during session creation or pos
 Use `Yubico.YubiKit.YubiHsm` for YubiHSM 2 workflows. Review connector/session creation, authentication, object identifiers, capabilities, and command behavior manually.
 
 A dedicated `HsmAuthRetryException.RetriesRemaining` and an `HsmAuthSession.OnTouchRequired` callback were restored after an initial v2 gap; see `yubihsm-retry-exception` and `yubihsm-touch-notify` in `v1-to-v2-map.yml`. `HsmAuthCredential.Counter` was hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics; see `yubihsm-credential-retries-remaining-rename`.
+
+Credential passwords moved from `string` to UTF-8 `ReadOnlyMemory<byte>` across nine `IHsmAuthSession`/`HsmAuthSession` members (parameters renamed with the `...Utf8` suffix), closing a v1 regression rather than introducing one, since v1's equivalent path already used byte-based passwords; see `yubihsm-credential-password-bytes` in `v1-to-v2-map.yml`.
 
 ## Manual Low-Level Command Cases
 

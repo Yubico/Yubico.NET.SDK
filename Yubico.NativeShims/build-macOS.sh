@@ -14,6 +14,8 @@ rm -rf build64 buildarm osx-arm64 osx-x64
 
 pushd "$VCPKG_INSTALLATION_ROOT"
 git fetch origin "$VCPKG_COMMIT"
+git reset --hard
+git clean -fdx
 git checkout --detach "$VCPKG_COMMIT"
 ./bootstrap-vcpkg.sh
 popd

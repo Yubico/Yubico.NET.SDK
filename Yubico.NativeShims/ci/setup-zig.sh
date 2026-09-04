@@ -41,6 +41,9 @@ exec /usr/local/zig/zig c++ -target "$ZIG_TARGET" -O2 -s "\$@"
 EOF
 chmod +x "$WRAPPER_DIR/zig-cc" "$WRAPPER_DIR/zig-c++"
 
-"$WRAPPER_DIR/zig-cc" --version | grep -q zig
+SMOKE_SRC="$(mktemp -u --suffix=.c)"
+trap 'rm -f "$ZIG_ARCHIVE" "$ZIG_ARCHIVE.minisig" "$SMOKE_SRC" "$SMOKE_SRC.out"' EXIT
+echo 'int main(void) { return 0; }' > "$SMOKE_SRC"
+"$WRAPPER_DIR/zig-cc" "$SMOKE_SRC" -o "$SMOKE_SRC.out"
 echo "CC=$WRAPPER_DIR/zig-cc" >> "$GITHUB_ENV"
 echo "CXX=$WRAPPER_DIR/zig-c++" >> "$GITHUB_ENV"

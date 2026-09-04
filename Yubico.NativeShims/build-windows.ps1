@@ -12,6 +12,10 @@ Push-Location $env:VCPKG_INSTALLATION_ROOT
 try {
     git fetch origin $vcpkgBaseline
     if ($LASTEXITCODE -ne 0) { throw "Failed to fetch vcpkg baseline $vcpkgBaseline." }
+    git reset --hard
+    if ($LASTEXITCODE -ne 0) { throw "Failed to reset vcpkg working tree." }
+    git clean -fdx
+    if ($LASTEXITCODE -ne 0) { throw "Failed to clean vcpkg working tree." }
     git checkout --detach $vcpkgBaseline
     if ($LASTEXITCODE -ne 0) { throw "Failed to check out vcpkg baseline $vcpkgBaseline." }
     .\bootstrap-vcpkg.bat

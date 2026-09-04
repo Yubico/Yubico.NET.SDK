@@ -144,7 +144,7 @@ public sealed class OpenPgpInvalidPinExceptionTests
     {
         // SW 6982 (Security Status Not Satisfied) for an extended-mode (Pw.Reset) verify: the
         // fallback must resolve AttemptsReset, not AttemptsUser or AttemptsAdmin. The only route
-        // that reaches VerifyPwAsync with Pw.Reset is VerifyPinAsync(pinUtf8, extended: true, ...).
+        // that reaches VerifyPwAsync with Pw.Reset is VerifyPinAsync(pin, extended: true, ...).
         // Distinct attempt counts in PwStatusResponse make a wrong arm mapping fail loudly.
         var connection = CreateInitializedConnection(
             KdfNotFoundResponse(),

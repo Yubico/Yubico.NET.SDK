@@ -92,7 +92,7 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<MetadataResult> GetMetadataAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
@@ -105,7 +105,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -138,7 +138,7 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<EnumerateRpsResult> EnumerateRelyingPartiesAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
@@ -151,7 +151,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -184,7 +184,7 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<EnumerateCredentialsResult> EnumerateCredentialsAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         ReadOnlyMemory<byte> rpIdHash,
         CancellationToken cancellationToken = default)
     {
@@ -198,7 +198,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -231,7 +231,7 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<CredMgmtResult> DeleteCredentialAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         ReadOnlyMemory<byte> credentialId,
         CancellationToken cancellationToken = default)
     {
@@ -245,7 +245,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 
@@ -279,7 +279,7 @@ public static class CredentialManagementExample
     /// </summary>
     public static async Task<CredMgmtResult> UpdateUserInfoAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         ReadOnlyMemory<byte> credentialId,
         string userName,
         string displayName,
@@ -296,7 +296,7 @@ public static class CredentialManagementExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken);
 

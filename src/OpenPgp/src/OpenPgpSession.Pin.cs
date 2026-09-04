@@ -22,7 +22,7 @@ public sealed partial class OpenPgpSession
 {
     /// <inheritdoc />
     public async Task VerifyPinAsync(
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         bool extended = false,
         CancellationToken cancellationToken = default)
     {
@@ -35,18 +35,18 @@ public sealed partial class OpenPgpSession
         var pw = extended ? Pw.Reset : Pw.User;
 
         _logger.LogDebug("Verifying User PIN (P2=0x{P2:X2})", p2);
-        await VerifyPwAsync(pw, p2, pinUtf8, cancellationToken).ConfigureAwait(false);
+        await VerifyPwAsync(pw, p2, pin, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task VerifyAdminAsync(
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
         _logger.LogDebug("Verifying Admin PIN");
-        await VerifyPwAsync(Pw.Admin, (byte)Pw.Admin, pinUtf8, cancellationToken)
+        await VerifyPwAsync(Pw.Admin, (byte)Pw.Admin, pin, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -71,33 +71,33 @@ public sealed partial class OpenPgpSession
 
     /// <inheritdoc />
     public async Task ChangePinAsync(
-        ReadOnlyMemory<byte> currentPinUtf8,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> currentPin,
+        ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
         _logger.LogDebug("Changing User PIN");
-        await ChangePwAsync(Pw.User, currentPinUtf8, newPinUtf8, cancellationToken)
+        await ChangePwAsync(Pw.User, currentPin, newPin, cancellationToken)
             .ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task ChangeAdminAsync(
-        ReadOnlyMemory<byte> currentPinUtf8,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> currentPin,
+        ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
         _logger.LogDebug("Changing Admin PIN");
-        await ChangePwAsync(Pw.Admin, currentPinUtf8, newPinUtf8, cancellationToken)
+        await ChangePwAsync(Pw.Admin, currentPin, newPin, cancellationToken)
             .ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task SetResetCodeAsync(
-        ReadOnlyMemory<byte> resetCodeUtf8,
+        ReadOnlyMemory<byte> resetCode,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -108,7 +108,7 @@ public sealed partial class OpenPgpSession
         try
         {
             var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
-            derivedBytes = kdf.Process(Pw.Reset, resetCodeUtf8.Span);
+            derivedBytes = kdf.Process(Pw.Reset, resetCode.Span);
 
             await PutDataAsync(DataObject.ResettingCode, derivedBytes, cancellationToken)
                 .ConfigureAwait(false);
@@ -124,8 +124,8 @@ public sealed partial class OpenPgpSession
 
     /// <inheritdoc />
     public async Task ResetPinAsync(
-        ReadOnlyMemory<byte> resetCodeUtf8,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> resetCode,
+        ReadOnlyMemory<byte> newPin,
         bool useAdmin = false,
         CancellationToken cancellationToken = default)
     {
@@ -139,7 +139,7 @@ public sealed partial class OpenPgpSession
         try
         {
             var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
-            newPinBytes = kdf.Process(Pw.User, newPinUtf8.Span);
+            newPinBytes = kdf.Process(Pw.User, newPin.Span);
 
             // P1=0x02 (admin): Admin PIN (PW3) must have been verified beforehand
             //   by the caller via VerifyAdminAsync. Data = new PIN only.
@@ -152,7 +152,7 @@ public sealed partial class OpenPgpSession
             }
             else
             {
-                resetBytes = kdf.Process(Pw.Reset, resetCodeUtf8.Span);
+                resetBytes = kdf.Process(Pw.Reset, resetCode.Span);
                 data = new byte[resetBytes.Length + newPinBytes.Length];
                 resetBytes.CopyTo(data.AsSpan());
                 newPinBytes.CopyTo(data.AsSpan(resetBytes.Length));
@@ -223,14 +223,14 @@ public sealed partial class OpenPgpSession
     private async Task VerifyPwAsync(
         Pw pw,
         byte p2,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken)
     {
         byte[]? derivedBytes = null;
         try
         {
             var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
-            derivedBytes = kdf.Process(pw, pinUtf8.Span);
+            derivedBytes = kdf.Process(pw, pin.Span);
 
             var command = new ApduCommand(0x00, (int)Ins.Verify, 0x00, p2, derivedBytes);
             var response = await TransmitNoThrowAsync(command, cancellationToken)
@@ -308,8 +308,8 @@ public sealed partial class OpenPgpSession
 
     private async Task ChangePwAsync(
         Pw pw,
-        ReadOnlyMemory<byte> currentPinUtf8,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> currentPin,
+        ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken)
     {
         byte[]? currentBytes = null;
@@ -318,8 +318,8 @@ public sealed partial class OpenPgpSession
         try
         {
             var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
-            currentBytes = kdf.Process(pw, currentPinUtf8.Span);
-            newBytes = kdf.Process(pw, newPinUtf8.Span);
+            currentBytes = kdf.Process(pw, currentPin.Span);
+            newBytes = kdf.Process(pw, newPin.Span);
 
             combined = new byte[currentBytes.Length + newBytes.Length];
             currentBytes.CopyTo(combined.AsSpan());

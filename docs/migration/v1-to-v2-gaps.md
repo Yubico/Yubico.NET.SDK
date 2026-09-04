@@ -307,7 +307,7 @@ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations onl
   **Severity**: Cosmetic | **Confidence**: High
 
 - **Feature/API**: Zeroable credential passwords — v1 accepted `ReadOnlyMemory<byte> credentialPassword` (`YubiHsmAuthSession.Symmetric.cs`, `Aes128CredentialWithSecrets.cs`).
-  **v2 status**: **Regressed, now fixed (2026-08-31).** v2 originally shipped these as `string`, which callers cannot wipe — the only module in the SDK still doing so after the `75353fd1` Fido2/OpenPgp/Oath sweep, which missed `src/YubiHsm/` because it landed seven days earlier. Nine members now take UTF-8 `ReadOnlyMemory<byte>` (`...Utf8` parameters), restoring v1 parity. Padding and PBKDF2 behavior are unchanged.
+  **v2 status**: **Regressed, now fixed (2026-08-31).** v2 originally shipped these as `string`, which callers cannot wipe — the only module in the SDK still doing so after the `75353fd1` Fido2/OpenPgp/Oath sweep, which missed `src/YubiHsm/` because it landed seven days earlier. Nine members now take UTF-8 `ReadOnlyMemory<byte>`, restoring v1 parity. Padding and PBKDF2 behavior are unchanged. The parameters are named plainly (`credentialPassword` and friends), with the UTF-8 and ownership contracts documented on each `<param>`.
   **Severity**: Major (while it lasted) | **Confidence**: High
 
 **Verified improvement, no gap**: `ChangeCredentialPasswordAsync`/`ChangeCredentialPasswordAdminAsync` (fw 5.8.0+), `GenerateCredentialAsymmetricAsync` (on-device EC keygen), `PutCredentialDerivedAsync` (PBKDF2-derived symmetric credential), `SessionKeys` as `IDisposable` with zeroization — all new capabilities beyond v1.

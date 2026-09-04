@@ -56,7 +56,7 @@ public static class MakeCredential
     /// <param name="rpId">The relying party identifier (e.g., "example.com").</param>
     /// <param name="userName">The user name (e.g., "user@example.com").</param>
     /// <param name="displayName">The user display name.</param>
-    /// <param name="pinUtf8">Optional PIN as UTF-8 bytes for user verification.</param>
+    /// <param name="pin">Optional PIN as UTF-8 bytes for user verification.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result containing the credential response.</returns>
     public static async Task<MakeCredentialResult> CreateAsync(
@@ -64,7 +64,7 @@ public static class MakeCredential
         string rpId,
         string userName,
         string? displayName,
-        ReadOnlyMemory<byte>? pinUtf8 = null,
+        ReadOnlyMemory<byte>? pin = null,
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
@@ -98,13 +98,13 @@ public static class MakeCredential
             };
 
             // If PIN is provided, get a PIN token for user verification
-            if (pinUtf8 is not null)
+            if (pin is not null)
             {
                 using var protocol = new PinUvAuthProtocolV2();
                 using var clientPin = new ClientPin(session, protocol);
 
                 pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    pinUtf8.Value,
+                    pin.Value,
                     PinUvAuthTokenPermissions.MakeCredential,
                     rpId,
                     cancellationToken);

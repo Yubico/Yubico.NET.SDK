@@ -204,13 +204,19 @@ public class YubiKeyDeviceRepositoryTests
         Assert.False(survivor.Completion.IsCompleted);
     }
 
-    /// <summary>ISC-7: overflow terminates only the watcher whose own buffer filled.</summary>
+    /// <summary>
+    /// ISC-7: overflow terminates only the watcher whose own buffer filled. The second watcher is
+    /// subscribed for the whole burst — not started afterwards — so it is the one that would also be
+    /// torn down if overflow were not isolated per watcher.
+    /// </summary>
     [Fact]
     public async Task WatchAsync_WhenOneWatcherOverflows_OnlyThatWatcherFaults()
     {
         using var repository = new YubiKeyDeviceRepository();
         using var cts = new CancellationTokenSource(Bound);
         using var stall = new SemaphoreSlim(0, 1);
+
+        await using var healthy = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         var overflowing = Task.Run(
             async () =>
@@ -228,27 +234,41 @@ public class YubiKeyDeviceRepositoryTests
             cts.Token);
 
         await AsyncWait.WaitUntilAsync(
-            () => repository.WatcherCount == 1,
+            () => repository.WatcherCount == 2,
             "the stalling watcher did not subscribe",
             Bound,
             cts.Token);
 
-        // Each cycle emits Removed + Added, so this overruns the 256-event buffer several times over.
-        for (var i = 0; i < DeviceEventHub.WatcherBufferCapacity; i++)
+        // Cycle 0 emits one Added; every later cycle emits Removed + Added, so cycle i leaves
+        // 1 + 2i events published in total, overrunning the 256-event buffer several times over.
+        // Paced so only the watcher that is genuinely not draining fills its buffer: an unpaced burst
+        // this size overflows any consumer, which would prove nothing about isolation.
+        const int cycles = DeviceEventHub.WatcherBufferCapacity;
+        for (var i = 0; i < cycles; i++)
         {
             repository.UpdateCache([new FakeYubiKey($"device-{i}", ConnectionType.SmartCard)]);
+            if (i % 32 == 31)
+            {
+                await healthy.WaitForCountAsync(1 + (2 * i), "the healthy watcher fell behind", cts.Token);
+            }
         }
 
         stall.Release();
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => overflowing);
         Assert.Contains("FindAllAsync", ex.Message, StringComparison.Ordinal);
 
-        // The publisher is unharmed and a fresh watcher still receives everything after the fault.
-        await using var healthy = await DeviceEventWatcher.StartAsync(repository, cts.Token);
-        repository.UpdateCache([new FakeYubiKey("after-overflow", ConnectionType.SmartCard)]);
+        // The watcher that kept up lost nothing to its neighbour's fault and is still enumerating.
+        const int published = 1 + (2 * (cycles - 1));
+        await healthy.WaitForCountAsync(published, "the healthy watcher did not receive every event", cts.Token);
+        Assert.Equal(published, healthy.Count);
+        Assert.False(healthy.Completion.IsCompleted);
 
-        await healthy.WaitForCountAsync(2, "publication did not continue after an overflow", cts.Token);
-        Assert.Contains(healthy.Events, e => e.Action == DeviceAction.Added && e.Device.DeviceId == "after-overflow");
+        // The publisher is unharmed: the same watcher keeps receiving after the fault.
+        repository.UpdateCache([new FakeYubiKey("after-overflow", ConnectionType.SmartCard)]);
+        _ = await healthy.WaitForAsync(
+            e => e.Action == DeviceAction.Added && e.Device.DeviceId == "after-overflow",
+            "publication did not continue after an overflow",
+            cts.Token);
     }
 
     /// <summary>ISC-9: <c>WatchAsync</c> subscribes on first enumeration, not when it is called.</summary>

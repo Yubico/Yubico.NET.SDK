@@ -119,6 +119,11 @@ internal sealed class DeviceEventHub
     /// </summary>
     /// <param name="cancellationToken">Cancels this enumeration only.</param>
     /// <returns>A sequence that ends normally when the hub completes.</returns>
+    /// <remarks>
+    /// The caller must dispose the enumerator — <c>await foreach</c> and <c>await using</c> do this
+    /// automatically. Unsubscription happens on disposal, so an abandoned enumeration keeps its buffer
+    /// registered with the hub for the lifetime of the process.
+    /// </remarks>
     /// <exception cref="OperationCanceledException">
     /// Thrown from enumeration when <paramref name="cancellationToken"/> is canceled.
     /// </exception>
@@ -199,14 +204,32 @@ internal sealed class DeviceEventHub
                 FullMode = BoundedChannelFullMode.Wait
             });
 
+        /// <summary>
+        /// Set once the channel can never accept another event, so <see cref="Deliver"/> can bail out
+        /// before doing any work. Volatile rather than locked: a stale <c>false</c> only costs one
+        /// wasted <c>TryWrite</c>, and the publisher must not take a lock.
+        /// </summary>
+        private volatile bool _terminated;
+
         public ChannelReader<DeviceEvent> Reader => _channel.Reader;
 
         public void Deliver(DeviceEvent deviceEvent)
         {
+            // A terminated watcher stays in the publisher's snapshot until its enumerator is disposed,
+            // and an abandoned enumerator never disposes. Without this check every later Publish would
+            // allocate and format a fresh overflow exception for a buffer that can never accept it —
+            // once per event, forever, on the path the monitor holds its publication gate across.
+            if (_terminated)
+            {
+                return;
+            }
+
             if (_channel.Writer.TryWrite(deviceEvent))
             {
                 return;
             }
+
+            _terminated = true;
 
             // Completing distinguishes a full live buffer from one that is already finished.
             var faulted = _channel.Writer.TryComplete(new InvalidOperationException(
@@ -225,6 +248,10 @@ internal sealed class DeviceEventHub
             }
         }
 
-        public void Complete() => _ = _channel.Writer.TryComplete();
+        public void Complete()
+        {
+            _terminated = true;
+            _ = _channel.Writer.TryComplete();
+        }
     }
 }

@@ -248,6 +248,54 @@ public class DeviceEventHubTests
     }
 
     /// <summary>
+    /// A watcher that overflowed but was never disposed stays in the publisher's snapshot for the
+    /// lifetime of the hub, so delivery to it must cost nothing. It used to re-allocate and re-format
+    /// the overflow exception on every subsequent publish — forever, on the path the device monitor
+    /// holds its publication gate across.
+    /// </summary>
+    [Fact]
+    public async Task Publish_ToAnOverflowedWatcherThatWasNeverDisposed_AllocatesNothing()
+    {
+        var hub = new DeviceEventHub();
+        using var cts = new CancellationTokenSource(Bound);
+
+        // Deliberately abandoned: MoveNextAsync subscribes, and skipping DisposeAsync is what leaves
+        // the terminated watcher registered. That is the leak this test measures the cost of.
+        var enumerator = hub.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+        var pending = enumerator.MoveNextAsync();
+        await AsyncWait.WaitUntilAsync(() => hub.WatcherCount == 1, "watcher did not subscribe", Bound, cts.Token);
+
+        var reused = Added("device");
+        for (var i = 0; i < DeviceEventHub.WatcherBufferCapacity + 50; i++)
+        {
+            hub.Publish(reused);
+        }
+
+        Assert.Equal(1, hub.WatcherCount);
+
+        // Publish is synchronous on this thread, so per-thread allocation attributes precisely to it.
+        // One warm-up publish first so JIT and tiering costs land outside the measured window.
+        hub.Publish(reused);
+
+        const int publishes = 1_000;
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var i = 0; i < publishes; i++)
+        {
+            hub.Publish(reused);
+        }
+
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+        Assert.True(
+            allocated < 4096,
+            $"publishing to a terminated watcher allocated {allocated} bytes over {publishes} events " +
+            "(~0 expected); the publish path is re-allocating per event.");
+
+        _ = await pending;
+        await enumerator.DisposeAsync();
+    }
+
+    /// <summary>
     /// Inverts the old broadcaster contract. A subscriber that threw used to propagate to the
     /// publisher and cut off every later subscriber; now the exception stays inside the consumer's
     /// own enumeration and everyone else — including the publisher — carries on.

@@ -21,18 +21,31 @@ public class CoreTests : IAsyncLifetime
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         await using var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
-        var first = enumerator.MoveNextAsync();
+        var first = enumerator.MoveNextAsync().AsTask();
 
         YubiKeyManager.StartMonitoring();
 
         bool observed;
         try
         {
-            observed = await first.AsTask().WaitAsync(TimeSpan.FromSeconds(10));
+            observed = await first.WaitAsync(TimeSpan.FromSeconds(10));
         }
         catch (TimeoutException)
         {
             observed = false;
+
+            // `first` is still in flight, and disposing an async iterator with a MoveNextAsync
+            // outstanding throws NotSupportedException — which would surface instead of the assertion
+            // below and hide what actually went wrong. Cancel and let the pending move retire first.
+            await cts.CancelAsync();
+            try
+            {
+                _ = await first;
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected: cancellation is how the in-flight MoveNextAsync is retired.
+            }
         }
 
         Assert.True(observed, "Expected at least one device event to reach the watcher.");

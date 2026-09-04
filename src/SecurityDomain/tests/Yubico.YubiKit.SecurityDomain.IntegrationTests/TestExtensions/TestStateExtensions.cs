@@ -65,6 +65,28 @@ public static class TestStateExtensions
                 await action(session).ConfigureAwait(false);
             }, cancellationToken);
 
+        /// <summary>
+        ///     Restores the Security Domain to its factory state, reinstating the default SCP03 keys.
+        /// </summary>
+        /// <remarks>
+        ///     Tests that rotate or delete SCP03 keys must call this when they finish. Deleting the last
+        ///     key set leaves the device with no key matching <see cref="Scp03KeyParameters.Default" />, so
+        ///     every later consumer of the default keys fails secure-channel establishment with
+        ///     <c>SW=0x6A88</c> (referenced data not found). That failure surfaces in whichever suite runs
+        ///     next rather than in the test that caused it, so resetting here keeps the integration suites
+        ///     order-independent.
+        /// </remarks>
+        public Task ResetSecurityDomainAsync(CancellationToken cancellationToken = default) =>
+            state.WithConnectionAsync(async connection =>
+            {
+                using var session = await SecurityDomainSession.CreateAsync(
+                        connection,
+                        new SessionCreationOptions { FirmwareVersionOverride = state.FirmwareVersion },
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+                await session.ResetAsync(cancellationToken).ConfigureAwait(false);
+            }, cancellationToken);
     }
 
 }

@@ -39,88 +39,98 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
     {
         var ct = CancellationTokenSource.Token;
 
-        // Use key material distinct from the default keys (0x40..0x4F) to avoid ambiguity.
-        byte[] keyBytes1 =
-        [
-            0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7,
-            0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF
-        ];
-
-        byte[] keyBytes2 =
-        [
-            0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7,
-            0xB8, 0xB9, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF
-        ];
-
-        var keyRef1 = new KeyReference(0x01, 0x10);
-        var keyRef2 = new KeyReference(0x01, 0x55);
-        using var staticKeys1 = new StaticKeys(keyBytes1, keyBytes1, keyBytes1);
-        using var staticKeys2 = new StaticKeys(keyBytes2, keyBytes2, keyBytes2);
-        var keyParams1 = new Scp03KeyParameters(keyRef1, staticKeys1);
-        var keyParams2 = new Scp03KeyParameters(keyRef2, staticKeys2);
-
-        // Session 1: Reset and import first custom key set using default keys
-        await state.WithSecurityDomainSessionAsync(true,
-            async session =>
-            {
-                await session.PutKeyAsync(keyRef1, staticKeys1, 0, ct);
-            }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: ct);
-
-        // Session 2: Authenticate with first key, import second key set
-        await state.WithSecurityDomainSessionAsync(false,
-            async session =>
-            {
-                await session.PutKeyAsync(keyRef2, staticKeys2, 0, ct);
-            }, scpKeyParams: keyParams1, cancellationToken: ct);
-
-        // Session 3: Authenticate with second key, delete first key
-        await state.WithSecurityDomainSessionAsync(false,
-            async session =>
-            {
-                await session.DeleteKeyAsync(keyRef1, cancellationToken: ct);
-            }, scpKeyParams: keyParams2, cancellationToken: ct);
-
-        // Session 4: Verify first key no longer works. The deleted key's KVN no longer exists on
-        // the device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
-        // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
-        var deletedKey1Ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+        try
         {
+
+            // Use key material distinct from the default keys (0x40..0x4F) to avoid ambiguity.
+            byte[] keyBytes1 =
+            [
+                0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7,
+                0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF
+            ];
+
+            byte[] keyBytes2 =
+            [
+                0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7,
+                0xB8, 0xB9, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF
+            ];
+
+            var keyRef1 = new KeyReference(0x01, 0x10);
+            var keyRef2 = new KeyReference(0x01, 0x55);
+            using var staticKeys1 = new StaticKeys(keyBytes1, keyBytes1, keyBytes1);
+            using var staticKeys2 = new StaticKeys(keyBytes2, keyBytes2, keyBytes2);
+            var keyParams1 = new Scp03KeyParameters(keyRef1, staticKeys1);
+            var keyParams2 = new Scp03KeyParameters(keyRef2, staticKeys2);
+
+            // Session 1: Reset and import first custom key set using default keys
+            await state.WithSecurityDomainSessionAsync(true,
+                async session =>
+                {
+                    await session.PutKeyAsync(keyRef1, staticKeys1, 0, ct);
+                }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: ct);
+
+            // Session 2: Authenticate with first key, import second key set
             await state.WithSecurityDomainSessionAsync(false,
-                session => Task.CompletedTask,
-                scpKeyParams: keyParams1,
-                cancellationToken: ct);
-        });
-        Assert.IsType<ApduException>(deletedKey1Ex.InnerException);
+                async session =>
+                {
+                    await session.PutKeyAsync(keyRef2, staticKeys2, 0, ct);
+                }, scpKeyParams: keyParams1, cancellationToken: ct);
 
-        // Session 5: Verify second key still works, and first key is gone from key info
-        await state.WithSecurityDomainSessionAsync(false,
-            async session =>
+            // Session 3: Authenticate with second key, delete first key
+            await state.WithSecurityDomainSessionAsync(false,
+                async session =>
+                {
+                    await session.DeleteKeyAsync(keyRef1, cancellationToken: ct);
+                }, scpKeyParams: keyParams2, cancellationToken: ct);
+
+            // Session 4: Verify first key no longer works. The deleted key's KVN no longer exists on
+            // the device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
+            // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
+            var deletedKey1Ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
             {
-                var keyInfo = await session.GetKeyInfoAsync(ct);
-                Assert.DoesNotContain(keyInfo,
-                    entry => entry.KeyReference.Kvn == keyRef1.Kvn);
-                Assert.Contains(keyInfo,
-                    entry => entry.KeyReference.Kvn == keyRef2.Kvn);
-            }, scpKeyParams: keyParams2, cancellationToken: ct);
+                await state.WithSecurityDomainSessionAsync(false,
+                    session => Task.CompletedTask,
+                    scpKeyParams: keyParams1,
+                    cancellationToken: ct);
+            });
+            Assert.IsType<ApduException>(deletedKey1Ex.InnerException);
 
-        // Session 6: Delete the last remaining custom key
-        await state.WithSecurityDomainSessionAsync(false,
-            async session =>
+            // Session 5: Verify second key still works, and first key is gone from key info
+            await state.WithSecurityDomainSessionAsync(false,
+                async session =>
+                {
+                    var keyInfo = await session.GetKeyInfoAsync(ct);
+                    Assert.DoesNotContain(keyInfo,
+                        entry => entry.KeyReference.Kvn == keyRef1.Kvn);
+                    Assert.Contains(keyInfo,
+                        entry => entry.KeyReference.Kvn == keyRef2.Kvn);
+                }, scpKeyParams: keyParams2, cancellationToken: ct);
+
+            // Session 6: Delete the last remaining custom key
+            await state.WithSecurityDomainSessionAsync(false,
+                async session =>
+                {
+                    await session.DeleteKeyAsync(keyRef2, deleteLast: true, cancellationToken: ct);
+                }, scpKeyParams: keyParams2, cancellationToken: ct);
+
+            // Session 7: Verify second key no longer works. The deleted key's KVN no longer exists on
+            // the device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
+            // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
+            var deletedKey2Ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
             {
-                await session.DeleteKeyAsync(keyRef2, deleteLast: true, cancellationToken: ct);
-            }, scpKeyParams: keyParams2, cancellationToken: ct);
-
-        // Session 7: Verify second key no longer works. The deleted key's KVN no longer exists on
-        // the device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
-        // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
-        var deletedKey2Ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+                await state.WithSecurityDomainSessionAsync(false,
+                    session => Task.CompletedTask,
+                    scpKeyParams: keyParams2,
+                    cancellationToken: ct);
+            });
+            Assert.IsType<ApduException>(deletedKey2Ex.InnerException);
+        }
+        finally
         {
-            await state.WithSecurityDomainSessionAsync(false,
-                session => Task.CompletedTask,
-                scpKeyParams: keyParams2,
-                cancellationToken: ct);
-        });
-        Assert.IsType<ApduException>(deletedKey2Ex.InnerException);
+            // Both custom key sets were deleted, leaving no SCP03 key on the device. Restore factory
+            // defaults so later tests and suites can still authenticate with the default keys.
+            await state.ResetSecurityDomainAsync(ct);
+        }
     }
 
     /// <summary>
@@ -133,60 +143,70 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
     {
         var ct = CancellationTokenSource.Token;
 
-        byte[] originalKeyBytes =
-        [
-            0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
-            0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
-        ];
-
-        byte[] rotatedKeyBytes =
-        [
-            0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57,
-            0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F
-        ];
-
-        var originalKeyRef = new KeyReference(0x01, 0x01);
-        var rotatedKeyRef = new KeyReference(0x01, 0x02);
-
-        using var originalStaticKeys = new StaticKeys(originalKeyBytes, originalKeyBytes, originalKeyBytes);
-        using var rotatedStaticKeys = new StaticKeys(rotatedKeyBytes, rotatedKeyBytes, rotatedKeyBytes);
-
-        // Session 1: Import original custom key set using default keys
-        await state.WithSecurityDomainSessionAsync(true,
-            async session =>
-            {
-                await session.PutKeyAsync(originalKeyRef, originalStaticKeys, 0, ct);
-            }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: ct);
-
-        // Session 2: Authenticate with original key, then replace it with a rotated key
-        var originalKeyParams = new Scp03KeyParameters(originalKeyRef, originalStaticKeys);
-        await state.WithSecurityDomainSessionAsync(false,
-            async session =>
-            {
-                // PutKeyAsync with replaceKvn=originalKeyRef.Kvn replaces the original key
-                await session.PutKeyAsync(rotatedKeyRef, rotatedStaticKeys, originalKeyRef.Kvn, ct);
-            }, scpKeyParams: originalKeyParams, cancellationToken: ct);
-
-        // Session 3: Verify the rotated key works for authentication
-        var rotatedKeyParams = new Scp03KeyParameters(rotatedKeyRef, rotatedStaticKeys);
-        await state.WithSecurityDomainSessionAsync(false,
-            session =>
-            {
-                Assert.NotNull(session);
-                return Task.CompletedTask;
-            }, scpKeyParams: rotatedKeyParams, cancellationToken: ct);
-
-        // Session 4: Verify the original key no longer works. The original KVN was replaced away
-        // on the device, so establishing the secure channel fails during
-        // SecurityDomainSession.CreateAsync and surfaces as SecureChannelException wrapping the
-        // device's APDU-level rejection.
-        var rotatedAwayEx = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+        try
         {
+
+            byte[] originalKeyBytes =
+            [
+                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+                0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
+            ];
+
+            byte[] rotatedKeyBytes =
+            [
+                0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57,
+                0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F
+            ];
+
+            var originalKeyRef = new KeyReference(0x01, 0x01);
+            var rotatedKeyRef = new KeyReference(0x01, 0x02);
+
+            using var originalStaticKeys = new StaticKeys(originalKeyBytes, originalKeyBytes, originalKeyBytes);
+            using var rotatedStaticKeys = new StaticKeys(rotatedKeyBytes, rotatedKeyBytes, rotatedKeyBytes);
+
+            // Session 1: Import original custom key set using default keys
+            await state.WithSecurityDomainSessionAsync(true,
+                async session =>
+                {
+                    await session.PutKeyAsync(originalKeyRef, originalStaticKeys, 0, ct);
+                }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: ct);
+
+            // Session 2: Authenticate with original key, then replace it with a rotated key
+            var originalKeyParams = new Scp03KeyParameters(originalKeyRef, originalStaticKeys);
             await state.WithSecurityDomainSessionAsync(false,
-                session => Task.CompletedTask,
-                scpKeyParams: originalKeyParams,
-                cancellationToken: ct);
-        });
-        Assert.IsType<ApduException>(rotatedAwayEx.InnerException);
+                async session =>
+                {
+                    // PutKeyAsync with replaceKvn=originalKeyRef.Kvn replaces the original key
+                    await session.PutKeyAsync(rotatedKeyRef, rotatedStaticKeys, originalKeyRef.Kvn, ct);
+                }, scpKeyParams: originalKeyParams, cancellationToken: ct);
+
+            // Session 3: Verify the rotated key works for authentication
+            var rotatedKeyParams = new Scp03KeyParameters(rotatedKeyRef, rotatedStaticKeys);
+            await state.WithSecurityDomainSessionAsync(false,
+                session =>
+                {
+                    Assert.NotNull(session);
+                    return Task.CompletedTask;
+                }, scpKeyParams: rotatedKeyParams, cancellationToken: ct);
+
+            // Session 4: Verify the original key no longer works. The original KVN was replaced away
+            // on the device, so establishing the secure channel fails during
+            // SecurityDomainSession.CreateAsync and surfaces as SecureChannelException wrapping the
+            // device's APDU-level rejection.
+            var rotatedAwayEx = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+            {
+                await state.WithSecurityDomainSessionAsync(false,
+                    session => Task.CompletedTask,
+                    scpKeyParams: originalKeyParams,
+                    cancellationToken: ct);
+            });
+            Assert.IsType<ApduException>(rotatedAwayEx.InnerException);
+        }
+        finally
+        {
+            // The rotated key set replaced the defaults. Restore factory defaults so later tests and
+            // suites can still authenticate with Scp03KeyParameters.Default.
+            await state.ResetSecurityDomainAsync(ct);
+        }
     }
 }

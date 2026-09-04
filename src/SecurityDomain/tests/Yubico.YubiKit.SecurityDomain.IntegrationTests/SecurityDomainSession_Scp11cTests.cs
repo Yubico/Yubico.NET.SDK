@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 ///     Integration tests for SCP11c authentication.
 ///     SCP11c provides mutual authentication with certificate chain (variant C).
 /// </summary>
-public class SecurityDomainSession_Scp11cTests
+public class SecurityDomainSession_Scp11cTests : SecurityDomainStateRestoringTests
 {
     private const byte OceKid = 0x010;
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
@@ -43,6 +43,8 @@ public class SecurityDomainSession_Scp11cTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11c_GenerateAndAuthenticate_Succeeds(YubiKeyTestState state)
     {
+        Track(state);
+
         var ct = CancellationTokenSource.Token;
         const byte kvn = 0x06;
         var oceKeyRef = new KeyReference(OceKid, kvn);

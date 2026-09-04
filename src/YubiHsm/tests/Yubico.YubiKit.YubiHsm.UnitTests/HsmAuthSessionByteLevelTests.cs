@@ -242,6 +242,74 @@ public class HsmAuthSessionByteLevelTests
         ], CommandData(command).ToArray());
     }
 
+    /// <summary>
+    ///     Pins the CHANGE credential password APDU for the password-authenticated path.
+    /// </summary>
+    /// <remarks>
+    ///     The hardware test for this operation skips on applet builds that answer SW=0x6D00, so the
+    ///     instruction byte, P1 selector, and TLV order are pinned here instead. Without this, a
+    ///     regression in the instruction byte would look identical to an applet that lacks the
+    ///     instruction and would be skipped rather than caught.
+    /// </remarks>
+    [Fact]
+    public async Task ChangeCredentialPasswordAsync_TransmitsChangeInstructionWithPasswordSelector()
+    {
+        var connection = CreateInitializedConnection(OkResponse());
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.ChangeCredentialPasswordAsync(
+            "cred",
+            "pass"u8.ToArray(),
+            "newpass"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        var command = LastCommand(connection);
+        Assert.Equal(0x00, command[0]);
+        Assert.Equal(0x0B, command[1]);
+        Assert.Equal(0x00, command[2]); // P1=0 selects password authentication.
+        Assert.Equal(0x00, command[3]);
+
+        // Label, then current password, then new password.
+        var data = CommandData(command).ToArray();
+        Assert.Equal(0x71, data[0]);
+        var afterLabel = 2 + data[1];
+        Assert.Equal(0x73, data[afterLabel]);
+        var afterCurrent = afterLabel + 2 + data[afterLabel + 1];
+        Assert.Equal(0x73, data[afterCurrent]);
+    }
+
+    /// <summary>
+    ///     Pins the CHANGE credential password APDU for the management-key path, which differs only
+    ///     by its P1 selector and by carrying the management key instead of the current password.
+    /// </summary>
+    [Fact]
+    public async Task ChangeCredentialPasswordAdminAsync_TransmitsChangeInstructionWithManagementKeySelector()
+    {
+        var connection = CreateInitializedConnection(OkResponse());
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.ChangeCredentialPasswordAdminAsync(
+            Sequence(0x10, 16),
+            "cred",
+            "newpass"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        var command = LastCommand(connection);
+        Assert.Equal(0x0B, command[1]);
+        Assert.Equal(0x01, command[2]); // P1=1 selects management-key authentication.
+
+        var data = CommandData(command).ToArray();
+        Assert.Equal(0x71, data[0]);
+        var afterLabel = 2 + data[1];
+        Assert.Equal(0x7B, data[afterLabel]); // Management key, not a credential password.
+    }
+
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), .. trailingResponses]);
 

@@ -122,7 +122,7 @@ internal static class ExcludeListPreflight
                         PinUvAuthProtocol = (byte)protocol.Version
                     };
 
-                    var response = await backend.GetAssertionAsync(request, progress: null, cancellationToken)
+                    var response = await backend.GetAssertionAsync(request, cancellationToken)
                         .ConfigureAwait(false);
 
                     // Match found - return the credential that matched

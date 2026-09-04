@@ -59,7 +59,6 @@ public class ExcludeListPreflightTests
         // Verify backend was never called
         await backend.DidNotReceive().GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -83,7 +82,6 @@ public class ExcludeListPreflightTests
         var mockResponse = BuildMockGetAssertionResponse(credentialId);
         backend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(mockResponse);
 
@@ -121,7 +119,6 @@ public class ExcludeListPreflightTests
         // Mock backend to throw NoCredentials (no match in this chunk)
         backend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Throws(new CtapException(CtapStatus.NoCredentials));
 
@@ -160,7 +157,6 @@ public class ExcludeListPreflightTests
         var callCount = 0;
         backend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(ci =>
             {

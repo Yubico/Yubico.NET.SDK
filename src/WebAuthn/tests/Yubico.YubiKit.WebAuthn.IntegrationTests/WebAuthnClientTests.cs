@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
@@ -68,8 +69,7 @@ public class WebAuthnClientTests
 
         var response = await client.MakeCredentialAsync(
             options,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotNull(response);
         Assert.True(response.CredentialId.Length > 0, "Credential ID should not be empty");
@@ -97,8 +97,7 @@ public class WebAuthnClientTests
 
         var response = await client.MakeCredentialAsync(
             options,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotNull(response);
         Assert.True(response.CredentialId.Length > 0);
@@ -120,20 +119,13 @@ public class WebAuthnClientTests
         var options = CreateRegistrationOptions();
         var statuses = new List<WebAuthnStatus>();
 
-        await foreach (var status in client.MakeCredentialStreamAsync(options))
+        await foreach (var status in client.MakeCredentialStreamAsync(options, KnownTestPin))
         {
             statuses.Add(status);
 
-            switch (status)
+            if (status is WebAuthnStatusFailed failed)
             {
-                case WebAuthnStatusRequestingPin requestingPin:
-                    await requestingPin.SubmitPin(KnownTestPin);
-                    break;
-                case WebAuthnStatusRequestingUv requestingUv:
-                    await requestingUv.SetUseUv(false);
-                    break;
-                case WebAuthnStatusFailed failed:
-                    throw failed.Error;
+                throw failed.Error;
             }
         }
 
@@ -161,8 +153,7 @@ public class WebAuthnClientTests
 
         var regResponse = await regClient.MakeCredentialAsync(
             regOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotNull(regResponse);
         var credentialId = regResponse.CredentialId;
@@ -191,8 +182,7 @@ public class WebAuthnClientTests
 
         var matches = await authClient.GetAssertionAsync(
             authOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotEmpty(matches);
 
@@ -223,8 +213,7 @@ public class WebAuthnClientTests
 
         var regResponse = await regClient.MakeCredentialAsync(
             regOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         await regClient.DisposeAsync();
 
@@ -243,8 +232,7 @@ public class WebAuthnClientTests
 
         var matches = await authClient.GetAssertionAsync(
             authOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotEmpty(matches);
 
@@ -256,26 +244,48 @@ public class WebAuthnClientTests
         Assert.True(authResponse.Signature.Length > 0);
     }
 
+    /// <summary>
+    /// Registration with <see cref="UserVerificationPreference.Discouraged"/> and no PIN must
+    /// succeed and produce a credential that was NOT user-verified.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The relying party asking for <c>discouraged</c> is asking for no user verification. Demanding
+    /// a PIN anyway would make a non-UV credential impossible to create, so the ceremony proceeds
+    /// with no <c>pinUvAuthParam</c> on the wire.
+    /// </para>
+    /// <para>
+    /// The flag assertions are the point of the test: user presence and user verification are
+    /// independent. Touch is still required (CTAP never lets a client set <c>up</c> on
+    /// makeCredential, so the authenticator default of true applies), while UV must stay clear.
+    /// </para>
+    /// </remarks>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
-    public async Task MakeCredential_NoPinProvided_ThrowsNotAllowed(YubiKeyTestState state)
+    public async Task MakeCredential_UvDiscouragedAndNoPinProvided_CreatesNonVerifiedCredential(
+        YubiKeyTestState state)
     {
         await using var session = await state.Device
             .CreateFidoSessionAsync();
 
+        // A PIN is deliberately set on the authenticator. Discouraged must still skip verification.
         await NormalizePinAsync(session);
 
         await using var client = CreateClient(session);
 
         var options = CreateRegistrationOptions();
 
-        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
-            client.MakeCredentialAsync(
-                options,
-                pin: (string?)null,
-                useUv: false));
+        var response = await client.MakeCredentialAsync(options, pinBytes: null);
 
-        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
+        Assert.NotNull(response);
+        Assert.True(response.CredentialId.Length > 0, "Credential ID should not be empty");
+
+        Assert.True(
+            response.AuthenticatorData.UserPresent,
+            "User presence must be set: makeCredential always requires touch, independent of UV.");
+        Assert.False(
+            response.AuthenticatorData.UserVerified,
+            "User verification must be clear: the relying party asked for UV=Discouraged.");
     }
 }

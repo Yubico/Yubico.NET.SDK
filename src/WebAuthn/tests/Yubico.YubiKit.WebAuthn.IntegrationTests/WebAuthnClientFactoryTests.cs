@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
@@ -22,7 +23,6 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Preferences;
-
 using static Yubico.YubiKit.WebAuthn.IntegrationTests.WebAuthnTestHelpers;
 
 namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
@@ -93,8 +93,7 @@ public class WebAuthnClientFactoryTests
 
         var response = await client.MakeCredentialAsync(
             options,
-            pin: "11234567",
-            useUv: false,
+            Encoding.UTF8.GetBytes("11234567"),
             CancellationToken.None);
 
         Assert.NotNull(response);

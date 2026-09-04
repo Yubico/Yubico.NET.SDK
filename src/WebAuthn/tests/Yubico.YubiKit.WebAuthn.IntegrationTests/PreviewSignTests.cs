@@ -64,8 +64,7 @@ public class PreviewSignTests
 
         var response = await client.MakeCredentialAsync(
             regOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotNull(response);
         Assert.True(response.CredentialId.Length > 0);
@@ -129,8 +128,7 @@ public class PreviewSignTests
 
         var regResponse = await regClient.MakeCredentialAsync(
             regOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotNull(regResponse.ClientExtensionResults?.PreviewSign);
 
@@ -189,8 +187,7 @@ public class PreviewSignTests
 
         var matches = await authClient.GetAssertionAsync(
             authOptions,
-            pin: "11234567",
-            useUv: false);
+            Encoding.UTF8.GetBytes("11234567"));
 
         Assert.NotEmpty(matches);
 

@@ -36,14 +36,31 @@ internal readonly record struct UvDecision(
 /// <summary>
 /// User verification decision logic.
 /// </summary>
+/// <remarks>
+/// First decides <em>whether</em> user verification is needed, then decides <em>which</em> method
+/// satisfies it. "Configured" means the option is both advertised and enabled: a YubiKey with no
+/// PIN set still advertises <c>clientPin: false</c>, and treating advertisement alone as available
+/// verification would request a token from a key that has no enabled verification method.
+/// </remarks>
 internal static class UvDecisionLogic
 {
+    /// <summary>
+    /// Permissions that are part of an ordinary registration or authentication ceremony. Anything
+    /// beyond these (credential management, bio enrollment, large-blob write, authenticator config)
+    /// requires user verification even when the relying party discouraged it.
+    /// </summary>
+    private const PinUvAuthTokenPermissions CeremonyPermissions =
+        PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion;
+
     /// <summary>
     /// Determines how to handle user verification based on authenticator capabilities and preferences.
     /// </summary>
     /// <param name="info">The authenticator info.</param>
     /// <param name="preference">The user verification preference from the request.</param>
-    /// <param name="pinAvailable">Whether a PIN is available (caller has PIN bytes).</param>
+    /// <param name="pinAvailable">
+    /// Whether a PIN can be obtained — either the caller passed PIN bytes or the client has an
+    /// <c>ICredentialPrompt</c> configured.
+    /// </param>
     /// <param name="requestedPermissions">The permissions needed for the operation.</param>
     /// <returns>The UV decision.</returns>
     /// <exception cref="WebAuthnClientError">
@@ -57,27 +74,25 @@ internal static class UvDecisionLogic
     {
         ArgumentNullException.ThrowIfNull(info);
 
-        bool clientPinSet = info.Options.TryGetValue("clientPin", out var pinSet) && pinSet;
-        bool uvSupported = info.Options.TryGetValue("uv", out var uv) && uv;
+        bool clientPinConfigured = IsOptionEnabled(info, "clientPin");
+        bool builtInUvConfigured = IsOptionEnabled(info, "uv");
+        bool uvConfigured = clientPinConfigured || builtInUvConfigured || IsOptionEnabled(info, "bioEnroll");
 
-        // If UV is required, ensure at least one method is available
-        if (preference == UserVerificationPreference.Required)
+        var noUv = new UvDecision(
+            UseToken: false,
+            UseUv: false,
+            UvOption: null,
+            Method: null,
+            Permissions: requestedPermissions);
+
+        if (!ShouldUseUv(info, preference, requestedPermissions, uvConfigured))
         {
-            bool hasUvMethod = (clientPinSet && pinAvailable) || uvSupported;
-            if (!hasUvMethod)
-            {
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.NotAllowed,
-                    "User verification is required but the authenticator does not support UV " +
-                    "and no PIN is available (or PIN is not set on the authenticator).");
-            }
+            return noUv;
         }
 
-        // Decide which method to use
-        // Priority: PIN (if available) > built-in UV > none
-        if (clientPinSet && pinAvailable)
+        // User verification is wanted. Pick a method: PIN first, then built-in UV.
+        if (clientPinConfigured && pinAvailable)
         {
-            // Use PIN method
             return new UvDecision(
                 UseToken: true,
                 UseUv: false,
@@ -86,9 +101,8 @@ internal static class UvDecisionLogic
                 Permissions: requestedPermissions);
         }
 
-        if (uvSupported)
+        if (builtInUvConfigured)
         {
-            // Use built-in UV (biometric, etc.)
             return new UvDecision(
                 UseToken: true,
                 UseUv: true,
@@ -97,21 +111,84 @@ internal static class UvDecisionLogic
                 Permissions: requestedPermissions);
         }
 
-        // No UV available - only allowed if preference is not Required
+        // Wanted, but nothing can satisfy it.
         if (preference == UserVerificationPreference.Required)
         {
-            // This shouldn't happen due to the check above, but defensively handle it
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.NotAllowed,
-                "User verification is required but no UV method is available.");
+                "User verification is required but the authenticator does not support UV " +
+                "and no PIN is available (or PIN is not set on the authenticator).");
         }
 
-        // UV is Preferred or Discouraged, and no method available - proceed without UV
-        return new UvDecision(
-            UseToken: false,
-            UseUv: false,
-            UvOption: null,
-            Method: null,
-            Permissions: requestedPermissions);
+        // The relying party did not require verification, so try the ceremony without it rather
+        // than failing on our own reading of the authenticator's options. If the authenticator
+        // really does insist, it answers CTAP2_ERR_PUAT_REQUIRED and WebAuthnClient retries the
+        // whole ceremony with Required.
+        return noUv;
     }
+
+    /// <summary>
+    /// Decides whether a PIN/UV auth token is needed at all, before any question of which method
+    /// would provide it.
+    /// </summary>
+    private static bool ShouldUseUv(
+        AuthenticatorInfo info,
+        UserVerificationPreference preference,
+        PinUvAuthTokenPermissions requestedPermissions,
+        bool uvConfigured) =>
+        preference switch
+        {
+            UserVerificationPreference.Required => true,
+
+            // WebAuthn L2 5.4.2 allows Preferred to proceed without verification when none is
+            // available, so only enabled verification methods count as configured here. This
+            // intentionally differs from implementations that treat an advertised false option as
+            // available verification.
+            UserVerificationPreference.Preferred => uvConfigured,
+
+            UserVerificationPreference.Discouraged =>
+                RequiresUvDespiteDiscouraged(info, requestedPermissions, uvConfigured),
+
+            _ => false
+        };
+
+    /// <summary>
+    /// The relying party discouraged user verification, but the authenticator or the request may
+    /// still force it.
+    /// </summary>
+    private static bool RequiresUvDespiteDiscouraged(
+        AuthenticatorInfo info,
+        PinUvAuthTokenPermissions requestedPermissions,
+        bool uvConfigured)
+    {
+        // Every override below presupposes that verification is actually configured. A key with no
+        // PIN and no biometrics has nothing to force.
+        if (!uvConfigured)
+        {
+            return false;
+        }
+
+        // The authenticator is configured to always verify, which outranks the relying party.
+        if (IsOptionEnabled(info, "alwaysUv"))
+        {
+            return true;
+        }
+
+        // Pre-CTAP-2.1 authenticators with verification configured refuse an unverified
+        // makeCredential. CTAP 2.1 authenticators advertise makeCredUvNotRqd to opt out of that.
+        bool isMakeCredential = (requestedPermissions & PinUvAuthTokenPermissions.MakeCredential) != 0;
+        if (isMakeCredential && !IsOptionEnabled(info, "makeCredUvNotRqd"))
+        {
+            return true;
+        }
+
+        // Privileged permissions always need verification, whatever the relying party asked for.
+        return (requestedPermissions & ~CeremonyPermissions) != 0;
+    }
+
+    /// <summary>
+    /// Returns true only when the option is both advertised and enabled.
+    /// </summary>
+    private static bool IsOptionEnabled(AuthenticatorInfo info, string option) =>
+        info.Options.TryGetValue(option, out bool enabled) && enabled;
 }

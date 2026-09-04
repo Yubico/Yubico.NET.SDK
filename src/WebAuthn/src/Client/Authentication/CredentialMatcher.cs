@@ -46,7 +46,7 @@ internal sealed class CredentialMatcher
 
         try
         {
-            firstResponse = await backend.GetAssertionAsync(request, progress: null, cancellationToken);
+            firstResponse = await backend.GetAssertionAsync(request, cancellationToken);
         }
         catch (CtapException ex) when (IsNoCredentialsError(ex.Status))
         {

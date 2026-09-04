@@ -40,7 +40,6 @@ public interface IWebAuthnBackend : IAsyncDisposable
     /// <param name="permissions">The requested token permissions.</param>
     /// <param name="rpId">Optional RP ID to bind the token to (required for some permissions).</param>
     /// <param name="pinBytes">PIN bytes (UTF-8 encoded) when method is PIN, otherwise null.</param>
-    /// <param name="progress">Optional progress reporter for CTAP status updates.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A session holding the PIN/UV auth token and protocol instance.</returns>
     Task<PinUvAuthTokenSession> GetPinUvTokenAsync(
@@ -48,15 +47,24 @@ public interface IWebAuthnBackend : IAsyncDisposable
         PinUvAuthTokenPermissions permissions,
         string? rpId,
         ReadOnlyMemory<byte>? pinBytes,
-        IProgress<CtapStatus>? progress,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the number of PIN attempts remaining before the authenticator blocks the PIN.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>
+    /// The remaining attempt count, or <c>null</c> when the authenticator does not
+    /// report one. Used to populate credential prompts after a rejected PIN, so a
+    /// failure to read it must not fail the surrounding operation.
+    /// </returns>
+    Task<int?> GetPinRetriesAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Creates a new credential via CTAP2 MakeCredential.
     /// </summary>
     Task<MakeCredentialResponse> MakeCredentialAsync(
         BackendMakeCredentialRequest request,
-        IProgress<CtapStatus>? progress,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -65,7 +73,6 @@ public interface IWebAuthnBackend : IAsyncDisposable
     /// <remarks>Implemented in Phase 4.</remarks>
     Task<GetAssertionResponse> GetAssertionAsync(
         BackendGetAssertionRequest request,
-        IProgress<CtapStatus>? progress,
         CancellationToken cancellationToken);
 
     /// <summary>

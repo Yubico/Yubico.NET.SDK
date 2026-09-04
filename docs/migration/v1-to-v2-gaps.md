@@ -26,7 +26,7 @@ Ranked roughly by blast radius. Full detail for each is in the module sections b
 | 1 | No .NET Framework/netstandard support — v2 is net10.0-only, v1 supported net472/netstandard2.0/2.1 | Cross-cutting | Blocker (for that consumer segment) |
 | 2 | U2F protocol entirely removed — no register/authenticate, no `U2fSession` equivalent | FIDO2 | Major/Blocker for U2F-only consumers |
 | 3 | PIV PIN-only mode gone — `PivSession.Pinonly.cs`/PIN-derived management key has no v2 equivalent | PIV | Major |
-| 4 | `KeyCollector` delegate pattern removed everywhere, no unified replacement — each applet (Piv/Oath/Fido2/YubiHsm) now handles PIN/PUK/touch differently | Cross-cutting | Major |
+| 4 | `KeyCollector` delegate pattern removed everywhere — each applet (Piv/Oath/Fido2/YubiHsm) handles PIN/PUK/touch with direct parameters. A shared async SDK-to-application prompt primitive, `ICredentialPrompt`, now exists in Core but is adopted only by WebAuthn so far; the application-initiated `ISecureCredentialReader` terminal helper serves a different role | Cross-cutting | Major |
 | 5 | Legacy pre-5.0 firmware mode switching removed from public API (`SetLegacyDeviceConfiguration`) — YubiKey NEO/4 users can't reconfigure interfaces at all | Management | Major |
 | 6 | Pluggable crypto primitives gone (`IAesGcmPrimitives`/`IEcdhPrimitives`/`ICmacPrimitives` extension points) | Core | Major |
 | 7 | `TlvReader`/`TlvWriter` typed sequential API gone, replaced by a much thinner `Tlv`/`TlvHelper` | Core | Major |
@@ -136,7 +136,10 @@ v2 locations: `src/Fido2/src/**`, `src/WebAuthn/src/**`
   **Severity**: Major (Blocker for U2F-only consumers) | **Confidence**: High
 
 - **Feature/API**: `KeyCollector` delegate for PIN/touch/UV prompts on `Fido2Session`
-  **v2 status**: Present-but-renamed/Behavior-changed — v2 exposes explicit async methods (`SetPinAsync`, `ChangePinAsync`, `GetPinUvAuthTokenUsingPinAsync/UsingUvAsync`) with no callback; WebAuthn layer adds an `IAsyncEnumerable<WebAuthnStatus>` streaming model instead. No 1:1 analog; arguably more explicit/testable, but requires a rewrite.
+  **v2 status**: Present-but-renamed/Behavior-changed — `Fido2Session` exposes explicit async methods (`SetPinAsync`, `ChangePinAsync`, `GetPinUvAuthTokenUsingPinAsync/UsingUvAsync`) with no callback. At the WebAuthn layer the closest analog is `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`), an optional async SDK-to-application prompt supplied to `WebAuthnClient`: the SDK calls it when a ceremony needs a PIN and owns a bounded retry loop with a fresh, zeroed secret for each attempt. The synchronous `ISecureCredentialReader` is instead an application-initiated terminal input helper and does not replace this callback.
+  `IAsyncEnumerable<WebAuthnStatus>` is **not** the replacement — it is observation-only ceremony progress (`Processing`, `Finished`, `Failed`) and never gathers input. Abandonment is via the cancellation token, not a stream state.
+  Touch remains a gap: WebAuthn has no dedicated in-flight touch signal, so UI can only prompt speculatively while a ceremony may be waiting for user presence.
+  No 1:1 analog; arguably more explicit/testable, but requires a rewrite.
   **Severity**: Minor (migration friction, not capability loss) | **Confidence**: High
 
 - **Feature/API**: COSE named constants `ES512` (-36) and `ECDHwHKDF256` (-25)
@@ -356,8 +359,9 @@ v2 location: `src/Management/src/**`
   **User impact**: Simple synchronous console-app/script consumers must adopt async/await throughout, including `await using` for disposal — a non-trivial rewrite for straightforward use cases v1 didn't require.
   **Severity**: Major (understandable architecturally, but a real DX cost) | **Confidence**: High
 
-- **`KeyCollector` delegate pattern**: removed entirely, with no unified replacement. v1 had one callback shape shared across Piv/Fido2/Oath/U2f/YubiHsmAuth (31 files reference it). v2 has zero matches for `KeyCollector`/`IAsyncKeyCollector`/`PinCollector`/`IPinProvider`/`IUserVerifier` — each applet now has its own bespoke credential-handling shape. Confirmed deliberate per `docs/migration/v1-to-v2.md`.
-  **User impact**: No single reusable PIN/PUK/touch-prompt callback wireable once across all applets; inconsistent prompting patterns per applet.
+- **`KeyCollector` delegate pattern**: removed entirely. v1 had one callback shape shared across Piv/Fido2/Oath/U2f/YubiHsmAuth (31 files reference it). v2 has zero matches for `KeyCollector`/`IAsyncKeyCollector`/`PinCollector`/`IPinProvider`/`IUserVerifier` — most applets take credentials as direct parameters.
+  Partially addressed: `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) is a shared async, context-carrying, cancellable SDK-to-application prompt primitive intended as the one reusable callback shape. It is currently consumed only by `WebAuthnClient`; other applets remain direct-parameter and would adopt the same interface if they grow interactive needs. `ISecureCredentialReader` remains a separate synchronous, application-initiated terminal helper.
+  **User impact**: A caller cannot yet wire one prompt across all applets. Prompting patterns still differ per applet outside WebAuthn.
   **Severity**: Major | **Confidence**: High
 
 - **Logging**: not a regression — both v1 and v2 use a global static logger factory (no per-instance DI). v2 additionally adds `UseTemporary(ILoggerFactory)` for test isolation. (Separate from the "silent by default" finding under Core above, which is a real behavior change in default output, not architecture.)

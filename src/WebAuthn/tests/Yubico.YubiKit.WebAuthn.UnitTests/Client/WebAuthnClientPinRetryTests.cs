@@ -31,10 +31,6 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 /// <summary>
 /// Tests for PIN retry behavior in WebAuthnClient.
 /// </summary>
-/// <remarks>
-/// These tests verify that PinAuthInvalid errors are handled correctly without
-/// burning YubiKey PIN attempts through unsafe retry loops.
-/// </remarks>
 public sealed class WebAuthnClientPinRetryTests
 {
     private readonly IWebAuthnBackend _mockBackend;
@@ -70,7 +66,6 @@ public sealed class WebAuthnClientPinRetryTests
             Arg.Any<PinUvAuthTokenPermissions>(),
             Arg.Any<string?>(),
             Arg.Any<ReadOnlyMemory<byte>?>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Throws(new CtapException(CtapStatus.PinAuthInvalid))
             .AndDoes(_ => _tokenCallCount++);
@@ -107,7 +102,6 @@ public sealed class WebAuthnClientPinRetryTests
             Arg.Any<PinUvAuthTokenPermissions>(),
             Arg.Any<string?>(),
             Arg.Any<ReadOnlyMemory<byte>?>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Throws(new CtapException(CtapStatus.PinAuthInvalid))
             .AndDoes(_ => _tokenCallCount++);

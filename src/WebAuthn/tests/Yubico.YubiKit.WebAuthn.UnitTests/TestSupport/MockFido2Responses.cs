@@ -34,7 +34,8 @@ internal static class MockFido2Responses
 
     public static AuthenticatorInfo CreateMockAuthenticatorInfo(
         bool clientPinSupported = false,
-        bool uvSupported = false)
+        bool uvSupported = false,
+        int? minPinLength = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
@@ -42,7 +43,8 @@ internal static class MockFido2Responses
         if (clientPinSupported) optionsCount++;
         if (uvSupported) optionsCount++;
 
-        writer.WriteStartMap(optionsCount > 0 ? 4 : 3);
+        var mapSize = (optionsCount > 0 ? 4 : 3) + (minPinLength.HasValue ? 1 : 0);
+        writer.WriteStartMap(mapSize);
 
         // 0x01: versions
         writer.WriteInt32(1);
@@ -80,6 +82,13 @@ internal static class MockFido2Responses
             }
 
             writer.WriteEndMap();
+        }
+
+        // 0x0D: minimum PIN length in Unicode code points (optional)
+        if (minPinLength.HasValue)
+        {
+            writer.WriteInt32(0x0D);
+            writer.WriteInt32(minPinLength.Value);
         }
 
         writer.WriteEndMap();

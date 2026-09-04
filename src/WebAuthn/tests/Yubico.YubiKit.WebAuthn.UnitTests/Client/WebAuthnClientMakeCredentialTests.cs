@@ -16,6 +16,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -67,7 +68,6 @@ public class WebAuthnClientMakeCredentialTests
         BackendMakeCredentialRequest? capturedRequest = null;
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockResponse());
 
@@ -120,7 +120,6 @@ public class WebAuthnClientMakeCredentialTests
 
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockResponse());
 
@@ -130,7 +129,6 @@ public class WebAuthnClientMakeCredentialTests
         // Assert - verify backend was called
         await _mockBackend.Received(1).MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -154,7 +152,6 @@ public class WebAuthnClientMakeCredentialTests
 
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockResponse());
 
@@ -164,7 +161,6 @@ public class WebAuthnClientMakeCredentialTests
         // Assert - verify backend was called
         await _mockBackend.Received(1).MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -184,7 +180,6 @@ public class WebAuthnClientMakeCredentialTests
         BackendMakeCredentialRequest? capturedRequest = null;
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockResponse());
 
@@ -212,7 +207,6 @@ public class WebAuthnClientMakeCredentialTests
         var expectedGuid = Guid.NewGuid();
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockResponse(expectedGuid));
 
@@ -241,7 +235,6 @@ public class WebAuthnClientMakeCredentialTests
         BackendMakeCredentialRequest? capturedRequest = null;
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(CreateMockResponse());
 
@@ -253,7 +246,6 @@ public class WebAuthnClientMakeCredentialTests
         Assert.Same(options.ExcludeCredentials, capturedRequest.ExcludeList);
         await _mockBackend.DidNotReceive().GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -268,7 +260,6 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Any<PinUvAuthTokenPermissions>(),
             "example.com",
             Arg.Any<ReadOnlyMemory<byte>?>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
 
@@ -284,7 +275,6 @@ public class WebAuthnClientMakeCredentialTests
         var callCount = 0;
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => requests.Add(r)),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(_ =>
             {
@@ -298,7 +288,7 @@ public class WebAuthnClientMakeCredentialTests
             });
 
         // Act
-        await _client.MakeCredentialAsync(options, "123456", useUv: false, CancellationToken.None);
+        await _client.MakeCredentialAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
 
         // Assert
         Assert.Equal(2, requests.Count);
@@ -321,12 +311,10 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Do<PinUvAuthTokenPermissions>(p => tokenPermissions.Add(p)),
             "example.com",
             Arg.Any<ReadOnlyMemory<byte>?>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Throws(new CtapException(CtapStatus.NoCredentials));
 
@@ -342,7 +330,6 @@ public class WebAuthnClientMakeCredentialTests
         var callCount = 0;
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>())
             .Returns(_ =>
             {
@@ -356,7 +343,7 @@ public class WebAuthnClientMakeCredentialTests
             });
 
         // Act
-        await _client.MakeCredentialAsync(options, "123456", useUv: false, CancellationToken.None);
+        await _client.MakeCredentialAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
 
         // Assert
         Assert.Equal(4, tokenPermissions.Count);
@@ -370,7 +357,6 @@ public class WebAuthnClientMakeCredentialTests
         Assert.Equal(PinUvAuthTokenPermissions.MakeCredential, tokenPermissions[3]);
         await _mockBackend.Received(2).GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<IProgress<CtapStatus>?>(),
             Arg.Any<CancellationToken>());
     }
 

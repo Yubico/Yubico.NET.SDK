@@ -17,6 +17,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
@@ -43,17 +44,28 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </remarks>
 public sealed class WebAuthnClient : IAsyncDisposable
 {
+    /// <summary>
+    /// The maximum number of times the client asks an <see cref="ICredentialPrompt"/>
+    /// for a PIN during a single operation.
+    /// </summary>
+    /// <remarks>
+    /// Reaching the cap fails the operation. The authenticator independently enforces its own
+    /// retry limit and may report a terminal PIN state before this cap is reached.
+    /// </remarks>
+    public const int MaxPromptAttempts = 3;
+
+    /// <summary>CTAP 2.1 minimum PIN length in Unicode code points.</summary>
+    private const int Ctap2MinPinLengthCodePoints = 4;
+
+    /// <summary>CTAP 2.1 maximum PIN length in bytes.</summary>
+    private const int Ctap2MaxPinLengthBytes = 63;
+
     private readonly IWebAuthnBackend _backend;
     private readonly WebAuthnOrigin _origin;
     private readonly Func<string, bool> _isPublicSuffix;
     private readonly IReadOnlySet<string> _enterpriseRpIds;
+    private readonly ICredentialPrompt? _prompt;
     private bool _disposed;
-
-    private enum MissingPinBehavior
-    {
-        ThrowAfterCancel,
-        DrainFailedStatus
-    }
 
     /// <summary>
     /// Initializes a new instance of <see cref="WebAuthnClient"/>.
@@ -62,11 +74,17 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// <param name="origin">The WebAuthn origin for this client.</param>
     /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
     /// <param name="enterpriseRpIds">Optional set of enterprise-allowed RP IDs.</param>
+    /// <param name="prompt">
+    /// Optional prompt used to obtain a PIN when an operation needs one and the caller
+    /// did not supply it. When omitted, such operations fail with
+    /// <see cref="WebAuthnClientErrorCode.NotAllowed"/> rather than prompting.
+    /// </param>
     public WebAuthnClient(
         IFidoSession fidoSession,
         WebAuthnOrigin origin,
         PublicSuffixChecker isPublicSuffix,
-        IReadOnlySet<string>? enterpriseRpIds = null)
+        IReadOnlySet<string>? enterpriseRpIds = null,
+        ICredentialPrompt? prompt = null)
     {
         ArgumentNullException.ThrowIfNull(fidoSession);
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
@@ -74,6 +92,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         _backend = new FidoSessionWebAuthnBackend(fidoSession);
         _isPublicSuffix = domain => isPublicSuffix(domain);
         _enterpriseRpIds = enterpriseRpIds ?? new HashSet<string>();
+        _prompt = prompt;
     }
 
     /// <summary>
@@ -83,44 +102,48 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// <param name="origin">The WebAuthn origin for this client.</param>
     /// <param name="isPublicSuffix">Predicate to determine if a domain is a public suffix.</param>
     /// <param name="enterpriseRpIds">Optional set of enterprise-allowed RP IDs.</param>
+    /// <param name="prompt">
+    /// Optional prompt used to obtain a PIN when an operation needs one and the caller
+    /// did not supply it. When omitted, such operations fail with
+    /// <see cref="WebAuthnClientErrorCode.NotAllowed"/> rather than prompting.
+    /// </param>
     public WebAuthnClient(
         IWebAuthnBackend backend,
         WebAuthnOrigin origin,
         Func<string, bool> isPublicSuffix,
-        IReadOnlySet<string>? enterpriseRpIds = null)
+        IReadOnlySet<string>? enterpriseRpIds = null,
+        ICredentialPrompt? prompt = null)
     {
         _backend = backend ?? throw new ArgumentNullException(nameof(backend));
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
         _isPublicSuffix = isPublicSuffix ?? throw new ArgumentNullException(nameof(isPublicSuffix));
         _enterpriseRpIds = enterpriseRpIds ?? new HashSet<string>();
+        _prompt = prompt;
     }
 
     /// <summary>
     /// Creates a new WebAuthn credential via CTAP2 MakeCredential.
     /// </summary>
     /// <param name="options">The registration options.</param>
-    /// <param name="pinBytes">Optional PIN bytes (UTF-8 encoded). Caller owns and zeroes this memory.</param>
+    /// <param name="pinBytes">
+    /// Optional PIN bytes (UTF-8 encoded). The caller owns and zeroes this memory. When omitted
+    /// and the operation needs a PIN, the client asks the configured
+    /// <see cref="ICredentialPrompt"/>; if none is configured the operation fails with
+    /// <see cref="WebAuthnClientErrorCode.NotAllowed"/>.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The registration response with credential details.</returns>
     /// <exception cref="WebAuthnClientError">Thrown on validation or operation failure.</exception>
-    /// <remarks>
-    /// This overload is a convenience wrapper that drains the underlying stream and auto-responds
-    /// to PIN requests if pinBytes is provided. For manual control over PIN/UV interaction,
-    /// use <see cref="MakeCredentialStreamAsync"/>.
-    /// </remarks>
     public async Task<RegistrationResponse> MakeCredentialAsync(
         RegistrationOptions options,
-        ReadOnlyMemory<byte>? pinBytes,
+        ReadOnlyMemory<byte>? pinBytes = null,
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        return await DrainInteractiveStreamAsync<RegistrationResponse>(
-            MakeCredentialStreamAsync(options, cancellationToken),
-            pinBytes,
-            useUv: false,
-            MissingPinBehavior.ThrowAfterCancel).ConfigureAwait(false);
+        return await MakeCredentialCoreAsync(options, pinBytes, channel: null, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -135,11 +158,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// </returns>
     /// <remarks>
     /// <para>
-    /// This overload is a convenience wrapper that drains the underlying stream and auto-responds
-    /// to PIN requests if pinBytes is provided. For manual control over PIN/UV interaction,
-    /// use <see cref="GetAssertionStreamAsync"/>.
-    /// </para>
-    /// <para>
     /// This method follows the deferred-selection pattern: the authenticator enumerates
     /// all matching credentials, and the caller can present a credential picker UI before
     /// calling <see cref="MatchedCredential.SelectAsync"/> to retrieve the assertion.
@@ -151,17 +169,14 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// </remarks>
     public async Task<IReadOnlyList<MatchedCredential>> GetAssertionAsync(
         AuthenticationOptions options,
-        ReadOnlyMemory<byte>? pinBytes,
+        ReadOnlyMemory<byte>? pinBytes = null,
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        return await DrainInteractiveStreamAsync<IReadOnlyList<MatchedCredential>>(
-            GetAssertionStreamAsync(options, cancellationToken),
-            pinBytes,
-            useUv: false,
-            MissingPinBehavior.ThrowAfterCancel).ConfigureAwait(false);
+        return await GetAssertionCoreAsync(options, pinBytes, channel: null, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -169,25 +184,35 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// </summary>
     /// <param name="options">The registration options.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <param name="pinBytes">
+    /// Optional PIN bytes (UTF-8 encoded). The caller owns and zeroes this memory. When omitted
+    /// and the operation needs a PIN, the client asks the configured
+    /// <see cref="ICredentialPrompt"/>.
+    /// </param>
     /// <returns>
-    /// An async enumerable of status updates. Terminal states are <see cref="WebAuthnStatusFinished{T}"/>
-    /// and <see cref="WebAuthnStatusFailed"/>. Interactive states like <see cref="WebAuthnStatusRequestingPin"/>
-    /// require consumer response to proceed.
+    /// An async enumerable of ceremony status updates. Terminal states are
+    /// <see cref="WebAuthnStatusFinished{T}"/> and <see cref="WebAuthnStatusFailed"/>.
     /// </returns>
     /// <remarks>
-    /// This is the underlying primitive for all MakeCredential operations. When PIN/UV is needed,
-    /// the stream emits <see cref="WebAuthnStatusRequestingPin"/> or <see cref="WebAuthnStatusRequestingUv"/>.
-    /// Consumers must call the provided callbacks to supply the required information.
+    /// <para>
+    /// The stream reports progress; it does not gather input. A PIN, when needed, comes from
+    /// <paramref name="pinBytes"/> or the configured <see cref="ICredentialPrompt"/>.
+    /// </para>
+    /// <para>
+    /// Enumerating the returned sequence starts a ceremony, so enumerating it a second time
+    /// starts another one. Abandoning enumeration early cancels the ceremony in progress.
+    /// </para>
     /// </remarks>
     public async IAsyncEnumerable<WebAuthnStatus> MakeCredentialStreamAsync(
         RegistrationOptions options,
+        ReadOnlyMemory<byte>? pinBytes = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
         await foreach (var status in RunStatusStreamAsync<RegistrationResponse>(
-            (channel, producerCt) => MakeCredentialCoreAsync(options, channel, producerCt),
+            (channel, producerCt) => MakeCredentialCoreAsync(options, pinBytes, channel, producerCt),
             cancellationToken).ConfigureAwait(false))
         {
             yield return status;
@@ -198,99 +223,41 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// Authenticates using an existing credential (GetAssertion) with status streaming.
     /// </summary>
     /// <param name="options">The authentication options.</param>
+    /// <param name="pinBytes">
+    /// Optional PIN bytes (UTF-8 encoded). The caller owns and zeroes this memory. When omitted
+    /// and the operation needs a PIN, the client asks the configured
+    /// <see cref="ICredentialPrompt"/>.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
-    /// An async enumerable of status updates. Terminal states are <see cref="WebAuthnStatusFinished{T}"/>
-    /// and <see cref="WebAuthnStatusFailed"/>. Interactive states like <see cref="WebAuthnStatusRequestingPin"/>
-    /// require consumer response to proceed.
+    /// An async enumerable of ceremony status updates. Terminal states are
+    /// <see cref="WebAuthnStatusFinished{T}"/> and <see cref="WebAuthnStatusFailed"/>.
     /// </returns>
     /// <remarks>
-    /// This is the underlying primitive for all GetAssertion operations. The terminal result is a list
-    /// of <see cref="MatchedCredential"/> instances, each exposing <see cref="MatchedCredential.SelectAsync"/>
-    /// for deferred authentication.
+    /// <para>
+    /// The stream reports progress; it does not gather input. A PIN, when needed, comes from
+    /// <paramref name="pinBytes"/> or the configured <see cref="ICredentialPrompt"/>. The terminal
+    /// result is a list of <see cref="MatchedCredential"/> instances, each exposing
+    /// <see cref="MatchedCredential.SelectAsync"/> for deferred authentication.
+    /// </para>
+    /// <para>
+    /// Enumerating the returned sequence starts a ceremony, so enumerating it a second time
+    /// starts another one. Abandoning enumeration early cancels the ceremony in progress.
+    /// </para>
     /// </remarks>
     public async IAsyncEnumerable<WebAuthnStatus> GetAssertionStreamAsync(
         AuthenticationOptions options,
+        ReadOnlyMemory<byte>? pinBytes = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
         await foreach (var status in RunStatusStreamAsync<IReadOnlyList<MatchedCredential>>(
-            (channel, producerCt) => GetAssertionCoreAsync(options, channel, producerCt),
+            (channel, producerCt) => GetAssertionCoreAsync(options, pinBytes, channel, producerCt),
             cancellationToken).ConfigureAwait(false))
         {
             yield return status;
-        }
-    }
-
-    /// <summary>
-    /// Creates a new WebAuthn credential with automatic PIN/UV handling.
-    /// </summary>
-    /// <param name="options">The registration options.</param>
-    /// <param name="pin">Optional PIN string. If null and PIN is required, throws <see cref="WebAuthnClientError"/>.</param>
-    /// <param name="useUv">Whether to use user verification when requested.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The registration response with credential details.</returns>
-    /// <exception cref="WebAuthnClientError">Thrown on validation or operation failure.</exception>
-    /// <remarks>
-    /// This is a convenience wrapper over <see cref="MakeCredentialStreamAsync"/> that automatically responds
-    /// to PIN and UV requests. The PIN string is converted to UTF-8 bytes and zeroed immediately after use.
-    /// </remarks>
-    public async Task<RegistrationResponse> MakeCredentialAsync(
-        RegistrationOptions options,
-        string? pin,
-        bool useUv,
-        CancellationToken cancellationToken = default)
-    {
-        var pinOwner = RentUtf8Pin(pin, out var pinByteCount);
-
-        try
-        {
-            return await DrainInteractiveStreamAsync<RegistrationResponse>(
-                MakeCredentialStreamAsync(options, cancellationToken),
-                pinOwner?.Memory[..pinByteCount],
-                useUv,
-                MissingPinBehavior.DrainFailedStatus).ConfigureAwait(false);
-        }
-        finally
-        {
-            ZeroAndDispose(pinOwner);
-        }
-    }
-
-    /// <summary>
-    /// Authenticates using an existing credential with automatic PIN/UV handling.
-    /// </summary>
-    /// <param name="options">The authentication options.</param>
-    /// <param name="pin">Optional PIN string. If null and PIN is required, throws <see cref="WebAuthnClientError"/>.</param>
-    /// <param name="useUv">Whether to use user verification when requested.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A list of matched credentials.</returns>
-    /// <exception cref="WebAuthnClientError">Thrown on validation or operation failure.</exception>
-    /// <remarks>
-    /// This is a convenience wrapper over <see cref="GetAssertionStreamAsync"/> that automatically responds
-    /// to PIN and UV requests. The PIN string is converted to UTF-8 bytes and zeroed immediately after use.
-    /// </remarks>
-    public async Task<IReadOnlyList<MatchedCredential>> GetAssertionAsync(
-        AuthenticationOptions options,
-        string? pin,
-        bool useUv,
-        CancellationToken cancellationToken = default)
-    {
-        var pinOwner = RentUtf8Pin(pin, out var pinByteCount);
-
-        try
-        {
-            return await DrainInteractiveStreamAsync<IReadOnlyList<MatchedCredential>>(
-                GetAssertionStreamAsync(options, cancellationToken),
-                pinOwner?.Memory[..pinByteCount],
-                useUv,
-                MissingPinBehavior.DrainFailedStatus).ConfigureAwait(false);
-        }
-        finally
-        {
-            ZeroAndDispose(pinOwner);
         }
     }
 
@@ -366,65 +333,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
         }
     }
 
-    private static async Task<TResult> DrainInteractiveStreamAsync<TResult>(
-        IAsyncEnumerable<WebAuthnStatus> statuses,
-        ReadOnlyMemory<byte>? pinBytes,
-        bool useUv,
-        MissingPinBehavior missingPinBehavior)
-    {
-        await foreach (var status in statuses.ConfigureAwait(false))
-        {
-            switch (status)
-            {
-                case WebAuthnStatusRequestingPin requestingPin:
-                    if (pinBytes is null)
-                    {
-                        await requestingPin.Cancel().ConfigureAwait(false);
-
-                        if (missingPinBehavior == MissingPinBehavior.ThrowAfterCancel)
-                        {
-                            throw new WebAuthnClientError(
-                                WebAuthnClientErrorCode.NotAllowed,
-                                "PIN required but not provided");
-                        }
-
-                        break;
-                    }
-
-                    await requestingPin.SubmitPin(pinBytes.Value).ConfigureAwait(false);
-                    break;
-
-                case WebAuthnStatusRequestingUv requestingUv:
-                    await requestingUv.SetUseUv(useUv).ConfigureAwait(false);
-                    break;
-
-                case WebAuthnStatusFinished<TResult> finished:
-                    return finished.Result;
-
-                case WebAuthnStatusFailed failed:
-                    throw failed.Error;
-            }
-        }
-
-        throw new WebAuthnClientError(
-            WebAuthnClientErrorCode.Unknown,
-            "Stream completed without terminal state");
-    }
-
-    private static IMemoryOwner<byte>? RentUtf8Pin(string? pin, out int pinByteCount)
-    {
-        if (pin is null)
-        {
-            pinByteCount = 0;
-            return null;
-        }
-
-        pinByteCount = Encoding.UTF8.GetByteCount(pin);
-        var pinOwner = MemoryPool<byte>.Shared.Rent(pinByteCount);
-        Encoding.UTF8.GetBytes(pin, pinOwner.Memory.Span);
-        return pinOwner;
-    }
-
     private static void ZeroAndDispose(IMemoryOwner<byte>? owner)
     {
         if (owner is null)
@@ -432,9 +340,14 @@ public sealed class WebAuthnClient : IAsyncDisposable
             return;
         }
 
-        // Zero entire rented buffer for defense-in-depth even though only the PIN prefix was written.
-        CryptographicOperations.ZeroMemory(owner.Memory.Span);
-        owner.Dispose();
+        try
+        {
+            CryptographicOperations.ZeroMemory(owner.Memory.Span);
+        }
+        finally
+        {
+            owner.Dispose();
+        }
     }
 
     /// <summary>
@@ -442,11 +355,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// This method handles validation, UV/PIN decision, token acquisition, and CTAP execution.
-    /// It may write status updates to the channel (e.g., WaitingForUser) and awaits interactive
+    /// It may write status updates to the channel and awaits interactive
     /// responses when PIN/UV is needed.
     /// </remarks>
     private async Task<RegistrationResponse> MakeCredentialCoreAsync(
         RegistrationOptions options,
+        ReadOnlyMemory<byte>? callerPinBytes,
         StatusChannel<RegistrationResponse>? channel,
         CancellationToken cancellationToken)
     {
@@ -471,20 +385,19 @@ public sealed class WebAuthnClient : IAsyncDisposable
         var uvDecision = UvDecisionLogic.Decide(
             info,
             options.UserVerification,
-            pinAvailable: channel is not null, // Stream mode can request PIN interactively
+            pinAvailable: callerPinBytes is not null || _prompt is not null,
             requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion);
 
         // Acquire PIN/UV token with retry on PinAuthInvalid
         PinUvAuthTokenSession? tokenSession = null;
         IMemoryOwner<byte>? pinOwner = null;
-        ReadOnlyMemory<byte>? pinBytes = null;
+        ReadOnlyMemory<byte>? pinBytes = callerPinBytes;
 
         try
         {
             (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
                 uvDecision,
                 options.Rp.Id,
-                channel,
                 pinOwner,
                 pinBytes,
                 cancellationToken).ConfigureAwait(false);
@@ -517,13 +430,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 uvDecision = UvDecisionLogic.Decide(
                     info,
                     Preferences.UserVerificationPreference.Required,
-                    pinAvailable: channel is not null,
+                    pinAvailable: callerPinBytes is not null || _prompt is not null,
                     requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion);
 
                 (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
                     uvDecision,
                     options.Rp.Id,
-                    channel,
                     pinOwner,
                     pinBytes,
                     cancellationToken).ConfigureAwait(false);
@@ -575,8 +487,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
             if (pinOwner is not null)
             {
-                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span);
-                pinOwner.Dispose();
+                ZeroAndDispose(pinOwner);
             }
         }
     }
@@ -586,11 +497,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// This method handles validation, UV/PIN decision, token acquisition, credential matching, and CTAP execution.
-    /// It may write status updates to the channel (e.g., WaitingForUser) and awaits interactive
+    /// It may write status updates to the channel and awaits interactive
     /// responses when PIN/UV is needed.
     /// </remarks>
     private async Task<IReadOnlyList<MatchedCredential>> GetAssertionCoreAsync(
         AuthenticationOptions options,
+        ReadOnlyMemory<byte>? callerPinBytes,
         StatusChannel<IReadOnlyList<MatchedCredential>>? channel,
         CancellationToken cancellationToken)
     {
@@ -615,20 +527,19 @@ public sealed class WebAuthnClient : IAsyncDisposable
         var uvDecision = UvDecisionLogic.Decide(
             info,
             options.UserVerification,
-            pinAvailable: channel is not null, // Stream mode can request PIN interactively
+            pinAvailable: callerPinBytes is not null || _prompt is not null,
             requestedPermissions: PinUvAuthTokenPermissions.GetAssertion);
 
         // Acquire PIN/UV token with retry on PinAuthInvalid
         PinUvAuthTokenSession? tokenSession = null;
         IMemoryOwner<byte>? pinOwner = null;
-        ReadOnlyMemory<byte>? pinBytes = null;
+        ReadOnlyMemory<byte>? pinBytes = callerPinBytes;
 
         try
         {
             (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
                 uvDecision,
                 options.RpId,
-                channel,
                 pinOwner,
                 pinBytes,
                 cancellationToken).ConfigureAwait(false);
@@ -650,13 +561,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
                 uvDecision = UvDecisionLogic.Decide(
                     info,
                     Preferences.UserVerificationPreference.Required,
-                    pinAvailable: channel is not null,
+                    pinAvailable: callerPinBytes is not null || _prompt is not null,
                     requestedPermissions: PinUvAuthTokenPermissions.GetAssertion);
 
                 (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
                     uvDecision,
                     options.RpId,
-                    channel,
                     pinOwner,
                     pinBytes,
                     cancellationToken).ConfigureAwait(false);
@@ -705,8 +615,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
 
             if (pinOwner is not null)
             {
-                CryptographicOperations.ZeroMemory(pinOwner.Memory.Span);
-                pinOwner.Dispose();
+                ZeroAndDispose(pinOwner);
             }
         }
     }
@@ -822,7 +731,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
     {
         try
         {
-            return await _backend.MakeCredentialAsync(request, progress: null, cancellationToken)
+            return await _backend.MakeCredentialAsync(request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -862,10 +771,9 @@ public sealed class WebAuthnClient : IAsyncDisposable
     private async Task<(
         PinUvAuthTokenSession? TokenSession,
         IMemoryOwner<byte>? PinOwner,
-        ReadOnlyMemory<byte>? PinBytes)> AcquireTokenForDecisionAsync<T>(
+        ReadOnlyMemory<byte>? PinBytes)> AcquireTokenForDecisionAsync(
         UvDecision uvDecision,
         string rpId,
-        StatusChannel<T>? channel,
         IMemoryOwner<byte>? pinOwner,
         ReadOnlyMemory<byte>? pinBytes,
         CancellationToken cancellationToken)
@@ -875,25 +783,26 @@ public sealed class WebAuthnClient : IAsyncDisposable
             return (null, pinOwner, pinBytes);
         }
 
-        if (uvDecision.Method == PinUvAuthMethod.Pin && pinBytes is null && channel is not null)
+        if (uvDecision.Method == PinUvAuthMethod.Pin && pinBytes is null)
         {
-            var (pinStatus, pinResponseTask) = channel.CreatePinRequest();
-            await channel.WriteAsync(pinStatus, cancellationToken).ConfigureAwait(false);
-
-            var response = await pinResponseTask.ConfigureAwait(false);
-            if (response is null)
+            if (_prompt is null)
             {
                 throw new WebAuthnClientError(
                     WebAuthnClientErrorCode.NotAllowed,
-                    "PIN required but cancelled");
+                    "A PIN is required for this operation, but none was supplied and no credential prompt is configured.");
             }
 
-            pinOwner = MemoryPool<byte>.Shared.Rent(response.Value.Length);
-            response.Value.Span.CopyTo(pinOwner.Memory.Span);
-            pinBytes = pinOwner.Memory[..response.Value.Length];
+            var (promptedSession, acceptedSecret) = await AcquireTokenViaPromptAsync(
+                uvDecision.Permissions,
+                rpId,
+                cancellationToken).ConfigureAwait(false);
+
+            // The accepted secret is returned so a later token re-mint in the same
+            // ceremony can reuse it; the core operation zeroes and disposes it.
+            return (promptedSession, acceptedSecret, acceptedSecret.Memory);
         }
 
-        var tokenSession = await AcquirePinUvTokenWithRetryAsync(
+        var tokenSession = await AcquirePinUvTokenAsync(
             uvDecision.Method!.Value,
             uvDecision.Permissions,
             rpId,
@@ -938,7 +847,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
             // GetAssertion permission and the same token can no longer authorize a
             // subsequent MakeCredential; the device returns PinAuthInvalid.
             tokenSession.Dispose();
-            tokenSession = await AcquirePinUvTokenWithRetryAsync(
+            tokenSession = await AcquirePinUvTokenAsync(
                 uvDecision.Method!.Value,
                 PinUvAuthTokenPermissions.MakeCredential,
                 options.Rp.Id,
@@ -962,13 +871,14 @@ public sealed class WebAuthnClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// Acquires a PIN/UV auth token from the backend.
+    /// Acquires a PIN/UV auth token from the backend using a secret the caller already supplied.
     /// </summary>
     /// <remarks>
-    /// On PinAuthInvalid, this method throws immediately without retrying. Retrying with identical
-    /// PIN bytes would burn YubiKey PIN attempts on wrong-PIN scenarios.
+    /// A caller-supplied secret is never retried because the SDK has no replacement value to
+    /// submit. Deciding whether to ask the user again belongs to the caller, or to the prompt-driven path in
+    /// <see cref="AcquireTokenViaPromptAsync"/>.
     /// </remarks>
-    private async Task<PinUvAuthTokenSession> AcquirePinUvTokenWithRetryAsync(
+    private async Task<PinUvAuthTokenSession> AcquirePinUvTokenAsync(
         PinUvAuthMethod method,
         PinUvAuthTokenPermissions permissions,
         string rpId,
@@ -977,26 +887,184 @@ public sealed class WebAuthnClient : IAsyncDisposable
     {
         try
         {
-            var session = await _backend.GetPinUvTokenAsync(
+            return await _backend.GetPinUvTokenAsync(
                 method,
                 permissions,
                 rpId,
                 pinBytes,
-                progress: null,
                 cancellationToken).ConfigureAwait(false);
-
-            return session;
         }
-        catch (CtapException ex) when (ex.Status == CtapStatus.PinAuthInvalid)
+        catch (CtapException ex) when (IsPinRejection(ex.Status))
         {
-            // Throw immediately - do NOT retry with the same PIN bytes.
-            // Retrying would burn PIN attempts on the hardware.
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.NotAllowed,
-                "PIN authentication failed",
-                ex);
+            throw MapPinRejection(ex);
         }
     }
+
+    /// <summary>
+    /// Acquires a PIN/UV auth token by asking <see cref="_prompt"/> for the PIN, re-prompting
+    /// after a rejected attempt.
+    /// </summary>
+    /// <remarks>
+    /// Every attempt comes from a fresh prompt call; a rejected secret is zeroed immediately and
+    /// never resubmitted. The loop stops when the prompt declines, when the authenticator reports
+    /// a terminal PIN state, or when <see cref="MaxPromptAttempts"/> is reached.
+    /// </remarks>
+    /// <returns>
+    /// The token session and the accepted secret, whose ownership passes to the caller.
+    /// </returns>
+    private async Task<(PinUvAuthTokenSession TokenSession, IMemoryOwner<byte> PinOwner)> AcquireTokenViaPromptAsync(
+        PinUvAuthTokenPermissions permissions,
+        string rpId,
+        CancellationToken cancellationToken)
+    {
+        var prompt = _prompt ?? throw new InvalidOperationException("No credential prompt configured.");
+
+        var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
+        var minPinLength = info.MinPinLength ?? Ctap2MinPinLengthCodePoints;
+        int? retriesRemaining = null;
+
+        for (var attempt = 0; attempt < MaxPromptAttempts; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var context = new CredentialPromptContext
+            {
+                Kind = CredentialKind.Pin,
+                Scope = rpId,
+                IsRetry = attempt > 0,
+                RetriesRemaining = retriesRemaining,
+                MinLengthCodePoints = minPinLength,
+                MaxLengthBytes = Ctap2MaxPinLengthBytes
+            };
+
+            var promptTask = prompt.RequestSecretAsync(context, cancellationToken).AsTask();
+            IMemoryOwner<byte>? secret;
+            try
+            {
+                secret = await promptTask.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                _ = DisposeLatePromptResultAsync(promptTask);
+                throw;
+            }
+
+            if (secret is null)
+            {
+                throw new WebAuthnClientError(
+                    WebAuthnClientErrorCode.NotAllowed,
+                    "PIN required but declined");
+            }
+
+            try
+            {
+                var tokenSession = await _backend.GetPinUvTokenAsync(
+                    PinUvAuthMethod.Pin,
+                    permissions,
+                    rpId,
+                    secret.Memory,
+                    cancellationToken).ConfigureAwait(false);
+
+                return (tokenSession, secret);
+            }
+            catch (CtapException ex) when (ex.Status == CtapStatus.PinInvalid)
+            {
+                ZeroAndDispose(secret);
+
+                if (attempt + 1 >= MaxPromptAttempts)
+                {
+                    throw MapPinRejection(ex);
+                }
+
+                retriesRemaining = await TryGetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (CtapException ex) when (IsPinRejection(ex.Status))
+            {
+                ZeroAndDispose(secret);
+                throw MapPinRejection(ex);
+            }
+            catch
+            {
+                ZeroAndDispose(secret);
+                throw;
+            }
+        }
+
+        throw new WebAuthnClientError(
+            WebAuthnClientErrorCode.NotAllowed,
+            "PIN authentication did not complete within the prompt-attempt limit.");
+    }
+
+    private static async Task DisposeLatePromptResultAsync(Task<IMemoryOwner<byte>?> promptTask)
+    {
+        IMemoryOwner<byte>? owner;
+        try
+        {
+            owner = await promptTask.ConfigureAwait(false);
+        }
+        catch
+        {
+            // Observe a fault from work that completed after the operation was cancelled.
+            return;
+        }
+
+        try
+        {
+            ZeroAndDispose(owner);
+        }
+        catch
+        {
+            // Cleanup cannot be surfaced because the cancelled operation has already returned.
+        }
+    }
+
+    /// <summary>
+    /// Reads the authenticator's remaining PIN attempts for display in a retry prompt.
+    /// </summary>
+    /// <remarks>
+    /// Purely informational: a failure to read the counter must not replace the PIN rejection
+    /// the caller is actually dealing with, so failures collapse to <c>null</c>. Caller cancellation
+    /// still propagates.
+    /// </remarks>
+    private async Task<int?> TryGetPinRetriesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _backend.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static bool IsPinRejection(CtapStatus status) =>
+        status is CtapStatus.PinInvalid
+            or CtapStatus.PinBlocked
+            or CtapStatus.PinAuthInvalid
+            or CtapStatus.PinAuthBlocked;
+
+    /// <summary>
+    /// Maps a terminal CTAP PIN status onto the client's error vocabulary, so raw CTAP status
+    /// codes never reach high-level consumers.
+    /// </summary>
+    private static WebAuthnClientError MapPinRejection(CtapException ex) => ex.Status switch
+    {
+        CtapStatus.PinInvalid => new WebAuthnClientError(
+            WebAuthnClientErrorCode.NotAllowed, "PIN was incorrect.", ex),
+        CtapStatus.PinBlocked => new WebAuthnClientError(
+            WebAuthnClientErrorCode.NotAllowed,
+            "PIN is blocked. The authenticator must be reset before it can be used again.", ex),
+        CtapStatus.PinAuthBlocked => new WebAuthnClientError(
+            WebAuthnClientErrorCode.NotAllowed,
+            "PIN authentication is blocked until the authenticator is power-cycled.", ex),
+        _ => new WebAuthnClientError(
+            WebAuthnClientErrorCode.NotAllowed, "PIN authentication failed.", ex)
+    };
 
     private BackendMakeCredentialRequest BuildMakeCredentialRequest(
         RegistrationOptions options,

@@ -361,6 +361,54 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     [Fact]
+    public async Task MakeCredential_WhenBackendFails_ThrowsTypedWebAuthnClientError()
+    {
+        // A raw CTAP status must never escape the client surface.
+        _mockBackend.MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns<MakeCredentialResponse>(_ => throw new CtapException(CtapStatus.OperationDenied));
+
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)]
+        };
+
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+            _client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
+    }
+
+    [Fact]
+    public async Task MakeCredential_WhenPinNeededAndNoPromptConfigured_ThrowsNotAllowed()
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+                clientPinSupported: true, uvSupported: false));
+
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            UserVerification = UserVerificationPreference.Required
+        };
+
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+            _client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
+        await _mockBackend.DidNotReceive().MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task MakeCredential_BackendDisposed_OnClientDisposeAsync()
     {
         // Arrange

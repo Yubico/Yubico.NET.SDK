@@ -137,7 +137,7 @@ v2 locations: `src/Fido2/src/**`, `src/WebAuthn/src/**`
 
 - **Feature/API**: `KeyCollector` delegate for PIN/touch/UV prompts on `Fido2Session`
   **v2 status**: Present-but-renamed/Behavior-changed — `Fido2Session` exposes explicit async methods (`SetPinAsync`, `ChangePinAsync`, `GetPinUvAuthTokenUsingPinAsync/UsingUvAsync`) with no callback. At the WebAuthn layer the closest analog is `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`), an optional async SDK-to-application prompt supplied to `WebAuthnClient`: the SDK calls it when a ceremony needs a PIN and owns a bounded retry loop with a fresh, zeroed secret for each attempt. The synchronous `ISecureCredentialReader` is instead an application-initiated terminal input helper and does not replace this callback.
-  `IAsyncEnumerable<WebAuthnStatus>` is **not** the replacement — it is observation-only ceremony progress (`Processing`, `Finished`, `Failed`) and never gathers input. Abandonment is via the cancellation token, not a stream state.
+  WebAuthn ceremonies are plain awaitable methods; there is no progress stream and no interaction callback. Abandonment is via the cancellation token.
   Touch remains a gap: WebAuthn has no dedicated in-flight touch signal, so UI can only prompt speculatively while a ceremony may be waiting for user presence.
   No 1:1 analog; arguably more explicit/testable, but requires a rewrite.
   **Severity**: Minor (migration friction, not capability loss) | **Confidence**: High

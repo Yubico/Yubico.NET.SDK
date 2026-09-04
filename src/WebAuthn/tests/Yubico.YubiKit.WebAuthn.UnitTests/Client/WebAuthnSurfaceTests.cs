@@ -65,4 +65,45 @@ public class WebAuthnSurfaceTests
     public void ConcreteBackend_IsNamedWebAuthnBackend_NotFidoSessionWebAuthnBackend() =>
         Assert.Null(WebAuthnAssembly.GetType(
             "Yubico.YubiKit.WebAuthn.Client.FidoSessionWebAuthnBackend", throwOnError: false));
+
+    [Theory]
+    [InlineData("MakeCredentialStreamAsync")]
+    [InlineData("GetAssertionStreamAsync")]
+    public void StatusStreamMethods_DoNotExist(string methodName) =>
+        Assert.Empty(typeof(WebAuthnClient)
+            .GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
+                        BindingFlags.Instance | BindingFlags.Static)
+            .Where(m => m.Name == methodName));
+
+    [Fact]
+    public void StatusTypes_AndTheirNamespace_DoNotExist()
+    {
+        var survivors = WebAuthnAssembly
+            .GetTypes()
+            .Where(t =>
+                t.Namespace?.StartsWith("Yubico.YubiKit.WebAuthn.Client.Status", StringComparison.Ordinal) == true ||
+                t.Name.StartsWith("WebAuthnStatus", StringComparison.Ordinal) ||
+                t.Name.StartsWith("StatusChannel", StringComparison.Ordinal))
+            .Select(t => t.FullName)
+            .ToList();
+
+        Assert.Empty(survivors);
+    }
+
+    /// <summary>
+    /// The client-creation factory has to be able to carry the client's configuration; a caller
+    /// that starts from a <see cref="IYubiKeyExtensions"/> must not be forced onto defaults.
+    /// </summary>
+    [Fact]
+    public void CreateWebAuthnClientAsync_TakesWebAuthnClientOptions_AndHasNoOverloadWithout()
+    {
+        var overloads = typeof(IYubiKeyExtensions)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(m => m.Name == "CreateWebAuthnClientAsync")
+            .ToList();
+
+        Assert.NotEmpty(overloads);
+        Assert.All(overloads, m => Assert.Contains(
+            m.GetParameters(), p => p.ParameterType == typeof(WebAuthnClientOptions)));
+    }
 }

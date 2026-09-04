@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Buffers;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -27,7 +26,6 @@ using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Attestation;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
-using Yubico.YubiKit.WebAuthn.Client.Status;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Client.Validation;
 using Yubico.YubiKit.WebAuthn.Cose;
@@ -121,7 +119,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        return await MakeCredentialCoreAsync(options, pinBytes, channel: null, cancellationToken: cancellationToken)
+        return await MakeCredentialCoreAsync(options, pinBytes, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -154,90 +152,8 @@ public sealed class WebAuthnClient : IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        return await GetAssertionCoreAsync(options, pinBytes, channel: null, cancellationToken: cancellationToken)
+        return await GetAssertionCoreAsync(options, pinBytes, cancellationToken)
             .ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Creates a new WebAuthn credential via CTAP2 MakeCredential with status streaming.
-    /// </summary>
-    /// <param name="options">The registration options.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <param name="pinBytes">
-    /// Optional PIN bytes (UTF-8 encoded). The caller owns and zeroes this memory. When omitted
-    /// and the operation needs a PIN, the client asks the configured
-    /// <see cref="ICredentialPrompt"/>.
-    /// </param>
-    /// <returns>
-    /// An async enumerable of ceremony status updates. Terminal states are
-    /// <see cref="WebAuthnStatusFinished{T}"/> and <see cref="WebAuthnStatusFailed"/>.
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// The stream reports progress; it does not gather input. A PIN, when needed, comes from
-    /// <paramref name="pinBytes"/> or the configured <see cref="ICredentialPrompt"/>.
-    /// </para>
-    /// <para>
-    /// Enumerating the returned sequence starts a ceremony, so enumerating it a second time
-    /// starts another one. Abandoning enumeration early cancels the ceremony in progress.
-    /// </para>
-    /// </remarks>
-    public async IAsyncEnumerable<WebAuthnStatus> MakeCredentialStreamAsync(
-        RegistrationOptions options,
-        ReadOnlyMemory<byte>? pinBytes = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(options);
-
-        await foreach (var status in RunStatusStreamAsync<RegistrationResponse>(
-            (channel, producerCt) => MakeCredentialCoreAsync(options, pinBytes, channel, producerCt),
-            cancellationToken).ConfigureAwait(false))
-        {
-            yield return status;
-        }
-    }
-
-    /// <summary>
-    /// Authenticates using an existing credential (GetAssertion) with status streaming.
-    /// </summary>
-    /// <param name="options">The authentication options.</param>
-    /// <param name="pinBytes">
-    /// Optional PIN bytes (UTF-8 encoded). The caller owns and zeroes this memory. When omitted
-    /// and the operation needs a PIN, the client asks the configured
-    /// <see cref="ICredentialPrompt"/>.
-    /// </param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>
-    /// An async enumerable of ceremony status updates. Terminal states are
-    /// <see cref="WebAuthnStatusFinished{T}"/> and <see cref="WebAuthnStatusFailed"/>.
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// The stream reports progress; it does not gather input. A PIN, when needed, comes from
-    /// <paramref name="pinBytes"/> or the configured <see cref="ICredentialPrompt"/>. The terminal
-    /// result is a list of <see cref="MatchedCredential"/> instances, each exposing
-    /// <see cref="MatchedCredential.SelectAsync"/> for deferred authentication.
-    /// </para>
-    /// <para>
-    /// Enumerating the returned sequence starts a ceremony, so enumerating it a second time
-    /// starts another one. Abandoning enumeration early cancels the ceremony in progress.
-    /// </para>
-    /// </remarks>
-    public async IAsyncEnumerable<WebAuthnStatus> GetAssertionStreamAsync(
-        AuthenticationOptions options,
-        ReadOnlyMemory<byte>? pinBytes = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(options);
-
-        await foreach (var status in RunStatusStreamAsync<IReadOnlyList<MatchedCredential>>(
-            (channel, producerCt) => GetAssertionCoreAsync(options, pinBytes, channel, producerCt),
-            cancellationToken).ConfigureAwait(false))
-        {
-            yield return status;
-        }
     }
 
     /// <inheritdoc/>
@@ -247,68 +163,6 @@ public sealed class WebAuthnClient : IAsyncDisposable
         {
             await _backend.DisposeAsync().ConfigureAwait(false);
             _disposed = true;
-        }
-    }
-
-    private async IAsyncEnumerable<WebAuthnStatus> RunStatusStreamAsync<TResult>(
-        Func<StatusChannel<TResult>, CancellationToken, Task<TResult>> produceResultAsync,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var producerCt = linked.Token;
-        var channel = new StatusChannel<TResult>();
-
-        var producerTask = Task.Run(async () =>
-        {
-            try
-            {
-                await channel.WriteAsync(new WebAuthnStatusProcessing(), producerCt).ConfigureAwait(false);
-
-                var result = await produceResultAsync(channel, producerCt).ConfigureAwait(false);
-
-                await channel.WriteAsync(new WebAuthnStatusFinished<TResult>(result), producerCt)
-                    .ConfigureAwait(false);
-            }
-            catch (WebAuthnClientError error)
-            {
-                await channel.WriteAsync(new WebAuthnStatusFailed(error), CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException oce)
-            {
-                // Cancellation is semantically distinct from backend failure; consumers need the typed signal.
-                var cancelledError = new WebAuthnClientError(
-                    WebAuthnClientErrorCode.Cancelled, "Operation was cancelled", oce);
-                await channel.WriteAsync(new WebAuthnStatusFailed(cancelledError), CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                var wrappedError = new WebAuthnClientError(WebAuthnClientErrorCode.Unknown, "Unexpected error", ex);
-                await channel.WriteAsync(new WebAuthnStatusFailed(wrappedError), CancellationToken.None).ConfigureAwait(false);
-            }
-            finally
-            {
-                channel.Complete();
-            }
-        }, producerCt);
-
-        try
-        {
-            await foreach (var status in channel.Reader(cancellationToken).ConfigureAwait(false))
-            {
-                yield return status;
-            }
-        }
-        finally
-        {
-            linked.Cancel();
-            try
-            {
-                await producerTask.ConfigureAwait(false);
-            }
-            catch
-            {
-                // Exceptions are surfaced as Failed statuses by the producer.
-            }
         }
     }
 
@@ -330,17 +184,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// Core MakeCredential implementation shared by all overloads.
+    /// Runs the MakeCredential ceremony: validation, UV/PIN decision, token acquisition,
+    /// excludeList pre-flight, and CTAP execution.
     /// </summary>
-    /// <remarks>
-    /// This method handles validation, UV/PIN decision, token acquisition, and CTAP execution.
-    /// It may write status updates to the channel and awaits interactive
-    /// responses when PIN/UV is needed.
-    /// </remarks>
     private async Task<RegistrationResponse> MakeCredentialCoreAsync(
         RegistrationOptions options,
         ReadOnlyMemory<byte>? callerPinBytes,
-        StatusChannel<RegistrationResponse>? channel,
         CancellationToken cancellationToken)
     {
         // Validate options
@@ -472,17 +321,12 @@ public sealed class WebAuthnClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// Core GetAssertion implementation shared by all overloads.
+    /// Runs the GetAssertion ceremony: validation, UV/PIN decision, token acquisition,
+    /// credential matching, and CTAP execution.
     /// </summary>
-    /// <remarks>
-    /// This method handles validation, UV/PIN decision, token acquisition, credential matching, and CTAP execution.
-    /// It may write status updates to the channel and awaits interactive
-    /// responses when PIN/UV is needed.
-    /// </remarks>
     private async Task<IReadOnlyList<MatchedCredential>> GetAssertionCoreAsync(
         AuthenticationOptions options,
         ReadOnlyMemory<byte>? callerPinBytes,
-        StatusChannel<IReadOnlyList<MatchedCredential>>? channel,
         CancellationToken cancellationToken)
     {
         // Validate options

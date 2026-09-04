@@ -142,6 +142,34 @@ public class CoseKeyForwardCompatibilityTests
     }
 
     [Fact]
+    public void Decode_NonIntegerAlgorithm_Throws()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(1);
+        writer.WriteInt32(2);
+        writer.WriteInt32(3);
+        writer.WriteTextString("ES256");
+        writer.WriteEndMap();
+
+        Assert.Throws<InvalidOperationException>(() => CoseKey.Decode(writer.Encode()));
+    }
+
+    [Fact]
+    public void Decode_KeyTypeOutsideInt32_Throws()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(2);
+        writer.WriteInt32(1);
+        writer.WriteUInt64((ulong)int.MaxValue + 1);
+        writer.WriteInt32(3);
+        writer.WriteInt32(-7);
+        writer.WriteEndMap();
+
+        Assert.Throws<InvalidOperationException>(() => CoseKey.Decode(writer.Encode()));
+    }
+
+    [Fact]
     public void Decode_Ec2KeyMissingRequiredCoordinate_Throws()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);

@@ -42,11 +42,18 @@ public abstract record CoseKey
     /// <returns>A <see cref="CoseKey"/> subclass based on the key type.</returns>
     public static CoseKey Decode(ReadOnlyMemory<byte> coseEncoded)
     {
+        Dictionary<int, object?> parameters = ReadParameters(coseEncoded);
+        int keyType = ReadRequiredInt32(parameters, 1, "Missing required kty parameter");
+        var algorithm = new CoseAlgorithm(
+            ReadRequiredInt32(parameters, 3, "Missing required alg parameter"));
+
+        return CreateKey(keyType, algorithm, parameters, coseEncoded);
+    }
+
+    private static Dictionary<int, object?> ReadParameters(ReadOnlyMemory<byte> coseEncoded)
+    {
         var reader = new CborReader(coseEncoded, CborConformanceMode.Ctap2Canonical);
         reader.ReadStartMap();
-
-        int? keyType = null;
-        int? algorithmValue = null;
         var parameters = new Dictionary<int, object?>();
 
         while (reader.PeekState() != CborReaderState.EndMap)
@@ -55,50 +62,61 @@ public abstract record CoseKey
             if (label is null)
             {
                 reader.SkipValue();
+                continue;
             }
-            else if (label is 1 or 3)
-            {
-                int? value = ReadInt32IfRepresentable(reader);
-                if (value is not null)
-                {
-                    if (label == 1)
-                    {
-                        keyType = value;
-                    }
-                    else
-                    {
-                        algorithmValue = value;
-                    }
-                }
-            }
-            else if (label is -1 or -2 or -3)
-            {
-                parameters[label.Value] = ReadModeledParameterValue(reader);
-            }
-            else
-            {
-                reader.SkipValue();
-            }
+
+            ReadParameter(reader, label.Value, parameters);
         }
+
         reader.ReadEndMap();
+        return parameters;
+    }
 
-        int kty = keyType ??
-            throw new InvalidOperationException("Missing required kty parameter");
-        int alg = algorithmValue ??
-            throw new InvalidOperationException("Missing required alg parameter");
-        CoseAlgorithm algorithm = new(alg);
+    private static void ReadParameter(
+        CborReader reader,
+        int label,
+        Dictionary<int, object?> parameters)
+    {
+        // ReadKnownLabel limits negative labels to the modeled key parameters -1, -2, and -3.
+        if (label < 0)
+        {
+            parameters[label] = ReadModeledParameterValue(reader);
+            return;
+        }
 
-        if (alg == -65700)
+        int? value = ReadInt32IfRepresentable(reader);
+        if (value is not null)
+        {
+            parameters[label] = value;
+        }
+    }
+
+    private static int ReadRequiredInt32(
+        IReadOnlyDictionary<int, object?> parameters,
+        int label,
+        string message) =>
+        parameters.TryGetValue(label, out object? value) && value is int intValue
+            ? intValue
+            : throw new InvalidOperationException(message);
+
+    private static CoseKey CreateKey(
+        int keyType,
+        CoseAlgorithm algorithm,
+        Dictionary<int, object?> parameters,
+        ReadOnlyMemory<byte> coseEncoded)
+    {
+        // ARKG uses an EC2-shaped experimental key selected by its algorithm identifier.
+        if (algorithm == CoseAlgorithm.ArkgP256SeedKey)
         {
             return CoseArkgP256SeedKey.Decode(parameters, algorithm);
         }
 
-        return kty switch
+        return keyType switch
         {
             2 => DecodeEc2(parameters, algorithm),
             1 => DecodeOkp(parameters, algorithm),
             3 => DecodeRsa(parameters, algorithm),
-            _ => new CoseOtherKey(kty, algorithm, coseEncoded.ToArray())
+            _ => new CoseOtherKey(keyType, algorithm, coseEncoded.ToArray())
         };
     }
 

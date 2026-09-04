@@ -173,20 +173,71 @@ await session.DeleteCredentialAsync(managementKey, label);
 ### Calculating session keys
 
 ```csharp
-// Symmetric
-using var symmetricKeys = await session.CalculateSessionKeysSymmetricAsync(
-    label, symmetricContext, credentialPasswordUtf8, symmetricCardCryptogram);
+using System.Security.Cryptography;
 
-// Asymmetric (fw 5.6.0+); cardCryptogram is required for mutual authentication
-using var asymmetricKeys = await session.CalculateSessionKeysAsymmetricAsync(
-    label, asymmetricContext, hsmPublicKey, credentialPasswordUtf8, asymmetricCardCryptogram);
+static async Task<SessionKeys> CalculateSymmetricSessionKeysAsync(
+    IHsmAuthSession session,
+    string label,
+    ReadOnlyMemory<byte> hostChallenge,
+    ReadOnlyMemory<byte> hsmChallenge,
+    ReadOnlyMemory<byte> credentialPasswordUtf8,
+    ReadOnlyMemory<byte>? cardCryptogram,
+    CancellationToken cancellationToken)
+{
+    if (hostChallenge.Length != 8 || hsmChallenge.Length != 8)
+        throw new ArgumentException("The host and HSM challenges must each be 8 bytes.");
+
+    var context = new byte[16];
+    try
+    {
+        hostChallenge.CopyTo(context);
+        hsmChallenge.CopyTo(context.AsMemory(8));
+        return await session.CalculateSessionKeysSymmetricAsync(
+            label, context, credentialPasswordUtf8, cardCryptogram, cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(context);
+    }
+}
+
+static async Task<SessionKeys> CalculateAsymmetricSessionKeysAsync(
+    IHsmAuthSession session,
+    string label,
+    ReadOnlyMemory<byte> epkOce,
+    ReadOnlyMemory<byte> epkSd,
+    ReadOnlyMemory<byte> hsmPublicKey,
+    ReadOnlyMemory<byte> credentialPasswordUtf8,
+    ReadOnlyMemory<byte> cardCryptogram,
+    CancellationToken cancellationToken)
+{
+    if (epkOce.Length != 65 || epkSd.Length != 65 || hsmPublicKey.Length != 65)
+        throw new ArgumentException("EPK-OCE, EPK-SD, and the HSM public key must each be 65-byte uncompressed points.");
+
+    var context = new byte[130];
+    try
+    {
+        epkOce.CopyTo(context);
+        epkSd.CopyTo(context.AsMemory(65));
+        return await session.CalculateSessionKeysAsymmetricAsync(
+            label, context, hsmPublicKey, credentialPasswordUtf8, cardCryptogram, cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(context);
+    }
+}
 ```
 
-The symmetric context is exactly 16 bytes: the 8-byte host challenge from `GetChallengeAsync`
-followed by the actual 8-byte HSM challenge returned by the connector. The asymmetric context is
-exactly 130 bytes: EPK-OCE followed by the connector's EPK-SD, each encoded as a 65-byte
-uncompressed P-256 point. The SDK validates these lengths before device I/O. It does not implement
-the YubiHSM connector handshake or generate the HSM-owned values.
+Obtain `hostChallenge` or `epkOce` first, then send it to the connector. The connector returns
+`hsmChallenge` or `epkSd` plus `cardCryptogram`; it also supplies `hsmPublicKey` for asymmetric
+authentication. On firmware 5.6.0 and later, `GetChallengeAsync` obtains the YubiKey value. For a
+symmetric credential on older supported firmware, generate a fresh 8-byte host challenge with
+`RandomNumberGenerator.GetBytes(8)`. Pass the exact value sent to the connector into the helper;
+do not call `GetChallengeAsync` again after the exchange. A symmetric `cardCryptogram` is optional,
+but omitting it skips mutual authentication of the HSM. The SDK validates context lengths before
+device I/O but does not implement the connector handshake. The returned `SessionKeys` must be
+disposed by its caller.
 
 ### Touch notification
 

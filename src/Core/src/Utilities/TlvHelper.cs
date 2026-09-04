@@ -73,33 +73,67 @@ public static class TlvHelper
     ///     Encodes a list of Tlvs into a sequence of BER-TLV encoded data.
     /// </summary>
     /// <param name="tlvData">List of Tlvs to encode</param>
-    /// <returns>BER-TLV encoded list</returns>
+    /// <returns>
+    ///     A caller-owned buffer containing the BER-TLV encoded list, or an empty buffer if
+    ///     <paramref name="tlvData" /> contains no elements. The caller must securely clear the returned
+    ///     buffer when it contains sensitive data.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="tlvData" /> is <see langword="null" />, or contains a <see langword="null" /> element.
+    /// </exception>
+    /// <remarks>
+    ///     This method does not dispose the input <see cref="Tlv" /> objects. The caller remains responsible
+    ///     for disposing them. Source buffers used to construct the TLVs also remain caller-owned and are not
+    ///     cleared by this method.
+    /// </remarks>
     public static Memory<byte> EncodeList(Tlv[] tlvData)
     {
-        // Calculate total size to avoid resizing
-        var estimatedSize = 0;
+        ArgumentNullException.ThrowIfNull(tlvData);
+
         var tlvSpan = tlvData.AsSpan();
-        foreach (var tlv in tlvSpan)
-            estimatedSize += tlv.TotalLength;
 
-        var writer = new ArrayBufferWriter<byte>(estimatedSize);
-
+        // TotalLength is the exact encoded span length. Direct assembly avoids abandoning a second
+        // complete copy of potentially sensitive encoded data on the managed heap.
+        var totalLength = 0;
         foreach (var tlv in tlvSpan)
         {
-            var tlvBytes = tlv.AsMemory().Span;
-            tlvBytes.CopyTo(writer.GetSpan(tlvBytes.Length));
-            writer.Advance(tlvBytes.Length);
+            ArgumentNullException.ThrowIfNull(tlv, nameof(tlvData));
+            totalLength += tlv.TotalLength;
         }
 
-        return writer.WrittenMemory.ToArray();
+        var encoded = new byte[totalLength];
+        var position = 0;
+        foreach (var tlv in tlvSpan)
+        {
+            var tlvBytes = tlv.AsSpan();
+            tlvBytes.CopyTo(encoded.AsSpan(position));
+            position += tlvBytes.Length;
+        }
+
+        return encoded;
     }
 
     /// <summary>
     ///     Encodes a collection of TLV objects into a single byte sequence, then disposes each TLV.
     ///     Use this when the TLV objects are created inline and not needed after encoding.
     /// </summary>
+    /// <param name="tlvData">TLVs to encode and dispose. Each TLV is disposed even if encoding fails.</param>
+    /// <returns>
+    ///     A caller-owned buffer containing the BER-TLV encoded list, or an empty buffer if
+    ///     <paramref name="tlvData" /> contains no elements. The caller must securely clear the returned
+    ///     buffer when it contains sensitive data.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="tlvData" /> is <see langword="null" />, or contains a <see langword="null" /> element.
+    /// </exception>
+    /// <remarks>
+    ///     Source buffers used to construct the TLVs remain caller-owned and are not cleared by this method.
+    ///     Disposing the input TLVs does not clear the returned buffer.
+    /// </remarks>
     public static Memory<byte> EncodeAndDisposeList(params Tlv[] tlvData)
     {
+        ArgumentNullException.ThrowIfNull(tlvData);
+
         try
         {
             return EncodeList(tlvData);
@@ -108,25 +142,24 @@ public static class TlvHelper
         {
             foreach (var tlv in tlvData)
             {
-                tlv.Dispose();
+                tlv?.Dispose();
             }
         }
     }
-
-    // /// <summary>
-    // ///     Encodes an array of Tlvs into a sequence of BER-TLV encoded data.
-    // /// </summary>
-    // /// <param name="tlvs">Array of Tlvs to encode</param>
-    // /// <returns>BER-TLV encoded array</returns>
-    // public static Memory<byte> EncodeMany(params Tlv[] tlvs) => EncodeList(tlvs);
 
     /// <summary>
     ///     Decode a single TLV encoded object, returning only the value.
     /// </summary>
     /// <param name="expectedTag">The expected tag value of the given TLV data</param>
     /// <param name="tlvData">The TLV data</param>
-    /// <returns>The value of the TLV</returns>
+    /// <returns>
+    ///     A caller-owned buffer containing the TLV value. The caller must securely clear the returned
+    ///     buffer when it contains sensitive data.
+    /// </returns>
     /// <exception cref="InvalidOperationException">If the TLV tag differs from expectedTag</exception>
+    /// <remarks>
+    ///     The returned buffer is a copy and remains valid after the internal <see cref="Tlv" /> is disposed.
+    /// </remarks>
     public static Memory<byte> GetValue(int expectedTag, ReadOnlySpan<byte> tlvData)
     {
         using var tlv = Tlv.Create(tlvData);
@@ -142,6 +175,10 @@ public static class TlvHelper
     /// <param name="tlvData">Sequence of TLV encoded data</param>
     /// <param name="value">The value of the first TLV with the matching tag, or default if not found</param>
     /// <returns>True if the tag was found, false otherwise</returns>
+    /// <remarks>
+    ///     When this method returns <see langword="true" />, <paramref name="value" /> is a caller-owned buffer.
+    ///     The caller must securely clear it when it contains sensitive data.
+    /// </remarks>
     public static bool TryFindValue(int tag, ReadOnlySpan<byte> tlvData, out Memory<byte> value)
     {
         var buffer = tlvData;
@@ -159,6 +196,18 @@ public static class TlvHelper
         return false;
     }
 
+    /// <summary>
+    ///     Encodes a mapping of tag-value pairs into BER-TLV data ordered by ascending tag.
+    /// </summary>
+    /// <param name="tlvData">Dictionary of TLV tag-value pairs.</param>
+    /// <returns>
+    ///     A caller-owned buffer containing the BER-TLV encoded dictionary, or an empty buffer if
+    ///     <paramref name="tlvData" /> contains no elements. The caller must securely clear the returned
+    ///     buffer when it contains sensitive data.
+    /// </returns>
+    /// <remarks>
+    ///     Source buffers used as dictionary values remain caller-owned and are not cleared by this method.
+    /// </remarks>
     public static Memory<byte> EncodeDictionary(IReadOnlyDictionary<int, byte[]?> tlvData)
     {
         if (tlvData.Count == 0) return Memory<byte>.Empty;

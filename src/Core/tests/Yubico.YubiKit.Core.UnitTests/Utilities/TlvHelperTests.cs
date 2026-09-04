@@ -143,4 +143,81 @@ public class TlvHelperTests
         Assert.Equal(1, tlv.Length);
         Assert.Equal(0xAA, tlv.Value.Span[0]);
     }
+
+    /// <summary>
+    ///     Verifies the invariant that total output length is exact because <see cref="Tlv.TotalLength" />
+    ///     equals the encoded span length.
+    /// </summary>
+    [Theory]
+    [InlineData(0x5A, 0x00, 2)]   // 1 tag + 1 short-form length
+    [InlineData(0x5A, 0x7F, 2)]   // largest short-form length
+    [InlineData(0x5A, 0x80, 3)]   // 1 tag + 0x81 0x80
+    [InlineData(0x5A, 0xFF, 3)]
+    [InlineData(0x5A, 0x100, 4)]  // 1 tag + 0x82 0x01 0x00
+    [InlineData(0x9F33, 0x7F, 3)] // 2-byte tag + 1 short-form length
+    [InlineData(0x9F33, 0x100, 5)]
+    public void Tlv_TotalLength_IsHeaderPlusValue(int tag, int valueLength, int headerLength)
+    {
+        using var tlv = new Tlv(tag, new byte[valueLength]);
+
+        // These literal sizes stay independent of the production TotalLength implementation.
+        Assert.Equal(headerLength + valueLength, tlv.TotalLength);
+    }
+
+    [Fact]
+    public void EncodeList_EmitsExpectedBytes()
+    {
+        using var first = new Tlv(0x5A, new byte[] { 0xAA });
+        using var second = new Tlv(0x9F33, new byte[] { 0xFF });
+
+        var encoded = TlvHelper.EncodeList([first, second]);
+
+        Assert.Equal(
+            new byte[] { 0x5A, 0x01, 0xAA, 0x9F, 0x33, 0x01, 0xFF },
+            encoded.ToArray());
+    }
+
+    [Fact]
+    public void EncodeList_WithSingleElement_EmitsThatElementOnly()
+    {
+        using var only = new Tlv(0x5A, new byte[] { 0xAA, 0xBB });
+
+        var encoded = TlvHelper.EncodeList([only]);
+
+        Assert.Equal(new byte[] { 0x5A, 0x02, 0xAA, 0xBB }, encoded.ToArray());
+    }
+
+    [Fact]
+    public void EncodeList_WithNoElements_ReturnsEmpty()
+    {
+        var encoded = TlvHelper.EncodeList([]);
+
+        Assert.True(encoded.IsEmpty);
+    }
+
+    [Fact]
+    public void EncodeAndDisposeList_WithNullArray_ThrowsArgumentNullException()
+    {
+        var exception = Assert.Throws<ArgumentNullException>(() => TlvHelper.EncodeAndDisposeList(null!));
+
+        Assert.Equal("tlvData", exception.ParamName);
+    }
+
+    [Fact]
+    public void EncodeAndDisposeList_WithNullElement_DisposesAllNonNullTlvs()
+    {
+        using var first = new Tlv(0x5A, [0xAA]);
+        using var sensitiveLater = new Tlv(0x5B, [0x10, 0x20, 0x30]);
+        var tlvs = new Tlv[] { first, null!, sensitiveLater };
+
+        var exception = Assert.Throws<ArgumentNullException>(() => TlvHelper.EncodeAndDisposeList(tlvs));
+
+        Assert.Equal("tlvData", exception.ParamName);
+        Assert.Equal(0, first.Length);
+        Assert.Equal(0, first.Tag);
+        Assert.Equal(0, sensitiveLater.Length);
+        Assert.Equal(0, sensitiveLater.Tag);
+        Assert.All(first.AsSpan().ToArray(), static b => Assert.Equal(0, b));
+        Assert.All(sensitiveLater.AsSpan().ToArray(), static b => Assert.Equal(0, b));
+    }
 }

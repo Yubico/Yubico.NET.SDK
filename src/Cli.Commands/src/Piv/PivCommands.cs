@@ -504,7 +504,13 @@ public sealed class PivKeysGenerateCommand : YkCommandBase<PivKeyGenerateSetting
             await session.AuthenticateAsync(mgmtKey);
 
             var publicKey = await session.GenerateKeyAsync(
-                slot, algorithm, pinPolicy, touchPolicy);
+                slot,
+                algorithm,
+                new PivKeyCreationOptions
+                {
+                    PinPolicy = pinPolicy,
+                    TouchPolicy = touchPolicy
+                });
 
             OutputHelpers.WriteSuccess(
                 $"Key pair generated in slot {PivHelpers.FormatSlot(slot)}.");

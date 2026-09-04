@@ -23,9 +23,7 @@ public interface IManagementSession : IApplicationSession
 
     Task SetDeviceConfigAsync(
         DeviceConfig config,
-        bool reboot,
-        byte[]? currentLockCode = null,
-        byte[]? newLockCode = null,
+        SetDeviceConfigOptions? options = null,
         CancellationToken cancellationToken = default);
 
     Task ResetDeviceAsync(CancellationToken cancellationToken = default);

@@ -58,15 +58,22 @@ from the inherited `IsAuthenticated`, which reports application-protocol authent
 var publicKey = await session.GenerateKeyAsync(
     PivSlot.Authentication,
     PivAlgorithm.EccP256,
-    PivPinPolicy.Once,
-    PivTouchPolicy.Never,
+    new PivKeyCreationOptions
+    {
+        PinPolicy = PivPinPolicy.Once,
+        TouchPolicy = PivTouchPolicy.Never
+    },
     cancellationToken);
 ```
 
 ### Store and Read a Certificate
 
 ```csharp
-await session.StoreCertificateAsync(PivSlot.Authentication, certificate, cancellationToken);
+await session.StoreCertificateAsync(
+    PivSlot.Authentication,
+    certificate,
+    PivCertificateCompression.Automatic,
+    cancellationToken);
 var stored = await session.GetCertificateAsync(PivSlot.Authentication, cancellationToken);
 ```
 
@@ -100,6 +107,17 @@ await session.SetPinAttemptsAsync(
     pukAttempts: 5,
     cancellationToken);
 ```
+
+### Biometric user verification
+
+```csharp
+var temporaryPin = await session.VerifyUvAsync(
+    PivUserVerification.VerifyAndRequestTemporaryPin,
+    cancellationToken);
+```
+
+Use `PivUserVerification.Verify` when no temporary PIN is needed and `CheckOnly` for the explicit check-only
+mode. A returned temporary PIN is caller-owned secret material and must be zeroed after use.
 
 ## Security Notes
 

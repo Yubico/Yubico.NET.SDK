@@ -19,6 +19,7 @@ using Yubico.YubiKit.Fido2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
+using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.Fido2.IntegrationTests;
 
 /// <summary>
@@ -157,11 +158,11 @@ public class FidoSessionSimpleTests
     public async Task CreateFidoSession_SecondExplicitHidFidoSession_IsRefused(YubiKeyTestState state)
     {
         await using var first = await state.Device.CreateFidoSessionAsync(
-            preferredConnection: ConnectionType.HidFido);
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido });
 
         _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
             state.Device.CreateFidoSessionAsync(
-                preferredConnection: ConnectionType.HidFido));
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido }));
     }
 
     [SkippableTheory]

@@ -67,6 +67,7 @@ public class SecurityDomainSessionTests
 
         connection.SupportsExtendedApdu().Returns(true);
         connection.Transport.Returns(Transport.Usb);
+        connection.Type.Returns(ConnectionType.SmartCard);
 
         return connection;
     }
@@ -78,6 +79,8 @@ public class SecurityDomainSessionTests
     {
         var yubiKey = Substitute.For<IYubiKey>();
         connection = CreateMockConnection();
+        yubiKey.AvailableConnections.Returns(ConnectionType.SmartCard);
+        yubiKey.SupportsConnection(ConnectionType.SmartCard).Returns(true);
 
         yubiKey.ConnectAsync<ISmartCardConnection>(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(connection));
@@ -223,7 +226,10 @@ public class SecurityDomainSessionTests
         var configuration = new ProtocolConfiguration();
 
         // Act
-        var session = await SecurityDomainSession.CreateAsync(connection, configuration: configuration, cancellationToken: TestContext.Current.CancellationToken);
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { ProtocolConfiguration = configuration },
+            TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -237,7 +243,10 @@ public class SecurityDomainSessionTests
         var firmwareVersion = new FirmwareVersion(5, 7, 2);
 
         // Act
-        var session = await SecurityDomainSession.CreateAsync(connection, firmwareVersion: firmwareVersion, cancellationToken: TestContext.Current.CancellationToken);
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { FirmwareVersionOverride = firmwareVersion },
+            TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -252,7 +261,14 @@ public class SecurityDomainSessionTests
         var firmwareVersion = new FirmwareVersion(5, 7, 2);
 
         // Act
-        var session = await SecurityDomainSession.CreateAsync(connection, configuration: configuration, firmwareVersion: firmwareVersion, cancellationToken: TestContext.Current.CancellationToken);
+        var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            new SessionCreationOptions
+            {
+                ProtocolConfiguration = configuration,
+                FirmwareVersionOverride = firmwareVersion
+            },
+            TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -284,9 +300,11 @@ public class SecurityDomainSessionTests
         // Act
         var session = await SecurityDomainSession.CreateAsync(
             connection,
-            configuration: configuration,
-            scpKeyParams: null, // SCP requires integration testing
-            firmwareVersion: firmwareVersion,
+            new SessionCreationOptions
+            {
+                ProtocolConfiguration = configuration,
+                FirmwareVersionOverride = firmwareVersion
+            },
             cancellationToken: cts.Token);
 
         // Assert
@@ -314,7 +332,9 @@ public class SecurityDomainSessionTests
         var configuration = new ProtocolConfiguration();
 
         // Act
-        var session = await yubiKey.CreateSecurityDomainSessionAsync(configuration: configuration, cancellationToken: TestContext.Current.CancellationToken);
+        var session = await yubiKey.CreateSecurityDomainSessionAsync(
+            new SessionCreationOptions { ProtocolConfiguration = configuration },
+            TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -328,7 +348,9 @@ public class SecurityDomainSessionTests
         var firmwareVersion = new FirmwareVersion(5, 7, 2);
 
         // Act
-        var session = await yubiKey.CreateSecurityDomainSessionAsync(firmwareVersion: firmwareVersion, cancellationToken: TestContext.Current.CancellationToken);
+        var session = await yubiKey.CreateSecurityDomainSessionAsync(
+            new SessionCreationOptions { FirmwareVersionOverride = firmwareVersion },
+            TestContext.Current.CancellationToken);
 
         // Assert
         AssertSessionAndDispose(session);
@@ -345,9 +367,11 @@ public class SecurityDomainSessionTests
 
         // Act
         var session = await yubiKey.CreateSecurityDomainSessionAsync(
-            scpKeyParams: null, // SCP requires integration testing
-            configuration: configuration,
-            firmwareVersion: firmwareVersion,
+            new SessionCreationOptions
+            {
+                ProtocolConfiguration = configuration,
+                FirmwareVersionOverride = firmwareVersion
+            },
             cancellationToken: cts.Token);
 
         // Assert
@@ -465,6 +489,49 @@ public class SecurityDomainSessionTests
         Assert.Equal([0xAA, 0xBB], cardRecognitionData.ToArray());
     }
 
+    [Theory]
+    [InlineData(CaIdentifierType.None)]
+    [InlineData((CaIdentifierType)4)]
+    [InlineData(CaIdentifierType.Kloc | (CaIdentifierType)4)]
+    public async Task GetCaIdentifiersAsync_UnsupportedSelection_ThrowsBeforeTransmitting(
+        CaIdentifierType identifierTypes)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse());
+        await using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        int transmissionsBeforeCall = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            session.GetCaIdentifiersAsync(identifierTypes, TestContext.Current.CancellationToken));
+
+        Assert.Equal(nameof(identifierTypes), exception.ParamName);
+        Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task GetCaIdentifiersAsync_BothGroups_RequestsKlocBeforeKlccAndPreservesResultOrder()
+    {
+        byte[] kloc = [0x42, 0x01, 0xAA, 0x83, 0x02, 0x11, 0x01, 0x90, 0x00];
+        byte[] klcc = [0x42, 0x01, 0xBB, 0x83, 0x02, 0x12, 0x02, 0x90, 0x00];
+        var connection = new RecordingSmartCardConnection(OkResponse(), kloc, klcc);
+        await using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var identifiers = await session.GetCaIdentifiersAsync(
+            CaIdentifierType.Kloc | CaIdentifierType.Klcc,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([0x00, 0xCA, 0xFF, 0x33, 0x00], connection.TransmittedCommands[1]);
+        Assert.Equal([0x00, 0xCA, 0xFF, 0x34, 0x00], connection.TransmittedCommands[2]);
+        Assert.Equal(2, identifiers.Count);
+        Assert.Equal(0x11, identifiers[0].KeyReference.Kid);
+        Assert.Equal([0xAA], identifiers[0].Identifier.ToArray());
+        Assert.Equal(0x12, identifiers[1].KeyReference.Kid);
+        Assert.Equal([0xBB], identifiers[1].Identifier.ToArray());
+    }
+
     [Fact]
     public async Task DeleteKeyAsync_TransmitsDeleteWithKeyReferenceFilter()
     {
@@ -522,7 +589,7 @@ public class SecurityDomainSessionTests
         var connection = new RecordingSmartCardConnection(OkResponse(), response);
         using var session = await SecurityDomainSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 7, 2),
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 7, 2) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var generatedKey = await session.GenerateKeyAsync(

@@ -268,28 +268,28 @@ public sealed class OpenPgpKeysGenerateCommand : YkCommandBase<KeysGenerateSetti
                 switch (alg)
                 {
                     case "RSA2048":
-                        await session.GenerateRsaKeyAsync(keyRef, RsaSize.Rsa2048);
+                        await session.GenerateKeyAsync(keyRef, RsaAttributes.Create(RsaSize.Rsa2048));
                         break;
                     case "RSA3072":
-                        await session.GenerateRsaKeyAsync(keyRef, RsaSize.Rsa3072);
+                        await session.GenerateKeyAsync(keyRef, RsaAttributes.Create(RsaSize.Rsa3072));
                         break;
                     case "RSA4096":
-                        await session.GenerateRsaKeyAsync(keyRef, RsaSize.Rsa4096);
+                        await session.GenerateKeyAsync(keyRef, RsaAttributes.Create(RsaSize.Rsa4096));
                         break;
                     case "ECCP256":
-                        await session.GenerateEcKeyAsync(keyRef, CurveOid.Secp256R1);
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.Secp256R1));
                         break;
                     case "ECCP384":
-                        await session.GenerateEcKeyAsync(keyRef, CurveOid.Secp384R1);
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.Secp384R1));
                         break;
                     case "ECCP521":
-                        await session.GenerateEcKeyAsync(keyRef, CurveOid.Secp521R1);
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.Secp521R1));
                         break;
                     case "ED25519":
-                        await session.GenerateEcKeyAsync(keyRef, CurveOid.Ed25519);
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.Ed25519));
                         break;
                     case "X25519":
-                        await session.GenerateEcKeyAsync(keyRef, CurveOid.X25519);
+                        await session.GenerateKeyAsync(keyRef, EcAttributes.Create(keyRef, CurveOid.X25519));
                         break;
                     default:
                         throw new ArgumentException(

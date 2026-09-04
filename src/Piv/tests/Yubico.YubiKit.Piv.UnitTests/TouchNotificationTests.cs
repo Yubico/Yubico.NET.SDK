@@ -21,14 +21,12 @@ namespace Yubico.YubiKit.Piv.UnitTests;
 public class TouchNotificationTests
 {
     [Fact]
-    public void TouchNotificationCallback_Delegate_IsParameterless()
+    public void OnTouchRequired_UsesParameterlessAction()
     {
-        // Verify the delegate signature has no parameters (security requirement)
-        var method = typeof(TouchNotificationCallback).GetMethod("Invoke");
+        var property = typeof(IPivSession).GetProperty(nameof(IPivSession.OnTouchRequired));
 
-        Assert.NotNull(method);
-        Assert.Empty(method.GetParameters());
-        Assert.Equal(typeof(void), method.ReturnType);
+        Assert.NotNull(property);
+        Assert.Equal(typeof(Action), property.PropertyType);
     }
 
     [Fact]

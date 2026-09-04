@@ -68,7 +68,7 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Stores a new credential on the device.
     /// </summary>
-    Task PutCredentialAsync(CredentialData credentialData, bool requireTouch = false,
+    Task PutCredentialAsync(CredentialData credentialData,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -98,7 +98,7 @@ public interface IOathSession : IApplicationSession
     ///     Calculates codes for all credentials on the device.
     ///     HOTP and touch-required credentials return <c>null</c> codes.
     /// </summary>
-    Task<Dictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null,
+    Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -159,6 +159,8 @@ public interface IOathSession : IApplicationSession
     ///     (<see cref="OathFailureReason.WrongPassword" />), or <paramref name="operation" /> failed
     ///     again after a successful authentication.
     /// </exception>
+    // Generic and non-generic forms preserve the established task-operation ergonomics.
+#pragma warning disable RS0026
     Task<T> AuthenticateAndRetryAsync<T>(
         Func<CancellationToken, Task<T>> operation,
         Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
@@ -174,4 +176,5 @@ public interface IOathSession : IApplicationSession
         Func<CancellationToken, Task> operation,
         Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
         CancellationToken cancellationToken = default);
+#pragma warning restore RS0026
 }

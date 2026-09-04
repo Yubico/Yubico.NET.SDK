@@ -124,6 +124,10 @@ Common async operations include:
 
 Check `IPivSession.cs` before adding or documenting public surface.
 
+Key generation and import keep required domain inputs positional while policy modifiers live in
+`PivKeyCreationOptions`. User-verification mode uses `PivUserVerification`; certificate storage uses
+`PivCertificateCompression` instead of mode-switch booleans.
+
 ## Test Infrastructure
 
 Unit tests should use fake SmartCard protocol/connection seams where possible to assert APDU/TLV bytes and parser behavior without hardware.

@@ -308,7 +308,7 @@ optional explicit **override** via the `preferredConnection` parameter:
 
 - Default selection: **HID FIDO** when exposed, otherwise **SmartCard FIDO2**. Once selected, a connection
   failure propagates rather than switching transports and creating a second session on the same key.
-- `preferredConnection: ConnectionType.SmartCard` (or `HidFido`) forces a transport. It must be a
+- `SessionCreationOptions.PreferredConnectionType` set to `ConnectionType.SmartCard` (or `HidFido`) forces a transport. It must be a
   transport FIDO2 can use and that the device exposes; otherwise it throws `ArgumentException`
   (not a valid FIDO2 transport, e.g. `HidOtp`) or `NotSupportedException` (valid but not on this device).
 - SCP applies only to SmartCard. Supplying `scpKeyParams` without an override selects SmartCard
@@ -319,7 +319,11 @@ optional explicit **override** via the `preferredConnection` parameter:
 // Force SmartCard FIDO2 with SCP on a dual-transport key
 using var scp = Scp03KeyParameters.Default;
 await using var session = await yubiKey.CreateFidoSessionAsync(
-    scpKeyParams: scp, preferredConnection: ConnectionType.SmartCard);
+    new SessionCreationOptions
+    {
+        ScpKeyParameters = scp,
+        PreferredConnectionType = ConnectionType.SmartCard
+    });
 ```
 
 ## Common Patterns

@@ -37,8 +37,7 @@ public class PivBioProtocolTests
         var result = await PivBioProtocol.VerifyUvAsync(
             backend,
             NullLogger.Instance,
-            requestTemporaryPin: true,
-            checkOnly: false,
+            PivUserVerification.VerifyAndRequestTemporaryPin,
             TestContext.Current.CancellationToken);
 
         // Sanity: the returned (distinct) copy still has the real temporary PIN.
@@ -61,23 +60,43 @@ public class PivBioProtocolTests
             PivBioProtocol.VerifyUvAsync(
                 backend,
                 NullLogger.Instance,
-                requestTemporaryPin: false,
-                checkOnly: true,
+                PivUserVerification.CheckOnly,
                 TestContext.Current.CancellationToken));
 
         Assert.Equal(3, exception.RetriesRemaining);
     }
 
+    [Fact]
+    public async Task VerifyUvAsync_UnknownMode_ThrowsBeforeSending()
+    {
+        var backend = new FixedStatusWordBackend(unchecked((short)0x9000));
+
+        var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            PivBioProtocol.VerifyUvAsync(
+                backend,
+                NullLogger.Instance,
+                (PivUserVerification)99,
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal("userVerification", exception.ParamName);
+        Assert.Equal(0, backend.SendCount);
+    }
+
     private sealed class FixedStatusWordBackend(short statusWord) : IPivBackend
     {
+        public int SendCount { get; private set; }
+
         public Task<PivInitialization> InitializeAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException("Not needed for these tests.");
 
         public Task<ApduResponse> SendAsync(
             ApduCommand command,
             bool throwOnError = true,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(new ApduResponse(Array.Empty<byte>(), statusWord));
+            CancellationToken cancellationToken = default)
+        {
+            SendCount++;
+            return Task.FromResult(new ApduResponse(Array.Empty<byte>(), statusWord));
+        }
     }
 
     private sealed class BioCapturingBackend(byte[] responseWithoutSw) : IPivBackend

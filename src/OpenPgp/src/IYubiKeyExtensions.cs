@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.OpenPgp;
@@ -29,36 +31,42 @@ public static class IYubiKeyExtensions
         /// <summary>
         ///     Creates and initializes an OpenPGP session, acquiring a SmartCard connection automatically.
         /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
-        /// <param name="configuration">Optional protocol configuration overrides.</param>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Token used to cancel the operation.</param>
         /// <returns>An initialized <see cref="OpenPgpSession" />. The caller owns its lifetime.</returns>
         public async Task<OpenPgpSession> CreateOpenPgpSessionAsync(
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                .ConfigureAwait(false);
-            try
-            {
-                var session = await OpenPgpSession.CreateAsync(
-                        connection,
-                        configuration,
-                        scpKeyParams,
-                        cancellationToken)
-                    .ConfigureAwait(false);
+            var configuration = options?.ProtocolConfiguration;
+            var scpKeyParams = options?.ScpKeyParameters;
+            var preferredConnectionType = options?.PreferredConnectionType;
+            var firmwareVersionOverride = options?.FirmwareVersionOverride;
+            var transport = yubiKey.ResolveSessionTransport(
+                preferredConnectionType,
+                "OpenPGP",
+                ConnectionType.SmartCard);
 
-                // This entry point created the connection, so the session it returns is the only thing that
-                // can close it. A caller-created connection is never owned this way.
-                session.OwnConnection();
-                return session;
-            }
-            catch
-            {
-                await connection.DisposeAsync().ConfigureAwait(false);
-                throw;
-            }
+            return await yubiKey.CreateSessionOverTransportAsync(
+                    transport,
+                    async (connection, ct) =>
+                    {
+                        var session = await OpenPgpSession.CreateAsync(
+                                (ISmartCardConnection)connection,
+                                new SessionCreationOptions
+                                {
+                                    ProtocolConfiguration = configuration,
+                                    ScpKeyParameters = scpKeyParams,
+                                    PreferredConnectionType = transport,
+                                    FirmwareVersionOverride = firmwareVersionOverride
+                                },
+                                ct)
+                            .ConfigureAwait(false);
+                        session.OwnConnection();
+                        return session;
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -66,13 +74,11 @@ public static class IYubiKeyExtensions
         /// </summary>
         internal async Task<OpenPgpSession> CreateOpenPgpSessionAsync(
             ISmartCardConnection existingConnection,
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default) =>
             await OpenPgpSession.CreateAsync(
                     existingConnection,
-                    configuration,
-                    scpKeyParams,
+                    options,
                     cancellationToken)
                 .ConfigureAwait(false);
     }

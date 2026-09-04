@@ -3,6 +3,7 @@
 
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.YubiHsm.IntegrationTests.TestExtensions;
@@ -40,7 +41,7 @@ public static class HsmAuthTestStateExtensions
                 {
                     await using var resetSession = await HsmAuthSession.CreateAsync(
                             connection,
-                            configuration,
+                            new SessionCreationOptions { ProtocolConfiguration = configuration },
                             cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
 
@@ -49,8 +50,11 @@ public static class HsmAuthTestStateExtensions
 
                 await using var session = await HsmAuthSession.CreateAsync(
                         connection,
-                        configuration,
-                        scpKeyParams,
+                        new SessionCreationOptions
+                        {
+                            ProtocolConfiguration = configuration,
+                            ScpKeyParameters = scpKeyParams
+                        },
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 

@@ -52,7 +52,7 @@ public class PivPolicyTests
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Authentication,
             PivAlgorithm.EccP256,
-            PivPinPolicy.Never);
+            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Never });
 
         Assert.NotNull(publicKey);
 
@@ -87,7 +87,7 @@ public class PivPolicyTests
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Signature,
             PivAlgorithm.EccP256,
-            PivPinPolicy.Always);
+            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Always });
 
         Assert.NotNull(publicKey);
 

@@ -295,12 +295,12 @@ public class OathSessionTests
             HashAlgorithm = OathHashAlgorithm.Sha1,
             Secret = secret,
             Digits = 8,
-            Counter = 7
+            Counter = 7,
+            RequireTouch = true
         };
 
         await session.PutCredentialAsync(
             credential,
-            requireTouch: true,
             cancellationToken: TestContext.Current.CancellationToken);
 
         var putCommand = Assert.Single(connection.TransmittedCommands, command => command[1] == OathConstants.InsPut);

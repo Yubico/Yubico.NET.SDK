@@ -18,6 +18,7 @@ using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -73,7 +74,8 @@ public class IYubiKeyExtensionsTransportTests
             ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp);
 
         await Assert.ThrowsAsync<ConnectProbeException>(
-            () => device.CreateManagementSessionAsync(preferredConnection: ConnectionType.HidOtp, cancellationToken: Ct));
+            () => device.CreateManagementSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }, Ct));
 
         Assert.Equal(typeof(IOtpHidConnection), device.RequestedConnection);
     }
@@ -85,7 +87,8 @@ public class IYubiKeyExtensionsTransportTests
         var device = new SelectionProbeYubiKey(ConnectionType.HidOtp);
 
         await Assert.ThrowsAsync<NotSupportedException>(
-            () => device.CreateManagementSessionAsync(preferredConnection: ConnectionType.SmartCard, cancellationToken: Ct));
+            () => device.CreateManagementSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }, Ct));
 
         Assert.Null(device.RequestedConnection);
     }
@@ -102,7 +105,8 @@ public class IYubiKeyExtensionsTransportTests
             ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp);
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => device.CreateManagementSessionAsync(preferredConnection: invalid, cancellationToken: Ct));
+            () => device.CreateManagementSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = invalid }, Ct));
 
         Assert.Null(device.RequestedConnection);
     }
@@ -144,7 +148,8 @@ public class IYubiKeyExtensionsTransportTests
             .Returns(ConnectionType.HidFido, new FailingFidoConnection());
 
         await Assert.ThrowsAsync<SCardException>(() =>
-            device.CreateManagementSessionAsync(preferredConnection: ConnectionType.SmartCard, cancellationToken: Ct));
+            device.CreateManagementSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }, Ct));
 
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
@@ -173,8 +178,7 @@ public class IYubiKeyExtensionsTransportTests
 
         _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
             device.CreateManagementSessionAsync(
-                scpKeyParams: Scp03KeyParameters.Default,
-                cancellationToken: Ct));
+                new SessionCreationOptions { ScpKeyParameters = Scp03KeyParameters.Default }, Ct));
 
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
@@ -189,7 +193,8 @@ public class IYubiKeyExtensionsTransportTests
             .Returns(ConnectionType.HidFido, new FailingFidoConnection());
 
         _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
-            device.CreateManagementSessionAsync(preferredConnection: ConnectionType.SmartCard, cancellationToken: Ct));
+            device.CreateManagementSessionAsync(
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }, Ct));
 
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }

@@ -75,8 +75,7 @@ public static class KeyGeneration
             var publicKey = await session.GenerateKeyAsync(
                 slot,
                 algorithm,
-                pinPolicy,
-                touchPolicy,
+                new PivKeyCreationOptions { PinPolicy = pinPolicy, TouchPolicy = touchPolicy },
                 cancellationToken);
 
             var spki = publicKey.ExportSubjectPublicKeyInfo();

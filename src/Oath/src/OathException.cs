@@ -38,6 +38,8 @@ public enum OathFailureReason
 /// </summary>
 public class OathException : Exception
 {
+    // Existing alpha constructors provide default, custom-message, and inner-exception forms.
+#pragma warning disable RS0026
     /// <summary>
     ///     Gets the reason this exception was thrown.
     /// </summary>
@@ -86,6 +88,7 @@ public class OathException : Exception
         Reason = reason;
         StatusWord = statusWord;
     }
+#pragma warning restore RS0026
 
     private static string GetMessage(OathFailureReason reason, short? statusWord)
     {

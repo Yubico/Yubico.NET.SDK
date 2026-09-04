@@ -12,9 +12,7 @@ This file provides Claude-specific guidance for the Security Domain test infrast
 
 `IntegrationTests/TestExtensions/TestStateExtensions.cs`
 
-### Two Session Creation Patterns
-
-#### 1. Direct Session Creation
+### Session creation pattern
 
 ```csharp
 extension(YubiKeyTestState state)
@@ -31,75 +29,34 @@ extension(YubiKeyTestState state)
 **Use when:** Testing `SecurityDomainSession` behavior directly.
 
 **Implementation:**
-- Calls `state.Device.CreateSecurityDomainSessionAsync()` directly
-- Handles SD reset via separate unauthenticated session
-- Runs the reset session and the test session in sequence over one connection
-
-#### 2. DI Factory Session Creation
-
-```csharp
-extension(YubiKeyTestState state)
-{
-    // Simple form - builds ServiceProvider internally
-    public Task WithSecurityDomainSessionFromDIAsync(
-        bool resetBeforeUse,
-        Func<SecurityDomainSession, Task> action,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
-        CancellationToken cancellationToken = default)
-
-    // Custom ServiceProvider overload
-    public Task WithSecurityDomainSessionFromDIAsync(
-        bool resetBeforeUse,
-        Func<SecurityDomainSession, Task> action,
-        IServiceProvider serviceProvider,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
-        CancellationToken cancellationToken = default)
-}
-```
-
-**Use when:** Testing that the DI-registered factory creates working sessions.
-
-**Implementation:**
-- Simple form builds `ServiceCollection` + `ServiceProvider` internally
-- Registers `AddYubiKeySecurityDomain()` for the session factory
-- Resolves `SecurityDomainSessionFactory` and invokes with connection
-- Same reset pattern as direct creation
-- Provider is disposed after test completes
-
-**DI Pattern:**
-```csharp
-// Core device discovery uses the static YubiKeyManager.
-// The module DI extension only registers the SecurityDomain factory.
-services.AddYubiKeySecurityDomain();
-```
+- Borrows one SmartCard connection and calls `SecurityDomainSession.CreateAsync()` for each session
+- Handles SD reset via a separate unauthenticated session
+- Runs the reset session and the test session in sequence over that connection
 
 ### One connection, successive sessions
 
-Both extensions run the reset session and the test session over a single physical connection. No wrapper is needed: a session does not dispose a connection it did not create, so the reset session leaves the connection open for the test session, and `WithConnectionAsync` disposes it at the end.
+The helper runs the reset session and the test session over a single physical connection. No wrapper is needed: a session does not dispose a connection it did not create, so the reset session leaves the connection open for the test session, and `WithConnectionAsync` disposes it at the end.
 
-The reset session is scoped to its own `using` block deliberately. A connection hosts one live session at a time, so the reset session must be disposed before the test session is constructed.
+The reset session is scoped to its own disposal declaration deliberately. A connection hosts one live session at a time, so the reset session must be disposed before the test session is constructed.
 
 ## Unit vs Integration Test Separation
 
-### Unit Tests (DependencyInjectionTests.cs)
+### Session factory tests
 
 **What they test:**
-- Factory registration (`AddYubiKeySecurityDomain()`)
-- Singleton lifetime
-- Fluent API chaining
-- Delegate signature via reflection
+- Static factory and device-extension behavior
+- Connection ownership and initialization behavior
+- Protocol and response handling
 
 **What they DON'T test:**
 - Actual session creation (no connection)
 - SCP authentication (no hardware)
 - Protocol communication
 
-### Integration Tests (SecurityDomainSession_DependencyInjectionTests.cs)
+### Integration tests
 
 **What they test:**
-- End-to-end: DI container → Factory resolution → Session creation → Query
+- End-to-end: Connection → Session creation → Query
 - Configuration flows through factory correctly
 - SCP parameters work via factory
 - Unauthenticated session creation
@@ -127,22 +84,6 @@ The `ResetAsync()` method (in `SecurityDomainSession.cs:685`):
 [WithYubiKey(MinFirmware = "5.4.3")]
 public async Task TestName_Condition_ExpectedResult(YubiKeyTestState state) =>
     await state.WithSecurityDomainSessionAsync(
-        resetBeforeUse: true,
-        async session =>
-        {
-            // Arrange/Act/Assert
-        },
-        scpKeyParams: Scp03KeyParameters.Default,
-        cancellationToken: CancellationTokenSource.Token);
-```
-
-### DI Integration Test
-
-```csharp
-[SkippableTheory]
-[WithYubiKey(MinFirmware = "5.4.3")]
-public async Task Factory_Condition_ExpectedResult(YubiKeyTestState state) =>
-    await state.WithSecurityDomainSessionFromDIAsync(
         resetBeforeUse: true,
         async session =>
         {
@@ -195,4 +136,4 @@ Assert.Equal(expectedKeyCount, keyInfo.Count);
 2. **Don't reset between related sessions** - Use `resetBeforeUse: false` for second session in multi-session tests
 3. **CancellationToken in GetDataAsync** - Use named parameter: `GetDataAsync(0x66, cancellationToken: ct)`
 4. **Firmware checks** - SCP11 tests require `MinFirmware = "5.7.2"`
-5. **DI scope** - `AddYubiKeySecurityDomain()` only registers the SecurityDomain session factory; Core discovery uses static `YubiKeyManager`
+5. **Creation scope** - applet factories and Core discovery are static APIs; no applet dependency-injection helper exists

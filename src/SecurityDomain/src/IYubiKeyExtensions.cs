@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.SecurityDomain;
@@ -30,9 +31,7 @@ public static class IYubiKeyExtensions
         /// <summary>
         ///     Creates a new Security Domain session for the specified YubiKey.
         /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="firmwareVersion">Optional firmware version override.</param>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A new <see cref="SecurityDomainSession" /> instance.</returns>
         /// <remarks>
@@ -40,78 +39,56 @@ public static class IYubiKeyExtensions
         ///     Always use a <c>using</c> statement or call <see cref="IDisposable.Dispose" /> when finished.
         /// </remarks>
         /// <exception cref="SecureChannelException">
-        ///     <paramref name="scpKeyParams" /> was supplied and establishing the SCP secure channel failed.
+        ///     Secure-channel parameters were supplied and establishing the SCP secure channel failed.
         ///     The original failure is available as <see cref="Exception.InnerException" />.
         /// </exception>
         public async Task<SecurityDomainSession> CreateSecurityDomainSessionAsync(
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
-            FirmwareVersion? firmwareVersion = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                .ConfigureAwait(false);
-            try
-            {
-                var session = await SecurityDomainSession.CreateAsync(
-                        connection,
-                        configuration,
-                        scpKeyParams,
-                        firmwareVersion,
-                        cancellationToken)
-                    .ConfigureAwait(false);
+            var configuration = options?.ProtocolConfiguration;
+            var scpKeyParams = options?.ScpKeyParameters;
+            var preferredConnectionType = options?.PreferredConnectionType;
+            var firmwareVersionOverride = options?.FirmwareVersionOverride;
+            var transport = yubiKey.ResolveSessionTransport(
+                preferredConnectionType,
+                "Security Domain",
+                ConnectionType.SmartCard);
 
-                // This entry point created the connection, so the session it returns is the only thing that
-                // can close it. A caller-created connection is never owned this way.
-                session.OwnConnection();
-                return session;
-            }
-            catch
-            {
-                await connection.DisposeAsync().ConfigureAwait(false);
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Creates a new Security Domain session using an existing connection.
-        /// </summary>
-        /// <param name="existingConnection">An existing SmartCard connection to use.</param>
-        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="firmwareVersion">Optional firmware version override.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>A new <see cref="SecurityDomainSession" /> instance.</returns>
-        /// <remarks>
-        ///     The session does NOT own the provided connection. The caller is responsible for
-        ///     managing the connection lifecycle.
-        /// </remarks>
-        internal async Task<SecurityDomainSession> CreateSecurityDomainSessionAsync(
-            ISmartCardConnection existingConnection,
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
-            FirmwareVersion? firmwareVersion = null,
-            CancellationToken cancellationToken = default) =>
-            await SecurityDomainSession.CreateAsync(
-                    existingConnection,
-                    configuration,
-                    scpKeyParams,
-                    firmwareVersion,
+            return await yubiKey.CreateSessionOverTransportAsync(
+                    transport,
+                    async (connection, ct) =>
+                    {
+                        var session = await SecurityDomainSession.CreateAsync(
+                                (ISmartCardConnection)connection,
+                                new SessionCreationOptions
+                                {
+                                    ProtocolConfiguration = configuration,
+                                    ScpKeyParameters = scpKeyParams,
+                                    PreferredConnectionType = transport,
+                                    FirmwareVersionOverride = firmwareVersionOverride
+                                },
+                                ct)
+                            .ConfigureAwait(false);
+                        session.OwnConnection();
+                        return session;
+                    },
                     cancellationToken)
                 .ConfigureAwait(false);
+        }
 
         /// <summary>
         ///     Gets key information from the Security Domain.
         /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A list of key information from the Security Domain.</returns>
         public async Task<IReadOnlyList<KeyInfo>> GetSecurityDomainKeyInfoAsync(
-            ScpKeyParameters? scpKeyParams = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            using var session = await yubiKey.CreateSecurityDomainSessionAsync(
-                    scpKeyParams,
+            await using var session = await yubiKey.CreateSecurityDomainSessionAsync(
+                    options,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 

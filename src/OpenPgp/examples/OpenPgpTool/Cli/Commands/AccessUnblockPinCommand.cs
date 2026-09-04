@@ -42,7 +42,7 @@ public sealed class AccessUnblockPinCommand : OpenPgpCommand<AccessUnblockPinCom
             return 1;
         }
 
-        await session.ResetPinAsync(resetCode.Memory, newPin.Memory, useAdmin: false);
+        await session.ResetPinUsingResetCodeAsync(resetCode.Memory, newPin.Memory);
         OutputHelpers.WriteSuccess("User PIN has been unblocked.");
         return 0;
     }

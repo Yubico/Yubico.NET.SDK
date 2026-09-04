@@ -61,62 +61,83 @@ public sealed record DeviceConfig
         EnabledCapabilities.TryGetValue(transport, out var caps) ? caps : null;
 
     /// <summary>Serializes to wire format (TLV-encoded bytes).</summary>
-    public Memory<byte> GetBytes(bool reboot, byte[]? currentLockCode, byte[]? newLockCode)
+    internal Memory<byte> GetBytes(SetDeviceConfigOptions? options = null)
     {
+        bool reboot = options?.Reboot ?? false;
+        ReadOnlyMemory<byte>? currentLockCode = options?.CurrentLockCode;
+        ReadOnlyMemory<byte>? newLockCode = options?.NewLockCode;
         var values = new Dictionary<int, byte[]?>();
+        byte[]? currentLockCodeCopy = null;
+        byte[]? newLockCodeCopy = null;
 
-        if (reboot)
-            values.Add(TagReboot, null);
-
-        if (currentLockCode is not null)
-            values.Add(TagUnlock, currentLockCode);
-
-        // USB capabilities (16-bit big-endian)
-        if (EnabledCapabilities.TryGetValue(Transport.Usb, out var usbEnabled))
-            values.Add(TagUsbEnabled, [(byte)(usbEnabled >> 8), (byte)usbEnabled]);
-
-        // NFC capabilities (16-bit big-endian)
-        if (EnabledCapabilities.TryGetValue(Transport.Nfc, out var nfcEnabled))
-            values.Add(TagNfcEnabled, [(byte)(nfcEnabled >> 8), (byte)nfcEnabled]);
-
-        // Auto-eject timeout (16-bit big-endian, unsigned)
-        if (AutoEjectTimeout.HasValue)
-        {
-            var timeout = AutoEjectTimeout.Value;
-            values.Add(TagAutoEjectTimeout, [(byte)(timeout >> 8), (byte)timeout]);
-        }
-
-        // Challenge-response timeout (8-bit unsigned)
-        if (ChallengeResponseTimeout.HasValue)
-            values.Add(TagChallengeResponseTimeout, [ChallengeResponseTimeout.Value]);
-
-        // Device flags (8-bit)
-        if (DeviceFlags.HasValue)
-            values.Add(TagDeviceFlags, [DeviceFlags.Value]);
-
-        if (newLockCode is not null)
-            values.Add(TagConfigurationLock, newLockCode);
-
-        if (NfcRestricted.HasValue)
-            values.Add(TagNfcRestricted, [NfcRestricted.Value ? (byte)0x01 : (byte)0x00]);
-
-        var tlvData = TlvHelper.EncodeDictionary(values);
         try
         {
-            if (tlvData.Length > 0xFF)
-                throw new InvalidOperationException("DeviceConfig exceeds maximum size (255 bytes)");
+            if (reboot)
+                values.Add(TagReboot, null);
 
-            // Prepend length byte
-            Memory<byte> result = new byte[tlvData.Length + 1];
-            result.Span[0] = (byte)tlvData.Length;
-            tlvData.Span.CopyTo(result.Span[1..]);
+            if (currentLockCode is not null)
+            {
+                currentLockCodeCopy = currentLockCode.Value.ToArray();
+                values.Add(TagUnlock, currentLockCodeCopy);
+            }
 
-            return result;
+            // USB capabilities (16-bit big-endian)
+            if (EnabledCapabilities.TryGetValue(Transport.Usb, out var usbEnabled))
+                values.Add(TagUsbEnabled, [(byte)(usbEnabled >> 8), (byte)usbEnabled]);
+
+            // NFC capabilities (16-bit big-endian)
+            if (EnabledCapabilities.TryGetValue(Transport.Nfc, out var nfcEnabled))
+                values.Add(TagNfcEnabled, [(byte)(nfcEnabled >> 8), (byte)nfcEnabled]);
+
+            // Auto-eject timeout (16-bit big-endian, unsigned)
+            if (AutoEjectTimeout.HasValue)
+            {
+                var timeout = AutoEjectTimeout.Value;
+                values.Add(TagAutoEjectTimeout, [(byte)(timeout >> 8), (byte)timeout]);
+            }
+
+            // Challenge-response timeout (8-bit unsigned)
+            if (ChallengeResponseTimeout.HasValue)
+                values.Add(TagChallengeResponseTimeout, [ChallengeResponseTimeout.Value]);
+
+            // Device flags (8-bit)
+            if (DeviceFlags.HasValue)
+                values.Add(TagDeviceFlags, [DeviceFlags.Value]);
+
+            if (newLockCode is not null)
+            {
+                newLockCodeCopy = newLockCode.Value.ToArray();
+                values.Add(TagConfigurationLock, newLockCodeCopy);
+            }
+
+            if (NfcRestricted.HasValue)
+                values.Add(TagNfcRestricted, [NfcRestricted.Value ? (byte)0x01 : (byte)0x00]);
+
+            var tlvData = TlvHelper.EncodeDictionary(values);
+            try
+            {
+                if (tlvData.Length > 0xFF)
+                    throw new InvalidOperationException("DeviceConfig exceeds maximum size (255 bytes)");
+
+                // Prepend length byte
+                Memory<byte> result = new byte[tlvData.Length + 1];
+                result.Span[0] = (byte)tlvData.Length;
+                tlvData.Span.CopyTo(result.Span[1..]);
+
+                return result;
+            }
+            finally
+            {
+                if (!tlvData.IsEmpty)
+                    CryptographicOperations.ZeroMemory(tlvData.Span);
+            }
         }
         finally
         {
-            if (!tlvData.IsEmpty)
-                CryptographicOperations.ZeroMemory(tlvData.Span);
+            if (currentLockCodeCopy is not null)
+                CryptographicOperations.ZeroMemory(currentLockCodeCopy);
+            if (newLockCodeCopy is not null)
+                CryptographicOperations.ZeroMemory(newLockCodeCopy);
         }
     }
 

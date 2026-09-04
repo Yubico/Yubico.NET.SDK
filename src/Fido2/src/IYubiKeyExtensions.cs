@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 
 namespace Yubico.YubiKit.Fido2;
 
@@ -63,17 +64,10 @@ public static class IYubiKeyExtensions
         /// <summary>
         /// Creates a FIDO2 session for interacting with a YubiKey asynchronously.
         /// </summary>
-        /// <param name="scpKeyParams">
-        /// Optional SCP (Secure Channel Protocol) key parameters for establishing
-        /// a secure session with the YubiKey device. Only applicable for SmartCard connections.
-        /// </param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="preferredConnection">
-        /// Optional explicit transport override. When <see langword="null"/> (the default), FIDO2 selects a
-        /// transport in its documented default order: <see cref="ConnectionType.HidFido"/>, then
-        /// <see cref="ConnectionType.SmartCard"/>. When set, it must be one of those two transports and
-        /// supported by the device; otherwise an <see cref="ArgumentException"/> (invalid transport) or
-        /// <see cref="NotSupportedException"/> (transport not available on this device) is thrown.
+        /// <param name="options">
+        /// Optional creation settings. FIDO2 selects HID FIDO, then SmartCard unless
+        /// <see cref="SessionCreationOptions.PreferredConnectionType" /> specifies a supported transport.
+        /// Secure-channel parameters force SmartCard when no preference is specified.
         /// </param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <returns>
@@ -83,10 +77,10 @@ public static class IYubiKeyExtensions
         /// <exception cref="NotSupportedException">
         /// Thrown if the YubiKey does not expose a FIDO-capable connection
         /// (<see cref="ConnectionType.HidFido"/> or <see cref="ConnectionType.SmartCard"/>), or if an
-        /// explicit <paramref name="preferredConnection"/> is valid for FIDO2 but not exposed by this device.
+        /// an explicitly preferred connection is valid for FIDO2 but not exposed by this device.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// Thrown if <paramref name="preferredConnection"/> is not a single concrete transport or is a
+        /// Thrown if the preferred connection is not a single concrete transport or is a
         /// transport FIDO2 cannot use (for example <see cref="ConnectionType.HidOtp"/>).
         /// </exception>
         /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
@@ -98,11 +92,12 @@ public static class IYubiKeyExtensions
         /// <item><description>SmartCard (CCID): Uses ISO 7816-4 APDUs over the FIDO2 AID (NFC, or USB on firmware 5.8.0+)</description></item>
         /// </list>
         /// When a device exposes both, the default selects HID FIDO; pass
-        /// <paramref name="preferredConnection"/> = <see cref="ConnectionType.SmartCard"/> to force SmartCard.
+        /// Set <see cref="SessionCreationOptions.PreferredConnectionType" /> to
+        /// <see cref="ConnectionType.SmartCard"/> to force SmartCard.
         /// </para>
         /// <para>
         /// SCP (Secure Channel Protocol) is supported only on SmartCard. Supplying
-        /// <paramref name="scpKeyParams"/> without an explicit override selects SmartCard automatically.
+        /// Secure-channel parameters without an explicit override select SmartCard automatically.
         /// Explicitly selecting HID FIDO with SCP parameters causes session initialization to throw
         /// <see cref="NotSupportedException"/> ("SCP is only supported on SmartCard protocols").
         /// </para>
@@ -116,24 +111,41 @@ public static class IYubiKeyExtensions
         /// // Create a session with SCP03 over SmartCard (force the SmartCard transport)
         /// using var scpKeys = Scp03KeyParameters.Default;
         /// await using var secureSession = await yubiKey.CreateFidoSessionAsync(
-        ///     scpKeyParams: scpKeys, preferredConnection: ConnectionType.SmartCard);
+        ///     new SessionCreationOptions
+        ///     {
+        ///         ScpKeyParameters = scpKeys,
+        ///         PreferredConnectionType = ConnectionType.SmartCard
+        ///     });
         /// </code>
         /// </example>
         public async Task<FidoSession> CreateFidoSessionAsync(
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
-            ConnectionType? preferredConnection = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
+            var configuration = options?.ProtocolConfiguration;
+            var scpKeyParams = options?.ScpKeyParameters;
+            var preferredConnectionType = options?.PreferredConnectionType;
+            var firmwareVersionOverride = options?.FirmwareVersionOverride;
             var transport = yubiKey.ResolveFidoSessionTransport(
-                scpKeyParams is not null && preferredConnection is null ? ConnectionType.SmartCard : preferredConnection);
+                scpKeyParams is not null && preferredConnectionType is null
+                    ? ConnectionType.SmartCard
+                    : preferredConnectionType);
 
             return await yubiKey.CreateSessionOverTransportAsync(
                     transport,
                     async (connection, ct) =>
                     {
                         var session = await FidoSession
-                            .CreateAsync(connection, configuration, scpKeyParams, cancellationToken: ct)
+                            .CreateAsync(
+                                connection,
+                                new SessionCreationOptions
+                                {
+                                    ProtocolConfiguration = configuration,
+                                    ScpKeyParameters = scpKeyParams,
+                                    PreferredConnectionType = transport,
+                                    FirmwareVersionOverride = firmwareVersionOverride
+                                },
+                                ct)
                             .ConfigureAwait(false);
 
                         // This entry point opened the connection, so the session it returns is the only thing
@@ -144,19 +156,6 @@ public static class IYubiKeyExtensions
                     cancellationToken)
                 .ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// Source-compatibility overload preserving the pre-Phase-38 positional shape
-        /// (<c>scpKeyParams, configuration, cancellationToken</c>); forwards using the default transport order.
-        /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters (SmartCard only).</param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-        public Task<FidoSession> CreateFidoSessionAsync(
-            ScpKeyParameters? scpKeyParams,
-            ProtocolConfiguration? configuration,
-            CancellationToken cancellationToken) =>
-            yubiKey.CreateFidoSessionAsync(scpKeyParams, configuration, null, cancellationToken);
 
         /// <summary>
         /// Resolves the single transport selected for FIDO2.

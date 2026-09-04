@@ -305,8 +305,11 @@ public class PivSessionTests
         _ = await session.GenerateKeyAsync(
             PivSlot.Signature,
             PivAlgorithm.EccP256,
-            PivPinPolicy.Once,
-            PivTouchPolicy.Never,
+            new PivKeyCreationOptions
+            {
+                PinPolicy = PivPinPolicy.Once,
+                TouchPolicy = PivTouchPolicy.Never
+            },
             TestContext.Current.CancellationToken);
 
         var command = LastCommand(connection);

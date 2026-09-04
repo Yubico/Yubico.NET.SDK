@@ -42,9 +42,9 @@ public abstract class Kdf : IDisposable
     ///     Derives PIN bytes from the given UTF-8 PIN bytes for the specified PIN type.
     /// </summary>
     /// <param name="pw">The PIN type (User, Reset, or Admin).</param>
-    /// <param name="pinUtf8Bytes">The PIN as UTF-8 encoded bytes.</param>
+    /// <param name="pinUtf8">The PIN as UTF-8 encoded bytes.</param>
     /// <returns>The derived PIN bytes.</returns>
-    public abstract byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8Bytes);
+    public abstract byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8);
 
     /// <summary>
     ///     Serializes the KDF configuration to its wire format (concatenated TLVs).
@@ -83,8 +83,8 @@ public sealed class KdfNone : Kdf
     public override int Algorithm => 0;
 
     /// <inheritdoc />
-    public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8Bytes) =>
-        pinUtf8Bytes.ToArray();
+    public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8) =>
+        pinUtf8.ToArray();
 
     /// <inheritdoc />
     public override byte[] ToBytes()
@@ -206,14 +206,14 @@ public sealed class KdfIterSaltedS2k : Kdf
         };
 
     /// <inheritdoc />
-    public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8Bytes)
+    public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8)
     {
         var salt = GetSalt(pw);
 
-        // data = salt + pinUtf8Bytes
-        var data = new byte[salt.Length + pinUtf8Bytes.Length];
+        // data = salt + pinUtf8
+        var data = new byte[salt.Length + pinUtf8.Length];
         salt.Span.CopyTo(data);
-        pinUtf8Bytes.CopyTo(data.AsSpan(salt.Length));
+        pinUtf8.CopyTo(data.AsSpan(salt.Length));
 
         try
         {

@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Tests.Shared;
 
+using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 public class HsmAuthSessionByteLevelTests
@@ -40,7 +41,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection(OkResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         await session.PutCredentialSymmetricAsync(
@@ -75,7 +76,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         using var keys = await session.CalculateSessionKeysSymmetricAsync(
@@ -108,7 +109,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
         var commandCount = connection.TransmittedCommands.Count;
         var touchCallbackInvoked = false;
@@ -134,7 +135,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
         var commandCount = connection.TransmittedCommands.Count;
         var touchCallbackInvoked = false;
@@ -160,7 +161,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var challenge = await session.GetChallengeAsync(
@@ -179,7 +180,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         await session.GetChallengeAsync(
@@ -198,7 +199,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 7, 1),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 7, 1) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         await session.GetChallengeAsync(
@@ -219,7 +220,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection([0x63, 0xC2]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.DeleteCredentialAsync(

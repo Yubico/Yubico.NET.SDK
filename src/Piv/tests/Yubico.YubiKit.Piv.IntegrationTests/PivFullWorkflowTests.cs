@@ -55,7 +55,7 @@ public class PivFullWorkflowTests
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Signature,
             PivAlgorithm.EccP256,
-            PivPinPolicy.Once);
+            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
 
         Assert.NotNull(publicKey);
         Assert.IsType<ECPublicKey>(publicKey);

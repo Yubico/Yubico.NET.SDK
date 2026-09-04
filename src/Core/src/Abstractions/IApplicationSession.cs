@@ -18,7 +18,16 @@ namespace Yubico.YubiKit.Core.Abstractions;
 
 public interface IApplicationSession : IDisposable, IAsyncDisposable
 {
+    /// <summary>
+    ///     Gets the effective firmware version used to configure the application protocol and evaluate features.
+    ///     This is the detected applet or device version unless session creation explicitly supplied a firmware
+    ///     version override.
+    /// </summary>
     FirmwareVersion FirmwareVersion { get; }
+
+    /// <summary>Gets the type of connection used by this session.</summary>
+    ConnectionType ConnectionType { get; }
+
     /// <summary>
     ///     Gets a value indicating whether the session has initialized its application protocol.
     ///     Returns <c>false</c> once disposal begins.

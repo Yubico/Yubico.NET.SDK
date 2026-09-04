@@ -1,0 +1,98 @@
+#nullable enable
+
+Yubico.YubiKit.SecurityDomain.CaIdentifier
+Yubico.YubiKit.SecurityDomain.CaIdentifier.<Clone>$() -> Yubico.YubiKit.SecurityDomain.CaIdentifier!
+Yubico.YubiKit.SecurityDomain.CaIdentifier.CaIdentifier(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference KeyReference, System.ReadOnlyMemory<byte> Identifier) -> void
+Yubico.YubiKit.SecurityDomain.CaIdentifier.Deconstruct(out Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference KeyReference, out System.ReadOnlyMemory<byte> Identifier) -> void
+Yubico.YubiKit.SecurityDomain.CaIdentifier.Equals(Yubico.YubiKit.SecurityDomain.CaIdentifier? other) -> bool
+Yubico.YubiKit.SecurityDomain.CaIdentifier.Identifier.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.SecurityDomain.CaIdentifier.Identifier.init -> void
+Yubico.YubiKit.SecurityDomain.CaIdentifier.KeyReference.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference
+Yubico.YubiKit.SecurityDomain.CaIdentifier.KeyReference.init -> void
+Yubico.YubiKit.SecurityDomain.CaIdentifierType
+Yubico.YubiKit.SecurityDomain.CaIdentifierType.Klcc = 2 -> Yubico.YubiKit.SecurityDomain.CaIdentifierType
+Yubico.YubiKit.SecurityDomain.CaIdentifierType.Kloc = 1 -> Yubico.YubiKit.SecurityDomain.CaIdentifierType
+Yubico.YubiKit.SecurityDomain.CaIdentifierType.None = 0 -> Yubico.YubiKit.SecurityDomain.CaIdentifierType
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.ClearAllowListAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.DeleteKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, bool deleteLast = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.GenerateKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, byte replaceKvn = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Cryptography.ECPublicKey!>!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.GetCaIdentifiersAsync(Yubico.YubiKit.SecurityDomain.CaIdentifierType identifierTypes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.SecurityDomain.CaIdentifier!>!>!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.GetCardRecognitionDataAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.GetCertificatesAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<System.Security.Cryptography.X509Certificates.X509Certificate2!>!>!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.GetDataAsync(int dataObject, System.ReadOnlyMemory<byte> requestData = default(System.ReadOnlyMemory<byte>), int expectedResponseLength = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.GetKeyInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo!>!>!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.PutKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, Yubico.YubiKit.Core.Cryptography.ECPrivateKey! privateKey, int replaceKvn = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.PutKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, Yubico.YubiKit.Core.Cryptography.ECPublicKey! publicKey, int replaceKvn = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.PutKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys! staticKeys, int replaceKvn = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.StoreAllowListAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.Collections.Generic.IReadOnlyCollection<string!>! serials, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.StoreCaIssuerAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.ReadOnlyMemory<byte> ski, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.StoreCertificatesAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.Collections.Generic.IReadOnlyList<System.Security.Cryptography.X509Certificates.X509Certificate2!>! certificates, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.ISecurityDomainSession.StoreDataAsync(System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.IYubiKeyExtensions
+Yubico.YubiKit.SecurityDomain.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!)
+Yubico.YubiKit.SecurityDomain.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CreateSecurityDomainSessionAsync(Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.SecurityDomain.SecurityDomainSession!>!
+Yubico.YubiKit.SecurityDomain.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).GetSecurityDomainKeyInfoAsync(Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo!>!>!
+Yubico.YubiKit.SecurityDomain.KeyInfo
+Yubico.YubiKit.SecurityDomain.KeyInfo.<Clone>$() -> Yubico.YubiKit.SecurityDomain.KeyInfo!
+Yubico.YubiKit.SecurityDomain.KeyInfo.Components.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent>!
+Yubico.YubiKit.SecurityDomain.KeyInfo.Components.init -> void
+Yubico.YubiKit.SecurityDomain.KeyInfo.Deconstruct(out Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference KeyReference, out System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent>! Components) -> void
+Yubico.YubiKit.SecurityDomain.KeyInfo.Equals(Yubico.YubiKit.SecurityDomain.KeyInfo? other) -> bool
+Yubico.YubiKit.SecurityDomain.KeyInfo.KeyInfo(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference KeyReference, System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent>! Components) -> void
+Yubico.YubiKit.SecurityDomain.KeyInfo.KeyReference.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference
+Yubico.YubiKit.SecurityDomain.KeyInfo.KeyReference.init -> void
+Yubico.YubiKit.SecurityDomain.SecureChannelException
+Yubico.YubiKit.SecurityDomain.SecureChannelException.SecureChannelException(System.Exception! innerException) -> void
+Yubico.YubiKit.SecurityDomain.SecureChannelException.SecureChannelException(string! message, System.Exception! innerException) -> void
+Yubico.YubiKit.SecurityDomain.SecureChannelException.StatusWord.get -> short?
+Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent
+Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.Deconstruct(out byte Tag, out byte Value) -> void
+Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.Equals(Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent other) -> bool
+Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.SecurityDomainKeyInfoComponent() -> void
+Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.SecurityDomainKeyInfoComponent(byte Tag, byte Value) -> void
+Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.Tag.get -> byte
+Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.Tag.init -> void
+Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.Value.get -> byte
+Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.Value.init -> void
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.ClearAllowListAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.DeleteKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, bool deleteLast = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.GenerateKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, byte replaceKvn = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Cryptography.ECPublicKey!>!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.GetCaIdentifiersAsync(Yubico.YubiKit.SecurityDomain.CaIdentifierType identifierTypes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.SecurityDomain.CaIdentifier!>!>!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.GetCardRecognitionDataAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.GetCertificatesAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<System.Security.Cryptography.X509Certificates.X509Certificate2!>!>!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.GetDataAsync(int dataObject, System.ReadOnlyMemory<byte> requestData = default(System.ReadOnlyMemory<byte>), int expectedResponseLength = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.GetKeyInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo!>!>!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.PutKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, Yubico.YubiKit.Core.Cryptography.ECPrivateKey! privateKey, int replaceKvn = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.PutKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, Yubico.YubiKit.Core.Cryptography.ECPublicKey! publicKey, int replaceKvn = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.PutKeyAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys! staticKeys, int replaceKvn = 0, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.StoreAllowListAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.Collections.Generic.IReadOnlyCollection<string!>! serials, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.StoreCaIssuerAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.ReadOnlyMemory<byte> ski, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.StoreCertificatesAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.KeyReference keyReference, System.Collections.Generic.IReadOnlyList<System.Security.Cryptography.X509Certificates.X509Certificate2!>! certificates, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.SecurityDomain.SecurityDomainSession.StoreDataAsync(System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+override Yubico.YubiKit.SecurityDomain.CaIdentifier.Equals(object? obj) -> bool
+override Yubico.YubiKit.SecurityDomain.CaIdentifier.GetHashCode() -> int
+override Yubico.YubiKit.SecurityDomain.CaIdentifier.ToString() -> string!
+override Yubico.YubiKit.SecurityDomain.KeyInfo.Equals(object? obj) -> bool
+override Yubico.YubiKit.SecurityDomain.KeyInfo.GetHashCode() -> int
+override Yubico.YubiKit.SecurityDomain.KeyInfo.ToString() -> string!
+override Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.GetHashCode() -> int
+static Yubico.YubiKit.SecurityDomain.CaIdentifier.operator !=(Yubico.YubiKit.SecurityDomain.CaIdentifier? left, Yubico.YubiKit.SecurityDomain.CaIdentifier? right) -> bool
+static Yubico.YubiKit.SecurityDomain.CaIdentifier.operator ==(Yubico.YubiKit.SecurityDomain.CaIdentifier? left, Yubico.YubiKit.SecurityDomain.CaIdentifier? right) -> bool
+static Yubico.YubiKit.SecurityDomain.IYubiKeyExtensions.CreateSecurityDomainSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.SecurityDomain.SecurityDomainSession!>!
+static Yubico.YubiKit.SecurityDomain.IYubiKeyExtensions.GetSecurityDomainKeyInfoAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.SecurityDomain.KeyInfo!>!>!
+static Yubico.YubiKit.SecurityDomain.KeyInfo.operator !=(Yubico.YubiKit.SecurityDomain.KeyInfo? left, Yubico.YubiKit.SecurityDomain.KeyInfo? right) -> bool
+static Yubico.YubiKit.SecurityDomain.KeyInfo.operator ==(Yubico.YubiKit.SecurityDomain.KeyInfo? left, Yubico.YubiKit.SecurityDomain.KeyInfo? right) -> bool
+static Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.operator !=(Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent left, Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent right) -> bool
+static Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.operator ==(Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent left, Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent right) -> bool
+static Yubico.YubiKit.SecurityDomain.SecurityDomainSession.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection! connection, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.SecurityDomain.SecurityDomainSession!>!
+static readonly Yubico.YubiKit.SecurityDomain.SecurityDomainSession.FeatureAllowList -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.SecurityDomain.SecurityDomainSession.FeatureKeyAttestation -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.SecurityDomain.SecurityDomainSession.FeatureScp03 -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.SecurityDomain.SecurityDomainSession.FeatureScp11 -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.SecurityDomain.SecurityDomainSession.FeatureSecurityDomain -> Yubico.YubiKit.Core.Devices.Feature
+~override Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.Equals(object obj) -> bool
+~override Yubico.YubiKit.SecurityDomain.SecurityDomainKeyInfoComponent.ToString() -> string

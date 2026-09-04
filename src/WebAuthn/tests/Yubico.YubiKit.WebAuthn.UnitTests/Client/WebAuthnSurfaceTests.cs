@@ -44,9 +44,8 @@ public class WebAuthnSurfaceTests
     public void WebAuthnClient_BackendConstructor_IsNotPublic()
     {
         var backendConstructor = Assert.Single(
-            typeof(WebAuthnClient)
-                .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(c => c.GetParameters()[0].ParameterType.Name == "IWebAuthnBackend"));
+            typeof(WebAuthnClient).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance),
+            c => c.GetParameters()[0].ParameterType.Name == "IWebAuthnBackend");
 
         Assert.False(backendConstructor.IsPublic);
     }
@@ -70,10 +69,10 @@ public class WebAuthnSurfaceTests
     [InlineData("MakeCredentialStreamAsync")]
     [InlineData("GetAssertionStreamAsync")]
     public void StatusStreamMethods_DoNotExist(string methodName) =>
-        Assert.Empty(typeof(WebAuthnClient)
-            .GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
-                        BindingFlags.Instance | BindingFlags.Static)
-            .Where(m => m.Name == methodName));
+        Assert.DoesNotContain(
+            typeof(WebAuthnClient).GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
+                                              BindingFlags.Instance | BindingFlags.Static),
+            m => m.Name == methodName);
 
     [Fact]
     public void StatusTypes_AndTheirNamespace_DoNotExist()

@@ -32,7 +32,7 @@
 - `ApplicationSession` centralizes firmware, initialization, authentication, and protocol ownership; prefer `IsSupported(...)` / `EnsureSupports(...)` over duplicating firmware gates.
 - Platform interop belongs under `src/Core/src/PlatformInterop/{Windows,MacOS,Linux,Desktop}` with safe handles and `SdkPlatformInfo` platform selection.
 - FIDO2 over USB primarily uses HID FIDO. SmartCard/CCID FIDO2 is supported over NFC and over USB when the FIDO2 AID is exposed; USB SmartCard FIDO2 requires firmware 5.8.0+.
-- `TlvBuilder` and `DisposableTlvList` must be disposed.
+- `Tlv` and `DisposableTlvList` must be disposed. `TlvHelper.EncodeList` does not dispose its inputs; `EncodeAndDisposeList` does.
 - Listener/native retry loops must block, back off, exit, or throttle on every failure path; add no-hardware fault-injection tests for persistent native errors.
 
 ## Hardware And Integration Tests

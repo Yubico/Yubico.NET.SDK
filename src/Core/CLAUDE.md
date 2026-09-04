@@ -132,27 +132,17 @@ var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oce
 
 ### TLV Processing
 
-Use `TlvHelper` and `Tlv` for parsing/constructing TLV data:
+The canonical usage examples for `DecodeList`, `TryFindValue`, `Tlv`, `EncodeList`, nested encoding, and
+`EncodeAndDisposeList` are in the [Core README](README.md#tlv-processing). Keep the full examples there rather
+than duplicating them in this contributor guide.
 
-```csharp
-// Parsing
-var tlvs = TlvHelper.ParseMany(data);
-var specificTlv = tlvs.FirstOrDefault(t => t.Tag == 0x9F);
-
-// Construction
-using var builder = new TlvBuilder();
-builder.Add(0x9F, value);
-var encoded = builder.ToArray();
-
-// Nested TLV
-using var builder = new TlvBuilder();
-using (var nested = builder.AddNested(0xE0))
-{
-    nested.Add(0x83, kidKvn);
-}
-```
-
-**Important:** `DisposableTlvList` and `TlvBuilder` must be disposed to avoid memory leaks.
+Contributor rules:
+- Dispose every `Tlv` and `DisposableTlvList`. `EncodeAndDisposeList` disposes the `Tlv` inputs passed to that
+  call; `EncodeList` does not.
+- Neither encoding method clears caller-owned source buffers. `EncodeAndDisposeList` also does not clear its
+  returned encoding or a returned encoding used as an intermediate value in nested TLV construction.
+- Classify buffers by semantics. For sensitive nested data, clear source buffers plus returned and intermediate
+  encodings in `finally`; public or nonsecret encodings do not require special clearing.
 
 ### Platform Interop Pattern
 
@@ -427,7 +417,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 1. **APDU Size Limits**: YubiKey Neo uses 254-byte max; YubiKey 4+ uses extended APDUs up to 2048 bytes
 2. **Connection Ownership**: whoever CREATES a connection disposes it with `await using`. Protocols and sessions are pure users — `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol`, and direct `Session.CreateAsync(connection)` never dispose a connection they were handed. The one exception is deliberate and internal: an `IYubiKey.Create<App>SessionAsync` convenience entry point opens a connection the caller never sees, so it calls `ApplicationSession.OwnConnection()` to hand that connection's lifetime to the session it returns. A leaked connection can retain the physical-device lease and block later opens; no finalizer releases it
 3. **SCP Key Zeroing**: Always zero SCP keys after use; `StaticKeys` implements `IDisposable`
-4. **TLV Disposal**: `TlvBuilder` and `DisposableTlvList` must be disposed
+4. **TLV Disposal**: `Tlv` and `DisposableTlvList` must be disposed
 5. **Platform-Specific Behavior**: PC/SC APIs behave differently across platforms; test on all three
 6. **Chained Response Assembly**: `INS_SEND_REMAINING` (0xC0) is used by default; some apps use custom values
 7. **Access Tiers**: Applet sessions are the golden path. Raw sessions bypass applet checks but retain session ownership and overlap guards. Raw `IConnection` calls bypass both session and exchange guards; do not interleave them, and dispose/reopen after an interrupted exchange. See [Raw Access Tiers](../../docs/architecture/raw-access-tiers.md)

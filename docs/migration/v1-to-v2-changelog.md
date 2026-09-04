@@ -84,3 +84,10 @@
 - `api-added.txt`, `api-removed.txt`, and `package-changes.txt` showed no public API or package/namespace-shape changes for this range.
 - No migration guide or map updates were needed; the existing `v1-to-v2.md` and `v1-to-v2-map.yml` guidance is unaffected.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `6e8cf371214436beb36755abf0c82522d481f603`.
+
+## 2026-09-03 - Curve25519 private-value validation
+
+- Manually added for this focused correction: Core now accepts any exactly 32-byte X25519 private value, including RFC 7748 values whose stored bytes are not pre-clamped, and preserves those bytes across PKCS#8 import and export. Scalar masking remains the responsibility of the X25519 operation.
+- `Curve25519PrivateKey.CreateFromValue` now rejects incompatible key types and Curve25519 values whose length is not exactly 32 bytes with `ArgumentException`.
+- Accessing `Curve25519PrivateKey.PrivateKey` after disposal now throws `ObjectDisposedException`
+  instead of exposing the zeroed owned buffer.

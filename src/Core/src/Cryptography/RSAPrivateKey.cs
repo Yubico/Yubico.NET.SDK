@@ -31,7 +31,8 @@ public sealed class RSAPrivateKey : PrivateKey
     /// Gets the RSA cryptographic parameters required for the private key operations.
     /// </summary>
     /// <value>
-    /// A structure containing RSA parameters, including Modulus, Exponent, D, P, Q, DP, DQ, and InverseQ values.
+    /// A structure containing the RSA parameters. The array fields are owned by this object, must
+    /// not be modified or cleared by the caller, and are cleared when the object is disposed.
     /// </value>
     /// <remarks>
     /// This property provides access to the fundamental mathematical components needed for RSA private key operations.
@@ -50,12 +51,14 @@ public sealed class RSAPrivateKey : PrivateKey
     /// <inheritdoc />
     public override KeyType KeyType => KeyDefinition.KeyType;
 
-    private RSAPrivateKey(RSAParameters parameters)
+    private RSAPrivateKey(
+        RSAParameters parameters,
+        Action<RSAParameters>? parametersCopied = null)
     {
         var keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
 
-        Parameters = parameters.NormalizeParameters();
         KeyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);
+        Parameters = parameters.NormalizeParameters(parametersCopied);
     }
 
     /// <summary>
@@ -88,10 +91,11 @@ public sealed class RSAPrivateKey : PrivateKey
     /// PKCS#8 private key.
     /// </summary>
     /// <param name="encodedKey">
-    /// The DER-encoded PKCS#8 private key.
+    /// The borrowed DER-encoded PKCS#8 private key. This method copies the decoded key material and
+    /// does not modify or clear the input.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="RSAPrivateKey"/>.
+    /// A new disposable key that owns and clears its copied private-key material.
     /// </returns>
     /// <exception cref="CryptographicException">
     /// Thrown if the private key is invalid.
@@ -100,9 +104,31 @@ public sealed class RSAPrivateKey : PrivateKey
     /// When the RSA key length is not supported.
     /// </exception>
     public static RSAPrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> encodedKey)
+        => CreateFromPkcs8(encodedKey, parametersDecoded: null);
+
+    // Test observation hook. The callback must not retain or mutate the decoded private arrays.
+    internal static RSAPrivateKey CreateFromPkcs8(
+        ReadOnlyMemory<byte> encodedKey,
+        Action<RSAParameters>? parametersDecoded)
     {
         var parameters = AsnPrivateKeyDecoder.CreateRSAParameters(encodedKey);
-        return new RSAPrivateKey(parameters);
+        try
+        {
+            parametersDecoded?.Invoke(parameters);
+            return new RSAPrivateKey(parameters);
+        }
+        finally
+        {
+            // On success the constructor copied these values; on failure this factory is
+            // unwinding. Either way, the decoder's temporary private arrays are factory-owned.
+            // CreateFromParameters is deliberately different because its input remains caller-owned.
+            CryptographicOperations.ZeroMemory(parameters.D);
+            CryptographicOperations.ZeroMemory(parameters.P);
+            CryptographicOperations.ZeroMemory(parameters.Q);
+            CryptographicOperations.ZeroMemory(parameters.DP);
+            CryptographicOperations.ZeroMemory(parameters.DQ);
+            CryptographicOperations.ZeroMemory(parameters.InverseQ);
+        }
     }
 
     /// <summary>
@@ -110,10 +136,17 @@ public sealed class RSAPrivateKey : PrivateKey
     /// <paramref name="parameters"/>.
     /// </summary>
     /// <param name="parameters">
-    /// The RSA parameters containing the private key data.
+    /// The borrowed RSA parameters to copy. The caller retains ownership of every input array and
+    /// remains responsible for clearing sensitive arrays.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="RSAPrivateKey"/>.
+    /// A new disposable key that owns and clears its copied private-key material.
     /// </returns>
     public static RSAPrivateKey CreateFromParameters(RSAParameters parameters) => new(parameters);
+
+    // Test observation hook. The callback must not retain or mutate the copied arrays.
+    internal static RSAPrivateKey CreateFromParameters(
+        RSAParameters parameters,
+        Action<RSAParameters>? parametersCopied) =>
+        new(parameters, parametersCopied);
 }

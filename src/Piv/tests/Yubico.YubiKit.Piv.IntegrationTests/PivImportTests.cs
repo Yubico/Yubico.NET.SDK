@@ -128,26 +128,33 @@ public class PivImportTests
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
-        // Generate Ed25519 private key (32 random bytes)
         var ed25519Bytes = new byte[32];
         RandomNumberGenerator.Fill(ed25519Bytes);
-        var privateKey = Curve25519PrivateKey.CreateFromValue(ed25519Bytes, Core.Cryptography.KeyType.Ed25519);
+        try
+        {
+            using var privateKey = Curve25519PrivateKey.CreateFromValue(
+                ed25519Bytes,
+                Core.Cryptography.KeyType.Ed25519);
 
-        var detectedAlgorithm = await session.ImportKeyAsync(
-            PivSlot.Authentication,
-            privateKey);
+            var detectedAlgorithm = await session.ImportKeyAsync(
+                PivSlot.Authentication,
+                privateKey);
 
-        Assert.Equal(PivAlgorithm.Ed25519, detectedAlgorithm);
+            Assert.Equal(PivAlgorithm.Ed25519, detectedAlgorithm);
 
-        // Sign with YubiKey
-        await session.VerifyPinAsync(DefaultPin);
-        var dataToSign = SHA256.HashData("Ed25519 import test"u8);
-        var signature = await session.SignOrDecryptAsync(
-            PivSlot.Authentication,
-            PivAlgorithm.Ed25519,
-            dataToSign);
+            await session.VerifyPinAsync(DefaultPin);
+            var dataToSign = SHA256.HashData("Ed25519 import test"u8);
+            var signature = await session.SignOrDecryptAsync(
+                PivSlot.Authentication,
+                PivAlgorithm.Ed25519,
+                dataToSign);
 
-        Assert.False(signature.IsEmpty);
+            Assert.False(signature.IsEmpty);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(ed25519Bytes);
+        }
     }
 
     [SkippableTheory]
@@ -158,23 +165,28 @@ public class PivImportTests
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
 
-        // Generate X25519 private key with proper RFC 7748 bit clamping
-        var x25519Bytes = new byte[32];
-        RandomNumberGenerator.Fill(x25519Bytes);
-        x25519Bytes[0] &= 248;   // Clear bits 0, 1, 2
-        x25519Bytes[31] &= 127;  // Clear bit 255 (most significant)
-        x25519Bytes[31] |= 64;   // Set bit 254
-        var privateKey = Curve25519PrivateKey.CreateFromValue(x25519Bytes, Core.Cryptography.KeyType.X25519);
+        var x25519Bytes = Convert.FromHexString(
+            "77076D0A7318A57D3C16C17251B26645DF4C2F87EBC0992AB177FBA51DB92C2A");
+        try
+        {
+            using var privateKey = Curve25519PrivateKey.CreateFromValue(
+                x25519Bytes,
+                Core.Cryptography.KeyType.X25519);
 
-        var detectedAlgorithm = await session.ImportKeyAsync(
-            PivSlot.KeyManagement,
-            privateKey);
+            var detectedAlgorithm = await session.ImportKeyAsync(
+                PivSlot.KeyManagement,
+                privateKey);
 
-        Assert.Equal(PivAlgorithm.X25519, detectedAlgorithm);
+            Assert.Equal(PivAlgorithm.X25519, detectedAlgorithm);
 
-        // Verify slot metadata
-        var metadata = await session.GetSlotMetadataAsync(PivSlot.KeyManagement);
-        Assert.NotNull(metadata);
-        Assert.Equal(PivAlgorithm.X25519, metadata.Value.Algorithm);
+            // Verify slot metadata
+            var metadata = await session.GetSlotMetadataAsync(PivSlot.KeyManagement);
+            Assert.NotNull(metadata);
+            Assert.Equal(PivAlgorithm.X25519, metadata.Value.Algorithm);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(x25519Bytes);
+        }
     }
 }

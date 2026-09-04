@@ -24,6 +24,9 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// This sealed class encapsulates Curve25519 private key data and supports
 /// both Ed25519 and X25519 cryptographic operations.
 /// It also provides factory methods for creating instances from private key values or DER-encoded data.
+/// Imported private key bytes are copied and preserved unchanged. In particular, X25519 masking occurs
+/// when a cryptographic operation decodes the scalar as specified by RFC 7748, not when key bytes are
+/// imported, encoded, or exported.
 /// </remarks>
 public sealed class Curve25519PrivateKey : PrivateKey
 {
@@ -33,7 +36,7 @@ public sealed class Curve25519PrivateKey : PrivateKey
     public override KeyType KeyType => KeyDefinition.KeyType;
 
     /// <summary>
-    /// Gets the key definition associated with this RSA private key.
+    /// Gets the key definition associated with this Curve25519 private key.
     /// </summary>
     /// <value>
     /// A <see cref="KeyDefinition"/> object that describes the key's properties, including its type and length.
@@ -41,19 +44,36 @@ public sealed class Curve25519PrivateKey : PrivateKey
     public KeyDefinition KeyDefinition { get; }
 
     /// <summary>
-    /// Gets the bytes representing the private scalar value.
+    /// Gets the raw private key bytes exactly as imported.
     /// </summary>
-    /// <returns>A <see cref="ReadOnlyMemory{T}"/> containing the private scalar value.</returns>
-    public ReadOnlyMemory<byte> PrivateKey => _privateKey;
+    /// <value>
+    /// A borrowed read-only view of the key-owned bytes. The view remains valid until this object
+    /// is disposed. The caller must not attempt to modify or clear the underlying memory.
+    /// </value>
+    /// <exception cref="ObjectDisposedException">This object has been disposed.</exception>
+    public ReadOnlyMemory<byte> PrivateKey
+    {
+        get
+        {
+            ThrowIfDisposed();
+            return _privateKey;
+        }
+    }
 
     private Curve25519PrivateKey(
         ReadOnlyMemory<byte> privateKey,
         KeyType keyType)
     {
-        var keyDefinition = keyType.GetKeyDefinition();
-        if (keyDefinition.AlgorithmOid == Oids.X25519)
+        if (keyType is not (KeyType.X25519 or KeyType.Ed25519))
         {
-            AsnUtilities.VerifyX25519PrivateKey(privateKey.Span);
+            throw new ArgumentException("Only X25519 and Ed25519 are supported.", nameof(keyType));
+        }
+
+        var keyDefinition = keyType.GetKeyDefinition();
+
+        if (privateKey.Length != 32)
+        {
+            throw new ArgumentException("Curve25519 private keys must be exactly 32 bytes.", nameof(privateKey));
         }
 
         _privateKey = new byte[privateKey.Length];
@@ -81,15 +101,20 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// ASN.1 DER-encoded private key.
     /// </summary>
     /// <param name="pkcs8EncodedKey">
-    /// The ASN.1 DER-encoded private key.
+    /// The borrowed ASN.1 DER-encoded private key. This method copies the decoded private value and
+    /// does not modify or clear the input.
     /// </param>
     /// <returns>
-    /// A new instance of <see cref="Curve25519PrivateKey"/>.
+    /// A new disposable key that owns and clears its copied private-key material.
     /// </returns>
     /// <exception cref="ArgumentException">
     /// Thrown if the algorithm OID is not X25519 or Ed25519.
     /// </exception>
     /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
+    /// <remarks>
+    /// This method accepts version 0 PKCS#8 <c>PrivateKeyInfo</c>. RFC 5958 version value 1
+    /// <c>OneAsymmetricKey</c> is valid but unsupported.
+    /// </remarks>
     public static Curve25519PrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {
         (var privateKey, var keyType) = AsnPrivateKeyDecoder.GetCurve25519PrivateKeyData(pkcs8EncodedKey);
@@ -101,10 +126,13 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// Creates an instance of <see cref="Curve25519PrivateKey"/> from the given
     /// <paramref name="privateKey"/> and <paramref name="keyType"/>.
     /// </summary>
-    /// <param name="privateKey">The raw private key data. This is copied internally.</param>
+    /// <param name="privateKey">
+    /// The 32 borrowed raw private-key bytes. These are copied and preserved unchanged. The caller
+    /// retains ownership and remains responsible for clearing the input.
+    /// </param>
     /// <param name="keyType">The type of key this is.</param>
-    /// <returns>An instance of <see cref="Curve25519PrivateKey"/>.</returns>
-    /// <exception cref="CryptographicException">Thrown if privateKey does not match expected format.</exception>
+    /// <returns>A new disposable key that owns and clears its copied private-key material.</returns>
+    /// <exception cref="ArgumentException">Thrown if <paramref name="keyType"/> is not X25519 or Ed25519, or if <paramref name="privateKey"/> is not exactly 32 bytes.</exception>
     public static Curve25519PrivateKey CreateFromValue(ReadOnlyMemory<byte> privateKey, KeyType keyType) => new(privateKey, keyType);
 
 }

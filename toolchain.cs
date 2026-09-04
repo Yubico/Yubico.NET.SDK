@@ -116,19 +116,6 @@ using static SimpleExec.Command;
 const string ProjectPrefix = "Yubico.YubiKit.";
 // Matches <TargetFramework> in Directory.Build.props; used to locate MTP test executables.
 const string TestTargetFramework = "net10.0";
-string[] nativeAotSdkProjects =
-[
-    "src/Core/src/Yubico.YubiKit.Core.csproj",
-    "src/Fido2/src/Yubico.YubiKit.Fido2.csproj",
-    "src/Management/src/Yubico.YubiKit.Management.csproj",
-    "src/Oath/src/Yubico.YubiKit.Oath.csproj",
-    "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
-    "src/Piv/src/Yubico.YubiKit.Piv.csproj",
-    "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
-    "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
-    "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
-    "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
-];
 var repoRoot = GetRepoRoot();
 var solutionFile = "Yubico.YubiKit.sln";
 var configuration = "Release";
@@ -230,7 +217,8 @@ Target("native-aot-contract-qa", () =>
 {
     PrintHeader("Validating Native AOT support contract");
 
-    var failures = ValidateNativeAotContract(nativeAotSdkProjects);
+    var sdkProjects = DiscoverNativeAotSdkProjects();
+    var failures = ValidateNativeAotContract(sdkProjects);
     if (failures.Count > 0)
     {
         foreach (var failure in failures)
@@ -242,7 +230,8 @@ Target("native-aot-contract-qa", () =>
             $"Native AOT support contract validation failed with {failures.Count} issue(s)");
     }
 
-    PrintInfo("All 10 supported SDK libraries opt in and are anchored by the verification host");
+    PrintInfo(
+        $"All {sdkProjects.Length} supported SDK libraries opt in and are anchored by the verification host");
 });
 
 Target("build", DependsOn("test-infrastructure-qa", "native-aot-contract-qa"), () =>
@@ -1205,10 +1194,16 @@ string[] DiscoverProjects(string subdirectory, string nameFilter, string? additi
         .OrderBy(p => p)
         .ToArray();
 
-List<string> ValidateNativeAotContract(string[] expectedProjects)
-{
-    var failures = new List<string>();
-    var actualSdkProjects = Directory.GetFiles(Path.Combine(repoRoot, "src"), "*.csproj", SearchOption.AllDirectories)
+// Native AOT support covers the published SDK libraries, which all sit at src/<Module>/src/*.csproj.
+// Deriving the set from that layout rather than a hand-maintained list means a newly added module is
+// held to the contract automatically: ValidateNativeAotContract will name it and fail the build until
+// it carries the IsYubiKitSdkLibrary opt-in and is referenced by the verification host.
+//
+// Cli.* matches the same layout but is internal tooling (IsPackable=false, never shipped), so it stays
+// outside the AOT support envelope. The exclusion is deliberately path-based rather than read from the
+// project file: a check that a project can opt itself out of is not a safety net.
+string[] DiscoverNativeAotSdkProjects() =>
+    Directory.GetFiles(Path.Combine(repoRoot, "src"), "*.csproj", SearchOption.AllDirectories)
         .Select(path => Path.GetRelativePath(repoRoot, path).Replace(Path.DirectorySeparatorChar, '/'))
         .Where(path => path.Count(character => character == '/') == 3 &&
                        path.StartsWith("src/", StringComparison.Ordinal) &&
@@ -1216,13 +1211,15 @@ List<string> ValidateNativeAotContract(string[] expectedProjects)
                        !path.Contains("/Cli.", StringComparison.Ordinal))
         .OrderBy(path => path, StringComparer.Ordinal)
         .ToArray();
-    var expected = expectedProjects.OrderBy(path => path, StringComparer.Ordinal).ToArray();
 
-    if (!actualSdkProjects.SequenceEqual(expected, StringComparer.Ordinal))
+List<string> ValidateNativeAotContract(string[] sdkProjects)
+{
+    var failures = new List<string>();
+
+    if (sdkProjects.Length == 0)
     {
-        failures.Add(
-            $"supported project set differs: expected [{string.Join(", ", expected)}], " +
-            $"found [{string.Join(", ", actualSdkProjects)}]");
+        // Discovery returning nothing would silently pass every per-project check below.
+        failures.Add("no SDK libraries discovered under src/<Module>/src/*.csproj");
     }
 
     var verificationProjectPath = Path.Combine(
@@ -1238,7 +1235,7 @@ List<string> ValidateNativeAotContract(string[] expectedProjects)
     var verificationProject = File.ReadAllText(verificationProjectPath);
     var verificationProgram = File.ReadAllText(verificationProgramPath);
 
-    foreach (var project in expectedProjects)
+    foreach (var project in sdkProjects)
     {
         var projectPath = Path.Combine(repoRoot, project);
         var projectContents = File.ReadAllText(projectPath);
@@ -1252,7 +1249,7 @@ List<string> ValidateNativeAotContract(string[] expectedProjects)
         var projectFileName = Path.GetFileName(project);
         if (!verificationProject.Contains(projectFileName, StringComparison.Ordinal))
         {
-            failures.Add($"verification host does not reference {projectFileName}");
+            failures.Add($"{project}: verification host does not reference {projectFileName}");
         }
     }
 

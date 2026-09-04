@@ -196,6 +196,25 @@ public class AsnPublicKeyEncoderTests
         Assert.Equal(original.Q.Y, decoded.Q.Y);
     }
 
+    [Theory]
+    [InlineData(Oids.ECP256, 31, 32)] // X one byte short
+    [InlineData(Oids.ECP256, 32, 31)] // Y one byte short
+    [InlineData(Oids.ECP256, 33, 33)] // both oversized but self-consistent
+    [InlineData(Oids.ECP256, 48, 48)] // P-384 sized coordinates on a P-256 curve
+    [InlineData(Oids.ECP384, 32, 32)] // P-256 sized coordinates on a P-384 curve
+    [InlineData(Oids.ECP521, 65, 66)] // P-521 coordinates are 66 bytes each
+    public void EncodeToSubjectPublicKeyInfo_EcParametersCoordinateSizeMismatch_ThrowsArgumentException(
+        string curveOid, int xLength, int yLength)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(curveOid),
+            Q = new ECPoint { X = new byte[xLength], Y = new byte[yLength] }
+        };
+
+        Assert.Throws<ArgumentException>(() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(parameters));
+    }
+
     [Fact]
     public void EncodeToSubjectPublicKeyInfo_EcParametersMissingX_ThrowsArgumentException()
     {
@@ -219,6 +238,27 @@ public class AsnPublicKeyEncoderTests
         {
             Curve = original.Curve,
             Q = new ECPoint { X = original.Q.X, Y = null }
+        };
+
+        Assert.Throws<ArgumentException>(() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(parameters));
+    }
+
+    /// <summary>
+    /// The curve OID is caller-supplied. X25519 has a 32-byte key definition, so a general OID
+    /// lookup would accept P-256 sized coordinates and emit them as an id-ecPublicKey key on a
+    /// curve that is not an EC prime curve at all.
+    /// </summary>
+    [Theory]
+    [InlineData(Oids.X25519)]
+    [InlineData(Oids.Ed25519)]
+    [InlineData(Oids.AES256Cbc)]
+    [InlineData("1.3.132.0.10")] // secp256k1
+    public void EncodeToSubjectPublicKeyInfo_EcParametersNotASupportedPrimeCurve_ThrowsArgumentException(string oid)
+    {
+        var parameters = new ECParameters
+        {
+            Curve = ECCurve.CreateFromValue(oid),
+            Q = new ECPoint { X = new byte[32], Y = new byte[32] }
         };
 
         Assert.Throws<ArgumentException>(() => AsnPublicKeyEncoder.EncodeToSubjectPublicKeyInfo(parameters));

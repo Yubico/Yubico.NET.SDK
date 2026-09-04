@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
 
 namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
@@ -117,22 +118,82 @@ public class AsnUtilitiesTests
 
     #endregion
 
-    #region GetCoordinateSizeFromCurve
+    #region Curve resolution
+
+    /// <summary>
+    /// OIDs that <see cref="KeyDefinitions.GetByOid"/> happily resolves but that are not EC prime
+    /// curves. Resolving through it would hand back a coordinate size for a non-EC algorithm.
+    /// </summary>
+    public static TheoryData<string> NonEcCurveOids => new()
+    {
+        Oids.X25519, // 32-byte definition, so it would masquerade as a P-256 coordinate size
+        Oids.Ed25519,
+        Oids.AES256Cbc,
+        Oids.TripleDESCbc
+    };
+
+    /// <summary>Well-formed EC curve OIDs that this SDK does not support.</summary>
+    public static TheoryData<string> UnsupportedCurveOids => new()
+    {
+        "1.3.132.0.10", // secp256k1
+        "1.2.840.10045.3.1.1", // secp192r1 / P-192
+        "1.2.3.4.5.6.7" // not an algorithm OID at all
+    };
 
     [Theory]
     [InlineData(Oids.ECP256, 32)]
     [InlineData(Oids.ECP384, 48)]
     [InlineData(Oids.ECP521, 66)]
-    public void GetCoordinateSizeFromCurve_SupportedCurve_ReturnsExpectedSize(string curveOid, int expectedSize)
+    public void GetDecodedCoordinateSize_SupportedCurve_ReturnsExpectedSize(string curveOid, int expectedSize)
     {
-        var size = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
+        var size = AsnUtilities.GetDecodedCoordinateSize(curveOid);
 
         Assert.Equal(expectedSize, size);
     }
 
-    [Fact]
-    public void GetCoordinateSizeFromCurve_UnsupportedOid_ThrowsNotSupportedException() =>
-        Assert.Throws<NotSupportedException>(() => AsnUtilities.GetCoordinateSizeFromCurve("1.2.3.4.5.6.7"));
+    [Theory]
+    [MemberData(nameof(NonEcCurveOids))]
+    [MemberData(nameof(UnsupportedCurveOids))]
+    public void GetDecodedCoordinateSize_NotASupportedPrimeCurve_ThrowsCryptographicException(string oid) =>
+        Assert.Throws<CryptographicException>(() => AsnUtilities.GetDecodedCoordinateSize(oid));
+
+    [Theory]
+    [MemberData(nameof(NonEcCurveOids))]
+    [MemberData(nameof(UnsupportedCurveOids))]
+    public void ValidateDecodedEcPoint_NotASupportedPrimeCurve_ThrowsCryptographicException(string oid)
+    {
+        var point = new byte[65];
+        point[0] = 0x04;
+
+        Assert.Throws<CryptographicException>(() => AsnUtilities.ValidateDecodedEcPoint(point, oid));
+    }
+
+    [Theory]
+    [MemberData(nameof(NonEcCurveOids))]
+    [MemberData(nameof(UnsupportedCurveOids))]
+    public void ValidateEcPointArgument_NotASupportedPrimeCurve_ThrowsArgumentException(string oid)
+    {
+        // A 65-byte uncompressed point is exactly right for P-256, and X25519's key definition is
+        // also 32 bytes, so a size-only check would let this through and emit it as an EC key.
+        var point = new byte[65];
+        point[0] = 0x04;
+
+        var exception = Assert.Throws<ArgumentException>(
+            () => AsnUtilities.ValidateEcPointArgument(point, oid, "publicPoint"));
+
+        Assert.Equal("publicPoint", exception.ParamName);
+    }
+
+    [Theory]
+    [MemberData(nameof(NonEcCurveOids))]
+    [MemberData(nameof(UnsupportedCurveOids))]
+    public void BuildUncompressedEcPoint_NotASupportedPrimeCurve_ThrowsArgumentException(string oid)
+    {
+        var exception = Assert.Throws<ArgumentException>(
+            () => AsnUtilities.BuildUncompressedEcPoint(new byte[32], new byte[32], oid, "parameters"));
+
+        Assert.Equal("parameters", exception.ParamName);
+    }
 
     #endregion
 

@@ -26,11 +26,11 @@ public class CredentialResponseTests
     /// <summary>
     /// Creates a minimal MakeCredential CBOR response for testing.
     /// </summary>
-    private static byte[] CreateMakeCredentialResponse(string format = "none")
+    private static byte[] CreateMakeCredentialResponse(string format = "none", bool includeUnknown = false)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        writer.WriteStartMap(3);
+        writer.WriteStartMap(includeUnknown ? 4 : 3);
 
         // 0x01: fmt
         writer.WriteInt32(1);
@@ -58,6 +58,12 @@ public class CredentialResponseTests
             // "none" format has empty attStmt per CTAP 2.1 §8.7.
             writer.WriteStartMap(0);
             writer.WriteEndMap();
+        }
+
+        if (includeUnknown)
+        {
+            writer.WriteInt32(99);
+            writer.WriteTextString("future");
         }
 
         writer.WriteEndMap();
@@ -125,13 +131,17 @@ public class CredentialResponseTests
     /// <summary>
     /// Creates a minimal GetAssertion CBOR response for testing.
     /// </summary>
-    private static byte[] CreateGetAssertionResponse(bool includeCredential = false, bool includeUser = false)
+    private static byte[] CreateGetAssertionResponse(
+        bool includeCredential = false,
+        bool includeUser = false,
+        bool includeUnknown = false)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
         var mapCount = 2; // authData + signature
         if (includeCredential) mapCount++;
         if (includeUser) mapCount++;
+        if (includeUnknown) mapCount++;
 
         writer.WriteStartMap(mapCount);
 
@@ -170,6 +180,14 @@ public class CredentialResponseTests
             writer.WriteEndMap();
         }
 
+        if (includeUnknown)
+        {
+            writer.WriteInt32(99);
+            writer.WriteStartArray(1);
+            writer.WriteTextString("future");
+            writer.WriteEndArray();
+        }
+
         writer.WriteEndMap();
 
         return writer.Encode();
@@ -195,6 +213,37 @@ public class CredentialResponseTests
         var response = MakeCredentialResponse.Decode(cbor);
 
         Assert.Equal("packed", response.Format);
+    }
+
+    [Fact]
+    public void MakeCredentialResponse_Decode_IgnoresUnknownField()
+    {
+        byte[] cbor = CreateMakeCredentialResponse(includeUnknown: true);
+        var response = MakeCredentialResponse.Decode(cbor);
+
+        Assert.Equal("none", response.Format);
+        Assert.True(response.AuthenticatorData.UserPresent);
+    }
+
+    [Fact]
+    public void MakeCredentialResponse_DecodeFromReader_ParsesOneValue()
+    {
+        byte[] cbor = CreateMakeCredentialResponse("packed", includeUnknown: true);
+        var writer = new CborWriter(CborConformanceMode.Lax, convertIndefiniteLengthEncodings: false, allowMultipleRootLevelValues: true);
+        writer.WriteBoolean(true);
+        writer.WriteEncodedValue(cbor);
+        var reader = new CborReader(
+            writer.Encode(),
+            CborConformanceMode.Ctap2Canonical,
+            allowMultipleRootLevelValues: true);
+        Assert.True(reader.ReadBoolean());
+
+        var response = MakeCredentialResponse.Decode(reader);
+
+        Assert.Equal("packed", response.Format);
+        Assert.Equal([0xA2, 0x63, 0x61, 0x6C, 0x67, 0x26, 0x63, 0x73, 0x69, 0x67, 0x42, 0x30, 0x44],
+            response.AttestationStatement.RawCbor.ToArray());
+        Assert.Equal(CborReaderState.Finished, reader.PeekState());
     }
 
     [Fact]
@@ -259,6 +308,16 @@ public class CredentialResponseTests
         var response = GetAssertionResponse.Decode(cbor);
 
         Assert.False(response.Signature.IsEmpty);
+    }
+
+    [Fact]
+    public void GetAssertionResponse_Decode_IgnoresUnknownField()
+    {
+        byte[] cbor = CreateGetAssertionResponse(includeUnknown: true);
+        var response = GetAssertionResponse.Decode(cbor);
+
+        Assert.True(response.AuthenticatorData.UserPresent);
+        Assert.Equal([0x30, 0x44], response.Signature.ToArray());
     }
 
     [Fact]

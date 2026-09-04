@@ -44,7 +44,7 @@ namespace Yubico.YubiKit.Fido2.Cose;
 /// to simplify downstream ARKG derivation logic.
 /// </para>
 /// <para>
-/// Discriminate this variant from standard EC2 keys by checking alg == -65700 AFTER kty == 2.
+/// Discriminate this variant from standard EC2 keys by checking alg == -65700.
 /// </para>
 /// </remarks>
 /// <param name="Algorithm">COSE algorithm identifier (must be ArkgP256SeedKey = -65700).</param>

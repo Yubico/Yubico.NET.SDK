@@ -122,15 +122,19 @@ public sealed class MakeCredentialResponse
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The parsed response.</returns>
-    public static MakeCredentialResponse Decode(CborReader reader) =>
-        DecodeInternal(reader, fullCbor: null);
+    /// <remarks>The returned response may reference the reader's underlying buffer.</remarks>
+    public static MakeCredentialResponse Decode(CborReader reader)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return Decode(reader.ReadEncodedValue(disableConformanceModeChecks: true));
+    }
 
     /// <summary>
-    /// Internal decoder that optionally captures raw CBOR for attestation statement.
+    /// Core decoder for the owned response bytes.
     /// </summary>
     private static MakeCredentialResponse DecodeInternal(
         CborReader reader,
-        ReadOnlyMemory<byte>? fullCbor)
+        ReadOnlyMemory<byte> fullCbor)
     {
         var mapLength = reader.ReadStartMap();
 
@@ -173,9 +177,7 @@ public sealed class MakeCredentialResponse
                     // Calculate how many bytes were consumed
                     var attStmtBytesConsumed = attStmtBytesBefore - reader.BytesRemaining;
                     attStmtLength = attStmtBytesConsumed;
-                    attStmtOffset = fullCbor.HasValue
-                        ? fullCbor.Value.Length - attStmtBytesBefore
-                        : -1;
+                    attStmtOffset = fullCbor.Length - attStmtBytesBefore;
                     break;
                 case 4: // epAtt
                     epAtt = reader.ReadBoolean();
@@ -195,12 +197,8 @@ public sealed class MakeCredentialResponse
                         reader.SkipValue();
                         int bytesConsumed = bytesRemainingBefore - reader.BytesRemaining;
 
-                        // Extract the value from fullCbor if available
-                        if (fullCbor.HasValue)
-                        {
-                            int valueOffset = fullCbor.Value.Length - bytesRemainingBefore;
-                            unsignedExtensionOutputs[extId] = fullCbor.Value.Slice(valueOffset, bytesConsumed);
-                        }
+                        int valueOffset = fullCbor.Length - bytesRemainingBefore;
+                        unsignedExtensionOutputs[extId] = fullCbor.Slice(valueOffset, bytesConsumed);
                     }
                     reader.ReadEndMap();
                     break;
@@ -218,15 +216,15 @@ public sealed class MakeCredentialResponse
         }
 
         // Decode attestation statement using the format-aware typed decoder
-        if (fullCbor.HasValue && attStmtOffset >= 0 && attStmtLength > 0)
+        if (attStmtOffset >= 0 && attStmtLength > 0)
         {
-            var rawAttStmt = fullCbor.Value.Slice(attStmtOffset, attStmtLength);
+            var rawAttStmt = fullCbor.Slice(attStmtOffset, attStmtLength);
             var attestationFormat = ParseAttestationFormat(format);
             attStmt = AttestationStatement.Decode(attestationFormat, rawAttStmt);
         }
         else
         {
-            throw new InvalidOperationException("AttestationStatement decoding requires fullCbor parameter.");
+            throw new InvalidOperationException("MakeCredential response missing attestation statement.");
         }
 
         return new MakeCredentialResponse(

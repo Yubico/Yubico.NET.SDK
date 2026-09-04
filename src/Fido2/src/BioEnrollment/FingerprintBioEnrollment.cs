@@ -204,17 +204,14 @@ public sealed class FingerprintBioEnrollment
         for (var i = 0; i < mapCount; i++)
         {
             var key = reader.ReadInt32();
-
             switch (key)
             {
                 case 4: // templateId
                     templateId = reader.ReadByteString();
                     break;
-
                 case 7: // templateFriendlyName
                     friendlyName = reader.ReadTextString();
                     break;
-
                 default:
                     reader.SkipValue();
                     break;

@@ -226,4 +226,24 @@ public class CoseArkgP256SeedKeyTests
         // Assert - should dispatch to CoseEc2Key, not CoseArkgP256SeedKey
         Assert.IsType<CoseEc2Key>(decoded);
     }
+
+    [Fact]
+    public void Decode_WithArkgAlgorithmAndNonEc2KeyType_UsesArkgVariant()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(5);
+        writer.WriteInt32(-3);
+        writer.WriteInt32(-9);
+        writer.WriteInt32(-2);
+        writer.WriteByteString(BuildNestedEc2Key(TestKemX, TestKemY));
+        writer.WriteInt32(-1);
+        writer.WriteByteString(BuildNestedEc2Key(TestBlX, TestBlY));
+        writer.WriteInt32(1);
+        writer.WriteInt32(99);
+        writer.WriteInt32(3);
+        writer.WriteInt32(-65700);
+        writer.WriteEndMap();
+
+        Assert.IsType<CoseArkgP256SeedKey>(CoseKey.Decode(writer.Encode()));
+    }
 }

@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('win-'))">winscard.lib</ExpectedLinkerArgs>
-        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('linux-'))">-lpcsclite|-Wl,--exclude-libs,ALL</ExpectedLinkerArgs>
+        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('linux-'))">-lpcsclite|-Wl,--exclude-libs,libYubico.NativeShims.a</ExpectedLinkerArgs>
         <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('osx-'))">-framework|PCSC</ExpectedLinkerArgs>
     </PropertyGroup>
 

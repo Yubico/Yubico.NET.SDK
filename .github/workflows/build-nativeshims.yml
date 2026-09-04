@@ -473,6 +473,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: global.json
       - run: |
           echo 'Running build script: macOS'
           cd Yubico.NativeShims
@@ -482,6 +485,9 @@ jobs:
           else
             sh ./build-macOS.sh "0.0.0"
           fi
+      - name: Validate static package targets
+        working-directory: Yubico.NativeShims
+        run: bash tests/check_static_package.sh
       - name: Verify export tables match canonical symbol list
         working-directory: Yubico.NativeShims
         run: |
@@ -744,7 +750,7 @@ jobs:
             throw "Static archive contains objects built for a newer macOS deployment target."
           }
 
-      - name: Remove shared shim and verify native output
+      - name: Verify native output
         shell: pwsh
         run: |
           $outputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}'

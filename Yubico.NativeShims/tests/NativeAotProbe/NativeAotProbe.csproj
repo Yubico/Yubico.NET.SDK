@@ -10,9 +10,4 @@
   <ItemGroup>
     <PackageReference Include="Yubico.NativeShims" Version="[$(NativeShimsVersion)]" />
   </ItemGroup>
-
-  <Target Name="RequireNativeShimsVersion" BeforeTargets="CollectPackageReferences">
-    <Error Condition="'$(NativeShimsVersion)' == ''"
-           Text="NativeShimsVersion must be supplied as an exact package version." />
-  </Target>
 </Project>

@@ -68,7 +68,7 @@ echo "============================="
 echo ""
 
 echo "Building for x64-linux with Zig targeting glibc 2.23..."
-CMAKE_ARGS="-S . -B $build_dir -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$SCRIPT_DIR/cmake/x86_64-linux-gnu.toolchain.cmake"
+CMAKE_ARGS="-S . -B $build_dir -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$SCRIPT_DIR/cmake/x86_64-linux-gnu.toolchain.cmake -DYUBICO_BUILD_STATIC=ON"
 if [ ! -z "$VERSION" ]; then
     CMAKE_ARGS="$CMAKE_ARGS -DPROJECT_VERSION=$VERSION"
 fi

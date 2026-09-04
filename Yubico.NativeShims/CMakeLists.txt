@@ -117,7 +117,7 @@ find_package(OpenSSL REQUIRED)
 
 add_library(Yubico.NativeShims SHARED)
 
-option(YUBICO_BUILD_STATIC "Build the merged NativeShims and OpenSSL static archive" ON)
+option(YUBICO_BUILD_STATIC "Build the merged NativeShims and OpenSSL static archive" OFF)
 if(YUBICO_BUILD_STATIC)
     add_library(Yubico.NativeShims.Static STATIC)
     set_target_properties(

@@ -4,9 +4,9 @@
         <_YubicoNativeShimsPackageRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))</_YubicoNativeShimsPackageRoot>
         <_YubicoNativeShimsStaticArchive Condition="'$(RuntimeIdentifier)' == 'win-x64' OR '$(RuntimeIdentifier)' == 'win-x86' OR '$(RuntimeIdentifier)' == 'win-arm64'">$(_YubicoNativeShimsPackageRoot)/runtimes/$(RuntimeIdentifier)/native/static/Yubico.NativeShims.lib</_YubicoNativeShimsStaticArchive>
         <_YubicoNativeShimsStaticArchive Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64' OR '$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'">$(_YubicoNativeShimsPackageRoot)/runtimes/$(RuntimeIdentifier)/native/static/libYubico.NativeShims.a</_YubicoNativeShimsStaticArchive>
-        <_YubicoNativeShimsSharedLibrary Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win-'))">Yubico.NativeShims.dll</_YubicoNativeShimsSharedLibrary>
-        <_YubicoNativeShimsSharedLibrary Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux-'))">libYubico.NativeShims.so</_YubicoNativeShimsSharedLibrary>
-        <_YubicoNativeShimsSharedLibrary Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('osx-'))">libYubico.NativeShims.dylib</_YubicoNativeShimsSharedLibrary>
+        <_YubicoNativeShimsSharedLibrary Condition="$(RuntimeIdentifier.StartsWith('win-'))">Yubico.NativeShims.dll</_YubicoNativeShimsSharedLibrary>
+        <_YubicoNativeShimsSharedLibrary Condition="$(RuntimeIdentifier.StartsWith('linux-'))">libYubico.NativeShims.so</_YubicoNativeShimsSharedLibrary>
+        <_YubicoNativeShimsSharedLibrary Condition="$(RuntimeIdentifier.StartsWith('osx-'))">libYubico.NativeShims.dylib</_YubicoNativeShimsSharedLibrary>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(PublishAot)' == 'true'">
@@ -33,7 +33,7 @@
                        Condition="'$(RuntimeIdentifier)' == 'win-x64' OR '$(RuntimeIdentifier)' == 'win-x86' OR '$(RuntimeIdentifier)' == 'win-arm64'" />
             <LinkerArg Include="-lpcsclite"
                        Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64'" />
-            <LinkerArg Include="-Wl,--exclude-libs,ALL"
+            <LinkerArg Include="-Wl,--exclude-libs,libYubico.NativeShims.a"
                        Condition="'$(RuntimeIdentifier)' == 'linux-x64' OR '$(RuntimeIdentifier)' == 'linux-arm64'" />
             <LinkerArg Include="-framework"
                        Condition="'$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64'" />

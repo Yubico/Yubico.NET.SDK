@@ -9,7 +9,7 @@ git checkout master
 Pop-Location
 
 # 32-bit builds
-$cmakeArgs = @("-S", ".", "-B", "build32", "-A", "Win32", "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake", "-DVCPKG_TARGET_TRIPLET=x86-windows-static")
+$cmakeArgs = @("-S", ".", "-B", "build32", "-A", "Win32", "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake", "-DVCPKG_TARGET_TRIPLET=x86-windows-static", "-DYUBICO_BUILD_STATIC=ON")
 if ($Version) { $cmakeArgs += "-DPROJECT_VERSION=$Version" }
 cmake @cmakeArgs
 cmake --build build32 --config Release
@@ -19,7 +19,7 @@ New-Item -ItemType Directory -Path win-x86\static -Force
 Copy-Item build32\static\Yubico.NativeShims.lib win-x86\static
 
 # 64-bit builds
-$cmakeArgs = @("-S", ".", "-B", "build64", "-A", "x64", "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake", "-DVCPKG_TARGET_TRIPLET=x64-windows-static")
+$cmakeArgs = @("-S", ".", "-B", "build64", "-A", "x64", "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake", "-DVCPKG_TARGET_TRIPLET=x64-windows-static", "-DYUBICO_BUILD_STATIC=ON")
 if ($Version) { $cmakeArgs += "-DPROJECT_VERSION=$Version" }
 cmake @cmakeArgs
 cmake --build build64 --config Release
@@ -29,7 +29,7 @@ New-Item -ItemType Directory -Path win-x64\static -Force
 Copy-Item build64\static\Yubico.NativeShims.lib win-x64\static
 
 # ARM64 builds
-$cmakeArgs = @("-S", ".", "-B", "buildarm", "-A", "arm64", "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake", "-DVCPKG_TARGET_TRIPLET=arm64-windows-static")
+$cmakeArgs = @("-S", ".", "-B", "buildarm", "-A", "arm64", "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake", "-DVCPKG_TARGET_TRIPLET=arm64-windows-static", "-DYUBICO_BUILD_STATIC=ON")
 if ($Version) { $cmakeArgs += "-DPROJECT_VERSION=$Version" }
 cmake @cmakeArgs
 cmake --build buildarm --config Release

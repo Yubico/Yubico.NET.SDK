@@ -12,6 +12,9 @@
 
     <!-- Allow unsafe code for performance-critical operations -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,28 @@
 <Project>
+  <!--
+    Native AOT support surface (SDK libraries only).
+
+    IsYubiKitSdkLibrary is an explicit per-project opt-in (set in each of the 10 published SDK
+    library .csproj files: Core, Management, Piv, Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain,
+    YubiOtp, YubiHsm). It defaults to false (Directory.Build.props) so CLI tools, example apps, and
+    test projects are never silently pulled into the AOT support envelope.
+
+    This block lives in Directory.Build.targets, not Directory.Build.props: props files are
+    imported before a project's own <PropertyGroup>, so a project-level
+    `<IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>` opt-in would not yet be visible to a
+    conditional block evaluated that early. Targets files are imported after the project body, so
+    the flag is guaranteed to be set by the time this condition is evaluated.
+
+    Setting IsAotCompatible=true also enables the trimming, AOT, and single-file analyzers.
+
+    VerifyReferenceAotCompatibility=true surfaces IL3058 for a referenced managed dependency that
+    lacks AOT-compatibility metadata. The repository does not suppress that diagnostic.
+  -->
+  <PropertyGroup Condition="'$(IsYubiKitSdkLibrary)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+    <VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>
+  </PropertyGroup>
+
   <!-- Add common analyzer packages to all projects -->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">

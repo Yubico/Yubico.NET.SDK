@@ -8,6 +8,9 @@
     <!-- Package Metadata -->
     <Description>OpenPGP support for YubiKey devices including key management, encryption, decryption, signing, and authentication operations.</Description>
     <PackageTags>yubikey;yubico;openpgp;pgp;gpg;encryption;signing;smartcard</PackageTags>
+
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 
   <ItemGroup>

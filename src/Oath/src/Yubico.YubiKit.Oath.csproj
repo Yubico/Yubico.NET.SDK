@@ -8,6 +8,9 @@
     <!-- Package Metadata -->
     <Description>OATH (One-Time Password) support for YubiKey devices including TOTP and HOTP credential management and code generation.</Description>
     <PackageTags>yubikey;yubico;oath;totp;hotp;otp;2fa;mfa;authenticator</PackageTags>
+
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 
   <ItemGroup>

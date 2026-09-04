@@ -8,6 +8,9 @@
     <!-- Package Metadata -->
     <Description>WebAuthn client implementation for YubiKey FIDO2 authenticators with support for credential management, extensions, and the previewSign draft specification.</Description>
     <PackageTags>yubikey;yubico;webauthn;fido2;passkeys;authentication</PackageTags>
+
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 
   <ItemGroup>

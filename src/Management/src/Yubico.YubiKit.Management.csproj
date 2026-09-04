@@ -8,6 +8,9 @@
     <!-- Package Metadata -->
     <Description>Management interface for YubiKey devices including device info queries, firmware version detection, and capability management.</Description>
     <PackageTags>yubikey;yubico;management;device-info;configuration</PackageTags>
+
+    <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
+    <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
   </PropertyGroup>
 
   <ItemGroup>

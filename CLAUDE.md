@@ -76,7 +76,7 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 > Deep dive: `docs/CSHARP-PATTERNS.md` (load when designing new types, choosing property accessors, writing switch expressions, or using primary constructors / records).
 
 **Code Quality:**
-- ✅ ALWAYS follow `.editorconfig` (run `dotnet format` scoped to your staged files before commit — see Pre-Commit Checklist, never the whole solution)
+- ✅ ALWAYS follow `.editorconfig` (see Pre-Commit Checklist for the formatting workflow)
 - ✅ ALWAYS handle `CancellationToken` in async methods
 - ✅ ALWAYS use `readonly` on fields that don't change
 - ❌ NEVER use `#region` (split large classes instead)
@@ -597,9 +597,9 @@ Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL
 3. ✅ Tests pass: `dotnet toolchain.cs test`
 4. ✅ Formatted — scope `dotnet format` to your staged files, never the whole solution:
    ```
-   dotnet format Yubico.YubiKit.sln --include $(git diff --name-only --cached -- '*.cs') --verify-no-changes
+   dotnet format Yubico.YubiKit.sln --include $(git diff --name-only --cached -- '*.cs')
    ```
-   Drop `--verify-no-changes` to actually apply fixes. Note: `--include` silently skips nonexistent/stale paths — re-run `git diff --cached --name-only` if a file seems to be missed.
+   Note: `--include` silently skips nonexistent/stale paths — re-run `git diff --cached --name-only` if a file seems to be missed.
 
    The `whitespace` subcommand (`dotnet format whitespace ... --include <files>`) is fine and often faster, **as long as it is scoped with `--include` to your own files**. The rule being enforced is "never reformat files you did not change", not "never use a particular subcommand". Unscoped formatting of the whole solution is what is forbidden.
 

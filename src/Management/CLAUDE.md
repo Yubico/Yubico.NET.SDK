@@ -189,14 +189,20 @@ var config = new DeviceConfig
 // Extension handles everything
 await yubiKey.SetDeviceConfigAsync(
     config,
-    reboot: true,
-    currentLockCode: lockCode,  // If device is locked
+    new SetDeviceConfigOptions
+    {
+        Reboot = true,
+        CurrentLockCode = lockCode // If device is locked
+    },
     cancellationToken: cancellationToken);
 
 // Equivalent manual code:
 await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
 await using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
-await mgmt.SetDeviceConfigAsync(config, reboot, lockCode, null, cancellationToken);
+await mgmt.SetDeviceConfigAsync(
+    config,
+    new SetDeviceConfigOptions { Reboot = reboot, CurrentLockCode = lockCode },
+    cancellationToken);
 ```
 
 **Lifecycle:**
@@ -218,8 +224,11 @@ await mgmt.SetDeviceConfigAsync(config, reboot, lockCode, null, cancellationToke
 ```csharp
 // Manual session management for multiple operations
 await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
-    configuration: customProtocolConfig,       // Optional protocol config
-    scpKeyParams: Scp03KeyParameters.Default,  // Optional SCP
+    new SessionCreationOptions
+    {
+        ProtocolConfiguration = customProtocolConfig,
+        ScpKeyParameters = Scp03KeyParameters.Default
+    },
     cancellationToken: cancellationToken);
 
 // Multiple operations in same session
@@ -676,8 +685,11 @@ var config = new DeviceConfig
     ChallengeResponseTimeout = 15
 };
 
-// Serializes to TLV format for transmission
-Memory<byte> bytes = config.GetBytes(reboot: true, null, null);
+// The session serializes the configuration and clears the encoded buffer after transmission.
+await session.SetDeviceConfigAsync(
+    config,
+    new SetDeviceConfigOptions { Reboot = true },
+    cancellationToken);
 ```
 
 ### Capability Flags Pattern

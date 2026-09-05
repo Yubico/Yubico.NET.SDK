@@ -156,7 +156,7 @@ public class ReconfigurationDiscoveryInvariantTests
                 try
                 {
                     await using var mgmt = await device.CreateManagementSessionAsync();
-                    await mgmt.SetDeviceConfigAsync(config, reboot: true);
+                    await mgmt.SetDeviceConfigAsync(config, new SetDeviceConfigOptions { Reboot = true });
                     return;
                 }
                 catch (Exception ex)

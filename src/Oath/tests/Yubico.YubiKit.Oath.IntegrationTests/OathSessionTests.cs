@@ -15,6 +15,7 @@
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Oath.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -30,7 +31,8 @@ public class OathSessionTests
 
     private static CredentialData CreateTotpCredential(
         string name = "user@example.com",
-        string? issuer = "TestIssuer") =>
+        string? issuer = "TestIssuer",
+        bool requireTouch = false) =>
         new()
         {
             Name = name,
@@ -38,7 +40,8 @@ public class OathSessionTests
             HashAlgorithm = OathHashAlgorithm.Sha1,
             Secret = [0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
                       0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30],
-            Issuer = issuer
+            Issuer = issuer,
+            RequireTouch = requireTouch
         };
 
     private static CredentialData CreateHotpCredential(
@@ -87,7 +90,7 @@ public class OathSessionTests
     {
         using var scpParams = Scp03KeyParameters.Default;
         await using var session = await state.Device.CreateOathSessionAsync(
-            scpParams,
+            new SessionCreationOptions { ScpKeyParameters = scpParams },
             cancellationToken: NewToken());
 
         Assert.Equal(103, state.SerialNumber);
@@ -326,9 +329,8 @@ public class OathSessionTests
         await state.WithOathSessionAsync(async session =>
         {
             // Put a touch-required credential
-            var credData = CreateTotpCredential("touch@example.com", "TouchService");
-            await session.PutCredentialAsync(credData, requireTouch: true,
-                cancellationToken: NewToken());
+            var credData = CreateTotpCredential("touch@example.com", "TouchService", requireTouch: true);
+            await session.PutCredentialAsync(credData, NewToken());
 
             // CalculateAll should return null code for touch-required credentials
             long timestamp = 1704067200;

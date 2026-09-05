@@ -20,6 +20,7 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
+using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
 /// <summary>
@@ -109,9 +110,9 @@ public class ManagementSessionSimpleTests
         YubiKeyTestState state)
     {
         await using var session = await state.Device.CreateManagementSessionAsync(
-            preferredConnection: ConnectionType.HidFido);
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido });
 
-        Assert.Equal(ConnectionType.HidFido, session.Transport);
+        Assert.Equal(ConnectionType.HidFido, session.ConnectionType);
         _ = await Assert.ThrowsAsync<NotSupportedException>(() => session.ResetDeviceAsync());
     }
 
@@ -149,7 +150,7 @@ public class ManagementSessionSimpleTests
                 .WithAutoEjectTimeout(newAutoEject)
                 .Build();
 
-            await mgmt.SetDeviceConfigAsync(newConfig, false);
+            await mgmt.SetDeviceConfigAsync(newConfig);
 
             var updatedInfo = await mgmt.GetDeviceInfoAsync();
             Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
@@ -160,7 +161,7 @@ public class ManagementSessionSimpleTests
                 .WithAutoEjectTimeout(originalAutoEject)
                 .Build();
 
-            await mgmt.SetDeviceConfigAsync(restoreConfig, false);
+            await mgmt.SetDeviceConfigAsync(restoreConfig);
         });
     }
 
@@ -181,7 +182,7 @@ public class ManagementSessionSimpleTests
             .WithAutoEjectTimeout(newAutoEject)
             .Build();
 
-        await device.SetDeviceConfigAsync(newConfig, false);
+        await device.SetDeviceConfigAsync(newConfig);
 
         var updatedInfo = await device.GetDeviceInfoAsync();
         Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
@@ -192,7 +193,7 @@ public class ManagementSessionSimpleTests
             .WithAutoEjectTimeout(originalAutoEject)
             .Build();
 
-        await device.SetDeviceConfigAsync(restoreConfig, false);
+        await device.SetDeviceConfigAsync(restoreConfig);
     }
 
 
@@ -213,7 +214,7 @@ public class ManagementSessionSimpleTests
         // Create ManagementSession with SCP03 enabled
         await using var mgmtSession = await ManagementSession.CreateAsync(
             connection,
-            scpKeyParams: scpKeyParams);
+            new SessionCreationOptions { ScpKeyParameters = scpKeyParams });
 
         // Verify we can communicate over SCP by getting device info
         var deviceInfo = await mgmtSession.GetDeviceInfoAsync();
@@ -244,7 +245,7 @@ public class ManagementSessionSimpleTests
         {
             await using var mgmtSession = await ManagementSession.CreateAsync(
                 connection,
-                scpKeyParams: scpKeyParams);
+                new SessionCreationOptions { ScpKeyParameters = scpKeyParams });
         });
     }
 

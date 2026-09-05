@@ -23,6 +23,8 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
 {
     public FirmwareVersion() { }
 
+    // Existing alpha convenience constructors intentionally support both byte and validated int inputs.
+#pragma warning disable RS0026
     public FirmwareVersion(byte major, byte minor = 0, byte patch = 0)
     {
         Major = major;
@@ -35,6 +37,7 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
             ByteUtils.ValidateByte(patch, nameof(patch)))
     {
     }
+#pragma warning restore RS0026
 
     public byte Major { get; }
     public byte Minor { get; }
@@ -45,6 +48,31 @@ public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquat
     ///     Alpha/beta keys report firmware versions with major version 0 but should be treated as the latest version
     ///     for feature compatibility checks.
     /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Treat an alpha or beta version as newer than any released firmware, and as being at least 5.8.0.
+    ///         Every alpha and beta key is built from a development branch at or ahead of that release, so a
+    ///         feature gate must not refuse one. <see cref="IsAtLeast(int,int,int)" /> already returns
+    ///         <see langword="true" /> for these versions, and
+    ///         <c>Feature.IsSupportedByFirmware</c> short-circuits on this property, so the usual gates need no
+    ///         special handling. Do not write <c>!IsAlphaOrBeta &amp;&amp; IsAtLeast(...)</c>: that cancels the
+    ///         built-in allowance and downgrades a development key to legacy behavior.
+    ///     </para>
+    ///     <para>
+    ///         The version carries no finer detail. Different development builds report the same placeholder
+    ///         (typically 0.0.1), so it cannot distinguish one build from another. An individual applet build can
+    ///         therefore lack a feature this property implies, usually because the applet was cut before the
+    ///         instruction landed. The device reports that itself, as <c>SW=0x6D00</c> (instruction not supported)
+    ///         or a comparable rejection.
+    ///     </para>
+    ///     <para>
+    ///         That case is deliberately not handled in code. Detecting it would mean either abandoning the
+    ///         optimistic assumption, which breaks every correctly built development key, or probing the device
+    ///         before each gated call, which costs a round trip to accommodate a defective build. A test failing
+    ///         against a development key with <c>SW=0x6D00</c> is the expected signal: the applet on that specific
+    ///         key is missing the instruction. Check the key before suspecting the gate or the command encoding.
+    ///     </para>
+    /// </remarks>
     public bool IsAlphaOrBeta => Major == 0;
 
     /// <summary>

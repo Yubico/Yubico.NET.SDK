@@ -31,6 +31,15 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(IsYubiKitSdkLibrary)' == 'true'">
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <AdditionalFiles Include="$(MSBuildProjectDirectory)/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="$(MSBuildProjectDirectory)/PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
   <!-- Shared Internals Visibility for non-test projects -->
   <ItemGroup Condition="'$(IsTestProject)' != 'true'">
     <InternalsVisibleTo Include="$(AssemblyName).UnitTests" />

@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Tests.Shared;
 
+using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 public class HsmAuthSessionByteLevelTests
@@ -40,7 +41,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection(OkResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         await session.PutCredentialSymmetricAsync(
@@ -75,7 +76,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         using var keys = await session.CalculateSessionKeysSymmetricAsync(
@@ -108,7 +109,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
         var commandCount = connection.TransmittedCommands.Count;
         var touchCallbackInvoked = false;
@@ -134,7 +135,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
         var commandCount = connection.TransmittedCommands.Count;
         var touchCallbackInvoked = false;
@@ -160,7 +161,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var challenge = await session.GetChallengeAsync(
@@ -179,7 +180,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         await session.GetChallengeAsync(
@@ -198,7 +199,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 7, 1),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 7, 1) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         await session.GetChallengeAsync(
@@ -219,7 +220,7 @@ public class HsmAuthSessionByteLevelTests
         var connection = CreateInitializedConnection([0x63, 0xC2]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.DeleteCredentialAsync(
@@ -239,6 +240,103 @@ public class HsmAuthSessionByteLevelTests
             0x7B, 0x10, .. Sequence(0x10, 16),
             0x71, 0x04, (byte)'c', (byte)'r', (byte)'e', (byte)'d'
         ], CommandData(command).ToArray());
+    }
+
+    /// <summary>
+    ///     Pins the CHANGE credential password APDU for the password-authenticated path.
+    /// </summary>
+    /// <remarks>
+    ///     The hardware test for this operation skips on applet builds that answer SW=0x6D00, so the
+    ///     instruction byte, P1 selector, and TLV order are pinned here instead. Without this, a
+    ///     regression in the instruction byte would look identical to an applet that lacks the
+    ///     instruction and would be skipped rather than caught.
+    /// </remarks>
+    [Fact]
+    public async Task ChangeCredentialPasswordAsync_TransmitsChangeInstructionWithPasswordSelector()
+    {
+        var connection = CreateInitializedConnection(OkResponse());
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.ChangeCredentialPasswordAsync(
+            "cred",
+            "pass"u8.ToArray(),
+            "newpass"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        var command = LastCommand(connection);
+        Assert.Equal(0x00, command[0]);
+        Assert.Equal(0x0B, command[1]);
+        Assert.Equal(0x00, command[2]); // P1=0 selects password authentication.
+        Assert.Equal(0x00, command[3]);
+
+        // Label, then current password, then new password.
+        var data = CommandData(command).ToArray();
+        Assert.Equal(0x71, data[0]);
+        var afterLabel = 2 + data[1];
+        Assert.Equal(0x73, data[afterLabel]);
+        var afterCurrent = afterLabel + 2 + data[afterLabel + 1];
+        Assert.Equal(0x73, data[afterCurrent]);
+    }
+
+    /// <summary>
+    ///     Pins the CHANGE credential password APDU for the management-key path, which differs only
+    ///     by its P1 selector and by carrying the management key instead of the current password.
+    /// </summary>
+    [Fact]
+    public async Task ChangeCredentialPasswordAdminAsync_TransmitsChangeInstructionWithManagementKeySelector()
+    {
+        var connection = CreateInitializedConnection(OkResponse());
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.ChangeCredentialPasswordAdminAsync(
+            Sequence(0x10, 16),
+            "cred",
+            "newpass"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        var command = LastCommand(connection);
+        Assert.Equal(0x0B, command[1]);
+        Assert.Equal(0x01, command[2]); // P1=1 selects management-key authentication.
+
+        var data = CommandData(command).ToArray();
+        Assert.Equal(0x71, data[0]);
+        var afterLabel = 2 + data[1];
+        Assert.Equal(0x7B, data[afterLabel]); // Management key, not a credential password.
+    }
+
+    /// <summary>
+    ///     A caller-supplied firmware override survives <c>ResetAsync</c>.
+    /// </summary>
+    /// <remarks>
+    ///     Reset re-SELECTs the applet to refresh cached state, and the SELECT response carries the
+    ///     applet's own version. Adopting that version would silently drop an override supplied through
+    ///     <c>SessionCreationOptions</c>, so feature gates evaluated after a reset would disagree with
+    ///     the ones evaluated before it. Reset refreshes applet state, not caller policy.
+    /// </remarks>
+    [Fact]
+    public async Task ResetAsync_PreservesCallerSuppliedFirmwareVersionOverride()
+    {
+        // Re-SELECT reports 5.4.3 through the version TLV; the override must win regardless.
+        byte[] reselectWithLowerVersion = [0x79, 0x03, 0x05, 0x04, 0x03, 0x90, 0x00];
+        var connection = CreateInitializedConnection(OkResponse(), reselectWithLowerVersion);
+
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(new FirmwareVersion(5, 8, 0), session.FirmwareVersion);
+
+        await session.ResetAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(new FirmwareVersion(5, 8, 0), session.FirmwareVersion);
+        Assert.True(session.IsSupported(HsmAuthSession.FeaturePasswordChange));
     }
 
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>

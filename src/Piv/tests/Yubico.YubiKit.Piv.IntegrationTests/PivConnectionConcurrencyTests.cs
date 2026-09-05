@@ -58,7 +58,7 @@ public class PivConnectionConcurrencyTests
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
-        _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, PivPinPolicy.Once);
+        _ = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         // A ~2.5KB object makes the read a large multi-frame exchange on the wire.

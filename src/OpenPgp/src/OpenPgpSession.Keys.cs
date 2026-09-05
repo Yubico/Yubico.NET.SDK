@@ -22,39 +22,25 @@ namespace Yubico.YubiKit.OpenPgp;
 public sealed partial class OpenPgpSession
 {
     /// <inheritdoc />
-    public async Task GenerateRsaKeyAsync(
+    public async Task GenerateKeyAsync(
         KeyRef keyRef,
-        RsaSize size = RsaSize.Rsa2048,
+        AlgorithmAttributes attributes,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(attributes);
 
-        _logger.LogInformation("Generating RSA {Size} key for {Slot}", (int)size, keyRef);
+        if (attributes is EcAttributes)
+            EnsureSupports(FeatureEc);
 
-        var attributes = RsaAttributes.Create(size);
+        _logger.LogInformation(
+            "Generating {AlgorithmType} key for {Slot}",
+            attributes.GetType().Name,
+            keyRef);
         await SetAlgorithmAttributesAsync(keyRef, attributes, cancellationToken)
             .ConfigureAwait(false);
 
-        await GenerateKeyAsync(keyRef, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
-    public async Task GenerateEcKeyAsync(
-        KeyRef keyRef,
-        CurveOid curve,
-        CancellationToken cancellationToken = default)
-    {
-        ThrowIfDisposed();
-
-        EnsureSupports(FeatureEc);
-
-        _logger.LogInformation("Generating EC {Curve} key for {Slot}", curve, keyRef);
-
-        var attributes = EcAttributes.Create(keyRef, curve);
-        await SetAlgorithmAttributesAsync(keyRef, attributes, cancellationToken)
-            .ConfigureAwait(false);
-
-        await GenerateKeyAsync(keyRef, cancellationToken).ConfigureAwait(false);
+        await GenerateKeyPairAsync(keyRef, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -246,7 +232,7 @@ public sealed partial class OpenPgpSession
 
     // ── Private Helpers ───────────────────────────────────────────────
 
-    private async Task GenerateKeyAsync(
+    private async Task GenerateKeyPairAsync(
         KeyRef keyRef,
         CancellationToken cancellationToken)
     {

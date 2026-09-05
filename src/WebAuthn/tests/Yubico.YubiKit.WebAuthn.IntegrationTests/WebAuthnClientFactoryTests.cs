@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
@@ -41,7 +42,7 @@ public class WebAuthnClientFactoryTests
             await using var client = await state.Device.CreateWebAuthnClientAsync(
                 origin,
                 isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk",
-                preferredConnection: ConnectionType.SmartCard);
+                options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 
             Assert.NotNull(client);
         }
@@ -61,7 +62,7 @@ public class WebAuthnClientFactoryTests
         try
         {
             setupSession = await state.Device.CreateFidoSessionAsync(
-                preferredConnection: ConnectionType.SmartCard);
+                new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
         }
         catch (NotSupportedException)
         {
@@ -79,7 +80,7 @@ public class WebAuthnClientFactoryTests
         await using var client = await state.Device.CreateWebAuthnClientAsync(
             origin,
             isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk",
-            preferredConnection: ConnectionType.SmartCard);
+            options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 
         var options = new RegistrationOptions
         {

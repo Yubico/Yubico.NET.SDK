@@ -77,19 +77,27 @@ internal static class PivBioProtocol
     /// <summary>
     /// Verifies the user via biometric (fingerprint) and optionally retrieves a temporary PIN.
     /// </summary>
-    /// <param name="requestTemporaryPin">If true, requests a temporary PIN from the YubiKey.</param>
-    /// <param name="checkOnly">If true, only checks UV status without retrieving temporary PIN.</param>
+    /// <param name="userVerification">The user-verification mode.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>Temporary PIN if requestTemporaryPin is true, otherwise null. WARNING: Caller MUST zero this immediately after use!</returns>
+    /// <returns>A temporary PIN only for <see cref="PivUserVerification.VerifyAndRequestTemporaryPin" />; otherwise null. Caller must zero returned bytes immediately after use.</returns>
     /// <exception cref="NotSupportedException">Thrown if biometrics are not supported or configured.</exception>
     /// <exception cref="InvalidPinException">Thrown if biometric verification fails, with the remaining retry count.</exception>
     internal static async Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
         IPivBackend backend,
         ILogger logger,
-        bool requestTemporaryPin = false,
-        bool checkOnly = false,
+        PivUserVerification userVerification = PivUserVerification.Verify,
         CancellationToken cancellationToken = default)
     {
+        if (userVerification is < PivUserVerification.Verify or > PivUserVerification.CheckOnly)
+            throw new ArgumentOutOfRangeException(nameof(userVerification));
+
+        (bool requestTemporaryPin, bool checkOnly) = userVerification switch
+        {
+            PivUserVerification.Verify => (false, false),
+            PivUserVerification.VerifyAndRequestTemporaryPin => (true, false),
+            PivUserVerification.CheckOnly => (false, true),
+            _ => throw new ArgumentOutOfRangeException(nameof(userVerification))
+        };
         logger.LogDebug("PIV: Verifying user via biometric (checkOnly={CheckOnly})", checkOnly);
 
         // Build command data

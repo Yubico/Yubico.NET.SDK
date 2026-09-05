@@ -14,8 +14,7 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.WebAuthn.Client;
 
@@ -34,39 +33,32 @@ public static class IYubiKeyExtensions
         /// <param name="origin">The WebAuthn origin for client data JSON.</param>
         /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
         /// <param name="enterpriseRpIds">Optional set of enterprise-allowed RP IDs.</param>
-        /// <param name="scpKeyParams">Optional SCP key parameters for SmartCard FIDO2 sessions.</param>
-        /// <param name="configuration">Optional FIDO2 protocol configuration.</param>
-        /// <param name="preferredConnection">
-        /// Optional explicit transport override forwarded to the underlying FIDO2 session. When
-        /// <see langword="null"/> (the default), the FIDO2 default order applies
-        /// (<see cref="ConnectionType.HidFido"/>, then <see cref="ConnectionType.SmartCard"/>). To use SCP
-        /// on a device that also exposes HID FIDO, pass <see cref="ConnectionType.SmartCard"/>.
+        /// <param name="options">
+        /// Optional cross-cutting settings forwarded to the underlying FIDO2 session. When no preferred
+        /// connection is specified, the FIDO2 default order applies (<see cref="ConnectionType.HidFido"/>,
+        /// then <see cref="ConnectionType.SmartCard"/>). To use SCP on a device that also exposes HID FIDO,
+        /// set <see cref="SessionCreationOptions.PreferredConnectionType"/> to
+        /// <see cref="ConnectionType.SmartCard"/>.
         /// </param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying FIDO2 session.</returns>
         /// <remarks>
         /// The public suffix checker should be backed by Public Suffix List data. RP ID validation
         /// rejects public suffixes such as <c>com</c> and <c>co.uk</c> before any CTAP operation runs.
-        /// This method adds no independent transport logic; <paramref name="preferredConnection"/> is
-        /// validated and applied by the underlying FIDO2 <c>CreateFidoSessionAsync</c>.
+        /// This method adds no independent session-creation logic; <paramref name="options"/> is validated
+        /// and applied by the underlying FIDO2 <c>CreateFidoSessionAsync</c>.
         /// </remarks>
         public async Task<WebAuthnClient> CreateWebAuthnClientAsync(
             WebAuthnOrigin origin,
             PublicSuffixChecker isPublicSuffix,
             IReadOnlySet<string>? enterpriseRpIds = null,
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
-            ConnectionType? preferredConnection = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(origin);
             ArgumentNullException.ThrowIfNull(isPublicSuffix);
 
-            var fidoSession = await yubiKey.CreateFidoSessionAsync(
-                    scpKeyParams,
-                    configuration,
-                    preferredConnection,
-                    cancellationToken)
+            var fidoSession = await yubiKey.CreateFidoSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
 
             try
@@ -79,27 +71,5 @@ public static class IYubiKeyExtensions
                 throw;
             }
         }
-
-        /// <summary>
-        /// Source-compatibility overload preserving the pre-Phase-38 positional shape
-        /// (ending in <c>scpKeyParams, configuration, cancellationToken</c>); forwards using the FIDO2 default
-        /// transport order.
-        /// </summary>
-        /// <param name="origin">The WebAuthn origin for client data JSON.</param>
-        /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
-        /// <param name="enterpriseRpIds">Optional set of enterprise-allowed RP IDs.</param>
-        /// <param name="scpKeyParams">Optional SCP key parameters for SmartCard FIDO2 sessions.</param>
-        /// <param name="configuration">Optional FIDO2 protocol configuration.</param>
-        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-        /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying FIDO2 session.</returns>
-        public Task<WebAuthnClient> CreateWebAuthnClientAsync(
-            WebAuthnOrigin origin,
-            PublicSuffixChecker isPublicSuffix,
-            IReadOnlySet<string>? enterpriseRpIds,
-            ScpKeyParameters? scpKeyParams,
-            ProtocolConfiguration? configuration,
-            CancellationToken cancellationToken) =>
-            yubiKey.CreateWebAuthnClientAsync(
-                origin, isPublicSuffix, enterpriseRpIds, scpKeyParams, configuration, null, cancellationToken);
     }
 }

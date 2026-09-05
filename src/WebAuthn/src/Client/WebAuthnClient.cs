@@ -44,6 +44,8 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </remarks>
 public sealed class WebAuthnClient : IAsyncDisposable
 {
+    // Existing alpha constructors intentionally support both a FIDO session and an injectable backend.
+#pragma warning disable RS0026
     /// <summary>
     /// The maximum number of times the client asks an <see cref="ICredentialPrompt"/>
     /// for a PIN during a single operation.
@@ -120,6 +122,7 @@ public sealed class WebAuthnClient : IAsyncDisposable
         _enterpriseRpIds = enterpriseRpIds ?? new HashSet<string>();
         _prompt = prompt;
     }
+#pragma warning restore RS0026
 
     /// <summary>
     /// Creates a new WebAuthn credential via CTAP2 MakeCredential.

@@ -59,7 +59,8 @@ public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettin
             }
         }
 
-        await using var session = await deviceContext.Device.CreateManagementSessionAsync(preferredConnection: deviceContext.PreferredConnection);
+        await using var session = await deviceContext.Device.CreateManagementSessionAsync(
+            deviceContext.SessionOptions);
         await session.ResetDeviceAsync();
 
         OutputHelpers.WriteSuccess("Device has been factory reset.");

@@ -88,7 +88,7 @@ internal static class PivCertificateProtocol
     /// </summary>
     /// <param name="slot">The slot to write to.</param>
     /// <param name="certificate">The certificate to store.</param>
-    /// <param name="compress">Whether to compress the certificate (default: auto-compress if > 1856 bytes).</param>
+    /// <param name="compression">Whether to always compress or automatically compress certificates over 1856 bytes.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     internal static async Task StoreCertificateAsync(
         IPivBackend backend,
@@ -96,7 +96,7 @@ internal static class PivCertificateProtocol
         bool isAuthenticated,
         PivSlot slot,
         X509Certificate2 certificate,
-        bool compress = false,
+        PivCertificateCompression compression = PivCertificateCompression.Automatic,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Storing certificate in slot 0x{Slot:X2}", (byte)slot);
@@ -107,7 +107,7 @@ internal static class PivCertificateProtocol
         }
 
         var certBytes = certificate.RawData;
-        bool shouldCompress = compress || certBytes.Length > 1856;
+        bool shouldCompress = compression == PivCertificateCompression.Always || certBytes.Length > 1856;
 
         if (shouldCompress)
         {

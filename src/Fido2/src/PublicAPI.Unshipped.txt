@@ -1,0 +1,969 @@
+#nullable enable
+
+Yubico.YubiKit.Fido2.AuthenticatorInfo
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Aaguid.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Aaguid.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Algorithms.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.PublicKeyCredentialParameters!>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Algorithms.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.AttestationFormats.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.AttestationFormats.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.AuthenticatorConfigCommands.get -> System.Collections.Generic.IReadOnlyList<int>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.AuthenticatorConfigCommands.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.AuthenticatorInfo() -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Certifications.get -> System.Collections.Generic.IReadOnlyDictionary<string!, int>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Certifications.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.EncCredStoreState.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.EncCredStoreState.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.EncIdentifier.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.EncIdentifier.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Extensions.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Extensions.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.FirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.FirmwareVersion.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.ForcePinChange.get -> bool?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.ForcePinChange.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.LongTouchForReset.get -> bool?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.LongTouchForReset.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxCredBlobLength.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxCredBlobLength.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxCredentialCountInList.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxCredentialCountInList.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxCredentialIdLength.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxCredentialIdLength.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxMsgSize.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxMsgSize.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxPinLength.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxPinLength.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxRpidsForSetMinPinLength.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxRpidsForSetMinPinLength.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxSerializedLargeBlobArray.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MaxSerializedLargeBlobArray.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MinPinLength.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.MinPinLength.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Options.get -> System.Collections.Generic.IReadOnlyDictionary<string!, bool>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Options.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.PinComplexityPolicy.get -> bool?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.PinComplexityPolicy.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.PinComplexityPolicyUrl.get -> string?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.PinComplexityPolicyUrl.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.PinUvAuthProtocols.get -> System.Collections.Generic.IReadOnlyList<int>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.PinUvAuthProtocols.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.PreferredPlatformUvAttempts.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.PreferredPlatformUvAttempts.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.RemainingDiscoverableCredentials.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.RemainingDiscoverableCredentials.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Transports.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Transports.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.TransportsForReset.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.TransportsForReset.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.UvCountSinceLastPinEntry.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.UvCountSinceLastPinEntry.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.UvModality.get -> int?
+Yubico.YubiKit.Fido2.AuthenticatorInfo.UvModality.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.VendorPrototypeConfigCommands.get -> System.Collections.Generic.IReadOnlyList<int>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.VendorPrototypeConfigCommands.init -> void
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Versions.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Yubico.YubiKit.Fido2.AuthenticatorInfo.Versions.init -> void
+Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentEnumerationResult
+Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentEnumerationResult.EnrollmentEnumerationResult() -> void
+Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentEnumerationResult.Templates.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.BioEnrollment.TemplateInfo!>!
+Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult
+Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult.EnrollmentSampleResult() -> void
+Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult.IsComplete.get -> bool
+Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult.LastSampleStatus.get -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult.RemainingSamples.get -> int
+Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult.TemplateId.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintBioEnrollment
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintBioEnrollment.EnrollBeginAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult!>!
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintBioEnrollment.EnrollCancelAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintBioEnrollment.EnrollCaptureNextSampleAsync(System.ReadOnlyMemory<byte> templateId, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult!>!
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintBioEnrollment.EnumerateEnrollmentsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.BioEnrollment.TemplateInfo!>!>!
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintBioEnrollment.FingerprintBioEnrollment(Yubico.YubiKit.Fido2.IFidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlyMemory<byte> pinUvAuthToken, bool usePreviewCommand = false) -> void
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintBioEnrollment.GetFingerprintSensorInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSensorInfo!>!
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintBioEnrollment.RemoveEnrollmentAsync(System.ReadOnlyMemory<byte> templateId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintBioEnrollment.SetFriendlyNameAsync(System.ReadOnlyMemory<byte> templateId, string! friendlyName, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintKind
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintKind.Swipe = 2 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintKind
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintKind.Touch = 1 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintKind
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintModality
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.Good = 0 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.MergeFailure = 10 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.NoUserActivity = 12 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.NoUserPresence = 13 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.PoorQuality = 7 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.StorageFull = 11 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.TooFast = 5 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.TooHigh = 1 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.TooLeft = 3 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.TooLow = 2 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.TooRight = 4 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.TooShort = 9 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.TooSkewed = 8 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus.TooSlow = 6 -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSensorInfo
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSensorInfo.FingerprintKind.get -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintKind
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSensorInfo.FingerprintSensorInfo() -> void
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSensorInfo.MaxCaptureSamplesRequiredForEnroll.get -> int
+Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSensorInfo.MaxTemplateCount.get -> int?
+Yubico.YubiKit.Fido2.BioEnrollment.TemplateInfo
+Yubico.YubiKit.Fido2.BioEnrollment.TemplateInfo.FriendlyName.get -> string?
+Yubico.YubiKit.Fido2.BioEnrollment.TemplateInfo.SampleCount.get -> int?
+Yubico.YubiKit.Fido2.BioEnrollment.TemplateInfo.TemplateId.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.BioEnrollment.TemplateInfo.TemplateInfo() -> void
+Yubico.YubiKit.Fido2.Cbor.AaguidConverter
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.Build() -> byte[]!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.BuildAsMemory() -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithArray(int key, System.Action<System.Formats.Cbor.CborWriter!>! writeArray) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithBool(int key, bool value) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithBytes(int key, System.ReadOnlyMemory<byte> value) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithBytes(int key, System.ReadOnlySpan<byte> value) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithEncodedValue(int key, System.ReadOnlyMemory<byte> encodedValue) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithInt(int key, int value) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithMap(int key, System.Action<System.Formats.Cbor.CborWriter!>! writeMap) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithString(int key, string! value) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithUInt(int key, uint value) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.WithValue(int key, System.Action<System.Formats.Cbor.CborWriter!>! writeValue) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+Yubico.YubiKit.Fido2.Config.AuthenticatorConfig
+Yubico.YubiKit.Fido2.Config.AuthenticatorConfig.AuthenticatorConfig(Yubico.YubiKit.Fido2.IFidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlyMemory<byte> pinUvAuthToken) -> void
+Yubico.YubiKit.Fido2.Config.AuthenticatorConfig.EnableEnterpriseAttestationAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.Config.AuthenticatorConfig.SetMinPinLengthAsync(int newMinPinLength, System.Collections.Generic.IReadOnlyList<string!>? rpIds = null, bool forceChangePin = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.Config.AuthenticatorConfig.ToggleAlwaysUvAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.CoseAlgorithm() -> void
+Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.CoseAlgorithm(int Value) -> void
+Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Deconstruct(out int Value) -> void
+Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Equals(Yubico.YubiKit.Fido2.Cose.CoseAlgorithm other) -> bool
+Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.IsKnown.get -> bool
+Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Value.get -> int
+Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Value.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.BlPublicKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.BlPublicKey.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.CoseArkgP256SeedKey(Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, Yubico.YubiKit.Fido2.Cose.CoseAlgorithm DerivedKeyAlgorithm, System.ReadOnlyMemory<byte> KemPublicKey, System.ReadOnlyMemory<byte> BlPublicKey) -> void
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.Deconstruct(out Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, out Yubico.YubiKit.Fido2.Cose.CoseAlgorithm DerivedKeyAlgorithm, out System.ReadOnlyMemory<byte> KemPublicKey, out System.ReadOnlyMemory<byte> BlPublicKey) -> void
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.DerivedKeyAlgorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.DerivedKeyAlgorithm.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.Equals(Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey? other) -> bool
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.KemPublicKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.KemPublicKey.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key.CoseEc2Key(Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, int Curve, System.ReadOnlyMemory<byte> X, System.ReadOnlyMemory<byte> Y) -> void
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Curve.get -> int
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Curve.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Deconstruct(out Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, out int Curve, out System.ReadOnlyMemory<byte> X, out System.ReadOnlyMemory<byte> Y) -> void
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Equals(Yubico.YubiKit.Fido2.Cose.CoseEc2Key? other) -> bool
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key.X.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key.X.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Y.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Y.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseKey
+Yubico.YubiKit.Fido2.Cose.CoseKey.CoseKey() -> void
+Yubico.YubiKit.Fido2.Cose.CoseKey.CoseKey(Yubico.YubiKit.Fido2.Cose.CoseKey! original) -> void
+Yubico.YubiKit.Fido2.Cose.CoseOkpKey
+Yubico.YubiKit.Fido2.Cose.CoseOkpKey.CoseOkpKey(Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, int Curve, System.ReadOnlyMemory<byte> X) -> void
+Yubico.YubiKit.Fido2.Cose.CoseOkpKey.Curve.get -> int
+Yubico.YubiKit.Fido2.Cose.CoseOkpKey.Curve.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseOkpKey.Deconstruct(out Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, out int Curve, out System.ReadOnlyMemory<byte> X) -> void
+Yubico.YubiKit.Fido2.Cose.CoseOkpKey.Equals(Yubico.YubiKit.Fido2.Cose.CoseOkpKey? other) -> bool
+Yubico.YubiKit.Fido2.Cose.CoseOkpKey.X.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Cose.CoseOkpKey.X.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseOtherKey
+Yubico.YubiKit.Fido2.Cose.CoseOtherKey.CoseOtherKey(int KeyType, Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, System.ReadOnlyMemory<byte> RawCbor) -> void
+Yubico.YubiKit.Fido2.Cose.CoseOtherKey.Deconstruct(out int KeyType, out Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, out System.ReadOnlyMemory<byte> RawCbor) -> void
+Yubico.YubiKit.Fido2.Cose.CoseOtherKey.Equals(Yubico.YubiKit.Fido2.Cose.CoseOtherKey? other) -> bool
+Yubico.YubiKit.Fido2.Cose.CoseOtherKey.RawCbor.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Cose.CoseOtherKey.RawCbor.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseRsaKey
+Yubico.YubiKit.Fido2.Cose.CoseRsaKey.CoseRsaKey(Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, System.ReadOnlyMemory<byte> Modulus, System.ReadOnlyMemory<byte> Exponent) -> void
+Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Deconstruct(out Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, out System.ReadOnlyMemory<byte> Modulus, out System.ReadOnlyMemory<byte> Exponent) -> void
+Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Equals(Yubico.YubiKit.Fido2.Cose.CoseRsaKey? other) -> bool
+Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Exponent.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Exponent.init -> void
+Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Modulus.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Modulus.init -> void
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.CredentialManagement(Yubico.YubiKit.Fido2.FidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlyMemory<byte> pinUvAuthToken) -> void
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.DeleteCredentialAsync(Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor! credentialId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.Dispose() -> void
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.EnumerateCredentialsAsync(System.ReadOnlyMemory<byte> rpIdHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo!>!>!
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.EnumerateRelyingPartiesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo!>!>!
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.GetCredentialsMetadataAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata!>!
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.UpdateUserInformationAsync(Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor! credentialId, Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity! user, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata.ExistingResidentCredentialsCount.get -> int
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata.MaxPossibleRemainingResidentCredentialsCount.get -> int
+Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo
+Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo.RelyingParty.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity!
+Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo.RpIdHash.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo.TotalRpCount.get -> int?
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.CredProtectPolicy.get -> int?
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.CredentialId.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.LargeBlobKey.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.PublicKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.ThirdPartyPayment.get -> bool?
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.TotalCredentials.get -> int?
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.User.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity!
+Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement
+Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.AppleAttestationStatement(System.Collections.Generic.IReadOnlyList<System.ReadOnlyMemory<byte>>! x5c, System.ReadOnlyMemory<byte> rawCbor) -> void
+Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement? other) -> bool
+Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.X5c.get -> System.Collections.Generic.IReadOnlyList<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+Yubico.YubiKit.Fido2.Credentials.AttestationFormat.AttestationFormat() -> void
+Yubico.YubiKit.Fido2.Credentials.AttestationFormat.AttestationFormat(string! Value) -> void
+Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Deconstruct(out string! Value) -> void
+Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Equals(Yubico.YubiKit.Fido2.Credentials.AttestationFormat other) -> bool
+Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Value.get -> string!
+Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Value.init -> void
+Yubico.YubiKit.Fido2.Credentials.AttestationStatement
+Yubico.YubiKit.Fido2.Credentials.AttestationStatement.AttestationStatement() -> void
+Yubico.YubiKit.Fido2.Credentials.AttestationStatement.AttestationStatement(Yubico.YubiKit.Fido2.Credentials.AttestationStatement! original) -> void
+Yubico.YubiKit.Fido2.Credentials.AttestedCredentialData
+Yubico.YubiKit.Fido2.Credentials.AttestedCredentialData.Aaguid.get -> System.Guid
+Yubico.YubiKit.Fido2.Credentials.AttestedCredentialData.CredentialId.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.AttestedCredentialData.CredentialPublicKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.AttestedCredentialData.get -> Yubico.YubiKit.Fido2.Credentials.AttestedCredentialData?
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.BackedUp.get -> bool
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.BackupEligible.get -> bool
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.Extensions.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.Flags.get -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.HasAttestedCredentialData.get -> bool
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.HasExtensions.get -> bool
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.RawData.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.RpIdHash.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.SignCount.get -> uint
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.UserPresent.get -> bool
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.UserVerified.get -> bool
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.VerifyRpIdHash(string! rpId) -> bool
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags.AttestedCredentialData = 64 -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags.BackupEligibility = 8 -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags.BackupState = 16 -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags.ExtensionData = 128 -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags.None = 0 -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags.RFU1 = 2 -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags.RFU2 = 32 -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags.UserPresent = 1 -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags.UserVerified = 4 -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorDataFlags
+Yubico.YubiKit.Fido2.Credentials.FidoCredentialOptions
+Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement
+Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement? other) -> bool
+Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.FidoU2FAttestationStatement(System.ReadOnlyMemory<byte> signature, System.Collections.Generic.IReadOnlyList<System.ReadOnlyMemory<byte>>! x5c, System.ReadOnlyMemory<byte> rawCbor) -> void
+Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.Signature.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.X5c.get -> System.Collections.Generic.IReadOnlyList<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.AllowList.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!>?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.AllowList.set -> void
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.Extensions.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.Extensions.set -> void
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.GetAssertionOptions() -> void
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.PinUvAuthParam.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.PinUvAuthParam.set -> void
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.PinUvAuthProtocol.get -> int?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.PinUvAuthProtocol.set -> void
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.UserPresence.get -> bool?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.UserPresence.set -> void
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.UserVerification.get -> bool?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.UserVerification.set -> void
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.WithAllowList(System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!>! allowList) -> Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions!
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.WithAllowList(params System.ReadOnlyMemory<byte>[]! credentialIds) -> Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions!
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.WithPinUvAuth(System.ReadOnlyMemory<byte> param, int protocol) -> Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions!
+Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions.WithUserVerification(bool value) -> Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions!
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.AuthenticatorData.get -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorData!
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.AuthenticatorDataRaw.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.Credential.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.ExtensionOutputs.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.GetCredentialId() -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.GetUserHandle() -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.LargeBlobKey.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.NumberOfCredentials.get -> int?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.Signature.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.User.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity?
+Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.UserSelected.get -> bool?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.EnterpriseAttestation.get -> int?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.EnterpriseAttestation.set -> void
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.ExcludeList.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!>?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.ExcludeList.set -> void
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.Extensions.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.Extensions.set -> void
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.MakeCredentialOptions() -> void
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.PinUvAuthParam.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.PinUvAuthParam.set -> void
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.PinUvAuthProtocol.get -> int?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.PinUvAuthProtocol.set -> void
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.ResidentKey.get -> bool?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.ResidentKey.set -> void
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.UserPresence.get -> bool?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.UserPresence.set -> void
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.UserVerification.get -> bool?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.UserVerification.set -> void
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.WithExcludeList(System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!>! excludeList) -> Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions!
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.WithPinUvAuth(System.ReadOnlyMemory<byte> param, int protocol) -> Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions!
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.WithResidentKey(bool value) -> Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions!
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions.WithUserVerification(bool value) -> Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions!
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.AttestationStatement.get -> Yubico.YubiKit.Fido2.Credentials.AttestationStatement!
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.AuthenticatorData.get -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorData!
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.AuthenticatorDataRaw.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.EnterpriseAttestation.get -> bool?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.ExtensionOutputs.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.Format.get -> string!
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.GetAaguid() -> System.Guid
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.GetCredentialId() -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.GetCredentialPublicKey() -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.LargeBlobKey.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.UnsignedExtensionOutputs.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.ReadOnlyMemory<byte>>?
+Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement
+Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement? other) -> bool
+Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.NoneAttestationStatement(System.ReadOnlyMemory<byte> rawCbor) -> void
+Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement
+Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.Algorithm.get -> int
+Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.EcdaaKeyId.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement? other) -> bool
+Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.PackedAttestationStatement(int algorithm, System.ReadOnlyMemory<byte> signature, System.Collections.Generic.IReadOnlyList<System.ReadOnlyMemory<byte>>? x5c, System.ReadOnlyMemory<byte>? ecdaaKeyId, System.ReadOnlyMemory<byte> rawCbor) -> void
+Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.Signature.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.X5c.get -> System.Collections.Generic.IReadOnlyList<System.ReadOnlyMemory<byte>>?
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor.Id.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor.PublicKeyCredentialDescriptor(System.ReadOnlyMemory<byte> id, string! type = "public-key", System.Collections.Generic.IReadOnlyList<string!>? transports = null) -> void
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor.Transports.get -> System.Collections.Generic.IReadOnlyList<string!>?
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor.Type.get -> string!
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity.Id.get -> string!
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity.Name.get -> string?
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity.PublicKeyCredentialRpEntity(string! id, string? name = null) -> void
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity.DisplayName.get -> string?
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity.Id.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity.Name.get -> string?
+Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity.PublicKeyCredentialUserEntity(System.ReadOnlyMemory<byte> id, string! name, string! displayName) -> void
+Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement
+Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement? other) -> bool
+Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.UnknownAttestationStatement(Yubico.YubiKit.Fido2.Credentials.AttestationFormat format, System.ReadOnlyMemory<byte> rawCbor) -> void
+Yubico.YubiKit.Fido2.Crypto.EncryptedMetadataDecryptor
+Yubico.YubiKit.Fido2.Ctap.CtapCommand
+Yubico.YubiKit.Fido2.Ctap.CtapException
+Yubico.YubiKit.Fido2.Ctap.CtapException.CtapException(Yubico.YubiKit.Fido2.Ctap.CtapStatus status) -> void
+Yubico.YubiKit.Fido2.Ctap.CtapException.CtapException(Yubico.YubiKit.Fido2.Ctap.CtapStatus status, string! message) -> void
+Yubico.YubiKit.Fido2.Ctap.CtapException.CtapException(Yubico.YubiKit.Fido2.Ctap.CtapStatus status, string! message, System.Exception! innerException) -> void
+Yubico.YubiKit.Fido2.Ctap.CtapException.Status.get -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.ActionTimeout = 58 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.CborUnexpectedType = 17 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.ChannelBusy = 6 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.CredentialExcluded = 25 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.ExtensionFirst = 224 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.ExtensionLast = 239 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.FpDatabaseFull = 23 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.IntegrityFailure = 61 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.InvalidCbor = 18 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.InvalidChannel = 11 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.InvalidCommand = 1 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.InvalidCredential = 34 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.InvalidLength = 3 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.InvalidOption = 44 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.InvalidParameter = 2 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.InvalidSeq = 4 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.InvalidSubcommand = 62 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.KeepAliveCancel = 45 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.KeyStoreFull = 40 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.LargeBlobStorageFull = 24 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.LimitExceeded = 21 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.LockRequired = 10 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.MissingParameter = 20 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.NoCredentials = 46 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.NoOperations = 37 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.NotAllowed = 48 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.OperationDenied = 39 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.OperationPending = 36 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.Other = 127 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.PinAuthBlocked = 52 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.PinAuthInvalid = 51 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.PinBlocked = 50 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.PinInvalid = 49 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.PinNotSet = 53 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.PinPolicyViolation = 55 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.PinTokenExpired = 56 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.Processing = 33 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.PuatRequired = 54 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.RequestTooLarge = 57 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.Success = 0 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.Timeout = 5 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.UnauthorizedPermission = 64 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.UnsupportedAlgorithm = 38 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.UnsupportedOption = 43 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.UpRequired = 59 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.UserActionPending = 35 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.UserActionTimeout = 47 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.UvBlocked = 60 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.UvInvalid = 63 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.VendorFirst = 240 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Ctap.CtapStatus.VendorLast = 255 -> Yubico.YubiKit.Fido2.Ctap.CtapStatus
+Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs
+Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.ArkgP256SignArgs(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> context) -> void
+Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.Context.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.Equals(Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs? other) -> bool
+Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.KeyHandle.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.CoseSignArgs
+Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.CoseSignArgs(Yubico.YubiKit.Fido2.Extensions.CoseSignArgs! original) -> void
+Yubico.YubiKit.Fido2.Extensions.CredBlobAssertionOutput
+Yubico.YubiKit.Fido2.Extensions.CredBlobAssertionOutput.Blob.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.CredBlobAssertionOutput.Blob.init -> void
+Yubico.YubiKit.Fido2.Extensions.CredBlobAssertionOutput.CredBlobAssertionOutput() -> void
+Yubico.YubiKit.Fido2.Extensions.CredBlobInput
+Yubico.YubiKit.Fido2.Extensions.CredBlobInput.Blob.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.CredBlobInput.Blob.init -> void
+Yubico.YubiKit.Fido2.Extensions.CredBlobInput.CredBlobInput() -> void
+Yubico.YubiKit.Fido2.Extensions.CredBlobInput.Encode() -> byte[]!
+Yubico.YubiKit.Fido2.Extensions.CredBlobInput.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput
+Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput.CredBlobMakeCredentialOutput() -> void
+Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput.Stored.get -> bool
+Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput.Stored.init -> void
+Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy
+Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy.UserVerificationOptional = 1 -> Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy
+Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy.UserVerificationOptionalWithCredentialIdList = 2 -> Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy
+Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy.UserVerificationRequired = 3 -> Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.Build() -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.ExtensionBuilder() -> void
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithCredBlob(System.ReadOnlyMemory<byte> blob) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithCredProtect(Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy policy, bool enforcePolicy = false) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecret(Yubico.YubiKit.Fido2.Extensions.HmacSecretInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecret(Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlySpan<byte> sharedSecret, System.Collections.Generic.IReadOnlyDictionary<int, object?>! keyAgreement, System.ReadOnlySpan<byte> salt1, System.ReadOnlySpan<byte> salt2 = default(System.ReadOnlySpan<byte>)) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecretMakeCredential() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlob(Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport support = Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport.Preferred) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlobKey() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlobRead() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlobWrite(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithMinPinLength() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPrf() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPrf(Yubico.YubiKit.Fido2.Extensions.PrfInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.ExtensionIds.get -> System.Collections.Generic.IEnumerable<string!>!
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.HasExtensions.get -> bool
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.TryGetCredBlob(out System.ReadOnlyMemory<byte> blob) -> bool
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.TryGetCredBlobStored(out bool stored) -> bool
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.TryGetCredProtect(out Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy policy) -> bool
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.TryGetHmacSecret(out Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput? output) -> bool
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.TryGetLargeBlob(out Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput? output) -> bool
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.TryGetLargeBlobKey(out System.ReadOnlyMemory<byte> key) -> bool
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.TryGetMinPinLength(out int minLength) -> bool
+Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.TryGetRawExtension(string! extensionId, out System.ReadOnlyMemory<byte> data) -> bool
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.Encode() -> byte[]!
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.HmacSecretInput() -> void
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.KeyAgreement.get -> System.Collections.Generic.IReadOnlyDictionary<int, object?>!
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.KeyAgreement.init -> void
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.PinUvAuthProtocol.get -> int
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.PinUvAuthProtocol.init -> void
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.SaltAuth.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.SaltAuth.init -> void
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.SaltEnc.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.HmacSecretInput.SaltEnc.init -> void
+Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput
+Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput.HmacSecretOutput() -> void
+Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput.Output.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput.Output.init -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput
+Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Encode() -> byte[]!
+Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.LargeBlobAssertionInput() -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Read.get -> bool
+Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Read.init -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Write.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Write.init -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobInput
+Yubico.YubiKit.Fido2.Extensions.LargeBlobInput.Encode() -> byte[]!
+Yubico.YubiKit.Fido2.Extensions.LargeBlobInput.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobInput.LargeBlobInput() -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobInput.Support.get -> Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport
+Yubico.YubiKit.Fido2.Extensions.LargeBlobInput.Support.init -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput
+Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput.Blob.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput.Blob.init -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput.LargeBlobKey.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput.LargeBlobKey.init -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput.LargeBlobOutput() -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput.Written.get -> bool?
+Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput.Written.init -> void
+Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport
+Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport.Preferred = 0 -> Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport
+Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport.Required = 1 -> Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput.Encode() -> byte[]!
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput.MinPinLengthInput() -> void
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput.Requested.get -> bool
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput.Requested.init -> void
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput.MinPinLength.get -> int
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput.MinPinLength.init -> void
+Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput.MinPinLengthOutput() -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput
+Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput.PreviewSignAuthenticationInput(System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams!>! signByCredential) -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput.SignByCredential.get -> System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams!>!
+Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput.SignByCredential.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationOutput
+Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationOutput.PreviewSignAuthenticationOutput(System.ReadOnlyMemory<byte> signature) -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationOutput.Signature.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationOutput.Signature.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.AttStmtRawCbor.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.AttStmtRawCbor.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.AuthData.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.AuthData.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.Deconstruct(out string! Fmt, out System.ReadOnlyMemory<byte> AuthData, out System.ReadOnlyMemory<byte> AttStmtRawCbor) -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.Equals(Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject other) -> bool
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.Fmt.get -> string!
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.Fmt.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.InnerAttestationObject() -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.InnerAttestationObject(string! Fmt, System.ReadOnlyMemory<byte> AuthData, System.ReadOnlyMemory<byte> AttStmtRawCbor) -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey.ArkgKeyHandle.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey.ArkgKeyHandle.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey.Context.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey.Context.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey.DeviceKeyHandle.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey.DeviceKeyHandle.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey.PublicKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey.PublicKey.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey.VerifySignature(System.ReadOnlySpan<byte> message, System.ReadOnlySpan<byte> signature) -> bool
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.BlindingPublicKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.BlindingPublicKey.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.DerivePublicKey(System.ReadOnlySpan<byte> ikm, System.ReadOnlySpan<byte> ctx) -> Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey!
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.DerivedKeyAlgorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.DerivedKeyAlgorithm.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.KemPublicKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.KemPublicKey.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.KeyHandle.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.KeyHandle.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput.Algorithms.get -> System.Collections.Generic.IReadOnlyList<int>!
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput.Algorithms.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput.Flags.get -> byte
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput.Flags.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput.PreviewSignRegistrationInput(System.Collections.Generic.IReadOnlyList<int>! algorithms, byte flags = 1) -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.Algorithm.get -> int
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.Algorithm.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.AttestationObject.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.AttestationObject.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.KeyHandle.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.KeyHandle.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.PreviewSignRegistrationOutput(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> publicKey, int algorithm, System.ReadOnlyMemory<byte>? attestationObject = null) -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.PublicKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.PublicKey.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationOutput.TryGetGeneratedKey() -> Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey?
+Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams
+Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.AdditionalArgs.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.AdditionalArgs.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.KeyHandle.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.KeyHandle.init -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.PreviewSignSigningParams(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> tbs, System.ReadOnlyMemory<byte>? additionalArgs = null) -> void
+Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.Tbs.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.Tbs.init -> void
+Yubico.YubiKit.Fido2.Extensions.PrfInput
+Yubico.YubiKit.Fido2.Extensions.PrfInput.EvalByCredential.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Yubico.YubiKit.Fido2.Extensions.PrfInputValues!>?
+Yubico.YubiKit.Fido2.Extensions.PrfInput.EvalByCredential.init -> void
+Yubico.YubiKit.Fido2.Extensions.PrfInput.First.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.PrfInput.First.init -> void
+Yubico.YubiKit.Fido2.Extensions.PrfInput.PrfInput() -> void
+Yubico.YubiKit.Fido2.Extensions.PrfInput.Second.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.PrfInput.Second.init -> void
+Yubico.YubiKit.Fido2.Extensions.PrfInputValues
+Yubico.YubiKit.Fido2.Extensions.PrfInputValues.First.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.Extensions.PrfInputValues.First.init -> void
+Yubico.YubiKit.Fido2.Extensions.PrfInputValues.PrfInputValues() -> void
+Yubico.YubiKit.Fido2.Extensions.PrfInputValues.Second.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.PrfInputValues.Second.init -> void
+Yubico.YubiKit.Fido2.Extensions.PrfOutput
+Yubico.YubiKit.Fido2.Extensions.PrfOutput.Enabled.get -> bool
+Yubico.YubiKit.Fido2.Extensions.PrfOutput.Enabled.init -> void
+Yubico.YubiKit.Fido2.Extensions.PrfOutput.First.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.PrfOutput.First.init -> void
+Yubico.YubiKit.Fido2.Extensions.PrfOutput.PrfOutput() -> void
+Yubico.YubiKit.Fido2.Extensions.PrfOutput.Second.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Fido2.Extensions.PrfOutput.Second.init -> void
+Yubico.YubiKit.Fido2.FidoSession
+Yubico.YubiKit.Fido2.FidoSession.GetAssertionAsync(string! rpId, System.ReadOnlyMemory<byte> clientDataHash, Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse!>!
+Yubico.YubiKit.Fido2.FidoSession.GetInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.AuthenticatorInfo!>!
+Yubico.YubiKit.Fido2.FidoSession.GetNextAssertionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse!>!
+Yubico.YubiKit.Fido2.FidoSession.MakeCredentialAsync(System.ReadOnlyMemory<byte> clientDataHash, Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity! rp, Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity! user, System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.PublicKeyCredentialParameters!>! pubKeyCredParams, Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse!>!
+Yubico.YubiKit.Fido2.FidoSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.FidoSession.SelectionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.FidoSession.SendCborRequestAsync(System.ReadOnlyMemory<byte> request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Fido2.IFidoSession
+Yubico.YubiKit.Fido2.IFidoSession.GetAssertionAsync(string! rpId, System.ReadOnlyMemory<byte> clientDataHash, Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse!>!
+Yubico.YubiKit.Fido2.IFidoSession.GetInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.AuthenticatorInfo!>!
+Yubico.YubiKit.Fido2.IFidoSession.GetNextAssertionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse!>!
+Yubico.YubiKit.Fido2.IFidoSession.MakeCredentialAsync(System.ReadOnlyMemory<byte> clientDataHash, Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity! rp, Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity! user, System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.PublicKeyCredentialParameters!>! pubKeyCredParams, Yubico.YubiKit.Fido2.Credentials.MakeCredentialOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse!>!
+Yubico.YubiKit.Fido2.IFidoSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.IFidoSession.SelectionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.IFidoSession.SendCborRequestAsync(System.ReadOnlyMemory<byte> request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Fido2.IYubiKeyExtensions
+Yubico.YubiKit.Fido2.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!)
+Yubico.YubiKit.Fido2.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CreateFidoSessionAsync(Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.FidoSession!>!
+Yubico.YubiKit.Fido2.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).GetFidoInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.AuthenticatorInfo!>!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.Entries.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry!>!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.Entries.init -> void
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.FindAndDecrypt(System.ReadOnlySpan<byte> largeBlobKey) -> byte[]?
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.LargeBlobArray() -> void
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.Serialize() -> byte[]!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.WithEntry(Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry! entry) -> Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.WithoutEntry(int index) -> Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.EncryptedData.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.EncryptedData.init -> void
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.LargeBlobEntry() -> void
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.TryDecrypt(System.ReadOnlySpan<byte> largeBlobKey) -> byte[]?
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.DeleteBlobAsync(System.ReadOnlyMemory<byte> largeBlobKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.GetBlobAsync(System.ReadOnlyMemory<byte> largeBlobKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]?>!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.LargeBlobStorage(Yubico.YubiKit.Fido2.IFidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlyMemory<byte> pinUvAuthToken, int maxFragmentLength = 1024) -> void
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.LargeBlobStorage(Yubico.YubiKit.Fido2.IFidoSession! session, int maxFragmentLength = 1024) -> void
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.ReadLargeBlobArrayAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray!>!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.SetBlobAsync(System.ReadOnlyMemory<byte> largeBlobKey, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.WriteLargeBlobArrayAsync(Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray! array, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.Pin.ClientPin
+Yubico.YubiKit.Fido2.Pin.ClientPin.ChangePinAsync(System.ReadOnlyMemory<byte> currentPinUtf8, System.ReadOnlyMemory<byte> newPinUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.Pin.ClientPin.ClientPin(Yubico.YubiKit.Fido2.IFidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol) -> void
+Yubico.YubiKit.Fido2.Pin.ClientPin.Dispose() -> void
+Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(int PinRetries, bool PowerCycleRequired)>!
+Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinTokenAsync(System.ReadOnlyMemory<byte> pinUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinUvAuthTokenUsingPinAsync(System.ReadOnlyMemory<byte> pinUtf8, Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions permissions, string? rpId = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinUvAuthTokenUsingUvAsync(Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions permissions, string? rpId = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Yubico.YubiKit.Fido2.Pin.ClientPin.GetUvRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(int UvRetries, bool PowerCycleRequired)>!
+Yubico.YubiKit.Fido2.Pin.ClientPin.Protocol.get -> Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol!
+Yubico.YubiKit.Fido2.Pin.ClientPin.SetPinAsync(System.ReadOnlyMemory<byte> newPinUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand
+Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol
+Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Authenticate(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.AuthenticationTagLength.get -> int
+Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Decrypt(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> ciphertext) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Encapsulate(System.Collections.Generic.IReadOnlyDictionary<int, object?>! peerCoseKey) -> (System.Collections.Generic.Dictionary<int, object?>! KeyAgreement, byte[]! SharedSecret)
+Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Encrypt(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> plaintext) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Kdf(System.ReadOnlySpan<byte> z) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Verify(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message, System.ReadOnlySpan<byte> signature) -> bool
+Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Version.get -> int
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.Authenticate(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.AuthenticationTagLength.get -> int
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.Decrypt(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> ciphertext) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.Dispose() -> void
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.Encapsulate(System.Collections.Generic.IReadOnlyDictionary<int, object?>! peerCoseKey) -> (System.Collections.Generic.Dictionary<int, object?>! KeyAgreement, byte[]! SharedSecret)
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.Encrypt(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> plaintext) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.Kdf(System.ReadOnlySpan<byte> z) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.PinUvAuthProtocolV1() -> void
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.Verify(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message, System.ReadOnlySpan<byte> signature) -> bool
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.Version.get -> int
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.Authenticate(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.AuthenticationTagLength.get -> int
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.Decrypt(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> ciphertext) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.Dispose() -> void
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.Encapsulate(System.Collections.Generic.IReadOnlyDictionary<int, object?>! peerCoseKey) -> (System.Collections.Generic.Dictionary<int, object?>! KeyAgreement, byte[]! SharedSecret)
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.Encrypt(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> plaintext) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.Kdf(System.ReadOnlySpan<byte> z) -> byte[]!
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.PinUvAuthProtocolV2() -> void
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.Verify(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message, System.ReadOnlySpan<byte> signature) -> bool
+Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.Version.get -> int
+Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.AuthenticatorConfig = 32 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.BioEnrollment = 8 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.CredentialManagement = 4 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.CredentialManagementRO = 64 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.GetAssertion = 2 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.LargeBlobWrite = 16 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.MakeCredential = 1 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.None = 0 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.PublicKeyCredentialParameters
+Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.Algorithm.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
+Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.Algorithm.init -> void
+Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.Encode(System.Formats.Cbor.CborWriter! writer) -> void
+Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.PublicKeyCredentialParameters() -> void
+Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.PublicKeyCredentialParameters(Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier algorithm) -> void
+Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.Type.get -> string!
+Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.Type.init -> void
+abstract Yubico.YubiKit.Fido2.Cose.CoseKey.<Clone>$() -> Yubico.YubiKit.Fido2.Cose.CoseKey!
+abstract Yubico.YubiKit.Fido2.Cose.CoseKey.Algorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+abstract Yubico.YubiKit.Fido2.Cose.CoseKey.Encode() -> byte[]!
+abstract Yubico.YubiKit.Fido2.Cose.CoseKey.KeyType.get -> int
+abstract Yubico.YubiKit.Fido2.Credentials.AttestationStatement.<Clone>$() -> Yubico.YubiKit.Fido2.Credentials.AttestationStatement!
+abstract Yubico.YubiKit.Fido2.Credentials.AttestationStatement.Format.get -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+abstract Yubico.YubiKit.Fido2.Credentials.AttestationStatement.RawCbor.get -> System.ReadOnlyMemory<byte>
+abstract Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.<Clone>$() -> Yubico.YubiKit.Fido2.Extensions.CoseSignArgs!
+abstract Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.Algorithm.get -> int
+const Yubico.YubiKit.Fido2.BioEnrollment.FingerprintModality.Fingerprint = 1 -> int
+const Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor.PublicKeyType = "public-key" -> string!
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.BioEnrollment = 9 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.ClientPin = 6 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.Config = 13 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.CredentialManagement = 10 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.GetAssertion = 2 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.GetInfo = 4 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.GetNextAssertion = 8 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.LargeBlobs = 12 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.MakeCredential = 1 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.PrototypeBioEnrollment = 64 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.PrototypeCredentialManagement = 65 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.Reset = 7 -> byte
+const Yubico.YubiKit.Fido2.Ctap.CtapCommand.Selection = 11 -> byte
+const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.CredBlob = "credBlob" -> string!
+const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.CredProtect = "credProtect" -> string!
+const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.HmacSecret = "hmac-secret" -> string!
+const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.HmacSecretMakeCredential = "hmac-secret-mc" -> string!
+const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.LargeBlob = "largeBlob" -> string!
+const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.LargeBlobKey = "largeBlobKey" -> string!
+const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.MinPinLength = "minPinLength" -> string!
+const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.PreviewSign = "previewSign" -> string!
+const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.Prf = "prf" -> string!
+const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.ChangePin = 4 -> int
+const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.GetKeyAgreement = 2 -> int
+const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.GetPinToken = 5 -> int
+const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.GetPinUvAuthTokenUsingPinWithPermissions = 9 -> int
+const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.GetPinUvAuthTokenUsingUvWithPermissions = 6 -> int
+const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.GetRetries = 1 -> int
+const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.GetUvRetries = 7 -> int
+const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.SetPin = 3 -> int
+override Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.ToString() -> string!
+override Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.<Clone>$() -> Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey!
+override Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.Algorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+override Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.Encode() -> byte[]!
+override Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.KeyType.get -> int
+override Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.ToString() -> string!
+override Yubico.YubiKit.Fido2.Cose.CoseEc2Key.<Clone>$() -> Yubico.YubiKit.Fido2.Cose.CoseEc2Key!
+override Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Algorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+override Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Encode() -> byte[]!
+override Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Cose.CoseEc2Key.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Cose.CoseEc2Key.KeyType.get -> int
+override Yubico.YubiKit.Fido2.Cose.CoseEc2Key.ToString() -> string!
+override Yubico.YubiKit.Fido2.Cose.CoseKey.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Cose.CoseKey.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Cose.CoseKey.ToString() -> string!
+override Yubico.YubiKit.Fido2.Cose.CoseOkpKey.<Clone>$() -> Yubico.YubiKit.Fido2.Cose.CoseOkpKey!
+override Yubico.YubiKit.Fido2.Cose.CoseOkpKey.Algorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+override Yubico.YubiKit.Fido2.Cose.CoseOkpKey.Encode() -> byte[]!
+override Yubico.YubiKit.Fido2.Cose.CoseOkpKey.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Cose.CoseOkpKey.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Cose.CoseOkpKey.KeyType.get -> int
+override Yubico.YubiKit.Fido2.Cose.CoseOkpKey.ToString() -> string!
+override Yubico.YubiKit.Fido2.Cose.CoseOtherKey.<Clone>$() -> Yubico.YubiKit.Fido2.Cose.CoseOtherKey!
+override Yubico.YubiKit.Fido2.Cose.CoseOtherKey.Algorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+override Yubico.YubiKit.Fido2.Cose.CoseOtherKey.Encode() -> byte[]!
+override Yubico.YubiKit.Fido2.Cose.CoseOtherKey.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Cose.CoseOtherKey.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Cose.CoseOtherKey.KeyType.get -> int
+override Yubico.YubiKit.Fido2.Cose.CoseOtherKey.ToString() -> string!
+override Yubico.YubiKit.Fido2.Cose.CoseRsaKey.<Clone>$() -> Yubico.YubiKit.Fido2.Cose.CoseRsaKey!
+override Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Algorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+override Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Encode() -> byte[]!
+override Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Cose.CoseRsaKey.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Cose.CoseRsaKey.KeyType.get -> int
+override Yubico.YubiKit.Fido2.Cose.CoseRsaKey.ToString() -> string!
+override Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.<Clone>$() -> Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement!
+override Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.Format.get -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+override Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.RawCbor.get -> System.ReadOnlyMemory<byte>
+override Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.ToString() -> string!
+override Yubico.YubiKit.Fido2.Credentials.AttestationFormat.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Credentials.AttestationFormat.ToString() -> string!
+override Yubico.YubiKit.Fido2.Credentials.AttestationStatement.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Credentials.AttestationStatement.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Credentials.AttestationStatement.ToString() -> string!
+override Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.<Clone>$() -> Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement!
+override Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.Format.get -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+override Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.RawCbor.get -> System.ReadOnlyMemory<byte>
+override Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.ToString() -> string!
+override Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.<Clone>$() -> Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement!
+override Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.Format.get -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+override Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.RawCbor.get -> System.ReadOnlyMemory<byte>
+override Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.ToString() -> string!
+override Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.<Clone>$() -> Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement!
+override Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.Format.get -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+override Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.RawCbor.get -> System.ReadOnlyMemory<byte>
+override Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.ToString() -> string!
+override Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.<Clone>$() -> Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement!
+override Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.Format.get -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+override Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.RawCbor.get -> System.ReadOnlyMemory<byte>
+override Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.ToString() -> string!
+override Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.<Clone>$() -> Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs!
+override Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.Algorithm.get -> int
+override Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.ToString() -> string!
+override Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.Equals(object? obj) -> bool
+override Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.GetHashCode() -> int
+override Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.ToString() -> string!
+override Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.GetHashCode() -> int
+override sealed Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.Equals(Yubico.YubiKit.Fido2.Cose.CoseKey? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Cose.CoseEc2Key.Equals(Yubico.YubiKit.Fido2.Cose.CoseKey? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Cose.CoseOkpKey.Equals(Yubico.YubiKit.Fido2.Cose.CoseKey? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Cose.CoseOtherKey.Equals(Yubico.YubiKit.Fido2.Cose.CoseKey? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Equals(Yubico.YubiKit.Fido2.Cose.CoseKey? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.AttestationStatement? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.AttestationStatement? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.AttestationStatement? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.AttestationStatement? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.AttestationStatement? other) -> bool
+override sealed Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.Equals(Yubico.YubiKit.Fido2.Extensions.CoseSignArgs? other) -> bool
+static Yubico.YubiKit.Fido2.AuthenticatorInfo.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.AuthenticatorInfo!
+static Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentEnumerationResult.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentEnumerationResult!
+static Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.BioEnrollment.EnrollmentSampleResult!
+static Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSensorInfo.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.BioEnrollment.FingerprintSensorInfo!
+static Yubico.YubiKit.Fido2.BioEnrollment.TemplateInfo.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.BioEnrollment.TemplateInfo!
+static Yubico.YubiKit.Fido2.Cbor.AaguidConverter.FromBigEndianBytes(System.ReadOnlySpan<byte> bigEndianBytes) -> System.Guid
+static Yubico.YubiKit.Fido2.Cbor.AaguidConverter.ToBigEndianBytes(System.Guid guid) -> byte[]!
+static Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder.Create(byte command) -> Yubico.YubiKit.Fido2.Cbor.CtapRequestBuilder!
+static Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Other(int value) -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+static Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.operator !=(Yubico.YubiKit.Fido2.Cose.CoseAlgorithm left, Yubico.YubiKit.Fido2.Cose.CoseAlgorithm right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.operator ==(Yubico.YubiKit.Fido2.Cose.CoseAlgorithm left, Yubico.YubiKit.Fido2.Cose.CoseAlgorithm right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.operator !=(Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey? left, Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey.operator ==(Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey? left, Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseEc2Key.operator !=(Yubico.YubiKit.Fido2.Cose.CoseEc2Key? left, Yubico.YubiKit.Fido2.Cose.CoseEc2Key? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseEc2Key.operator ==(Yubico.YubiKit.Fido2.Cose.CoseEc2Key? left, Yubico.YubiKit.Fido2.Cose.CoseEc2Key? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseKey.Decode(System.ReadOnlyMemory<byte> coseEncoded) -> Yubico.YubiKit.Fido2.Cose.CoseKey!
+static Yubico.YubiKit.Fido2.Cose.CoseKey.operator !=(Yubico.YubiKit.Fido2.Cose.CoseKey? left, Yubico.YubiKit.Fido2.Cose.CoseKey? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseKey.operator ==(Yubico.YubiKit.Fido2.Cose.CoseKey? left, Yubico.YubiKit.Fido2.Cose.CoseKey? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseOkpKey.operator !=(Yubico.YubiKit.Fido2.Cose.CoseOkpKey? left, Yubico.YubiKit.Fido2.Cose.CoseOkpKey? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseOkpKey.operator ==(Yubico.YubiKit.Fido2.Cose.CoseOkpKey? left, Yubico.YubiKit.Fido2.Cose.CoseOkpKey? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseOtherKey.operator !=(Yubico.YubiKit.Fido2.Cose.CoseOtherKey? left, Yubico.YubiKit.Fido2.Cose.CoseOtherKey? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseOtherKey.operator ==(Yubico.YubiKit.Fido2.Cose.CoseOtherKey? left, Yubico.YubiKit.Fido2.Cose.CoseOtherKey? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseRsaKey.operator !=(Yubico.YubiKit.Fido2.Cose.CoseRsaKey? left, Yubico.YubiKit.Fido2.Cose.CoseRsaKey? right) -> bool
+static Yubico.YubiKit.Fido2.Cose.CoseRsaKey.operator ==(Yubico.YubiKit.Fido2.Cose.CoseRsaKey? left, Yubico.YubiKit.Fido2.Cose.CoseRsaKey? right) -> bool
+static Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata!
+static Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo!
+static Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo!
+static Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.operator !=(Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement.operator ==(Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.AppleAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Other(string! value) -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+static Yubico.YubiKit.Fido2.Credentials.AttestationFormat.operator !=(Yubico.YubiKit.Fido2.Credentials.AttestationFormat left, Yubico.YubiKit.Fido2.Credentials.AttestationFormat right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.AttestationFormat.operator ==(Yubico.YubiKit.Fido2.Credentials.AttestationFormat left, Yubico.YubiKit.Fido2.Credentials.AttestationFormat right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.AttestationStatement.operator !=(Yubico.YubiKit.Fido2.Credentials.AttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.AttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.AttestationStatement.operator ==(Yubico.YubiKit.Fido2.Credentials.AttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.AttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.AttestedCredentialData.Parse(System.ReadOnlySpan<byte> data, out int bytesRead) -> Yubico.YubiKit.Fido2.Credentials.AttestedCredentialData!
+static Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.Parse(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorData!
+static Yubico.YubiKit.Fido2.Credentials.AuthenticatorData.Parse(System.ReadOnlySpan<byte> data) -> Yubico.YubiKit.Fido2.Credentials.AuthenticatorData!
+static Yubico.YubiKit.Fido2.Credentials.FidoCredentialOptions.ForFido2Pin() -> Yubico.YubiKit.Core.Credentials.CredentialReaderOptions!
+static Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.operator !=(Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement.operator ==(Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.FidoU2FAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse!
+static Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse!
+static Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse!
+static Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse!
+static Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.operator !=(Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.operator ==(Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.operator !=(Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.operator ==(Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor.FromCredentialId(System.ReadOnlyMemory<byte> credentialId) -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!
+static Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor.Parse(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!
+static Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity.Parse(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity!
+static Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity.Parse(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity!
+static Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.operator !=(Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement.operator ==(Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement? left, Yubico.YubiKit.Fido2.Credentials.UnknownAttestationStatement? right) -> bool
+static Yubico.YubiKit.Fido2.Crypto.EncryptedMetadataDecryptor.DecryptCredStoreState(System.ReadOnlySpan<byte> ppuat, System.ReadOnlySpan<byte> encCredStoreState) -> byte[]?
+static Yubico.YubiKit.Fido2.Crypto.EncryptedMetadataDecryptor.DecryptIdentifier(System.ReadOnlySpan<byte> ppuat, System.ReadOnlySpan<byte> encIdentifier) -> byte[]?
+static Yubico.YubiKit.Fido2.Crypto.EncryptedMetadataDecryptor.DeriveKey(System.ReadOnlySpan<byte> ppuat, System.ReadOnlySpan<byte> info) -> byte[]!
+static Yubico.YubiKit.Fido2.Ctap.CtapException.ThrowIfError(Yubico.YubiKit.Fido2.Ctap.CtapStatus status) -> void
+static Yubico.YubiKit.Fido2.Ctap.CtapException.ThrowIfError(byte status) -> void
+static Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.operator !=(Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs? left, Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs? right) -> bool
+static Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs.operator ==(Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs? left, Yubico.YubiKit.Fido2.Extensions.ArkgP256SignArgs? right) -> bool
+static Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.ArkgP256(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> context) -> Yubico.YubiKit.Fido2.Extensions.CoseSignArgs!
+static Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.operator !=(Yubico.YubiKit.Fido2.Extensions.CoseSignArgs? left, Yubico.YubiKit.Fido2.Extensions.CoseSignArgs? right) -> bool
+static Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.operator ==(Yubico.YubiKit.Fido2.Extensions.CoseSignArgs? left, Yubico.YubiKit.Fido2.Extensions.CoseSignArgs? right) -> bool
+static Yubico.YubiKit.Fido2.Extensions.CredBlobAssertionOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Extensions.CredBlobAssertionOutput!
+static Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput!
+static Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Extensions.ExtensionOutput!
+static Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.Extensions.ExtensionOutput!
+static Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.DecodeWithRawData(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.Extensions.ExtensionOutput!
+static Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput!
+static Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput!
+static Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Extensions.LargeBlobOutput!
+static Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput!
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.DecodeAuthenticationOutput(System.ReadOnlyMemory<byte> cbor) -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(System.Formats.Cbor.CborReader! reader) -> (int Algorithm, int? Flags)
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(System.ReadOnlyMemory<byte> cbor) -> Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.EncodeAdditionalArgs(Yubico.YubiKit.Fido2.Extensions.CoseSignArgs! args) -> byte[]!
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.EncodeAuthenticationInput(Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams! signingParams) -> byte[]!
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.EncodeCoseSignArgs(Yubico.YubiKit.Fido2.Extensions.CoseSignArgs! args) -> byte[]!
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.EncodeRegistrationInput(Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput! input) -> byte[]!
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.operator !=(Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject left, Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject right) -> bool
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.operator ==(Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject left, Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject right) -> bool
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.TryExtractGeneratedKey(Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse! response, out Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey? generatedKey) -> bool
+static Yubico.YubiKit.Fido2.Extensions.PrfInput.ComputeSalt(System.ReadOnlySpan<byte> input) -> byte[]!
+static Yubico.YubiKit.Fido2.Extensions.PrfOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Extensions.PrfOutput?
+static Yubico.YubiKit.Fido2.Extensions.PrfOutput.FromHmacSecretOutput(System.ReadOnlySpan<byte> decryptedOutput, bool hasTwoOutputs = false) -> Yubico.YubiKit.Fido2.Extensions.PrfOutput!
+static Yubico.YubiKit.Fido2.FidoSession.CreateAsync(Yubico.YubiKit.Core.Abstractions.IConnection! connection, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.FidoSession!>!
+static Yubico.YubiKit.Fido2.IYubiKeyExtensions.CreateFidoSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.FidoSession!>!
+static Yubico.YubiKit.Fido2.IYubiKeyExtensions.GetFidoInfoAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.AuthenticatorInfo!>!
+static Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.CreateEmpty() -> Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray!
+static Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.Deserialize(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray!
+static Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.Encrypt(System.ReadOnlySpan<byte> largeBlobKey, System.ReadOnlySpan<byte> data) -> Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry!
+static Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.CreateES256() -> Yubico.YubiKit.Fido2.PublicKeyCredentialParameters!
+static Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.CreateEdDSA() -> Yubico.YubiKit.Fido2.PublicKeyCredentialParameters!
+static Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.CreateRS256() -> Yubico.YubiKit.Fido2.PublicKeyCredentialParameters!
+static readonly Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.ArkgP256 -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+static readonly Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.ArkgP256SeedKey -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+static readonly Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.EdDsa -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+static readonly Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Es256 -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+static readonly Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Es384 -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+static readonly Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Esp256 -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+static readonly Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Esp256SplitArkgPlaceholder -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+static readonly Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Rs256 -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
+static readonly Yubico.YubiKit.Fido2.Credentials.AttestationFormat.AndroidKey -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+static readonly Yubico.YubiKit.Fido2.Credentials.AttestationFormat.AndroidSafetynet -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+static readonly Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Apple -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+static readonly Yubico.YubiKit.Fido2.Credentials.AttestationFormat.FidoU2F -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+static readonly Yubico.YubiKit.Fido2.Credentials.AttestationFormat.None -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+static readonly Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Packed -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+static readonly Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Tpm -> Yubico.YubiKit.Fido2.Credentials.AttestationFormat
+static readonly Yubico.YubiKit.Fido2.FidoSession.FeatureAuthenticatorConfig -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.Fido2.FidoSession.FeatureBioEnrollment -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.Fido2.FidoSession.FeatureCredBlob -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.Fido2.FidoSession.FeatureCredentialManagement -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.Fido2.FidoSession.FeatureEncIdentifier -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.Fido2.FidoSession.FeatureFido2 -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.Fido2.FidoSession.FeatureHmacSecretMc -> Yubico.YubiKit.Core.Devices.Feature
+virtual Yubico.YubiKit.Fido2.Cose.CoseKey.EqualityContract.get -> System.Type!
+virtual Yubico.YubiKit.Fido2.Cose.CoseKey.Equals(Yubico.YubiKit.Fido2.Cose.CoseKey? other) -> bool
+virtual Yubico.YubiKit.Fido2.Cose.CoseKey.PrintMembers(System.Text.StringBuilder! builder) -> bool
+virtual Yubico.YubiKit.Fido2.Credentials.AttestationStatement.EqualityContract.get -> System.Type!
+virtual Yubico.YubiKit.Fido2.Credentials.AttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.AttestationStatement? other) -> bool
+virtual Yubico.YubiKit.Fido2.Credentials.AttestationStatement.PrintMembers(System.Text.StringBuilder! builder) -> bool
+virtual Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.EqualityContract.get -> System.Type!
+virtual Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.Equals(Yubico.YubiKit.Fido2.Extensions.CoseSignArgs? other) -> bool
+virtual Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.PrintMembers(System.Text.StringBuilder! builder) -> bool
+~override Yubico.YubiKit.Fido2.Cose.CoseAlgorithm.Equals(object obj) -> bool
+~override Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Equals(object obj) -> bool
+~override Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.Equals(object obj) -> bool
+~override Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.ToString() -> string

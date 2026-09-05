@@ -81,7 +81,8 @@ public static class AccountsCommand
             Secret = secretBytes,
             Digits = digits,
             Period = period,
-            Issuer = issuer
+            Issuer = issuer,
+            RequireTouch = touch
         };
 
         var displayName = OutputHelpers.FormatCredentialName(credentialData.Issuer, credentialData.Name);
@@ -108,7 +109,7 @@ public static class AccountsCommand
         {
             try
             {
-                await session.PutCredentialAsync(credentialData, touch, cancellationToken);
+                await session.PutCredentialAsync(credentialData, cancellationToken);
                 OutputHelpers.WriteSuccess($"Credential added: {displayName}");
                 return 0;
             }
@@ -277,10 +278,10 @@ public static class AccountsCommand
         IMemoryOwner<byte>? passwordBytes = null,
         CancellationToken cancellationToken = default)
     {
-        CredentialData credentialData;
+        CredentialData parsedCredentialData;
         try
         {
-            credentialData = CredentialData.ParseUri(uri);
+            parsedCredentialData = CredentialData.ParseUri(uri, touch);
         }
         catch (Exception ex)
         {
@@ -288,13 +289,13 @@ public static class AccountsCommand
             return 1;
         }
 
-        using (credentialData)
+        using (parsedCredentialData)
         {
-            var displayName = OutputHelpers.FormatCredentialName(credentialData.Issuer, credentialData.Name);
+            var displayName = OutputHelpers.FormatCredentialName(parsedCredentialData.Issuer, parsedCredentialData.Name);
 
             if (!force)
             {
-                Console.Error.Write($"Add credential {displayName} ({credentialData.OathType})? [y/N] ");
+                Console.Error.Write($"Add credential {displayName} ({parsedCredentialData.OathType})? [y/N] ");
                 var response = Console.ReadLine();
                 if (!string.Equals(response, "y", StringComparison.OrdinalIgnoreCase))
                 {
@@ -314,7 +315,7 @@ public static class AccountsCommand
             {
                 try
                 {
-                    await session.PutCredentialAsync(credentialData, touch, cancellationToken);
+                    await session.PutCredentialAsync(parsedCredentialData, cancellationToken);
                     OutputHelpers.WriteSuccess($"Credential added: {displayName}");
                     return 0;
                 }

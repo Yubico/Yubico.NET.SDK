@@ -53,6 +53,31 @@ public class CredentialDataTests
     }
 
     [Fact]
+    public void ParseUri_WithTouchPolicy_PreservesParsedCredentialAndOwnsOneSecret()
+    {
+        const string uri = "otpauth://totp/GitHub:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=GitHub";
+
+        using var data = CredentialData.ParseUri(uri, requireTouch: true);
+
+        Assert.True(data.RequireTouch);
+        Assert.Equal("user@example.com", data.Name);
+        Assert.Equal("GitHub", data.Issuer);
+        Assert.NotEmpty(data.Secret);
+    }
+
+    [Fact]
+    public void ParseUri_WithTouchPolicy_DisposeZeroesOwnedSecret()
+    {
+        const string uri = "otpauth://totp/user@example.com?secret=JBSWY3DPEHPK3PXP";
+        var data = CredentialData.ParseUri(uri, requireTouch: true);
+        byte[] ownedSecret = data.Secret;
+
+        data.Dispose();
+
+        Assert.All(ownedSecret, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
     public void ParseUri_TotpWithSha256_ParsesAlgorithm()
     {
         const string uri = "otpauth://totp/Test:user?secret=JBSWY3DPEHPK3PXP&algorithm=SHA256";

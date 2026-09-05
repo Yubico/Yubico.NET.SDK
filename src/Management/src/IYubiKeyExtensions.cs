@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 
 namespace Yubico.YubiKit.Management;
 
@@ -54,31 +55,21 @@ public static class IYubiKeyExtensions
         /// <param name="config">
         ///     The desired device configuration to be applied to the YubiKey.
         /// </param>
-        /// <param name="reboot">
-        ///     A value indicating whether the YubiKey should reboot after applying the configuration.
-        /// </param>
-        /// <param name="currentLockCode">
-        ///     The current lock code for the device, if required.
-        /// </param>
-        /// <param name="newLockCode">
-        ///     An optional new lock code to set for the device.
-        /// </param>
+        /// <param name="options">Optional device-configuration policy and borrowed lock-code memory.</param>
         /// <param name="cancellationToken">
         ///     An optional token to cancel the operation.
         /// </param>
         /// <returns>
         ///     A task representing the asynchronous operation.
         /// </returns>
-        public async ValueTask SetDeviceConfigAsync(
+        public async Task SetDeviceConfigAsync(
             DeviceConfig config,
-            bool reboot,
-            byte[]? currentLockCode = null,
-            byte[]? newLockCode = null,
+            SetDeviceConfigOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-            await mgmtSession.SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken)
+            await mgmtSession.SetDeviceConfigAsync(config, options, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -86,22 +77,10 @@ public static class IYubiKeyExtensions
         ///     Creates a management session for interacting with a YubiKey asynchronously.
         ///     The session provides capabilities to perform management operations on the device.
         /// </summary>
-        /// <param name="scpKeyParams">
-        ///     Optional SCP (Secure Channel Protocol) key parameters necessary to establish
-        ///     a secure session with the YubiKey device. SCP requires <see cref="ConnectionType.SmartCard" />.
-        ///     Supplying SCP with an explicit <see cref="ConnectionType.HidFido" /> or
-        ///     <see cref="ConnectionType.HidOtp" /> override throws <see cref="NotSupportedException" />.
-        ///     When SCP is supplied without an override, SmartCard is forced; if CCID is held, creation fails
-        ///     rather than falling back to a plaintext HID session.
-        /// </param>
-        /// <param name="configuration"></param>
-        /// <param name="preferredConnection">
-        ///     Optional explicit transport override. When <see langword="null" /> (the default), Management
-        ///     selects a transport in its documented default order:
-        ///     <see cref="ConnectionType.SmartCard" />, then <see cref="ConnectionType.HidFido" />, then
-        ///     <see cref="ConnectionType.HidOtp" />. When set, it must be exactly one of those three transports
-        ///     and supported by the device; otherwise an <see cref="ArgumentException" /> (invalid transport) or
-        ///     <see cref="NotSupportedException" /> (transport not available on this device) is thrown.
+        /// <param name="options">
+        ///     Optional creation settings. Management selects SmartCard, HID FIDO, then HID OTP unless
+        ///     <see cref="SessionCreationOptions.PreferredConnectionType" /> specifies a supported transport.
+        ///     Secure-channel parameters force SmartCard when no preference is specified.
         /// </param>
         /// <param name="cancellationToken">
         ///     An optional token to cancel the operation.
@@ -112,13 +91,17 @@ public static class IYubiKeyExtensions
         /// </returns>
         /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
         public async Task<ManagementSession> CreateManagementSessionAsync(
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
-            ConnectionType? preferredConnection = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
+            var configuration = options?.ProtocolConfiguration;
+            var scpKeyParams = options?.ScpKeyParameters;
+            var preferredConnectionType = options?.PreferredConnectionType;
+            var firmwareVersionOverride = options?.FirmwareVersionOverride;
             var transport = yubiKey.ResolveSessionTransport(
-                scpKeyParams is not null && preferredConnection is null ? ConnectionType.SmartCard : preferredConnection,
+                scpKeyParams is not null && preferredConnectionType is null
+                    ? ConnectionType.SmartCard
+                    : preferredConnectionType,
                 "Management",
                 ManagementTransportOrder);
 
@@ -127,7 +110,16 @@ public static class IYubiKeyExtensions
                     async (connection, ct) =>
                     {
                         var session = await ManagementSession
-                            .CreateAsync(connection, configuration, scpKeyParams, cancellationToken: ct)
+                            .CreateAsync(
+                                connection,
+                                new SessionCreationOptions
+                                {
+                                    ProtocolConfiguration = configuration,
+                                    ScpKeyParameters = scpKeyParams,
+                                    PreferredConnectionType = transport,
+                                    FirmwareVersionOverride = firmwareVersionOverride
+                                },
+                                ct)
                             .ConfigureAwait(false);
 
                         // This entry point opened the connection, so the session it returns is the only thing
@@ -139,19 +131,6 @@ public static class IYubiKeyExtensions
                 .ConfigureAwait(false);
         }
 
-        /// <summary>
-        ///     Source-compatibility overload preserving the pre-Phase-38 positional shape
-        ///     (<c>scpKeyParams, configuration, cancellationToken</c>); forwards using the default transport order.
-        /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters.</param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-        /// <returns>A <see cref="ManagementSession" /> the caller must dispose.</returns>
-        public Task<ManagementSession> CreateManagementSessionAsync(
-            ScpKeyParameters? scpKeyParams,
-            ProtocolConfiguration? configuration,
-            CancellationToken cancellationToken) =>
-            yubiKey.CreateManagementSessionAsync(scpKeyParams, configuration, null, cancellationToken);
     }
 
     // Management can run over SmartCard or HID. On a physical (possibly multi-connection) device the

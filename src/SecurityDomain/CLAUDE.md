@@ -176,6 +176,8 @@ SecurityDomainSession public method
 
 Do not introduce operation-specific command classes such as `PutKeyCommand`, `GetDataCommand`, `DeleteKeyCommand`, or `ResetCommand`. Do not hide the reset raw connection bypass behind a helper.
 
+Use `CaIdentifierType` flags to select KLOC, KLCC, or both; preserve KLOC-before-KLCC result ordering.
+
 ### SCP Parameter Types
 
 ```csharp

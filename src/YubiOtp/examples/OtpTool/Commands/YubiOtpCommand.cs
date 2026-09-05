@@ -101,7 +101,7 @@ public static class YubiOtpCommand
             // Resolve serial-based public ID now that we have a session
             if (options.SerialPublicId)
             {
-                int serial = await session.GetSerialAsync(ct);
+                int serial = await session.GetSerialNumberAsync(ct);
                 publicId = EncodeSerialAsPublicId(serial);
 
                 if (!options.Json)

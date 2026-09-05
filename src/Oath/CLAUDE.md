@@ -11,6 +11,8 @@ The OATH module implements TOTP (RFC 6238) and HOTP (RFC 4226) one-time password
 - **Firmware 5.0.0+** — SDK 2.0 targets modern devices only, no NEO workarounds
 - **Sealed session** — `OathSession` is sealed, extended via `IOathSession` interface
 - **Two-phase init** — private constructor + static `CreateAsync` (matches Management/SecurityDomain)
+- **Credential policy ownership** — `CredentialData.RequireTouch` travels with creation policy
+- **Read-only aggregate results** — `CalculateAllAsync` returns `IReadOnlyDictionary<Credential, Code?>`
 
 ## Key Files
 

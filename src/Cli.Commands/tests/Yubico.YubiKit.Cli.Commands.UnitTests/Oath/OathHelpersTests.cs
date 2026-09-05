@@ -98,6 +98,7 @@ public sealed class OathHelpersTests
         private readonly byte[] _derivedKey = [0x01, 0x02, 0x03, 0x04];
 
         public FirmwareVersion FirmwareVersion { get; } = new(5, 8, 0);
+        public ConnectionType ConnectionType => ConnectionType.SmartCard;
         public bool IsInitialized => true;
         public bool IsAuthenticated => true;
         public string DeviceId => "test-device";
@@ -124,12 +125,12 @@ public sealed class OathHelpersTests
         public bool IsSupported(Feature feature) => true;
         public void EnsureSupports(Feature feature) { }
         public Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
-        public Task PutCredentialAsync(CredentialData credentialData, bool requireTouch = false, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task PutCredentialAsync(CredentialData credentialData, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task DeleteCredentialAsync(Credential credential, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<Credential> RenameCredentialAsync(Credential credential, string? newIssuer, string newName, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null, CancellationToken cancellationToken = default) => throw new NotSupportedException();
-        public Task<Dictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task ResetAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task UnsetKeyAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();

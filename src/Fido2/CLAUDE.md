@@ -40,7 +40,6 @@ Yubico.YubiKit.Fido2/
 │   ├── FidoSession.cs              # Main session class (entry point)
 │   ├── IFidoSession.cs             # Session interface
 │   ├── AuthenticatorInfo.cs        # GetInfo response parsing
-│   ├── DependencyInjection.cs      # DI registration
 │   ├── IYubiKeyExtensions.cs       # Extension methods for IYubiKey
 │   ├── Backend/                    # Transport backends
 │   │   ├── IFidoBackend.cs
@@ -104,10 +103,6 @@ Yubico.YubiKit.Fido2/
 ```csharp
 // Recommended: Use extension method
 await using var fidoSession = await yubiKey.CreateFidoSessionAsync();
-
-// Or via DI
-var factory = serviceProvider.GetRequiredService<FidoSessionFactoryDelegate>();
-await using var fidoSession = await factory(connection, configuration: null);
 
 // Or direct creation
 await using var fidoSession = await FidoSession.CreateAsync(connection);

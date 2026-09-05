@@ -1,0 +1,89 @@
+#nullable enable
+
+Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm
+Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm.Aes128YubicoAuthentication = 38 -> Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm
+Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm.EcP256YubicoAuthentication = 39 -> Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm
+Yubico.YubiKit.YubiHsm.HsmAuthAlgorithmExtensions
+Yubico.YubiKit.YubiHsm.HsmAuthAlgorithmExtensions.extension(Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm)
+Yubico.YubiKit.YubiHsm.HsmAuthAlgorithmExtensions.extension(Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm).KeyLength.get -> int
+Yubico.YubiKit.YubiHsm.HsmAuthAlgorithmExtensions.extension(Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm).PublicKeyLength.get -> int?
+Yubico.YubiKit.YubiHsm.HsmAuthCredential
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.<Clone>$() -> Yubico.YubiKit.YubiHsm.HsmAuthCredential!
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.Algorithm.get -> Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.Algorithm.init -> void
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.CompareTo(Yubico.YubiKit.YubiHsm.HsmAuthCredential? other) -> int
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.Deconstruct(out string! Label, out Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm Algorithm, out int RetriesRemaining, out bool? TouchRequired) -> void
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.Equals(Yubico.YubiKit.YubiHsm.HsmAuthCredential? other) -> bool
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.HsmAuthCredential(string! Label, Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm Algorithm, int RetriesRemaining, bool? TouchRequired) -> void
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.Label.get -> string!
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.Label.init -> void
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.RetriesRemaining.get -> int
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.RetriesRemaining.init -> void
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.TouchRequired.get -> bool?
+Yubico.YubiKit.YubiHsm.HsmAuthCredential.TouchRequired.init -> void
+Yubico.YubiKit.YubiHsm.HsmAuthRetryException
+Yubico.YubiKit.YubiHsm.HsmAuthRetryException.HsmAuthRetryException(int retriesRemaining, string! message) -> void
+Yubico.YubiKit.YubiHsm.HsmAuthRetryException.RetriesRemaining.get -> int
+Yubico.YubiKit.YubiHsm.HsmAuthSession
+Yubico.YubiKit.YubiHsm.HsmAuthSession.CalculateSessionKeysAsymmetricAsync(string! label, System.ReadOnlyMemory<byte> context, System.ReadOnlyMemory<byte> publicKey, System.ReadOnlyMemory<byte> credentialPasswordUtf8, System.ReadOnlyMemory<byte> cardCryptogram, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiHsm.SessionKeys!>!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.CalculateSessionKeysSymmetricAsync(string! label, System.ReadOnlyMemory<byte> context, System.ReadOnlyMemory<byte> credentialPasswordUtf8, System.ReadOnlyMemory<byte>? cardCryptogram = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiHsm.SessionKeys!>!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.ChangeCredentialPasswordAdminAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> newPasswordUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.ChangeCredentialPasswordAsync(string! label, System.ReadOnlyMemory<byte> currentPasswordUtf8, System.ReadOnlyMemory<byte> newPasswordUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.DeleteCredentialAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.GenerateCredentialAsymmetricAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> credentialPasswordUtf8, bool touchRequired = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.GetChallengeAsync(string! label, System.ReadOnlyMemory<byte>? credentialPasswordUtf8 = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.GetManagementKeyRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.GetPublicKeyAsync(string! label, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.ListCredentialsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.YubiHsm.HsmAuthCredential!>!>!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.OnTouchRequired.get -> System.Action?
+Yubico.YubiKit.YubiHsm.HsmAuthSession.OnTouchRequired.set -> void
+Yubico.YubiKit.YubiHsm.HsmAuthSession.PutCredentialAsymmetricAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> privateKey, System.ReadOnlyMemory<byte> credentialPasswordUtf8, bool touchRequired = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.PutCredentialDerivedAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> derivationPasswordUtf8, System.ReadOnlyMemory<byte> credentialPasswordUtf8, bool touchRequired = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.PutCredentialSymmetricAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> keyEnc, System.ReadOnlyMemory<byte> keyMac, System.ReadOnlyMemory<byte> credentialPasswordUtf8, bool touchRequired = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.PutManagementKeyAsync(System.ReadOnlyMemory<byte> currentManagementKey, System.ReadOnlyMemory<byte> newManagementKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.CalculateSessionKeysAsymmetricAsync(string! label, System.ReadOnlyMemory<byte> context, System.ReadOnlyMemory<byte> publicKey, System.ReadOnlyMemory<byte> credentialPasswordUtf8, System.ReadOnlyMemory<byte> cardCryptogram, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiHsm.SessionKeys!>!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.CalculateSessionKeysSymmetricAsync(string! label, System.ReadOnlyMemory<byte> context, System.ReadOnlyMemory<byte> credentialPasswordUtf8, System.ReadOnlyMemory<byte>? cardCryptogram = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiHsm.SessionKeys!>!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.ChangeCredentialPasswordAdminAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> newPasswordUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.ChangeCredentialPasswordAsync(string! label, System.ReadOnlyMemory<byte> currentPasswordUtf8, System.ReadOnlyMemory<byte> newPasswordUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.DeleteCredentialAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.GenerateCredentialAsymmetricAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> credentialPasswordUtf8, bool touchRequired = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.GetChallengeAsync(string! label, System.ReadOnlyMemory<byte>? credentialPasswordUtf8 = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.GetManagementKeyRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.GetPublicKeyAsync(string! label, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.ListCredentialsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.YubiHsm.HsmAuthCredential!>!>!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.OnTouchRequired.get -> System.Action?
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.OnTouchRequired.set -> void
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.PutCredentialAsymmetricAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> privateKey, System.ReadOnlyMemory<byte> credentialPasswordUtf8, bool touchRequired = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.PutCredentialDerivedAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> derivationPasswordUtf8, System.ReadOnlyMemory<byte> credentialPasswordUtf8, bool touchRequired = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.PutCredentialSymmetricAsync(System.ReadOnlyMemory<byte> managementKey, string! label, System.ReadOnlyMemory<byte> keyEnc, System.ReadOnlyMemory<byte> keyMac, System.ReadOnlyMemory<byte> credentialPasswordUtf8, bool touchRequired = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.PutManagementKeyAsync(System.ReadOnlyMemory<byte> currentManagementKey, System.ReadOnlyMemory<byte> newManagementKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IYubiKeyExtensions
+Yubico.YubiKit.YubiHsm.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!)
+Yubico.YubiKit.YubiHsm.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CreateHsmAuthSessionAsync(Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiHsm.HsmAuthSession!>!
+Yubico.YubiKit.YubiHsm.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).ListHsmAuthCredentialsAsync(Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.YubiHsm.HsmAuthCredential!>!>!
+Yubico.YubiKit.YubiHsm.SessionKeys
+Yubico.YubiKit.YubiHsm.SessionKeys.Dispose() -> void
+Yubico.YubiKit.YubiHsm.SessionKeys.SEnc.get -> System.ReadOnlySpan<byte>
+Yubico.YubiKit.YubiHsm.SessionKeys.SMac.get -> System.ReadOnlySpan<byte>
+Yubico.YubiKit.YubiHsm.SessionKeys.SRmac.get -> System.ReadOnlySpan<byte>
+const Yubico.YubiKit.YubiHsm.SessionKeys.ExpectedResponseLength = 48 -> int
+override Yubico.YubiKit.YubiHsm.HsmAuthCredential.Equals(object? obj) -> bool
+override Yubico.YubiKit.YubiHsm.HsmAuthCredential.GetHashCode() -> int
+override Yubico.YubiKit.YubiHsm.HsmAuthCredential.ToString() -> string!
+static Yubico.YubiKit.YubiHsm.HsmAuthAlgorithmExtensions.get_KeyLength(Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm algorithm) -> int
+static Yubico.YubiKit.YubiHsm.HsmAuthAlgorithmExtensions.get_PublicKeyLength(Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm algorithm) -> int?
+static Yubico.YubiKit.YubiHsm.HsmAuthCredential.operator !=(Yubico.YubiKit.YubiHsm.HsmAuthCredential? left, Yubico.YubiKit.YubiHsm.HsmAuthCredential? right) -> bool
+static Yubico.YubiKit.YubiHsm.HsmAuthCredential.operator ==(Yubico.YubiKit.YubiHsm.HsmAuthCredential? left, Yubico.YubiKit.YubiHsm.HsmAuthCredential? right) -> bool
+static Yubico.YubiKit.YubiHsm.HsmAuthSession.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection! connection, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiHsm.HsmAuthSession!>!
+static Yubico.YubiKit.YubiHsm.IYubiKeyExtensions.CreateHsmAuthSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiHsm.HsmAuthSession!>!
+static Yubico.YubiKit.YubiHsm.IYubiKeyExtensions.ListHsmAuthCredentialsAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.YubiHsm.HsmAuthCredential!>!>!
+static Yubico.YubiKit.YubiHsm.SessionKeys.Parse(System.ReadOnlySpan<byte> response) -> Yubico.YubiKit.YubiHsm.SessionKeys!
+static readonly Yubico.YubiKit.YubiHsm.HsmAuthSession.FeatureAsymmetric -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.YubiHsm.HsmAuthSession.FeatureGetChallenge -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.YubiHsm.HsmAuthSession.FeatureGetChallengeNoPassword -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.YubiHsm.HsmAuthSession.FeatureGetChallengeWithPassword -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.YubiHsm.HsmAuthSession.FeatureHsmAuth -> Yubico.YubiKit.Core.Devices.Feature
+static readonly Yubico.YubiKit.YubiHsm.HsmAuthSession.FeaturePasswordChange -> Yubico.YubiKit.Core.Devices.Feature

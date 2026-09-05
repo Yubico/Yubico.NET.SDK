@@ -1,0 +1,195 @@
+#nullable enable
+
+Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.AllowHidTrig = 16 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.ChalBtnTrig = 8 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.ChalHmac = Yubico.YubiKit.YubiOtp.ConfigFlag.OathHotp8 | Yubico.YubiKit.YubiOtp.ConfigFlag.ChalYubico -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.ChalYubico = 32 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.HmacLt64 = 4 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.ManUpdate = 128 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.None = 0 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.OathFixedMask = Yubico.YubiKit.YubiOtp.ConfigFlag.AllowHidTrig | Yubico.YubiKit.YubiOtp.ConfigFlag.OathFixedModhex2 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.OathFixedModhex = Yubico.YubiKit.YubiOtp.ConfigFlag.AllowHidTrig | Yubico.YubiKit.YubiOtp.ConfigFlag.OathFixedModhex2 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.OathFixedModhex1 = 16 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.OathFixedModhex2 = 64 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.OathHotp8 = 2 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.PacingChar10 = 4 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.PacingChar20 = 8 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.SendRef = 1 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.ShortTicket = 2 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.StaticTicket = 32 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.StrongPw1 = 16 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.StrongPw2 = 64 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlag.TicketFirst = 2 -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.ConfigFlagMasks
+Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.ChalHmac1 = 48 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.ChalHmac2 = 56 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.ChalYubico1 = 32 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.ChalYubico2 = 40 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.Config1 = 1 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.Config2 = 3 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.DeviceSerial = 16 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.Ndef1 = 8 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.Ndef2 = 9 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.ScanMap = 18 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.Swap = 6 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.Update1 = 4 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigSlot.Update2 = 5 -> Yubico.YubiKit.YubiOtp.ConfigSlot
+Yubico.YubiKit.YubiOtp.ConfigState
+Yubico.YubiKit.YubiOtp.ConfigState.ConfigState() -> void
+Yubico.YubiKit.YubiOtp.ConfigState.ConfigState(System.ReadOnlySpan<byte> statusBytes) -> void
+Yubico.YubiKit.YubiOtp.ConfigState.FirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+Yubico.YubiKit.YubiOtp.ConfigState.IsConfigured(Yubico.YubiKit.YubiOtp.Slot slot) -> bool
+Yubico.YubiKit.YubiOtp.ConfigState.IsLedInverted() -> bool
+Yubico.YubiKit.YubiOtp.ConfigState.IsTouchTriggered(Yubico.YubiKit.YubiOtp.Slot slot) -> bool
+Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlag.AllowUpdate = 32 -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlag.Dormant = 64 -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlag.FastTrigger = 16 -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlag.InvertLed = 128 -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlag.None = 0 -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialApiVisible = 4 -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialBtnVisible = 1 -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialUsbVisible = 2 -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlag.UseNumericKeypad = 8 -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.ExtendedFlagMasks
+Yubico.YubiKit.YubiOtp.HmacSha1SlotConfiguration
+Yubico.YubiKit.YubiOtp.HmacSha1SlotConfiguration.HmacSha1SlotConfiguration(System.ReadOnlySpan<byte> hmacKey) -> void
+Yubico.YubiKit.YubiOtp.HmacSha1SlotConfiguration.RequireTouch(bool enable = true) -> Yubico.YubiKit.YubiOtp.HmacSha1SlotConfiguration!
+Yubico.YubiKit.YubiOtp.HmacSha1SlotConfiguration.UseShortChallenge(bool enable = true) -> Yubico.YubiKit.YubiOtp.HmacSha1SlotConfiguration!
+Yubico.YubiKit.YubiOtp.HotpSlotConfiguration
+Yubico.YubiKit.YubiOtp.HotpSlotConfiguration.HotpSlotConfiguration(System.ReadOnlySpan<byte> hmacKey, int imf = 0) -> void
+Yubico.YubiKit.YubiOtp.HotpSlotConfiguration.TokenId(System.ReadOnlySpan<byte> tokenId, bool fixedModhex1 = false, bool fixedModhex2 = false) -> Yubico.YubiKit.YubiOtp.HotpSlotConfiguration!
+Yubico.YubiKit.YubiOtp.HotpSlotConfiguration.Use8Digits(bool enable = true) -> Yubico.YubiKit.YubiOtp.HotpSlotConfiguration!
+Yubico.YubiKit.YubiOtp.IYubiKeyExtensions
+Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!)
+Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CalculateHmacSha1Async(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CreateYubiOtpSessionAsync(Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.YubiOtpSession!>!
+Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).GetConfigStateAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.ConfigState>!
+Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).PutConfigurationAsync(Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.IYubiOtpSession
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.CalculateHmacSha1Async(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.CalculateYubicoOtpAsync(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.DeleteSlotAsync(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.GetConfigState() -> Yubico.YubiKit.YubiOtp.ConfigState
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.GetSerialNumberAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.PutConfigurationAsync(Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.SetNdefConfigurationAsync(Yubico.YubiKit.YubiOtp.Slot slot, string? uri = null, System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), Yubico.YubiKit.YubiOtp.NdefType ndefType = Yubico.YubiKit.YubiOtp.NdefType.Uri, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.SetScanMapAsync(System.ReadOnlyMemory<byte> scanMap, System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.SwapSlotsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.IYubiOtpSession.UpdateConfigurationAsync(Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.UpdateConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.AppendCr(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.AppendDelay1(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.AppendDelay2(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.AppendTab1(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.AppendTab2(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.FastTrigger(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.InitializeKeys(System.ReadOnlySpan<byte> publicId, System.ReadOnlySpan<byte> privateId, System.ReadOnlySpan<byte> aesKey) -> void
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.KeyboardSlotConfiguration() -> void
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.PacingChar10(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.PacingChar20(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.TabFirst(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration.UseNumericKeypad(bool enable = true) -> Yubico.YubiKit.YubiOtp.KeyboardSlotConfiguration!
+Yubico.YubiKit.YubiOtp.NdefType
+Yubico.YubiKit.YubiOtp.NdefType.Text = 84 -> Yubico.YubiKit.YubiOtp.NdefType
+Yubico.YubiKit.YubiOtp.NdefType.Uri = 85 -> Yubico.YubiKit.YubiOtp.NdefType
+Yubico.YubiKit.YubiOtp.Slot
+Yubico.YubiKit.YubiOtp.Slot.One = 1 -> Yubico.YubiKit.YubiOtp.Slot
+Yubico.YubiKit.YubiOtp.Slot.Two = 2 -> Yubico.YubiKit.YubiOtp.Slot
+Yubico.YubiKit.YubiOtp.SlotConfiguration
+Yubico.YubiKit.YubiOtp.SlotConfiguration.AllowUpdate(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
+Yubico.YubiKit.YubiOtp.SlotConfiguration.Dispose() -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration.Dormant(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
+Yubico.YubiKit.YubiOtp.SlotConfiguration.GetConfig(System.ReadOnlySpan<byte> accCode = default(System.ReadOnlySpan<byte>)) -> byte[]!
+Yubico.YubiKit.YubiOtp.SlotConfiguration.InvertLed(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
+Yubico.YubiKit.YubiOtp.SlotConfiguration.IsSupportedBy(Yubico.YubiKit.Core.Devices.FirmwareVersion! version) -> bool
+Yubico.YubiKit.YubiOtp.SlotConfiguration.ProtectSlot2(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SerialApiVisible(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SerialBtnVisible(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SerialUsbVisible(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SetCfgFlag(Yubico.YubiKit.YubiOtp.ConfigFlag flag, bool enable) -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SetExtFlag(Yubico.YubiKit.YubiOtp.ExtendedFlag flag, bool enable) -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SetTktFlag(Yubico.YubiKit.YubiOtp.TicketFlag flag, bool enable) -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SlotConfiguration() -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration.ThrowIfDisposed() -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration._cfgFlags -> Yubico.YubiKit.YubiOtp.ConfigFlag
+Yubico.YubiKit.YubiOtp.SlotConfiguration._extFlags -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+Yubico.YubiKit.YubiOtp.SlotConfiguration._fixedSize -> byte
+Yubico.YubiKit.YubiOtp.SlotConfiguration._tktFlags -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.SlotExtensions
+Yubico.YubiKit.YubiOtp.SlotOperation
+Yubico.YubiKit.YubiOtp.SlotOperation.ChallengeHmac = 3 -> Yubico.YubiKit.YubiOtp.SlotOperation
+Yubico.YubiKit.YubiOtp.SlotOperation.ChallengeYubicoOtp = 4 -> Yubico.YubiKit.YubiOtp.SlotOperation
+Yubico.YubiKit.YubiOtp.SlotOperation.Configure = 0 -> Yubico.YubiKit.YubiOtp.SlotOperation
+Yubico.YubiKit.YubiOtp.SlotOperation.Ndef = 2 -> Yubico.YubiKit.YubiOtp.SlotOperation
+Yubico.YubiKit.YubiOtp.SlotOperation.Update = 1 -> Yubico.YubiKit.YubiOtp.SlotOperation
+Yubico.YubiKit.YubiOtp.StaticPasswordSlotConfiguration
+Yubico.YubiKit.YubiOtp.StaticPasswordSlotConfiguration.StaticPasswordSlotConfiguration(System.ReadOnlySpan<byte> scanCodes) -> void
+Yubico.YubiKit.YubiOtp.StaticPasswordSlotConfiguration.StaticPasswordSlotConfiguration(string! password, Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout keyboardLayout) -> void
+Yubico.YubiKit.YubiOtp.StaticTicketSlotConfiguration
+Yubico.YubiKit.YubiOtp.StaticTicketSlotConfiguration.StaticTicketSlotConfiguration(System.ReadOnlySpan<byte> publicId, System.ReadOnlySpan<byte> privateId, System.ReadOnlySpan<byte> aesKey) -> void
+Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.AppendCr = 32 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.AppendDelay1 = 8 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.AppendDelay2 = 16 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.AppendTab1 = 2 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.AppendTab2 = 4 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.ChalResp = 64 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.None = 0 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.OathHotp = 64 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.ProtectSlot2 = 64 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.TabFirst = 1 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlagMasks
+Yubico.YubiKit.YubiOtp.UpdateConfiguration
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.AppendCr(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.AppendDelay1(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.AppendDelay2(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.AppendTab1(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.AppendTab2(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.Dormant(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.FastTrigger(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.PacingChar10(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.PacingChar20(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.TabFirst(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.UpdateConfiguration() -> void
+Yubico.YubiKit.YubiOtp.UpdateConfiguration.UseNumericKeypad(bool enable = true) -> Yubico.YubiKit.YubiOtp.UpdateConfiguration!
+Yubico.YubiKit.YubiOtp.YubiOtpSession
+Yubico.YubiKit.YubiOtp.YubiOtpSession.CalculateHmacSha1Async(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiOtp.YubiOtpSession.CalculateYubicoOtpAsync(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiOtp.YubiOtpSession.DeleteSlotAsync(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.YubiOtpSession.GetConfigState() -> Yubico.YubiKit.YubiOtp.ConfigState
+Yubico.YubiKit.YubiOtp.YubiOtpSession.GetSerialNumberAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+Yubico.YubiKit.YubiOtp.YubiOtpSession.PutConfigurationAsync(Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.YubiOtpSession.SetNdefConfigurationAsync(Yubico.YubiKit.YubiOtp.Slot slot, string? uri = null, System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), Yubico.YubiKit.YubiOtp.NdefType ndefType = Yubico.YubiKit.YubiOtp.NdefType.Uri, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.YubiOtpSession.SetScanMapAsync(System.ReadOnlyMemory<byte> scanMap, System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.YubiOtpSession.SwapSlotsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.YubiOtpSession.UpdateConfigurationAsync(Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.UpdateConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.YubiOtpSlotConfiguration
+Yubico.YubiKit.YubiOtp.YubiOtpSlotConfiguration.YubiOtpSlotConfiguration(System.ReadOnlySpan<byte> publicId, System.ReadOnlySpan<byte> privateId, System.ReadOnlySpan<byte> aesKey) -> void
+Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration
+Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration.RequireTouch(bool enable = true) -> Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration!
+Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration.YubicoOtpChallengeResponseSlotConfiguration(System.ReadOnlySpan<byte> aesKey) -> void
+const Yubico.YubiKit.YubiOtp.ConfigFlagMasks.UpdateMask = Yubico.YubiKit.YubiOtp.ConfigFlag.HmacLt64 | Yubico.YubiKit.YubiOtp.ConfigFlag.ChalBtnTrig -> Yubico.YubiKit.YubiOtp.ConfigFlag
+const Yubico.YubiKit.YubiOtp.ExtendedFlagMasks.UpdateMask = Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialBtnVisible | Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialUsbVisible | Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialApiVisible | Yubico.YubiKit.YubiOtp.ExtendedFlag.UseNumericKeypad | Yubico.YubiKit.YubiOtp.ExtendedFlag.FastTrigger | Yubico.YubiKit.YubiOtp.ExtendedFlag.Dormant | Yubico.YubiKit.YubiOtp.ExtendedFlag.InvertLed -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+const Yubico.YubiKit.YubiOtp.TicketFlagMasks.UpdateMask = Yubico.YubiKit.YubiOtp.TicketFlag.TabFirst | Yubico.YubiKit.YubiOtp.TicketFlag.AppendTab1 | Yubico.YubiKit.YubiOtp.TicketFlag.AppendTab2 | Yubico.YubiKit.YubiOtp.TicketFlag.AppendDelay1 | Yubico.YubiKit.YubiOtp.TicketFlag.AppendDelay2 | Yubico.YubiKit.YubiOtp.TicketFlag.AppendCr -> Yubico.YubiKit.YubiOtp.TicketFlag
+override Yubico.YubiKit.YubiOtp.HmacSha1SlotConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+override Yubico.YubiKit.YubiOtp.HotpSlotConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+override Yubico.YubiKit.YubiOtp.UpdateConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+override Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+readonly Yubico.YubiKit.YubiOtp.SlotConfiguration._fixed -> byte[]!
+readonly Yubico.YubiKit.YubiOtp.SlotConfiguration._key -> byte[]!
+readonly Yubico.YubiKit.YubiOtp.SlotConfiguration._uid -> byte[]!
+static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.CalculateHmacSha1Async(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.CreateYubiOtpSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.YubiOtpSession!>!
+static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.GetConfigStateAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.ConfigState>!
+static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.PutConfigurationAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+static Yubico.YubiKit.YubiOtp.SlotConfiguration.ProcessHmacKey(System.ReadOnlySpan<byte> hmacKey, System.Span<byte> key, System.Span<byte> uid) -> void
+static Yubico.YubiKit.YubiOtp.SlotExtensions.Map(this Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotOperation operation) -> Yubico.YubiKit.YubiOtp.ConfigSlot
+static Yubico.YubiKit.YubiOtp.YubiOtpSession.CreateAsync(Yubico.YubiKit.Core.Abstractions.IConnection! connection, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.YubiOtpSession!>!
+virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.Dispose(bool disposing) -> void
+virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.GetEffectiveCfgFlags() -> Yubico.YubiKit.YubiOtp.ConfigFlag
+virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.GetEffectiveExtFlags() -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.GetEffectiveTktFlags() -> Yubico.YubiKit.YubiOtp.TicketFlag
+virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!

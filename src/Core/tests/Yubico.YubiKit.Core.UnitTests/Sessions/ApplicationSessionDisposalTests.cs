@@ -22,6 +22,40 @@ namespace Yubico.YubiKit.Core.UnitTests.Sessions;
 public class ApplicationSessionDisposalTests
 {
     [Fact]
+    public void ConnectionType_ReflectsTheAttachedConnection()
+    {
+        using var session = new ProbeSession(new TrackingConnection());
+
+        Assert.Equal(ConnectionType.SmartCard, session.ConnectionType);
+    }
+
+    [Theory]
+    [InlineData(null, false)]
+    [InlineData(ConnectionType.SmartCard, false)]
+    [InlineData(ConnectionType.HidFido, true)]
+    public void ValidatePreferredConnectionType_MatchMismatchAndNull(
+        ConnectionType? preferredConnectionType,
+        bool shouldThrow)
+    {
+        var connection = new TrackingConnection();
+        var options = preferredConnectionType is null
+            ? null
+            : new SessionCreationOptions { PreferredConnectionType = preferredConnectionType };
+
+        Exception? exception = Record.Exception(() => ProbeSession.ValidateConnectionPreference(connection, options));
+
+        if (shouldThrow)
+        {
+            var argumentException = Assert.IsType<ArgumentException>(exception);
+            Assert.Equal("options", argumentException.ParamName);
+        }
+        else
+        {
+            Assert.Null(exception);
+        }
+    }
+
+    [Fact]
     public void Dispose_Repeated_EntersManagedCleanupExactlyOnce()
     {
         var session = new ProbeSession(new TrackingConnection());
@@ -418,6 +452,9 @@ public class ApplicationSessionDisposalTests
         public Task SyncBeforeBaseEntered => _syncBeforeBaseEntered.Task;
 
         public void AssertNotDisposed() => ThrowIfDisposed();
+
+        public static void ValidateConnectionPreference(IConnection connection, SessionCreationOptions? options) =>
+            ValidatePreferredConnectionType(connection, options);
 
         public void SetInitializedAndAuthenticated()
         {

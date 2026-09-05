@@ -30,6 +30,8 @@ public static class YubiKeyConnectionExtensions
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger(nameof(YubiKeyConnectionExtensions));
 
+    // Existing alpha overload family: preserve the simple and SCP-specific raw-session entry points.
+#pragma warning disable RS0026
     /// <summary>Opens exactly the SmartCard transport and creates a raw APDU session that owns it.</summary>
     /// <remarks>No application is selected. The returned session must be disposed.</remarks>
     public static Task<RawSmartCardSession> CreateRawSmartCardSessionAsync(
@@ -81,6 +83,7 @@ public static class YubiKeyConnectionExtensions
             },
             cancellationToken);
     }
+#pragma warning restore RS0026
 
     /// <summary>Opens exactly the FIDO HID transport and creates a raw CTAP HID session that owns it.</summary>
     /// <remarks>No fallback transport is attempted. The returned session must be disposed.</remarks>

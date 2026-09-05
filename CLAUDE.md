@@ -22,6 +22,7 @@ Guidance for AI agents working in this repository. Yubico.NET.SDK (YubiKit) is a
 | `OpenPgp/` | OpenPGP card |
 | `SecurityDomain/` | SCP03 secure channel, key management |
 | `YubiHsm/` | YubiHSM 2 integration |
+| `PublicApi/` | Test-only cross-module public API conventions; no shipping assembly |
 | `Cli.Shared/` | Shared CLI infra for example tools |
 | `Tests.Shared/` | Multi-transport test harness |
 | `Tests.TestProject/` | xUnit v3 test project layout |

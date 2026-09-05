@@ -62,6 +62,9 @@ public sealed class CredentialData : IDisposable
     /// </summary>
     public string? Issuer { get; init; }
 
+    /// <summary>Gets whether using this credential requires physical touch.</summary>
+    public bool RequireTouch { get; init; }
+
     /// <summary>
     ///     Parses an <c>otpauth://</c> URI into a <see cref="CredentialData" /> instance.
     /// </summary>
@@ -74,7 +77,15 @@ public sealed class CredentialData : IDisposable
     ///     Thrown when the URI scheme is not <c>otpauth</c>, the OATH type is missing or invalid,
     ///     or the <c>secret</c> query parameter is missing.
     /// </exception>
-    public static CredentialData ParseUri(string uri)
+    public static CredentialData ParseUri(string uri) => ParseUri(uri, requireTouch: false);
+
+    /// <summary>
+    ///     Parses an <c>otpauth://</c> URI and applies the credential's physical-touch policy.
+    /// </summary>
+    /// <param name="uri">The otpauth URI to parse.</param>
+    /// <param name="requireTouch">Whether using the credential requires physical touch.</param>
+    /// <returns>A populated <see cref="CredentialData" /> instance that exclusively owns its secret.</returns>
+    public static CredentialData ParseUri(string uri, bool requireTouch)
     {
         var parsed = new Uri(uri.Trim());
 
@@ -166,7 +177,8 @@ public sealed class CredentialData : IDisposable
             Digits = digits,
             Period = period,
             Counter = counter,
-            Issuer = issuer
+            Issuer = issuer,
+            RequireTouch = requireTouch
         };
     }
 

@@ -122,7 +122,7 @@ public class PivSigningAlgorithmTests
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa2048,
-            PivPinPolicy.Once);
+            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "SHA-1 signing test"u8.ToArray();
@@ -157,7 +157,7 @@ public class PivSigningAlgorithmTests
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa2048,
-            PivPinPolicy.Once);
+            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "SHA-384 signing test"u8.ToArray();
@@ -188,7 +188,7 @@ public class PivSigningAlgorithmTests
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa2048,
-            PivPinPolicy.Once);
+            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "SHA-512 signing test"u8.ToArray();
@@ -253,7 +253,7 @@ public class PivSigningAlgorithmTests
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Signature,
             PivAlgorithm.EccP256,
-            PivPinPolicy.Once);
+            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "ECC P-256 SHA-256 signing test"u8.ToArray();
@@ -285,7 +285,7 @@ public class PivSigningAlgorithmTests
         var publicKey = await session.GenerateKeyAsync(
             PivSlot.Signature,
             PivAlgorithm.EccP384,
-            PivPinPolicy.Once);
+            new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once });
         await session.VerifyPinAsync(DefaultPin);
 
         var dataToSign = "ECC P-384 SHA-384 signing test"u8.ToArray();

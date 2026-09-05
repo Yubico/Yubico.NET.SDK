@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
@@ -50,7 +51,7 @@ public static class OpenPgpTestStateExtensions
                     using var resetSession = await state.Device
                         .CreateOpenPgpSessionAsync(
                             connection,
-                            configuration: configuration,
+                            new SessionCreationOptions { ProtocolConfiguration = configuration },
                             cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
 
@@ -60,8 +61,11 @@ public static class OpenPgpTestStateExtensions
                 using var session = await state.Device
                     .CreateOpenPgpSessionAsync(
                         connection,
-                        scpKeyParams,
-                        configuration,
+                        new SessionCreationOptions
+                        {
+                            ScpKeyParameters = scpKeyParams,
+                            ProtocolConfiguration = configuration
+                        },
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 

@@ -250,6 +250,7 @@ HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diag
 
 `ApplicationSession` centralizes shared session state:
 - `FirmwareVersion`
+- `ConnectionType`
 - `IsInitialized`
 - `IsAuthenticated`
 - `Protocol` lifetime/disposal
@@ -266,6 +267,8 @@ only after teardown completes. `IsAuthenticated` describes application-protocol 
 example, SCP); applet-specific authentication is exposed by the concrete applet session.
 
 Prefer using `IsSupported(feature)` / `EnsureSupports(feature)` on `IApplicationSession` rather than duplicating firmware gates in each module.
+
+Applet factories consume `SessionCreationOptions` without retaining it. Secure-channel parameters remain borrowed.
 
 ## Test Infrastructure
 

@@ -125,6 +125,11 @@ Application modules should converge on this shape when possible:
 - Session uses `IsSupported(...)` / `EnsureSupports(...)` for firmware and feature gates.
 - Session keeps public API operations readable and close to the wire behavior.
 
+The durable applet API grammar is in [Applet public API](architecture/applet-public-api.md). Applet factories take
+`SessionCreationOptions?` and a final defaulted cancellation token; required domain inputs remain positional;
+options objects are reserved for real growth axes or policy groups; and applet dependency-injection registrations
+are not part of the SDK surface.
+
 For multi-transport modules, a backend adapter can be appropriate when it removes transport branching from every operation. The backend should stay narrow and mechanical.
 
 ## SmartCard And APDU Style

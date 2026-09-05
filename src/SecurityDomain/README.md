@@ -25,7 +25,7 @@ using Yubico.YubiKit.SecurityDomain;
 using Yubico.YubiKit.Core.Abstractions;
 
 IYubiKey yubiKey = ...;
-using var sdSession = await yubiKey.CreateSecurityDomainSessionAsync();
+await using var sdSession = await yubiKey.CreateSecurityDomainSessionAsync();
 // Use sdSession for SCP key management, etc.
 ```
 
@@ -76,18 +76,19 @@ Keys are identified by:
 using Yubico.YubiKit.SecurityDomain;
 
 // Without secure channel
-using var session = await SecurityDomainSession.CreateAsync(
+await using var session = await SecurityDomainSession.CreateAsync(
     connection,
     cancellationToken: cancellationToken);
 
-// If you already know the device firmware version, you can optionally pass it via
-// the `firmwareVersion` parameter to avoid hardcoding defaults.
+// Security Domain cannot detect firmware. FirmwareVersionOverride is its only exact
+// version source and controls feature gates; without it, the session assumes 5.3.0.
+// The property remains provisional until the stable API baseline.
 
 // With SCP03 authentication
 using var scpParams = Scp03KeyParameters.Default;
-using var session = await SecurityDomainSession.CreateAsync(
+await using var session = await SecurityDomainSession.CreateAsync(
     connection,
-    scpKeyParams: scpParams,
+    new SessionCreationOptions { ScpKeyParameters = scpParams },
     cancellationToken: cancellationToken);
 ```
 
@@ -96,6 +97,11 @@ using var session = await SecurityDomainSession.CreateAsync(
 ```csharp
 // Get key information
 var keyInfo = await session.GetKeyInfoAsync(cancellationToken);
+
+// The one-shot convenience method accepts the same creation options.
+var oneShotKeyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync(
+    new SessionCreationOptions { ScpKeyParameters = scpParams },
+    cancellationToken);
 
 // Generate EC key for SCP11b
 var keyRef = new KeyReference(ScpKid.SCP11b, kvn: 0x01);
@@ -154,9 +160,9 @@ Yubico.YubiKit.SecurityDomain/
 ```csharp
 // Authenticate with current keys
 using var currentParams = new Scp03KeyParameters(currentKeyRef, currentKeys);
-using var session = await SecurityDomainSession.CreateAsync(
+await using var session = await SecurityDomainSession.CreateAsync(
     connection,
-    scpKeyParams: currentParams,
+    new SessionCreationOptions { ScpKeyParameters = currentParams },
     cancellationToken: cancellationToken);
 
 // Import new keys
@@ -178,9 +184,9 @@ var publicKey = await session.GenerateKeyAsync(keyRef, 0, cancellationToken);
 
 // Step 3: Authenticate with SCP11b in future sessions
 var scp11Params = new Scp11KeyParameters(keyRef, publicKey);
-using var session = await SecurityDomainSession.CreateAsync(
+await using var session = await SecurityDomainSession.CreateAsync(
     connection,
-    scpKeyParams: scp11Params,
+    new SessionCreationOptions { ScpKeyParameters = scp11Params },
     cancellationToken: cancellationToken);
 ```
 
@@ -188,9 +194,8 @@ using var session = await SecurityDomainSession.CreateAsync(
 
 ```csharp
 // Create session without authentication
-using var session = await SecurityDomainSession.CreateAsync(
+await using var session = await SecurityDomainSession.CreateAsync(
     connection,
-    firmwareVersion: null,
     cancellationToken: cancellationToken);
 
 // Block all keys and restore defaults

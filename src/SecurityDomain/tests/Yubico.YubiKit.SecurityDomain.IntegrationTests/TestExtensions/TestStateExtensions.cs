@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.DependencyInjection;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
@@ -38,23 +38,27 @@ public static class TestStateExtensions
             {
                 if (resetBeforeUse)
                 {
-                    using var resetSession = await state.Device
-                        .CreateSecurityDomainSessionAsync(
+                    using var resetSession = await SecurityDomainSession.CreateAsync(
                             connection,
-                            configuration: configuration,
-                            firmwareVersion: state.FirmwareVersion,
+                            new SessionCreationOptions
+                            {
+                                ProtocolConfiguration = configuration,
+                                FirmwareVersionOverride = state.FirmwareVersion
+                            },
                             cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
 
                     await resetSession.ResetAsync(cancellationToken).ConfigureAwait(false);
                 }
 
-                using var session = await state.Device
-                    .CreateSecurityDomainSessionAsync(
+                using var session = await SecurityDomainSession.CreateAsync(
                         connection,
-                        scpKeyParams,
-                        configuration,
-                        firmwareVersion: state.FirmwareVersion,
+                        new SessionCreationOptions
+                        {
+                            ScpKeyParameters = scpKeyParams,
+                            ProtocolConfiguration = configuration,
+                            FirmwareVersionOverride = state.FirmwareVersion
+                        },
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
@@ -62,95 +66,27 @@ public static class TestStateExtensions
             }, cancellationToken);
 
         /// <summary>
-        ///     Executes an action with a <see cref="SecurityDomainSession" /> created via the
-        ///     DI-registered <see cref="SecurityDomainSessionFactory" />.
+        ///     Restores the Security Domain to its factory state, reinstating the default SCP03 keys.
         /// </summary>
         /// <remarks>
-        ///     This method builds a <see cref="ServiceProvider" /> internally with
-        ///     <see cref="DependencyInjection.AddYubiKeySecurityDomain" /> registered,
-        ///     then resolves and invokes the factory. Use this for integration tests
-        ///     that verify the standard DI registration works end-to-end.
+        ///     Tests that rotate or delete SCP03 keys must call this when they finish. Deleting the last
+        ///     key set leaves the device with no key matching <see cref="Scp03KeyParameters.Default" />, so
+        ///     every later consumer of the default keys fails secure-channel establishment with
+        ///     <c>SW=0x6A88</c> (referenced data not found). That failure surfaces in whichever suite runs
+        ///     next rather than in the test that caused it, so resetting here keeps the integration suites
+        ///     order-independent.
         /// </remarks>
-        /// <param name="resetBeforeUse">
-        ///     When <c>true</c>, resets the Security Domain before running the test action.
-        /// </param>
-        /// <param name="action">The async action to execute with the session.</param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="scpKeyParams">Optional SCP key parameters for authentication.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        public async Task WithSecurityDomainSessionFromDIAsync(
-            bool resetBeforeUse,
-            Func<SecurityDomainSession, Task> action,
-            ProtocolConfiguration? configuration = null,
-            ScpKeyParameters? scpKeyParams = null,
-            CancellationToken cancellationToken = default)
-        {
-            var services = new ServiceCollection();
-            services.AddYubiKeySecurityDomain();
-            await using var provider = services.BuildServiceProvider();
-
-            await state.WithSecurityDomainSessionFromDIAsync(
-                resetBeforeUse,
-                action,
-                provider,
-                configuration,
-                scpKeyParams,
-                cancellationToken).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        ///     Executes an action with a <see cref="SecurityDomainSession" /> created via a
-        ///     custom <see cref="IServiceProvider" />.
-        /// </summary>
-        /// <remarks>
-        ///     Use this overload when you need to test with additional services registered
-        ///     or a custom DI configuration.
-        /// </remarks>
-        /// <param name="resetBeforeUse">
-        ///     When <c>true</c>, resets the Security Domain before running the test action.
-        /// </param>
-        /// <param name="action">The async action to execute with the session.</param>
-        /// <param name="serviceProvider">
-        ///     The service provider containing the registered <see cref="SecurityDomainSessionFactory" />.
-        /// </param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="scpKeyParams">Optional SCP key parameters for authentication.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        public Task WithSecurityDomainSessionFromDIAsync(
-            bool resetBeforeUse,
-            Func<SecurityDomainSession, Task> action,
-            IServiceProvider serviceProvider,
-            ProtocolConfiguration? configuration = null,
-            ScpKeyParameters? scpKeyParams = null,
-            CancellationToken cancellationToken = default)
-        {
-            var factory = serviceProvider.GetRequiredService<SecurityDomainSessionFactory>();
-
-            return state.WithConnectionAsync(async connection =>
+        public Task ResetSecurityDomainAsync(CancellationToken cancellationToken = default) =>
+            state.WithConnectionAsync(async connection =>
             {
-                if (resetBeforeUse)
-                {
-                    using var resetSession = await state.Device
-                        .CreateSecurityDomainSessionAsync(
-                            connection,
-                            configuration: configuration,
-                            firmwareVersion: state.FirmwareVersion,
-                            cancellationToken: cancellationToken)
-                        .ConfigureAwait(false);
+                using var session = await SecurityDomainSession.CreateAsync(
+                        connection,
+                        new SessionCreationOptions { FirmwareVersionOverride = state.FirmwareVersion },
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
 
-                    await resetSession.ResetAsync(cancellationToken).ConfigureAwait(false);
-                }
-
-                using var session = await factory(
-                    connection,
-                    configuration,
-                    scpKeyParams,
-                    state.FirmwareVersion,
-                    cancellationToken).ConfigureAwait(false);
-
-                await action(session).ConfigureAwait(false);
+                await session.ResetAsync(cancellationToken).ConfigureAwait(false);
             }, cancellationToken);
-        }
     }
 
 }

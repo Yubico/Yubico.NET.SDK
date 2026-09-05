@@ -27,7 +27,6 @@ The YubiHSM Auth module implements the **YubiHSM Auth applet** for authenticatin
 - [`SessionKeys.cs`](src/SessionKeys.cs) - Disposable session key container (S-ENC, S-MAC, S-RMAC)
 - [`HsmAuthAlgorithm.cs`](src/HsmAuthAlgorithm.cs) - Algorithm enum with C# 14 extension properties
 - [`HsmAuthCredential.cs`](src/HsmAuthCredential.cs) - Credential record (from LIST response)
-- [`DependencyInjection.cs`](src/DependencyInjection.cs) - `AddHsmAuth()` DI registration
 - [`IYubiKeyExtensions.cs`](src/IYubiKeyExtensions.cs) - `IYubiKey` convenience methods
 
 ## Firmware Feature Gates

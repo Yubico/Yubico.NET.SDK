@@ -57,14 +57,6 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
 
-        // Report what was actually opened. Upstream has no Transport concept, so this assignment lives
-        // only on this branch and must survive merges that restructure the constructor around it.
-        Transport = connection switch
-        {
-            ISmartCardConnection => ConnectionType.SmartCard,
-            IFidoHidConnection => ConnectionType.HidFido,
-            _ => ConnectionType.HidOtp
-        };
     }
 
     private static IConnection EnsureSupportedConnection(IConnection connection)
@@ -78,32 +70,25 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
                 "Supported types: ISmartCardConnection, IFidoHidConnection, IOtpHidConnection.");
     }
 
-    /// <summary>
-    ///     The transport this session actually runs over.
-    /// </summary>
-    /// <remarks>
-    ///     Management runs over SmartCard, HID FIDO, or HID OTP, and the transport is chosen by a default
-    ///     order or a caller override — so the same call site can land on different transports depending on
-    ///     what else holds the device. Capabilities differ: <see cref="ResetDeviceAsync" /> and SCP are
-    ///     SmartCard-only. This reports what was actually opened, not what was requested, so callers and
-    ///     diagnostics can tell the difference without inspecting the protocol.
-    /// </remarks>
-    public ConnectionType Transport { get; }
-
     public static async Task<ManagementSession> CreateAsync(
         IConnection connection,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
+        SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(connection);
+
+        var configuration = options?.ProtocolConfiguration;
+        var scpKeyParams = options?.ScpKeyParameters;
+        var firmwareVersionOverride = options?.FirmwareVersionOverride;
+
+        ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new ManagementSession(connection, scpKeyParams));
         try
         {
-            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
             return session;
         }
         catch
@@ -115,6 +100,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
+        FirmwareVersion? firmwareVersionOverride,
         CancellationToken cancellationToken = default)
     {
         if (IsInitialized)
@@ -127,10 +113,11 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         _backend = backend;
 
         _version = await ResolveFirmwareVersionAsync(backend, protocol, cancellationToken).ConfigureAwait(false);
+        var effectiveFirmwareVersion = firmwareVersionOverride ?? _version;
 
         var effectiveProtocol = await InitializeProtocolAsync(
                 protocol,
-                _version,
+                effectiveFirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
@@ -155,9 +142,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
 
     public Task SetDeviceConfigAsync(
         DeviceConfig config,
-        bool reboot,
-        byte[]? currentLockCode = null,
-        byte[]? newLockCode = null,
+        SetDeviceConfigOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         // Before the feature gate: a disposed session should say so, not report the firmware verdict of a
@@ -166,14 +151,18 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         EnsureSupports(FeatureSetConfig);
         ArgumentNullException.ThrowIfNull(config);
 
+        bool reboot = options?.Reboot ?? false;
+        ReadOnlyMemory<byte>? currentLockCode = options?.CurrentLockCode;
+        ReadOnlyMemory<byte>? newLockCode = options?.NewLockCode;
+
         const int lockCodeLength = 16;
-        if (currentLockCode is { Length: not lockCodeLength })
-            throw new ArgumentException("Current lock code must be 16 bytes", nameof(currentLockCode));
+        if (currentLockCode is { } current && current.Length != lockCodeLength)
+            throw new ArgumentException("options.CurrentLockCode must be 16 bytes", nameof(options));
 
-        if (newLockCode is { Length: not lockCodeLength })
-            throw new ArgumentException("New lock code must be 16 bytes", nameof(newLockCode));
+        if (newLockCode is { } replacement && replacement.Length != lockCodeLength)
+            throw new ArgumentException("options.NewLockCode must be 16 bytes", nameof(options));
 
-        var configBytes = config.GetBytes(reboot, currentLockCode, newLockCode);
+        var configBytes = config.GetBytes(options);
         return WriteConfigAndZeroAsync(_backend, configBytes, cancellationToken);
 
         static async Task WriteConfigAndZeroAsync(

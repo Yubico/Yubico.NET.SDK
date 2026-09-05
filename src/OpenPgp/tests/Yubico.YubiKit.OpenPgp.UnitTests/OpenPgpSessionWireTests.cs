@@ -103,6 +103,32 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
+    public async Task GenerateKeyAsync_SetsAlgorithmAttributesBeforeGeneratingKeyPair()
+    {
+        var connection = CreateInitializedConnection(
+            OkResponse(),
+            [0x90, 0x00],
+            ApplicationRelatedDataResponse());
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.GenerateKeyAsync(
+            KeyRef.Sig,
+            RsaAttributes.Create(RsaSize.Rsa2048),
+            TestContext.Current.CancellationToken);
+
+        byte[][] operationCommands = connection.TransmittedCommands.Skip(3).ToArray();
+        Assert.Equal(3, operationCommands.Length);
+        Assert.Equal(0xDA, operationCommands[0][1]);
+        Assert.Equal(0xC1, operationCommands[0][3]);
+        Assert.Equal(0x47, operationCommands[1][1]);
+        Assert.Equal(0x80, operationCommands[1][2]);
+        Assert.Equal(0xCA, operationCommands[2][1]);
+        Assert.Equal(0x6E, operationCommands[2][3]);
+    }
+
+    [Fact]
     public async Task VerifyPinAsync_TransmitsVerifyWithUserPinPayload()
     {
         var connection = CreateInitializedConnection(
@@ -219,8 +245,8 @@ public sealed class OpenPgpSessionWireTests
     {
         public override int Algorithm => 0;
 
-        public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8Bytes) =>
-            pinUtf8Bytes.ToArray();
+        public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8) =>
+            pinUtf8.ToArray();
 
         public override byte[] ToBytes() => [];
 

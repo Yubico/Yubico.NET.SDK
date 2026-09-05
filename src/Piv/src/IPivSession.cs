@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.Piv;
 /// including key generation, certificate management, and cryptographic operations.
 /// </para>
 /// </remarks>
-public interface IPivSession : IApplicationSession, IAsyncDisposable
+public interface IPivSession : IApplicationSession
 {
     /// <summary>PIV management key type currently in use.</summary>
     PivManagementKeyType ManagementKeyType { get; }
@@ -43,6 +43,13 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     ///     represents application-protocol authentication such as SCP. Returns <c>false</c> once disposal begins.
     /// </remarks>
     bool IsManagementKeyAuthenticated { get; }
+
+    /// <summary>Gets or sets a parameterless callback invoked before an operation may require touch.</summary>
+    /// <remarks>
+    ///     The callback intentionally receives no operation context so it cannot disclose the slot, algorithm,
+    ///     or data involved. It must not call back into this session.
+    /// </remarks>
+    Action? OnTouchRequired { get; set; }
 
     // Session management
 
@@ -100,22 +107,20 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// for secure disposal of PIN data.
     /// </para>
     /// </remarks>
-    /// <param name="pin">PIN as UTF-8 bytes.</param>
+    /// <param name="pinUtf8">PIN as UTF-8 bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">PIN incorrect. Check RetriesRemaining property.</exception>
-    Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default);
+    Task VerifyPinAsync(ReadOnlyMemory<byte> pinUtf8, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Verify biometric authentication and optionally get temporary PIN.
     /// </summary>
-    /// <param name="requestTemporaryPin">Request temporary PIN for subsequent operations.</param>
-    /// <param name="checkOnly">Only check biometric without authentication.</param>
+    /// <param name="userVerification">The user-verification mode.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>16-byte temporary PIN if requested; null otherwise. Caller must zero returned bytes.</returns>
     /// <exception cref="NotSupportedException">Biometric authentication not available.</exception>
     Task<ReadOnlyMemory<byte>?> VerifyUvAsync(
-        bool requestTemporaryPin = false,
-        bool checkOnly = false,
+        PivUserVerification userVerification = PivUserVerification.Verify,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -133,29 +138,29 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// <summary>
     /// Change PIN from old PIN to new PIN.
     /// </summary>
-    /// <param name="oldPin">Current PIN as UTF-8 bytes.</param>
-    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
+    /// <param name="currentPinUtf8">Current PIN as UTF-8 bytes.</param>
+    /// <param name="newPinUtf8">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">Old PIN incorrect.</exception>
-    Task ChangePinAsync(ReadOnlyMemory<byte> oldPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
+    Task ChangePinAsync(ReadOnlyMemory<byte> currentPinUtf8, ReadOnlyMemory<byte> newPinUtf8, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Change PUK from old PUK to new PUK.
     /// </summary>
-    /// <param name="oldPuk">Current PUK as UTF-8 bytes.</param>
-    /// <param name="newPuk">New PUK as UTF-8 bytes (6-8 ASCII characters).</param>
+    /// <param name="currentPukUtf8">Current PUK as UTF-8 bytes.</param>
+    /// <param name="newPukUtf8">New PUK as UTF-8 bytes (6-8 ASCII characters).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">Old PUK incorrect.</exception>
-    Task ChangePukAsync(ReadOnlyMemory<byte> oldPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default);
+    Task ChangePukAsync(ReadOnlyMemory<byte> currentPukUtf8, ReadOnlyMemory<byte> newPukUtf8, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Unblock PIN using PUK and set new PIN.
     /// </summary>
-    /// <param name="puk">PUK as UTF-8 bytes.</param>
-    /// <param name="newPin">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
+    /// <param name="pukUtf8">PUK as UTF-8 bytes.</param>
+    /// <param name="newPinUtf8">New PIN as UTF-8 bytes (6-8 ASCII characters).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="InvalidPinException">PUK incorrect.</exception>
-    Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
+    Task UnblockPinAsync(ReadOnlyMemory<byte> pukUtf8, ReadOnlyMemory<byte> newPinUtf8, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Set PIN and PUK retry limits.
@@ -185,16 +190,14 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// </remarks>
     /// <param name="slot">PIV slot for key storage.</param>
     /// <param name="algorithm">Key algorithm and size.</param>
-    /// <param name="pinPolicy">PIN verification policy for key usage.</param>
-    /// <param name="touchPolicy">Touch requirement policy for key usage.</param>
+    /// <param name="options">Optional key-use policies.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Generated public key.</returns>
     /// <exception cref="NotSupportedException">Algorithm not supported on this YubiKey version.</exception>
     Task<IPublicKey> GenerateKeyAsync(
         PivSlot slot,
         PivAlgorithm algorithm,
-        PivPinPolicy pinPolicy = PivPinPolicy.Default,
-        PivTouchPolicy touchPolicy = PivTouchPolicy.Default,
+        PivKeyCreationOptions? options = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -205,15 +208,13 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// </remarks>
     /// <param name="slot">PIV slot for key storage.</param>
     /// <param name="privateKey">Private key to import.</param>
-    /// <param name="pinPolicy">PIN verification policy for key usage.</param>
-    /// <param name="touchPolicy">Touch requirement policy for key usage.</param>
+    /// <param name="options">Optional key-use policies.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Algorithm of imported key.</returns>
     Task<PivAlgorithm> ImportKeyAsync(
         PivSlot slot,
         IPrivateKey privateKey,
-        PivPinPolicy pinPolicy = PivPinPolicy.Default,
-        PivTouchPolicy touchPolicy = PivTouchPolicy.Default,
+        PivKeyCreationOptions? options = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -270,6 +271,8 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// <param name="data">Data to sign or decrypt.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Signature or decrypted data.</returns>
+    // Both declarations are established alpha entry points: explicit and metadata-driven algorithms.
+#pragma warning disable RS0026
     Task<ReadOnlyMemory<byte>> SignOrDecryptAsync(
         PivSlot slot,
         PivAlgorithm algorithm,
@@ -302,6 +305,7 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
         PivSlot slot,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default);
+#pragma warning restore RS0026
 
     /// <summary>
     /// Decrypts RSA cipher text and removes padding, returning clean plaintext.
@@ -364,16 +368,16 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// </summary>
     /// <remarks>
     /// Requires management key authentication. Certificates larger than 1856 bytes are
-    /// automatically compressed unless compress=false is specified.
+    /// automatically compressed.
     /// </remarks>
     /// <param name="slot">PIV slot for certificate storage.</param>
     /// <param name="certificate">X.509 certificate to store.</param>
-    /// <param name="compress">Force gzip compression for large certificates.</param>
+    /// <param name="compression">Certificate compression policy.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task StoreCertificateAsync(
         PivSlot slot,
         X509Certificate2 certificate,
-        bool compress = false,
+        PivCertificateCompression compression = PivCertificateCompression.Automatic,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -553,11 +557,11 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// retained by the session.
     /// </para>
     /// </remarks>
-    /// <param name="pin">PIN as UTF-8 bytes, used if PRINTED is PIN-gated or PIN-derived data is present.</param>
+    /// <param name="pinUtf8">PIN as UTF-8 bytes, used if PRINTED is PIN-gated or PIN-derived data is present.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The PIN-only mode(s) successfully authenticated. <see cref="PivPinOnlyMode.None"/> if neither succeeded.</returns>
     /// <exception cref="InvalidPinException">PIN verification is required and the supplied PIN is incorrect.</exception>
-    Task<PivPinOnlyMode> RecoverPinOnlyModeAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default);
+    Task<PivPinOnlyMode> RecoverPinOnlyModeAsync(ReadOnlyMemory<byte> pinUtf8, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Enable or disable PIN-protected management key mode.
@@ -580,7 +584,7 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// <para><paramref name="managementKey"/> is NOT zeroed by this method - caller is responsible for secure disposal.</para>
     /// </remarks>
     /// <param name="pinOnlyMode"><see cref="PivPinOnlyMode.None"/> to disable, or <see cref="PivPinOnlyMode.PinProtected"/> to enable.</param>
-    /// <param name="pin">PIN as UTF-8 bytes. Required (and verified) when enabling PIN-protected mode; ignored when disabling.</param>
+    /// <param name="pinUtf8">PIN as UTF-8 bytes. Required (and verified) when enabling PIN-protected mode; ignored when disabling.</param>
     /// <param name="managementKey">
     /// The active management key to authenticate and protect. Required when enabling PIN-protected mode;
     /// its length must match <see cref="ManagementKeyType"/>. Ignored when disabling.
@@ -592,7 +596,7 @@ public interface IPivSession : IApplicationSession, IAsyncDisposable
     /// <exception cref="InvalidPinException">The supplied PIN is incorrect.</exception>
     Task SetPinOnlyModeAsync(
         PivPinOnlyMode pinOnlyMode,
-        ReadOnlyMemory<byte> pin,
+        ReadOnlyMemory<byte> pinUtf8,
         ReadOnlyMemory<byte>? managementKey = null,
         CancellationToken cancellationToken = default);
 

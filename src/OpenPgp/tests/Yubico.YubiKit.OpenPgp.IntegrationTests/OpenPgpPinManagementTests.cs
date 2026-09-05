@@ -48,7 +48,7 @@ public class OpenPgpPinManagementTests
 
                 // Reset PIN using the reset code
                 byte[] newPin = "654321"u8.ToArray();
-                await session.ResetPinAsync(resetCode, newPin);
+                await session.ResetPinUsingResetCodeAsync(resetCode, newPin);
 
                 // Verify the new PIN works
                 await session.VerifyPinAsync(newPin);
@@ -65,7 +65,7 @@ public class OpenPgpPinManagementTests
             {
                 // Generate a signing key so we can test PIN-gated operations
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateEcKeyAsync(KeyRef.Sig, CurveOid.Secp256R1);
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
 
                 // Verify PIN for signing
                 await session.VerifyPinAsync(DefaultUserPin);
@@ -125,7 +125,7 @@ public class OpenPgpPinManagementTests
                 // Attempt key generation without verifying Admin PIN
                 // The card should reject the operation with a security status error
                 await Assert.ThrowsAsync<ApduException>(
-                    () => session.GenerateEcKeyAsync(KeyRef.Sig, CurveOid.Secp256R1));
+                    () => session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1)));
             });
 
     // ── Reset PIN via Admin PIN ─────────────────────────────────────
@@ -163,7 +163,7 @@ public class OpenPgpPinManagementTests
                 // requires at least 2 unique characters; "111111" would fail with
                 // SW=0x6985 "Conditions of use not satisfied").
                 byte[] newPin = "654321"u8.ToArray();
-                await session.ResetPinAsync(DefaultAdminPin, newPin, useAdmin: true);
+                await session.ResetPinUsingAdminAuthenticationAsync(newPin);
 
                 // Verify the new PIN works
                 await session.VerifyPinAsync(newPin);

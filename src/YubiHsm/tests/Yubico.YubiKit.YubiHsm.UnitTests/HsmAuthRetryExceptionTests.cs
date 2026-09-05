@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Tests.Shared;
 
+using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 /// <summary>
@@ -43,7 +44,7 @@ public class HsmAuthRetryExceptionTests
         var connection = CreateInitializedConnection([0x63, 0xC4]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.PutCredentialSymmetricAsync(
@@ -65,7 +66,7 @@ public class HsmAuthRetryExceptionTests
         var connection = CreateInitializedConnection([0x63, 0xC1]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.PutManagementKeyAsync(
@@ -85,7 +86,7 @@ public class HsmAuthRetryExceptionTests
         var connection = CreateInitializedConnection([0x63, 0xC6]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.CalculateSessionKeysSymmetricAsync(
@@ -105,7 +106,7 @@ public class HsmAuthRetryExceptionTests
         var connection = CreateInitializedConnection([0x63, 0xC0]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 8, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.ChangeCredentialPasswordAsync(
@@ -125,7 +126,7 @@ public class HsmAuthRetryExceptionTests
         var connection = CreateInitializedConnection([0x63, 0xC3]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.PutCredentialAsymmetricAsync(
@@ -147,7 +148,7 @@ public class HsmAuthRetryExceptionTests
         var connection = CreateInitializedConnection([0x63, 0xC7]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.GenerateCredentialAsymmetricAsync(
@@ -168,7 +169,7 @@ public class HsmAuthRetryExceptionTests
         var connection = CreateInitializedConnection([0x63, 0xC2]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 8, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.ChangeCredentialPasswordAdminAsync(
@@ -190,7 +191,7 @@ public class HsmAuthRetryExceptionTests
         var connection = CreateInitializedConnection([0x63, 0xC5]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 6, 0),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.CalculateSessionKeysAsymmetricAsync(
@@ -216,7 +217,7 @@ public class HsmAuthRetryExceptionTests
         var connection = CreateInitializedConnection([0x63, 0xC9]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
-            firmwareVersion: new FirmwareVersion(5, 4, 3),
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.PutCredentialDerivedAsync(

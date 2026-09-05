@@ -105,8 +105,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     /// <summary>
     ///     Gets or sets a callback invoked when a session-key calculation may require the user
-    ///     to physically touch the YubiKey. See <see cref="TouchNotificationCallback" /> for
-    ///     threading, reentrancy, and firing-condition details.
+    ///     to physically touch the YubiKey.
     /// </summary>
     /// <remarks>
     ///     Each session-key calculation snapshots the callback before querying the credential
@@ -117,7 +116,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
     /// </code>
     /// </example>
-    public TouchNotificationCallback? OnTouchRequired { get; set; }
+    public Action? OnTouchRequired { get; set; }
 
     private HsmAuthSession(
         ISmartCardConnection connection,
@@ -133,26 +132,28 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     ///     Factory helper that creates and initializes a YubiHSM Auth session.
     /// </summary>
     /// <param name="connection">The SmartCard connection to use.</param>
-    /// <param name="configuration">Optional protocol configuration.</param>
-    /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
-    /// <param name="firmwareVersion">Optional firmware version override.</param>
+    /// <param name="options">Optional cross-cutting session creation settings.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An initialized <see cref="HsmAuthSession" />.</returns>
     public static async Task<HsmAuthSession> CreateAsync(
         ISmartCardConnection connection,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
-        FirmwareVersion? firmwareVersion = null,
+        SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(connection);
+
+        var configuration = options?.ProtocolConfiguration;
+        var scpKeyParams = options?.ScpKeyParameters;
+        var firmwareVersionOverride = options?.FirmwareVersionOverride;
+
+        ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new HsmAuthSession(connection, scpKeyParams));
         try
         {
-            await session.InitializeAsync(configuration, firmwareVersion, cancellationToken)
+            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken)
                 .ConfigureAwait(false);
             return session;
         }
@@ -534,9 +535,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         // Re-SELECT the applet using the existing protocol to refresh cached state.
         // Do NOT create a new protocol here — that would abandon the current one without
         // disposing it, leaking the PCSC transaction and causing SW=0x6985 on next operation.
-        var resolvedFirmwareVersion = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
-
-        FirmwareVersion = resolvedFirmwareVersion;
+        //
+        // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet
+        // state, not caller policy, so a SessionCreationOptions.FirmwareVersionOverride supplied at
+        // creation must survive it; otherwise the override would silently lapse mid-session and
+        // later feature gates would disagree with earlier ones.
+        _ = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -884,7 +888,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// </remarks>
     private async Task NotifyTouchIfRequiredAsync(string label, CancellationToken cancellationToken)
     {
-        TouchNotificationCallback? callback = OnTouchRequired;
+        Action? callback = OnTouchRequired;
         if (callback is null)
             return;
 

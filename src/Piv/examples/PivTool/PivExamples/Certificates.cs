@@ -88,7 +88,7 @@ public static class Certificates
     /// 
     /// var certData = await File.ReadAllBytesAsync("certificate.pem", ct);
     /// var result = await Certificates.ImportCertificateAsync(
-    ///     session, PivSlot.Authentication, certData, compress: false, ct);
+    ///     session, PivSlot.Authentication, certData, PivCertificateCompression.Automatic, ct);
     /// </code>
     /// </example>
     public static async Task<CertificateResult> ImportCertificateAsync(
@@ -107,7 +107,11 @@ public static class Certificates
                 ? X509Certificate2.CreateFromPem(text)
                 : X509CertificateLoader.LoadCertificate(certificateData.Span);
 
-            await session.StoreCertificateAsync(slot, cert, compress, cancellationToken);
+            await session.StoreCertificateAsync(
+                slot,
+                cert,
+                compress ? PivCertificateCompression.Always : PivCertificateCompression.Automatic,
+                cancellationToken);
             return CertificateResult.Stored();
         }
         catch (CryptographicException)
@@ -292,7 +296,11 @@ public static class Certificates
                 DateTimeOffset.UtcNow.AddDays(validityDays),
                 serialNumber);
 
-            await session.StoreCertificateAsync(slot, newCert, false, cancellationToken);
+            await session.StoreCertificateAsync(
+                slot,
+                newCert,
+                PivCertificateCompression.Automatic,
+                cancellationToken);
             return CertificateResult.Succeeded(newCert);
         }
         catch (Exception ex)

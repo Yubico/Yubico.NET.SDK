@@ -12,8 +12,12 @@ namespace Yubico.YubiKit.Core.Devices;
 /// Simply call the static methods directly to discover and monitor devices.
 /// </para>
 /// <para><strong>Thread Safety:</strong> All methods are thread-safe and can be called from any thread.</para>
-/// <para><strong>UI Thread Marshaling:</strong> Events from <see cref="WatchAsync"/> are delivered on
-/// background threads. UI applications must marshal to the UI thread for updates.</para>
+/// <para><strong>Threading:</strong> Publication never runs consumer code — <see cref="WatchAsync"/>
+/// enqueues into a per-watcher buffer, so nothing in the <c>await foreach</c> body executes on the
+/// device-monitoring path. The thread that resumes each iteration is not guaranteed: an already-buffered
+/// event can complete <c>MoveNextAsync</c> synchronously on the calling thread, while an awaited one
+/// resumes on a thread-pool thread. UI applications must therefore marshal explicitly rather than relying
+/// on either behaviour.</para>
 /// <para><strong>Testing Pattern:</strong> Call <see cref="ShutdownAsync"/> in test cleanup (e.g., xUnit
 /// <c>DisposeAsync</c> or <c>IAsyncLifetime.DisposeAsync</c>) to reset static state between tests.</para>
 /// <para><strong>Caching Behavior:</strong> By default, <see cref="FindAllAsync(CancellationToken)"/>

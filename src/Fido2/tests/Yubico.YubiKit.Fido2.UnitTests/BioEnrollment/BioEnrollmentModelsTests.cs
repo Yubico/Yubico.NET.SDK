@@ -104,40 +104,50 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(100); // Another unknown key
         writer.WriteInt32(42);
         writer.WriteEndMap();
-        var cbor = writer.Encode();
+        byte[] cbor = writer.Encode();
+        byte[] expectedRawData = cbor.ToArray();
 
         // Act
         var info = FingerprintSensorInfo.Decode(cbor);
+        cbor.AsSpan().Clear();
 
         // Assert
         Assert.Equal(FingerprintKind.Touch, info.FingerprintKind);
         Assert.Equal(5, info.MaxCaptureSamplesRequiredForEnroll);
+        Assert.Equal(expectedRawData, info.RawData.ToArray());
     }
 
     [Fact]
-    public void EnrollmentSampleResult_Decode_ParsesFirstSample()
+    public void EnrollmentSampleResult_Decode_WithUnknownField_PreservesOwnedRawData()
     {
         // Arrange - CBOR response from enrollBegin
         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(3);
+        writer.WriteStartMap(4);
         writer.WriteInt32(4); // templateId key
         writer.WriteByteString(templateId);
         writer.WriteInt32(5); // lastEnrollSampleStatus key
         writer.WriteInt32(0); // Good
         writer.WriteInt32(6); // remainingSamples key
         writer.WriteInt32(4);
+        writer.WriteInt32(99);
+        writer.WriteStartArray(1);
+        writer.WriteBoolean(true);
+        writer.WriteEndArray();
         writer.WriteEndMap();
-        var cbor = writer.Encode();
+        byte[] cbor = writer.Encode();
+        byte[] expectedRawData = cbor.ToArray();
 
         // Act
         var result = EnrollmentSampleResult.Decode(cbor);
+        cbor.AsSpan().Clear();
 
         // Assert
         Assert.Equal(templateId, result.TemplateId.ToArray());
         Assert.Equal(FingerprintSampleStatus.Good, result.LastSampleStatus);
         Assert.Equal(4, result.RemainingSamples);
         Assert.False(result.IsComplete);
+        Assert.Equal(expectedRawData, result.RawData.ToArray());
     }
 
     [Fact]

@@ -168,6 +168,12 @@ public static class YubiKeyManager
     /// <para>Each enumeration gets an independent bounded buffer, so concurrent watchers do not
     /// interfere and a slow consumer cannot stall device monitoring. Overflow faults only the
     /// affected enumeration.</para>
+    /// <para><strong>Physical-device semantics:</strong> A composite key normally appears as one event,
+    /// but ambiguous evidence can conservatively publish one physical key as multiple devices. For an
+    /// uninterrupted presence with unchanged interface and connection sets and no contradictory known
+    /// serial, the repository retains the object originally published in <see cref="DeviceAction.Added"/>
+    /// so its <see cref="IYubiKey.DeviceId"/> correlates with the eventual
+    /// <see cref="DeviceAction.Removed"/> event.</para>
     /// </remarks>
     /// <example>
     /// <para><strong>Wait for the next YubiKey to be inserted, with a timeout:</strong></para>
@@ -291,9 +297,11 @@ public static class YubiKeyManager
     /// </para>
     /// <para><strong>Identity:</strong> For an uninterrupted presence with unchanged physical interfaces and
     /// <see cref="IYubiKey.AvailableConnections"/>, the cached object retains the <see cref="IYubiKey.DeviceId"/>
-    /// that was originally published. A newly constructed object from a fresh scan can have a different
-    /// evidence-tier-derived ID before repository reconciliation; do not use independently obtained scan
-    /// objects as durable physical-identity records.</para>
+    /// that was originally published unless a fresh known serial proves that different hardware now occupies
+    /// the same interfaces. A connection-set change or proven substitution is republished as removal followed
+    /// by addition. A newly
+    /// constructed object from a fresh scan can have a different evidence-tier-derived ID before repository
+    /// reconciliation; do not use independently obtained scan objects as durable physical-identity records.</para>
     /// <para><strong>Physical-device bounds:</strong> One result per physical key is the common case, not an
     /// unconditional promise. When topology, serial, and PID evidence cannot safely correlate interfaces,
     /// discovery publishes conservative splits rather than risk merging different keys.</para>

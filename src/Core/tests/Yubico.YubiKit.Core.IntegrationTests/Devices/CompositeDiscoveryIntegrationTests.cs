@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
@@ -44,7 +45,12 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         ConnectionType.HidOtp
     ];
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public Task InitializeAsync()
+    {
+        YubiKitLogging.LoggerFactory = LoggerFactory.Create(
+            builder => builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
+        return Task.CompletedTask;
+    }
 
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
 
@@ -70,7 +76,6 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
                 $"Conservation violated for {type}: {enumerated} interface(s) enumerated at the USB layer " +
                 $"but {exposed} returned device(s) expose the type. Devices: {Describe(devices)}");
         }
-
         // Per-connection filters must return exactly the devices from the same snapshot exposing the type.
         foreach (var type in ConcreteTypes)
         {
@@ -147,6 +152,109 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
         Assert.Equal(
             scan1.Select(d => d.DeviceId).Order(StringComparer.Ordinal),
             scan2.Select(d => d.DeviceId).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task FindAllAsync_RepeatedScans_EventuallyPopulateMetadataOnEveryRetainedDevice()
+    {
+        // Best-effort metadata reads use four process-wide worker slots. A rig with more keys can leave a
+        // first-scan object without metadata, but later scans must retry and propagate successful metadata
+        // onto the object retained by the repository without requiring a hot-plug.
+        IReadOnlyList<IYubiKey> devices = [];
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+            if (devices.All(device => Assert.IsType<YubiKeyDevice>(device).DeviceInfo is not null))
+                break;
+        }
+
+        Assert.NotEmpty(devices);
+        Assert.All(devices, device => Assert.NotNull(Assert.IsType<YubiKeyDevice>(device).DeviceInfo));
+    }
+
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task FindAllAsync_RepeatedScans_EventuallyExposeSerialNumberWithoutASession()
+    {
+        // IYubiKey.SerialNumber surfaces the discovery-read serial with no session or Management
+        // dependency. Assert only the authorized serial-bearing fixtures: other attached devices may
+        // legitimately be serial-less and remain null forever.
+        var expectedSerials = AuthorizedSerialsOrSkip();
+        var devices = await ScanUntilAsync(scan =>
+            expectedSerials.All(serial => scan.Any(device => device.SerialNumber == serial)));
+
+        Assert.NotEmpty(devices);
+        Assert.All(expectedSerials, serial =>
+            Assert.Contains(devices, device => device.SerialNumber == serial));
+    }
+
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task SameDeviceAs_AcrossConsecutiveScans_UsesKnownSerials()
+    {
+        // Conservative grouping can publish several objects for one physical key. Correlation follows
+        // their known serials rather than assuming one published object per key.
+        var expectedSerials = AuthorizedSerialsOrSkip();
+        var scan1 = await ScanUntilAsync(scan =>
+            expectedSerials.All(serial => scan.Any(device => device.SerialNumber == serial)));
+        var scan2 = await ScanUntilAsync(scan =>
+            expectedSerials.All(serial => scan.Any(device => device.SerialNumber == serial)));
+        var known1 = scan1.Where(device => device.SerialNumber is { } serial && expectedSerials.Contains(serial)).ToList();
+        var known2 = scan2.Where(device => device.SerialNumber is { } serial && expectedSerials.Contains(serial)).ToList();
+
+        Assert.NotEmpty(known1);
+        Assert.NotEmpty(known2);
+        Assert.Equal(
+            expectedSerials.Order(),
+            known1.Select(device => device.SerialNumber!.Value).Distinct().Order());
+        Assert.Equal(
+            expectedSerials.Order(),
+            known2.Select(device => device.SerialNumber!.Value).Distinct().Order());
+
+        foreach (var device in known1)
+        {
+            foreach (var other in known2)
+            {
+                var expected = device.SerialNumber == other.SerialNumber
+                    ? DeviceCorrelation.Same
+                    : DeviceCorrelation.Different;
+                Assert.Equal(expected, device.SameDeviceAs(other));
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Rescans (bounded attempts) until <paramref name="ready" /> holds, tolerating the four-worker
+    ///     metadata budget leaving early scans partially populated on larger rigs.
+    /// </summary>
+    private static async Task<IReadOnlyList<IYubiKey>> ScanUntilAsync(
+        Func<IReadOnlyList<IYubiKey>, bool> ready)
+    {
+        IReadOnlyList<IYubiKey> devices = [];
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            devices = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
+            if (devices.Count > 0 && ready(devices))
+                break;
+        }
+
+        return devices;
+    }
+
+    private static HashSet<int> AuthorizedSerialsOrSkip()
+    {
+        var serials = AuthorizedDevices.GetAll()
+            .Select(device => device.SerialNumber)
+            .OfType<int>()
+            .ToHashSet();
+        if (serials.Count == 0)
+        {
+            throw new Xunit.SkipException(
+                "This identity contract requires at least one authorized device with a readable serial number.");
+        }
+
+        return serials;
     }
 
     [Fact]

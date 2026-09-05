@@ -97,8 +97,23 @@ mappings:
       - yubikit:src/Core/src/Devices/YubiKeyDeviceMonitorService.cs
       - yubikit:src/Core/src/Devices/YubiKeyDeviceRepository.cs
       - yubikit:src/Core/src/Devices/YubiKeyManager.cs
-    notes: V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> events with per-HID-device payloads, while v1 device-level consumers used YubiKeyDeviceListener.Arrived/Removed and YubiKeyDevice.FindAll() over the listener cache. V2 low-level HID DeviceEvent is only a diagnostic rescan hint (HidDeviceChangeKind plus optional platform id/path), not public physical-device truth. Use YubiKeyManager.WatchAsync for repository-diffed Added/Removed events after YubiKeyDeviceRepository.UpdateCache.
-    last_reviewed_commit: b1744cb36974ba8885fc7d9c007fe9fc5012b225
+    notes: V1 low-level HID consumers handled Arrived/Removed EventHandler<HidDeviceEventArgs> events with per-HID-device payloads, while v1 device-level consumers used YubiKeyDeviceListener.Arrived/Removed and YubiKeyDevice.FindAll() over the listener cache. V2 low-level HID DeviceEvent is only a diagnostic rescan hint (HidDeviceChangeKind plus optional platform id/path), not public physical-device truth. Use YubiKeyManager.WatchAsync(cancellationToken) (IAsyncEnumerable<DeviceEvent>) for repository-diffed Added/Removed events after YubiKeyDeviceRepository.UpdateCache. WatchAsync is the only device-change stream: the earlier IObservable<DeviceEvent> DeviceChanges property was removed outright with no shim, and the System.Reactive dependency is gone. Each enumeration is an independent watcher with its own bounded buffer, so filtering that used Rx operators such as Where becomes an if inside the await foreach.
+    last_reviewed_commit: c3b7e206fd900413cf0a64b0efa75badbe71fd49
+  - id: hid-usage-page-to-interface-type
+    status: assisted
+    confidence: high
+    migration_kind: type
+    v1: Yubico.Core.Devices.Hid.IHidDevice.UsagePage (HidUsagePage - Unknown, Fido, Keyboard)
+    v2: Yubico.YubiKit.Core.Transports.Hid.IHidDevice.InterfaceType (HidInterfaceType - Unknown, Fido, Otp)
+    evidence:
+      - develop:Yubico.Core/src/Yubico/Core/Devices/Hid/HidUsagePage.cs
+      - develop:Yubico.Core/src/Yubico/Core/Devices/Hid/IHidDevice.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/DeviceExtensions/IHidDeviceExtension.cs
+      - yubikit:src/Core/src/Transports/Hid/HidInterfaceType.cs
+      - yubikit:src/Core/src/Transports/Hid/HidInterfaceClassifier.cs
+      - yubikit:src/Core/src/Transports/Hid/IHidDevice.cs
+    notes: V1's public IHidDevice.UsagePage classified a device from the HID UsagePage field alone; Keyboard = 1 was actually the Generic Desktop usage page (0x01), not specifically a keyboard, so v1's internal IsFido()/IsKeyboard() extension helpers (IHidDeviceExtension, not public) used UsagePage == HidUsagePage.Fido/Keyboard to detect the YubiKey FIDO and OTP/keyboard-emulation interfaces respectively. V2 initially carried a same-shaped HidUsagePage (Unknown=0, Fido=0xF1D0, Keyboard=1) as a near-direct v1 port, marked [Obsolete] in favor of HidInterfaceType (Unknown/Fido/Otp) plus HidInterfaceClassifier, which classify from the full UsagePage+Usage pair. This range's refactor(core)! change removing the three obsolete public members deleted the obsolete v2 HidUsagePage entirely (it had zero callers), so it is no longer available even as a same-named decoy. Migrate v1 UsagePage == HidUsagePage.Fido to InterfaceType == HidInterfaceType.Fido, and v1 IsKeyboard()/UsagePage == HidUsagePage.Keyboard to InterfaceType == HidInterfaceType.Otp. This is low-level HID device access; most applications should prefer YubiKeyManager/IYubiKey discovery and ConnectionType over raw IHidDevice interface classification.
+    last_reviewed_commit: c3b7e206fd900413cf0a64b0efa75badbe71fd49
   - id: session-lifecycle
     status: manual
     confidence: medium
@@ -463,6 +478,32 @@ mappings:
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
     notes: The initial v2 snapshot had zero dedicated OpenPGP exception types (historical gap 9). The `yubikit-gaps` remediation effort added `OpenPgpInvalidPinException` (derives from `ApduException`), thrown by `IOpenPgpSession.VerifyPinAsync`/`VerifyAdminAsync` for every PIN rejection shape observed across firmware (standard SW 0x63Cx, SW 0x6982 on some 5.8.0-alpha firmware, and SW 0x6983 for an already-blocked PIN), exposing a typed nullable `RetriesRemaining` instead of requiring callers to parse the message or separately call `GetPinStatusAsync`.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+  - id: webauthn-credential-prompt
+    status: assisted
+    confidence: medium
+    migration_kind: behavior
+    v1: Fido2Session.KeyCollector-driven interactive PIN collection and retry (v1 had no WebAuthn package)
+    v2: WebAuthnClient(..., prompt = ICredentialPrompt) with an SDK-owned bounded retry loop
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.Pin.cs
+      - develop:Yubico.YubiKey/examples/Fido2SampleCode/KeyCollector/Fido2SampleKeyCollector.cs
+      - yubikit:src/Core/src/Credentials/ICredentialPrompt.cs
+      - yubikit:src/WebAuthn/src/Client/WebAuthnClient.cs
+      - yubikit:src/WebAuthn/CLAUDE.md
+    notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Fido2 (IFidoSession); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt, an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (MaxPromptAttempts = 3); returning null from the prompt means the user declined, not a retry request. This replaces the KeyCollector pattern only for WebAuthn; the lower-level Yubico.YubiKit.Fido2.IFidoSession still takes PIN bytes explicitly and has no prompt integration. Review the prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
+    last_reviewed_commit: c3b7e206fd900413cf0a64b0efa75badbe71fd49
+  - id: yubihsm-credential-password-bytes
+    status: assisted
+    confidence: high
+    migration_kind: member
+    v1: YubiHsmAuthSession credential-password parameters (ReadOnlyMemory<byte> in Symmetric.cs; string in Aes128CredentialWithSecrets.cs and related asymmetric/admin members)
+    v2: IHsmAuthSession/HsmAuthSession credential-password parameters as UTF-8 ReadOnlyMemory<byte>, renamed with the ...Utf8 suffix
+    evidence:
+      - yubikit:src/YubiHsm/src/HsmAuthSession.cs
+      - yubikit:src/YubiHsm/src/IHsmAuthSession.cs
+      - yubikit:docs/migration/v1-to-v2-changelog.md
+    notes: The initial v2 snapshot regressed nine IHsmAuthSession/HsmAuthSession members (11 parameters) to a string credential-password parameter, which .NET cannot securely zero. This finished the sweep started for Fido2/OpenPgp/Oath (`75353fd1`, 2026-04-09) and closes a v1 regression rather than introducing one - v1's YubiHsmAuthSession.Symmetric.cs path already took a ReadOnlyMemory<byte> credentialPassword. Affected members - PutCredentialSymmetricAsync, PutCredentialDerivedAsync, CalculateSessionKeysSymmetricAsync, CalculateSessionKeysAsymmetricAsync, GetChallengeAsync, PutCredentialAsymmetricAsync, GenerateCredentialAsymmetricAsync, ChangeCredentialPasswordAsync, ChangeCredentialPasswordAdminAsync. Breaking, with no [Obsolete] overload (package is 2.0.0-alpha.2). Migrate by passing Encoding.UTF8.GetBytes(password) and zeroing the resulting array in a finally, or an owning buffer type that zeroes on disposal; validation (max 16 UTF-8 bytes, null-padded) and PBKDF2-HMAC-SHA256 derivation are unchanged. The same change corrected the GetChallengeAsync firmware boundary (5.6.0 supports the command without a password; 5.7.1 adds the optional password field) and added session-key context-length validation (8-byte host+HSM challenges for symmetric; 65-byte EPK-OCE+EPK-SD for asymmetric) before device I/O; see the 2026-08-31 and 2026-09-03 changelog entries for full detail.
+    last_reviewed_commit: c3b7e206fd900413cf0a64b0efa75badbe71fd49
 manual_review:
   - device discovery call sites
   - low-level HID listener DeviceEvent callback signatures

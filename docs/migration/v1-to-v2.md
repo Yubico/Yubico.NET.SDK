@@ -33,6 +33,10 @@ V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arriv
 
 Earlier v2 alphas also exposed these events as an `IObservable<DeviceEvent>` (`YubiKeyManager.DeviceChanges`), briefly with Rx-style `Subscribe(Action<T>)` and query operators appearing transitively. That property has been removed outright, with no shim: `WatchAsync` is the only device-change stream. Filtering that used `Where` becomes an `if` inside the `await foreach`, and each `await foreach` is an independent watcher, so several parts of an application can consume the stream concurrently.
 
+### HID Interface Type Classification
+
+V1's `IHidDevice.UsagePage` (`HidUsagePage`: `Unknown`, `Fido`, `Keyboard`) classified a device from the HID UsagePage field alone; `Keyboard = 1` was actually the Generic Desktop usage page, not specifically a keyboard, so v1 code paired it with `Usage` to detect the YubiKey OTP interface. V2 classifies from the full UsagePage+Usage pair through `IHidDevice.InterfaceType` (`HidInterfaceType`: `Unknown`, `Fido`, `Otp`). Migrate `UsagePage == HidUsagePage.Fido` to `InterfaceType == HidInterfaceType.Fido`, and `UsagePage == HidUsagePage.Keyboard` (v1's OTP-interface check) to `InterfaceType == HidInterfaceType.Otp`. See `hid-usage-page-to-interface-type` in `v1-to-v2-map.yml`. Most applications should prefer `YubiKeyManager`/`IYubiKey` discovery and `ConnectionType` over raw `IHidDevice` interface classification.
+
 ### Secure Channel (SCP) Session Construction
 
 `ProtocolFactory`, `ISmartCardProtocol`, and `PcscProtocolScp` are internal implementation machinery in v2.
@@ -444,6 +448,10 @@ PIN-only management-key mode (`IPivSession.GetPinOnlyModeAsync`/`SetPinOnlyModeA
 
 Use `Yubico.YubiKit.Fido2` for FIDO2/WebAuthn operations. Review transport selection, PIN/UV flows, credential management, and authenticator state assumptions manually.
 
+### WebAuthn
+
+Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new package built on top of `Yubico.YubiKit.Fido2` (`IFidoSession`); v1 had no equivalent package. `WebAuthnClient` accepts an optional `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) that supplies a PIN on demand instead of requiring `pinBytes` up front, and owns a bounded retry loop instead of v1 FIDO2 code's global, unbounded `KeyCollector` pattern; see `webauthn-credential-prompt` in `v1-to-v2-map.yml`.
+
 ### OATH
 
 Use `Yubico.YubiKit.Oath` for TOTP/HOTP credential management and code calculation. Review credential naming, secret handling, password flows, and time-source assumptions manually.
@@ -473,6 +481,8 @@ Secure-channel handshake/authentication failures (during session creation or pos
 Use `Yubico.YubiKit.YubiHsm` for YubiHSM 2 workflows. Review connector/session creation, authentication, object identifiers, capabilities, and command behavior manually.
 
 A dedicated `HsmAuthRetryException.RetriesRemaining` and an `HsmAuthSession.OnTouchRequired` callback were restored after an initial v2 gap; see `yubihsm-retry-exception` and `yubihsm-touch-notify` in `v1-to-v2-map.yml`. `HsmAuthCredential.Counter` was hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics; see `yubihsm-credential-retries-remaining-rename`.
+
+Credential passwords moved from `string` to UTF-8 `ReadOnlyMemory<byte>` across nine `IHsmAuthSession`/`HsmAuthSession` members (parameters renamed with the `...Utf8` suffix), closing a v1 regression rather than introducing one, since v1's equivalent path already used byte-based passwords; see `yubihsm-credential-password-bytes` in `v1-to-v2-map.yml`.
 
 ## Manual Low-Level Command Cases
 

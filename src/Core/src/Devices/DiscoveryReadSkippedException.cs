@@ -16,9 +16,9 @@ namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
 ///     Why a best-effort discovery device-info read was skipped. Carried on
-///     <see cref="DiscoveryReadSkippedException" /> so logs and diagnostics can distinguish the causes
-///     (Phase-0 diagnostics misattributed worker-admission saturation to interface contention because the
-///     causes were previously indistinguishable).
+///     <see cref="DiscoveryReadSkippedException" /> so logs and diagnostics can distinguish unsupported
+///     discovery access, active connection ownership, worker-admission saturation, and transport
+///     supersession.
 /// </summary>
 internal enum DiscoveryReadSkipCause
 {
@@ -26,7 +26,7 @@ internal enum DiscoveryReadSkipCause
     NoDiscoveryProvider,
 
     /// <summary>
-    ///     A session in this process owns (or is waiting for) the interface; discovery must not clobber it.
+    ///     A connection in this process owns (or is waiting for) the interface; discovery must not clobber it.
     /// </summary>
     InterfaceLeaseHeld,
 
@@ -34,20 +34,28 @@ internal enum DiscoveryReadSkipCause
     ///     All bounded discovery workers were busy and this read path skips instead of waiting
     ///     (the best-effort metadata path; identity reads wait for a slot instead).
     /// </summary>
-    WorkerAdmissionSaturated
+    WorkerAdmissionSaturated,
+
+    /// <summary>
+    ///     Hotplug activity superseded this read before it opened the interface: the physical topology it
+    ///     was started against may no longer exist, so it aborts (or its queued admission wait is
+    ///     cancelled) instead of reading hardware it can no longer name. Retried on the next scan.
+    /// </summary>
+    SupersededByTransportActivity
 }
 
 /// <summary>
-///     Thrown by discovery's best-effort device-info reads when the target interface cannot safely provide
-///     exclusive discovery access (see <see cref="ProtocolDeviceInfo.ReadBoundedAsync" />). This includes an
-///     active session or a device that does not expose the internal discovery-only connection path. The read
-///     aborts without opening a normal session connection or transmitting, so it cannot clobber applet state.
-///     Callers degrade exactly like any other failed best-effort read: identity unknown / try next transport.
+///     Thrown when a best-effort discovery device-info read is intentionally skipped because the target does
+///     not support the internal discovery-only connection path, an active or waiting connection prevents
+///     exclusive access, bounded worker admission is saturated, or transport activity superseded the read
+///     before it opened the interface (see <see cref="ProtocolDeviceInfo.ReadBoundedAsync" />). The read does
+///     not open a normal session connection or transmit. Callers degrade like any other failed best-effort
+///     read: identity unknown / try next transport.
 /// </summary>
 internal sealed class DiscoveryReadSkippedException(
     string deviceId,
     DiscoveryReadSkipCause cause = DiscoveryReadSkipCause.NoDiscoveryProvider) : Exception(
-    $"Discovery device-info read for {deviceId} skipped ({cause}): exclusive discovery access is unavailable.")
+    $"Discovery device-info read for {deviceId} skipped ({cause}).")
 {
     /// <summary>The specific reason the read was skipped.</summary>
     public DiscoveryReadSkipCause Cause { get; } = cause;

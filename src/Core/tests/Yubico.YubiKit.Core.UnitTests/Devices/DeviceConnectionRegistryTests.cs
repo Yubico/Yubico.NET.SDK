@@ -38,20 +38,19 @@ public class DeviceConnectionRegistryTests
         var id = NewId();
 
         var held = await DeviceConnectionRegistry.AcquireConnectionAsync(
-            id, TestContext.Current.CancellationToken);
+            [id], TestContext.Current.CancellationToken);
 
         var refusal = await Assert.ThrowsAsync<ConnectionInUseException>(async () =>
             await DeviceConnectionRegistry.AcquireConnectionAsync(
-                id, TestContext.Current.CancellationToken));
+            [id], TestContext.Current.CancellationToken));
         Assert.Contains(id, refusal.Message, StringComparison.Ordinal);
 
         held.Dispose();
 
         using var next = await DeviceConnectionRegistry.AcquireConnectionAsync(
-            id, TestContext.Current.CancellationToken);
+            [id], TestContext.Current.CancellationToken);
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
     }
-
     [Fact]
     public async Task AcquireConnection_MultipleInterfaces_DeduplicatesAndReleasesAllMembers()
     {
@@ -78,14 +77,14 @@ public class DeviceConnectionRegistryTests
         var firstId = $"{prefix}:a";
         var secondId = $"{prefix}:b";
         using var held = await DeviceConnectionRegistry.AcquireConnectionAsync(
-            secondId, TestContext.Current.CancellationToken);
+            [secondId], TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<ConnectionInUseException>(async () =>
             await DeviceConnectionRegistry.AcquireConnectionAsync(
                 new[] { secondId, firstId }, TestContext.Current.CancellationToken));
 
         using var firstClaim = await DeviceConnectionRegistry.AcquireConnectionAsync(
-            firstId, TestContext.Current.CancellationToken);
+            [firstId], TestContext.Current.CancellationToken);
         Assert.True(DeviceConnectionRegistry.IsInUse(firstId));
     }
 
@@ -155,7 +154,7 @@ public class DeviceConnectionRegistryTests
     {
         var device = new RecordingYubiKey(NewId(), ConnectionType.SmartCard);
         using var registration = await DeviceConnectionRegistry.AcquireConnectionAsync(
-            device.DeviceId, TestContext.Current.CancellationToken);
+            [device.InterfaceId], TestContext.Current.CancellationToken);
 
         var info = await DiscoveryIdentityReader.TryReadAsync(
             device, ConnectionType.SmartCard, NullLogger.Instance, TestContext.Current.CancellationToken);
@@ -172,9 +171,10 @@ public class DeviceConnectionRegistryTests
     {
         var smartCardMember = new RecordingYubiKey(NewId(), ConnectionType.SmartCard);
         var otpMember = new RecordingYubiKey(NewId(), ConnectionType.HidOtp);
-        var composite = new CompositeYubiKey(NewId(), [smartCardMember, otpMember], deviceInfo: null);
+        var composite = new YubiKeyDevice(
+            NewId(), smartCardMember, hidFido: null, otpMember, deviceInfo: null);
         using var registration = await DeviceConnectionRegistry.AcquireConnectionAsync(
-            composite.MemberDeviceIds, TestContext.Current.CancellationToken);
+            composite.InterfaceIds, TestContext.Current.CancellationToken);
 
         var info = await CompositeMetadataReader.TryReadAsync(
             composite, TimeSpan.FromSeconds(5), NullLogger.Instance, TestContext.Current.CancellationToken);
@@ -189,7 +189,7 @@ public class DeviceConnectionRegistryTests
     {
         var id = NewId();
         var throwingInner = new FakeSmartCardConnection { ThrowOnDispose = true };
-        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync(id, TestContext.Current.CancellationToken);
+        var lease = await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken);
         var wrapped = new RegisteredSmartCardConnection(throwingInner, lease);
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
 
@@ -199,7 +199,7 @@ public class DeviceConnectionRegistryTests
         var asyncId = NewId();
         var inner = new FakeSmartCardConnection();
         var asyncLease = await DeviceConnectionRegistry.AcquireConnectionAsync(
-            asyncId, TestContext.Current.CancellationToken);
+            [asyncId], TestContext.Current.CancellationToken);
         var asyncWrapped = new RegisteredSmartCardConnection(inner, asyncLease);
         Assert.True(DeviceConnectionRegistry.IsInUse(asyncId));
 
@@ -393,28 +393,27 @@ public class DeviceConnectionRegistryTests
         public void Dispose() => Interlocked.Increment(ref _releaseCount);
     }
 
-    private sealed class RecordingYubiKey(string deviceId, ConnectionType available) : IYubiKey, IDiscoveryConnectionProvider
+    private sealed class RecordingYubiKey(string deviceId, ConnectionType available)
+        : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
     {
         public int ConnectCalls { get; private set; }
 
-        public string DeviceId => deviceId;
+        public string InterfaceId => deviceId;
 
-        public ConnectionType AvailableConnections => available;
+        public ConnectionType ConnectionType => available;
 
-        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
-        {
-            ConnectCalls++;
-            throw new InvalidOperationException("Test connect refused by design.");
-        }
-
-        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+        public Task<IConnection> OpenRawConnectionAsync(
             ConnectionType connection,
             CancellationToken cancellationToken)
         {
             ConnectCalls++;
             throw new InvalidOperationException("Test discovery connect refused by design.");
         }
+
+        Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken) =>
+            OpenRawConnectionAsync(connection, cancellationToken);
     }
 
     /// <summary>

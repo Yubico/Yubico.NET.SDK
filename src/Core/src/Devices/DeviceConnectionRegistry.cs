@@ -59,8 +59,8 @@ internal static class DeviceConnectionRegistry
 
     /// <summary>
     ///     Whether the interface of <paramref name="device" /> that would serve <paramref name="connection" />
-    ///     is in use. Composite members are resolved through
-    ///     <see cref="CompositeYubiKey.TryResolveMember" />, the same routing a connect uses, so the check
+    ///     is in use. Published-device slots are resolved through
+    ///     <see cref="YubiKeyDevice.TryResolveSlot" />, the same routing a connect uses, so the check
     ///     matches the interface a read would actually open.
     /// </summary>
     public static bool IsInterfaceInUse(IYubiKey device, ConnectionType connection) =>
@@ -72,32 +72,18 @@ internal static class DeviceConnectionRegistry
     /// </summary>
     public static string ResolveInterfaceId(IYubiKey device, ConnectionType connection)
     {
-        if (device is not CompositeYubiKey composite)
+        if (device is not YubiKeyDevice published)
             return device.DeviceId;
 
-        return composite.TryResolveMember(connection, out var member)
-            ? member.DeviceId
+        return published.TryResolveSlot(connection, out var slot)
+            ? slot.InterfaceId
             : device.DeviceId;
     }
-
     /// <summary>
-    ///     Acquires the interface lease for a connection, before physical connection creation. Waits while
-    ///     discovery owns the interface; cancellation applies only while waiting.
-    /// </summary>
-    /// <param name="deviceId">The per-interface device id.</param>
-    /// <param name="cancellationToken">Cancels the wait for an active discovery read only.</param>
-    /// <exception cref="ConnectionInUseException">
-    ///     The interface already has a live connection.
-    /// </exception>
-    public static ValueTask<IDisposable> AcquireConnectionAsync(
-        string deviceId,
-        CancellationToken cancellationToken = default) =>
-        GetOwnership(deviceId).AcquireConnectionAsync(deviceId, cancellationToken);
-
-    /// <summary>
-    ///     Acquires every known interface lease for one physical YubiKey as a single logical registration.
-    ///     Interface ids are de-duplicated and acquired in ordinal order; partial acquisition rolls back in
-    ///     reverse order.
+    ///     Acquires every known interface lease for one physical YubiKey as a single logical registration,
+    ///     before physical connection creation. Interface ids are de-duplicated and acquired in ordinal
+    ///     order; partial acquisition rolls back in reverse order. Waits while discovery owns an interface;
+    ///     cancellation applies only while waiting. Standalone devices pass a one-element scope.
     /// </summary>
     /// <exception cref="ConnectionInUseException">Any member ID already has a live connection.</exception>
     public static async ValueTask<IDisposable> AcquireConnectionAsync(

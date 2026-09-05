@@ -61,7 +61,7 @@ public class FindPcscDevicesTests
         var finder = new FindYubiKeys(
             new FindPcscDevices(NullLogger<FindPcscDevices>.Instance, api),
             new EmptyHidFinder(),
-            new UnexpectedYubiKeyFactory());
+            UnexpectedSlotCreation);
         await using var monitor = new YubiKeyDeviceMonitorService(repository, finder);
         using var saturation = await DiscoveryWorkerAdmissionCollection.SaturateAsync(
             TestContext.Current.CancellationToken);
@@ -177,9 +177,6 @@ public class FindPcscDevicesTests
             Task.FromResult<IReadOnlyList<IHidDevice>>([]);
     }
 
-    private sealed class UnexpectedYubiKeyFactory : IYubiKeyFactory
-    {
-        public IYubiKey Create(IDevice device) =>
-            throw new InvalidOperationException("No device should be created when PC/SC admission is saturated.");
-    }
+    private static IYubiKeyConnectionSlot UnexpectedSlotCreation(IDevice device) =>
+        throw new InvalidOperationException("No slot should be created when PC/SC admission is saturated.");
 }

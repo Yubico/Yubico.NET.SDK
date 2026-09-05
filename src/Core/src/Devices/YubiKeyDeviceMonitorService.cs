@@ -746,17 +746,16 @@ internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
             hint.PlatformDeviceId,
             hint.DevicePath);
 
-        // Hardware changed on this transport, so identity evidence cached from its interfaces may now
-        // describe a departed key (a same-slot swap reuses the interface id and is invisible to scan-time
-        // eviction). Invalidate BEFORE queueing, so the rescan this event triggers re-reads rather than
-        // reusing. See IFindYubiKeys.NotifyTransportActivity.
+        // Hardware activity on any transport globally invalidates identity and metadata evidence: a
+        // composite swap may signal one transport first, and retaining sibling evidence could mix two keys.
+        // Invalidate BEFORE queueing so the triggered rescan re-reads. See IFindYubiKeys.NotifyTransportActivity.
         _findYubiKeys.NotifyTransportActivity(ConnectionType.Hid);
         QueueRescan(signal, "HID");
     }
 
     private void SignalSmartCardEvent(DeviceMonitorSignal signal)
     {
-        // See SignalHidEvent: invalidate this transport's cached identity before the rescan runs.
+        // See SignalHidEvent: globally invalidate cached identity and metadata before the rescan runs.
         _findYubiKeys.NotifyTransportActivity(ConnectionType.SmartCard);
         QueueRescan(signal, "SmartCard");
     }

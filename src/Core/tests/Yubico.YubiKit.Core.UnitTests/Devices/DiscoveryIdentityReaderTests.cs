@@ -41,7 +41,7 @@ public class DiscoveryIdentityReaderTests
                 NullLogger.Instance,
                 TestContext.Current.CancellationToken);
 
-            // Generous bound: 3 attempts x per-attempt timeout + retry backoff must all fit well inside it.
+            // A timeout is not retried, so the two-second per-attempt budget must fit well inside this bound.
             var winner = await Task.WhenAny(
                 readTask,
                 Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
@@ -65,24 +65,25 @@ public class DiscoveryIdentityReaderTests
     ///     cancellation once in flight. A fix that only signals a token into ConnectAsync would not fix the
     ///     real bug; the reader must abandon the wait (e.g. <c>Task.WaitAsync</c>) to stay bounded.
     /// </summary>
-    private sealed class HangingConnectYubiKey : IYubiKey, IDiscoveryConnectionProvider
+    private sealed class HangingConnectYubiKey : IYubiKeyConnectionSlot, IDiscoveryConnectionProvider
     {
         private readonly TaskCompletionSource<IConnection> _connect =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        public string DeviceId => "test:hanging-connect";
+        public string InterfaceId => "test:hanging-connect";
 
-        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+        public ConnectionType ConnectionType => ConnectionType.SmartCard;
 
         public TaskCompletionSource ConnectFinished { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        public async Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
-            where TConnection : class, IConnection
+        public async Task<IConnection> OpenRawConnectionAsync(
+            ConnectionType connection,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                return (TConnection)await _connect.Task;
+                return await _connect.Task;
             }
             finally
             {
@@ -93,7 +94,7 @@ public class DiscoveryIdentityReaderTests
         Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(
             ConnectionType connection,
             CancellationToken cancellationToken) =>
-            ConnectAsync<IConnection>(cancellationToken);
+            OpenRawConnectionAsync(connection, cancellationToken);
 
         public void FailConnect() =>
             _connect.TrySetException(new InvalidOperationException("Released after timeout assertion."));

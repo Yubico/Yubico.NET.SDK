@@ -50,28 +50,37 @@ concept); failures and null serials are retried on later scans. This is pinned b
 A cached identity is evidence about specific hardware in a specific configuration, and it expires with
 either. **Hardware**: scan-time eviction only catches interfaces observed absent, and a same-slot swap
 completing between scans reuses the slot-derived interface identifier — the old key's serial would be
-attributed to its same-model successor (key substitution). A physical swap cannot happen without the OS
-observing removal and arrival, so the device monitor forwards every listener event to
-`IFindYubiKeys.NotifyTransportActivity` at ingress, which discards that transport's cached identities
-before the rescan the event triggers. Eviction is per transport (HID activity does not discard PC/SC
-evidence, and vice versa). **Configuration**: each entry records the PID observed at read time, and a
-hit under a different PID is a miss. Pinned by
+attributed to its same-model successor (key substitution). When a platform listener reports removal or
+arrival, the device monitor forwards that activity to `IFindYubiKeys.NotifyTransportActivity` at ingress
+before the rescan the event triggers. Activity on any transport globally discards both identity and
+metadata caches; the reported transport is diagnostic context, not an eviction scope. A fresh different
+serial then makes the repository republish the successor rather than mutate the retained predecessor. A
+composite swap's events can arrive on one transport before another, so per-transport retention could
+combine evidence from the departed and replacement keys. **Configuration**: each entry records the PID
+observed at read time, and a hit under a different PID is a miss. Pinned by
 `FindAllAsync_SameSlotSwapWithTransportActivity_RereadsInsteadOfServingTheOldKeysSerial`,
-`NotifyTransportActivity_HidOnly_LeavesPcscIdentityCacheIntact`, and
+`FindAllAsync_SameSlotSwapWithTransportActivity_DoesNotServeStaleMetadata`,
+`NotifyTransportActivity_HidOnly_EvictsPcscIdentityEvidenceToo`, and
 `FindAllAsync_PidChangeOnSameInterfaceId_IsACacheMissNotAHit`; the monitor wiring by
 `ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport`.
 
-Documented bound: without monitoring running there are no listener events, and staleness detection
-degrades to scan-observed absence. Consumers driving `FindAllAsync` directly across a physical swap
-they orchestrated themselves should force a rescan after replugging.
+Documented bound: if no listener event reports the change, staleness detection degrades to scan-observed
+absence. A forced scan only after replugging does not invalidate same-interface cache entries. Consumers
+driving `FindAllAsync` directly across a physical swap they orchestrated themselves should force a scan
+while the slot is empty before replugging, or restart `YubiKeyManager` to discard the caches.
 
 Hardware evidence and its limit: an operator-coordinated port swap of two same-model keys (the
 reader-name-reuse shape behind the substitution hazard) re-published both under their correct serial
 identities with monitoring running. A hand-timed swap necessarily spans scan intervals, so scan-observed
 absence also fires; the between-scan timing that only the event-driven eviction catches is covered
-deterministically by the fault-injection vectors above.
+deterministically by the fault-injection vectors above, and repository republication on fresh contradictory
+serial evidence is pinned by
+`UpdateCache_DifferentKnownSerials_RepublishesDifferentDevice`.
 
 ## Device identity: what `DeviceId` does and does not promise
+
+See [device identity and physical-device correlation](./device-identity.md) for the architecture decision
+covering public identity, repository object retention, discovery metadata, and canonical yubikit behavior.
 
 The merge hierarchy above decides *which interfaces form one key*. It also decides *what that key is
 called*, and the two are the same decision — which is why the identifier is evidence-dependent rather than
@@ -148,15 +157,18 @@ subscribers, the other reports present truth. Observed simultaneously on macOS �
 ### Use the serial as the durable key
 
 For persistence, audit logs, allow lists, or anything surviving a process restart, use
-`DeviceInfo.SerialNumber`, not `DeviceId`. Caveats:
+`IYubiKey.SerialNumber`, not `DeviceId`. Caveats:
 
 - YubiKeys expose **no USB `iSerialNumber` descriptor**. The serial lives inside the key and is read by
-  opening an interface, so obtaining it costs a connection and a Management exchange — it is not free the
-  way `DeviceId` is.
+  opening an interface, so discovery obtains it with a budgeted best-effort read — it is not free the way
+  `DeviceId` is, and `IYubiKey.SerialNumber` stays `null` until such a read succeeds (see the contract in
+  `docs/architecture/device-identity.md`).
 - It is `null` on devices that do not report one (for example Security Key series, or when serial
   visibility is disabled). A null serial cannot be a durable key; such devices are only distinguishable by
   topology evidence, which exists on Windows alone (see G4 in the guarantee matrix).
-- Discovery itself reads serials only on demand, for the reasons given above.
+- To ask whether two `IYubiKey` references describe the same physical key, use
+  `IYubiKey.SameDeviceAs`: the same reference answers `Same`; distinct references answer
+  `Same`/`Different` from known serials or `Unknown` when either serial is missing.
 
 ### Firmware version is deliberately not part of identity
 
@@ -165,8 +177,9 @@ It adds no uniqueness — the serial is already unique — and it is not dependa
 - It can differ per applet on one physical key. This SDK carries an explicit workaround taking the higher
   of the Management and OTP values on NEO (`src/YubiOtp/src/YubiOtpSession.cs`).
 - Canonical yubikit sometimes *guesses* it (`version = Version(3, 0, 0); // Guess NEO`).
-- Canonical uses it only as a tie-breaker for which metadata record to retain once serials already match,
-  never as a match key.
+- Canonical Rust's polling merger has a `(version, serial)` fallback match. This SDK deliberately does not:
+  development keys can expose an alpha/beta USB descriptor version while Management reports the effective
+  firmware version, so firmware would make identity less stable rather than more precise.
 
 This SDK's merger contains no firmware-version logic, and none should be added for identity purposes.
 
@@ -179,16 +192,17 @@ This SDK's merger contains no firmware-version logic, and none should be added f
 | G3 | Same-PID keys that report serials: complete grouping | first scan, with topology | first scan in practice; converges — see [G3](#g3-convergence) | same as macOS |
 | G4 | Serial-less multi-interface keys: complete grouping | yes, with topology | **no — permanent split** | **no — permanent split** |
 | G5 | Reconfigured key (different enabled interfaces) | yes | yes | yes |
-| G6 | Single-interface keys are never wrapped in a composite | yes | yes | yes |
-| G7 | Conservation: every enumerated interface appears exactly once | yes | yes | yes |
+| G6 | Single-interface keys publish as one-slot flat devices with their transport-shaped `DeviceId` preserved | yes | yes | yes |
+| G7 | Conservation: every supported concrete interface appears exactly once | yes | yes | yes |
 | G8 | Interfaces held in use since plug-in | attributed once idle and readable — see [G8](#g8-in-use-interfaces) | same | same |
 | G9 | Topology-read failure degrades safely | yes — becomes macOS semantics | n/a | n/a |
 
-`AvailableConnections` is the union of the concrete interfaces observed for the published device;
-`CompositeYubiKeyTests.AvailableConnections_IsUnionOfMembers` pins that structural rule. It is
+`AvailableConnections` is the union of the supported concrete interfaces observed for the published device;
+`YubiKeyDeviceTests.FlatSlots_ExposeCombinedConnectionsAndSortedInterfaceIds` pins that structural rule. It is
 transport availability only. It does not prove that every applet or capability is enabled over every
 interface, nor that interfaces or operations are safe to use concurrently. Applet capability and
-connection-ownership rules remain separate contracts.
+connection-ownership rules remain separate contracts. Yubico HID reports that cannot be classified as FIDO
+or OTP are logged and excluded because they do not represent an openable Core connection slot.
 
 "with topology evidence" is the normal Windows case. Topology reads can fail (stale devnode during
 hotplug, `CR_NO_SUCH_DEVNODE`, missing ContainerId, API unavailable before Windows 8); when they
@@ -209,7 +223,7 @@ Hardware invariants: `Core.IntegrationTests/Devices/CompositeDiscoveryIntegratio
 | G4 (Windows yes) | `Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys` |
 | G4 (mac/Linux no) | `Merge_TwoSamePidTripleKeysNoSerialsFullVisibility_ConservativeSplit_Pin`, `Merge_TwoSamePidDualKeysNoSerialsFullVisibility_ConservativeSplit_Pin` |
 | G5 | `Merge_ReconfiguredKeyReenumeratedUnderNewPid_GroupsByCurrentPidTruth_Pin`, `Merge_OneOfTwoKeysReconfigured_DifferentPidsNoSerials_TriviallyDistinguishable_Pin`; hardware: `ReconfigurationDiscoveryInvariantTests.UsbReconfigurationReboot_DiscoveryIdentityInvariantsHoldThroughTheTransition` (Slow — drives a real PID-changing reboot and asserts the identity invariants on every scan across the transition, self-restoring) |
-| G6 | `Merge_SingleInterfacePid_StandsAloneWithoutCompositeWrapper_Pin`; hardware: Phase 4 Tier 1 CASE 2 |
+| G6 | `Merge_SingleInterfacePid_PublishesOneSlotWithTransportShapedDeviceId_Pin`; hardware: Phase 4 Tier 1 CASE 2 |
 | G7 | `Merge_MixedTopologyAndSerialEvidence_IsDeterministicAndConserving_Pin`, `FindAllAsync_Conservation_EveryEnumeratedUsbInterfaceAppearsExactlyOnce` |
 | G8 | Cache convergence / eviction / reader-rename vectors in `FindYubiKeysFaultInjectionTests` |
 | G9 | `Merge_TopologyAbsentForAllInterfaces_IsByteIdenticalToPreTopologyBehavior_Pin`, `Merge_PartialTopology_KeyedInterfacesGroup_UnkeyedFallThroughUnguessed_Pin`, and the 13 failure-mode vectors in `WindowsDeviceTopologyResolverTests` |
@@ -239,8 +253,8 @@ evidence. Healing is conditional on evidence, not on elapsed time — an interfa
 busy, or unreadable keeps the window open. Discovery keeps scanning, but no scan is guaranteed to
 heal.
 
-**Blast radius:** connections are path-bound — a `PcscYubiKey` connects by reader name, a HID key
-by device path — so a misgrouped composite never routes a connection to a different physical
+**Blast radius:** raw interface slots are path-bound — PC/SC connects through its enumerated reader
+and HID through its enumerated device handle — so a misgrouped composite never routes a connection to a different physical
 interface than the one it names. The exposure is composite-level metadata and capability-filter
 truth, not connection misdelivery.
 
@@ -252,9 +266,11 @@ than closing it, and doubles metadata reads.
 
 ### G3: convergence
 
-Successful serial reads are cached per interface and evicted only when the interface disappears, so
-knowledge accumulates monotonically across scans. In practice a long-lived `YubiKeyManager` reaches
-complete grouping on the first scan and stays there.
+Successful serial reads are cached per interface and evicted when an interface disappears or any
+transport activity globally invalidates cached identity and metadata. Between invalidations, knowledge
+accumulates across scans. In practice a long-lived `YubiKeyManager` reaches complete grouping on the first
+scan and stays there until any HID or PC/SC hotplug activity invalidates it. Listener activity is
+transport-wide and can include devices other than YubiKeys.
 
 Convergence is conditional: it completes **provided each interface is eventually idle and
 identity-readable**. An interface held in use forever, or persistently unreadable, stays
@@ -287,8 +303,10 @@ evidence while it stays busy.
 
 The guarantee is: an in-use interface is attributed **once it first becomes idle AND a subsequent
 scan successfully reads its identity**; the cache retains that attribution thereafter, including
-across later periods of use. An interface that is in use from the moment of plug-in and never
-becomes idle is never attributed by serial — on Windows, topology attributes it anyway.
+across later periods of use, until transport activity invalidates it. If invalidation occurs while
+the interface is held by a live connection, discovery cannot re-read the serial and temporarily
+falls back to the remaining evidence. An interface that is in use from the moment of plug-in and
+never becomes idle is never attributed by serial — on Windows, topology attributes it anyway.
 
 ### G9: topology-read failure
 

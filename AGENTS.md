@@ -35,6 +35,11 @@
 - `Tlv` and `DisposableTlvList` must be disposed. `TlvHelper.EncodeList` does not dispose its inputs; `EncodeAndDisposeList` does.
 - Listener/native retry loops must block, back off, exit, or throttle on every failure path; add no-hardware fault-injection tests for persistent native errors.
 
+## Forward compatibility doctrine
+- Valid device response data that the SDK does not yet model must not block users. Use open value carriers where practical and preserve complete raw response bytes as an escape hatch.
+- Keep malformed, missing required, and security-critical protocol data strict.
+- Prefer response-side raw escape hatches. Do not blindly re-emit unknown response fields in requests; request encoding remains explicitly modeled and validated.
+
 ## Hardware And Integration Tests
 - Integration tests require authorized YubiKey hardware. The shared test infrastructure reads `YubiKeyTests:AllowedSerialNumbers` from `appsettings.json`; an empty/missing allow list can hard-fail with `Environment.Exit(-1)`, and unauthorized devices are filtered out.
 - Linux hardware tests need PC/SC pieces like `pcscd`, `libpcsclite-dev`, and `libudev-dev`; CI starts `pcscd` manually before build/test.

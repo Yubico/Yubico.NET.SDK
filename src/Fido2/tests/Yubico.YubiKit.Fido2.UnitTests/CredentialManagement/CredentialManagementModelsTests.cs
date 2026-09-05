@@ -46,6 +46,29 @@ public class CredentialManagementModelsTests
     }
 
     [Fact]
+    public void CredentialMetadata_Decode_PreservesRawData()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+        writer.WriteInt32(1);
+        writer.WriteInt32(5);
+        writer.WriteInt32(2);
+        writer.WriteInt32(20);
+        writer.WriteInt32(99);
+        writer.WriteTextString("future");
+        writer.WriteEndMap();
+        byte[] data = writer.Encode();
+        byte[] expected = data.ToArray();
+
+        var metadata = CredentialMetadata.Decode(data);
+        data[0] = 0;
+
+        Assert.Equal(5, metadata.ExistingResidentCredentialsCount);
+        Assert.Equal(20, metadata.MaxPossibleRemainingResidentCredentialsCount);
+        Assert.Equal(expected, metadata.RawData.ToArray());
+    }
+
+    [Fact]
     public void CredentialMetadata_Decode_HandlesZeroCounts()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -125,6 +148,32 @@ public class CredentialManagementModelsTests
         Assert.Equal("test.org", rpInfo.RelyingParty.Id);
         Assert.Null(rpInfo.RelyingParty.Name);
         Assert.Null(rpInfo.TotalRpCount);
+    }
+
+    [Fact]
+    public void RelyingPartyInfo_Decode_PreservesRawData()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+        writer.WriteInt32(3);
+        writer.WriteStartMap(1);
+        writer.WriteTextString("id");
+        writer.WriteTextString("example.com");
+        writer.WriteEndMap();
+        writer.WriteInt32(4);
+        writer.WriteByteString(new byte[32]);
+        writer.WriteInt32(99);
+        writer.WriteBoolean(true);
+        writer.WriteEndMap();
+        byte[] data = writer.Encode();
+        byte[] expected = data.ToArray();
+
+        var info = RelyingPartyInfo.Decode(data);
+        data[0] = 0;
+
+        Assert.Equal("example.com", info.RelyingParty.Id);
+        Assert.Equal(32, info.RpIdHash.Length);
+        Assert.Equal(expected, info.RawData.ToArray());
     }
 
     [Fact]
@@ -404,4 +453,5 @@ public class CredentialManagementModelsTests
         Assert.Null(credInfo.LargeBlobKey);
         Assert.Null(credInfo.ThirdPartyPayment);
     }
+
 }

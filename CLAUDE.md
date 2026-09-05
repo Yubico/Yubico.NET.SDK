@@ -136,6 +136,10 @@ dotnet toolchain.cs -- pack --include-docs
 
 **House style:** `docs/SDK-HOUSE-STYLE.md` is the v2 architectural style guide. Load it before module consolidation, refactoring, or protocol-flow work. It defines flat protocol flow, minimal helper depth, plain `ApduCommand`/DTO usage, and the rule against operation-specific command classes like `AuthenticateCommand`, `PutKeyCommand`, and `GetDataCommand`.
 
+### Forward compatibility doctrine
+
+Valid device response data that the SDK does not yet model must not block users. Represent extensible protocol identifiers with open value carriers where practical, and preserve complete raw response bytes so callers can inspect new fields. Malformed encodings, missing required fields, and security-critical protocol data remain strict. Prefer response-side raw escape hatches; request encoders must not blindly re-emit unknown response fields and must continue to model and validate what they send.
+
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
 - **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow through one internal `DeviceEventHub` (per-watcher bounded buffers), surfaced as `YubiKeyManager.WatchAsync` (`IAsyncEnumerable`), the only public device change stream. No reactive dependency - see `docs/usage/device-discovery.md`.

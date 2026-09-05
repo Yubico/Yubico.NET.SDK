@@ -1236,10 +1236,9 @@ public class YubiKeyDeviceMonitorServiceTests
     }
 
     /// <summary>
-    ///     Listener events must invalidate the finder's transport-scoped identity cache — the wiring half
-    ///     of the same-slot-swap fix. The eviction behaviour itself is pinned in
-    ///     <c>FindYubiKeysFaultInjectionTests</c>; this pins that production composition actually delivers
-    ///     the signal, per transport, before the rescan the event triggers.
+    ///     Listener events from either transport must notify the finder before the triggered rescan. The
+    ///     finder treats the transport as diagnostic context and globally invalidates identity and metadata
+    ///     caches; <c>FindYubiKeysFaultInjectionTests</c> pins that eviction behavior.
     /// </summary>
     [Fact]
     public async Task ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport()

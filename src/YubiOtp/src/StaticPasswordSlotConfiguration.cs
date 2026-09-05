@@ -101,27 +101,39 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
                 nameof(scanCodes));
         }
 
-        // Distribute scan codes across fixed, uid, and key fields
-        int remaining = scanCodes.Length;
-
-        int fixedLen = Math.Min(remaining, YubiOtpConstants.FixedSize);
-        scanCodes[..fixedLen].CopyTo(_fixed);
-        remaining -= fixedLen;
-
-        if (remaining > 0)
+        Span<byte> uid = stackalloc byte[YubiOtpConstants.UidSize];
+        Span<byte> key = stackalloc byte[YubiOtpConstants.KeySize];
+        uid.Clear();
+        key.Clear();
+        try
         {
-            int uidLen = Math.Min(remaining, YubiOtpConstants.UidSize);
-            scanCodes.Slice(fixedLen, uidLen).CopyTo(_uid);
-            remaining -= uidLen;
+            // Distribute scan codes across fixed, uid, and key fields.
+            int remaining = scanCodes.Length;
+            int fixedLen = Math.Min(remaining, YubiOtpConstants.FixedSize);
+            remaining -= fixedLen;
 
             if (remaining > 0)
             {
-                int keyLen = Math.Min(remaining, YubiOtpConstants.KeySize);
-                scanCodes.Slice(fixedLen + YubiOtpConstants.UidSize, keyLen).CopyTo(_key);
+                int uidLen = Math.Min(remaining, YubiOtpConstants.UidSize);
+                scanCodes.Slice(fixedLen, uidLen).CopyTo(uid);
+                remaining -= uidLen;
+
+                if (remaining > 0)
+                {
+                    scanCodes[(fixedLen + YubiOtpConstants.UidSize)..].CopyTo(key);
+                }
             }
+
+            SetFixed(scanCodes[..fixedLen]);
+            SetUid(uid);
+            SetKey(key);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(uid);
+            CryptographicOperations.ZeroMemory(key);
         }
 
-        _fixedSize = (byte)Math.Min(scanCodes.Length, YubiOtpConstants.FixedSize);
         _cfgFlags |= ConfigFlag.ShortTicket;
     }
 

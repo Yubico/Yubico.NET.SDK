@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
@@ -40,10 +41,10 @@ namespace Yubico.YubiKit.YubiOtp;
 /// </remarks>
 public abstract class SlotConfiguration : IDisposable
 {
-    protected readonly byte[] _fixed = new byte[YubiOtpConstants.FixedSize];
-    protected readonly byte[] _uid = new byte[YubiOtpConstants.UidSize];
-    protected readonly byte[] _key = new byte[YubiOtpConstants.KeySize];
-    protected byte _fixedSize;
+    private readonly byte[] _fixed = new byte[YubiOtpConstants.FixedSize];
+    private readonly byte[] _uid = new byte[YubiOtpConstants.UidSize];
+    private readonly byte[] _key = new byte[YubiOtpConstants.KeySize];
+    private byte _fixedSize;
     protected ExtendedFlag _extFlags = ExtendedFlag.SerialApiVisible | ExtendedFlag.AllowUpdate;
     protected TicketFlag _tktFlags;
     protected ConfigFlag _cfgFlags;
@@ -181,6 +182,71 @@ public abstract class SlotConfiguration : IDisposable
     /// </summary>
     protected virtual ConfigFlag GetEffectiveCfgFlags() => _cfgFlags;
 
+    /// <summary>
+    /// Replaces the fixed field and records its wire-format length.
+    /// </summary>
+    /// <param name="value">The fixed field value, up to 16 bytes.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="value"/> exceeds <see cref="YubiOtpConstants.FixedSize"/> bytes.
+    /// </exception>
+    protected void SetFixed(ReadOnlySpan<byte> value)
+    {
+        ThrowIfDisposed();
+
+        if (value.Length > YubiOtpConstants.FixedSize)
+        {
+            throw new ArgumentException(
+                $"Fixed data must be at most {YubiOtpConstants.FixedSize} bytes, got {value.Length}.",
+                nameof(value));
+        }
+
+        CryptographicOperations.ZeroMemory(_fixed);
+        value.CopyTo(_fixed);
+        _fixedSize = (byte)value.Length;
+    }
+
+    /// <summary>
+    /// Replaces the UID field.
+    /// </summary>
+    /// <param name="value">The exact 6-byte UID field value.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="value"/> is not exactly <see cref="YubiOtpConstants.UidSize"/> bytes.
+    /// </exception>
+    protected void SetUid(ReadOnlySpan<byte> value)
+    {
+        ThrowIfDisposed();
+
+        if (value.Length != YubiOtpConstants.UidSize)
+        {
+            throw new ArgumentException(
+                $"UID data must be exactly {YubiOtpConstants.UidSize} bytes, got {value.Length}.",
+                nameof(value));
+        }
+
+        value.CopyTo(_uid);
+    }
+
+    /// <summary>
+    /// Replaces the key field.
+    /// </summary>
+    /// <param name="value">The exact 16-byte key field value.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="value"/> is not exactly <see cref="YubiOtpConstants.KeySize"/> bytes.
+    /// </exception>
+    protected void SetKey(ReadOnlySpan<byte> value)
+    {
+        ThrowIfDisposed();
+
+        if (value.Length != YubiOtpConstants.KeySize)
+        {
+            throw new ArgumentException(
+                $"Key data must be exactly {YubiOtpConstants.KeySize} bytes, got {value.Length}.",
+                nameof(value));
+        }
+
+        value.CopyTo(_key);
+    }
+
     protected void SetExtFlag(ExtendedFlag flag, bool enable)
     {
         if (enable)
@@ -219,20 +285,23 @@ public abstract class SlotConfiguration : IDisposable
 
     /// <summary>
     /// Validates and splits an exact-length HMAC key for wire format storage.
-    /// The key is split into <paramref name="key"/> (16 bytes) and <paramref name="uid"/> (4 bytes).
+    /// The first 16 bytes are stored in the key field and the remaining 4 bytes in the UID field.
     /// </summary>
     /// <param name="hmacKey">
     /// The raw HMAC key. Must be exactly <see cref="YubiOtpConstants.HmacKeySize"/> (20) bytes.
     /// </param>
-    /// <param name="key">Destination for the first 16 bytes of the key.</param>
-    /// <param name="uid">Destination for bytes 16-19 of the key (written to first 4 bytes).</param>
+    /// <param name="initialMovingFactor">
+    /// The HOTP initial moving factor divided by 0x10000, or zero for HMAC challenge-response.
+    /// </param>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="hmacKey"/> is not exactly
     /// <see cref="YubiOtpConstants.HmacKeySize"/> bytes. No device I/O is performed when this
     /// is thrown, and the key is never hashed or padded to fit.
     /// </exception>
-    protected static void ProcessHmacKey(ReadOnlySpan<byte> hmacKey, Span<byte> key, Span<byte> uid)
+    protected void SetHmacKey(ReadOnlySpan<byte> hmacKey, ushort initialMovingFactor)
     {
+        ThrowIfDisposed();
+
         if (hmacKey.Length != YubiOtpConstants.HmacKeySize)
         {
             throw new ArgumentException(
@@ -240,9 +309,20 @@ public abstract class SlotConfiguration : IDisposable
                 nameof(hmacKey));
         }
 
-        // Split: first 16 bytes -> key, next 4 bytes -> uid[0..4]
-        hmacKey[..YubiOtpConstants.KeySize].CopyTo(key);
-        hmacKey[YubiOtpConstants.KeySize..].CopyTo(uid);
+        Span<byte> uid = stackalloc byte[YubiOtpConstants.UidSize];
+        uid.Clear();
+        try
+        {
+            hmacKey[YubiOtpConstants.KeySize..].CopyTo(uid);
+            BinaryPrimitives.WriteUInt16BigEndian(uid[4..], initialMovingFactor);
+
+            SetKey(hmacKey[..YubiOtpConstants.KeySize]);
+            SetUid(uid);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(uid);
+        }
     }
 
     protected void ThrowIfDisposed() =>

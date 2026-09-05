@@ -65,7 +65,7 @@ public sealed class OpenPgpDeviceSelector : DeviceSelectorBase
     {
         try
         {
-            return await device.GetDeviceInfoAsync(cancellationToken);
+            return await device.GetDeviceInfoAsync(cancellationToken: cancellationToken);
         }
         catch
         {

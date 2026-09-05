@@ -26,7 +26,7 @@ public class DiTestController
             return Problem("No YubiKey detected. Please connect a YubiKey and try again.", statusCode: 503);
 
         var yubiKey = yubiKeys[0];
-        var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken);
+        var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken: cancellationToken);
 
         var yubiInfo = new YubiInfo(
             deviceInfo.SerialNumber?.ToString() ?? "Unknown",

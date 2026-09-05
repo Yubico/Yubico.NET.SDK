@@ -64,10 +64,10 @@ Yubico.YubiKit.YubiOtp.HotpSlotConfiguration.TokenId(System.ReadOnlySpan<byte> t
 Yubico.YubiKit.YubiOtp.HotpSlotConfiguration.Use8Digits(bool enable = true) -> Yubico.YubiKit.YubiOtp.HotpSlotConfiguration!
 Yubico.YubiKit.YubiOtp.IYubiKeyExtensions
 Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!)
-Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CalculateHmacSha1Async(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CalculateHmacSha1Async(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
 Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CreateYubiOtpSessionAsync(Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.YubiOtpSession!>!
-Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).GetConfigStateAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.ConfigState>!
-Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).PutConfigurationAsync(Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).GetConfigStateAsync(Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.ConfigState>!
+Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).PutConfigurationAsync(Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.YubiOtp.IYubiOtpSession
 Yubico.YubiKit.YubiOtp.IYubiOtpSession.CalculateHmacSha1Async(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
 Yubico.YubiKit.YubiOtp.IYubiOtpSession.CalculateYubicoOtpAsync(Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
@@ -111,12 +111,15 @@ Yubico.YubiKit.YubiOtp.SlotConfiguration.SerialBtnVisible(bool enable = true) ->
 Yubico.YubiKit.YubiOtp.SlotConfiguration.SerialUsbVisible(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
 Yubico.YubiKit.YubiOtp.SlotConfiguration.SetCfgFlag(Yubico.YubiKit.YubiOtp.ConfigFlag flag, bool enable) -> void
 Yubico.YubiKit.YubiOtp.SlotConfiguration.SetExtFlag(Yubico.YubiKit.YubiOtp.ExtendedFlag flag, bool enable) -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SetFixed(System.ReadOnlySpan<byte> value) -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SetHmacKey(System.ReadOnlySpan<byte> hmacKey, ushort initialMovingFactor) -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SetKey(System.ReadOnlySpan<byte> value) -> void
 Yubico.YubiKit.YubiOtp.SlotConfiguration.SetTktFlag(Yubico.YubiKit.YubiOtp.TicketFlag flag, bool enable) -> void
+Yubico.YubiKit.YubiOtp.SlotConfiguration.SetUid(System.ReadOnlySpan<byte> value) -> void
 Yubico.YubiKit.YubiOtp.SlotConfiguration.SlotConfiguration() -> void
 Yubico.YubiKit.YubiOtp.SlotConfiguration.ThrowIfDisposed() -> void
 Yubico.YubiKit.YubiOtp.SlotConfiguration._cfgFlags -> Yubico.YubiKit.YubiOtp.ConfigFlag
 Yubico.YubiKit.YubiOtp.SlotConfiguration._extFlags -> Yubico.YubiKit.YubiOtp.ExtendedFlag
-Yubico.YubiKit.YubiOtp.SlotConfiguration._fixedSize -> byte
 Yubico.YubiKit.YubiOtp.SlotConfiguration._tktFlags -> Yubico.YubiKit.YubiOtp.TicketFlag
 Yubico.YubiKit.YubiOtp.SlotExtensions
 Yubico.YubiKit.YubiOtp.SlotOperation
@@ -178,14 +181,10 @@ override Yubico.YubiKit.YubiOtp.HmacSha1SlotConfiguration.MinimumFirmwareVersion
 override Yubico.YubiKit.YubiOtp.HotpSlotConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
 override Yubico.YubiKit.YubiOtp.UpdateConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
 override Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
-readonly Yubico.YubiKit.YubiOtp.SlotConfiguration._fixed -> byte[]!
-readonly Yubico.YubiKit.YubiOtp.SlotConfiguration._key -> byte[]!
-readonly Yubico.YubiKit.YubiOtp.SlotConfiguration._uid -> byte[]!
-static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.CalculateHmacSha1Async(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.CalculateHmacSha1Async(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.YubiOtp.Slot slot, System.ReadOnlyMemory<byte> challenge, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
 static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.CreateYubiOtpSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.YubiOtpSession!>!
-static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.GetConfigStateAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.ConfigState>!
-static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.PutConfigurationAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-static Yubico.YubiKit.YubiOtp.SlotConfiguration.ProcessHmacKey(System.ReadOnlySpan<byte> hmacKey, System.Span<byte> key, System.Span<byte> uid) -> void
+static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.GetConfigStateAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.ConfigState>!
+static Yubico.YubiKit.YubiOtp.IYubiKeyExtensions.PutConfigurationAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotConfiguration! config, System.ReadOnlyMemory<byte> accessCode = default(System.ReadOnlyMemory<byte>), System.ReadOnlyMemory<byte> currentAccessCode = default(System.ReadOnlyMemory<byte>), Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 static Yubico.YubiKit.YubiOtp.SlotExtensions.Map(this Yubico.YubiKit.YubiOtp.Slot slot, Yubico.YubiKit.YubiOtp.SlotOperation operation) -> Yubico.YubiKit.YubiOtp.ConfigSlot
 static Yubico.YubiKit.YubiOtp.YubiOtpSession.CreateAsync(Yubico.YubiKit.Core.Abstractions.IConnection! connection, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiOtp.YubiOtpSession!>!
 virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.Dispose(bool disposing) -> void

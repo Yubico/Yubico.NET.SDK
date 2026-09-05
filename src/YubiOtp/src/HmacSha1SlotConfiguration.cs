@@ -41,7 +41,7 @@ public sealed class HmacSha1SlotConfiguration : SlotConfiguration
     /// </exception>
     public HmacSha1SlotConfiguration(ReadOnlySpan<byte> hmacKey)
     {
-        ProcessHmacKey(hmacKey, _key, _uid);
+        SetHmacKey(hmacKey, 0);
 
         _tktFlags |= TicketFlag.ChalResp;
         _cfgFlags |= ConfigFlag.ChalHmac | ConfigFlag.HmacLt64;

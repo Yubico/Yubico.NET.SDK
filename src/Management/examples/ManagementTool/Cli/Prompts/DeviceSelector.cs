@@ -100,7 +100,7 @@ public static class DeviceSelector
     {
         try
         {
-            return await device.GetDeviceInfoAsync(cancellationToken);
+            return await device.GetDeviceInfoAsync(cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {

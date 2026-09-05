@@ -154,9 +154,8 @@ public abstract class KeyboardSlotConfiguration : SlotConfiguration
                 nameof(aesKey));
         }
 
-        publicId.CopyTo(_fixed);
-        privateId.CopyTo(_uid);
-        aesKey.CopyTo(_key);
-        _fixedSize = (byte)publicId.Length;
+        SetFixed(publicId);
+        SetUid(privateId);
+        SetKey(aesKey);
     }
 }

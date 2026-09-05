@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers.Binary;
 using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.YubiOtp;
@@ -56,14 +55,7 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
                 nameof(imf));
         }
 
-        ProcessHmacKey(hmacKey, _key, _uid);
-
-        // Store IMF / 0x10000 as big-endian in uid[4..6]
-        if (imf != 0)
-        {
-            ushort imfValue = (ushort)(imf / 0x10000);
-            BinaryPrimitives.WriteUInt16BigEndian(_uid.AsSpan(4, 2), imfValue);
-        }
+        SetHmacKey(hmacKey, (ushort)(imf / 0x10000));
 
         _tktFlags |= TicketFlag.OathHotp;
     }
@@ -102,9 +94,7 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
                 nameof(tokenId));
         }
 
-        _fixed.AsSpan().Clear();
-        tokenId.CopyTo(_fixed);
-        _fixedSize = (byte)tokenId.Length;
+        SetFixed(tokenId);
         SetCfgFlag(ConfigFlag.OathFixedModhex1, fixedModhex1);
         SetCfgFlag(ConfigFlag.OathFixedModhex2, fixedModhex2);
         return this;

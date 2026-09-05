@@ -127,11 +127,13 @@ public static class IYubiKeyExtensions
     extension(IYubiKey yubiKey)
     {
         // Methods here extend IYubiKey
-        public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken ct = default)
+        public async Task<DeviceInfo> GetDeviceInfoAsync(
+            SessionCreationOptions? options = null,
+            CancellationToken cancellationToken = default)
         {
             // 'yubiKey' parameter is implicitly the extension target
-            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: ct);
-            return await mgmtSession.GetDeviceInfoAsync(ct);
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(options, cancellationToken);
+            return await mgmtSession.GetDeviceInfoAsync(cancellationToken);
         }
     }
 }
@@ -153,7 +155,7 @@ The extension class provides three levels of abstraction:
 
 ```csharp
 // Extension handles everything
-var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken);
+var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken: cancellationToken);
 
 // Equivalent manual code:
 await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
@@ -261,8 +263,8 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
 | Single config change | `yubiKey.SetDeviceConfigAsync()` | Simplest, automatic cleanup |
 | Multiple queries | `CreateManagementSessionAsync()` | Reuse session, more efficient |
 | Query + config change | `CreateManagementSessionAsync()` | Need both in same session |
-| SCP authentication required | `CreateManagementSessionAsync()` | Need to pass `scpKeyParams` |
-| Custom protocol configuration | `CreateManagementSessionAsync()` | Need `configuration` parameter |
+| SCP authentication required | Pass `SessionCreationOptions` to either pattern | Both one-shot operations and session creation accept `ScpKeyParameters` |
+| Custom protocol configuration | Pass `SessionCreationOptions` to either pattern | Both one-shot operations and session creation accept `ProtocolConfiguration` |
 | Need logging | Any | Configure `YubiKitLogging.LoggerFactory` (or DI) once at startup |
 | Testing (YubiKeyTestState) | `state.WithManagementAsync()` | Test helper, automatic cleanup |
 
@@ -887,7 +889,7 @@ using var mgmt = await ManagementSession.CreateAsync(
 var devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken);
 foreach (var device in devices)
 {
-    var info = await device.GetDeviceInfoAsync(cancellationToken);
+    var info = await device.GetDeviceInfoAsync(cancellationToken: cancellationToken);
     Console.WriteLine($"Serial: {info.SerialNumber}");
     Console.WriteLine($"Firmware: {info.FirmwareVersion}");
     Console.WriteLine($"USB enabled: {info.UsbEnabled}");

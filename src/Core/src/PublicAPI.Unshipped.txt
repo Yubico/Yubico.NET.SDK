@@ -507,8 +507,6 @@ Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.Mac.get -> System.ReadOnl
 Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.StaticKeys(System.ReadOnlySpan<byte> enc, System.ReadOnlySpan<byte> mac, System.ReadOnlySpan<byte> dek = default(System.ReadOnlySpan<byte>)) -> void
 Yubico.YubiKit.Core.ServiceLocator
 Yubico.YubiKit.Core.Sessions.ApplicationIds
-Yubico.YubiKit.Core.Sessions.ApplicationIds.ApplicationIds() -> void
-Yubico.YubiKit.Core.Sessions.ApplicationIds.ApplicationIds(Yubico.YubiKit.Core.Sessions.ApplicationIds! original) -> void
 Yubico.YubiKit.Core.Sessions.ApplicationSession
 Yubico.YubiKit.Core.Sessions.ApplicationSession.ApplicationSession(Yubico.YubiKit.Core.Abstractions.IConnection! connection) -> void
 Yubico.YubiKit.Core.Sessions.ApplicationSession.Connection.get -> Yubico.YubiKit.Core.Abstractions.IConnection!
@@ -545,6 +543,7 @@ Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ProtocolConfiguration.init -
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ScpKeyParameters.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters?
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ScpKeyParameters.init -> void
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.SessionCreationOptions() -> void
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.WithPreferredConnectionType(Yubico.YubiKit.Core.Devices.ConnectionType connectionType) -> Yubico.YubiKit.Core.Sessions.SessionCreationOptions!
 Yubico.YubiKit.Core.Transport
 Yubico.YubiKit.Core.Transport.All = Yubico.YubiKit.Core.Transport.Usb | Yubico.YubiKit.Core.Transport.Nfc -> Yubico.YubiKit.Core.Transport
 Yubico.YubiKit.Core.Transport.Nfc = 2 -> Yubico.YubiKit.Core.Transport
@@ -877,9 +876,6 @@ override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.Scp11KeyParameters.ToString
 override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.Equals(object? obj) -> bool
 override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.GetHashCode() -> int
 override Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.ToString() -> string!
-override Yubico.YubiKit.Core.Sessions.ApplicationIds.Equals(object? obj) -> bool
-override Yubico.YubiKit.Core.Sessions.ApplicationIds.GetHashCode() -> int
-override Yubico.YubiKit.Core.Sessions.ApplicationIds.ToString() -> string!
 override Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.Equals(object? obj) -> bool
 override Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.GetHashCode() -> int
 override Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.ToString() -> string!
@@ -1033,8 +1029,15 @@ static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.operator ==(
 static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.GetDefaultKeys() -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys!
 static Yubico.YubiKit.Core.ServiceLocator.GetService<T>() -> T
 static Yubico.YubiKit.Core.ServiceLocator.SetLocatorProvider(System.IServiceProvider! serviceProvider) -> void
-static Yubico.YubiKit.Core.Sessions.ApplicationIds.operator !=(Yubico.YubiKit.Core.Sessions.ApplicationIds? left, Yubico.YubiKit.Core.Sessions.ApplicationIds? right) -> bool
-static Yubico.YubiKit.Core.Sessions.ApplicationIds.operator ==(Yubico.YubiKit.Core.Sessions.ApplicationIds? left, Yubico.YubiKit.Core.Sessions.ApplicationIds? right) -> bool
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.Fido2.get -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.FidoU2f.get -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.Management.get -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.Oath.get -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.OpenPgp.get -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.Otp.get -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.Piv.get -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.SecurityDomain.get -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.YubiHsmAuth.get -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.Core.Sessions.ApplicationSession.Construct<TSession>(Yubico.YubiKit.Core.Abstractions.IConnection! connection, System.Func<TSession!>! create) -> TSession!
 static Yubico.YubiKit.Core.Sessions.RawFidoHidSession.CreateAsync(Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawFidoHidSession!>!
 static Yubico.YubiKit.Core.Sessions.RawOtpHidSession.CreateAsync(Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawOtpHidSession!>!
@@ -1180,15 +1183,6 @@ static readonly Yubico.YubiKit.Core.ProductAtrs.YubiKey5Nfc -> Yubico.YubiKit.Co
 static readonly Yubico.YubiKit.Core.ProductAtrs.YubiKey5Usb -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!
 static readonly Yubico.YubiKit.Core.ProductAtrs.YubiKeyNeoNfc -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!
 static readonly Yubico.YubiKit.Core.ProductAtrs.YubiKeyNeoUsb -> Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.AnswerToReset!
-static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Fido2 -> byte[]!
-static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.FidoU2f -> byte[]!
-static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Management -> byte[]!
-static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Oath -> byte[]!
-static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.OpenPgp -> byte[]!
-static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Otp -> byte[]!
-static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.Piv -> byte[]!
-static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.SecurityDomain -> byte[]!
-static readonly Yubico.YubiKit.Core.Sessions.ApplicationIds.YubiHsmAuth -> byte[]!
 virtual Yubico.YubiKit.Core.Credentials.CredentialPromptContext.<Clone>$() -> Yubico.YubiKit.Core.Credentials.CredentialPromptContext!
 virtual Yubico.YubiKit.Core.Credentials.CredentialPromptContext.EqualityContract.get -> System.Type!
 virtual Yubico.YubiKit.Core.Credentials.CredentialPromptContext.Equals(Yubico.YubiKit.Core.Credentials.CredentialPromptContext? other) -> bool
@@ -1197,10 +1191,6 @@ virtual Yubico.YubiKit.Core.Protocols.SmartCard.Scp.DataEncryptor.Invoke(System.
 virtual Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.EqualityContract.get -> System.Type!
 virtual Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.Equals(Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters? other) -> bool
 virtual Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.PrintMembers(System.Text.StringBuilder! builder) -> bool
-virtual Yubico.YubiKit.Core.Sessions.ApplicationIds.<Clone>$() -> Yubico.YubiKit.Core.Sessions.ApplicationIds!
-virtual Yubico.YubiKit.Core.Sessions.ApplicationIds.EqualityContract.get -> System.Type!
-virtual Yubico.YubiKit.Core.Sessions.ApplicationIds.Equals(Yubico.YubiKit.Core.Sessions.ApplicationIds? other) -> bool
-virtual Yubico.YubiKit.Core.Sessions.ApplicationIds.PrintMembers(System.Text.StringBuilder! builder) -> bool
 virtual Yubico.YubiKit.Core.Sessions.ApplicationSession.Dispose(bool disposing) -> void
 virtual Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAsyncCore() -> System.Threading.Tasks.ValueTask
 virtual Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Dispose(bool disposing) -> void

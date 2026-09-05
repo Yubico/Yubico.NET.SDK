@@ -36,15 +36,18 @@ public static class IYubiKeyExtensions
         /// <summary>
         ///     Retrieves device information from a YubiKey asynchronously.
         /// </summary>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">
         ///     An optional token to cancel the operation.
         /// </param>
         /// <returns>
         ///     A <see cref="DeviceInfo" /> structure containing detailed information about the YubiKey device.
         /// </returns>
-        public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
+        public async Task<DeviceInfo> GetDeviceInfoAsync(
+            SessionCreationOptions? options = null,
+            CancellationToken cancellationToken = default)
         {
-            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
             return await mgmtSession.GetDeviceInfoAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -56,6 +59,10 @@ public static class IYubiKeyExtensions
         ///     The desired device configuration to be applied to the YubiKey.
         /// </param>
         /// <param name="options">Optional device-configuration policy and borrowed lock-code memory.</param>
+        /// <param name="sessionOptions">
+        ///     Optional cross-cutting settings for creating the temporary management session. These are distinct
+        ///     from <paramref name="options" />, which controls the device-configuration operation.
+        /// </param>
         /// <param name="cancellationToken">
         ///     An optional token to cancel the operation.
         /// </param>
@@ -65,9 +72,10 @@ public static class IYubiKeyExtensions
         public async Task SetDeviceConfigAsync(
             DeviceConfig config,
             SetDeviceConfigOptions? options = null,
+            SessionCreationOptions? sessionOptions = null,
             CancellationToken cancellationToken = default)
         {
-            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken)
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(sessionOptions, cancellationToken)
                 .ConfigureAwait(false);
             await mgmtSession.SetDeviceConfigAsync(config, options, cancellationToken)
                 .ConfigureAwait(false);

@@ -67,12 +67,14 @@ public static class IYubiKeyExtensions
         /// <summary>
         ///     Lists all OATH credentials stored on the YubiKey.
         /// </summary>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A list of credentials stored on the device.</returns>
         public async Task<IReadOnlyList<Credential>> ListOathCredentialsAsync(
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            await using var session = await yubiKey.CreateOathSessionAsync(cancellationToken: cancellationToken)
+            await using var session = await yubiKey.CreateOathSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
             return await session.ListCredentialsAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -82,13 +84,15 @@ public static class IYubiKeyExtensions
         ///     HOTP and touch-required credentials return <c>null</c> codes.
         /// </summary>
         /// <param name="timestamp">Optional Unix timestamp. Defaults to current time.</param>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A dictionary mapping each credential to its calculated code (or null).</returns>
         public async Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllOathCodesAsync(
             long? timestamp = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            await using var session = await yubiKey.CreateOathSessionAsync(cancellationToken: cancellationToken)
+            await using var session = await yubiKey.CreateOathSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
             return await session.CalculateAllAsync(timestamp, cancellationToken).ConfigureAwait(false);
         }

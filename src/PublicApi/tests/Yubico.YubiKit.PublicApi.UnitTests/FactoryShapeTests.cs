@@ -27,6 +27,55 @@ public sealed class FactoryShapeTests
     }
 
     [Fact]
+    public void OneShotDeviceExtensions_UseUniformOptionsAndCancellationShape()
+    {
+        var violations = new List<string>();
+        var oneShotMethods = new List<MethodInfo>();
+        var nullability = new NullabilityInfoContext();
+
+        foreach (var (session, _, factoryName) in AppletSessionShapeTests.Sessions)
+        {
+            // One-shot conveniences are public, non-special IYubiKey extensions in an applet's root namespace
+            // other than its Create*SessionAsync factory. The non-special check excludes the C# 14 extension
+            // block marker; WebAuthn is not an applet session and has its own factory test.
+            oneShotMethods.AddRange(AppletSessionShapeTests.GetDeviceExtensionMethods(session)
+                .Where(method => !method.IsSpecialName &&
+                    method.DeclaringType?.Namespace == session.Namespace &&
+                    method.Name != factoryName));
+        }
+
+        Assert.True(
+            oneShotMethods.Count == 10,
+            $"Expected 10 one-shot extensions, found: {string.Join(", ", oneShotMethods.Select(static method => method.Name))}");
+
+        foreach (MethodInfo method in oneShotMethods)
+        {
+            ParameterInfo[] parameters = method.GetParameters();
+            string displayName = $"{method.DeclaringType!.FullName}.{method.Name}";
+
+            if (parameters.Length < 3)
+            {
+                violations.Add($"{displayName} does not have receiver, session options, and cancellation parameters");
+                continue;
+            }
+
+            ParameterInfo options = parameters[^2];
+            if (options.ParameterType != typeof(SessionCreationOptions) ||
+                nullability.Create(options).ReadState != NullabilityState.Nullable ||
+                !options.IsOptional || options.RawDefaultValue is not null)
+                violations.Add($"{displayName} does not take optional SessionCreationOptions? before cancellation");
+
+            ParameterInfo cancellationToken = parameters[^1];
+            if (cancellationToken.Name != "cancellationToken" ||
+                cancellationToken.ParameterType != typeof(CancellationToken) ||
+                !cancellationToken.IsOptional || cancellationToken.RawDefaultValue is not null)
+                violations.Add($"{displayName} does not end with CancellationToken cancellationToken = default");
+        }
+
+        Assert.Empty(violations);
+    }
+
+    [Fact]
     public void WebAuthnDeviceFactory_UsesSessionOptionsAndCancellationShape()
     {
         MethodInfo method = typeof(IYubiKeyExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)

@@ -59,7 +59,7 @@ internal static class DeviceHelper
         {
             try
             {
-                var info = await device.GetDeviceInfoAsync(ct);
+                var info = await device.GetDeviceInfoAsync(cancellationToken: ct);
                 if (info.SerialNumber == serial)
                 {
                     return device;

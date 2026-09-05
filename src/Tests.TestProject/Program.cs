@@ -24,7 +24,7 @@ app.MapGet("/di-demo/minimal", async (
     if (yubiKeys.Count == 0)
         return Results.Problem("No YubiKey detected. Please connect a YubiKey and try again.", statusCode: 503);
 
-    var deviceInfo = await yubiKeys[0].GetDeviceInfoAsync(cancellationToken);
+    var deviceInfo = await yubiKeys[0].GetDeviceInfoAsync(cancellationToken: cancellationToken);
     var yubiInfo = new YubiInfo(
         deviceInfo.SerialNumber?.ToString() ?? "Unknown",
         deviceInfo.FirmwareVersion.ToString()

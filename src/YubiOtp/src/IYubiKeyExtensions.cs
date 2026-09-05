@@ -31,10 +31,14 @@ public static class IYubiKeyExtensions
         /// Gets the OTP slot configuration state from the YubiKey.
         /// Creates a session, queries state, and disposes automatically.
         /// </summary>
-        public async Task<ConfigState> GetConfigStateAsync(CancellationToken cancellationToken = default)
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
+        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
+        public async Task<ConfigState> GetConfigStateAsync(
+            SessionCreationOptions? options = null,
+            CancellationToken cancellationToken = default)
         {
             await using var session = await yubiKey
-                .CreateYubiOtpSessionAsync(cancellationToken: cancellationToken)
+                .CreateYubiOtpSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
             return session.GetConfigState();
         }
@@ -43,15 +47,22 @@ public static class IYubiKeyExtensions
         /// Writes a slot configuration to the YubiKey.
         /// Creates a session, writes the configuration, and disposes automatically.
         /// </summary>
+        /// <param name="slot">The slot to configure.</param>
+        /// <param name="config">The configuration to write.</param>
+        /// <param name="accessCode">The new access code.</param>
+        /// <param name="currentAccessCode">The current access code.</param>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
+        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         public async Task PutConfigurationAsync(
             Slot slot,
             SlotConfiguration config,
             ReadOnlyMemory<byte> accessCode = default,
             ReadOnlyMemory<byte> currentAccessCode = default,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             await using var session = await yubiKey
-                .CreateYubiOtpSessionAsync(cancellationToken: cancellationToken)
+                .CreateYubiOtpSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
             await session.PutConfigurationAsync(slot, config, accessCode, currentAccessCode, cancellationToken)
                 .ConfigureAwait(false);
@@ -61,13 +72,18 @@ public static class IYubiKeyExtensions
         /// Performs an HMAC-SHA1 challenge-response operation.
         /// Creates a session, computes the response, and disposes automatically.
         /// </summary>
+        /// <param name="slot">The challenge-response slot.</param>
+        /// <param name="challenge">The challenge data.</param>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
+        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         public async Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
             Slot slot,
             ReadOnlyMemory<byte> challenge,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             await using var session = await yubiKey
-                .CreateYubiOtpSessionAsync(cancellationToken: cancellationToken)
+                .CreateYubiOtpSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
             return await session.CalculateHmacSha1Async(slot, challenge, cancellationToken)
                 .ConfigureAwait(false);

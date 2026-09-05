@@ -117,7 +117,7 @@ internal static class CliRunner
         var device = await DeviceHelper.GetDeviceAsync(serial, ct);
         if (device is null) return 1;
 
-        var deviceInfo = await device.GetDeviceInfoAsync(ct);
+        var deviceInfo = await device.GetDeviceInfoAsync(cancellationToken: ct);
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await DeviceInfoQuery.GetPivRetryInfoAsync(session, ct);

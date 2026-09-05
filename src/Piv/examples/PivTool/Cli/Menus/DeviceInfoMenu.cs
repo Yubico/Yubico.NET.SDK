@@ -31,7 +31,7 @@ public static class DeviceInfoMenu
             .StartAsync("Getting device information...", async ctx =>
             {
                 // Get device info using the Management extension
-                var deviceInfo = await selection.Device.GetDeviceInfoAsync(cancellationToken);
+                var deviceInfo = await selection.Device.GetDeviceInfoAsync(cancellationToken: cancellationToken);
                 DisplayDeviceDetails(deviceInfo);
 
                 // Get PIV-specific retry info

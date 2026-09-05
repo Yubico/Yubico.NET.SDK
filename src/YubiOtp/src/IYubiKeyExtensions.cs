@@ -87,16 +87,16 @@ public static class IYubiKeyExtensions
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            var configuration = options?.ProtocolConfiguration;
             var scpKeyParams = options?.ScpKeyParameters;
             var preferredConnectionType = options?.PreferredConnectionType;
-            var firmwareVersionOverride = options?.FirmwareVersionOverride;
             var transport = yubiKey.ResolveSessionTransport(
                 scpKeyParams is not null && preferredConnectionType is null
                     ? ConnectionType.SmartCard
                     : preferredConnectionType,
                 "YubiOTP",
                 YubiOtpTransportOrder);
+            var sessionOptions = (options ?? new SessionCreationOptions())
+                .WithPreferredConnectionType(transport);
 
             return await yubiKey.CreateSessionOverTransportAsync(
                     transport,
@@ -105,13 +105,7 @@ public static class IYubiKeyExtensions
                         var session = await YubiOtpSession
                             .CreateAsync(
                                 connection,
-                                new SessionCreationOptions
-                                {
-                                    ProtocolConfiguration = configuration,
-                                    ScpKeyParameters = scpKeyParams,
-                                    PreferredConnectionType = transport,
-                                    FirmwareVersionOverride = firmwareVersionOverride
-                                },
+                                sessionOptions,
                                 ct)
                             .ConfigureAwait(false);
 

@@ -51,7 +51,7 @@ public sealed class OpenPgpSessionWireTests
             command[1] == 0xA4 && // SELECT
             command[2] == 0x04 &&
             command[3] == 0x00 &&
-            CommandData(command).SequenceEqual(ApplicationIds.OpenPgp.AsSpan()));
+            CommandData(command).SequenceEqual(ApplicationIds.OpenPgp.Span));
         Assert.Contains(connection.TransmittedCommands, command =>
             command.Length >= 4 &&
             command[1] == 0xF1); // GET VERSION

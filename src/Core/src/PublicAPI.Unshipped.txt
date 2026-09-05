@@ -545,6 +545,7 @@ Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ProtocolConfiguration.init -
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ScpKeyParameters.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters?
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ScpKeyParameters.init -> void
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.SessionCreationOptions() -> void
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.WithPreferredConnectionType(Yubico.YubiKit.Core.Devices.ConnectionType connectionType) -> Yubico.YubiKit.Core.Sessions.SessionCreationOptions!
 Yubico.YubiKit.Core.Transport
 Yubico.YubiKit.Core.Transport.All = Yubico.YubiKit.Core.Transport.Usb | Yubico.YubiKit.Core.Transport.Nfc -> Yubico.YubiKit.Core.Transport
 Yubico.YubiKit.Core.Transport.Nfc = 2 -> Yubico.YubiKit.Core.Transport

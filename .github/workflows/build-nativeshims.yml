@@ -570,6 +570,14 @@ jobs:
           global-json-file: global.json
           architecture: x86
 
+      - name: Use x64 SDK with x86 runtime discovery
+        if: ${{ matrix.rid == 'win-x86' }}
+        shell: pwsh
+        run: |
+          "DOTNET_ROOT_X86=$env:DOTNET_ROOT" >> $env:GITHUB_ENV
+          "DOTNET_ROOT=$env:ProgramFiles\dotnet" >> $env:GITHUB_ENV
+          "$env:ProgramFiles\dotnet" >> $env:GITHUB_PATH
+
       - name: Install Linux Native AOT prerequisites
         if: ${{ matrix.os == 'linux' }}
         run: |

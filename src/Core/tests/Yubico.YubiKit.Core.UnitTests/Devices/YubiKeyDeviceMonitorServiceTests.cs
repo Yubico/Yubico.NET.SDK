@@ -1241,7 +1241,7 @@ public class YubiKeyDeviceMonitorServiceTests
     ///     caches; <c>FindYubiKeysFaultInjectionTests</c> pins that eviction behavior.
     /// </summary>
     [Fact]
-    public async Task ListenerEvents_NotifyTheFinderOfTransportActivity_PerTransport()
+    public async Task ListenerEvents_NotifyTheFinderOfTransportActivity_EvictingEvidenceGlobally()
     {
         var (service, repository, findYubiKeys, hidListener, smartCardListener) = CreateService();
 

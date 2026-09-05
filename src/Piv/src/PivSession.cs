@@ -292,8 +292,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
         SetManagementKeyAuthenticationState(false);
 
         // RESET changed the physical applet even if the metadata refresh below fails. Establish a
-        // conservative post-reset type before querying: only a non-sentinel >=5.7 version reliably
-        // identifies the AES-192 default; unknown/alpha/beta PIV versions fall back to TripleDes.
+        // conservative post-reset type before querying: a >=5.7 version defaults to AES-192, and an
+        // alpha/beta version counts as >=5.7 because such a key is at least 5.8.0.
         ManagementKeyType = GetConservativeDefaultManagementKeyType(FirmwareVersion);
 
         // Update management key type from metadata (firmware 5.3+)
@@ -311,8 +311,16 @@ public sealed class PivSession : ApplicationSession, IPivSession
         Logger.LogDebug("PIV: Reset completed successfully");
     }
 
+    /// <summary>
+    ///     Returns the management key type to assume before metadata has been read.
+    /// </summary>
+    /// <remarks>
+    ///     <see cref="FirmwareVersion.IsAtLeast(int,int,int)" /> reports <see langword="true" /> for an alpha or
+    ///     beta version, which is intended: such a key is at least 5.8.0 and therefore defaults to AES-192.
+    ///     Excluding it here would assume Triple-DES for a development key that does not use it.
+    /// </remarks>
     private static PivManagementKeyType GetConservativeDefaultManagementKeyType(FirmwareVersion firmwareVersion) =>
-        !firmwareVersion.IsAlphaOrBeta && firmwareVersion.IsAtLeast(5, 7, 0)
+        firmwareVersion.IsAtLeast(5, 7, 0)
             ? PivManagementKeyType.Aes192
             : PivManagementKeyType.TripleDes;
 

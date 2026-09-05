@@ -200,11 +200,43 @@ public class PivSessionTests
         Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
     }
 
+    /// <summary>
+    ///     An alpha or beta PIV version falls back to AES-192, not Triple-DES, when management key
+    ///     metadata is unavailable.
+    /// </summary>
+    /// <remarks>
+    ///     A major version of 0 marks a development key, which is at least 5.8.0 and therefore defaults
+    ///     to AES-192. Assuming Triple-DES for it would pick an algorithm the key does not use. See
+    ///     <see cref="FirmwareVersion.IsAlphaOrBeta" />.
+    /// </remarks>
     [Theory]
     [InlineData(0, 0, 0)]
     [InlineData(0, 0, 1)]
     [InlineData(0, 9, 9)]
-    public async Task CreateAsync_WhenSentinelFirmwareManagementMetadataUnavailable_UsesTripleDesFallback(
+    public async Task CreateAsync_WhenAlphaFirmwareManagementMetadataUnavailable_UsesAes192Fallback(
+        int major,
+        int minor,
+        int patch)
+    {
+        var connection = new RecordingSmartCardConnection(
+            OkResponse(),
+            [(byte)major, (byte)minor, (byte)patch, 0x90, 0x00],
+            [0x6A, 0x88]);
+
+        await using var session = await PivSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+    }
+
+    /// <summary>
+    ///     A released firmware below 5.7 still falls back to Triple-DES.
+    /// </summary>
+    [Theory]
+    [InlineData(4, 3, 0)]
+    [InlineData(5, 6, 9)]
+    public async Task CreateAsync_WhenPre57FirmwareManagementMetadataUnavailable_UsesTripleDesFallback(
         int major,
         int minor,
         int patch)
@@ -544,8 +576,15 @@ public class PivSessionTests
         Assert.Equal(PivManagementKeyType.Aes128, session.ManagementKeyType);
     }
 
+    /// <summary>
+    ///     After reset on an alpha or beta key whose metadata is unsupported, the fallback is AES-192.
+    /// </summary>
+    /// <remarks>
+    ///     <c>VersionResponse</c> reports 0.0.1, marking a development key, which is at least 5.8.0 and
+    ///     therefore defaults to AES-192. See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
+    /// </remarks>
     [Fact]
-    public async Task ResetAsync_WhenMetadataUnsupported_UsesTripleDesFallbackAndClearsAuthentication()
+    public async Task ResetAsync_WhenMetadataUnsupportedOnAlphaFirmware_UsesAes192FallbackAndClearsAuthentication()
     {
         var connection = CreateInitializedConnection(
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES128
@@ -557,6 +596,29 @@ public class PivSessionTests
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
         await SetManagementKeyForTestAsync(session, PivManagementKeyType.Aes128);
+
+        await session.ResetAsync(TestContext.Current.CancellationToken);
+
+        Assert.False(session.IsManagementKeyAuthenticated);
+        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
+    }
+
+    /// <summary>
+    ///     After reset on a released firmware below 5.7 whose metadata is unsupported, the fallback
+    ///     remains Triple-DES.
+    /// </summary>
+    [Fact]
+    public async Task ResetAsync_WhenMetadataUnsupportedOnPre57Firmware_UsesTripleDesFallbackAndClearsAuthentication()
+    {
+        var connection = CreateInitializedConnectionWithVersion(
+            [0x05, 0x06, 0x00, 0x90, 0x00], // PIV applet version 5.6.0
+            [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
+            [0x63, 0xC0], // PIN blocked
+            [0x63, 0xC0], // PUK blocked
+            [0x90, 0x00], // RESET
+            [0x6D, 0x00]); // GET METADATA unsupported
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        MarkAuthenticated(session);
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
@@ -612,7 +674,7 @@ public class PivSessionTests
     }
 
     [Fact]
-    public async Task ResetAsync_WhenMetadataRefreshUnexpectedlyFailsWithSentinelVersion_UsesTripleDesFallbackBeforePropagating()
+    public async Task ResetAsync_WhenMetadataRefreshUnexpectedlyFailsOnAlphaFirmware_UsesAes192FallbackBeforePropagating()
     {
         var connection = CreateInitializedConnection(
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
@@ -628,7 +690,7 @@ public class PivSessionTests
         await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
 
         Assert.False(session.IsManagementKeyAuthenticated);
-        Assert.Equal(PivManagementKeyType.TripleDes, session.ManagementKeyType);
+        Assert.Equal(PivManagementKeyType.Aes192, session.ManagementKeyType);
     }
 
     [Fact]

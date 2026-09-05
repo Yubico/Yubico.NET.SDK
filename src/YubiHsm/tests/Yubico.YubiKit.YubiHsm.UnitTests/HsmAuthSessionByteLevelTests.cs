@@ -310,6 +310,35 @@ public class HsmAuthSessionByteLevelTests
         Assert.Equal(0x7B, data[afterLabel]); // Management key, not a credential password.
     }
 
+    /// <summary>
+    ///     A caller-supplied firmware override survives <c>ResetAsync</c>.
+    /// </summary>
+    /// <remarks>
+    ///     Reset re-SELECTs the applet to refresh cached state, and the SELECT response carries the
+    ///     applet's own version. Adopting that version would silently drop an override supplied through
+    ///     <c>SessionCreationOptions</c>, so feature gates evaluated after a reset would disagree with
+    ///     the ones evaluated before it. Reset refreshes applet state, not caller policy.
+    /// </remarks>
+    [Fact]
+    public async Task ResetAsync_PreservesCallerSuppliedFirmwareVersionOverride()
+    {
+        // Re-SELECT reports 5.4.3 through the version TLV; the override must win regardless.
+        byte[] reselectWithLowerVersion = [0x79, 0x03, 0x05, 0x04, 0x03, 0x90, 0x00];
+        var connection = CreateInitializedConnection(OkResponse(), reselectWithLowerVersion);
+
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(new FirmwareVersion(5, 8, 0), session.FirmwareVersion);
+
+        await session.ResetAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(new FirmwareVersion(5, 8, 0), session.FirmwareVersion);
+        Assert.True(session.IsSupported(HsmAuthSession.FeaturePasswordChange));
+    }
+
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), .. trailingResponses]);
 

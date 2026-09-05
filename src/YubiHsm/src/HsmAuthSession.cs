@@ -535,9 +535,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         // Re-SELECT the applet using the existing protocol to refresh cached state.
         // Do NOT create a new protocol here — that would abandon the current one without
         // disposing it, leaking the PCSC transaction and causing SW=0x6985 on next operation.
-        var resolvedFirmwareVersion = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
-
-        FirmwareVersion = resolvedFirmwareVersion;
+        //
+        // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet
+        // state, not caller policy, so a SessionCreationOptions.FirmwareVersionOverride supplied at
+        // creation must survive it; otherwise the override would silently lapse mid-session and
+        // later feature gates would disagree with earlier ones.
+        _ = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

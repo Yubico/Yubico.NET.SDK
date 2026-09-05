@@ -57,6 +57,10 @@ Raw SCP configuration is applied before channel establishment and cannot be chan
 reuses Core's SCP processor and exchange guard. Do not log real keys or sensitive APDU payloads.
 See [Raw Access Tiers](../architecture/raw-access-tiers.md) for ownership and recovery rules.
 
+### Device Identity: Serial Number and Correlation
+
+V1 device discovery read the hardware serial synchronously while building each returned device object (`IYubiKeyDeviceInfo.SerialNumber`), so it was reliably present immediately unless the device class does not report one. V2 now exposes `IYubiKey.SerialNumber` (`int?`) directly on the physical device object without a Management session, but it is populated by a background discovery read: it is `null` until that read succeeds, can remain `null` indefinitely (a failed read, an exhausted discovery read budget, or a serial-less device class such as the Security Key series), and once non-null never reverts to `null`. Do not assume `SerialNumber` is populated immediately after `FindAllAsync` returns; use a Management session (see the Device Info recipe below) when a serial is required synchronously and reliably. `IYubiKey.SameDeviceAs(IYubiKey)` returns a three-valued `DeviceCorrelation` (`Same`/`Different`/`Unknown`) for comparing two device references: `Unknown` means "cannot correlate," not "different," and must not be coerced to either outcome for collection equality or deduplication. See `device-serial-number-property` in `v1-to-v2-map.yml`.
+
 ## Session Lifecycle
 
 V2 application sessions are applet-specific and commonly own connection/protocol state. Prefer the v2 session factory or constructor pattern documented by each applet package rather than carrying v1 session setup forward mechanically.
@@ -447,6 +451,8 @@ PIN-only management-key mode (`IPivSession.GetPinOnlyModeAsync`/`SetPinOnlyModeA
 ### FIDO2
 
 Use `Yubico.YubiKit.Fido2` for FIDO2/WebAuthn operations. Review transport selection, PIN/UV flows, credential management, and authenticator state assumptions manually.
+
+`AuthenticatorInfo.RawData`, `BioEnrollment.FingerprintSensorInfo.RawData`, `BioEnrollment.EnrollmentSampleResult.RawData`, `CredentialManagement.CredentialMetadata.RawData`, and `CredentialManagement.RelyingPartyInfo.RawData` each preserve the complete original CBOR-encoded authenticator response for that type. This is a new v2-only forward-compatibility escape hatch for authenticator response fields this SDK version does not yet model, not a substitute for the typed properties on the same objects; see `fido2-raw-response-envelopes` in `v1-to-v2-map.yml`.
 
 ### WebAuthn
 

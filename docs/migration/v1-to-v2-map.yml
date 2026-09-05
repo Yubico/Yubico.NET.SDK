@@ -506,6 +506,36 @@ mappings:
       - yubikit:docs/migration/v1-to-v2-changelog.md
     notes: The initial v2 snapshot regressed nine IHsmAuthSession/HsmAuthSession members (11 parameters) to a string credential-password parameter, which .NET cannot securely zero. This finished the sweep started for Fido2/OpenPgp/Oath (`75353fd1`, 2026-04-09) and closes a v1 regression rather than introducing one - v1's YubiHsmAuthSession.Symmetric.cs path already took a ReadOnlyMemory<byte> credentialPassword. Affected members - PutCredentialSymmetricAsync, PutCredentialDerivedAsync, CalculateSessionKeysSymmetricAsync, CalculateSessionKeysAsymmetricAsync, GetChallengeAsync, PutCredentialAsymmetricAsync, GenerateCredentialAsymmetricAsync, ChangeCredentialPasswordAsync, ChangeCredentialPasswordAdminAsync. Breaking, with no [Obsolete] overload (package is 2.0.0-alpha.2). Migrate by passing Encoding.UTF8.GetBytes(password) and zeroing the resulting array in a finally, or an owning buffer type that zeroes on disposal; validation (max 16 UTF-8 bytes, null-padded) and PBKDF2-HMAC-SHA256 derivation are unchanged. The same change corrected the GetChallengeAsync firmware boundary (5.6.0 supports the command without a password; 5.7.1 adds the optional password field) and added session-key context-length validation (8-byte host+HSM challenges for symmetric; 65-byte EPK-OCE+EPK-SD for asymmetric) before device I/O; see the 2026-08-31 and 2026-09-03 changelog entries for full detail.
     last_reviewed_commit: c3b7e206fd900413cf0a64b0efa75badbe71fd49
+  - id: device-serial-number-property
+    status: assisted
+    confidence: high
+    migration_kind: member
+    v1: IYubiKeyDeviceInfo.SerialNumber (int?), read synchronously as part of YubiKeyDevice.FindAll()/FindByTransport() discovery
+    v2: IYubiKey.SerialNumber (int?), populated asynchronously by discovery, plus IYubiKey.SameDeviceAs(IYubiKey) / DeviceCorrelation for reference-vs-serial identity comparison
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/IYubiKeyDeviceInfo.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiKeyDevice.Instance.cs
+      - yubikit:src/Core/src/Abstractions/IYubiKey.cs
+      - yubikit:src/Core/src/Abstractions/DeviceCorrelation.cs
+      - yubikit:docs/architecture/device-identity.md
+    notes: "feat(core): expose SerialNumber and tri-state SameDeviceAs on IYubiKey (455b2b82) added a serial directly to the physical device object, narrowing but not closing the gap where v2 IYubiKey previously exposed no serial without a Management session (see recipe-management-device-info). V1 discovery read the serial synchronously while building the returned device object, so IYubiKeyDeviceInfo.SerialNumber was reliably populated (or null only for serial-less device classes, for example Security Key series) by the time FindAll()/FindByTransport() returned. V2's IYubiKey.SerialNumber is null until a background discovery metadata read succeeds, can remain null indefinitely if that read fails or the discovery read budget is exhausted, and once non-null never reverts to null; do not assume it is populated immediately after FindAllAsync returns. IYubiKey.SameDeviceAs(other) returns a three-valued DeviceCorrelation (Same/Different/Unknown): the same reference or equal known serials are Same, unequal known serials are Different, and an unknown serial on either side is Unknown, meaning \"cannot correlate\" rather than \"different\" - it must not be coerced to either outcome for collection equality or deduplication. This correlation helper has no v1 equivalent; v1 had no analogous republished-object identity problem to solve. Use a Management session (recipe-management-device-info) when a serial is required synchronously and reliably."
+    last_reviewed_commit: 7b740667da8b2f8c0a85d5916e938da9c67afda4
+  - id: fido2-raw-response-envelopes
+    status: assisted
+    confidence: medium
+    migration_kind: member
+    v1: no direct equivalent on AuthenticatorInfo or BioEnrollmentData; Fido2.Commands.CredentialManagementData.RawData exposed one combined raw CBOR buffer for credential management responses
+    v2: ReadOnlyMemory<byte> RawData on Yubico.YubiKit.Fido2.AuthenticatorInfo, BioEnrollment.FingerprintSensorInfo, BioEnrollment.EnrollmentSampleResult, CredentialManagement.CredentialMetadata, and CredentialManagement.RelyingPartyInfo
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Commands/CredentialManagementData.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/AuthenticatorInfo.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Commands/BioEnrollmentData.cs
+      - yubikit:src/Fido2/src/AuthenticatorInfo.cs
+      - yubikit:src/Fido2/src/BioEnrollment/BioEnrollmentModels.cs
+      - yubikit:src/Fido2/src/CredentialManagement/CredentialManagementModels.cs
+      - yubikit:src/Fido2/CLAUDE.md
+    notes: "feat(fido2): expose safe raw responses (9f221bc4) added a RawData property, populated by each type's Decode(ReadOnlyMemory<byte>) factory method, that preserves the complete original CBOR-encoded authenticator response (empty only on caller-constructed instances). This is a new v2-only forward-compatibility escape hatch, per the root CLAUDE.md 'Forward compatibility doctrine' added in the same range, rather than a restored v1 feature: v1's AuthenticatorInfo and BioEnrollmentData had no public raw-CBOR accessor, though v1's separate CredentialManagementData class did expose one combined RawData buffer at a coarser granularity than v2's per-type properties. Useful for code that needs to inspect authenticator response fields this SDK version does not yet model; it is not a substitute for the typed properties on the same objects."
+    last_reviewed_commit: 7b740667da8b2f8c0a85d5916e938da9c67afda4
 manual_review:
   - device discovery call sites
   - low-level HID listener DeviceEvent callback signatures

@@ -117,6 +117,51 @@ the corresponding `IYubiKey.CreateXSessionAsync` extension directly:
 | YubiOTP `DependencyInjection`, `YubiOtpSessionFactory`, `AddYubiOtp` | `YubiOtpSession.CreateAsync` or `CreateYubiOtpSessionAsync` |
 | YubiHSM Auth `DependencyInjection`, `HsmAuthSessionFactory`, `AddHsmAuth` | `HsmAuthSession.CreateAsync` or `CreateHsmAuthSessionAsync` |
 
+### 2.0.0-alpha.2 -> 2.0.0-alpha.3 deferred API resolutions
+
+These are source breaks between v2 alpha packages. Apply the mechanical replacements below before diagnosing
+behavior changes.
+
+| alpha.2 API or behavior | alpha.3 replacement |
+|---|---|
+| The one-shot conveniences `GetDeviceInfoAsync`, `SetDeviceConfigAsync`, `GetFidoInfoAsync`, `ListOathCredentialsAsync`, `CalculateAllOathCodesAsync`, `GetConfigStateAsync`, `PutConfigurationAsync`, and `CalculateHmacSha1Async` ended with a cancellation token and did not expose session creation policy. | Each now takes an optional `SessionCreationOptions?` immediately before its cancellation token. Callers that passed the cancellation token positionally must name it as `cancellationToken:`. |
+| `SetDeviceConfigAsync(DeviceConfig config, SetDeviceConfigOptions? options = null, CancellationToken cancellationToken = default)` | `SetDeviceConfigAsync(DeviceConfig config, SetDeviceConfigOptions? options = null, SessionCreationOptions? sessionOptions = null, CancellationToken cancellationToken = default)`. `options` controls the configuration operation (`Reboot`, `CurrentLockCode`, and `NewLockCode`); `sessionOptions` controls creation of the temporary Management session. |
+| `ApplicationIds` was a record with public static `byte[]` fields. | `ApplicationIds` is a static class whose members are `ReadOnlyMemory<byte>` properties. Most APIs consuming application identifiers already accept `ReadOnlyMemory<byte>`, so most call sites need no change; use `.ToArray()` only when an array is required. |
+| A type derived from `SlotConfiguration` could write the protected `_fixed`, `_uid`, `_key`, and `_fixedSize` fields or call protected static `ProcessHmacKey(ReadOnlySpan<byte> hmacKey, Span<byte> key, Span<byte> uid)`. | The fields are private and derived classes use the protected copy-in methods `SetFixed`, `SetUid`, and `SetKey`. `ProcessHmacKey` is replaced by protected `SetHmacKey(ReadOnlySpan<byte> hmacKey, ushort initialMovingFactor)`. This affects only consumers deriving from `SlotConfiguration` outside the SDK. |
+
+For example, a positional cancellation token passed to a one-shot convenience must become named:
+
+```csharp
+// alpha.2
+var info = await yubiKey.GetFidoInfoAsync(cancellationToken);
+
+// alpha.3
+var info = await yubiKey.GetFidoInfoAsync(cancellationToken: cancellationToken);
+```
+
+Copy an application identifier only when an API specifically requires an array:
+
+```csharp
+byte[] pivApplicationId = ApplicationIds.Piv.ToArray();
+```
+
+External `SlotConfiguration` subclasses must use the copy-in setters instead of retaining access to the backing
+key array:
+
+```csharp
+// alpha.2
+public sealed class CustomSlotConfiguration : SlotConfiguration
+{
+    public CustomSlotConfiguration(ReadOnlySpan<byte> key) => key.CopyTo(_key);
+}
+
+// alpha.3
+public sealed class CustomSlotConfiguration : SlotConfiguration
+{
+    public CustomSlotConfiguration(ReadOnlySpan<byte> key) => SetKey(key);
+}
+```
+
 ## Common Migration Recipes
 
 These examples show the shape of common v1 code and the closest v2 pattern. They are intentionally small and source-backed. Treat examples that write applet state, credential material, keys, PINs, PUKs, access codes, or slot configuration as human-reviewed migrations even when the session or member mapping is clear.
@@ -281,7 +326,7 @@ V2 reads fresh authenticator info asynchronously:
 ```csharp
 using Yubico.YubiKit.Fido2;
 
-var info = await device.GetFidoInfoAsync(cancellationToken);
+var info = await device.GetFidoInfoAsync(cancellationToken: cancellationToken);
 ```
 
 For several FIDO2 operations, keep the session open:

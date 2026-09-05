@@ -132,7 +132,7 @@ The module provides convenience extension methods on `IYubiKey` for common opera
 using Yubico.YubiKit.Management;
 
 // Quick device info (creates session automatically)
-var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken);
+var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken: cancellationToken);
 
 // Quick configuration change (creates session automatically)
 await yubiKey.SetDeviceConfigAsync(

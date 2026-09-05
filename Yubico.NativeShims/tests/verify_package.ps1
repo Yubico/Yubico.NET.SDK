@@ -25,6 +25,7 @@ Set-StrictMode -Version Latest
 $project = Join-Path $PSScriptRoot 'NativeAotProbe/NativeAotProbe.csproj'
 $packageSource = (Resolve-Path $PackageSource).Path
 $nupkgs = @(Get-ChildItem -LiteralPath $packageSource -File -Filter '*.nupkg')
+$nugetConfig = Join-Path $ArtifactsRoot 'NativeShims.NuGet.config'
 
 if ($nupkgs.Count -ne 1) {
     throw "Expected exactly one current-run package, found $($nupkgs.Count)."
@@ -34,6 +35,27 @@ $expectedPackageName = "Yubico.NativeShims.$PackageVersion.nupkg"
 if ($nupkgs[0].Name -cne $expectedPackageName) {
     throw "Expected package '$expectedPackageName', found '$($nupkgs[0].Name)'."
 }
+
+New-Item -ItemType Directory -Force -Path $ArtifactsRoot | Out-Null
+$escapedPackageSource = [Security.SecurityElement]::Escape($packageSource)
+@"
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="current-package" value="$escapedPackageSource" />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+  </packageSources>
+  <packageSourceMapping>
+    <packageSource key="current-package">
+      <package pattern="Yubico.NativeShims" />
+    </packageSource>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+  </packageSourceMapping>
+</configuration>
+"@ | Set-Content -LiteralPath $nugetConfig -Encoding utf8
 
 $sharedName = switch ($TargetOS) {
     'windows' { 'Yubico.NativeShims.dll' }
@@ -92,8 +114,7 @@ $restoreArguments = @(
     '-r', $RuntimeIdentifier,
     '--packages', $PackagesPath,
     '--no-cache',
-    '--source', $packageSource,
-    '--source', 'https://api.nuget.org/v3/index.json',
+    '--configfile', $nugetConfig,
     "-p:NativeShimsVersion=$PackageVersion"
 )
 Invoke-DotNet 'Package restore' $restoreArguments

@@ -27,7 +27,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <remarks>
 /// <para>
 /// This service owns the device listeners (HID and SmartCard) and coordinates
-/// with <see cref="IYubiKeyDeviceRepository"/> to update the device cache.
+/// with <see cref="YubiKeyDeviceRepository"/> to update the device cache.
+/// It has no cache of its own - all state is maintained in the repository.
 /// Uses a single-reader channel to serialize listener ingress and debounce redundant scans.
 /// </para>
 /// <para>
@@ -50,7 +51,7 @@ namespace Yubico.YubiKit.Core.Devices;
 /// contract, not an accident.
 /// </para>
 /// </remarks>
-internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
+internal sealed class YubiKeyDeviceMonitorService : IAsyncDisposable
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<YubiKeyDeviceMonitorService>();
 
@@ -70,7 +71,7 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     /// </summary>
     internal static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
 
-    private readonly IYubiKeyDeviceRepository _repository;
+    private readonly YubiKeyDeviceRepository _repository;
     private readonly IFindYubiKeys _findYubiKeys;
     private readonly Lock _monitorLock = new();
 
@@ -112,19 +113,32 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
     internal Func<Task>? PublishGateAcquiredForTest;
 
     /// <summary>
+    /// Test seam: invoked after a snapshot passes admission and before
+    /// <see cref="YubiKeyDeviceRepository.UpdateCache"/> runs, while <see cref="_publishGate"/> is
+    /// still held. Never set in production.
+    /// </summary>
+    /// <remarks>
+    /// This is the window a blocking device-event subscriber used to occupy. Delivery is now
+    /// asynchronous fan-out into per-watcher buffers, so no consumer can hold a publication in flight
+    /// any more - which is the point of the design, and also why the lifecycle tests that must hold one
+    /// need a seam instead.
+    /// </remarks>
+    internal Func<Task>? PublishAdmittedForTest;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="YubiKeyDeviceMonitorService"/> class.
     /// </summary>
     /// <param name="repository">The device repository to update on scans.</param>
     /// <param name="findYubiKeys">The device discovery service.</param>
     public YubiKeyDeviceMonitorService(
-        IYubiKeyDeviceRepository repository,
+        YubiKeyDeviceRepository repository,
         IFindYubiKeys findYubiKeys)
         : this(repository, findYubiKeys, HidDeviceListener.Create, () => new DesktopSmartCardDeviceListener())
     {
     }
 
     internal YubiKeyDeviceMonitorService(
-        IYubiKeyDeviceRepository repository,
+        YubiKeyDeviceRepository repository,
         IFindYubiKeys findYubiKeys,
         Func<HidDeviceListener> hidListenerFactory,
         Func<ISmartCardDeviceListener> smartCardListenerFactory,
@@ -147,7 +161,9 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
 
     private Func<ISmartCardDeviceListener> SmartCardListenerFactory { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets a value indicating whether device monitoring is currently active.
+    /// </summary>
     public bool IsMonitoring
     {
         get
@@ -159,7 +175,11 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Performs a single device scan and updates the repository.
+    /// </summary>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <returns>A task representing the async operation.</returns>
     public async Task RescanAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -228,6 +248,12 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 }
             }
 
+            var admittedHook = PublishAdmittedForTest;
+            if (admittedHook is not null)
+            {
+                await admittedHook().ConfigureAwait(false);
+            }
+
             try
             {
                 _repository.UpdateCache(devices);
@@ -238,16 +264,14 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
                 // was admitted before disposal, outlived DisposeAsync's bounded drain,
                 // and resumed after the manager disposed the repository. Discarding it
                 // here is what makes "the repository silences any later emission" true -
-                // UpdateCache throws once disposed. (The broadcaster underneath does not:
+                // UpdateCache throws once disposed. (The event hub underneath does not:
                 // publishing after completion is a silent no-op, so UpdateCache's own
                 // ThrowIfDisposed is the single source of that behaviour.)
                 // Nothing is lost: the repository is being torn down.
                 //
-                // The _disposed guard matters: UpdateCache invokes DeviceChanges
-                // subscribers synchronously, so a subscriber touching its own disposed
-                // state throws the same exception type. Outside monitor disposal that is
-                // a subscriber bug, and it must keep surfacing through the normal scan
-                // failure path rather than being misattributed to shutdown.
+                // The _disposed guard matters: a repository disposed while THIS monitor is
+                // still alive is a composition bug, not shutdown, and it must keep surfacing
+                // through the normal scan failure path rather than being misattributed.
                 Logger.LogDebug(
                     "Repository disposed while publishing from monitor generation {GenerationId}; discarding late snapshot",
                     generation.Id);
@@ -259,7 +283,25 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Starts continuous monitoring for device changes.
+    /// </summary>
+    /// <param name="interval">The polling interval between scans when no events occur.</param>
+    /// <remarks>
+    /// <para>
+    /// Monitoring is event-driven with interval-based fallback. When device events
+    /// occur (via HID or SmartCard listeners), a rescan is triggered immediately
+    /// with coalescing to avoid redundant scans.
+    /// </para>
+    /// <para>
+    /// Calling this while monitoring is already running is a no-op, <b>including when
+    /// <paramref name="interval"/> differs from the running one</b>. The new interval is
+    /// ignored rather than applied, and no error is raised. Stop monitoring and start it
+    /// again to change the interval. This is a deliberate contract, not an oversight: a
+    /// silent partial application would be worse than either extreme, and throwing would
+    /// make an idempotent start unsafe to call defensively.
+    /// </para>
+    /// </remarks>
     public void StartMonitoring(TimeSpan interval)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(interval, TimeSpan.Zero, nameof(interval));
@@ -416,7 +458,9 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         return null;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Stops monitoring for device changes.
+    /// </summary>
     public void StopMonitoring()
     {
         var taskToAwait = StopMonitoringCore(disposing: false);
@@ -779,7 +823,10 @@ internal sealed class YubiKeyDeviceMonitorService : IYubiKeyDeviceMonitorService
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Stops monitoring, tears down listeners, and bounded-drains any in-flight publication.
+    /// Idempotent.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) == 1)

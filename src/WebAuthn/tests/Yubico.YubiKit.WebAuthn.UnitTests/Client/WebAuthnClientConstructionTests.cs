@@ -148,7 +148,7 @@ public class WebAuthnClientConstructionTests
             fidoSession,
             ParseOrigin("https://example.com"),
             isPublicSuffix: domain => domain == "com" || domain == "test",
-            enterpriseRpIds: new HashSet<string> { "partner.test" });
+            new WebAuthnClientOptions { EnterpriseRpIds = new HashSet<string> { "partner.test" } });
 
         var options = new RegistrationOptions
         {

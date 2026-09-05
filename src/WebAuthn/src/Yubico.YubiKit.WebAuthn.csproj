@@ -14,6 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- For NSubstitute to mock the internal IWebAuthnBackend test seam -->
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Fido2\src\Yubico.YubiKit.Fido2.csproj" />
   </ItemGroup>
 

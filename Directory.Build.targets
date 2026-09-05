@@ -2,10 +2,11 @@
   <!--
     Native AOT support surface (SDK libraries only).
 
-    IsYubiKitSdkLibrary is an explicit per-project opt-in (set in each of the 10 published SDK
-    library .csproj files: Core, Management, Piv, Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain,
-    YubiOtp, YubiHsm). It defaults to false (Directory.Build.props) so CLI tools, example apps, and
-    test projects are never silently pulled into the AOT support envelope.
+    IsYubiKitSdkLibrary is an explicit per-project opt-in, set in every published SDK library
+    .csproj. It defaults to false (Directory.Build.props) so CLI tools, example apps, and test
+    projects are never silently pulled into the AOT support envelope. The opt-in is not optional:
+    `dotnet toolchain.cs native-aot-contract-qa` discovers the SDK libraries from the
+    src/<Module>/src/*.csproj layout and fails the build naming any that lacks it.
 
     This block lives in Directory.Build.targets, not Directory.Build.props: props files are
     imported before a project's own <PropertyGroup>, so a project-level

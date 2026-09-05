@@ -142,7 +142,7 @@ Valid device response data that the SDK does not yet model must not block users.
 
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
-- **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow through `DeviceEventBroadcaster` (multicast) and `DeviceEventStream` (buffering), surfaced as `YubiKeyManager.WatchAsync` (`IAsyncEnumerable`) and `DeviceChanges` (`IObservable`). No reactive dependency - see `docs/usage/device-discovery.md`.
+- **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow through one internal `DeviceEventHub` (per-watcher bounded buffers), surfaced as `YubiKeyManager.WatchAsync` (`IAsyncEnumerable`), the only public device change stream. No reactive dependency - see `docs/usage/device-discovery.md`.
 - **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawFidoHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is an explicitly unguarded expert escape hatch. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
 - **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
 - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
@@ -600,6 +600,10 @@ Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL
    dotnet format Yubico.YubiKit.sln --include $(git diff --name-only --cached -- '*.cs')
    ```
    Note: `--include` silently skips nonexistent/stale paths — re-run `git diff --cached --name-only` if a file seems to be missed.
+
+   The `whitespace` subcommand (`dotnet format whitespace ... --include <files>`) is fine and often faster, **as long as it is scoped with `--include` to your own files**. The rule being enforced is "never reformat files you did not change", not "never use a particular subcommand". Unscoped formatting of the whole solution is what is forbidden.
+
+   Caveat: `dotnet format` only visits documents that belong to a project in the solution. Scoping it to a file-based app script such as `toolchain.cs`, or to a Markdown/props file, matches zero documents and exits `0` — that is "skipped", not "verified clean". Do not report it as a passing gate.
 5. ✅ No nullable warnings
 6. ✅ Sensitive data zeroed (`ZeroMemory` / `Dispose`)
 7. ✅ No unnecessary allocations in hot paths

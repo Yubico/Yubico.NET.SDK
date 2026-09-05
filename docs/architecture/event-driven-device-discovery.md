@@ -61,7 +61,7 @@
 │    └─ YubiKeyDeviceRepository.UpdateCache(discoveredDevices)                         │
 │             │                                                                        │
 │             ▼                                                                        │
-│  YubiKeyDeviceRepository.DeviceChanges                                               │
+│  YubiKeyDeviceRepository -> DeviceEventHub                                           │
 │    └─ repository-diffed DeviceEvent Added/Removed notifications                      │
 │             │                                                                        │
 │             ▼                                                                        │
@@ -148,15 +148,14 @@ YubiKeyDeviceMonitorService ──TrySignal──► DeviceMonitorSignal (capaci
 Single reader ──consume one occurrence──► 200ms quiet period (re-arms on new hints)
 Single reader ──cap reached or quiet period elapsed──► RescanCoreAsync()
 RescanCoreAsync() ──FindAllAsync snapshot──► YubiKeyDeviceRepository.UpdateCache()
-YubiKeyDeviceRepository ──diff──► DeviceEventBroadcaster (multicast)
+YubiKeyDeviceRepository ──diff──► DeviceEventHub (asynchronous fan-out)
                                         │
-              ┌─────────────────────────┴─────────────────────────┐
-              ▼                                                   ▼
-   YubiKeyManager.DeviceChanges                    DeviceEventStream (bounded buffer)
-   (IObservable<DeviceEvent>)                                     │
-              │                                                   ▼
-              ▼                                      YubiKeyManager.WatchAsync(ct)
-   Application observer                              (IAsyncEnumerable<DeviceEvent>)
+                                        ▼
+                          one bounded buffer (256) per watcher
+                                        │
+                                        ▼
+                             YubiKeyManager.WatchAsync(ct)
+                             (IAsyncEnumerable<DeviceEvent>)
 ```
 
 ---
@@ -257,9 +256,8 @@ HID: macOS stops its run loop directly; Linux polls the udev monitor and an expl
 src/Core/src/
 ├── Devices/
 │   ├── YubiKeyDeviceMonitorService.cs        ◄── Event-driven monitor loop
-│   ├── YubiKeyDeviceRepository.cs            ◄── Repository-diffed DeviceChanges
-│   ├── IYubiKeyDeviceMonitorService.cs       ◄── Monitor contract
-│   ├── IYubiKeyDeviceRepository.cs           ◄── Cache contract
+│   ├── YubiKeyDeviceRepository.cs            ◄── Repository-diffed device events
+│   ├── DeviceEventHub.cs                     ◄── Asynchronous fan-out behind WatchAsync
 │   └── YubiKeyManager.cs                     ◄── Static public entry point
 └── Transports/
     ├── SmartCard/

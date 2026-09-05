@@ -21,10 +21,18 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// Holds a PIN/UV auth token and associated protocol instance.
 /// </summary>
 /// <remarks>
-/// This session owns the token bytes and zeroes them on disposal.
+/// <para>
+/// This session takes ownership of the token array and zeroes it on disposal. It deliberately
+/// does not copy: the array is the decrypted PIN/UV auth token that
+/// <c>ClientPin.GetPinUvAuthTokenUsing*Async</c> allocates and returns to a single caller, so
+/// copying would leave a second live plaintext token that nothing zeroes. There must be exactly
+/// one live copy of a decrypted token, and this session is its owner.
+/// </para>
+/// <para>
 /// The protocol instance is NOT disposed by this session (owned by backend).
+/// </para>
 /// </remarks>
-public sealed class PinUvAuthTokenSession : IDisposable
+internal sealed class PinUvAuthTokenSession : IDisposable
 {
     private readonly byte[] _token;
     private bool _disposed;
@@ -51,11 +59,18 @@ public sealed class PinUvAuthTokenSession : IDisposable
     /// Initializes a new instance of <see cref="PinUvAuthTokenSession"/>.
     /// </summary>
     /// <param name="protocol">The PIN/UV auth protocol instance (not owned by this session).</param>
-    /// <param name="token">The token bytes (copied and owned by this session).</param>
-    internal PinUvAuthTokenSession(IPinUvAuthProtocol protocol, ReadOnlySpan<byte> token)
+    /// <param name="token">
+    /// The token bytes. Ownership transfers to this session; the caller must not keep using or
+    /// separately zero the array.
+    /// </param>
+    /// <remarks>
+    /// The token is adopted before anything that can throw, so a failed construction still leaves
+    /// the array reachable only from this instance, whose finalizer clears it.
+    /// </remarks>
+    internal PinUvAuthTokenSession(IPinUvAuthProtocol protocol, byte[] token)
     {
-        Protocol = protocol;
-        _token = token.ToArray();
+        _token = token ?? throw new ArgumentNullException(nameof(token));
+        Protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
     }
 
     /// <summary>

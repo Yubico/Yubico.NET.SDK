@@ -89,7 +89,7 @@ NFC records. Grouping does not depend on those metadata results, but the bounded
 delay scan completion by up to their budget. When a later scan obtains metadata for an otherwise unchanged
 physical device, the repository copies it onto the object it originally published without emitting `Added`
 or `Removed`. Request fresh Management data explicitly when current device configuration matters.
-`DeviceChanges` is emitted from repository diffs after a full rescan, not directly from native listener
+`WatchAsync` events are emitted from repository diffs after a full rescan, not directly from native listener
 hints. These APIs inherit the conservative grouping bounds in
 [Device Discovery Guarantees](device-discovery-guarantees.md); they do not strengthen them.
 

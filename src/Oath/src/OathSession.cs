@@ -528,12 +528,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <inheritdoc />
-    public byte[] DeriveKey(ReadOnlyMemory<byte> passwordUtf8)
+    public byte[] DeriveKey(ReadOnlyMemory<byte> password)
     {
         ThrowIfDisposed();
 
         return Rfc2898DeriveBytes.Pbkdf2(
-            passwordUtf8.Span,
+            password.Span,
             _salt,
             iterations: 1000,
             HashAlgorithmName.SHA1,

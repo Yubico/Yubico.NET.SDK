@@ -417,7 +417,7 @@ public class MyTests
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
-    public async Task DeviceChanges_DetectsRemoval() { }
+    public async Task WatchAsync_DetectsRemoval() { }
 
     // Slow test with long delays
     [Fact]

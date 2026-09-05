@@ -45,6 +45,20 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     private int _disposed;
 
     /// <summary>
+    /// Test seam: invoked by <see cref="DisposeAsync"/> immediately before the repository is disposed,
+    /// after every other teardown step has run. Never set in production.
+    /// </summary>
+    /// <remarks>
+    /// This is the instant the disposal contract turns on. Any repository teardown step the manager
+    /// performs before disposing it happens before this hook, so a test that resumes a publication here
+    /// observes whatever intermediate repository state that step left behind. The contract is that
+    /// there is no such state: a publication resuming at this point must not be able to emit a device
+    /// event. Pinning it needs a hook because the window lives entirely inside <see cref="DisposeAsync"/>
+    /// and closes before it returns.
+    /// </remarks>
+    internal Func<Task>? RepositoryTeardownReachedForTest;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="YubiKeyDeviceManager"/> class.
     /// </summary>
     /// <param name="repository">The device repository.</param>
@@ -61,14 +75,9 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets an observable sequence of device events (arrivals and removals).
-    /// </summary>
-    public IObservable<DeviceEvent> DeviceChanges => _repository.DeviceChanges;
-
-    /// <summary>
     /// Gets an async sequence of device events (arrivals and removals).
     /// </summary>
-    /// <param name="cancellationToken">Stops the stream.</param>
+    /// <param name="cancellationToken">Stops this enumeration.</param>
     public IAsyncEnumerable<DeviceEvent> WatchAsync(CancellationToken cancellationToken = default) =>
         _repository.WatchAsync(cancellationToken);
 
@@ -183,8 +192,19 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
         // 2. Dispose monitor service
         await _monitorService.DisposeAsync().ConfigureAwait(false);
 
-        // 3. Clear and dispose repository
-        _repository.Clear();
+        // 3. Dispose the repository. Disposal already clears the cache, and it must be the first
+        //    thing done to the repository: a publication that outlived the monitor's bounded drain
+        //    and resumes here would find a live-but-emptied repository if the cache were cleared
+        //    separately first, diff against an empty cache, and emit Added for every attached
+        //    device after DisposeAsync had already returned. Disposing first makes that publication
+        //    throw ObjectDisposedException instead, which is what upholds the documented guarantee
+        //    that no device event escapes a disposed manager.
+        var teardownHook = RepositoryTeardownReachedForTest;
+        if (teardownHook is not null)
+        {
+            await teardownHook().ConfigureAwait(false);
+        }
+
         _repository.Dispose();
 
         // 4. Dispose synchronization primitives

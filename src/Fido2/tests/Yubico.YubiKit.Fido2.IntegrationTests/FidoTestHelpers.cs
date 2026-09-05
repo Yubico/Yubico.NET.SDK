@@ -30,12 +30,12 @@ public static class FidoTestHelpers
     /// Sets the PIN if not already configured, or validates the PIN is correct.
     /// </summary>
     /// <param name="session">The FIDO session.</param>
-    /// <param name="pinUtf8">The PIN as UTF-8 bytes to set or verify.</param>
+    /// <param name="pin">The PIN as UTF-8 bytes to set or verify.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The ClientPin instance for further operations.</returns>
     public static async Task<ClientPin> SetOrVerifyPinAsync(
         IFidoSession session,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         var info = await session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
@@ -54,12 +54,12 @@ public static class FidoTestHelpers
 
         if (!pinConfigured)
         {
-            await clientPin.SetPinAsync(pinUtf8, cancellationToken).ConfigureAwait(false);
+            await clientPin.SetPinAsync(pin, cancellationToken).ConfigureAwait(false);
         }
         else
         {
             // Verify by getting a PIN token
-            _ = await clientPin.GetPinTokenAsync(pinUtf8, cancellationToken).ConfigureAwait(false);
+            _ = await clientPin.GetPinTokenAsync(pin, cancellationToken).ConfigureAwait(false);
         }
 
         return clientPin;
@@ -69,13 +69,13 @@ public static class FidoTestHelpers
     /// Gets a PIN/UV auth token with credential management permission.
     /// </summary>
     /// <param name="session">The FIDO session.</param>
-    /// <param name="pinUtf8">The PIN as UTF-8 bytes.</param>
+    /// <param name="pin">The PIN as UTF-8 bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The PIN token, ClientPin instance, and protocol for credential management.</returns>
     public static async Task<(byte[] PinToken, ClientPin ClientPin, IPinUvAuthProtocol Protocol)>
         GetCredManTokenAsync(
             IFidoSession session,
-            ReadOnlyMemory<byte> pinUtf8,
+            ReadOnlyMemory<byte> pin,
             CancellationToken cancellationToken = default)
     {
         var info = await session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
@@ -98,14 +98,14 @@ public static class FidoTestHelpers
         if (supportsPermissions)
         {
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.CredentialManagement,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
         else
         {
             // Fallback to basic PIN token
-            pinToken = await clientPin.GetPinTokenAsync(pinUtf8, cancellationToken).ConfigureAwait(false);
+            pinToken = await clientPin.GetPinTokenAsync(pin, cancellationToken).ConfigureAwait(false);
         }
 
         return (pinToken, clientPin, protocol);
@@ -121,13 +121,13 @@ public static class FidoTestHelpers
     public static async Task DeleteAllCredentialsForRpAsync(
         FidoSession session,
         string rpId,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         try
         {
             var (pinToken, clientPin, protocol) = await GetCredManTokenAsync(
-                session, pinUtf8, cancellationToken).ConfigureAwait(false);
+                session, pin, cancellationToken).ConfigureAwait(false);
 
             using (clientPin)
             {

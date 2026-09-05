@@ -105,33 +105,48 @@ public sealed class ClientPinTests : IDisposable
         Assert.False(powerCycleRequired);
     }
 
+    // ─── PIN length validation and ParamName accuracy ──────────────────────────
+    //
+    // The length check lives in the private ValidatePin helper, but a caller filtering on
+    // ArgumentException.ParamName only ever sees the public parameter it actually passed. The
+    // public surface spells that parameter three different ways — pin, currentPin and newPin —
+    // so every route below asserts its own name. A single hard-coded helper name cannot satisfy
+    // all of them, and reporting one that names no public parameter is the defect these
+    // assertions exist to catch.
+
     [Theory]
     [InlineData("")]
     [InlineData("a")]
     [InlineData("ab")]
     [InlineData("abc")]
-    public async Task SetPinAsync_WithShortPin_ThrowsArgumentException(string shortPin)
+    public async Task SetPinAsync_WithShortPin_ThrowsArgumentExceptionNamingNewPin(string shortPin)
     {
         using var clientPin = CreateClientPin();
 
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(Encoding.UTF8.GetBytes(shortPin), TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(Encoding.UTF8.GetBytes(shortPin), TestContext.Current.CancellationToken));
+
+        Assert.Equal("newPin", exception.ParamName);
     }
 
     [Fact]
-    public async Task SetPinAsync_WithEmptyPin_ThrowsArgumentException()
+    public async Task SetPinAsync_WithEmptyPin_ThrowsArgumentExceptionNamingNewPin()
     {
         using var clientPin = CreateClientPin();
 
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        Assert.Equal("newPin", exception.ParamName);
     }
 
     [Fact]
-    public async Task SetPinAsync_WithTooLongPin_ThrowsArgumentException()
+    public async Task SetPinAsync_WithTooLongPin_ThrowsArgumentExceptionNamingNewPin()
     {
         using var clientPin = CreateClientPin();
 
         var longPin = new byte[64];
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(longPin, TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(longPin, TestContext.Current.CancellationToken));
+
+        Assert.Equal("newPin", exception.ParamName);
     }
 
     [Fact]
@@ -169,19 +184,33 @@ public sealed class ClientPinTests : IDisposable
     }
 
     [Fact]
-    public async Task ChangePinAsync_WithShortCurrentPin_ThrowsArgumentException()
+    public async Task ChangePinAsync_WithShortCurrentPin_ThrowsArgumentExceptionNamingCurrentPin()
     {
         using var clientPin = CreateClientPin();
 
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("ab"), Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("ab"), Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken));
+
+        Assert.Equal("currentPin", exception.ParamName);
     }
 
     [Fact]
-    public async Task ChangePinAsync_WithShortNewPin_ThrowsArgumentException()
+    public async Task ChangePinAsync_WithShortNewPin_ThrowsArgumentExceptionNamingNewPin()
     {
         using var clientPin = CreateClientPin();
 
-        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("1234"), Encoding.UTF8.GetBytes("ab"), TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("1234"), Encoding.UTF8.GetBytes("ab"), TestContext.Current.CancellationToken));
+
+        Assert.Equal("newPin", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task GetPinTokenAsync_WithShortPin_ThrowsArgumentExceptionNamingPin()
+    {
+        using var clientPin = CreateClientPin();
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.GetPinTokenAsync(Encoding.UTF8.GetBytes("ab"), TestContext.Current.CancellationToken));
+
+        Assert.Equal("pin", exception.ParamName);
     }
 
     [Fact]
@@ -210,6 +239,18 @@ public sealed class ClientPinTests : IDisposable
 
         await Assert.ThrowsAsync<ArgumentException>(
             () => clientPin.GetPinUvAuthTokenUsingPinAsync(Encoding.UTF8.GetBytes("1234"), PinUvAuthTokenPermissions.None, cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task GetPinUvAuthTokenUsingPinAsync_WithShortPin_ThrowsArgumentExceptionNamingPin()
+    {
+        using var clientPin = CreateClientPin();
+
+        // Permissions are valid here, so "permissions" is the name this must not report.
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => clientPin.GetPinUvAuthTokenUsingPinAsync(Encoding.UTF8.GetBytes("ab"), PinUvAuthTokenPermissions.MakeCredential, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("pin", exception.ParamName);
     }
 
     [Fact]

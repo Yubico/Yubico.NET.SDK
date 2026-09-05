@@ -43,7 +43,7 @@ public static class ConfigManagement
     /// </summary>
     public static async Task<ConfigResult> EnableEnterpriseAttestationAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
@@ -56,7 +56,7 @@ public static class ConfigManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.AuthenticatorConfig,
                 cancellationToken: cancellationToken);
 
@@ -87,7 +87,7 @@ public static class ConfigManagement
     /// </summary>
     public static async Task<ConfigResult> ToggleAlwaysUvAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
@@ -100,7 +100,7 @@ public static class ConfigManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.AuthenticatorConfig,
                 cancellationToken: cancellationToken);
 
@@ -131,7 +131,7 @@ public static class ConfigManagement
     /// </summary>
     public static async Task<ConfigResult> SetMinPinLengthAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         int newMinPinLength,
         IReadOnlyList<string>? rpIds = null,
         bool forceChangePin = false,
@@ -147,7 +147,7 @@ public static class ConfigManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.AuthenticatorConfig,
                 cancellationToken: cancellationToken);
 

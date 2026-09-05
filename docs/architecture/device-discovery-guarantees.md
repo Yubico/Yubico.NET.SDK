@@ -92,7 +92,7 @@ XML docs.
 | Identifier | Example | Names | Used by |
 |---|---|---|---|
 | **Interface identifier** | `hid:4367418413:0006`, `pcsc:Yubico YubiKey OTP+FIDO+CCID` | one USB interface | connection registry, identity cache |
-| **Physical identifier** (`IYubiKey.DeviceId`) | `ykphysical:103` | one physical key | discovery results, `DeviceChanges` |
+| **Physical identifier** (`IYubiKey.DeviceId`) | `ykphysical:103` | one physical key | discovery results, `WatchAsync` |
 
 The interface identifier is stable for as long as the interface exists. The physical identifier is not, in
 the way described below. Where this document says "stable interface `DeviceId`" it means the former.

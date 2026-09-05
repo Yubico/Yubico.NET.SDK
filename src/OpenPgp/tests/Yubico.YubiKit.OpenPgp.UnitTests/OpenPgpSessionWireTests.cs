@@ -219,8 +219,8 @@ public sealed class OpenPgpSessionWireTests
     {
         public override int Algorithm => 0;
 
-        public override byte[] Process(Pw pw, ReadOnlySpan<byte> pinUtf8Bytes) =>
-            pinUtf8Bytes.ToArray();
+        public override byte[] Process(Pw pw, ReadOnlySpan<byte> pin) =>
+            pin.ToArray();
 
         public override byte[] ToBytes() => [];
 

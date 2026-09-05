@@ -37,7 +37,7 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
     /// <param name="keyEnc">The 16-byte encryption key (K-ENC).</param>
     /// <param name="keyMac">The 16-byte MAC key (K-MAC).</param>
-    /// <param name="credentialPasswordUtf8">
+    /// <param name="credentialPassword">
     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
     ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
@@ -52,7 +52,7 @@ public interface IHsmAuthSession : IApplicationSession
         string label,
         ReadOnlyMemory<byte> keyEnc,
         ReadOnlyMemory<byte> keyMac,
-        ReadOnlyMemory<byte> credentialPasswordUtf8,
+        ReadOnlyMemory<byte> credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default);
 
@@ -61,11 +61,11 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
-    /// <param name="derivationPasswordUtf8">
+    /// <param name="derivationPassword">
     ///     The borrowed UTF-8 encoded password used to derive K-ENC and K-MAC. It must not be
     ///     empty. The caller must clear it after use.
     /// </param>
-    /// <param name="credentialPasswordUtf8">
+    /// <param name="credentialPassword">
     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
     ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
@@ -78,8 +78,8 @@ public interface IHsmAuthSession : IApplicationSession
     Task PutCredentialDerivedAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        ReadOnlyMemory<byte> derivationPasswordUtf8,
-        ReadOnlyMemory<byte> credentialPasswordUtf8,
+        ReadOnlyMemory<byte> derivationPassword,
+        ReadOnlyMemory<byte> credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default);
 
@@ -108,7 +108,7 @@ public interface IHsmAuthSession : IApplicationSession
     ///     the caller on older supported firmware, followed by the actual 8-byte HSM challenge
     ///     returned by the YubiHSM connector. The caller must clear it after use.
     /// </param>
-    /// <param name="credentialPasswordUtf8">
+    /// <param name="credentialPassword">
     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
     ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
@@ -123,7 +123,7 @@ public interface IHsmAuthSession : IApplicationSession
     Task<SessionKeys> CalculateSessionKeysSymmetricAsync(
         string label,
         ReadOnlyMemory<byte> context,
-        ReadOnlyMemory<byte> credentialPasswordUtf8,
+        ReadOnlyMemory<byte> credentialPassword,
         ReadOnlyMemory<byte>? cardCryptogram = null,
         CancellationToken cancellationToken = default);
 
@@ -169,7 +169,7 @@ public interface IHsmAuthSession : IApplicationSession
     ///     The borrowed uncompressed EC P256 public key of the YubiHSM 2 device (65 bytes:
     ///     0x04 || X || Y).
     /// </param>
-    /// <param name="credentialPasswordUtf8">
+    /// <param name="credentialPassword">
     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
     ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
@@ -188,7 +188,7 @@ public interface IHsmAuthSession : IApplicationSession
         string label,
         ReadOnlyMemory<byte> context,
         ReadOnlyMemory<byte> publicKey,
-        ReadOnlyMemory<byte> credentialPasswordUtf8,
+        ReadOnlyMemory<byte> credentialPassword,
         ReadOnlyMemory<byte> cardCryptogram,
         CancellationToken cancellationToken = default);
 
@@ -197,7 +197,7 @@ public interface IHsmAuthSession : IApplicationSession
     ///     for a credential. Requires firmware 5.6.0+.
     /// </summary>
     /// <param name="label">The credential label.</param>
-    /// <param name="credentialPasswordUtf8">
+    /// <param name="credentialPassword">
     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
     ///     null-padded to 16 bytes before transmission on firmware 5.7.1 and later. The SDK does not
     ///     transmit this value on earlier firmware because the command did not yet support password
@@ -207,7 +207,7 @@ public interface IHsmAuthSession : IApplicationSession
     /// <returns>The 8-byte host challenge or 65-byte uncompressed EPK-OCE.</returns>
     Task<ReadOnlyMemory<byte>> GetChallengeAsync(
         string label,
-        ReadOnlyMemory<byte>? credentialPasswordUtf8 = null,
+        ReadOnlyMemory<byte>? credentialPassword = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -217,7 +217,7 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
     /// <param name="privateKey">The borrowed 32-byte EC P256 private key. The caller must clear it after use.</param>
-    /// <param name="credentialPasswordUtf8">
+    /// <param name="credentialPassword">
     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
     ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
@@ -231,7 +231,7 @@ public interface IHsmAuthSession : IApplicationSession
         ReadOnlyMemory<byte> managementKey,
         string label,
         ReadOnlyMemory<byte> privateKey,
-        ReadOnlyMemory<byte> credentialPasswordUtf8,
+        ReadOnlyMemory<byte> credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default);
 
@@ -242,7 +242,7 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The credential label (1-64 UTF-8 bytes).</param>
-    /// <param name="credentialPasswordUtf8">
+    /// <param name="credentialPassword">
     ///     The borrowed UTF-8 encoded credential password, at most 16 bytes. Shorter values are
     ///     null-padded to 16 bytes in an internal copy. The caller must clear the input after use.
     /// </param>
@@ -255,7 +255,7 @@ public interface IHsmAuthSession : IApplicationSession
     Task GenerateCredentialAsymmetricAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        ReadOnlyMemory<byte> credentialPasswordUtf8,
+        ReadOnlyMemory<byte> credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default);
 
@@ -275,11 +275,11 @@ public interface IHsmAuthSession : IApplicationSession
     ///     Requires firmware 5.8.0+.
     /// </summary>
     /// <param name="label">The credential label.</param>
-    /// <param name="currentPasswordUtf8">
+    /// <param name="currentPassword">
     ///     The borrowed UTF-8 encoded current credential password, at most 16 bytes. Shorter values
     ///     are null-padded in an internal copy. The caller must clear the input after use.
     /// </param>
-    /// <param name="newPasswordUtf8">
+    /// <param name="newPassword">
     ///     The borrowed UTF-8 encoded new credential password, at most 16 bytes. Shorter values are
     ///     null-padded in an internal copy. The caller must clear the input after use.
     /// </param>
@@ -290,8 +290,8 @@ public interface IHsmAuthSession : IApplicationSession
     /// </exception>
     Task ChangeCredentialPasswordAsync(
         string label,
-        ReadOnlyMemory<byte> currentPasswordUtf8,
-        ReadOnlyMemory<byte> newPasswordUtf8,
+        ReadOnlyMemory<byte> currentPassword,
+        ReadOnlyMemory<byte> newPassword,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -300,7 +300,7 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <param name="managementKey">The borrowed 16-byte management key. The caller must clear it after use.</param>
     /// <param name="label">The credential label.</param>
-    /// <param name="newPasswordUtf8">
+    /// <param name="newPassword">
     ///     The borrowed UTF-8 encoded new credential password, at most 16 bytes. Shorter values are
     ///     null-padded in an internal copy. The caller must clear the input after use.
     /// </param>
@@ -312,6 +312,6 @@ public interface IHsmAuthSession : IApplicationSession
     Task ChangeCredentialPasswordAdminAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        ReadOnlyMemory<byte> newPasswordUtf8,
+        ReadOnlyMemory<byte> newPassword,
         CancellationToken cancellationToken = default);
 }

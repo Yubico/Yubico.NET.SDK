@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using NSubstitute;
-using System.Formats.Cbor;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Fido2.Credentials;
@@ -21,6 +20,7 @@ using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
@@ -46,7 +46,7 @@ public class WebAuthnClientGetAssertionTests
             _mockBackend,
             _origin,
             isPublicSuffix: domain => domain == "com",
-            enterpriseRpIds: new HashSet<string>());
+            new WebAuthnClientOptions());
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Do<BackendGetAssertionRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId));
 
         // Act
         await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
@@ -111,7 +111,7 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId, numberOfCredentials: 1));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId, numberOfCredentials: 1));
 
         // Act
         var result = await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
@@ -140,13 +140,13 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(cred1, numberOfCredentials: 3));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(cred1, numberOfCredentials: 3));
 
         // GetNextAssertion called twice
         _mockBackend.GetNextAssertionAsync(Arg.Any<CancellationToken>())
             .Returns(
-                CreateMockGetAssertionResponse(cred2),
-                CreateMockGetAssertionResponse(cred3));
+                MockFido2Responses.CreateMockGetAssertionResponse(cred2),
+                MockFido2Responses.CreateMockGetAssertionResponse(cred3));
 
         // Act
         var result = await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
@@ -170,7 +170,7 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId));
 
         // Act
         var result = await _client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
@@ -204,7 +204,7 @@ public class WebAuthnClientGetAssertionTests
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId, signature: signature));
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId, signature: signature));
 
         // Act
         var result = await _client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
@@ -249,7 +249,7 @@ public class WebAuthnClientGetAssertionTests
                     throw new CtapException(CtapStatus.PuatRequired);
                 }
 
-                return CreateMockGetAssertionResponse(credentialId);
+                return MockFido2Responses.CreateMockGetAssertionResponse(credentialId);
             });
 
         // Act
@@ -328,115 +328,124 @@ public class WebAuthnClientGetAssertionTests
     }
 
     [Fact]
-    public async Task GetAssertion_PinTokenZeroedAfterMethodReturns()
+    public async Task GetAssertion_Success_ZeroesTheTokenSessionBuffer()
     {
         // Arrange
+        var token = TokenBufferAssert.CreateSentinelToken();
+        ArrangePinTokenAcquisition(token);
+
         var credentialId = RandomNumberGenerator.GetBytes(32);
-        var pinBytes = "123456"u8.ToArray();
-        var options = new AuthenticationOptions
-        {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            RpId = "example.com"
-        };
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId));
+
+        // Act
+        var result = await _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Single(result);
+        await AssertTokenWasAcquired();
+        TokenBufferAssert.Zeroed(token, "a successful ceremony must dispose the token session");
+    }
+
+    [Fact]
+    public async Task GetAssertion_BackendThrows_ZeroesTheTokenSessionBuffer()
+    {
+        // Arrange
+        var token = TokenBufferAssert.CreateSentinelToken();
+        ArrangePinTokenAcquisition(token);
 
         _mockBackend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockGetAssertionResponse(credentialId));
+            .Returns<GetAssertionResponse>(_ => throw new CtapException(CtapStatus.InvalidCbor));
 
         // Act
-        await _client.GetAssertionAsync(options, pinBytes: pinBytes, CancellationToken.None);
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken));
 
-        // Assert - this test verifies the pattern exists via code inspection
-        // The actual zeroing is verified by grep in the checklist
-        Assert.True(true, "PIN lifecycle validated by code inspection");
+        // Assert
+        Assert.Equal(WebAuthnClientErrorCode.Unknown, ex.Code);
+        await AssertTokenWasAcquired();
+        TokenBufferAssert.Zeroed(token, "a failed ceremony must dispose the token session");
     }
 
-    private static GetAssertionResponse CreateMockGetAssertionResponse(
-        byte[] credentialId,
-        int? numberOfCredentials = null,
-        byte[]? signature = null,
-        PublicKeyCredentialUserEntity? user = null)
+    [Fact]
+    public async Task GetAssertion_Cancelled_ZeroesTheTokenSessionBuffer()
     {
-        signature ??= RandomNumberGenerator.GetBytes(64);
-        var authData = BuildAuthData();
-        var cborBytes = BuildGetAssertionResponseCbor(credentialId, authData, signature, user, numberOfCredentials);
-        return GetAssertionResponse.Decode(cborBytes);
+        // Arrange
+        var token = TokenBufferAssert.CreateSentinelToken();
+        ArrangePinTokenAcquisition(token);
+
+        using var cts = new CancellationTokenSource();
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ =>
+            {
+                // Cancel once the token is minted and in use, which is the window the
+                // token session has to survive and then clean up.
+                cts.Cancel();
+                throw new OperationCanceledException(cts.Token);
+            });
+
+        // Act
+        _ = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            cts.Token));
+
+        // Assert
+        await AssertTokenWasAcquired();
+        TokenBufferAssert.Zeroed(token, "a cancelled ceremony must dispose the token session");
     }
 
-    private static byte[] BuildAuthData()
+    /// <summary>
+    /// Arranges an authenticator with a PIN set and hands the client a token session that owns
+    /// <paramref name="token"/>, so the test can inspect that buffer after the ceremony.
+    /// </summary>
+    /// <remarks>
+    /// The session does not copy the array, so <paramref name="token"/> is the session's owned
+    /// buffer and is also the buffer <c>ClientPin</c> would have returned in production.
+    /// </remarks>
+    private void ArrangePinTokenAcquisition(byte[] token)
     {
-        // rpIdHash (32) + flags (1) + signCount (4)
-        var data = new List<byte>();
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
 
-        // rpIdHash (32 bytes)
-        var rpIdHash = new byte[32];
-        SHA256.HashData("example.com"u8, rpIdHash);
-        data.AddRange(rpIdHash);
-
-        // flags = UP | UV (0x05)
-        data.Add(0x05);
-
-        // signCount (4 bytes, big-endian)
-        data.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x01 });
-
-        return data.ToArray();
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), token));
     }
 
-    private static byte[] BuildGetAssertionResponseCbor(
-        byte[] credentialId,
-        byte[] authData,
-        byte[] signature,
-        PublicKeyCredentialUserEntity? user,
-        int? numberOfCredentials)
+    /// <summary>
+    /// Guards the zeroing assertions against passing for the wrong reason: a ceremony that never
+    /// minted a token would never have had a buffer to clear.
+    /// </summary>
+    private async Task AssertTokenWasAcquired() =>
+        await _mockBackend.Received(1).GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>());
+
+    private static AuthenticationOptions CreateUvRequiredOptions() => new()
     {
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-
-        // Count keys: credential (1) + authData (2) + signature (3) + optional user (4) + optional numberOfCredentials (5)
-        int keyCount = 3;
-        if (user is not null) keyCount++;
-        if (numberOfCredentials is not null) keyCount++;
-
-        writer.WriteStartMap(keyCount);
-
-        // 0x01: credential
-        writer.WriteInt32(1);
-        writer.WriteStartMap(2);
-        writer.WriteTextString("id");
-        writer.WriteByteString(credentialId);
-        writer.WriteTextString("type");
-        writer.WriteTextString("public-key");
-        writer.WriteEndMap();
-
-        // 0x02: authData
-        writer.WriteInt32(2);
-        writer.WriteByteString(authData);
-
-        // 0x03: signature
-        writer.WriteInt32(3);
-        writer.WriteByteString(signature);
-
-        // 0x04: user (optional)
-        if (user is not null)
-        {
-            writer.WriteInt32(4);
-            writer.WriteStartMap(1);
-            writer.WriteTextString("id");
-            writer.WriteByteString(user.Id.Span);
-            writer.WriteEndMap();
-        }
-
-        // 0x05: numberOfCredentials (optional)
-        if (numberOfCredentials is not null)
-        {
-            writer.WriteInt32(5);
-            writer.WriteInt32(numberOfCredentials.Value);
-        }
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
-    }
+        Challenge = RandomNumberGenerator.GetBytes(32),
+        RpId = "example.com",
+        UserVerification = UserVerificationPreference.Required
+    };
 
     [Fact(Timeout = 5000)]
     public async Task MatchedCredential_SelectAsync_HonorsCancellationToken()
@@ -445,7 +454,7 @@ public class WebAuthnClientGetAssertionTests
         var credentialId = RandomNumberGenerator.GetBytes(32);
         var tcs = new TaskCompletionSource<AuthenticationResponse>();
 
-        var rawAuthData = BuildAuthData();
+        var rawAuthData = MockFido2Responses.BuildAuthData();
         var mockResponse = new AuthenticationResponse
         {
             CredentialId = credentialId,

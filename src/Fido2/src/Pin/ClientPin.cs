@@ -128,14 +128,17 @@ public sealed class ClientPin : IDisposable
     /// <summary>
     /// Sets a new PIN on the authenticator (first-time setup).
     /// </summary>
-    /// <param name="newPinUtf8">The PIN as UTF-8 bytes (4-63 bytes).</param>
+    /// <param name="newPin">
+    ///     The borrowed UTF-8 encoded PIN, 4-63 bytes. The caller owns the buffer and must
+    ///     clear it after use.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="ArgumentException">If the PIN byte length is invalid.</exception>
     /// <exception cref="CtapException">If the authenticator already has a PIN set.</exception>
-    public async Task SetPinAsync(ReadOnlyMemory<byte> newPinUtf8, CancellationToken cancellationToken = default)
+    public async Task SetPinAsync(ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(newPinUtf8);
+        ValidatePin(newPin, nameof(newPin));
 
         // Get authenticator's key agreement key
         var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
@@ -150,7 +153,7 @@ public sealed class ClientPin : IDisposable
         try
         {
             // Pad and encrypt PIN
-            pinBytes = PadPin(newPinUtf8.Span);
+            pinBytes = PadPin(newPin.Span);
             newPinEnc = _protocol.Encrypt(sharedSecret, pinBytes);
 
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc)
@@ -179,19 +182,25 @@ public sealed class ClientPin : IDisposable
     /// <summary>
     /// Changes the existing PIN on the authenticator.
     /// </summary>
-    /// <param name="currentPinUtf8">The current PIN as UTF-8 bytes.</param>
-    /// <param name="newPinUtf8">The new PIN as UTF-8 bytes (4-63 bytes).</param>
+    /// <param name="currentPin">
+    ///     The borrowed UTF-8 encoded current PIN. The caller owns the buffer and must clear
+    ///     it after use.
+    /// </param>
+    /// <param name="newPin">
+    ///     The borrowed UTF-8 encoded new PIN, 4-63 bytes. The caller owns the buffer and must
+    ///     clear it after use.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="ArgumentException">If either PIN byte length is invalid.</exception>
     /// <exception cref="CtapException">If the current PIN is incorrect.</exception>
     public async Task ChangePinAsync(
-        ReadOnlyMemory<byte> currentPinUtf8,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> currentPin,
+        ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(currentPinUtf8);
-        ValidatePin(newPinUtf8);
+        ValidatePin(currentPin, nameof(currentPin));
+        ValidatePin(newPin, nameof(newPin));
 
         // Get authenticator's key agreement key
         var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
@@ -209,11 +218,11 @@ public sealed class ClientPin : IDisposable
         try
         {
             // Compute PIN hash for current PIN: LEFT(SHA-256(currentPin), 16)
-            currentPinHash = ComputePinHash(currentPinUtf8.Span);
+            currentPinHash = ComputePinHash(currentPin.Span);
             pinHashEnc = _protocol.Encrypt(sharedSecret, currentPinHash);
 
             // Pad and encrypt new PIN
-            newPinBytes = PadPin(newPinUtf8.Span);
+            newPinBytes = PadPin(newPin.Span);
             newPinEnc = _protocol.Encrypt(sharedSecret, newPinBytes);
 
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc || pinHashEnc)
@@ -250,7 +259,10 @@ public sealed class ClientPin : IDisposable
     /// <summary>
     /// Gets a PIN token using the PIN.
     /// </summary>
-    /// <param name="pinUtf8">The PIN as UTF-8 bytes.</param>
+    /// <param name="pin">
+    ///     The borrowed UTF-8 encoded PIN. The caller owns the buffer and must clear it after
+    ///     use.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The decrypted PIN token.</returns>
     /// <exception cref="CtapException">If the PIN is incorrect.</exception>
@@ -259,11 +271,11 @@ public sealed class ClientPin : IDisposable
     /// to create pinUvAuthParam values for subsequent CTAP commands.
     /// </remarks>
     public async Task<byte[]> GetPinTokenAsync(
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(pinUtf8);
+        ValidatePin(pin, nameof(pin));
 
         // Get authenticator's key agreement key
         var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
@@ -277,7 +289,7 @@ public sealed class ClientPin : IDisposable
         try
         {
             // Compute PIN hash: LEFT(SHA-256(pin), 16)
-            pinHash = ComputePinHash(pinUtf8.Span);
+            pinHash = ComputePinHash(pin.Span);
             pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
 
             var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
@@ -304,7 +316,10 @@ public sealed class ClientPin : IDisposable
     /// <summary>
     /// Gets a PIN/UV auth token using PIN with specified permissions (CTAP 2.1).
     /// </summary>
-    /// <param name="pinUtf8">The PIN as UTF-8 bytes.</param>
+    /// <param name="pin">
+    ///     The borrowed UTF-8 encoded PIN. The caller owns the buffer and must clear it after
+    ///     use.
+    /// </param>
     /// <param name="permissions">The permissions to request.</param>
     /// <param name="rpId">Optional RP ID for credential-related permissions.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -322,13 +337,13 @@ public sealed class ClientPin : IDisposable
     /// </para>
     /// </remarks>
     public async Task<byte[]> GetPinUvAuthTokenUsingPinAsync(
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         PinUvAuthTokenPermissions permissions,
         string? rpId = null,
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(pinUtf8);
+        ValidatePin(pin, nameof(pin));
 
         if (permissions == PinUvAuthTokenPermissions.None)
         {
@@ -343,7 +358,7 @@ public sealed class ClientPin : IDisposable
 
         if (!supportsTokenWithPermissions)
         {
-            return await GetPinTokenAsync(pinUtf8, cancellationToken).ConfigureAwait(false);
+            return await GetPinTokenAsync(pin, cancellationToken).ConfigureAwait(false);
         }
 
         // Get authenticator's key agreement key
@@ -358,7 +373,7 @@ public sealed class ClientPin : IDisposable
         try
         {
             // Compute PIN hash: LEFT(SHA-256(pin), 16)
-            pinHash = ComputePinHash(pinUtf8.Span);
+            pinHash = ComputePinHash(pin.Span);
             pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
 
             var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
@@ -475,34 +490,49 @@ public sealed class ClientPin : IDisposable
         return ParseKeyAgreementResponse(response);
     }
 
-    private static void ValidatePin(ReadOnlyMemory<byte> pinUtf8)
+    /// <summary>
+    ///     Validates the encoded length of a UTF-8 encoded PIN.
+    /// </summary>
+    /// <param name="pin">The UTF-8 encoded PIN bytes.</param>
+    /// <param name="paramName">
+    ///     The name of the public parameter <paramref name="pin" /> was supplied through. The
+    ///     public surface spells this parameter three different ways — <c>pin</c>,
+    ///     <c>currentPin</c> and <c>newPin</c> — so the caller has to name its own, otherwise
+    ///     <see cref="ArgumentException.ParamName" /> would report this helper's local name,
+    ///     which matches nothing a caller can filter on.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    ///     Thrown when the UTF-8 encoding is shorter than <see cref="PinMinLength" /> bytes or
+    ///     longer than <see cref="PinMaxLength" /> bytes.
+    /// </exception>
+    private static void ValidatePin(ReadOnlyMemory<byte> pin, string paramName)
     {
-        if (pinUtf8.Length < PinMinLength)
+        if (pin.Length < PinMinLength)
         {
             throw new ArgumentException(
-                $"PIN must be at least {PinMinLength} bytes.", nameof(pinUtf8));
+                $"PIN must be at least {PinMinLength} bytes.", paramName);
         }
 
-        if (pinUtf8.Length > PinMaxLength)
+        if (pin.Length > PinMaxLength)
         {
             throw new ArgumentException(
-                $"PIN must not exceed {PinMaxLength} bytes.", nameof(pinUtf8));
+                $"PIN must not exceed {PinMaxLength} bytes.", paramName);
         }
     }
 
-    private static byte[] PadPin(ReadOnlySpan<byte> pinUtf8Bytes)
+    private static byte[] PadPin(ReadOnlySpan<byte> pin)
     {
         var padded = new byte[PinBlockSize];
-        pinUtf8Bytes.CopyTo(padded);
+        pin.CopyTo(padded);
         return padded;
     }
 
-    private static byte[] ComputePinHash(ReadOnlySpan<byte> pinUtf8Bytes)
+    private static byte[] ComputePinHash(ReadOnlySpan<byte> pin)
     {
         Span<byte> hash = stackalloc byte[32];
         try
         {
-            SHA256.HashData(pinUtf8Bytes, hash);
+            SHA256.HashData(pin, hash);
             return hash[..16].ToArray();
         }
         finally

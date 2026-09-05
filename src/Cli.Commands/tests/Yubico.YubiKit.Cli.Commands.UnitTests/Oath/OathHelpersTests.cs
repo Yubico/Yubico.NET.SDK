@@ -108,10 +108,10 @@ public sealed class OathHelpersTests
         public byte[] DerivedPasswordBytes { get; private set; } = [];
         public List<ReadOnlyMemory<byte>> ValidatedKeys { get; } = [];
 
-        public byte[] DeriveKey(ReadOnlyMemory<byte> passwordUtf8)
+        public byte[] DeriveKey(ReadOnlyMemory<byte> password)
         {
-            DerivedPasswordMemory = passwordUtf8;
-            DerivedPasswordBytes = passwordUtf8.ToArray();
+            DerivedPasswordMemory = password;
+            DerivedPasswordBytes = password.ToArray();
             return (byte[])_derivedKey.Clone();
         }
 

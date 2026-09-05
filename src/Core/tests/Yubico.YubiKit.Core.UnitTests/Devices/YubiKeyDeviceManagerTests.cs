@@ -149,19 +149,23 @@ public class YubiKeyDeviceManagerTests
 
 
     [Fact]
-    public async Task DeviceChanges_EmitsEventsFromRepository()
+    public async Task WatchAsync_EmitsEventsFromRepository()
     {
         // Arrange
         var (manager, findYubiKeys, repository) = CreateManager();
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = manager.DeviceChanges.Subscribe(events);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        await using var watcher = await DeviceEventWatcher.StartAsync(
+            manager.WatchAsync,
+            () => repository.WatcherCount,
+            cts.Token);
 
         findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
 
         // Act
-        await manager.FindAllAsync(forceRescan: true, cancellationToken: TestContext.Current.CancellationToken);
+        await manager.FindAllAsync(forceRescan: true, cancellationToken: cts.Token);
 
         // Assert
+        var events = await watcher.DrainAsync(repository, cts.Token);
         Assert.Single(events);
         Assert.Equal(DeviceAction.Added, events[0].Action);
 
@@ -169,6 +173,60 @@ public class YubiKeyDeviceManagerTests
     }
 
 
+
+    /// <summary>
+    /// Ending one enumeration releases that watcher and nothing else: monitoring keeps running and
+    /// every other watcher keeps receiving.
+    /// </summary>
+    /// <remarks>
+    /// Ported here from <c>YubiKeyManagerStaticTests</c>, which asserted the same thing by calling
+    /// the static <c>StartMonitoring</c> for real and so started actual HID and PC/SC listeners
+    /// inside a unit test. On this seam the listeners are fakes, so the assertion is about watcher
+    /// independence rather than about what hardware happens to be plugged in — which also lets it
+    /// assert the part the static version had to leave out: that the surviving watcher still
+    /// receives events afterwards.
+    /// </remarks>
+    [Fact]
+    public async Task WatchAsync_EndingOneWatcher_LeavesMonitoringAndTheOtherWatcherRunning()
+    {
+        var (manager, findYubiKeys, repository) = CreateManager();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+        await using var survivor = await DeviceEventWatcher.StartAsync(
+            manager.WatchAsync,
+            () => repository.WatcherCount,
+            cts.Token);
+
+        using var doomedCts = new CancellationTokenSource();
+        var doomed = await DeviceEventWatcher.StartAsync(
+            manager.WatchAsync,
+            () => repository.WatcherCount,
+            doomedCts.Token);
+
+        manager.StartMonitoring(TimeSpan.FromMilliseconds(50));
+        Assert.True(manager.IsMonitoring);
+
+        await doomedCts.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => doomed.Completion);
+        await doomed.DisposeAsync();
+
+        await AsyncWait.WaitUntilAsync(
+            () => repository.WatcherCount == 1,
+            "the ended watcher did not release its subscription",
+            TimeSpan.FromSeconds(10),
+            cts.Token);
+
+        // Monitoring was not disturbed and is still delivering to the watcher that stayed.
+        findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
+        await survivor.WaitForCountAsync(1, "monitoring stopped delivering after a watcher ended", cts.Token);
+
+        Assert.True(manager.IsMonitoring);
+        Assert.Equal(DeviceAction.Added, survivor.Events[0].Action);
+        Assert.False(survivor.Completion.IsCompleted);
+
+        manager.StopMonitoring();
+        await manager.DisposeAsync();
+    }
 
     [Fact]
     public async Task IsMonitoring_InitiallyFalse()
@@ -245,6 +303,132 @@ public class YubiKeyDeviceManagerTests
 
         // Assert
         Assert.False(manager.IsMonitoring);
+    }
+
+    /// <summary>
+    /// The load-bearing half of the disposal contract, pinned at the instant it applies. A publication
+    /// admitted before disposal outlives the monitor's bounded drain and is resumed at the point where
+    /// the manager is about to dispose the repository — after every other teardown step it performs.
+    /// The repository must still be intact there. If any teardown step empties it first, this snapshot
+    /// diffs an attached device against an empty cache and reports it as newly Added, which is the
+    /// event the contract says can never escape.
+    /// </summary>
+    /// <remarks>
+    /// The publication is driven by an explicit <c>RescanAsync</c> whose task the test holds, so the
+    /// hook can await the resumed <c>UpdateCache</c> to completion before disposal proceeds. Releasing
+    /// it without awaiting would let the repository be disposed underneath the publication and turn any
+    /// emission into a silently swallowed <see cref="ObjectDisposedException"/> — the race that made the
+    /// post-return variant below unable to distinguish the two orderings.
+    /// </remarks>
+    [Fact]
+    public async Task DisposeAsync_ResumingAParkedPublicationAtRepositoryTeardown_EmitsNothing()
+    {
+        var repository = new YubiKeyDeviceRepository();
+        var device = new FakeYubiKey("device-1", ConnectionType.SmartCard);
+        var findYubiKeys = new FakeFindYubiKeys([device]);
+        var monitorService = new YubiKeyDeviceMonitorService(
+            repository,
+            findYubiKeys,
+            static () => new FakeHidDeviceListener(),
+            static () => new FakeSmartCardDeviceListener(),
+            shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        var manager = new YubiKeyDeviceManager(repository, monitorService);
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+        // Populate the cache first, then start watching, so the steady state is "device-1 present and
+        // already reported" and any further event can only come from the disposal window.
+        await monitorService.RescanAsync(cts.Token);
+        Assert.Single(repository.GetAll());
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+
+        var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        monitorService.PublishAdmittedForTest = async () =>
+        {
+            admitted.SetResult();
+            await release.Task;
+        };
+
+        // Admitted while the service is live; then parked, holding the publication gate.
+        var parkedPublication = monitorService.RescanAsync(cts.Token);
+        await admitted.Task.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+
+        manager.RepositoryTeardownReachedForTest = async () =>
+        {
+            release.SetResult();
+            await parkedPublication.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+        };
+
+        // The parked publication holds the publication gate, so the monitor's bounded drain times out
+        // and disposal walks on to repository teardown with the publication still in flight.
+        await manager.DisposeAsync();
+
+        // Ended normally at repository disposal, having received nothing: the resumed snapshot found
+        // the cache exactly as it left it and had nothing to report.
+        await watcher.Completion.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+        Assert.True(watcher.EndedNormally);
+        Assert.Empty(watcher.Events);
+    }
+
+    /// <summary>
+    /// The companion case: a publication that outlives the monitor's bounded drain and does not resume
+    /// until <see cref="YubiKeyDeviceManager.DisposeAsync"/> has already returned. By then the
+    /// repository is disposed, so the late snapshot is refused outright rather than published and
+    /// merely unobserved.
+    /// </summary>
+    /// <remarks>
+    /// This pins the post-return path only. It cannot distinguish disposing the repository from
+    /// emptying and then disposing it, because both orderings finish before the publication resumes;
+    /// the disposal window itself is pinned by
+    /// <see cref="DisposeAsync_ResumingAParkedPublicationAtRepositoryTeardown_EmitsNothing"/> above.
+    /// </remarks>
+    [Fact]
+    public async Task DisposeAsync_WithAPublicationResumingAfterDisposeReturned_EmitsNothing()
+    {
+        var repository = new YubiKeyDeviceRepository();
+        var findYubiKeys = new FakeFindYubiKeys([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
+        var monitorService = new YubiKeyDeviceMonitorService(
+            repository,
+            findYubiKeys,
+            static () => new FakeHidDeviceListener(),
+            static () => new FakeSmartCardDeviceListener(),
+            shutdownTimeout: TimeSpan.FromMilliseconds(250));
+        var manager = new YubiKeyDeviceManager(repository, monitorService);
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
+
+        var admitted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var resumed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var parkFirst = 1;
+        monitorService.PublishAdmittedForTest = async () =>
+        {
+            if (Interlocked.Exchange(ref parkFirst, 0) == 1)
+            {
+                admitted.SetResult();
+                await release.Task;
+                resumed.SetResult();
+            }
+        };
+
+        manager.StartMonitoring(TimeSpan.FromHours(1));
+        await admitted.Task.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+
+        // The parked publication holds the publication gate, so the bounded drain cannot complete;
+        // DisposeAsync returns on its shutdown timeout with the publication still in flight.
+        await manager.DisposeAsync();
+
+        // Resuming it runs UpdateCache on the very next statement of the publication path.
+        release.SetResult();
+        await resumed.Task.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+
+        // Ended normally at repository disposal, having received nothing: the late snapshot was
+        // refused outright rather than published and merely unobserved.
+        await watcher.Completion.WaitAsync(TimeSpan.FromSeconds(10), cts.Token);
+        Assert.True(watcher.EndedNormally);
+        Assert.Empty(watcher.Events);
     }
 
     [Fact]

@@ -129,6 +129,21 @@ public class AsnPublicKeyDecoderTests
         Assert.Equal("Invalid EC public key encoding", ex.Message);
     }
 
+    [Theory]
+    [InlineData(Oids.ECP256)]
+    [InlineData(Oids.ECP384)]
+    [InlineData(Oids.ECP521)]
+    public void CreatePublicKey_EmptyEcPoint_ThrowsCryptographicExceptionNotIndexOutOfRange(string curveOid)
+    {
+        // A zero-length BIT STRING has no prefix octet to inspect. The decoder must report this as
+        // malformed encoded data, not index past the end of the buffer.
+        var spki = BuildEcSubjectPublicKeyInfo(curveOid, []);
+
+        var ex = Assert.Throws<CryptographicException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
+
+        Assert.Equal("Invalid EC public key encoding", ex.Message);
+    }
+
     [Fact]
     public void CreatePublicKey_UnknownBitStringUnusedBits_ThrowsCryptographicException()
     {

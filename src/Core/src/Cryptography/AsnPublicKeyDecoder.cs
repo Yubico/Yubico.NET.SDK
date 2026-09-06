@@ -113,18 +113,11 @@ internal class AsnPublicKeyDecoder
                     curveOid));
         }
 
-        // For PKCS EC keys, the bit string contains the EC point in uncompressed form
-        // Format is typically: 0x04 + X coordinate + Y coordinate
-        if (subjectPublicKey[0] != 0x04)
-        {
-            throw new CryptographicException("Unsupported EC point format");
-        }
+        // For PKCS EC keys, the bit string contains the EC point in uncompressed form:
+        // 0x04 || X coordinate || Y coordinate.
+        AsnUtilities.ValidateDecodedEcPoint(subjectPublicKey, curveOid);
 
-        var coordinateSize = AsnUtilities.GetCoordinateSizeFromCurve(curveOid);
-        if (subjectPublicKey.Length != 1 + (2 * coordinateSize))
-        {
-            throw new CryptographicException("Invalid EC public key encoding");
-        }
+        var coordinateSize = AsnUtilities.GetDecodedCoordinateSize(curveOid);
         var xCoordinate = new byte[coordinateSize];
         var yCoordinate = new byte[coordinateSize];
 

@@ -24,19 +24,23 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// </summary>
 public class YubiKeyDeviceRepositoryCompositeTests
 {
+    private static readonly TimeSpan Bound = TimeSpan.FromSeconds(30);
+
     [Fact]
-    public void UpdateCache_SamePhysicalIdConnectionsChanged_EmitsRemovedThenAdded()
+    public async Task UpdateCache_SamePhysicalIdConnectionsChanged_EmitsRemovedThenAdded()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         repository.UpdateCache([new FakeYubiKey("ykphysical:103", ConnectionType.SmartCard)]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Same physical device id, but a HID interface appeared (capabilities changed).
         repository.UpdateCache([
             new FakeYubiKey("ykphysical:103", ConnectionType.SmartCard | ConnectionType.HidFido)
         ]);
+
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         Assert.Equal(2, events.Count);
         Assert.Equal(DeviceAction.Removed, events[0].Action);
@@ -45,28 +49,30 @@ public class YubiKeyDeviceRepositoryCompositeTests
         Assert.Equal(ConnectionType.SmartCard | ConnectionType.HidFido, events[1].Device.AvailableConnections);
     }
     [Fact]
-    public void UpdateCache_SamePhysicalIdUnchangedConnections_EmitsNoEvent()
+    public async Task UpdateCache_SamePhysicalIdUnchangedConnections_EmitsNoEvent()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         repository.UpdateCache([new FakeYubiKey("ykphysical:103", ConnectionType.SmartCard | ConnectionType.HidOtp)]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         repository.UpdateCache([new FakeYubiKey("ykphysical:103", ConnectionType.SmartCard | ConnectionType.HidOtp)]);
+
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         Assert.Empty(events);
     }
 
     [Fact]
-    public void UpdateCache_LaterScanHasMetadata_UpdatesRetainedPublishedObjectWithoutEvents()
+    public async Task UpdateCache_LaterScanHasMetadata_UpdatesRetainedPublishedObjectWithoutEvents()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var firstScan = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([firstScan]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
         var metadata = default(DeviceInfo) with
         {
             FirmwareVersion = new FirmwareVersion(5, 7, 2),
@@ -76,16 +82,21 @@ public class YubiKeyDeviceRepositoryCompositeTests
         var laterScan = Published("ykphysical:103", "pcsc:a", "hid-fido:a", metadata);
         repository.UpdateCache([laterScan]);
 
-        var retained = Assert.Single(repository.GetAll());
+        // Snapshot the cache before draining: the drain sentinel is itself a cache entry.
+        var cached = repository.GetAll();
+        var events = await watcher.DrainAsync(repository, cts.Token);
+
+        var retained = Assert.Single(cached);
         Assert.Same(firstScan, retained);
         Assert.Equal(metadata, firstScan.DeviceInfo);
         Assert.Empty(events);
     }
 
     [Fact]
-    public void UpdateCache_LaterScanWithoutMetadata_DoesNotClearRetainedMetadata()
+    public async Task UpdateCache_LaterScanWithoutMetadata_DoesNotClearRetainedMetadata()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var metadata = default(DeviceInfo) with
         {
             FirmwareVersion = new FirmwareVersion(5, 7, 2),
@@ -94,27 +105,29 @@ public class YubiKeyDeviceRepositoryCompositeTests
         var firstScan = Published("ykphysical:103", "pcsc:a", "hid-fido:a", metadata);
         repository.UpdateCache([firstScan]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
         var laterScan = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
 
         repository.UpdateCache([laterScan]);
 
-        Assert.Same(firstScan, Assert.Single(repository.GetAll()));
+        var cached = repository.GetAll();
+        var events = await watcher.DrainAsync(repository, cts.Token);
+
+        Assert.Same(firstScan, Assert.Single(cached));
         Assert.Equal(metadata, firstScan.DeviceInfo);
         Assert.Empty(events);
     }
 
     [Fact]
-    public void UpdateCache_DifferentKnownSerials_RepublishesDifferentDevice()
+    public async Task UpdateCache_DifferentKnownSerials_RepublishesDifferentDevice()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var oldMetadata = default(DeviceInfo) with { SerialNumber = 103 };
         var existing = Published("ykphysical:103", "pcsc:a", "hid-fido:a", oldMetadata);
         repository.UpdateCache([existing]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
         var updatedMetadata = default(DeviceInfo) with { SerialNumber = 125 };
         var updated = Published("ykphysical:125", "pcsc:a", "hid-fido:a", updatedMetadata);
 
@@ -123,6 +136,9 @@ public class YubiKeyDeviceRepositoryCompositeTests
 
         repository.UpdateCache([updated]);
 
+        var cached = repository.GetAll();
+        var events = await watcher.DrainAsync(repository, cts.Token);
+
         Assert.Collection(
             events,
             removed =>
@@ -135,23 +151,26 @@ public class YubiKeyDeviceRepositoryCompositeTests
                 Assert.Equal(DeviceAction.Added, added.Action);
                 Assert.Same(updated, added.Device);
             });
-        Assert.Same(updated, Assert.Single(repository.GetAll()));
+        Assert.Same(updated, Assert.Single(cached));
         Assert.Equal(oldMetadata, existing.DeviceInfo);
         Assert.Equal(103, existing.SerialNumber);
     }
 
     [Fact]
-    public void UpdateCache_KnownSerialContradiction_DoesNotTrustCustomCorrelationOverride()
+    public async Task UpdateCache_KnownSerialContradiction_DoesNotTrustCustomCorrelationOverride()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         IYubiKey existing = new CorrelationOverridingYubiKey("same-interface", serialNumber: 103);
         IYubiKey updated = new CorrelationOverridingYubiKey("same-interface", serialNumber: 125);
         repository.UpdateCache([existing]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         repository.UpdateCache([updated]);
+
+        var cached = repository.GetAll();
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         Assert.Collection(
             events,
@@ -165,15 +184,15 @@ public class YubiKeyDeviceRepositoryCompositeTests
                 Assert.Equal(DeviceAction.Added, added.Action);
                 Assert.Same(updated, added.Device);
             });
-        Assert.Same(updated, Assert.Single(repository.GetAll()));
+        Assert.Same(updated, Assert.Single(cached));
     }
 
     [Fact]
-    public void UpdateCache_OnePhysicalDevice_EmitsSingleAddedNotPerInterface()
+    public async Task UpdateCache_OnePhysicalDevice_EmitsSingleAddedNotPerInterface()
     {
         using var repository = new YubiKeyDeviceRepository();
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        using var cts = new CancellationTokenSource(Bound);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // A merged composite device is a single cache entry keyed by physical identity.
         repository.UpdateCache([
@@ -181,23 +200,27 @@ public class YubiKeyDeviceRepositoryCompositeTests
                 ConnectionType.SmartCard | ConnectionType.HidFido | ConnectionType.HidOtp)
         ]);
 
+        var events = await watcher.DrainAsync(repository, cts.Token);
+
         var evt = Assert.Single(events);
         Assert.Equal(DeviceAction.Added, evt.Action);
         Assert.Equal("ykphysical:103", evt.Device.DeviceId);
     }
 
     [Fact]
-    public void UpdateCache_SamePidCompositeDifferentMemberIds_EmitsRemovedThenAdded()
+    public async Task UpdateCache_SamePidCompositeDifferentMemberIds_EmitsRemovedThenAdded()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var first = Published("ykphysical:pid:0407", "pcsc:key-a", "hid:key-a", deviceInfo: null);
         var second = Published("ykphysical:pid:0407", "pcsc:key-b", "hid:key-b", deviceInfo: null);
         repository.UpdateCache([first]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         repository.UpdateCache([second]);
+
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         Assert.Equal(2, events.Count);
         Assert.Equal(DeviceAction.Removed, events[0].Action);
@@ -227,17 +250,19 @@ public class YubiKeyDeviceRepositoryCompositeTests
     }
 
     [Fact]
-    public void UpdateCache_SiblingSamePidKeyRemoved_SurvivorEmitsNoRemovedOrAdded()
+    public async Task UpdateCache_SiblingSamePidKeyRemoved_SurvivorEmitsNoRemovedOrAdded()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         repository.UpdateCache(CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]));
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Key B unplugged. Key A did not move — same three interfaces, same interface paths — but its
         // composite DeviceId flips from the serial tier to the PID tier.
         repository.UpdateCache(CompositeDeviceMerger.Merge(KeyInterfaces("a", null)));
+
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         var evt = Assert.Single(events);
         Assert.Equal(DeviceAction.Removed, evt.Action);
@@ -245,17 +270,19 @@ public class YubiKeyDeviceRepositoryCompositeTests
     }
 
     [Fact]
-    public void UpdateCache_SiblingSamePidKeyArrives_IncumbentEmitsNoRemovedOrAdded()
+    public async Task UpdateCache_SiblingSamePidKeyArrives_IncumbentEmitsNoRemovedOrAdded()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         repository.UpdateCache(CompositeDeviceMerger.Merge(KeyInterfaces("a", null)));
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Key B plugged in. Key A did not move, but its DeviceId flips back from the PID tier to the
         // serial tier.
         repository.UpdateCache(CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]));
+
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         var evt = Assert.Single(events);
         Assert.Equal(DeviceAction.Added, evt.Action);
@@ -263,15 +290,17 @@ public class YubiKeyDeviceRepositoryCompositeTests
     }
 
     [Fact]
-    public void UpdateCache_TierFlipThenFinalRemoval_RemovalUsesPreviouslyAddedDeviceId()
+    public async Task UpdateCache_TierFlipThenFinalRemoval_RemovalUsesPreviouslyAddedDeviceId()
     {
         using var repository = new YubiKeyDeviceRepository();
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        using var cts = new CancellationTokenSource(Bound);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         repository.UpdateCache(CompositeDeviceMerger.Merge([.. KeyInterfaces("a", 103), .. KeyInterfaces("b", 125)]));
         repository.UpdateCache(CompositeDeviceMerger.Merge(KeyInterfaces("a", null)));
         repository.UpdateCache([]);
+
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         var added = Assert.Single(events, e =>
             e.Action == DeviceAction.Added && e.Device.DeviceId == "ykphysical:103");
@@ -284,16 +313,18 @@ public class YubiKeyDeviceRepositoryCompositeTests
 
     // INVARIANT PIN (not fix evidence): a genuinely removed physical key still emits Removed.
     [Fact]
-    public void UpdateCache_CompositeKeyUnplugged_EmitsRemoved()
+    public async Task UpdateCache_CompositeKeyUnplugged_EmitsRemoved()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var key = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([key]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         repository.UpdateCache([]);
+
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         var evt = Assert.Single(events);
         Assert.Equal(DeviceAction.Removed, evt.Action);
@@ -302,16 +333,18 @@ public class YubiKeyDeviceRepositoryCompositeTests
 
     // INVARIANT PIN (not fix evidence): a genuinely added physical key still emits Added.
     [Fact]
-    public void UpdateCache_CompositeKeyPluggedIn_EmitsAdded()
+    public async Task UpdateCache_CompositeKeyPluggedIn_EmitsAdded()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         repository.UpdateCache([]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         var key = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([key]);
+
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         var evt = Assert.Single(events);
         Assert.Equal(DeviceAction.Added, evt.Action);
@@ -345,14 +378,14 @@ public class YubiKeyDeviceRepositoryCompositeTests
     }
 
     [Fact]
-    public void UpdateCache_InterfaceSetChanged_RepublishesAsNewObject()
+    public async Task UpdateCache_InterfaceSetChanged_RepublishesAsNewObject()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var twoInterfaces = Published("ykphysical:pid:0407", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([twoInterfaces]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // The same physical key now also enumerates its OTP interface: the interface set changed.
         var threeInterfaces = new YubiKeyDevice(
@@ -363,22 +396,26 @@ public class YubiKeyDeviceRepositoryCompositeTests
             deviceInfo: null);
         repository.UpdateCache([threeInterfaces]);
 
+        var cached = repository.GetAll();
+        var events = await watcher.DrainAsync(repository, cts.Token);
+
         Assert.Equal(2, events.Count);
         Assert.Equal(DeviceAction.Removed, events[0].Action);
         Assert.Same(twoInterfaces, events[0].Device);
         Assert.Equal(DeviceAction.Added, events[1].Action);
         Assert.Same(threeInterfaces, events[1].Device);
-        Assert.NotSame(twoInterfaces, Assert.Single(repository.GetAll()));
+        Assert.NotSame(twoInterfaces, Assert.Single(cached));
     }
 
     [Theory]
     [InlineData(103, 103)]
     [InlineData(103, 125)]
-    public void UpdateCache_ConnectionSetChangedSameInterfaceSet_RepublishesOnce(
+    public async Task UpdateCache_ConnectionSetChangedSameInterfaceSet_RepublishesOnce(
         int existingSerial,
         int updatedSerial)
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var fidoShape = new YubiKeyDevice(
             "ykphysical:pid:0402",
             smartCard: null,
@@ -387,8 +424,7 @@ public class YubiKeyDeviceRepositoryCompositeTests
             default(DeviceInfo) with { SerialNumber = existingSerial });
         repository.UpdateCache([fidoShape]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         // Same sole interface id, but it now reports the OTP connection type instead of FIDO.
         var otpShape = new YubiKeyDevice(
@@ -402,6 +438,8 @@ public class YubiKeyDeviceRepositoryCompositeTests
             YubiKeyDevice.PhysicalIdentityKeyFor(otpShape));
         repository.UpdateCache([otpShape]);
 
+        var events = await watcher.DrainAsync(repository, cts.Token);
+
         Assert.Equal(2, events.Count);
         Assert.Equal(DeviceAction.Removed, events[0].Action);
         Assert.Same(fidoShape, events[0].Device);
@@ -410,18 +448,20 @@ public class YubiKeyDeviceRepositoryCompositeTests
     }
 
     [Fact]
-    public void UpdateCache_ReinsertionObservedAcrossScans_PublishesNewObject()
+    public async Task UpdateCache_ReinsertionObservedAcrossScans_PublishesNewObject()
     {
         using var repository = new YubiKeyDeviceRepository();
+        using var cts = new CancellationTokenSource(Bound);
         var beforeRemoval = Published("ykphysical:103", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([beforeRemoval]);
 
-        var events = new RecordingObserver<DeviceEvent>();
-        using var subscription = repository.DeviceChanges.Subscribe(events);
+        await using var watcher = await DeviceEventWatcher.StartAsync(repository, cts.Token);
 
         repository.UpdateCache([]);
         var afterReinsertion = Published("ykphysical:103", "pcsc:a", "hid-fido:a", deviceInfo: null);
         repository.UpdateCache([afterReinsertion]);
+
+        var events = await watcher.DrainAsync(repository, cts.Token);
 
         Assert.Equal(2, events.Count);
         Assert.Equal(DeviceAction.Removed, events[0].Action);

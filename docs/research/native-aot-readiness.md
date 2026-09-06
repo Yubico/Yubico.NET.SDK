@@ -181,11 +181,10 @@ None of the above surfaced an architectural blocker in this assessment — they 
 **AOT-B5 — Resolve the `System.Reactive` IL3058 finding**
 - Module: Core
 - Status: **Closed — resolved by removal.** The dependency was dropped rather than suppressed.
-  `System.Reactive`'s `Subject<DeviceEvent>` is replaced by two internal types:
-  `DeviceEventBroadcaster` (multicast) and `DeviceEventStream` (per-consumer buffering). The public
-  signature is unchanged — `DeviceChanges` is still `IObservable<DeviceEvent>`, a BCL type — and a
-  new `IAsyncEnumerable` surface, `YubiKeyManager.WatchAsync`, gives consumers an ergonomic path
-  with no third-party dependency.
+  `System.Reactive`'s `Subject<DeviceEvent>` is replaced by internal machinery. The observable
+  surface was initially preserved as a BCL `IObservable<DeviceEvent>`; it has since been removed
+  outright, leaving `YubiKeyManager.WatchAsync` (`IAsyncEnumerable<DeviceEvent>`) as the only device
+  change stream, backed by one internal `DeviceEventHub`. No third-party dependency either way.
 - Why removal rather than an upstream fix: Rx cannot carry the metadata yet. The `IsAotCompatible`
   assembly attribute was introduced in .NET 10, and Rx 7.0.0 — the current release — targets at most
   `net8.0`. Verified directly against the packages: `IsAotCompatible` appears zero times in every

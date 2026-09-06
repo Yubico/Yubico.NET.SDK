@@ -14,7 +14,6 @@
 
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using System.Formats.Cbor;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Fido2.Cose;
@@ -49,7 +48,7 @@ public class WebAuthnClientMakeCredentialTests
             _mockBackend,
             _origin,
             isPublicSuffix: domain => domain == "com",
-            enterpriseRpIds: new HashSet<string>());
+            new WebAuthnClientOptions());
     }
 
     [Fact]
@@ -69,7 +68,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -108,7 +107,7 @@ public class WebAuthnClientMakeCredentialTests
             _mockBackend,
             origin!,
             isPublicSuffix: domain => domain == "com",
-            enterpriseRpIds: new HashSet<string>());
+            new WebAuthnClientOptions());
 
         var options = new RegistrationOptions
         {
@@ -121,7 +120,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act (should not throw)
         await client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -140,7 +139,7 @@ public class WebAuthnClientMakeCredentialTests
             _mockBackend,
             _origin,
             isPublicSuffix: domain => domain == "com",
-            enterpriseRpIds: new HashSet<string> { "partner.test" });
+            new WebAuthnClientOptions { EnterpriseRpIds = new HashSet<string> { "partner.test" } });
 
         var options = new RegistrationOptions
         {
@@ -153,7 +152,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act (should not throw)
         await client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -181,7 +180,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -208,7 +207,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse(expectedGuid));
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse(expectedGuid));
 
         // Act
         var response = await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -236,7 +235,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(CreateMockResponse());
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -284,7 +283,7 @@ public class WebAuthnClientMakeCredentialTests
                     throw new CtapException(CtapStatus.PuatRequired);
                 }
 
-                return CreateMockResponse();
+                return MockFido2Responses.CreateMockMakeCredentialResponse();
             });
 
         // Act
@@ -339,7 +338,7 @@ public class WebAuthnClientMakeCredentialTests
                     throw new CtapException(CtapStatus.PuatRequired);
                 }
 
-                return CreateMockResponse();
+                return MockFido2Responses.CreateMockMakeCredentialResponse();
             });
 
         // Act
@@ -361,6 +360,126 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     [Fact]
+    public async Task MakeCredential_WithExcludeList_ZeroesEveryIssuedTokenBuffer()
+    {
+        // Arrange
+        var issued = ArrangePinTokenAcquisition();
+        ArrangePreflightMiss();
+        _mockBackend.MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+
+        // Act
+        _ = await _client.MakeCredentialAsync(
+            CreateExcludeListUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        AssertEveryIssuedTokenZeroed(issued, expectedCount: 2);
+    }
+
+    [Fact]
+    public async Task MakeCredential_WithExcludeList_WhenBackendThrows_ZeroesEveryIssuedTokenBuffer()
+    {
+        // Arrange
+        var issued = ArrangePinTokenAcquisition();
+        ArrangePreflightMiss();
+        _mockBackend.MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<CancellationToken>())
+            .Throws(new CtapException(CtapStatus.OperationDenied));
+
+        // Act
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.MakeCredentialAsync(
+            CreateExcludeListUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken));
+
+        // Assert
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
+        AssertEveryIssuedTokenZeroed(issued, expectedCount: 2);
+    }
+
+    [Fact]
+    public async Task MakeCredential_WithExcludeList_PuatRequiredRetry_ZeroesEveryIssuedTokenBuffer()
+    {
+        // Arrange - the retry re-runs acquisition and pre-flight, so the ceremony holds four
+        // separate token buffers and each one has its own disposal site.
+        var issued = ArrangePinTokenAcquisition();
+        ArrangePreflightMiss();
+        var callCount = 0;
+        _mockBackend.MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                callCount++;
+                return callCount == 1
+                    ? throw new CtapException(CtapStatus.PuatRequired)
+                    : MockFido2Responses.CreateMockMakeCredentialResponse();
+            });
+
+        // Act - UV is left unspecified so the PuatRequired retry path is the one taken.
+        _ = await _client.MakeCredentialAsync(
+            CreateExcludeListOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        AssertEveryIssuedTokenZeroed(issued, expectedCount: 4);
+    }
+
+    [Fact]
+    public async Task MakeCredential_WhenBackendFails_ThrowsTypedWebAuthnClientError()
+    {
+        // A raw CTAP status must never escape the client surface.
+        _mockBackend.MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns<MakeCredentialResponse>(_ => throw new CtapException(CtapStatus.OperationDenied));
+
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)]
+        };
+
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+            _client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
+    }
+
+    [Fact]
+    public async Task MakeCredential_WhenPinNeededAndNoPromptConfigured_ThrowsNotAllowed()
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+                clientPinSupported: true, uvSupported: false));
+
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            UserVerification = UserVerificationPreference.Required
+        };
+
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+            _client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, ex.Code);
+        await _mockBackend.DidNotReceive().MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task MakeCredential_BackendDisposed_OnClientDisposeAsync()
     {
         // Arrange
@@ -377,116 +496,73 @@ public class WebAuthnClientMakeCredentialTests
         await mockBackend.Received(1).DisposeAsync();
     }
 
-    private static MakeCredentialResponse CreateMockResponse(Guid? aaguid = null)
+    /// <summary>
+    /// Arranges an authenticator with a PIN set and hands out a fresh sentinel-filled buffer for
+    /// every token acquisition, so the caller can check each one individually afterwards.
+    /// </summary>
+    /// <remarks>
+    /// One buffer per acquisition matters: a shared buffer would let a single disposal mask every
+    /// other token's missing one.
+    /// </remarks>
+    private List<byte[]> ArrangePinTokenAcquisition()
     {
-        var guid = aaguid ?? Guid.NewGuid();
-        var authData = BuildAuthDataWithAttestedCredential(guid);
-        var cborBytes = BuildMakeCredentialResponseCbor(authData, "none");
-        return MakeCredentialResponse.Decode(cborBytes);
+        var issued = new List<byte[]>();
+
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            Arg.Any<PinUvAuthTokenPermissions>(),
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                var token = TokenBufferAssert.CreateSentinelToken();
+                TokenBufferAssert.NotZeroed(token, "a token must be live when the client receives it");
+                issued.Add(token);
+                return new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), token);
+            });
+
+        return issued;
     }
 
-    private static byte[] BuildAuthDataWithAttestedCredential(Guid aaguid)
+    /// <summary>
+    /// Makes the silent pre-flight probe report no match, so pre-flight runs to completion and
+    /// re-mints the token.
+    /// </summary>
+    private void ArrangePreflightMiss() =>
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Throws(new CtapException(CtapStatus.NoCredentials));
+
+    private static void AssertEveryIssuedTokenZeroed(IReadOnlyList<byte[]> issued, int expectedCount)
     {
-        // rpIdHash (32) + flags (1) + signCount (4) + AAGUID (16) + credIdLen (2) + credId + publicKey
-        var data = new List<byte>();
+        // Guards the zeroing assertions against passing for the wrong reason: a ceremony that
+        // minted fewer tokens than expected never reached the paths under test, and a ceremony
+        // that reused one buffer would let a single disposal cover for every missing one.
+        Assert.Equal(expectedCount, issued.Count);
+        Assert.Equal(expectedCount, issued.Cast<object>().Distinct(ReferenceEqualityComparer.Instance).Count());
 
-        // rpIdHash (32 bytes)
-        var rpIdHash = new byte[32];
-        SHA256.HashData("example.com"u8, rpIdHash);
-        data.AddRange(rpIdHash);
-
-        // flags = UP | UV | AT (0x45)
-        data.Add(0x45);
-
-        // signCount (4 bytes, big-endian)
-        data.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x01 });
-
-        // AAGUID (16 bytes, big-endian network byte order)
-        data.AddRange(EncodeAaguidBigEndian(aaguid));
-
-        // Credential ID length (2 bytes, big-endian) = 32
-        data.AddRange(new byte[] { 0x00, 0x20 });
-
-        // Credential ID (32 bytes)
-        var credId = new byte[32];
-        RandomNumberGenerator.Fill(credId);
-        data.AddRange(credId);
-
-        // COSE public key (minimal EC2 key in CBOR)
-        var keyWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        keyWriter.WriteStartMap(5);
-
-        // kty = 2 (EC2)
-        keyWriter.WriteInt32(1);
-        keyWriter.WriteInt32(2);
-
-        // alg = -7 (ES256)
-        keyWriter.WriteInt32(3);
-        keyWriter.WriteInt32(-7);
-
-        // crv = 1 (P-256)
-        keyWriter.WriteInt32(-1);
-        keyWriter.WriteInt32(1);
-
-        // x coordinate (32 bytes)
-        keyWriter.WriteInt32(-2);
-        keyWriter.WriteByteString(new byte[32]);
-
-        // y coordinate (32 bytes)
-        keyWriter.WriteInt32(-3);
-        keyWriter.WriteByteString(new byte[32]);
-
-        keyWriter.WriteEndMap();
-        data.AddRange(keyWriter.Encode());
-
-        return data.ToArray();
-    }
-
-    private static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format)
-    {
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-
-        writer.WriteStartMap(3);
-
-        // 0x01: fmt
-        writer.WriteInt32(1);
-        writer.WriteTextString(format);
-
-        // 0x02: authData
-        writer.WriteInt32(2);
-        writer.WriteByteString(authData);
-
-        // 0x03: attStmt (empty for "none" format)
-        writer.WriteInt32(3);
-        writer.WriteStartMap(0);
-        writer.WriteEndMap();
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
-    }
-
-    private static byte[] EncodeAaguidBigEndian(Guid guid)
-    {
-        // AAGUID must be in big-endian (network byte order)
-        // .NET Guid.ToByteArray() gives little-endian on little-endian systems
-        Span<byte> bytes = stackalloc byte[16];
-        guid.TryWriteBytes(bytes);
-
-        // Convert first 3 components from little-endian to big-endian
-        if (BitConverter.IsLittleEndian)
+        for (var i = 0; i < issued.Count; i++)
         {
-            // Reverse Data1 (4 bytes)
-            (bytes[0], bytes[1], bytes[2], bytes[3]) =
-                (bytes[3], bytes[2], bytes[1], bytes[0]);
-
-            // Reverse Data2 (2 bytes)
-            (bytes[4], bytes[5]) = (bytes[5], bytes[4]);
-
-            // Reverse Data3 (2 bytes)
-            (bytes[6], bytes[7]) = (bytes[7], bytes[6]);
+            TokenBufferAssert.Zeroed(issued[i], $"token buffer {i} of the ceremony must be zeroed");
         }
-
-        return bytes.ToArray();
     }
+
+    private static RegistrationOptions CreateExcludeListOptions(
+        UserVerificationPreference userVerification = UserVerificationPreference.Preferred) => new()
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            ExcludeCredentials = [new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32))],
+            UserVerification = userVerification
+        };
+
+    private static RegistrationOptions CreateExcludeListUvRequiredOptions() =>
+        CreateExcludeListOptions(UserVerificationPreference.Required);
 }

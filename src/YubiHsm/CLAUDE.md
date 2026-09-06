@@ -70,8 +70,9 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
 
 Credential passwords cross the public API as **UTF-8 `ReadOnlyMemory<byte>`**, never `string`.
 .NET strings are immutable and cannot be wiped, so a `string` parameter makes it impossible for
-the caller to zero the secret. This matches Fido2/OpenPgp/Oath, and the `...Utf8` parameter
-naming convention they use.
+the caller to zero the secret. Parameters are named plainly (`credentialPassword`,
+`derivationPassword`, `currentPassword`, `newPassword`) with no `Utf8` suffix; the UTF-8 encoding
+contract lives in the XML documentation for each parameter, not in its name.
 
 - **The caller owns the input buffer** and is responsible for zeroing it. The SDK never zeroes a
   buffer it does not own.
@@ -83,15 +84,15 @@ naming convention they use.
 
 ```csharp
 // Caller side: own the bytes, zero them.
-var passwordUtf8 = Encoding.UTF8.GetBytes(password);
+var credentialPassword = Encoding.UTF8.GetBytes(password);
 try
 {
     await session.PutCredentialSymmetricAsync(
-        managementKey, label, keyEnc, keyMac, passwordUtf8);
+        managementKey, label, keyEnc, keyMac, credentialPassword);
 }
 finally
 {
-    CryptographicOperations.ZeroMemory(passwordUtf8);
+    CryptographicOperations.ZeroMemory(credentialPassword);
 }
 ```
 
@@ -105,7 +106,7 @@ finally
 ### Session Keys Lifecycle
 ```csharp
 using var keys = await session.CalculateSessionKeysSymmetricAsync(
-    label, context, credentialPasswordUtf8, cardCryptogram);
+    label, context, credentialPassword, cardCryptogram);
 // Use keys.SEnc, keys.SMac, keys.SRmac
 // All key material zeroed automatically on dispose
 ```

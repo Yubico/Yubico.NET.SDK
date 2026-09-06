@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.WebAuthn.Util;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -27,7 +26,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <remarks>
 /// This adapter owns the FidoSession lifetime and manages the PinUvAuthProtocolV2 instance.
 /// </remarks>
-internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
+internal sealed class WebAuthnBackend : IWebAuthnBackend
 {
     private readonly IFidoSession _session;
     private PinUvAuthProtocolV2? _protocol;
@@ -35,10 +34,10 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
     private bool _disposed;
 
     /// <summary>
-    /// Initializes a new instance of <see cref="FidoSessionWebAuthnBackend"/>.
+    /// Initializes a new instance of <see cref="WebAuthnBackend"/>.
     /// </summary>
     /// <param name="session">The FIDO session (ownership transferred to this backend).</param>
-    public FidoSessionWebAuthnBackend(IFidoSession session)
+    public WebAuthnBackend(IFidoSession session)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
     }
@@ -81,6 +80,9 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         EnsureProtocolInitialized();
         var clientPin = new ClientPin(_session, _protocol!);
 
+        // ClientPin allocates and returns the decrypted token to this single caller and keeps no
+        // reference to it, so ownership passes straight to the session below. Copying it here (or
+        // in the session) would leave a second live plaintext token that nothing zeroes.
         byte[] token = method switch
         {
             PinUvAuthMethod.Pin when pinBytes is not null =>
@@ -97,6 +99,7 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
             _ => throw new ArgumentOutOfRangeException(nameof(method), method, "Invalid PIN/UV auth method")
         };
 
+        // Ownership transfer: the session zeroes this array when the caller disposes it.
         return new PinUvAuthTokenSession(_protocol!, token);
     }
 
@@ -125,6 +128,11 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         // Add PIN/UV auth if provided
         if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
         {
+            // The copy is load-bearing, not defensive: the finally below zeroes whatever is in
+            // options, and callers reuse one pinUvAuthParam across several backend calls (see
+            // ExcludeListPreflight's chunk loop). Zeroing the caller's buffer here would make
+            // every call after the first send an all-zero parameter. The caller zeroes the
+            // original when it is done with it.
             options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
             options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
         }
@@ -146,7 +154,7 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         }
         finally
         {
-            ZeroMemory(options.PinUvAuthParam);
+            SensitiveMemory.Zero(options.PinUvAuthParam);
         }
     }
 
@@ -182,6 +190,9 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         // Add PIN/UV auth if provided
         if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
         {
+            // Load-bearing copy: see the note in MakeCredentialAsync. ExcludeListPreflight probes
+            // several exclude-list chunks with one pinUvAuthParam, so this method must not zero
+            // the caller's buffer.
             options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
             options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
         }
@@ -201,20 +212,7 @@ internal sealed class FidoSessionWebAuthnBackend : IWebAuthnBackend
         }
         finally
         {
-            ZeroMemory(options.PinUvAuthParam);
-        }
-    }
-
-    private static void ZeroMemory(ReadOnlyMemory<byte>? memory)
-    {
-        if (memory is null || memory.Value.IsEmpty)
-        {
-            return;
-        }
-
-        if (MemoryMarshal.TryGetArray(memory.Value, out var segment) && segment.Array is not null)
-        {
-            CryptographicOperations.ZeroMemory(segment.AsSpan());
+            SensitiveMemory.Zero(options.PinUvAuthParam);
         }
     }
 

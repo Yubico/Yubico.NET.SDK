@@ -96,6 +96,9 @@ Supports SHA256 (0x08) and SHA512 (0x0A).
 
 ## Security Requirements
 
+- Public secret parameters are named plainly (`pin`, `currentPin`, `newPin`, `resetCode`)
+  with no `Utf8` suffix; the UTF-8 encoding contract and the caller's ownership/clearing
+  responsibility live in the XML documentation for each parameter, not in its name.
 - Zero ALL PIN bytes after use: `CryptographicOperations.ZeroMemory()`
 - Zero private key material after import
 - Zero KDF-derived bytes after use

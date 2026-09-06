@@ -1,20 +1,23 @@
 # Native AOT support
 
-This document defines Native AOT support for the v2 SDK libraries: `Core`, `Management`, `Piv`,
-`Fido2`, `WebAuthn`, `Oath`, `OpenPgp`, `SecurityDomain`, `YubiOtp`, and `YubiHsm`. Command-line
-tools, example applications, verification hosts, and test projects are not part of this support
-surface.
+This document defines Native AOT support for the v2 SDK libraries. The supported set is not a list
+maintained here: it is every published SDK library, which `dotnet toolchain.cs
+native-aot-contract-qa` derives from the `src/<Module>/src/*.csproj` layout and reports on each
+build. At the time of writing that is `Core`, `Management`, `Piv`, `Fido2`, `WebAuthn`, `Oath`,
+`OpenPgp`, `SecurityDomain`, `YubiOtp`, and `YubiHsm`. Command-line tools, example applications,
+verification hosts, and test projects are not part of this support surface.
 
 ## Support statement
 
-The ten SDK libraries publish Native AOT compatibility metadata and enable the AOT, trimming,
-single-file, and reference-compatibility analyzers. A verification host references all ten
-libraries and has been published successfully for macOS Apple Silicon, Windows x64, and Linux x64.
+Every SDK library publishes Native AOT compatibility metadata and enables the AOT, trimming,
+single-file, and reference-compatibility analyzers. A verification host references all of them and
+has been published successfully for macOS Apple Silicon, Windows x64, and Linux x64.
 
 The evidence is not equally deep for every platform or module:
 
-- All ten libraries are analyzer-checked during normal builds.
-- All ten libraries are linked into the Native AOT verification host.
+- Every SDK library is analyzer-checked during normal builds.
+- Every SDK library is linked into the Native AOT verification host, and the contract target fails
+  the build if one is missing the opt-in, the host project reference, or a rooted entry type.
 - Core device discovery has run against physical YubiKeys on macOS, Windows, and Linux.
 - Management device-information reads, a PIV session, and device monitoring have run against
   physical YubiKeys on macOS.
@@ -81,8 +84,9 @@ prove that every runtime path has executed under Native AOT.
 [`verification/NativeAotVerification`](../verification/NativeAotVerification) is an internal,
 non-packable console host. Its default mode:
 
-1. References a public entry type from each of the ten SDK libraries so the Native AOT compiler
-   processes all of them.
+1. References a public entry type from each SDK library so the Native AOT compiler processes all of
+   them. A project reference alone is not enough — without a rooted type the compiler trims the
+   assembly out of the host's closure — so `native-aot-contract-qa` checks for both.
 2. Runs `YubiKeyManager.FindAllAsync` through Core.
 3. Succeeds with an empty device list when no YubiKey is attached.
 

@@ -60,6 +60,9 @@ public class CredentialPromptRetryTests
     {
         public Memory<byte> Memory => secret;
 
+        /// <summary>The backing array, readable after disposal so zeroing can be asserted.</summary>
+        public byte[] RawBuffer => secret;
+
         public int DisposeCount { get; private set; }
 
         public TaskCompletionSource Disposed { get; } =
@@ -88,6 +91,36 @@ public class CredentialPromptRetryTests
             var answer = _answers.Count > 0 ? _answers.Dequeue() : null;
             return ValueTask.FromResult<IMemoryOwner<byte>?>(
                 answer is null ? null : DisposableArrayPoolBuffer.CreateFromSpan(answer));
+        }
+    }
+
+    /// <summary>
+    /// Prompt that hands out tracked buffers and records, at the moment each new prompt starts,
+    /// whether every previously handed-out buffer had already been zeroed and disposed.
+    /// </summary>
+    private sealed class TrackingPrompt : ICredentialPrompt
+    {
+        private readonly byte[] _answer;
+
+        public TrackingPrompt(byte[] answer) => _answer = answer;
+
+        public List<TrackingMemoryOwner> Issued { get; } = [];
+
+        /// <summary>State of the previously issued buffers observed at the start of each prompt.</summary>
+        public List<(int DisposeCount, bool IsZeroed)> PreviousStateAtPrompt { get; } = [];
+
+        public ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(
+            CredentialPromptContext context, CancellationToken cancellationToken)
+        {
+            foreach (var previous in Issued)
+            {
+                PreviousStateAtPrompt.Add(
+                    (previous.DisposeCount, previous.RawBuffer.All(b => b == 0)));
+            }
+
+            var owner = new TrackingMemoryOwner(_answer.ToArray());
+            Issued.Add(owner);
+            return ValueTask.FromResult<IMemoryOwner<byte>?>(owner);
         }
     }
 
@@ -160,7 +193,7 @@ public class CredentialPromptRetryTests
     {
         var prompt = new ScriptedPrompt(WrongPin, CorrectPin);
         await using var client = new WebAuthnClient(
-            CreateBackend(), Origin(), _ => false, prompt: prompt);
+            CreateBackend(), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         var result = await client.MakeCredentialAsync(
             CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken);
@@ -185,7 +218,7 @@ public class CredentialPromptRetryTests
                 clientPinSupported: true, uvSupported: false, minPinLength: 8));
         var prompt = new ScriptedPrompt(CorrectPin);
         await using var client = new WebAuthnClient(
-            backend, Origin(), _ => false, prompt: prompt);
+            backend, Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         await client.MakeCredentialAsync(
             CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken);
@@ -203,7 +236,7 @@ public class CredentialPromptRetryTests
             .Returns(Task.FromException<int?>(new IOException("transport failed")));
         var prompt = new ScriptedPrompt(WrongPin, WrongPin, WrongPin);
         await using var client = new WebAuthnClient(
-            backend, Origin(), _ => false, prompt: prompt);
+            backend, Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             client.MakeCredentialAsync(
@@ -211,7 +244,7 @@ public class CredentialPromptRetryTests
 
         Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
         Assert.Equal("PIN was incorrect.", error.Message);
-        Assert.Equal(WebAuthnClient.MaxPromptAttempts, prompt.Contexts.Count);
+        Assert.Equal(WebAuthnClientOptions.DefaultMaxPromptAttempts, prompt.Contexts.Count);
         Assert.Null(prompt.Contexts[1].RetriesRemaining);
     }
 
@@ -221,7 +254,7 @@ public class CredentialPromptRetryTests
         var submitted = new List<byte[]?>();
         var prompt = new ScriptedPrompt(WrongPin, CorrectPin);
         await using var client = new WebAuthnClient(
-            CreateBackend(submittedPins: submitted), Origin(), _ => false, prompt: prompt);
+            CreateBackend(submittedPins: submitted), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         await client.MakeCredentialAsync(
             CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken);
@@ -237,7 +270,7 @@ public class CredentialPromptRetryTests
     {
         var prompt = new ScriptedPrompt(WrongPin, null);
         await using var client = new WebAuthnClient(
-            CreateBackend(), Origin(), _ => false, prompt: prompt);
+            CreateBackend(), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             client.MakeCredentialAsync(CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken));
@@ -251,7 +284,7 @@ public class CredentialPromptRetryTests
     {
         var prompt = new ScriptedPrompt(WrongPin, CorrectPin, CorrectPin);
         await using var client = new WebAuthnClient(
-            CreateBackend(CtapStatus.PinBlocked), Origin(), _ => false, prompt: prompt);
+            CreateBackend(CtapStatus.PinBlocked), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             client.MakeCredentialAsync(CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken));
@@ -264,7 +297,7 @@ public class CredentialPromptRetryTests
     {
         var prompt = new ScriptedPrompt(WrongPin, CorrectPin, CorrectPin);
         await using var client = new WebAuthnClient(
-            CreateBackend(CtapStatus.PinAuthInvalid), Origin(), _ => false, prompt: prompt);
+            CreateBackend(CtapStatus.PinAuthInvalid), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             client.MakeCredentialAsync(CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken));
@@ -278,14 +311,69 @@ public class CredentialPromptRetryTests
         var submitted = new List<byte[]?>();
         var prompt = new ScriptedPrompt(WrongPin, WrongPin, WrongPin, WrongPin, WrongPin, WrongPin);
         await using var client = new WebAuthnClient(
-            CreateBackend(submittedPins: submitted), Origin(), _ => false, prompt: prompt);
+            CreateBackend(submittedPins: submitted), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             client.MakeCredentialAsync(CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken));
 
         Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
-        Assert.Equal(WebAuthnClient.MaxPromptAttempts, prompt.Contexts.Count);
-        Assert.Equal(WebAuthnClient.MaxPromptAttempts, submitted.Count);
+        Assert.Equal(WebAuthnClientOptions.DefaultMaxPromptAttempts, prompt.Contexts.Count);
+        Assert.Equal(WebAuthnClientOptions.DefaultMaxPromptAttempts, submitted.Count);
+    }
+
+    [Theory(Timeout = 10000)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(5)]
+    public async Task RepeatedWrongPin_InvokesPromptExactlyConfiguredMaxPromptAttempts(int maxAttempts)
+    {
+        var submitted = new List<byte[]?>();
+        var prompt = new ScriptedPrompt(Enumerable.Repeat(WrongPin, 10).ToArray<byte[]?>());
+        await using var client = new WebAuthnClient(
+            CreateBackend(submittedPins: submitted),
+            Origin(),
+            _ => false,
+            new WebAuthnClientOptions { MaxPromptAttempts = maxAttempts, CredentialPrompt = prompt });
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+            client.MakeCredentialAsync(
+                CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
+        Assert.Equal(maxAttempts, prompt.Contexts.Count);
+        Assert.Equal(maxAttempts, submitted.Count);
+    }
+
+    [Fact(Timeout = 10000)]
+    public async Task RejectedPromptSecret_IsZeroedAndDisposedBeforeTheNextPrompt()
+    {
+        var prompt = new TrackingPrompt(WrongPin);
+        await using var client = new WebAuthnClient(
+            CreateBackend(),
+            Origin(),
+            _ => false,
+            new WebAuthnClientOptions { MaxPromptAttempts = 3, CredentialPrompt = prompt });
+
+        await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+            client.MakeCredentialAsync(
+                CreateOptions(), pinBytes: null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(3, prompt.Issued.Count);
+
+        // Prompt 2 observes buffer 1; prompt 3 observes buffers 1 and 2.
+        Assert.Equal(3, prompt.PreviousStateAtPrompt.Count);
+        Assert.All(prompt.PreviousStateAtPrompt, state =>
+        {
+            Assert.Equal(1, state.DisposeCount);
+            Assert.True(state.IsZeroed, "A rejected PIN buffer was not zeroed before the next prompt.");
+        });
+
+        // The final rejected buffer is cleaned up too, even though no prompt follows it.
+        Assert.All(prompt.Issued, owner =>
+        {
+            Assert.Equal(1, owner.DisposeCount);
+            Assert.All(owner.RawBuffer, b => Assert.Equal(0, b));
+        });
     }
 
     [Fact(Timeout = 10000)]
@@ -293,7 +381,7 @@ public class CredentialPromptRetryTests
     {
         var prompt = new DelayedPrompt();
         await using var client = new WebAuthnClient(
-            CreateBackend(), Origin(), _ => false, prompt: prompt);
+            CreateBackend(), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
         using var cts = new CancellationTokenSource();
 
         var operation = client.MakeCredentialAsync(CreateOptions(), pinBytes: null, cts.Token);
@@ -317,7 +405,7 @@ public class CredentialPromptRetryTests
     {
         var prompt = new ScriptedPrompt(CorrectPin);
         await using var client = new WebAuthnClient(
-            CreateBackend(), Origin(), _ => false, prompt: prompt);
+            CreateBackend(), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
@@ -333,7 +421,7 @@ public class CredentialPromptRetryTests
     {
         var prompt = new ScriptedPrompt(CorrectPin);
         await using var client = new WebAuthnClient(
-            CreateBackend(), Origin(), _ => false, prompt: prompt);
+            CreateBackend(), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         var result = await client.MakeCredentialAsync(
             CreateOptions(), CorrectPin, TestContext.Current.CancellationToken);
@@ -349,7 +437,7 @@ public class CredentialPromptRetryTests
         // silently substitute a prompt for it.
         var prompt = new ScriptedPrompt(CorrectPin);
         await using var client = new WebAuthnClient(
-            CreateBackend(), Origin(), _ => false, prompt: prompt);
+            CreateBackend(), Origin(), _ => false, new WebAuthnClientOptions { CredentialPrompt = prompt });
 
         await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             client.MakeCredentialAsync(CreateOptions(), WrongPin, TestContext.Current.CancellationToken));

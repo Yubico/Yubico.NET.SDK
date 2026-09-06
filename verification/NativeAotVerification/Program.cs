@@ -91,34 +91,12 @@ internal static class MonitorVerification
         Console.WriteLine("Follow each prompt, then press Enter. Ctrl+C aborts.");
         Console.WriteLine();
 
-        using var cts = new CancellationTokenSource();
-        var sinkA = new Sink("observer-A");
-        var sinkB = new Sink("observer-B");
-        var sinkWatch = new Sink("watchasync");
-        var sinkTransient = new Sink("observer-transient");
+        // Three concurrent watchers over the one public stream. Each subscribes before monitoring
+        // starts, because WatchAsync subscribes on first enumeration rather than at call time.
+        await using var sinkA = Sink.Start("watcher-A");
+        await using var sinkB = Sink.Start("watcher-B");
+        await using var sinkTransient = Sink.Start("watcher-transient");
 
-        using var subA = YubiKeyManager.DeviceChanges.Subscribe(sinkA);
-        using var subB = YubiKeyManager.DeviceChanges.Subscribe(sinkB);
-        var subTransient = YubiKeyManager.DeviceChanges.Subscribe(sinkTransient);
-
-        // Start the async consumer before monitoring, since WatchAsync subscribes on first
-        // enumeration rather than at call time.
-        var watcher = Task.Run(async () =>
-        {
-            try
-            {
-                await foreach (var e in YubiKeyManager.WatchAsync(cts.Token))
-                {
-                    sinkWatch.OnNext(e);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // Expected on shutdown.
-            }
-        });
-
-        await Task.Delay(TimeSpan.FromMilliseconds(250));
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
 
         var failures = new List<string>();
@@ -131,7 +109,6 @@ internal static class MonitorVerification
 
         var baselineA = sinkA.Snapshot().Count;
         var baselineB = sinkB.Snapshot().Count;
-        var baselineWatch = sinkWatch.Snapshot().Count;
 
         Step(2, "Insert USB key A. A composite key (CCID + HID FIDO + HID OTP) must appear ONCE.",
             sinkA, expected: 1, failures, DeviceAction.Added);
@@ -159,36 +136,36 @@ internal static class MonitorVerification
             Console.WriteLine("  ok    step 6: observed both Added and Removed events");
         }
 
-        subTransient.Dispose();
-        var transientAtUnsubscribe = sinkTransient.Snapshot().Count;
-        var activeAtUnsubscribe = sinkA.Snapshot().Count;
+        await sinkTransient.StopAsync();
+        var transientAtStop = sinkTransient.Snapshot().Count;
+        var activeAtStop = sinkA.Snapshot().Count;
 
         // Count is informational: with a two-key setup the operator may be moving one key between
         // transports, which legitimately produces a Removed and an Added.
-        Step(7, "One observer just unsubscribed. Attach a key that is not currently attached "
+        Step(7, "One watcher just stopped. Attach a key that is not currently attached "
               + "(moving one off the NFC reader to USB is fine).", sinkA, expected: -1, failures);
 
-        if (sinkA.Snapshot().Count == activeAtUnsubscribe)
+        if (sinkA.Snapshot().Count == activeAtStop)
         {
-            failures.Add("step 7: no event observed after transient observer unsubscribed");
-            Console.WriteLine("  FAIL  step 7: no post-unsubscribe event observed");
+            failures.Add("step 7: no event observed after the transient watcher stopped");
+            Console.WriteLine("  FAIL  step 7: no post-stop event observed");
         }
 
-        if (sinkTransient.Snapshot().Count != transientAtUnsubscribe)
+        if (sinkTransient.Snapshot().Count != transientAtStop)
         {
-            failures.Add("unsubscribed observer kept receiving events");
-            Console.WriteLine("  FAIL  observer-transient received events after unsubscribe");
+            failures.Add("a cancelled watcher kept receiving events");
+            Console.WriteLine("  FAIL  watcher-transient received events after it stopped");
         }
         else
         {
-            Console.WriteLine("  ok    observer-transient silent since unsubscribe");
+            Console.WriteLine("  ok    watcher-transient silent since it stopped");
         }
 
         // --- cross-sink consistency: the primary invariant ---
         Console.WriteLine();
         Console.WriteLine("--- Cross-sink consistency ---");
         var reference = sinkA.Snapshot().Skip(baselineA).ToList();
-        foreach (var (other, baseline) in new[] { (sinkB, baselineB), (sinkWatch, baselineWatch) })
+        foreach (var (other, baseline) in new[] { (sinkB, baselineB) })
         {
             var seq = other.Snapshot().Skip(baseline).ToList();
             if (!seq.SequenceEqual(reference, StringComparer.Ordinal))
@@ -208,27 +185,24 @@ internal static class MonitorVerification
         Console.WriteLine();
         Prompt(8, "Leave a key attached. Press Enter to shut down.");
         await YubiKeyManager.ShutdownAsync();
-        await cts.CancelAsync();
 
-        var watcherExited = await Task.WhenAny(watcher, Task.Delay(TimeSpan.FromSeconds(10))) == watcher;
-        if (!watcherExited)
+        // Shutdown must end every active watcher normally - not cancelled, not faulted.
+        foreach (var sink in new[] { sinkA, sinkB })
         {
-            failures.Add("WatchAsync did not exit within 10s of shutdown");
-            Console.WriteLine("  FAIL  WatchAsync consumer did not exit cleanly");
-        }
-        else
-        {
-            Console.WriteLine("  ok    WatchAsync consumer exited cleanly");
-        }
-
-        if (!sinkA.Completed || !sinkB.Completed)
-        {
-            failures.Add("observers did not receive OnCompleted on shutdown");
-            Console.WriteLine("  FAIL  observers did not receive OnCompleted");
-        }
-        else
-        {
-            Console.WriteLine("  ok    observers received OnCompleted");
+            if (!await sink.WaitForExitAsync(TimeSpan.FromSeconds(10)))
+            {
+                failures.Add($"{sink.Name} did not exit within 10s of shutdown");
+                Console.WriteLine($"  FAIL  {sink.Name} did not exit within 10s of shutdown");
+            }
+            else if (!sink.EndedNormally)
+            {
+                failures.Add($"{sink.Name} did not end normally on shutdown");
+                Console.WriteLine($"  FAIL  {sink.Name} ended abnormally on shutdown");
+            }
+            else
+            {
+                Console.WriteLine($"  ok    {sink.Name} ended normally on shutdown");
+            }
         }
 
         // --- Step 9: restart after shutdown ---
@@ -358,27 +332,92 @@ internal static class MonitorVerification
         Console.WriteLine($"SIGNAL-TIMEOUT step={number}");
     }
 
-    /// <summary>Records the event sequence one consumer surface observed.</summary>
-    private sealed class Sink(string name) : IObserver<DeviceEvent>
+    /// <summary>Drains one <c>WatchAsync</c> enumeration and records the sequence it received.</summary>
+    private sealed class Sink : IAsyncDisposable
     {
         private readonly Lock _gate = new();
         private readonly List<string> _events = [];
-        private bool _completed;
+        private readonly CancellationTokenSource _cts = new();
+        private readonly Task _pump;
 
-        public string Name { get; } = name;
+        private volatile bool _endedNormally;
 
-        public bool Completed
+        private Sink(string name)
         {
-            get
+            Name = name;
+
+            // Subscribe synchronously here: WatchAsync subscribes on the first MoveNextAsync, and
+            // that first call runs the iterator up to its first suspension point before returning.
+            // Deferring it to the pump task would race the initial scan.
+            var enumerator = YubiKeyManager.WatchAsync(_cts.Token).GetAsyncEnumerator(_cts.Token);
+            var first = enumerator.MoveNextAsync();
+
+            _pump = Task.Run(async () =>
             {
-                lock (_gate)
+                try
                 {
-                    return _completed;
+                    var move = first;
+                    while (await move)
+                    {
+                        Record(enumerator.Current);
+                        move = enumerator.MoveNextAsync();
+                    }
+
+                    _endedNormally = true;
                 }
+                catch (OperationCanceledException)
+                {
+                    // Expected when this watcher is stopped deliberately.
+                }
+                finally
+                {
+                    await enumerator.DisposeAsync();
+                }
+            });
+        }
+
+        public string Name { get; }
+
+        /// <summary>True once the enumeration ended because the SDK completed the sequence.</summary>
+        public bool EndedNormally => _endedNormally;
+
+        public static Sink Start(string name) => new(name);
+
+        /// <summary>Cancels this watcher only and waits for its pump to unwind.</summary>
+        public async Task StopAsync()
+        {
+            await _cts.CancelAsync();
+            await _pump;
+        }
+
+        public async Task<bool> WaitForExitAsync(TimeSpan timeout) =>
+            await Task.WhenAny(_pump, Task.Delay(timeout)) == _pump;
+
+        public IReadOnlyList<string> Snapshot()
+        {
+            lock (_gate)
+            {
+                return [.. _events];
             }
         }
 
-        public void OnNext(DeviceEvent value)
+        public async ValueTask DisposeAsync()
+        {
+            await _cts.CancelAsync();
+
+            try
+            {
+                await _pump;
+            }
+            catch (OperationCanceledException)
+            {
+                // Teardown; the run's assertions have already been made.
+            }
+
+            _cts.Dispose();
+        }
+
+        private void Record(DeviceEvent value)
         {
             var entry = string.Create(
                 CultureInfo.InvariantCulture,
@@ -390,27 +429,6 @@ internal static class MonitorVerification
             }
 
             Console.WriteLine($"        [{Name}] {entry}");
-        }
-
-        public void OnCompleted()
-        {
-            lock (_gate)
-            {
-                _completed = true;
-            }
-        }
-
-        public void OnError(Exception error)
-        {
-            // Not used; the SDK stream never faults.
-        }
-
-        public IReadOnlyList<string> Snapshot()
-        {
-            lock (_gate)
-            {
-                return [.. _events];
-            }
         }
     }
 }

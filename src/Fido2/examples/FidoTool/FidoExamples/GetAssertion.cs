@@ -54,13 +54,13 @@ public static class GetAssertion
     /// </summary>
     /// <param name="yubiKey">The YubiKey device.</param>
     /// <param name="rpId">The relying party identifier (e.g., "example.com").</param>
-    /// <param name="pinUtf8">The PIN as UTF-8 bytes for user verification, or null.</param>
+    /// <param name="pin">The PIN as UTF-8 bytes for user verification, or null.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result containing the assertion response.</returns>
     public static async Task<GetAssertionResult> AssertAsync(
         IYubiKey yubiKey,
         string rpId,
-        ReadOnlyMemory<byte>? pinUtf8 = null,
+        ReadOnlyMemory<byte>? pin = null,
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
@@ -76,13 +76,13 @@ public static class GetAssertion
             var options = new GetAssertionOptions();
 
             // If PIN is provided, get a PIN token for user verification
-            if (pinUtf8 is not null)
+            if (pin is not null)
             {
                 using var protocol = new PinUvAuthProtocolV2();
                 using var clientPin = new ClientPin(session, protocol);
 
                 pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                    pinUtf8.Value,
+                    pin.Value,
                     PinUvAuthTokenPermissions.GetAssertion,
                     rpId,
                     cancellationToken);

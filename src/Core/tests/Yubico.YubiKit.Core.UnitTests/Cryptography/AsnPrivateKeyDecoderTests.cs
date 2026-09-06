@@ -25,14 +25,6 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 /// </remarks>
 public class AsnPrivateKeyDecoderTests
 {
-    private static ECCurve GetNamedCurve(string curveOid) => curveOid switch
-    {
-        Oids.ECP256 => ECCurve.NamedCurves.nistP256,
-        Oids.ECP384 => ECCurve.NamedCurves.nistP384,
-        Oids.ECP521 => ECCurve.NamedCurves.nistP521,
-        _ => throw new ArgumentOutOfRangeException(nameof(curveOid))
-    };
-
     private static void AssertEcParametersMatch(ECParameters expected, ECParameters actual, string expectedCurveOid)
     {
         Assert.Equal(expectedCurveOid, actual.Curve.Oid.Value);
@@ -49,7 +41,7 @@ public class AsnPrivateKeyDecoderTests
     [InlineData(Oids.ECP521)]
     public void CreateECParameters_BclEncodedKey_MatchesBclExportedParameters(string curveOid)
     {
-        using var bcl = ECDsa.Create(GetNamedCurve(curveOid));
+        using var bcl = ECDsa.Create(EcTestSupport.NamedCurve(curveOid));
         var pkcs8 = bcl.ExportPkcs8PrivateKey();
         var expected = bcl.ExportParameters(includePrivateParameters: true);
 
@@ -70,7 +62,8 @@ public class AsnPrivateKeyDecoderTests
         byte[]? publicKeyPointBytes = null,
         int publicKeyUnusedBits = 0,
         bool includeParametersField = false,
-        int pkcs8Version = 0)
+        int pkcs8Version = 0,
+        bool explicitPublicKeyTag = false)
     {
         var ecWriter = new AsnWriter(AsnEncodingRules.DER);
         ecWriter.PushSequence();
@@ -87,8 +80,20 @@ public class AsnPrivateKeyDecoderTests
 
         if (publicKeyPointBytes is not null)
         {
-            var publicKeyTag = new Asn1Tag(TagClass.ContextSpecific, 1);
-            ecWriter.WriteBitString(publicKeyPointBytes, publicKeyUnusedBits, publicKeyTag);
+            if (explicitPublicKeyTag)
+            {
+                // RFC 5915 form: constructed [1] wrapping a universal BIT STRING.
+                var publicKeyTag = new Asn1Tag(TagClass.ContextSpecific, 1, isConstructed: true);
+                ecWriter.PushSequence(publicKeyTag);
+                ecWriter.WriteBitString(publicKeyPointBytes, publicKeyUnusedBits);
+                ecWriter.PopSequence(publicKeyTag);
+            }
+            else
+            {
+                // Legacy form emitted by earlier releases of this SDK: primitive, implicit [1].
+                var publicKeyTag = new Asn1Tag(TagClass.ContextSpecific, 1);
+                ecWriter.WriteBitString(publicKeyPointBytes, publicKeyUnusedBits, publicKeyTag);
+            }
         }
 
         ecWriter.PopSequence();
@@ -211,6 +216,45 @@ public class AsnPrivateKeyDecoderTests
 
         var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
         Assert.Equal("Invalid EC public key encoding", exception.Message);
+    }
+
+    [Theory]
+    [InlineData(false)] // legacy implicit [1] BIT STRING
+    [InlineData(true)] // RFC 5915 explicit [1] BIT STRING
+    public void CreateECParameters_PublicKeyInEitherTagForm_DecodesToTheSamePoint(bool explicitPublicKeyTag)
+    {
+        using var bcl = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var expected = bcl.ExportParameters(includePrivateParameters: true);
+        var point = new byte[65];
+        point[0] = 0x04;
+        expected.Q.X!.CopyTo(point, 1);
+        expected.Q.Y!.CopyTo(point, 33);
+
+        var pkcs8 = BuildEcPkcs8(
+            Oids.ECDSA, Oids.ECP256, ecVersion: 1, expected.D!,
+            publicKeyPointBytes: point, explicitPublicKeyTag: explicitPublicKeyTag);
+
+        var result = AsnPrivateKeyDecoder.CreateECParameters(pkcs8);
+
+        AssertEcParametersMatch(expected, result, Oids.ECP256);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CreateECParameters_MalformedPointInEitherTagForm_ThrowsCryptographicException(
+        bool explicitPublicKeyTag)
+    {
+        // A compressed point must be rejected regardless of how the [1] field is tagged.
+        var compressedPoint = new byte[33];
+        compressedPoint[0] = 0x02;
+
+        var pkcs8 = BuildEcPkcs8(
+            Oids.ECDSA, Oids.ECP256, ecVersion: 1, privateKeyValue: new byte[32],
+            publicKeyPointBytes: compressedPoint, explicitPublicKeyTag: explicitPublicKeyTag);
+
+        var exception = Assert.Throws<CryptographicException>(() => AsnPrivateKeyDecoder.CreateECParameters(pkcs8));
+        Assert.Equal("Unsupported EC point format", exception.Message);
     }
 
     [Fact]

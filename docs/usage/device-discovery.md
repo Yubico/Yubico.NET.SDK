@@ -36,7 +36,6 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
 | `StopMonitoring()` | Stop monitoring |
 | `IsMonitoring` | Check if monitoring is active |
 | `WatchAsync(CancellationToken)` | Async sequence of repository-diffed device events (`await foreach`) |
-| `DeviceChanges` | The same events as an `IObservable<DeviceEvent>` |
 
 ### Lifecycle Methods
 
@@ -121,35 +120,12 @@ concurrently without interfering. If a new event arrives while a consumer's 256-
 full, its stream ends with an `InvalidOperationException` rather than silently dropping events —
 resynchronise with `FindAllAsync` and re-enumerate. Because `DeviceEvent` is a delta rather than a
 snapshot, dropping one would permanently desynchronise your device list, so the SDK reports it instead.
-Concurrent watchers are state-safe. For the observable surface, strict `OnNext`/`OnCompleted`
-grammar still depends on producer-side serialization; `YubiKeyManager`'s internal monitor provides
-that for SDK-generated events.
+Concurrent watchers are state-safe: cancelling or losing one watcher neither completes nor faults
+another, and shutting the SDK down ends every active watcher normally rather than by throwing.
 
-### `IObservable<DeviceEvent>`
-
-`DeviceChanges` exposes the same events for observer-style consumers:
-
-```csharp
-using var subscription = YubiKeyManager.DeviceChanges.Subscribe(myObserver);
-```
-
-`IObservable<T>` is a BCL type, so this works with no extra packages — but the BCL only provides
-`Subscribe(IObserver<DeviceEvent>)`, meaning you supply an observer object.
-
-The familiar lambda overload and query operators are available from **Reactive Extensions**. Add
-the package directly if you want them:
-
-```xml
-<PackageReference Include="System.Reactive" Version="6.0.1" />
-```
-
-```csharp
-using System.Reactive.Linq;
-
-using var subscription = YubiKeyManager.DeviceChanges
-    .Where(e => e.Action == DeviceAction.Added)
-    .Subscribe(e => Console.WriteLine($"Connected: {e.Device.DeviceId}"));
-```
+`WatchAsync` is the only device-change stream. Device events are never delivered inline on the
+monitor's publishing thread, so a slow or abandoned watcher cannot delay device monitoring for
+anyone else.
 
 `StartMonitoring()` performs an initial repository rescan. Native SmartCard and HID listener notifications are
 treated as rescan triggers only. Public device events are emitted from repository diffs after discovery,
@@ -178,17 +154,8 @@ await foreach (var e in YubiKeyManager.WatchAsync(CancellationToken.None))
 }
 ```
 
-If you have already added `System.Reactive`, `ObserveOn` does the same for the observable surface:
-
-```csharp
-YubiKeyManager.DeviceChanges
-    .ObserveOn(SynchronizationContext.Current!)
-    .Subscribe(myObserver);
-```
-
-Note that observable subscribers are invoked **inline on the publishing thread**, so a handler that
-blocks will delay device monitoring. `WatchAsync` consumers are decoupled by their own buffer and do
-not have this property.
+Watchers are decoupled from the publisher by their own buffer, so a loop body that blocks delays
+only that watcher — never device monitoring — until its 256-event buffer fills.
 
 ## Error Handling
 
@@ -239,7 +206,7 @@ Device discovery is inherently subject to race conditions. If a device connects 
 - The returned list may not include a device that just connected
 - The returned list may include a device that just disconnected
 
-For real-time accuracy, use `DeviceChanges` with `StartMonitoring()` to track changes as they occur.
+For real-time accuracy, use `WatchAsync` with `StartMonitoring()` to track changes as they occur.
 
 ## Migration from DI-based API
 
@@ -284,4 +251,4 @@ All `YubiKeyManager` methods are thread-safe:
 - `FindAllAsync()` can be called from multiple threads concurrently
 - `StartMonitoring()` and `StopMonitoring()` are idempotent
 - Listener notifications are serialized through a single-reader debounce queue before rescans
-- `DeviceChanges` events may be delivered on any thread
+- `WatchAsync` events may be delivered on any thread

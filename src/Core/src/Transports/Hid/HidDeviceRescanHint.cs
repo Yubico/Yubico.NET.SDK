@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid;
 /// </summary>
 /// <remarks>
 /// HID listener hints are not authoritative physical-device state. Consumers that need YubiKey
-/// arrivals and removals should use <c>YubiKeyManager.DeviceChanges</c>, which is emitted only
+/// arrivals and removals should use <c>YubiKeyManager.WatchAsync</c>, which emits only
 /// after a repository rescan and diff.
 /// </remarks>
 /// <param name="ChangeKind">The platform-reported HID topology change.</param>

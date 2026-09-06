@@ -71,13 +71,37 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
 
         var removedTcs = new TaskCompletionSource<IYubiKey>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        using var subscription = YubiKeyManager.DeviceChanges.Subscribe(new DeviceEventObserver(evt =>
-        {
-            Note($"EVENT {evt.Action,-7} {evt.Device.DeviceId} connections={evt.Device.AvailableConnections} " +
-                 $"serialAtEvent={evt.Device.SerialNumber?.ToString() ?? "null"} ref={evt.Device.GetHashCode():x8}");
-            if (evt.Action == DeviceAction.Removed)
-                removedTcs.TrySetResult(evt.Device);
-        }));
+        using var watching = new CancellationTokenSource();
+
+        // WatchAsync subscribes on the first MoveNextAsync, and that call runs the iterator up to its
+        // first suspension point before returning. Taking the enumerator and starting that first move
+        // here on the test thread — before StartMonitoring — is what stops the initial scan racing
+        // ahead of the watcher.
+        var enumerator = YubiKeyManager.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
+        var firstMove = enumerator.MoveNextAsync();
+        var pump = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    var move = firstMove;
+                    while (await move)
+                    {
+                        var evt = enumerator.Current;
+                        Note($"EVENT {evt.Action,-7} {evt.Device.DeviceId} connections={evt.Device.AvailableConnections} " +
+                             $"serialAtEvent={evt.Device.SerialNumber?.ToString() ?? "null"} ref={evt.Device.GetHashCode():x8}");
+                        if (evt.Action == DeviceAction.Removed)
+                            removedTcs.TrySetResult(evt.Device);
+
+                        move = enumerator.MoveNextAsync();
+                    }
+                }
+                finally
+                {
+                    await enumerator.DisposeAsync();
+                }
+            },
+            CancellationToken.None);
 
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
         Note("monitoring started (1 s interval)");
@@ -163,19 +187,19 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         Assert.Equal(DeviceCorrelation.Same, original.SameDeviceAs(reinserted));
         Assert.Equal(DeviceCorrelation.Same, reinserted.SameDeviceAs(original));
 
+        await watching.CancelAsync();
+
+        // Cancellation is the intended way this pump ends, but a session this long can also end by hub
+        // completion or an overflowed buffer. Every assertion that matters has already run, so record
+        // the terminal outcome rather than attributing an unrelated ending to a hot-plug failure.
+        var terminal = await Record.ExceptionAsync(() => pump);
+
         // Full captured timeline for the hardware-evidence record.
         output.WriteLine("Hot-plug protocol timeline:");
         output.WriteLine(Timeline());
-    }
-
-    private sealed class DeviceEventObserver(Action<DeviceEvent> onNext) : IObserver<DeviceEvent>
-    {
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error) => throw error;
-
-        public void OnNext(DeviceEvent value) => onNext(value);
+        output.WriteLine(
+            terminal is null
+                ? "watcher pump ended normally"
+                : $"watcher pump ended with {terminal.GetType().Name}: {terminal.Message}");
     }
 }

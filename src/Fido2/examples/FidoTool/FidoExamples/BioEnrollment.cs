@@ -91,7 +91,7 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<SensorInfoResult> GetSensorInfoAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
@@ -104,7 +104,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -136,7 +136,7 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<EnrollResult> EnrollFingerprintAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         string? friendlyName,
         Action<int, int, FingerprintSampleStatus>? onSampleCaptured = null,
         CancellationToken cancellationToken = default)
@@ -151,7 +151,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -218,7 +218,7 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<EnumerateResult> EnumerateEnrollmentsAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
@@ -231,7 +231,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -262,7 +262,7 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<BioResult> RenameEnrollmentAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         ReadOnlyMemory<byte> templateId,
         string friendlyName,
         CancellationToken cancellationToken = default)
@@ -277,7 +277,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 
@@ -308,7 +308,7 @@ public static class BioEnrollmentExample
     /// </summary>
     public static async Task<BioResult> RemoveEnrollmentAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         ReadOnlyMemory<byte> templateId,
         CancellationToken cancellationToken = default)
     {
@@ -322,7 +322,7 @@ public static class BioEnrollmentExample
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.BioEnrollment,
                 cancellationToken: cancellationToken);
 

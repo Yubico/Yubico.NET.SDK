@@ -20,8 +20,8 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
 /// <summary>
-/// Verifies that the observable device-event surface remains live across repeated physical
-/// removal and insertion cycles.
+/// Verifies that the device-event surface remains live across repeated physical removal and
+/// insertion cycles.
 /// </summary>
 /// <remarks>
 /// This test requires an operator to remove and insert a YubiKey when prompted. It asserts event
@@ -44,13 +44,38 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     [Trait(TestCategories.Category, TestCategories.Slow)]
-    public async Task DeviceChanges_AcrossRepeatedHotPlugCycles_EmitsRemovalAndArrivalAfterEachPrompt()
+    public async Task WatchAsync_AcrossRepeatedHotPlugCycles_EmitsRemovalAndArrivalAfterEachPrompt()
     {
         Assert.False(
             Console.IsInputRedirected,
             "This test requires interactive console input for each remove and insert checkpoint.");
 
-        using var subscription = YubiKeyManager.DeviceChanges.Subscribe(_log);
+        using var watching = new CancellationTokenSource();
+
+        // WatchAsync subscribes on the first MoveNextAsync, and that call runs the iterator up to its
+        // first suspension point before returning. Subscribing here rather than inside the pump task
+        // is what stops the initial scan racing ahead of the watcher.
+        var enumerator = YubiKeyManager.WatchAsync(watching.Token).GetAsyncEnumerator(watching.Token);
+        var firstMove = enumerator.MoveNextAsync();
+        var pump = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    var move = firstMove;
+                    while (await move)
+                    {
+                        _log.Record(enumerator.Current);
+                        move = enumerator.MoveNextAsync();
+                    }
+                }
+                finally
+                {
+                    await enumerator.DisposeAsync();
+                }
+            },
+            CancellationToken.None);
+
         var initialCheckpoint = _log.CreateCheckpoint();
         YubiKeyManager.StartMonitoring(TimeSpan.FromSeconds(1));
 
@@ -77,6 +102,18 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         }
 
         output.WriteLine(_log.ToString());
+
+        await watching.CancelAsync();
+
+        // Cancellation is the intended way this pump ends, but it is not the only way a session this
+        // long can end: an overflowed buffer faults it, and hub completion ends it normally. Every
+        // assertion that matters has already run, so record the terminal outcome instead of asserting
+        // one, rather than attributing an unrelated ending to a failure of the hot-plug behaviour.
+        var terminal = await Record.ExceptionAsync(() => pump);
+        output.WriteLine(
+            terminal is null
+                ? "watcher pump ended normally"
+                : $"watcher pump ended with {terminal.GetType().Name}: {terminal.Message}");
     }
 
     private async Task<DeviceEvent> ExpectAsync(int checkpoint, DeviceAction action, string what)
@@ -106,11 +143,11 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
     /// Records every event and lets the test await the next one of a given kind.
     /// </summary>
     /// <remarks>
-    /// Observers are invoked inline on the publishing thread, so the completion source uses
+    /// Records are appended from the watcher's pump task, so the completion source uses
     /// <see cref="TaskCreationOptions.RunContinuationsAsynchronously"/> to keep the resumed test off
-    /// the monitor's thread.
+    /// that task.
     /// </remarks>
-    private sealed class EventLog : IObserver<DeviceEvent>
+    private sealed class EventLog
     {
         private readonly Lock _gate = new();
         private readonly List<(TimeSpan At, DeviceEvent Event)> _entries = [];
@@ -119,7 +156,7 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
         private Func<DeviceEvent, bool>? _awaited;
         private TaskCompletionSource<DeviceEvent>? _pending;
 
-        public void OnNext(DeviceEvent value)
+        public void Record(DeviceEvent value)
         {
             TaskCompletionSource<DeviceEvent>? toComplete = null;
 
@@ -136,14 +173,6 @@ public class DeviceEventHotPlugTests(ITestOutputHelper output) : IAsyncLifetime
             }
 
             _ = toComplete?.TrySetResult(value);
-        }
-
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
         }
 
         /// <summary>

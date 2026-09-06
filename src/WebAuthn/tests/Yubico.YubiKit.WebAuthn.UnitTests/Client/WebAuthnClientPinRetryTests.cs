@@ -53,7 +53,7 @@ public sealed class WebAuthnClientPinRetryTests
             _mockBackend,
             _origin,
             isPublicSuffix: domain => domain == "com",
-            enterpriseRpIds: new HashSet<string>());
+            new WebAuthnClientOptions());
     }
 
     [Fact(Timeout = 5000)]

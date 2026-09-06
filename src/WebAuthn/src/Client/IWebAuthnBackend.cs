@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// This interface allows WebAuthn Client logic to be tested with mock implementations
 /// while the production implementation delegates to IFidoSession.
 /// </remarks>
-public interface IWebAuthnBackend : IAsyncDisposable
+internal interface IWebAuthnBackend : IAsyncDisposable
 {
     /// <summary>
     /// Gets cached authenticator info (does not require user presence).
@@ -85,7 +85,7 @@ public interface IWebAuthnBackend : IAsyncDisposable
 /// <summary>
 /// Authentication method for PIN/UV token acquisition.
 /// </summary>
-public enum PinUvAuthMethod
+internal enum PinUvAuthMethod
 {
     /// <summary>
     /// Use PIN for authentication.
@@ -101,7 +101,7 @@ public enum PinUvAuthMethod
 /// <summary>
 /// Request parameters for CTAP2 MakeCredential via backend.
 /// </summary>
-public sealed record class BackendMakeCredentialRequest
+internal sealed record class BackendMakeCredentialRequest
 {
     /// <summary>
     /// Hash of the client data JSON.
@@ -152,7 +152,7 @@ public sealed record class BackendMakeCredentialRequest
 /// <summary>
 /// Request parameters for CTAP2 GetAssertion via backend.
 /// </summary>
-public sealed record class BackendGetAssertionRequest
+internal sealed record class BackendGetAssertionRequest
 {
     /// <summary>
     /// Hash of the client data JSON.

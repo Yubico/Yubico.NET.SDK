@@ -116,19 +116,6 @@ using static SimpleExec.Command;
 const string ProjectPrefix = "Yubico.YubiKit.";
 // Matches <TargetFramework> in Directory.Build.props; used to locate MTP test executables.
 const string TestTargetFramework = "net10.0";
-string[] nativeAotSdkProjects =
-[
-    "src/Core/src/Yubico.YubiKit.Core.csproj",
-    "src/Fido2/src/Yubico.YubiKit.Fido2.csproj",
-    "src/Management/src/Yubico.YubiKit.Management.csproj",
-    "src/Oath/src/Yubico.YubiKit.Oath.csproj",
-    "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
-    "src/Piv/src/Yubico.YubiKit.Piv.csproj",
-    "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
-    "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
-    "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
-    "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
-];
 var repoRoot = GetRepoRoot();
 var solutionFile = "Yubico.YubiKit.sln";
 var configuration = "Release";
@@ -230,7 +217,8 @@ Target("native-aot-contract-qa", () =>
 {
     PrintHeader("Validating Native AOT support contract");
 
-    var failures = ValidateNativeAotContract(nativeAotSdkProjects);
+    var discovery = DiscoverNativeAotProjects();
+    var failures = ValidateNativeAotContract(discovery);
     if (failures.Count > 0)
     {
         foreach (var failure in failures)
@@ -242,7 +230,12 @@ Target("native-aot-contract-qa", () =>
             $"Native AOT support contract validation failed with {failures.Count} issue(s)");
     }
 
-    PrintInfo("All 10 supported SDK libraries opt in and are anchored by the verification host");
+    PrintInfo(
+        $"All {discovery.SdkProjects.Length} supported SDK libraries opt in, are referenced by the " +
+        "verification host, and are anchored there by an entry type");
+    PrintInfo(
+        $"Excluded internal tooling ({discovery.ExcludedProjects.Length}): " +
+        $"{string.Join(", ", discovery.ExcludedProjects)}");
 });
 
 Target("build", DependsOn("test-infrastructure-qa", "native-aot-contract-qa"), () =>
@@ -1205,43 +1198,110 @@ string[] DiscoverProjects(string subdirectory, string nameFilter, string? additi
         .OrderBy(p => p)
         .ToArray();
 
-List<string> ValidateNativeAotContract(string[] expectedProjects)
+// Native AOT support covers the published SDK libraries, which all sit at src/<Module>/src/*.csproj.
+// Deriving the set from that layout rather than a hand-maintained list means a newly added module is
+// held to the contract automatically: ValidateNativeAotContract will name it and fail the build until
+// it carries the IsYubiKitSdkLibrary opt-in, is referenced by the verification host, and is anchored
+// there by an entry type.
+(string[] SdkProjects, string[] ExcludedProjects, string[] UnclassifiedProjects) DiscoverNativeAotProjects()
 {
-    var failures = new List<string>();
-    var actualSdkProjects = Directory.GetFiles(Path.Combine(repoRoot, "src"), "*.csproj", SearchOption.AllDirectories)
+    // Modules that sit at the shipped-library layout but are internal tooling (IsPackable=false,
+    // never shipped), so they stay outside the Native AOT support envelope. This is a closed set,
+    // not a "Cli.*" prefix rule: any other Cli.* module appearing at that layout is reported as
+    // unclassified rather than silently skipped, so shipping one forces the in/out decision to be
+    // made here. The exclusion is deliberately path-based rather than read from the project file:
+    // a check that a project can opt itself out of is not a safety net.
+    string[] excludedModules = ["Cli.Commands", "Cli.Shared"];
+
+    // The slash count pins the depth and Contains("/src/") pins the middle segment. That second
+    // predicate is load-bearing in a non-obvious way: it is the only thing excluding
+    // src/Cli/YkTool/Yubico.YubiKit.Cli.YkTool.csproj, which also has three slashes and whose module
+    // segment is "Cli", not "Cli.<something>", so neither the depth test nor the excluded-module set
+    // would reject it.
+    var candidates = Directory
+        .GetFiles(Path.Combine(repoRoot, "src"), "*.csproj", SearchOption.AllDirectories)
         .Select(path => Path.GetRelativePath(repoRoot, path).Replace(Path.DirectorySeparatorChar, '/'))
         .Where(path => path.Count(character => character == '/') == 3 &&
                        path.StartsWith("src/", StringComparison.Ordinal) &&
-                       path.Contains("/src/", StringComparison.Ordinal) &&
-                       !path.Contains("/Cli.", StringComparison.Ordinal))
+                       path.Contains("/src/", StringComparison.Ordinal))
         .OrderBy(path => path, StringComparer.Ordinal)
         .ToArray();
-    var expected = expectedProjects.OrderBy(path => path, StringComparer.Ordinal).ToArray();
 
-    if (!actualSdkProjects.SequenceEqual(expected, StringComparer.Ordinal))
+    static string ModuleSegment(string path) => path.Split('/')[1];
+
+    bool IsTooling(string path) => ModuleSegment(path).StartsWith("Cli.", StringComparison.Ordinal);
+    bool IsKnownExclusion(string path) =>
+        excludedModules.Contains(ModuleSegment(path), StringComparer.Ordinal);
+
+    return (
+        SdkProjects: candidates.Where(path => !IsTooling(path)).ToArray(),
+        ExcludedProjects: candidates.Where(IsKnownExclusion).ToArray(),
+        UnclassifiedProjects: candidates.Where(path => IsTooling(path) && !IsKnownExclusion(path)).ToArray());
+}
+
+List<string> ValidateNativeAotContract(
+    (string[] SdkProjects, string[] ExcludedProjects, string[] UnclassifiedProjects) discovery)
+{
+    // Maps each SDK library to the public type the verification host must root. A <ProjectReference>
+    // on its own proves nothing: with no reachable type from the assembly, ILC trims it straight out
+    // of the host's whole-program closure, so the publish would verify nothing for that library while
+    // this target still reported it as anchored. Discovery drives the iteration below; this map only
+    // answers "which type anchors this library", so a newly discovered library with no entry fails
+    // until a maintainer picks one and roots it in Program.cs.
+    var entryTypes = new Dictionary<string, string>(StringComparer.Ordinal)
     {
-        failures.Add(
-            $"supported project set differs: expected [{string.Join(", ", expected)}], " +
-            $"found [{string.Join(", ", actualSdkProjects)}]");
+        ["Yubico.YubiKit.Core.csproj"] = "YubiKeyManager",
+        ["Yubico.YubiKit.Management.csproj"] = "ManagementSession",
+        ["Yubico.YubiKit.Piv.csproj"] = "PivSession",
+        ["Yubico.YubiKit.Fido2.csproj"] = "FidoSession",
+        ["Yubico.YubiKit.WebAuthn.csproj"] = "WebAuthnClient",
+        ["Yubico.YubiKit.Oath.csproj"] = "OathSession",
+        ["Yubico.YubiKit.OpenPgp.csproj"] = "OpenPgpSession",
+        ["Yubico.YubiKit.SecurityDomain.csproj"] = "SecurityDomainSession",
+        ["Yubico.YubiKit.YubiOtp.csproj"] = "YubiOtpSession",
+        ["Yubico.YubiKit.YubiHsm.csproj"] = "HsmAuthSession"
+    };
+
+    var failures = new List<string>();
+    var sdkProjects = discovery.SdkProjects;
+
+    if (sdkProjects.Length == 0)
+    {
+        // Discovery returning nothing would silently pass every per-project check below.
+        failures.Add("no SDK libraries discovered under src/<Module>/src/*.csproj");
     }
 
+    foreach (var project in discovery.UnclassifiedProjects)
+    {
+        failures.Add(
+            $"{project}: internal-tooling module at the SDK library layout is neither a supported SDK " +
+            "library nor in the excludedModules set in DiscoverNativeAotProjects (toolchain.cs); " +
+            "classify it explicitly");
+    }
+
+    var verificationDirectory = Path.Combine(repoRoot, "verification", "NativeAotVerification");
     var verificationProjectPath = Path.Combine(
-        repoRoot,
-        "verification",
-        "NativeAotVerification",
+        verificationDirectory,
         "Yubico.YubiKit.NativeAotVerification.csproj");
-    var verificationProgramPath = Path.Combine(
-        repoRoot,
-        "verification",
-        "NativeAotVerification",
-        "Program.cs");
-    var verificationProject = File.ReadAllText(verificationProjectPath);
+    var verificationProgramPath = Path.Combine(verificationDirectory, "Program.cs");
     var verificationProgram = File.ReadAllText(verificationProgramPath);
 
-    foreach (var project in expectedProjects)
+    // Parsed as XML rather than substring-matched against the raw file text: a commented-out
+    // <ProjectReference>, or a project file name that merely appears in the host csproj's header
+    // comment, satisfies a substring check while referencing nothing at all.
+    var referencedSdkProjects = XDocument.Load(verificationProjectPath)
+        .Descendants("ProjectReference")
+        .Attributes("Include")
+        .Select(include => Path.GetFullPath(Path.Combine(
+            verificationDirectory,
+            include.Value.Replace('\\', Path.DirectorySeparatorChar))))
+        .Select(fullPath => Path.GetRelativePath(repoRoot, fullPath).Replace(Path.DirectorySeparatorChar, '/'))
+        .Where(path => path.StartsWith("src/", StringComparison.Ordinal))
+        .ToHashSet(StringComparer.Ordinal);
+
+    foreach (var project in sdkProjects)
     {
-        var projectPath = Path.Combine(repoRoot, project);
-        var projectContents = File.ReadAllText(projectPath);
+        var projectContents = File.ReadAllText(Path.Combine(repoRoot, project));
         if (!projectContents.Contains(
                 "<IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>",
                 StringComparison.Ordinal))
@@ -1249,33 +1309,38 @@ List<string> ValidateNativeAotContract(string[] expectedProjects)
             failures.Add($"{project}: missing IsYubiKitSdkLibrary opt-in");
         }
 
-        var projectFileName = Path.GetFileName(project);
-        if (!verificationProject.Contains(projectFileName, StringComparison.Ordinal))
+        if (!referencedSdkProjects.Contains(project))
         {
-            failures.Add($"verification host does not reference {projectFileName}");
+            failures.Add(
+                $"{project}: verification host does not reference it; add a <ProjectReference> to " +
+                "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj");
+        }
+
+        if (!entryTypes.TryGetValue(Path.GetFileName(project), out var entryType))
+        {
+            failures.Add(
+                $"{project}: no verification-host entry type mapped; add one to entryTypes in " +
+                "toolchain.cs and root it in verification/NativeAotVerification/Program.cs");
+        }
+        else if (!verificationProgram.Contains($"typeof({entryType})", StringComparison.Ordinal))
+        {
+            failures.Add(
+                $"{project}: verification host does not anchor typeof({entryType}) in " +
+                "verification/NativeAotVerification/Program.cs");
         }
     }
 
-    string[] entryTypes =
-    [
-        "YubiKeyManager",
-        "ManagementSession",
-        "PivSession",
-        "FidoSession",
-        "WebAuthnClient",
-        "OathSession",
-        "OpenPgpSession",
-        "SecurityDomainSession",
-        "YubiOtpSession",
-        "HsmAuthSession"
-    ];
-
-    foreach (var entryType in entryTypes)
+    // The other direction: every SDK project the host references must still be a discovered library.
+    // Without this, a library that moves out of the src/<Module>/src/ shape simply drops out of the
+    // loop above and the contract passes green with a smaller count, leaving it outside AOT coverage.
+    // It also catches a reference left behind by a deleted or renamed module.
+    foreach (var referenced in referencedSdkProjects
+                 .Except(sdkProjects, StringComparer.Ordinal)
+                 .Order(StringComparer.Ordinal))
     {
-        if (!verificationProgram.Contains($"typeof({entryType})", StringComparison.Ordinal))
-        {
-            failures.Add($"verification host does not anchor {entryType}");
-        }
+        failures.Add(
+            $"{referenced}: referenced by the verification host but not discovered as a supported SDK " +
+            "library at src/<Module>/src/*.csproj (moved, renamed, deleted, or internal tooling)");
     }
 
     return failures;

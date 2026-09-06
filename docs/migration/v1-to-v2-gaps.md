@@ -76,7 +76,7 @@ v2 location: `src/Core/src/**`
   **User impact**: Code catching `TlvException` specifically won't compile/catch correctly.
   **Severity**: Minor | **Confidence**: Medium
 
-**Verified parity/improvement, no gap**: device discovery/hot-plug (`YubiKeyManager.WatchAsync` for `await foreach`, plus `DeviceChanges` as `IObservable<DeviceEvent>`; richer than v1's event-based `YubiKeyDeviceListener` and with no third-party dependency); USB HID/CCID/NFC transports; Windows/macOS/Linux platform interop; APDU chaining (`ApduException` gains `FromResponse`/`FromStatusWord` factories); crypto key-handling types (RSA/EC/Curve25519, ASN.1, HKDF) fully ported plus new COSE/ARKG types; `SCardException`/`PlatformApiException` parity.
+**Verified parity/improvement, no gap**: device discovery/hot-plug (`YubiKeyManager.WatchAsync` for `await foreach`; richer than v1's event-based `YubiKeyDeviceListener` and with no third-party dependency); USB HID/CCID/NFC transports; Windows/macOS/Linux platform interop; APDU chaining (`ApduException` gains `FromResponse`/`FromStatusWord` factories); crypto key-handling types (RSA/EC/Curve25519, ASN.1, HKDF) fully ported plus new COSE/ARKG types; `SCardException`/`PlatformApiException` parity.
 
 ---
 
@@ -137,7 +137,7 @@ v2 locations: `src/Fido2/src/**`, `src/WebAuthn/src/**`
 
 - **Feature/API**: `KeyCollector` delegate for PIN/touch/UV prompts on `Fido2Session`
   **v2 status**: Present-but-renamed/Behavior-changed — `Fido2Session` exposes explicit async methods (`SetPinAsync`, `ChangePinAsync`, `GetPinUvAuthTokenUsingPinAsync/UsingUvAsync`) with no callback. At the WebAuthn layer the closest analog is `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`), an optional async SDK-to-application prompt supplied to `WebAuthnClient`: the SDK calls it when a ceremony needs a PIN and owns a bounded retry loop with a fresh, zeroed secret for each attempt. The synchronous `ISecureCredentialReader` is instead an application-initiated terminal input helper and does not replace this callback.
-  `IAsyncEnumerable<WebAuthnStatus>` is **not** the replacement — it is observation-only ceremony progress (`Processing`, `Finished`, `Failed`) and never gathers input. Abandonment is via the cancellation token, not a stream state.
+  WebAuthn ceremonies are plain awaitable methods; there is no progress stream and no interaction callback. Abandonment is via the cancellation token.
   Touch remains a gap: WebAuthn has no dedicated in-flight touch signal, so UI can only prompt speculatively while a ceremony may be waiting for user presence.
   No 1:1 analog; arguably more explicit/testable, but requires a rewrite.
   **Severity**: Minor (migration friction, not capability loss) | **Confidence**: High
@@ -307,7 +307,7 @@ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations onl
   **Severity**: Cosmetic | **Confidence**: High
 
 - **Feature/API**: Zeroable credential passwords — v1 accepted `ReadOnlyMemory<byte> credentialPassword` (`YubiHsmAuthSession.Symmetric.cs`, `Aes128CredentialWithSecrets.cs`).
-  **v2 status**: **Regressed, now fixed (2026-08-31).** v2 originally shipped these as `string`, which callers cannot wipe — the only module in the SDK still doing so after the `75353fd1` Fido2/OpenPgp/Oath sweep, which missed `src/YubiHsm/` because it landed seven days earlier. Nine members now take UTF-8 `ReadOnlyMemory<byte>` (`...Utf8` parameters), restoring v1 parity. Padding and PBKDF2 behavior are unchanged.
+  **v2 status**: **Regressed, now fixed (2026-08-31).** v2 originally shipped these as `string`, which callers cannot wipe — the only module in the SDK still doing so after the `75353fd1` Fido2/OpenPgp/Oath sweep, which missed `src/YubiHsm/` because it landed seven days earlier. Nine members now take UTF-8 `ReadOnlyMemory<byte>`, restoring v1 parity. Padding and PBKDF2 behavior are unchanged. The parameters are named plainly (`credentialPassword` and friends), with the UTF-8 and ownership contracts documented on each `<param>`.
   **Severity**: Major (while it lasted) | **Confidence**: High
 
 **Verified improvement, no gap**: `ChangeCredentialPasswordAsync`/`ChangeCredentialPasswordAdminAsync` (fw 5.8.0+), `GenerateCredentialAsymmetricAsync` (on-device EC keygen), `PutCredentialDerivedAsync` (PBKDF2-derived symmetric credential), `SessionKeys` as `IDisposable` with zeroization — all new capabilities beyond v1.

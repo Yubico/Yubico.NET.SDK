@@ -63,6 +63,10 @@ Parsing regex: `^((\d+)/)?(([^:]+):)?(.+)$`
 
 `PBKDF2-HMAC-SHA1(password_utf8, salt, 1000 iterations, 16 bytes)` — dictated by hardware.
 
+`IOathSession.DeriveKey` takes the password as a borrowed UTF-8 `ReadOnlyMemory<byte>` named
+`password` — no `Utf8` suffix. The UTF-8 contract and the caller's obligation to zero both the
+input buffer and the returned key live in the XML documentation for the member.
+
 ## Version-Gated Features
 
 | Feature | Minimum Version |

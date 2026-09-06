@@ -76,7 +76,9 @@ public interface IOpenPgpSession : IApplicationSession
     ///     sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(pin)</c> and zero
     ///     the resulting array when finished.
     /// </remarks>
-    /// <param name="pinUtf8">The User PIN as UTF-8 encoded bytes.</param>
+    /// <param name="pin">
+    ///     The borrowed UTF-8 encoded User PIN. The caller owns the buffer and must clear it after use.
+    /// </param>
     /// <param name="extended">
     ///     If <c>true</c>, verifies for extended operations (decrypt/authenticate, P2=0x82).
     ///     If <c>false</c>, verifies for signature operations (P2=0x81). Defaults to <c>false</c>.
@@ -89,13 +91,17 @@ public interface IOpenPgpSession : IApplicationSession
     ///     be determined.
     /// </exception>
     Task VerifyPinAsync(
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         bool extended = false,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Verifies the Admin PIN. If KDF is configured, the PIN is derived before sending.
     /// </summary>
+    /// <param name="pin">
+    ///     The borrowed UTF-8 encoded Admin PIN. The caller owns the buffer and must clear it after use.
+    /// </param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <exception cref="OpenPgpInvalidPinException">
     ///     Thrown when the card rejects the supplied Admin PIN.
     ///     <see cref="OpenPgpInvalidPinException.RetriesRemaining" /> reports the remaining
@@ -103,7 +109,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     be determined.
     /// </exception>
     Task VerifyAdminAsync(
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -113,26 +119,44 @@ public interface IOpenPgpSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Changes the User PIN from <paramref name="currentPinUtf8" /> to <paramref name="newPinUtf8" />.
+    ///     Changes the User PIN from <paramref name="currentPin" /> to <paramref name="newPin" />.
     /// </summary>
+    /// <param name="currentPin">
+    ///     The borrowed UTF-8 encoded current User PIN. The caller owns the buffer and must clear it after use.
+    /// </param>
+    /// <param name="newPin">
+    ///     The borrowed UTF-8 encoded new User PIN. The caller owns the buffer and must clear it after use.
+    /// </param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task ChangePinAsync(
-        ReadOnlyMemory<byte> currentPinUtf8,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> currentPin,
+        ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Changes the Admin PIN from <paramref name="currentPinUtf8" /> to <paramref name="newPinUtf8" />.
+    ///     Changes the Admin PIN from <paramref name="currentPin" /> to <paramref name="newPin" />.
     /// </summary>
+    /// <param name="currentPin">
+    ///     The borrowed UTF-8 encoded current Admin PIN. The caller owns the buffer and must clear it after use.
+    /// </param>
+    /// <param name="newPin">
+    ///     The borrowed UTF-8 encoded new Admin PIN. The caller owns the buffer and must clear it after use.
+    /// </param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task ChangeAdminAsync(
-        ReadOnlyMemory<byte> currentPinUtf8,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> currentPin,
+        ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Sets the Reset Code used for resetting the User PIN without the Admin PIN.
     /// </summary>
+    /// <param name="resetCode">
+    ///     The borrowed UTF-8 encoded Reset Code. The caller owns the buffer and must clear it after use.
+    /// </param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task SetResetCodeAsync(
-        ReadOnlyMemory<byte> resetCodeUtf8,
+        ReadOnlyMemory<byte> resetCode,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -141,22 +165,25 @@ public interface IOpenPgpSession : IApplicationSession
     /// <remarks>
     ///     When <paramref name="useAdmin" /> is <c>true</c>, the caller must have already
     ///     verified the Admin PIN via <see cref="VerifyAdminAsync" /> before calling this method.
-    ///     The <paramref name="resetCodeUtf8" /> parameter is ignored in admin mode; only the
-    ///     <paramref name="newPinUtf8" /> is sent to the card.
+    ///     The <paramref name="resetCode" /> parameter is ignored in admin mode; only the
+    ///     <paramref name="newPin" /> is sent to the card.
     /// </remarks>
-    /// <param name="resetCodeUtf8">
-    ///     The Reset Code as UTF-8 bytes (when <paramref name="useAdmin" /> is <c>false</c>).
-    ///     Ignored when <paramref name="useAdmin" /> is <c>true</c>.
+    /// <param name="resetCode">
+    ///     The borrowed UTF-8 encoded Reset Code (when <paramref name="useAdmin" /> is
+    ///     <c>false</c>). Ignored when <paramref name="useAdmin" /> is <c>true</c>.
+    ///     The caller owns the buffer and must clear it after use.
     /// </param>
-    /// <param name="newPinUtf8">The new User PIN as UTF-8 encoded bytes.</param>
+    /// <param name="newPin">
+    ///     The borrowed UTF-8 encoded new User PIN. The caller owns the buffer and must clear it after use.
+    /// </param>
     /// <param name="useAdmin">
     ///     If <c>true</c>, assumes Admin PIN (PW3) has been verified and sends
     ///     RESET RETRY COUNTER with P1=0x02. If <c>false</c>, uses the Reset Code with P1=0x00.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     Task ResetPinAsync(
-        ReadOnlyMemory<byte> resetCodeUtf8,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> resetCode,
+        ReadOnlyMemory<byte> newPin,
         bool useAdmin = false,
         CancellationToken cancellationToken = default);
 

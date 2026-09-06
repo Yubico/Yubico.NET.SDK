@@ -10,24 +10,45 @@ public class CoreTests : IAsyncLifetime
 
     public async Task DisposeAsync() => await YubiKeyManager.ShutdownAsync();
 
-    /// <summary>Verifies observable delivery of the initial device scan against real hardware.</summary>
+    /// <summary>Verifies delivery of the initial device scan to a watcher against real hardware.</summary>
     /// <remarks>
-    /// <see cref="YubiKeyManager.DeviceChanges"/> invokes observers inline on the monitor's publish
-    /// path. The subscription is established before monitoring starts so it observes the initial
-    /// scan.
+    /// <see cref="YubiKeyManager.WatchAsync"/> subscribes on the first <c>MoveNextAsync</c>, so the
+    /// enumeration is started before monitoring starts; that is how it observes the initial scan.
     /// </remarks>
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
-    public async Task DeviceChanges_PublishesToObservableSubscribers()
+    public async Task WatchAsync_ReceivesEventsFromTheInitialScan()
     {
-        var observer = new FirstEventObserver();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        await using var enumerator = YubiKeyManager.WatchAsync(cts.Token).GetAsyncEnumerator(cts.Token);
+        var first = enumerator.MoveNextAsync().AsTask();
 
-        using var subscription = YubiKeyManager.DeviceChanges.Subscribe(observer);
         YubiKeyManager.StartMonitoring();
 
-        var observed = await observer.WaitForFirstAsync(TimeSpan.FromSeconds(10));
+        bool observed;
+        try
+        {
+            observed = await first.WaitAsync(TimeSpan.FromSeconds(10));
+        }
+        catch (TimeoutException)
+        {
+            observed = false;
 
-        Assert.True(observed, "Expected at least one device event to reach the observable subscriber.");
+            // `first` is still in flight, and disposing an async iterator with a MoveNextAsync
+            // outstanding throws NotSupportedException — which would surface instead of the assertion
+            // below and hide what actually went wrong. Cancel and let the pending move retire first.
+            await cts.CancelAsync();
+            try
+            {
+                _ = await first;
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected: cancellation is how the in-flight MoveNextAsync is retired.
+            }
+        }
+
+        Assert.True(observed, "Expected at least one device event to reach the watcher.");
     }
 
     [Fact]
@@ -38,34 +59,5 @@ public class CoreTests : IAsyncLifetime
             () => YubiKeyManager.FindAllAsync(ConnectionType.SmartCard));
         var device = devices.FirstOrDefault();
         Assert.NotNull(device);
-    }
-
-    /// <summary>Signals as soon as the first device event arrives.</summary>
-    private sealed class FirstEventObserver : IObserver<DeviceEvent>
-    {
-        private readonly TaskCompletionSource _first = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        public void OnNext(DeviceEvent value) => _first.TrySetResult();
-
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
-
-        public async Task<bool> WaitForFirstAsync(TimeSpan timeout)
-        {
-            try
-            {
-                await _first.Task.WaitAsync(timeout).ConfigureAwait(false);
-                return true;
-            }
-            catch (TimeoutException)
-            {
-                return false;
-            }
-        }
     }
 }

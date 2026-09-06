@@ -57,12 +57,12 @@ public static class PinManagement
     /// Sets the initial PIN on the authenticator.
     /// </summary>
     /// <param name="yubiKey">The YubiKey device.</param>
-    /// <param name="newPinUtf8">The PIN as UTF-8 bytes.</param>
+    /// <param name="newPin">The PIN as UTF-8 bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result.</returns>
     public static async Task<PinResult> SetPinAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
         try
@@ -73,7 +73,7 @@ public static class PinManagement
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            await clientPin.SetPinAsync(newPinUtf8, cancellationToken);
+            await clientPin.SetPinAsync(newPin, cancellationToken);
 
             return PinResult.Succeeded();
         }
@@ -95,14 +95,14 @@ public static class PinManagement
     /// Changes the existing PIN on the authenticator.
     /// </summary>
     /// <param name="yubiKey">The YubiKey device.</param>
-    /// <param name="currentPinUtf8">The current PIN as UTF-8 bytes.</param>
-    /// <param name="newPinUtf8">The new PIN as UTF-8 bytes.</param>
+    /// <param name="currentPin">The current PIN as UTF-8 bytes.</param>
+    /// <param name="newPin">The new PIN as UTF-8 bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result.</returns>
     public static async Task<PinResult> ChangePinAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> currentPinUtf8,
-        ReadOnlyMemory<byte> newPinUtf8,
+        ReadOnlyMemory<byte> currentPin,
+        ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
         try
@@ -113,7 +113,7 @@ public static class PinManagement
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            await clientPin.ChangePinAsync(currentPinUtf8, newPinUtf8, cancellationToken);
+            await clientPin.ChangePinAsync(currentPin, newPin, cancellationToken);
 
             return PinResult.Succeeded();
         }
@@ -135,12 +135,12 @@ public static class PinManagement
     /// Verifies the PIN by attempting to obtain a PIN token.
     /// </summary>
     /// <param name="yubiKey">The YubiKey device.</param>
-    /// <param name="pinUtf8">The PIN as UTF-8 bytes to verify.</param>
+    /// <param name="pin">The PIN as UTF-8 bytes to verify.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The operation result.</returns>
     public static async Task<PinResult> VerifyPinAsync(
         IYubiKey yubiKey,
-        ReadOnlyMemory<byte> pinUtf8,
+        ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
@@ -153,7 +153,7 @@ public static class PinManagement
             using var clientPin = new ClientPin(session, protocol);
 
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pinUtf8,
+                pin,
                 PinUvAuthTokenPermissions.GetAssertion,
                 cancellationToken: cancellationToken);
 

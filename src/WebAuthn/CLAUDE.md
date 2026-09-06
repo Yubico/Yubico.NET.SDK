@@ -16,8 +16,7 @@ For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.m
 The WebAuthn module implements the W3C Web Authentication API (Level 2/3) on top of the FIDO2 CTAP protocol. It provides:
 - **High-level WebAuthn API**: `WebAuthnClient` orchestrates credential registration and authentication
 - **Extension Framework**: Pluggable CTAP v4 extensions (e.g., `previewSign`)
-- **Backend Abstraction**: Transparently routes operations through `IFidoSession`
-- **Status Streaming**: Observation-only async enumerable for ceremony progress (`IAsyncEnumerable<WebAuthnStatus>`)
+- **Backend Abstraction**: `IWebAuthnBackend` (internal) routes operations through `IFidoSession`
 - **Credential Prompting**: Optional `ICredentialPrompt` supplies a PIN on demand; the SDK owns the retry loop
 
 **Key Dependencies:**
@@ -28,16 +27,18 @@ The WebAuthn module implements the W3C Web Authentication API (Level 2/3) on top
 ```
 src/
 ├── Client/                       # WebAuthn Client API
-│   ├── WebAuthnClient.cs
+│   ├── WebAuthnClient.cs                 # ctors, disposal, shared state
+│   ├── WebAuthnClient.Registration.cs    # MakeCredential ceremony
+│   ├── WebAuthnClient.Authentication.cs  # GetAssertion ceremony
+│   ├── WebAuthnClient.PinUvAuth.cs       # PIN/UV token acquisition and prompting
+│   ├── WebAuthnClient.Validation.cs      # option validation and CTAP error mapping
+│   ├── WebAuthnClientOptions.cs
 │   ├── PublicSuffixChecker.cs
-│   ├── FidoSessionWebAuthnBackend.cs
-│   ├── IWebAuthnBackend.cs
-│   ├── PinUvAuthTokenSession.cs
+│   ├── WebAuthnBackend.cs        # internal
+│   ├── IWebAuthnBackend.cs       # internal
+│   ├── PinUvAuthTokenSession.cs  # internal
 │   ├── WebAuthnClientData.cs
 │   ├── WebAuthnOrigin.cs
-│   ├── Status/                   # Ceremony progress reporting
-│   │   ├── WebAuthnStatus.cs
-│   │   └── StatusChannel.cs
 │   ├── UserVerification/         # UV/PIN decision logic
 │   │   └── UvDecision.cs
 │   ├── Validation/
@@ -90,13 +91,18 @@ Logger.LogError(ex, "PreviewSign authentication failed");
 ```csharp
 // Create client from an existing FIDO2 session.
 // The PublicSuffixChecker should be backed by Public Suffix List data.
-// `prompt` is optional; supply one to let the SDK ask for a PIN when the ceremony needs it.
+// WebAuthnClientOptions is optional; supply a CredentialPrompt to let the SDK ask for a PIN
+// when the ceremony needs it.
 await using var client = new WebAuthnClient(
     fidoSession,
     origin,
     isPublicSuffix: domain => publicSuffixList.Contains(domain),
-    enterpriseRpIds: null,
-    prompt: myCredentialPrompt);
+    new WebAuthnClientOptions
+    {
+        CredentialPrompt = myCredentialPrompt,
+        EnterpriseRpIds = enterpriseRpIds,
+        MaxPromptAttempts = 3
+    });
 
 // Or create the FIDO2 session and WebAuthn client from a YubiKey device.
 await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
@@ -132,8 +138,9 @@ var assertion = await matches[0].SelectAsync();
 ### Credential Prompting
 
 A PIN reaches the client one of two ways: the caller passes `pinBytes`, or the client was
-constructed with an `ICredentialPrompt` (from `Yubico.YubiKit.Core.Credentials`) and asks for one
-when the ceremony needs it. There is no callback on the status stream.
+constructed with `WebAuthnClientOptions.CredentialPrompt` (an `ICredentialPrompt` from
+`Yubico.YubiKit.Core.Credentials`) and asks for one when the ceremony needs it. There is no
+other interaction callback.
 
 ```csharp
 public interface ICredentialPrompt
@@ -159,8 +166,9 @@ Contract:
 - **The SDK owns the retry loop.** On a rejected PIN it zeroes the secret, never resubmits it, and
   calls the prompt again with a fresh `CredentialPromptContext` carrying `IsRetry = true` and the
   refreshed `RetriesRemaining`. Implementations must not retry internally.
-- `MaxPromptAttempts` (3) limits SDK prompt attempts. The authenticator separately enforces and
-  reports its own retry state.
+- `WebAuthnClientOptions.MaxPromptAttempts` (default 3) limits SDK prompt attempts and is rejected
+  at options construction if it is not positive. The authenticator separately enforces and reports
+  its own retry state.
 - WebAuthn additionally zeroes and disposes late-returned PIN buffers after cancellation when the
   prompt task eventually completes. There is no Core-wide tracking guarantee for a prompt that
   never completes; implementations must honor cancellation.
@@ -195,36 +203,15 @@ Known gap: extension-driven permissions are not aggregated before the decision, 
 write does not yet contribute `LargeBlobWrite` to `requestedPermissions`. The logic handles that
 permission correctly once something requests it.
 
-### Status Streaming
+### No Progress Stream Or Interaction Callback
 
-WebAuthn operations report ceremony progress via `IAsyncEnumerable<WebAuthnStatus>`. The stream is
-**observation-only**: statuses never gather input and carry no callbacks. To abandon an operation,
-cancel the token you passed to it.
+WebAuthn ceremonies are plain awaitable methods: `MakeCredentialAsync` and `GetAssertionAsync`.
+There is no progress stream, no touch signal, and no user-verification callback. To abandon a
+ceremony, cancel the token you passed to it. A PIN comes from `pinBytes` or
+`WebAuthnClientOptions.CredentialPrompt`, and nothing else.
 
-There is also no dedicated touch signal in the WebAuthn surface. If the authenticator needs user
-presence, UI can only prompt speculatively before or during the wait.
-
-```csharp
-await foreach (var status in client.MakeCredentialStreamAsync(options, cancellationToken: ct))
-{
-    switch (status)
-    {
-        case WebAuthnStatusProcessing:
-            Console.WriteLine("Processing WebAuthn ceremony...");
-            break;
-        case WebAuthnStatusFinished<RegistrationResponse> finished:
-            Console.WriteLine($"Created credential {Convert.ToHexString(finished.Result.CredentialId.Span)}");
-            break;
-        case WebAuthnStatusFailed failed:
-            throw failed.Error;
-    }
-}
-```
-
-**Status records:**
-- `WebAuthnStatusProcessing` — ceremony work is in progress
-- `WebAuthnStatusFinished<T>` — operation completed successfully
-- `WebAuthnStatusFailed` — operation completed with a typed WebAuthn error
+If UX needs a touch prompt, show concise factual guidance based on the ceremony shape, not on an
+in-flight signal from the SDK.
 
 ### RP ID Validation
 
@@ -322,7 +309,7 @@ var authenticationExtensions = new AuthenticationExtensionInputs(
 
 | Lane | Examples | Agent-runnable? | Rule |
 |------|----------|-----------------|------|
-| Unit/fake-backend | WebAuthn client, origin, extension adapter, status-stream unit tests | Yes | Run through `dotnet toolchain.cs -- test --project WebAuthn` |
+| Unit/fake-backend | WebAuthn client, origin, extension adapter unit tests | Yes | Run through `dotnet toolchain.cs -- test --project WebAuthn` |
 | Integration smoke without UP | factory/session checks that do not ask for touch | Yes | Use `--smoke` or `Category!=RequiresUserPresence` |
 | User Presence | registration/authentication ceremonies, previewSign hardware checks | No by default | Mark with `Category=RequiresUserPresence`; run only with a human present |
 | User Verification / PIN | PIN normalization, UV-required/preferred flows | No by default | Requires explicit human approval and known PIN/device state |
@@ -344,6 +331,7 @@ public async Task Registration_WithPreviewSign_ReturnsGeneratedSigningKey(YubiKe
         fidoSession,
         origin!,
         isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk");
+
     
     // Test logic...
 }
@@ -380,15 +368,14 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 2. **Extension inputs must reach the backend** — Assert on encoded extension maps because a missing adapter call can silently omit an extension
 3. **`flags` optional in previewSign registration output** — Some authenticators return only key 3 (algorithm)
 4. **No LoggingFactory** — Use `YubiKitLogging.CreateLogger<T>()` from Core
-5. **Status stream must be consumed** — `IAsyncEnumerable` won't advance unless caller enumerates
-6. **CBOR key constants are context-specific** — key `7` means authentication `additionalArgs` in GetAssertion input and attestation object in MakeCredential unsigned output; keep parsing paths context-specific
-7. **The status stream never asks for anything** — it reports only. Input comes from `pinBytes` or
-   `ICredentialPrompt`; abandonment comes from the cancellation token.
-8. **User presence and user verification are independent** — touch (UP) is always required for
+5. **CBOR key constants are context-specific** — key `7` means authentication `additionalArgs` in GetAssertion input and attestation object in MakeCredential unsigned output; keep parsing paths context-specific
+6. **The client never asks for anything except a PIN** — input comes from `pinBytes` or
+   `WebAuthnClientOptions.CredentialPrompt`; abandonment comes from the cancellation token.
+7. **User presence and user verification are independent** — touch (UP) is always required for
    makeCredential regardless of the UV preference. CTAP does not let a client set `up` on
    makeCredential at all, so never send it; the authenticator's default of `true` applies. `up=false`
    is legitimate only on the silent exclude-list pre-flight getAssertion probe
    (`Internal/ExcludeListPreflight.cs`).
-9. **Touch guidance is speculative only** — WebAuthn exposes no dedicated "touch now" callback or
-   status. If UX needs a touch prompt, show concise factual guidance based on the ceremony shape,
+8. **Touch guidance is speculative only** — WebAuthn exposes no dedicated "touch now" callback.
+   If UX needs a touch prompt, show concise factual guidance based on the ceremony shape,
    not on an in-flight signal from the SDK.

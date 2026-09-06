@@ -22,7 +22,6 @@ using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
-using Yubico.YubiKit.WebAuthn.Client.Status;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using static Yubico.YubiKit.WebAuthn.IntegrationTests.WebAuthnTestHelpers;
 
@@ -102,38 +101,6 @@ public class WebAuthnClientTests
         Assert.NotNull(response);
         Assert.True(response.CredentialId.Length > 0);
         Assert.NotEqual(Guid.Empty, response.Aaguid.Value);
-    }
-
-    [SkippableTheory]
-    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
-    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
-    public async Task MakeCredentialStream_EmitsProcessingThenFinished(YubiKeyTestState state)
-    {
-        await using var session = await state.Device
-            .CreateFidoSessionAsync();
-
-        await NormalizePinAsync(session);
-
-        await using var client = CreateClient(session);
-
-        var options = CreateRegistrationOptions();
-        var statuses = new List<WebAuthnStatus>();
-
-        await foreach (var status in client.MakeCredentialStreamAsync(options, KnownTestPin))
-        {
-            statuses.Add(status);
-
-            if (status is WebAuthnStatusFailed failed)
-            {
-                throw failed.Error;
-            }
-        }
-
-        Assert.Contains(statuses, s => s is WebAuthnStatusProcessing);
-        Assert.Contains(statuses, s => s is WebAuthnStatusFinished<RegistrationResponse>);
-
-        var finished = statuses.OfType<WebAuthnStatusFinished<RegistrationResponse>>().Single();
-        Assert.True(finished.Result.CredentialId.Length > 0);
     }
 
     [SkippableTheory]

@@ -30,13 +30,11 @@ internal static class AsnPublicKeyEncoder
     /// <returns>A byte array containing the ASN.1 DER encoded public key.</returns>
     public static byte[] EncodeToSubjectPublicKeyInfo(ReadOnlyMemory<byte> publicPoint, KeyType keyType)
     {
-        var keyDefinition = KeyDefinitions.GetByKeyType(keyType);
-        var coordinateLength = keyDefinition.LengthInBytes;
         return keyType switch
         {
-            KeyType.ECP256 => EncodeECDsaPublicKey(publicPoint, Oids.ECP256, coordinateLength),
-            KeyType.ECP384 => EncodeECDsaPublicKey(publicPoint, Oids.ECP384, coordinateLength),
-            KeyType.ECP521 => EncodeECDsaPublicKey(publicPoint, Oids.ECP521, coordinateLength),
+            KeyType.ECP256 => EncodeECDsaPublicKey(publicPoint, Oids.ECP256),
+            KeyType.ECP384 => EncodeECDsaPublicKey(publicPoint, Oids.ECP384),
+            KeyType.ECP521 => EncodeECDsaPublicKey(publicPoint, Oids.ECP521),
             KeyType.X25519 or KeyType.Ed25519 => EncodeCurve25519PublicKey(publicPoint, keyType),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
         };
@@ -128,33 +126,13 @@ internal static class AsnPublicKeyEncoder
         var curveOid = parameters.Curve.Oid.Value;
 
         // Create the uncompressed EC point format: 0x04 || X || Y
-        var xCoordinate = parameters.Q.X;
-        var yCoordinate = parameters.Q.Y;
+        var uncompressedPoint = AsnUtilities.BuildUncompressedEcPoint(
+            parameters.Q.X,
+            parameters.Q.Y,
+            curveOid,
+            nameof(parameters));
 
-        var uncompressedPoint = new byte[1 + xCoordinate.Length + yCoordinate.Length];
-        uncompressedPoint[0] = 0x04; // Uncompressed point format
-        xCoordinate.CopyTo(uncompressedPoint, 1);
-        yCoordinate.CopyTo(uncompressedPoint, 1 + xCoordinate.Length);
-
-        // Write ASN.1 structure for SubjectPublicKeyInfo
-        var writer = new AsnWriter(AsnEncodingRules.DER);
-
-        // Start SubjectPublicKeyInfo SEQUENCE
-        _ = writer.PushSequence();
-
-        // Algorithm Identifier SEQUENCE
-        _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(Oids.ECDSA);
-        writer.WriteObjectIdentifier(curveOid);
-        writer.PopSequence();
-
-        // Write subject public key as BIT STRING
-        writer.WriteBitString(uncompressedPoint);
-
-        // End SubjectPublicKeyInfo SEQUENCE
-        writer.PopSequence();
-
-        return writer.Encode();
+        return EncodeECDsaPublicKey(uncompressedPoint, curveOid);
     }
 
     private static byte[] EncodeCurve25519PublicKey(ReadOnlyMemory<byte> publicKey, KeyType keyType)
@@ -193,19 +171,9 @@ internal static class AsnPublicKeyEncoder
         return writer.Encode();
     }
 
-    private static byte[] EncodeECDsaPublicKey(ReadOnlyMemory<byte> publicPoint, string curveOid, int coordinateSize)
+    private static byte[] EncodeECDsaPublicKey(ReadOnlyMemory<byte> publicPoint, string curveOid)
     {
-        if (publicPoint.Length == 0 || publicPoint.Span[0] != 0x04)
-        {
-            throw new ArgumentException("EC public point must be in uncompressed format (starting with 0x04).");
-        }
-
-        var isValidLength = publicPoint.Length == 1 + (coordinateSize * 2);
-        if (!isValidLength)
-        {
-            throw new ArgumentException(
-                $"Invalid EC public point size for the specified curve. Expected {1 + (coordinateSize * 2)} bytes.");
-        }
+        AsnUtilities.ValidateEcPointArgument(publicPoint.Span, curveOid, nameof(publicPoint));
 
         // Write ASN.1 structure for SubjectPublicKeyInfo
         var writer = new AsnWriter(AsnEncodingRules.DER);

@@ -106,7 +106,7 @@ Before implementing a feature, load relevant API surface:
 | **Class** | `[Class] DeviceChannel : IDeviceChannel, IDisposable :27` |
 | **Interface** | `[Interface] IDeviceRepository : IDisposable :24` |
 | **Method** | `[Method] Task<IReadOnlyList<IYubiKey>> FindAllAsync(...) :91` |
-| **Property** | `[Property] IObservable<DeviceEvent> DeviceChanges :26` |
+| **Property** | `[Property] ConnectionType AvailableConnections :72` |
 | **Constructor** | `[Constructor] DeviceChannel(ILogger logger) :30` |
 | **Static** | `[Class:static]` or `[Method:static]` |
 | **Enum** | `[Enum] Transport { None, Usb, Nfc, All } [Flags] :17` |

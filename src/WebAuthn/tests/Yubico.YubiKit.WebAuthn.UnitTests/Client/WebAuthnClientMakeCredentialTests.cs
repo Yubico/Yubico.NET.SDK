@@ -19,9 +19,11 @@ using System.Text;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
+using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -431,6 +433,71 @@ public class WebAuthnClientMakeCredentialTests
         AssertEveryIssuedTokenZeroed(issued, expectedCount: 4);
     }
 
+    /// <summary>
+    /// Control for <see cref="MakeCredential_WhenExtensionBuildFails_NeverComputesPinUvAuthParam"/>:
+    /// proves the protocol double actually records the tags it issues.
+    /// </summary>
+    /// <remarks>
+    /// Without this, the "no tag was issued" assertion could pass because the recording is broken
+    /// rather than because the ceremony genuinely produced nothing.
+    /// </remarks>
+    [Fact]
+    public async Task MakeCredential_WhenTokenIsUsed_RecordsExactlyOnePinUvAuthParam()
+    {
+        // Arrange
+        var protocol = new TestPinUvAuthProtocol();
+        ArrangePinTokenAcquisition(protocol);
+        _mockBackend.MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+
+        // Act
+        _ = await _client.MakeCredentialAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Single(protocol.IssuedAuthTags);
+    }
+
+    /// <summary>
+    /// A ceremony that fails while building extension CBOR must not leave a live PIN/UV auth
+    /// parameter behind.
+    /// </summary>
+    /// <remarks>
+    /// The parameter is computed after everything in the request builder that can throw, so the
+    /// correct outcome here is that it was never produced at all - there is no stranded buffer to
+    /// clean up. Computing it earlier would strand it: the request never reaches
+    /// <c>ExecuteMakeCredentialAsync</c>, whose finally is what clears the parameter on every
+    /// other path. LargeBlob "Required" is used as the trigger because it is a shipped
+    /// not-yet-implemented input, so this is a path real callers can reach.
+    /// </remarks>
+    [Fact]
+    public async Task MakeCredential_WhenExtensionBuildFails_NeverComputesPinUvAuthParam()
+    {
+        // Arrange
+        var protocol = new TestPinUvAuthProtocol();
+        ArrangePinTokenAcquisition(protocol);
+
+        var options = CreateUvRequiredOptions() with
+        {
+            Extensions = new RegistrationExtensionInputs(
+                LargeBlob: new LargeBlobInput { Support = LargeBlobSupport.Required })
+        };
+
+        // Act
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.MakeCredentialAsync(
+            options,
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken));
+
+        // Assert
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
+        Assert.Empty(protocol.IssuedAuthTags);
+    }
+
     [Fact]
     public async Task MakeCredential_WhenBackendFails_ThrowsTypedWebAuthnClientError()
     {
@@ -551,6 +618,38 @@ public class WebAuthnClientMakeCredentialTests
             TokenBufferAssert.Zeroed(issued[i], $"token buffer {i} of the ceremony must be zeroed");
         }
     }
+
+    /// <summary>
+    /// Arranges token acquisition that hands every session the supplied protocol, so a test can
+    /// inspect which authentication tags the ceremony produced.
+    /// </summary>
+    private void ArrangePinTokenAcquisition(TestPinUvAuthProtocol protocol)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            Arg.Any<PinUvAuthTokenPermissions>(),
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(protocol, TokenBufferAssert.CreateSentinelToken()));
+    }
+
+    /// <summary>
+    /// Options that force token acquisition but carry no exclude list, so pre-flight - which mints
+    /// an authentication tag of its own - does not run and the tag count stays attributable to the
+    /// request builder alone.
+    /// </summary>
+    private static RegistrationOptions CreateUvRequiredOptions() => new()
+    {
+        Challenge = RandomNumberGenerator.GetBytes(32),
+        Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+        User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+        PubKeyCredParams = [new CoseAlgorithm(-7)],
+        UserVerification = UserVerificationPreference.Required
+    };
 
     private static RegistrationOptions CreateExcludeListOptions(
         UserVerificationPreference userVerification = UserVerificationPreference.Preferred) => new()

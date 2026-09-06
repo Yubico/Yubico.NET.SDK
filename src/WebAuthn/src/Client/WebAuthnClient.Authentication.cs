@@ -232,21 +232,27 @@ public sealed partial class WebAuthnClient
                 .ToList();
         }
 
-        // Build PIN/UV auth params
+        // Build extensions CBOR via pipeline
+        var extensionsCbor = ExtensionPipeline.BuildAuthenticationExtensionsCbor(
+            options.Extensions,
+            options.AllowCredentials);
+
+        // Computed last, deliberately. Nothing between here and the return can throw, so the
+        // parameter cannot be stranded: the request owns it from construction, and
+        // ExecuteGetAssertionAsync's finally is what clears it. Computing it any earlier leaks the
+        // tag whenever extension building fails, because on that path the request never reaches
+        // that finally.
         ReadOnlyMemory<byte>? pinUvAuthParam = null;
         byte? pinUvAuthProtocol = null;
 
         if (tokenSession is not null)
         {
-            // Compute pinUvAuthParam = HMAC(token, clientDataHash)
-            pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token, clientData.Hash.Span);
+            // Version is read first so the tag is the very last thing to come into existence.
             pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
-        }
 
-        // Build extensions CBOR via pipeline
-        var extensionsCbor = ExtensionPipeline.BuildAuthenticationExtensionsCbor(
-            options.Extensions,
-            options.AllowCredentials);
+            // pinUvAuthParam = HMAC(token, clientDataHash)
+            pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token.Span, clientData.Hash.Span);
+        }
 
         return new BackendGetAssertionRequest
         {

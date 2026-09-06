@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Buffers;
-using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Fido2;
@@ -244,16 +243,17 @@ public sealed partial class WebAuthnClient
             return (null, tokenSession, false);
         }
 
-        // ToArray() creates a copy; pre-flight needs to pass token across async boundary.
-        var tokenCopy = tokenSession.Token.ToArray();
         try
         {
+            // The session's own memory is passed straight through: it stays live for the whole
+            // pre-flight, and taking a copy here would mean a second plaintext token to keep track
+            // of and clear.
             var matchedExclude = await Internal.ExcludeListPreflight.FindFirstMatchAsync(
                 _backend,
                 options.Rp.Id,
                 options.ExcludeCredentials,
                 info,
-                tokenCopy,
+                tokenSession.Token,
                 tokenSession.Protocol,
                 cancellationToken).ConfigureAwait(false);
 
@@ -280,10 +280,6 @@ public sealed partial class WebAuthnClient
                 "This authenticator may not support silent excludeList probing.",
                 preflightEx);
         }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(tokenCopy);
-        }
     }
 
     private BackendMakeCredentialRequest BuildMakeCredentialRequest(
@@ -307,17 +303,6 @@ public sealed partial class WebAuthnClient
             optionsDict["uv"] = uvDecision.UvOption.Value;
         }
 
-        // Compute PIN/UV auth parameter if we have a token
-        ReadOnlyMemory<byte>? pinUvAuthParam = null;
-        byte? pinUvAuthProtocol = null;
-
-        if (tokenSession is not null)
-        {
-            var authParam = tokenSession.Protocol.Authenticate(tokenSession.Token, clientData.Hash.Span);
-            pinUvAuthParam = authParam;
-            pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
-        }
-
         // Build extensions CBOR via pipeline
         var extensionsCbor = ExtensionPipeline.BuildRegistrationExtensionsCbor(options.Extensions, options);
 
@@ -327,14 +312,33 @@ public sealed partial class WebAuthnClient
             ? matchedExclude is not null ? new[] { matchedExclude } : Array.Empty<PublicKeyCredentialDescriptor>()
             : options.ExcludeCredentials;
 
+        // Hoisted out of the object initializer below so that every step which can throw happens
+        // before the PIN/UV auth parameter exists.
+        var pubKeyCredParams = options.PubKeyCredParams
+            .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
+            .ToList();
+
+        // Computed last, deliberately. Nothing between here and the return can throw, so the
+        // parameter cannot be stranded: the request owns it from construction, and
+        // ExecuteMakeCredentialAsync's finally is what clears it. Computing it any earlier leaks
+        // the tag whenever extension building or option mapping fails, because on that path the
+        // request never reaches that finally.
+        ReadOnlyMemory<byte>? pinUvAuthParam = null;
+        byte? pinUvAuthProtocol = null;
+
+        if (tokenSession is not null)
+        {
+            // Version is read first so the tag is the very last thing to come into existence.
+            pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
+            pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token.Span, clientData.Hash.Span);
+        }
+
         return new BackendMakeCredentialRequest
         {
             ClientDataHash = clientData.Hash,
             Rp = options.Rp,
             User = options.User,
-            PubKeyCredParams = options.PubKeyCredParams
-                .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
-                .ToList(),
+            PubKeyCredParams = pubKeyCredParams,
             ExcludeList = excludeList,
             Extensions = extensionsCbor,
             Options = optionsDict.Count > 0 ? optionsDict : null,

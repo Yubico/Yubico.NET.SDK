@@ -18,11 +18,37 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 internal sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
 {
+    /// <summary>
+    /// Fills issued authentication tags with a recognisable non-zero pattern.
+    /// </summary>
+    /// <remarks>
+    /// An all-zero tag would make "this buffer was zeroed" assertions pass without the production
+    /// code doing anything, which is the failure mode <see cref="TokenBufferAssert"/> exists to
+    /// avoid. The value is arbitrary; only its being non-zero matters.
+    /// </remarks>
+    private const byte TagSentinel = 0x5A;
+
     public int Version => 2;
 
     public int AuthenticationTagLength => 16;
 
-    public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message) => new byte[AuthenticationTagLength];
+    /// <summary>
+    /// Every tag handed out by <see cref="Authenticate"/>, in call order.
+    /// </summary>
+    /// <remarks>
+    /// Recorded so a test can assert on what secret-derived material a ceremony actually produced.
+    /// An empty list after a failed ceremony is a meaningful result rather than an absent one: it
+    /// says the tag was never computed, so there was nothing left live to clean up.
+    /// </remarks>
+    public List<byte[]> IssuedAuthTags { get; } = [];
+
+    public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
+    {
+        var tag = new byte[AuthenticationTagLength];
+        Array.Fill(tag, TagSentinel);
+        IssuedAuthTags.Add(tag);
+        return tag;
+    }
 
     public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext) => throw new NotImplementedException();
 

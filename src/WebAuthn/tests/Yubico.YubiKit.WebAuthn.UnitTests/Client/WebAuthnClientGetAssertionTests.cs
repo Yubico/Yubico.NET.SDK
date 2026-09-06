@@ -17,9 +17,11 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
+using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
+using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -404,6 +406,88 @@ public class WebAuthnClientGetAssertionTests
         // Assert
         await AssertTokenWasAcquired();
         TokenBufferAssert.Zeroed(token, "a cancelled ceremony must dispose the token session");
+    }
+
+    /// <summary>
+    /// Control for <see cref="GetAssertion_WhenExtensionBuildFails_NeverComputesPinUvAuthParam"/>:
+    /// proves the protocol double actually records the tags it issues.
+    /// </summary>
+    /// <remarks>
+    /// Without this, the "no tag was issued" assertion could pass because the recording is broken
+    /// rather than because the ceremony genuinely produced nothing.
+    /// </remarks>
+    [Fact]
+    public async Task GetAssertion_WhenTokenIsUsed_RecordsExactlyOnePinUvAuthParam()
+    {
+        // Arrange
+        var protocol = new TestPinUvAuthProtocol();
+        ArrangePinTokenAcquisition(protocol);
+        _mockBackend.GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse());
+
+        // Act
+        _ = await _client.GetAssertionAsync(
+            CreateUvRequiredOptions(),
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Single(protocol.IssuedAuthTags);
+    }
+
+    /// <summary>
+    /// A ceremony that fails while building extension CBOR must not leave a live PIN/UV auth
+    /// parameter behind.
+    /// </summary>
+    /// <remarks>
+    /// The parameter is computed after everything in the request builder that can throw, so the
+    /// correct outcome here is that it was never produced at all - there is no stranded buffer to
+    /// clean up. Computing it earlier would strand it: the request never reaches
+    /// <c>ExecuteGetAssertionAsync</c>, whose finally is what clears the parameter on every other
+    /// path. A LargeBlob input is used as the trigger because assertion-time LargeBlob is a
+    /// shipped not-yet-implemented input, so this is a path real callers can reach.
+    /// </remarks>
+    [Fact]
+    public async Task GetAssertion_WhenExtensionBuildFails_NeverComputesPinUvAuthParam()
+    {
+        // Arrange
+        var protocol = new TestPinUvAuthProtocol();
+        ArrangePinTokenAcquisition(protocol);
+
+        var options = CreateUvRequiredOptions() with
+        {
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput())
+        };
+
+        // Act
+        var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.GetAssertionAsync(
+            options,
+            "123456"u8.ToArray(),
+            TestContext.Current.CancellationToken));
+
+        // Assert
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
+        Assert.Empty(protocol.IssuedAuthTags);
+    }
+
+    /// <summary>
+    /// Arranges token acquisition that hands the session the supplied protocol, so a test can
+    /// inspect which authentication tags the ceremony produced.
+    /// </summary>
+    private void ArrangePinTokenAcquisition(TestPinUvAuthProtocol protocol)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+
+        _mockBackend.GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin,
+            PinUvAuthTokenPermissions.GetAssertion,
+            "example.com",
+            Arg.Any<ReadOnlyMemory<byte>?>(),
+            Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(protocol, TokenBufferAssert.CreateSentinelToken()));
     }
 
     /// <summary>

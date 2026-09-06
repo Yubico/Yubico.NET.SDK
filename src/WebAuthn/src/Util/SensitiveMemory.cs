@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
@@ -28,10 +27,14 @@ internal static class SensitiveMemory
     /// Zeroes <paramref name="memory"/> in place. Null and empty are no-ops.
     /// </summary>
     /// <remarks>
-    /// A zeroing helper that quietly skips is a secret left in memory, so make the only
-    /// unreachable case loud rather than silent. Callers here always pass array-backed memory;
-    /// this cannot throw instead because every call site is a finally block, where throwing
-    /// would swallow the exception already in flight.
+    /// <see cref="MemoryMarshal.AsMemory{T}(ReadOnlyMemory{T})"/> is what makes this total: it
+    /// yields a writable span whatever the memory is backed by, so there is no "could not zero
+    /// this one" branch left to get wrong. The previous form asserted array backing in debug
+    /// builds and silently skipped it in release, which is the single behaviour a zeroing helper
+    /// must never have - a release build would have left the secret live. Throwing instead is not
+    /// an option either, because every call site is a finally block where it would swallow the
+    /// exception already in flight. Writing through a read-only view is sound here: every buffer
+    /// reaching this method is secret material the caller allocated in order to destroy.
     /// </remarks>
     public static void Zero(ReadOnlyMemory<byte>? memory)
     {
@@ -40,12 +43,6 @@ internal static class SensitiveMemory
             return;
         }
 
-        var isArrayBacked = MemoryMarshal.TryGetArray(memory.Value, out var segment) && segment.Array is not null;
-        Debug.Assert(isArrayBacked, "pinUvAuthParam must be array-backed so it can be zeroed");
-
-        if (isArrayBacked)
-        {
-            CryptographicOperations.ZeroMemory(segment.AsSpan());
-        }
+        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(memory.Value).Span);
     }
 }

@@ -57,6 +57,8 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     protected IConnection Connection { get; }
 
     public FirmwareVersion FirmwareVersion { get; protected set; } = new();
+    public ConnectionType ConnectionType => Connection.Type;
+
     public bool IsInitialized
     {
         get => Volatile.Read(ref _disposalStarted) == 0 && _isInitialized;
@@ -125,6 +127,29 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         }
 
         return session;
+    }
+
+    /// <summary>
+    ///     Validates the connection-type assertion supplied to a direct session factory.
+    /// </summary>
+    /// <param name="connection">The caller-owned connection.</param>
+    /// <param name="options">Optional session creation settings.</param>
+    /// <exception cref="ArgumentException">
+    ///     <see cref="SessionCreationOptions.PreferredConnectionType" /> does not match the connection.
+    /// </exception>
+    private protected static void ValidatePreferredConnectionType(
+        IConnection connection,
+        SessionCreationOptions? options)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        if (options?.PreferredConnectionType is { } preferredConnectionType &&
+            preferredConnectionType != connection.Type)
+        {
+            throw new ArgumentException(
+                $"The provided connection is {connection.Type}, not the requested {preferredConnectionType}.",
+                nameof(options));
+        }
     }
 
     /// <summary>

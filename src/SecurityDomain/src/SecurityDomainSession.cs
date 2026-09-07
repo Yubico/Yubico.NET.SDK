@@ -116,26 +116,30 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     Factory helper that creates and initializes a Security Domain session.
     /// </summary>
     /// <exception cref="SecureChannelException">
-    ///     <paramref name="scpKeyParams" /> was supplied and establishing the SCP secure channel failed
+    ///     Secure-channel parameters were supplied and establishing the SCP secure channel failed
     ///     (for example, a wrong SCP03 key, an SCP11 receipt/authentication mismatch, a rejected SCP11
     ///     certificate, or SCP unsupported by the connected firmware/transport). The original failure is
     ///     available as <see cref="Exception.InnerException" />.
     /// </exception>
     public static async Task<SecurityDomainSession> CreateAsync(
         ISmartCardConnection connection,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
-        FirmwareVersion? firmwareVersion = null,
+        SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(connection);
+
+        var configuration = options?.ProtocolConfiguration;
+        var scpKeyParams = options?.ScpKeyParameters;
+        var firmwareVersionOverride = options?.FirmwareVersionOverride;
+
+        ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new SecurityDomainSession(connection, scpKeyParams));
         try
         {
-            await session.InitializeAsync(configuration, firmwareVersion, cancellationToken).ConfigureAwait(false);
+            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
             return session;
         }
         catch
@@ -342,23 +346,22 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <summary>
     ///     Retrieves the supported CA identifiers (KLOC/KLCC) exposed by the Security Domain.
     /// </summary>
-    /// <param name="includeKloc">Whether to include Key Loading OCE Certificate identifiers.</param>
-    /// <param name="includeKlcc">Whether to include Key Loading Card Certificate identifiers.</param>
+    /// <param name="identifierTypes">The identifier groups to retrieve.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task<IReadOnlyList<CaIdentifier>> GetCaIdentifiersAsync(
-        bool includeKloc,
-        bool includeKlcc,
+        CaIdentifierType identifierTypes,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
-        if (!includeKloc && !includeKlcc)
-            throw new ArgumentException("At least one of kloc and klcc must be true");
+        const CaIdentifierType supportedTypes = CaIdentifierType.Kloc | CaIdentifierType.Klcc;
+        if (identifierTypes == CaIdentifierType.None || (identifierTypes & ~supportedTypes) != 0)
+            throw new ArgumentOutOfRangeException(nameof(identifierTypes));
 
-        _logger.LogDebug("Getting CA identifiers KLOC={Kloc}, KLCC={Klcc}", includeKloc, includeKlcc);
+        _logger.LogDebug("Getting CA identifier groups {IdentifierTypes}", identifierTypes);
 
         var arrayBufferWriter = new ArrayBufferWriter<byte>();
-        if (includeKloc)
+        if (identifierTypes.HasFlag(CaIdentifierType.Kloc))
             try
             {
                 var kloc = await GetDataAsync(TagCaKlocIdentifiers, cancellationToken: cancellationToken)
@@ -369,7 +372,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             {
             }
 
-        if (includeKlcc)
+        if (identifierTypes.HasFlag(CaIdentifierType.Klcc))
             try
             {
                 var klcc = await GetDataAsync(TagCaKlccIdentifiers, cancellationToken: cancellationToken)
@@ -388,7 +391,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             var caIdentifierTlv = caTlvObjects[0];
             var keyReferenceTlv = caTlvObjects[1];
 
-            var keyReferenceData = keyReferenceTlv.AsSpan();
+            var keyReferenceData = keyReferenceTlv.Value.Span;
             var keyReference = new KeyReference(keyReferenceData[0], keyReferenceData[1]);
             caIdentifiers.Add(new CaIdentifier(keyReference, caIdentifierTlv.Value.ToArray()));
 
@@ -464,6 +467,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <exception cref="ArgumentNullException">Thrown when staticKeys is null.</exception>
     /// <exception cref="ArgumentException">Thrown when keyReference.Kid is not 0x01 (required for SCP03).</exception>
     /// <exception cref="InvalidOperationException">Thrown when no SCP session is active or KCV validation fails.</exception>
+    // The three overloads represent distinct SCP03, EC public-key, and EC private-key payloads.
+#pragma warning disable RS0026
     public async Task PutKeyAsync(
         KeyReference keyReference,
         StaticKeys staticKeys,
@@ -515,6 +520,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             buffer.Clear();
         }
     }
+#pragma warning restore RS0026
 
     /// <summary>
     ///     Deletes keys matching the supplied reference.
@@ -623,6 +629,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     Thrown when the new key set's checksum failed to verify, or some other SCP related error
     ///     described in the exception message.
     /// </exception>
+    // The EC public-key import overload has distinct key ownership and wire encoding.
+#pragma warning disable RS0026
     public async Task PutKeyAsync(KeyReference keyReference, ECPublicKey publicKey, int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
@@ -635,6 +643,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         await PutEcKeyAsync(keyReference, KeyTypeEccPublicKey, publicKey.PublicPoint, replaceKvn,
             cancellationToken).ConfigureAwait(false);
     }
+#pragma warning restore RS0026
 
     /// <summary>
     ///     Puts an EC private key onto the YubiKey using the Security Domain.
@@ -649,6 +658,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     Thrown when the new key set's checksum failed to verify, or some other SCP related error
     ///     described in the exception message.
     /// </exception>
+    // The EC private-key import overload encrypts caller-owned private key material before transfer.
+#pragma warning disable RS0026
     public async Task PutKeyAsync(
         KeyReference keyReference,
         ECPrivateKey privateKey,
@@ -668,6 +679,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         await PutEcKeyAsync(keyReference, KeyTypeEccPrivateKey, (ReadOnlyMemory<byte>)encryptedKey, replaceKvn,
             cancellationToken).ConfigureAwait(false);
     }
+#pragma warning restore RS0026
 
     /// <summary>
     ///     Shared helper for importing an EC key (public or private) into the Security Domain.

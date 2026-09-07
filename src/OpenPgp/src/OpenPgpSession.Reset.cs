@@ -54,8 +54,11 @@ public sealed partial class OpenPgpSession
         // Step 6: Re-initialize — re-SELECT and refresh cached state
         _logger.LogDebug("Re-initializing session after reset");
 
-        var initialization = await _backend!.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        FirmwareVersion = initialization.FirmwareVersion;
+        // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet
+        // state, not caller policy, so a SessionCreationOptions.FirmwareVersionOverride supplied at
+        // creation must survive it; otherwise the override would silently lapse mid-session and
+        // later feature gates would disagree with earlier ones.
+        _ = await _backend!.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);

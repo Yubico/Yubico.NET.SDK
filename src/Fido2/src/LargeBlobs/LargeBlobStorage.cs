@@ -60,6 +60,8 @@ public sealed class LargeBlobStorage
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
     private readonly int _maxFragmentLength;
 
+    // Existing alpha constructors intentionally distinguish read-only and authenticated read/write use.
+#pragma warning disable RS0026
     /// <summary>
     /// Initializes a new instance for read-only operations.
     /// </summary>
@@ -100,6 +102,7 @@ public sealed class LargeBlobStorage
         _protocol = protocol;
         _pinUvAuthToken = pinUvAuthToken;
     }
+#pragma warning restore RS0026
 
     /// <summary>
     /// Reads the entire large blob array from the authenticator.

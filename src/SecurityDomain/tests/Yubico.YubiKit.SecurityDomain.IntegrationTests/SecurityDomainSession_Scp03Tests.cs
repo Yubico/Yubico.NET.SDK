@@ -67,43 +67,53 @@ public class SecurityDomainSession_Scp03Tests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutKeyAsync_WithStaticKeys_ImportsAndAuthenticates(YubiKeyTestState state)
     {
-        // Custom key set (non-default) for testing
-        byte[] keyBytes =
-        [
-            0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
-            0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
-        ];
-
-        using var newStaticKeys = new StaticKeys(keyBytes, keyBytes, keyBytes);
-        var newKeyReference = new KeyReference(0x01, 0x01);
-        var newKeyParams = new Scp03KeyParameters(newKeyReference, newStaticKeys);
-
-        // Step 1: Authenticate with default keys and import new keys
-        await state.WithSecurityDomainSessionAsync(true,
-            async session =>
-            {
-                await session.PutKeyAsync(newKeyReference, newStaticKeys, 0,
-                    CancellationTokenSource.Token);
-            }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
-
-        // Step 2: Verify new keys work
-        await state.WithSecurityDomainSessionAsync(false,
-            session =>
-            {
-                Assert.NotNull(session);
-                return Task.CompletedTask;
-            }, scpKeyParams: newKeyParams, cancellationToken: CancellationTokenSource.Token);
-
-        // Step 3: Verify default keys no longer work. The default KVN was superseded on the
-        // device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
-        // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
-        var ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+        try
         {
+            // Custom key set (non-default) for testing
+            byte[] keyBytes =
+            [
+                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+                0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
+            ];
+
+            using var newStaticKeys = new StaticKeys(keyBytes, keyBytes, keyBytes);
+            var newKeyReference = new KeyReference(0x01, 0x01);
+            var newKeyParams = new Scp03KeyParameters(newKeyReference, newStaticKeys);
+
+            // Step 1: Authenticate with default keys and import new keys
+            await state.WithSecurityDomainSessionAsync(true,
+                async session =>
+                {
+                    await session.PutKeyAsync(newKeyReference, newStaticKeys, 0,
+                        CancellationTokenSource.Token);
+                }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
+
+            // Step 2: Verify new keys work
             await state.WithSecurityDomainSessionAsync(false,
-                session => Task.CompletedTask, scpKeyParams: Scp03KeyParameters.Default,
-                cancellationToken: CancellationTokenSource.Token);
-        });
-        Assert.IsType<ApduException>(ex.InnerException);
+                session =>
+                {
+                    Assert.NotNull(session);
+                    return Task.CompletedTask;
+                }, scpKeyParams: newKeyParams, cancellationToken: CancellationTokenSource.Token);
+
+            // Step 3: Verify default keys no longer work. The default KVN was superseded on the
+            // device, so establishing the secure channel fails during SecurityDomainSession.CreateAsync
+            // and surfaces as SecureChannelException wrapping the device's APDU-level rejection.
+            var ex = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+            {
+                await state.WithSecurityDomainSessionAsync(false,
+                    session => Task.CompletedTask, scpKeyParams: Scp03KeyParameters.Default,
+                    cancellationToken: CancellationTokenSource.Token);
+            });
+            Assert.IsType<ApduException>(ex.InnerException);
+        }
+        finally
+        {
+            // This test deliberately supersedes the default SCP03 keys and asserts they stop
+            // working. Restore factory defaults so later tests and suites can still authenticate
+            // with Scp03KeyParameters.Default.
+            await state.ResetSecurityDomainAsync(CancellationTokenSource.Token);
+        }
     }
 
     [SkippableTheory]
@@ -143,8 +153,40 @@ public class SecurityDomainSession_Scp03Tests
         await state.WithSecurityDomainSessionAsync(true,
             async session =>
             {
-                var result = await session.GetCaIdentifiersAsync(true, true);
+                var result = await session.GetCaIdentifiersAsync(CaIdentifierType.Kloc | CaIdentifierType.Klcc);
                 Assert.True(result.Count > 0);
+            },
+            scpKeyParams: Scp03KeyParameters.Default,
+            configuration: new ProtocolConfiguration { ForceShortApdus = true },
+            cancellationToken: CancellationTokenSource.Token);
+
+    /// <summary>
+    ///     Validates that each returned CA identifier carries the decoded two-byte key-reference
+    ///     value rather than the surrounding TLV header.
+    /// </summary>
+    /// <remarks>
+    ///     The key reference arrives as TLV <c>83 02 KID KVN</c>. Reading the whole TLV instead of its
+    ///     value yields <c>Kid = 0x83</c> and <c>Kvn = 0x02</c> for every entry, which still produces a
+    ///     non-empty list and therefore passes a count-only assertion. Pinning the key identifier to the
+    ///     SCP11 set is what makes that decoding regression observable on hardware.
+    /// </remarks>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
+    public async Task GetCaIdentifiersAsync_DecodesKeyReferenceValue(YubiKeyTestState state) =>
+        await state.WithSecurityDomainSessionAsync(true,
+            async session =>
+            {
+                var identifiers =
+                    await session.GetCaIdentifiersAsync(CaIdentifierType.Kloc | CaIdentifierType.Klcc);
+
+                Assert.NotEmpty(identifiers);
+                Assert.All(identifiers, identifier =>
+                {
+                    Assert.Contains(
+                        identifier.KeyReference.Kid,
+                        new[] { ScpKid.SCP11a, ScpKid.SCP11b, ScpKid.SCP11c });
+                    Assert.NotEqual(0, identifier.Identifier.Length);
+                });
             },
             scpKeyParams: Scp03KeyParameters.Default,
             configuration: new ProtocolConfiguration { ForceShortApdus = true },

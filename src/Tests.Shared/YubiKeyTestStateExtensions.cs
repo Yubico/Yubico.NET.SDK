@@ -15,6 +15,7 @@
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management;
 
@@ -78,9 +79,12 @@ public static class YubiKeyTestStateExtensions
 
             await using var session = await state.Device
                 .CreateManagementSessionAsync(
-                    scpKeyParams,
-                    configuration,
-                    preferredConnection,
+                    new SessionCreationOptions
+                    {
+                        ProtocolConfiguration = configuration,
+                        ScpKeyParameters = scpKeyParams,
+                        PreferredConnectionType = preferredConnection
+                    },
                     cancellationToken)
                 .ConfigureAwait(false);
             await action(session, state.DeviceInfo).ConfigureAwait(false);

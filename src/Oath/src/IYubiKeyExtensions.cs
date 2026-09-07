@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Oath;
@@ -29,38 +31,44 @@ public static class IYubiKeyExtensions
         /// <summary>
         ///     Creates a new OATH session for the specified YubiKey.
         /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
-        /// <param name="configuration">Optional protocol configuration.</param>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
         ///     A new <see cref="OathSession" /> instance. The caller owns the session and must dispose it.
         /// </returns>
         public async Task<OathSession> CreateOathSessionAsync(
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                .ConfigureAwait(false);
-            try
-            {
-                var session = await OathSession.CreateAsync(
-                        connection,
-                        configuration,
-                        scpKeyParams,
-                        cancellationToken)
-                    .ConfigureAwait(false);
+            var configuration = options?.ProtocolConfiguration;
+            var scpKeyParams = options?.ScpKeyParameters;
+            var preferredConnectionType = options?.PreferredConnectionType;
+            var firmwareVersionOverride = options?.FirmwareVersionOverride;
+            var transport = yubiKey.ResolveSessionTransport(
+                preferredConnectionType,
+                "OATH",
+                ConnectionType.SmartCard);
 
-                // This entry point created the connection, so the session it returns is the only thing that
-                // can close it. A caller-created connection is never owned this way.
-                session.OwnConnection();
-                return session;
-            }
-            catch
-            {
-                await connection.DisposeAsync().ConfigureAwait(false);
-                throw;
-            }
+            return await yubiKey.CreateSessionOverTransportAsync(
+                    transport,
+                    async (connection, ct) =>
+                    {
+                        var session = await OathSession.CreateAsync(
+                                (ISmartCardConnection)connection,
+                                new SessionCreationOptions
+                                {
+                                    ProtocolConfiguration = configuration,
+                                    ScpKeyParameters = scpKeyParams,
+                                    PreferredConnectionType = transport,
+                                    FirmwareVersionOverride = firmwareVersionOverride
+                                },
+                                ct)
+                            .ConfigureAwait(false);
+                        session.OwnConnection();
+                        return session;
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -83,7 +91,7 @@ public static class IYubiKeyExtensions
         /// <param name="timestamp">Optional Unix timestamp. Defaults to current time.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A dictionary mapping each credential to its calculated code (or null).</returns>
-        public async Task<Dictionary<Credential, Code?>> CalculateAllOathCodesAsync(
+        public async Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllOathCodesAsync(
             long? timestamp = null,
             CancellationToken cancellationToken = default)
         {

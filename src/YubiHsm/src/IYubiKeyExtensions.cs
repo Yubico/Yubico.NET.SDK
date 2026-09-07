@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.YubiHsm;
@@ -30,9 +31,7 @@ public static class IYubiKeyExtensions
         /// <summary>
         ///     Creates a new YubiHSM Auth session for the specified YubiKey.
         /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="firmwareVersion">Optional firmware version override.</param>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A new <see cref="HsmAuthSession" /> instance.</returns>
         /// <remarks>
@@ -40,48 +39,53 @@ public static class IYubiKeyExtensions
         ///     Always use a <c>using</c> statement or call <c>Dispose</c> when finished.
         /// </remarks>
         public async Task<HsmAuthSession> CreateHsmAuthSessionAsync(
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
-            FirmwareVersion? firmwareVersion = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken)
-                .ConfigureAwait(false);
-            try
-            {
-                var session = await HsmAuthSession.CreateAsync(
-                        connection,
-                        configuration,
-                        scpKeyParams,
-                        firmwareVersion,
-                        cancellationToken)
-                    .ConfigureAwait(false);
+            var configuration = options?.ProtocolConfiguration;
+            var scpKeyParams = options?.ScpKeyParameters;
+            var preferredConnectionType = options?.PreferredConnectionType;
+            var firmwareVersionOverride = options?.FirmwareVersionOverride;
+            var transport = yubiKey.ResolveSessionTransport(
+                preferredConnectionType,
+                "YubiHSM Auth",
+                ConnectionType.SmartCard);
 
-                // This entry point created the connection, so the session it returns is the only thing that
-                // can close it. A caller-created connection is never owned this way.
-                session.OwnConnection();
-                return session;
-            }
-            catch
-            {
-                await connection.DisposeAsync().ConfigureAwait(false);
-                throw;
-            }
+            return await yubiKey.CreateSessionOverTransportAsync(
+                    transport,
+                    async (connection, ct) =>
+                    {
+                        var session = await HsmAuthSession.CreateAsync(
+                                (ISmartCardConnection)connection,
+                                new SessionCreationOptions
+                                {
+                                    ProtocolConfiguration = configuration,
+                                    ScpKeyParameters = scpKeyParams,
+                                    PreferredConnectionType = transport,
+                                    FirmwareVersionOverride = firmwareVersionOverride
+                                },
+                                ct)
+                            .ConfigureAwait(false);
+                        session.OwnConnection();
+                        return session;
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
         ///     Lists all YubiHSM Auth credentials stored on the YubiKey.
         ///     Creates and disposes a session automatically.
         /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters for secure channel authentication.</param>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A read-only list of stored credentials.</returns>
         public async Task<IReadOnlyList<HsmAuthCredential>> ListHsmAuthCredentialsAsync(
-            ScpKeyParameters? scpKeyParams = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             await using var session = await yubiKey.CreateHsmAuthSessionAsync(
-                    scpKeyParams,
+                    options,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 

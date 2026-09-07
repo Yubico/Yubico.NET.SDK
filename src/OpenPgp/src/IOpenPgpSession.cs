@@ -159,32 +159,30 @@ public interface IOpenPgpSession : IApplicationSession
         ReadOnlyMemory<byte> resetCode,
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    ///     Resets the User PIN using either the Reset Code or Admin PIN privilege.
-    /// </summary>
-    /// <remarks>
-    ///     When <paramref name="useAdmin" /> is <c>true</c>, the caller must have already
-    ///     verified the Admin PIN via <see cref="VerifyAdminAsync" /> before calling this method.
-    ///     The <paramref name="resetCode" /> parameter is ignored in admin mode; only the
-    ///     <paramref name="newPin" /> is sent to the card.
-    /// </remarks>
+    /// <summary>Resets the User PIN using the configured Reset Code.</summary>
     /// <param name="resetCode">
-    ///     The borrowed UTF-8 encoded Reset Code (when <paramref name="useAdmin" /> is
-    ///     <c>false</c>). Ignored when <paramref name="useAdmin" /> is <c>true</c>.
-    ///     The caller owns the buffer and must clear it after use.
+    ///     The borrowed UTF-8 encoded Reset Code. The caller owns the buffer and must clear it after use.
     /// </param>
     /// <param name="newPin">
     ///     The borrowed UTF-8 encoded new User PIN. The caller owns the buffer and must clear it after use.
     /// </param>
-    /// <param name="useAdmin">
-    ///     If <c>true</c>, assumes Admin PIN (PW3) has been verified and sends
-    ///     RESET RETRY COUNTER with P1=0x02. If <c>false</c>, uses the Reset Code with P1=0x00.
-    /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    Task ResetPinAsync(
+    Task ResetPinUsingResetCodeAsync(
         ReadOnlyMemory<byte> resetCode,
         ReadOnlyMemory<byte> newPin,
-        bool useAdmin = false,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Resets the User PIN after the caller has authenticated the administrator PIN.</summary>
+    /// <remarks>
+    ///     The caller must have already verified the Admin PIN via <see cref="VerifyAdminAsync" />
+    ///     before calling this method. No Reset Code is involved; only the new PIN is sent to the card.
+    /// </remarks>
+    /// <param name="newPin">
+    ///     The borrowed UTF-8 encoded new User PIN. The caller owns the buffer and must clear it after use.
+    /// </param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    Task ResetPinUsingAdminAuthenticationAsync(
+        ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -205,20 +203,10 @@ public interface IOpenPgpSession : IApplicationSession
 
     // ── Key Operations ────────────────────────────────────────────────
 
-    /// <summary>
-    ///     Generates an RSA key pair in the specified slot.
-    /// </summary>
-    Task GenerateRsaKeyAsync(
+    /// <summary>Generates a key pair with the supplied algorithm attributes in the specified slot.</summary>
+    Task GenerateKeyAsync(
         KeyRef keyRef,
-        RsaSize size = RsaSize.Rsa2048,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    ///     Generates an EC key pair in the specified slot.
-    /// </summary>
-    Task GenerateEcKeyAsync(
-        KeyRef keyRef,
-        CurveOid curve,
+        AlgorithmAttributes attributes,
         CancellationToken cancellationToken = default);
 
     /// <summary>

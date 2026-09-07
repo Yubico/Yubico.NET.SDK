@@ -14,7 +14,6 @@ The YubiOTP module implements the Yubico OTP application for .NET. It is unique 
 - [`HidBackend.cs`](src/Backend/HidBackend.cs) - Feature report backend with CRC validation
 - [`SlotConfiguration.cs`](src/SlotConfiguration.cs) - Abstract base for 52-byte config struct
 - [`IYubiKeyExtensions.cs`](src/IYubiKeyExtensions.cs) - C# 14 extension convenience methods
-- [`DependencyInjection.cs`](src/DependencyInjection.cs) - `AddYubiOtp()` DI registration
 
 ## Architecture: Backend Pattern
 
@@ -124,4 +123,4 @@ bool isConfigured = state.IsConfigured(Slot.One);
 ## Related Modules
 
 - **Core** — `ApplicationSession`, `ISmartCardProtocol`, `IOtpHidProtocol`, `ChecksumUtils`
-- **Management** — Reference for backend pattern, session factory, DI extensions
+- **Management** — Reference for backend pattern and session factories

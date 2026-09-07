@@ -42,7 +42,7 @@ namespace Yubico.YubiKit.Fido2;
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html
 /// </para>
 /// </remarks>
-public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDisposable
+public sealed class FidoSession : ApplicationSession, IFidoSession
 {
     /// <summary>
     /// Feature flag for FIDO2 support (requires firmware 5.0+).
@@ -97,26 +97,30 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
     /// Creates and initializes a FIDO session from a connection.
     /// </summary>
     /// <param name="connection">The connection to the YubiKey (SmartCard or FIDO HID).</param>
-    /// <param name="configuration">Optional protocol configuration.</param>
-    /// <param name="scpKeyParams">Optional SCP key parameters for secure channel (SmartCard only).</param>
+    /// <param name="options">Optional cross-cutting session creation settings.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An initialized FidoSession.</returns>
     /// <exception cref="ArgumentNullException">If <paramref name="connection"/> is null.</exception>
     /// <exception cref="NotSupportedException">If the connection type is not supported.</exception>
     public static async Task<FidoSession> CreateAsync(
         IConnection connection,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
+        SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(connection);
+
+        var configuration = options?.ProtocolConfiguration;
+        var scpKeyParams = options?.ScpKeyParameters;
+        var firmwareVersionOverride = options?.FirmwareVersionOverride;
+
+        ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new FidoSession(connection, scpKeyParams));
         try
         {
-            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
             return session;
         }
         catch
@@ -128,6 +132,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
+        FirmwareVersion? firmwareVersionOverride,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
@@ -140,17 +145,17 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
         // Get firmware version from authenticator info
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
-        var firmwareVersion = info.FirmwareVersion ?? new FirmwareVersion();
+        var detectedFirmwareVersion = info.FirmwareVersion ?? new FirmwareVersion();
 
         if (Connection is ISmartCardConnection smartCardConnection)
         {
-            EnsureSmartCardTransportSupported(smartCardConnection.Transport, firmwareVersion);
+            EnsureSmartCardTransportSupported(smartCardConnection.Transport, detectedFirmwareVersion);
         }
 
         // Initialize base class
         var effectiveProtocol = await InitializeProtocolAsync(
                 protocol,
-                firmwareVersion,
+                firmwareVersionOverride ?? detectedFirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
@@ -165,7 +170,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession, IAsyncDispos
 
         _logger.LogDebug(
             "FIDO session initialized. Firmware: {Version}, Versions: [{Versions}]",
-            firmwareVersion,
+            detectedFirmwareVersion,
             string.Join(", ", info.Versions));
     }
 

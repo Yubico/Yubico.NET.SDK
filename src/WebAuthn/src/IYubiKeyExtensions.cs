@@ -14,8 +14,7 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.WebAuthn.Client;
 
@@ -33,48 +32,44 @@ public static class IYubiKeyExtensions
         /// </summary>
         /// <param name="origin">The WebAuthn origin for client data JSON.</param>
         /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
-        /// <param name="options">
-        /// Optional client configuration (enterprise RP IDs, credential prompt, prompt-attempt
-        /// limit) forwarded to the created <see cref="WebAuthnClient"/>.
+        /// <param name="clientOptions">
+        /// Optional configuration for the client itself (enterprise RP IDs, credential prompt,
+        /// prompt-attempt limit), forwarded to the created <see cref="WebAuthnClient"/>. Unrelated to
+        /// <paramref name="sessionOptions"/>, which configures the session rather than the client.
         /// </param>
-        /// <param name="scpKeyParams">Optional SCP key parameters for SmartCard FIDO2 sessions.</param>
-        /// <param name="configuration">Optional FIDO2 protocol configuration.</param>
-        /// <param name="preferredConnection">
-        /// Optional explicit transport override forwarded to the underlying FIDO2 session. When
-        /// <see langword="null"/> (the default), the FIDO2 default order applies
-        /// (<see cref="ConnectionType.HidFido"/>, then <see cref="ConnectionType.SmartCard"/>). To use SCP
-        /// on a device that also exposes HID FIDO, pass <see cref="ConnectionType.SmartCard"/>.
+        /// <param name="sessionOptions">
+        /// Optional settings for the underlying FIDO2 session (SCP key parameters, protocol
+        /// configuration, preferred transport, firmware override). When no preferred connection is
+        /// specified, the FIDO2 default order applies (<see cref="ConnectionType.HidFido"/>, then
+        /// <see cref="ConnectionType.SmartCard"/>). To use SCP on a device that also exposes HID FIDO,
+        /// set <see cref="SessionCreationOptions.PreferredConnectionType"/> to
+        /// <see cref="ConnectionType.SmartCard"/>.
         /// </param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying FIDO2 session.</returns>
         /// <remarks>
         /// The public suffix checker should be backed by Public Suffix List data. RP ID validation
         /// rejects public suffixes such as <c>com</c> and <c>co.uk</c> before any CTAP operation runs.
-        /// This method adds no independent transport logic; <paramref name="preferredConnection"/> is
-        /// validated and applied by the underlying FIDO2 <c>CreateFidoSessionAsync</c>.
+        /// This method adds no independent session-creation logic; <paramref name="sessionOptions"/> is
+        /// validated and applied by the underlying FIDO2 <c>CreateFidoSessionAsync</c>, while
+        /// <paramref name="clientOptions"/> is forwarded to the returned <see cref="WebAuthnClient"/>.
         /// </remarks>
         public async Task<WebAuthnClient> CreateWebAuthnClientAsync(
             WebAuthnOrigin origin,
             PublicSuffixChecker isPublicSuffix,
-            WebAuthnClientOptions? options = null,
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
-            ConnectionType? preferredConnection = null,
+            WebAuthnClientOptions? clientOptions = null,
+            SessionCreationOptions? sessionOptions = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(origin);
             ArgumentNullException.ThrowIfNull(isPublicSuffix);
 
-            var fidoSession = await yubiKey.CreateFidoSessionAsync(
-                    scpKeyParams,
-                    configuration,
-                    preferredConnection,
-                    cancellationToken)
+            var fidoSession = await yubiKey.CreateFidoSessionAsync(sessionOptions, cancellationToken)
                 .ConfigureAwait(false);
 
             try
             {
-                return new WebAuthnClient(fidoSession, origin, isPublicSuffix, options);
+                return new WebAuthnClient(fidoSession, origin, isPublicSuffix, clientOptions);
             }
             catch
             {

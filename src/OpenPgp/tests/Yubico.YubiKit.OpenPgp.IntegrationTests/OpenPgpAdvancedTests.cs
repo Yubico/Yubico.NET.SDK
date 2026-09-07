@@ -24,7 +24,7 @@ public class OpenPgpAdvancedTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateEcKeyAsync(KeyRef.Dec, CurveOid.X25519);
+                await session.GenerateKeyAsync(KeyRef.Dec, EcAttributes.Create(KeyRef.Dec, CurveOid.X25519));
 
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Dec);
                 Assert.IsType<EcAttributes>(attrs);
@@ -115,7 +115,7 @@ public class OpenPgpAdvancedTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateRsaKeyAsync(KeyRef.Sig, RsaSize.Rsa3072);
+                await session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa3072));
 
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
                 Assert.IsType<RsaAttributes>(attrs);
@@ -136,7 +136,7 @@ public class OpenPgpAdvancedTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateRsaKeyAsync(KeyRef.Sig, RsaSize.Rsa4096);
+                await session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa4096));
 
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
                 Assert.IsType<RsaAttributes>(attrs);
@@ -156,7 +156,7 @@ public class OpenPgpAdvancedTests
             action: async session =>
             {
                 await session.VerifyAdminAsync(DefaultAdminPin);
-                await session.GenerateEcKeyAsync(KeyRef.Sig, CurveOid.Ed25519);
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Ed25519));
 
                 var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
                 Assert.IsType<EcAttributes>(attrs);

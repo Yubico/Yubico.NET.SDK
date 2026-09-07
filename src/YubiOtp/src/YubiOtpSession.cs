@@ -118,18 +118,23 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     /// </summary>
     public static async Task<YubiOtpSession> CreateAsync(
         IConnection connection,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
+        SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(connection);
+
+        var configuration = options?.ProtocolConfiguration;
+        var scpKeyParams = options?.ScpKeyParameters;
+        var firmwareVersionOverride = options?.FirmwareVersionOverride;
+
+        ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(connection, () => new YubiOtpSession(connection, scpKeyParams));
         try
         {
-            await session.InitializeAsync(configuration, cancellationToken).ConfigureAwait(false);
+            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
             return session;
         }
         catch
@@ -141,6 +146,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
+        FirmwareVersion? firmwareVersionOverride,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
@@ -157,7 +163,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
         var effectiveProtocol = await InitializeProtocolAsync(
                 protocol,
-                initialization.FirmwareVersion,
+                firmwareVersionOverride ?? initialization.FirmwareVersion,
                 configuration,
                 _scpKeyParams,
                 cancellationToken)
@@ -178,7 +184,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         _logger.LogDebug("YubiOTP session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
     }
 
-    public Task<int> GetSerialAsync(CancellationToken cancellationToken = default)
+    public Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         EnsureSupports(FeatureSerial);

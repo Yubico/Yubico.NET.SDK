@@ -91,7 +91,7 @@ await using var mgmt = await yubiKey.CreateManagementSessionAsync();
 
 // Force a specific transport:
 await using var mgmtOverOtp = await yubiKey.CreateManagementSessionAsync(
-    preferredConnection: ConnectionType.HidOtp);
+    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
 ```
 
 Management selects exactly one transport: the explicit override, or the first supported transport in
@@ -137,7 +137,7 @@ var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken);
 // Quick configuration change (creates session automatically)
 await yubiKey.SetDeviceConfigAsync(
     config,
-    reboot: true,
+    new SetDeviceConfigOptions { Reboot = true },
     cancellationToken: cancellationToken);
 
 // Manual session management (for multiple operations)
@@ -174,7 +174,7 @@ await using var mgmtSession = await ManagementSession.CreateAsync(
 await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
 await using var mgmtSession = await ManagementSession.CreateAsync(
     connection,
-    scpKeyParams: Scp03KeyParameters.Default,
+    new SessionCreationOptions { ScpKeyParameters = Scp03KeyParameters.Default },
     cancellationToken: cancellationToken);
 ```
 
@@ -222,7 +222,7 @@ var config = new DeviceConfig
 
 await mgmtSession.SetDeviceConfigAsync(
     config,
-    reboot: true, // Device will reboot to apply changes
+    new SetDeviceConfigOptions { Reboot = true }, // Device will reboot to apply changes
     cancellationToken: cancellationToken);
 
 // After reboot, need to re-enumerate device
@@ -245,8 +245,7 @@ var config = new DeviceConfig
 
 await mgmtSession.SetDeviceConfigAsync(
     config,
-    reboot: false,
-    newLockCode: lockCode,
+    new SetDeviceConfigOptions { NewLockCode = lockCode },
     cancellationToken: cancellationToken);
 
 // Later, modify configuration with lock code
@@ -260,8 +259,7 @@ var newConfig = new DeviceConfig
 
 await mgmtSession.SetDeviceConfigAsync(
     newConfig,
-    reboot: true,
-    currentLockCode: lockCode,
+    new SetDeviceConfigOptions { Reboot = true, CurrentLockCode = lockCode },
     cancellationToken: cancellationToken);
 ```
 
@@ -281,7 +279,6 @@ Yubico.YubiKit.Management/
 │   ├── ManagementSession.cs           # Main session class
 │   ├── DeviceConfig.cs                # Configuration model
 │   ├── IYubiKeyExtensions.cs          # Convenience extensions
-│   ├── DependencyInjection.cs         # DI support
 │   └── Yubico.YubiKit.Management.csproj
 └── tests/
     ├── Yubico.YubiKit.Management.IntegrationTests/
@@ -325,7 +322,10 @@ var config = new DeviceConfig
     }
 };
 
-await mgmtSession.SetDeviceConfigAsync(config, reboot: true, cancellationToken: cancellationToken);
+await mgmtSession.SetDeviceConfigAsync(
+    config,
+    new SetDeviceConfigOptions { Reboot = true },
+    cancellationToken);
 ```
 
 ### 3. Configure Auto-Eject Timeout
@@ -339,7 +339,10 @@ var config = new DeviceConfig
     DeviceFlags = DeviceConfig.FlagEject
 };
 
-await mgmtSession.SetDeviceConfigAsync(config, reboot: true, cancellationToken: cancellationToken);
+await mgmtSession.SetDeviceConfigAsync(
+    config,
+    new SetDeviceConfigOptions { Reboot = true },
+    cancellationToken);
 ```
 
 ### 4. Restrict NFC (Firmware 5.7+)
@@ -352,7 +355,7 @@ var config = new DeviceConfig
     NfcRestricted = true
 };
 
-await mgmtSession.SetDeviceConfigAsync(config, reboot: false, cancellationToken: cancellationToken);
+await mgmtSession.SetDeviceConfigAsync(config, cancellationToken: cancellationToken);
 ```
 
 ### 5. Check FIPS Status

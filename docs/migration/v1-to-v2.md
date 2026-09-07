@@ -70,6 +70,53 @@ Migration review is required for code that:
 
 Every v2 applet package exposes an `IYubiKey.Create{Applet}SessionAsync(...)` extension method (for example `CreatePivSessionAsync`, `CreateFidoSessionAsync`, `CreateOathSessionAsync`, `CreateOpenPgpSessionAsync`, `CreateSecurityDomainSessionAsync`, `CreateHsmAuthSessionAsync`, `CreateYubiOtpSessionAsync`) and `Yubico.YubiKit.Management` exposes `CreateManagementSessionAsync`. These are the preferred v2 entry points: they open the correct connection/transport and construct the session in one call. Treat the underlying connection handling, transport selection defaults, and SCP key parameter plumbing as assisted rather than automatic until the specific v1 call site is reviewed.
 
+Creation policy is grouped in `SessionCreationOptions`. Applet dependency-injection registration methods and
+session-factory delegates from earlier v2 alphas were removed; call the static factory or `IYubiKey` extension.
+
+### 2.0.0-alpha.1 -> 2.0.0-alpha.2 applet API normalization
+
+These are source and, where noted, binary breaks between v2 alpha packages. Apply the mechanical replacements
+below before diagnosing behavior changes.
+
+| alpha.1 API or behavior | alpha.2 replacement |
+|---|---|
+| `OathSession.PutCredentialAsync(data, requireTouch, cancellationToken)` | Set `CredentialData.RequireTouch`; for URI input use `CredentialData.ParseUri(uri, requireTouch)`, then call `PutCredentialAsync(data, cancellationToken)`. |
+| `OpenPgpSession.ResetPinAsync(resetCode, newPin, useAdmin, cancellationToken)` | Use `ResetPinUsingResetCodeAsync(resetCode, newPin, cancellationToken)` or `ResetPinUsingAdminAuthenticationAsync(newPin, cancellationToken)`. |
+| `GenerateRsaKeyAsync(...)` / `GenerateEcKeyAsync(...)` | `GenerateKeyAsync(KeyRef, AlgorithmAttributes, cancellationToken)` with `RsaAttributes` or `EcAttributes`. |
+| `YubiOtpSession.GetSerialAsync(...)` | `GetSerialNumberAsync(...)`. |
+| `SecurityDomainSession.GetCaIdentifiersAsync(includeKloc, includeKlcc, cancellationToken)` | `GetCaIdentifiersAsync(CaIdentifierType, cancellationToken)`, combining `Kloc` and `Klcc` flags when needed. `None` or unknown bits now throw `ArgumentOutOfRangeException`, replacing `ArgumentException`; this exception-type change is silent at compile time. |
+| `PivSession.StoreCertificateAsync(slot, certificate, compress, cancellationToken)` | Pass `PivCertificateCompression.Automatic` or `PivCertificateCompression.Always`. |
+| `PivSession.VerifyUvAsync(requestTemporaryPin, checkOnly, cancellationToken)` | Pass `PivUserVerification.Verify`, `VerifyAndRequestTemporaryPin`, or `CheckOnly`. The old `(true, true)` input had no distinct meaning: check-only won. |
+| `PivSession.ImportKeyAsync(slot, key, pinPolicy, touchPolicy, cancellationToken)` | Put policies in `PivKeyCreationOptions` and pass it as the third argument. |
+| PIV/YubiHSM `TouchNotificationCallback` | Assign an `Action?` to `OnTouchRequired`. |
+| `ManagementSession.Transport` | Use inherited `ConnectionType`. |
+| `SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken)` | Pass `new SetDeviceConfigOptions { Reboot = ..., CurrentLockCode = ..., NewLockCode = ... }`. |
+| Any of the eight `XSession.CreateAsync(connection, configuration, scpKeyParams[, firmwareVersion], cancellationToken)` factories | `XSession.CreateAsync(connection, SessionCreationOptions?, cancellationToken)`. The eight applets are Management, PIV, FIDO2, OATH, OpenPGP, Security Domain, YubiOTP, and YubiHSM Auth. |
+| Security Domain's fourth positional `firmwareVersion` factory argument | Set `SessionCreationOptions.FirmwareVersionOverride`. Security Domain cannot detect firmware, so this remains its only exact version source. |
+| FIDO2 Phase-38 compatibility factory overload | Use the single normalized `CreateAsync(connection, options, cancellationToken)` factory. |
+| `CreateWebAuthnClientAsync(origin, isPublicSuffix, enterpriseRpIds, scpKeyParams, configuration, preferredConnection, cancellationToken)` | Keep `origin`, `isPublicSuffix`, and `enterpriseRpIds` in place; pass cross-cutting settings through `SessionCreationOptions? options`. |
+| WebAuthn Phase-38 compatibility overload ending in `scpKeyParams, configuration, cancellationToken` | Removed. Call the single normalized `CreateWebAuthnClientAsync(origin, isPublicSuffix, enterpriseRpIds, options, cancellationToken)` signature. |
+| `CalculateAllAsync` / `CalculateAllOathCodesAsync` returning `Dictionary<Credential, Code?>` | Consume `IReadOnlyDictionary<Credential, Code?>`. |
+| One-shot `SetDeviceConfigAsync` / `PutConfigurationAsync` returning `ValueTask` | Await the returned `Task`. This is binary-breaking even though normal `await` source often remains unchanged. |
+| `GetSecurityDomainKeyInfoAsync(scpKeyParams, cancellationToken)` / `ListHsmAuthCredentialsAsync(scpKeyParams, cancellationToken)` | Pass `new SessionCreationOptions { ScpKeyParameters = scpKeyParams }` as the optional second-level creation policy. |
+| A direct applet factory with a mismatched `SessionCreationOptions.PreferredConnectionType` | All eight direct factories now throw `ArgumentException` before device input/output. |
+| Public `DeviceConfig.GetBytes(reboot, currentLockCode, newLockCode)` | Removed. Pass `SetDeviceConfigOptions` to `SetDeviceConfigAsync`; wire encoding is session implementation detail. |
+| Named PIV arguments `ChangePukAsync(pukUtf8: ...)`, `RecoverPinOnlyModeAsync(pin: ...)`, or `SetPinOnlyModeAsync(pin: ...)` | Rename them to `currentPukUtf8:` or `pinUtf8:` as appropriate. |
+| Named OpenPGP `Kdf.Process(..., pinUtf8Bytes: ...)` argument | Rename it to `pinUtf8:`. |
+
+The following dependency-injection APIs were removed rather than replaced. Call the normalized static factory or
+the corresponding `IYubiKey.CreateXSessionAsync` extension directly:
+
+| Removed file/API family | Direct replacement |
+|---|---|
+| Management `DependencyInjection`, `ManagementSessionFactory`, `AddYubiKeyManager` | `ManagementSession.CreateAsync` or `CreateManagementSessionAsync` |
+| FIDO2 `DependencyInjection`, `FidoSessionFactoryDelegate`, `SmartCardFidoSessionFactoryDelegate`, `AddYubiKeyFido2` | `FidoSession.CreateAsync` or `CreateFidoSessionAsync` |
+| OATH `DependencyInjection`, `OathSessionFactory`, `AddOath` | `OathSession.CreateAsync` or `CreateOathSessionAsync` |
+| OpenPGP `DependencyInjection`, `OpenPgpSessionFactory`, `AddOpenPgp` | `OpenPgpSession.CreateAsync` or `CreateOpenPgpSessionAsync` |
+| Security Domain `DependencyInjection`, `SecurityDomainSessionFactory`, `AddYubiKeySecurityDomain` | `SecurityDomainSession.CreateAsync` or `CreateSecurityDomainSessionAsync` |
+| YubiOTP `DependencyInjection`, `YubiOtpSessionFactory`, `AddYubiOtp` | `YubiOtpSession.CreateAsync` or `CreateYubiOtpSessionAsync` |
+| YubiHSM Auth `DependencyInjection`, `HsmAuthSessionFactory`, `AddHsmAuth` | `HsmAuthSession.CreateAsync` or `CreateHsmAuthSessionAsync` |
+
 ## Common Migration Recipes
 
 These examples show the shape of common v1 code and the closest v2 pattern. They are intentionally small and source-backed. Treat examples that write applet state, credential material, keys, PINs, PUKs, access codes, or slot configuration as human-reviewed migrations even when the session or member mapping is clear.
@@ -199,8 +246,11 @@ try
     var publicKey = await piv.GenerateKeyAsync(
         PivSlot.Authentication,
         PivAlgorithm.EccP256,
-        PivPinPolicy.Default,
-        PivTouchPolicy.Default,
+        new PivKeyCreationOptions
+        {
+            PinPolicy = PivPinPolicy.Default,
+            TouchPolicy = PivTouchPolicy.Default
+        },
         cancellationToken);
 }
 finally
@@ -246,7 +296,7 @@ var info = await fido.GetInfoAsync(cancellationToken);
 Migration notes:
 
 - V2 does not treat authenticator info as a cached session property; call `GetInfoAsync(...)` when fresh data matters.
-- USB FIDO normally uses HID FIDO first. If v1 code depended on smart-card FIDO2 or SCP, review the v2 `preferredConnection` and SCP parameters explicitly.
+- USB FIDO normally uses HID FIDO first. If v1 code depended on smart-card FIDO2 or SCP, set `PreferredConnectionType` and `ScpKeyParameters` in `SessionCreationOptions` explicitly.
 - Operations such as make credential, get assertion, reset, and credential management still need flow-specific review for PIN/UV, user presence, and extension behavior.
 
 ### OATH: Add and Calculate Credentials

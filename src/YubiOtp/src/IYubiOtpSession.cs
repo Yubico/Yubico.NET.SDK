@@ -33,7 +33,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// Thrown when the device returns a malformed or too-short serial number response.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
-    Task<int> GetSerialAsync(CancellationToken cancellationToken = default);
+    Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the current slot configuration state (which slots are programmed, touch-triggered).

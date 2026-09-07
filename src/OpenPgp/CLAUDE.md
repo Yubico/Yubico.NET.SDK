@@ -36,6 +36,9 @@ SmartCard-only (`ISmartCardConnection`). OpenPGP spec is SmartCard/CCID only. Ap
 - `ApplicationRelatedData _appData` — cached card state (refreshable)
 - `Kdf? _kdf` — active KDF configuration (lazy-loaded)
 
+Public key generation uses `GenerateKeyAsync(KeyRef, AlgorithmAttributes, CancellationToken)`. User PIN reset is
+split into reset-code and prior-administrator-authentication methods so no input is conditionally ignored.
+
 ## Key Patterns
 
 ### Initialization Sequence

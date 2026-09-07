@@ -70,7 +70,10 @@ public static class DeviceConfiguration
                 .WithCapabilities(transport, (int)capabilities)
                 .Build();
 
-            await session.SetDeviceConfigAsync(config, reboot, lockCode, cancellationToken: cancellationToken);
+            await session.SetDeviceConfigAsync(
+                config,
+                new SetDeviceConfigOptions { Reboot = reboot, CurrentLockCode = lockCode },
+                cancellationToken);
             return ConfigResult.Succeeded(reboot);
         }
         catch (Exception ex)
@@ -114,7 +117,10 @@ public static class DeviceConfiguration
             }
 
             var config = builder.Build();
-            await session.SetDeviceConfigAsync(config, reboot, lockCode, cancellationToken: cancellationToken);
+            await session.SetDeviceConfigAsync(
+                config,
+                new SetDeviceConfigOptions { Reboot = reboot, CurrentLockCode = lockCode },
+                cancellationToken);
             return ConfigResult.Succeeded(reboot);
         }
         catch (Exception ex)
@@ -147,7 +153,10 @@ public static class DeviceConfiguration
                 .WithDeviceFlags((byte)flags)
                 .Build();
 
-            await session.SetDeviceConfigAsync(config, reboot, lockCode, cancellationToken: cancellationToken);
+            await session.SetDeviceConfigAsync(
+                config,
+                new SetDeviceConfigOptions { Reboot = reboot, CurrentLockCode = lockCode },
+                cancellationToken);
             return ConfigResult.Succeeded(reboot);
         }
         catch (Exception ex)
@@ -180,7 +189,10 @@ public static class DeviceConfiguration
                 .WithNfcRestricted(restricted)
                 .Build();
 
-            await session.SetDeviceConfigAsync(config, reboot, lockCode, cancellationToken: cancellationToken);
+            await session.SetDeviceConfigAsync(
+                config,
+                new SetDeviceConfigOptions { Reboot = reboot, CurrentLockCode = lockCode },
+                cancellationToken);
             return ConfigResult.Succeeded(reboot);
         }
         catch (Exception ex)
@@ -234,7 +246,10 @@ public static class DeviceConfiguration
         try
         {
             var config = DeviceConfig.CreateBuilder().Build();
-            await session.SetDeviceConfigAsync(config, reboot: false, currentLockCode, newLockCode, cancellationToken);
+            await session.SetDeviceConfigAsync(
+                config,
+                new SetDeviceConfigOptions { CurrentLockCode = currentLockCode, NewLockCode = newLockCode },
+                cancellationToken);
             return ConfigResult.Succeeded(rebootRequired: false);
         }
         catch (Exception ex)
@@ -268,7 +283,10 @@ public static class DeviceConfiguration
         {
             zeroCode = new byte[16]; // All zeros
             var config = DeviceConfig.CreateBuilder().Build();
-            await session.SetDeviceConfigAsync(config, reboot: false, currentLockCode, zeroCode, cancellationToken);
+            await session.SetDeviceConfigAsync(
+                config,
+                new SetDeviceConfigOptions { CurrentLockCode = currentLockCode, NewLockCode = zeroCode },
+                cancellationToken);
             return ConfigResult.Succeeded(rebootRequired: false);
         }
         catch (Exception ex)

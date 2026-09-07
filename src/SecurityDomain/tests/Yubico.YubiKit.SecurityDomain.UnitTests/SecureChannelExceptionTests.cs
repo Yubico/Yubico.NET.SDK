@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.SecurityDomain.UnitTests;
@@ -49,7 +50,7 @@ public class SecureChannelExceptionTests
         var ex = await Assert.ThrowsAsync<SecureChannelException>(() =>
             SecurityDomainSession.CreateAsync(
                 connection,
-                scpKeyParams: scpKeyParams,
+                new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
                 cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(unchecked((short)0x6982), ex.StatusWord);
@@ -85,7 +86,7 @@ public class SecureChannelExceptionTests
         var ex = await Assert.ThrowsAsync<SecureChannelException>(() =>
             SecurityDomainSession.CreateAsync(
                 connection,
-                scpKeyParams: scpKeyParams,
+                new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
                 cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Null(ex.StatusWord);
@@ -108,8 +109,11 @@ public class SecureChannelExceptionTests
         var ex = await Assert.ThrowsAsync<SecureChannelException>(() =>
             SecurityDomainSession.CreateAsync(
                 connection,
-                scpKeyParams: scpKeyParams,
-                firmwareVersion: new FirmwareVersion(5, 2, 9),
+                new SessionCreationOptions
+                {
+                    ScpKeyParameters = scpKeyParams,
+                    FirmwareVersionOverride = new FirmwareVersion(5, 2, 9)
+                },
                 cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Null(ex.StatusWord);
@@ -156,7 +160,7 @@ public class SecureChannelExceptionTests
 
         using var session = await SecurityDomainSession.CreateAsync(
             connection,
-            scpKeyParams: scpKeyParams,
+            new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(session.IsAuthenticated);

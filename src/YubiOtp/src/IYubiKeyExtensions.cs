@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 
 namespace Yubico.YubiKit.YubiOtp;
 
@@ -42,7 +43,7 @@ public static class IYubiKeyExtensions
         /// Writes a slot configuration to the YubiKey.
         /// Creates a session, writes the configuration, and disposes automatically.
         /// </summary>
-        public async ValueTask PutConfigurationAsync(
+        public async Task PutConfigurationAsync(
             Slot slot,
             SlotConfiguration config,
             ReadOnlyMemory<byte> accessCode = default,
@@ -75,25 +76,25 @@ public static class IYubiKeyExtensions
         /// <summary>
         /// Creates a YubiOTP session for the device. The caller owns the session lifetime.
         /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters for a SmartCard session.</param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="preferredConnection">
-        /// Optional explicit transport override. When <see langword="null"/> (the default), YubiOTP selects a
-        /// transport in its documented default order: <see cref="ConnectionType.SmartCard"/>, then
-        /// <see cref="ConnectionType.HidOtp"/>. When set, it must be one of those two transports and supported
-        /// by the device; otherwise an <see cref="ArgumentException"/> (invalid transport) or
-        /// <see cref="NotSupportedException"/> (transport not available on this device) is thrown.
+        /// <param name="options">
+        /// Optional creation settings. YubiOTP selects SmartCard, then HID OTP unless
+        /// <see cref="SessionCreationOptions.PreferredConnectionType" /> specifies a supported transport.
+        /// Secure-channel parameters force SmartCard when no preference is specified.
         /// </param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
         public async Task<YubiOtpSession> CreateYubiOtpSessionAsync(
-            ScpKeyParameters? scpKeyParams = null,
-            ProtocolConfiguration? configuration = null,
-            ConnectionType? preferredConnection = null,
+            SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
+            var configuration = options?.ProtocolConfiguration;
+            var scpKeyParams = options?.ScpKeyParameters;
+            var preferredConnectionType = options?.PreferredConnectionType;
+            var firmwareVersionOverride = options?.FirmwareVersionOverride;
             var transport = yubiKey.ResolveSessionTransport(
-                scpKeyParams is not null && preferredConnection is null ? ConnectionType.SmartCard : preferredConnection,
+                scpKeyParams is not null && preferredConnectionType is null
+                    ? ConnectionType.SmartCard
+                    : preferredConnectionType,
                 "YubiOTP",
                 YubiOtpTransportOrder);
 
@@ -102,7 +103,16 @@ public static class IYubiKeyExtensions
                     async (connection, ct) =>
                     {
                         var session = await YubiOtpSession
-                            .CreateAsync(connection, configuration, scpKeyParams, ct)
+                            .CreateAsync(
+                                connection,
+                                new SessionCreationOptions
+                                {
+                                    ProtocolConfiguration = configuration,
+                                    ScpKeyParameters = scpKeyParams,
+                                    PreferredConnectionType = transport,
+                                    FirmwareVersionOverride = firmwareVersionOverride
+                                },
+                                ct)
                             .ConfigureAwait(false);
 
                         // This entry point opened the connection, so the session it returns is the only thing
@@ -114,18 +124,6 @@ public static class IYubiKeyExtensions
                 .ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Source-compatibility overload preserving the pre-Phase-38 positional shape
-        /// (<c>scpKeyParams, configuration, cancellationToken</c>); forwards using the default transport order.
-        /// </summary>
-        /// <param name="scpKeyParams">Optional SCP key parameters.</param>
-        /// <param name="configuration">Optional protocol configuration.</param>
-        /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-        public Task<YubiOtpSession> CreateYubiOtpSessionAsync(
-            ScpKeyParameters? scpKeyParams,
-            ProtocolConfiguration? configuration,
-            CancellationToken cancellationToken) =>
-            yubiKey.CreateYubiOtpSessionAsync(scpKeyParams, configuration, null, cancellationToken);
     }
 
     // YubiOTP is dual-transport (SmartCard or OTP HID). On a physical (possibly multi-connection) device

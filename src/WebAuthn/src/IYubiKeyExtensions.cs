@@ -49,8 +49,9 @@ public static class IYubiKeyExtensions
         /// <remarks>
         /// The public suffix checker should be backed by Public Suffix List data. RP ID validation
         /// rejects public suffixes such as <c>com</c> and <c>co.uk</c> before any CTAP operation runs.
-        /// This method adds no independent session-creation logic; <paramref name="options"/> is validated
-        /// and applied by the underlying FIDO2 <c>CreateFidoSessionAsync</c>.
+        /// This method adds no independent session-creation logic; <paramref name="sessionOptions"/> is
+        /// validated and applied by the underlying FIDO2 <c>CreateFidoSessionAsync</c>, while
+        /// <paramref name="options"/> is forwarded to the returned <see cref="WebAuthnClient"/>.
         /// </remarks>
         public async Task<WebAuthnClient> CreateWebAuthnClientAsync(
             WebAuthnOrigin origin,

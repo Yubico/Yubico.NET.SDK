@@ -39,7 +39,6 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 ///         connection possible, which is the ergonomic price of the two refusal rules.
 ///     </para>
 /// </remarks>
-[Collection(DiscoveryWorkerAdmissionCollection.Name)]
 public class ConnectionOwnershipContractTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

@@ -237,20 +237,12 @@ public sealed partial class WebAuthnClient
             options.Extensions,
             options.AllowCredentials);
 
-        // Computed last, deliberately. Nothing between here and the return can throw, so the
-        // parameter cannot be stranded: the request owns it from construction, and
-        // ExecuteGetAssertionAsync's finally is what clears it. Computing it any earlier leaks the
-        // tag whenever extension building fails, because on that path the request never reaches
-        // that finally.
         ReadOnlyMemory<byte>? pinUvAuthParam = null;
         byte? pinUvAuthProtocol = null;
 
         if (tokenSession is not null)
         {
-            // Version is read first so the tag is the very last thing to come into existence.
             pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
-
-            // pinUvAuthParam = HMAC(token, clientDataHash)
             pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token.Span, clientData.Hash.Span);
         }
 

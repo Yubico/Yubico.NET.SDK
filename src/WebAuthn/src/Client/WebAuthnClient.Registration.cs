@@ -245,9 +245,6 @@ public sealed partial class WebAuthnClient
 
         try
         {
-            // The session's own memory is passed straight through: it stays live for the whole
-            // pre-flight, and taking a copy here would mean a second plaintext token to keep track
-            // of and clear.
             var matchedExclude = await Internal.ExcludeListPreflight.FindFirstMatchAsync(
                 _backend,
                 options.Rp.Id,
@@ -312,23 +309,15 @@ public sealed partial class WebAuthnClient
             ? matchedExclude is not null ? new[] { matchedExclude } : Array.Empty<PublicKeyCredentialDescriptor>()
             : options.ExcludeCredentials;
 
-        // Hoisted out of the object initializer below so that every step which can throw happens
-        // before the PIN/UV auth parameter exists.
         var pubKeyCredParams = options.PubKeyCredParams
             .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
             .ToList();
 
-        // Computed last, deliberately. Nothing between here and the return can throw, so the
-        // parameter cannot be stranded: the request owns it from construction, and
-        // ExecuteMakeCredentialAsync's finally is what clears it. Computing it any earlier leaks
-        // the tag whenever extension building or option mapping fails, because on that path the
-        // request never reaches that finally.
         ReadOnlyMemory<byte>? pinUvAuthParam = null;
         byte? pinUvAuthProtocol = null;
 
         if (tokenSession is not null)
         {
-            // Version is read first so the tag is the very last thing to come into existence.
             pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
             pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token.Span, clientData.Hash.Span);
         }

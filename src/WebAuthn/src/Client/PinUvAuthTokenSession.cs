@@ -45,15 +45,6 @@ internal sealed class PinUvAuthTokenSession : IDisposable
     /// <summary>
     /// Gets the token bytes.
     /// </summary>
-    /// <remarks>
-    /// <see cref="ReadOnlyMemory{T}"/> rather than <see cref="ReadOnlySpan{T}"/> so the token can
-    /// cross an await: the exclude-list pre-flight needs it across several asynchronous probes. A
-    /// span forced that caller into a defensive <c>ToArray</c> copy, which contradicted the whole
-    /// reason this type exists - that exactly one live plaintext copy of a decrypted token should
-    /// be reachable. The trade is that a caller could hold the memory past disposal and read a
-    /// zeroed, or later reused, buffer. The type is internal and its callers all use it inside the
-    /// session's lifetime, so the copy was the worse of the two risks.
-    /// </remarks>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
     public ReadOnlyMemory<byte> Token
     {

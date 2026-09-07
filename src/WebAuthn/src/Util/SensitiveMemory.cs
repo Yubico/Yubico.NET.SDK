@@ -26,16 +26,6 @@ internal static class SensitiveMemory
     /// <summary>
     /// Zeroes <paramref name="memory"/> in place. Null and empty are no-ops.
     /// </summary>
-    /// <remarks>
-    /// <see cref="MemoryMarshal.AsMemory{T}(ReadOnlyMemory{T})"/> is what makes this total: it
-    /// yields a writable span whatever the memory is backed by, so there is no "could not zero
-    /// this one" branch left to get wrong. The previous form asserted array backing in debug
-    /// builds and silently skipped it in release, which is the single behaviour a zeroing helper
-    /// must never have - a release build would have left the secret live. Throwing instead is not
-    /// an option either, because every call site is a finally block where it would swallow the
-    /// exception already in flight. Writing through a read-only view is sound here: every buffer
-    /// reaching this method is secret material the caller allocated in order to destroy.
-    /// </remarks>
     public static void Zero(ReadOnlyMemory<byte>? memory)
     {
         if (memory is null || memory.Value.IsEmpty)

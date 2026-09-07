@@ -2,6 +2,7 @@ using System.Reflection;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.WebAuthn;
+using Yubico.YubiKit.WebAuthn.Client;
 
 namespace Yubico.YubiKit.PublicApi.UnitTests;
 
@@ -26,6 +27,18 @@ public sealed class FactoryShapeTests
         Assert.Empty(violations);
     }
 
+    /// <summary>
+    /// The WebAuthn factory carries two independent options objects, and they must stay separate.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="WebAuthnClientOptions"/> configures the client that is returned (enterprise RP IDs,
+    /// credential prompt, prompt-attempt cap) and is equally meaningful on the public
+    /// <c>WebAuthnClient</c> constructor, where the caller supplies their own session.
+    /// <see cref="SessionCreationOptions"/> configures the session this factory creates on the
+    /// caller's behalf, so it is meaningful only here. Folding the latter into the former would put a
+    /// property on <see cref="WebAuthnClientOptions"/> that is silently ignored whenever a caller
+    /// constructs the client directly - with nothing from the compiler or at runtime to say so.
+    /// </remarks>
     [Fact]
     public void WebAuthnDeviceFactory_UsesSessionOptionsAndCancellationShape()
     {
@@ -38,13 +51,19 @@ public sealed class FactoryShapeTests
             receiver => Assert.Equal(typeof(IYubiKey), receiver.ParameterType),
             origin => Assert.Equal("origin", origin.Name),
             suffixChecker => Assert.Equal("isPublicSuffix", suffixChecker.Name),
-            enterpriseRpIds => Assert.Equal("enterpriseRpIds", enterpriseRpIds.Name),
             options =>
             {
                 Assert.Equal("options", options.Name);
-                Assert.Equal(typeof(SessionCreationOptions), options.ParameterType);
+                Assert.Equal(typeof(WebAuthnClientOptions), options.ParameterType);
                 Assert.True(options.IsOptional);
                 Assert.Null(options.RawDefaultValue);
+            },
+            sessionOptions =>
+            {
+                Assert.Equal("sessionOptions", sessionOptions.Name);
+                Assert.Equal(typeof(SessionCreationOptions), sessionOptions.ParameterType);
+                Assert.True(sessionOptions.IsOptional);
+                Assert.Null(sessionOptions.RawDefaultValue);
             },
             cancellationToken =>
             {

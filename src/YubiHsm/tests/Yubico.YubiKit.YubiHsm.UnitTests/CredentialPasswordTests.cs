@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
@@ -205,6 +206,6 @@ public class CredentialPasswordTests
     private static Task<HsmAuthSession> CreateSessionAsync() =>
         HsmAuthSession.CreateAsync(
             new RecordingSmartCardConnection([0x90, 0x00]),
-            firmwareVersion: new FirmwareVersion(5, 8, 0),
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
 }

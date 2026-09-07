@@ -1,5 +1,4 @@
 #nullable enable
-
 Yubico.YubiKit.Fido2.AuthenticatorInfo
 Yubico.YubiKit.Fido2.AuthenticatorInfo.Aaguid.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Fido2.AuthenticatorInfo.Aaguid.init -> void
@@ -647,16 +646,16 @@ Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.ReadLargeBlobArrayAsync(System.
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.SetBlobAsync(System.ReadOnlyMemory<byte> largeBlobKey, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.WriteLargeBlobArrayAsync(Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray! array, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Fido2.Pin.ClientPin
-Yubico.YubiKit.Fido2.Pin.ClientPin.ChangePinAsync(System.ReadOnlyMemory<byte> currentPinUtf8, System.ReadOnlyMemory<byte> newPinUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.Pin.ClientPin.ChangePinAsync(System.ReadOnlyMemory<byte> currentPin, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Fido2.Pin.ClientPin.ClientPin(Yubico.YubiKit.Fido2.IFidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol) -> void
 Yubico.YubiKit.Fido2.Pin.ClientPin.Dispose() -> void
 Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(int PinRetries, bool PowerCycleRequired)>!
-Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinTokenAsync(System.ReadOnlyMemory<byte> pinUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
-Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinUvAuthTokenUsingPinAsync(System.ReadOnlyMemory<byte> pinUtf8, Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions permissions, string? rpId = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinTokenAsync(System.ReadOnlyMemory<byte> pin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
+Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinUvAuthTokenUsingPinAsync(System.ReadOnlyMemory<byte> pin, Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions permissions, string? rpId = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
 Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinUvAuthTokenUsingUvAsync(Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions permissions, string? rpId = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
 Yubico.YubiKit.Fido2.Pin.ClientPin.GetUvRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(int UvRetries, bool PowerCycleRequired)>!
 Yubico.YubiKit.Fido2.Pin.ClientPin.Protocol.get -> Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol!
-Yubico.YubiKit.Fido2.Pin.ClientPin.SetPinAsync(System.ReadOnlyMemory<byte> newPinUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Fido2.Pin.ClientPin.SetPinAsync(System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand
 Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol
 Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Authenticate(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message) -> byte[]!

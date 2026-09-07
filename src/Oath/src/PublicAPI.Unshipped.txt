@@ -1,5 +1,4 @@
 #nullable enable
-
 Yubico.YubiKit.Oath.Code
 Yubico.YubiKit.Oath.Code.<Clone>$() -> Yubico.YubiKit.Oath.Code!
 Yubico.YubiKit.Oath.Code.Code(string! Value, long ValidFrom, long ValidTo) -> void
@@ -52,7 +51,7 @@ Yubico.YubiKit.Oath.IOathSession.CalculateAllAsync(long? timestamp = null, Syste
 Yubico.YubiKit.Oath.IOathSession.CalculateAsync(Yubico.YubiKit.Oath.Credential! credential, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
 Yubico.YubiKit.Oath.IOathSession.CalculateCodeAsync(Yubico.YubiKit.Oath.Credential! credential, long? timestamp = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Oath.Code!>!
 Yubico.YubiKit.Oath.IOathSession.DeleteCredentialAsync(Yubico.YubiKit.Oath.Credential! credential, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.Oath.IOathSession.DeriveKey(System.ReadOnlyMemory<byte> passwordUtf8) -> byte[]!
+Yubico.YubiKit.Oath.IOathSession.DeriveKey(System.ReadOnlyMemory<byte> password) -> byte[]!
 Yubico.YubiKit.Oath.IOathSession.DeviceId.get -> string!
 Yubico.YubiKit.Oath.IOathSession.IsLocked.get -> bool
 Yubico.YubiKit.Oath.IOathSession.IsPasswordProtected.get -> bool
@@ -89,7 +88,7 @@ Yubico.YubiKit.Oath.OathSession.CalculateAllAsync(long? timestamp = null, System
 Yubico.YubiKit.Oath.OathSession.CalculateAsync(Yubico.YubiKit.Oath.Credential! credential, System.ReadOnlyMemory<byte> challenge, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
 Yubico.YubiKit.Oath.OathSession.CalculateCodeAsync(Yubico.YubiKit.Oath.Credential! credential, long? timestamp = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Oath.Code!>!
 Yubico.YubiKit.Oath.OathSession.DeleteCredentialAsync(Yubico.YubiKit.Oath.Credential! credential, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.Oath.OathSession.DeriveKey(System.ReadOnlyMemory<byte> passwordUtf8) -> byte[]!
+Yubico.YubiKit.Oath.OathSession.DeriveKey(System.ReadOnlyMemory<byte> password) -> byte[]!
 Yubico.YubiKit.Oath.OathSession.DeviceId.get -> string!
 Yubico.YubiKit.Oath.OathSession.IsLocked.get -> bool
 Yubico.YubiKit.Oath.OathSession.IsPasswordProtected.get -> bool

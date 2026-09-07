@@ -1,5 +1,4 @@
 #nullable enable
-
 Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject
 Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject.AuthenticatorData.get -> Yubico.YubiKit.WebAuthn.WebAuthnAuthenticatorData!
 Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject.Encode() -> byte[]!
@@ -50,60 +49,6 @@ Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential.Id.get -> System
 Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential.RequiresSelection.get -> bool
 Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential.SelectAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse!>!
 Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential.User.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity?
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.<Clone>$() -> Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest!
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.AllowList.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!>?
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.AllowList.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.BackendGetAssertionRequest() -> void
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.ClientDataHash.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.ClientDataHash.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.Equals(Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest? other) -> bool
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.Extensions.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.Extensions.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.Options.get -> System.Collections.Generic.IReadOnlyDictionary<string!, bool>?
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.Options.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.PinUvAuthParam.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.PinUvAuthParam.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.PinUvAuthProtocol.get -> byte?
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.PinUvAuthProtocol.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.RpId.get -> string!
-Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.RpId.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.<Clone>$() -> Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest!
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.BackendMakeCredentialRequest() -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.ClientDataHash.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.ClientDataHash.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.Equals(Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest? other) -> bool
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.ExcludeList.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!>?
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.ExcludeList.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.Extensions.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.Extensions.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.Options.get -> System.Collections.Generic.IReadOnlyDictionary<string!, bool>?
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.Options.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.PinUvAuthParam.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.PinUvAuthParam.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.PinUvAuthProtocol.get -> byte?
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.PinUvAuthProtocol.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.PubKeyCredParams.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.PublicKeyCredentialParameters!>!
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.PubKeyCredParams.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.Rp.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity!
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.Rp.init -> void
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.User.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity!
-Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.User.init -> void
-Yubico.YubiKit.WebAuthn.Client.IWebAuthnBackend
-Yubico.YubiKit.WebAuthn.Client.IWebAuthnBackend.GetAssertionAsync(Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse!>!
-Yubico.YubiKit.WebAuthn.Client.IWebAuthnBackend.GetCachedInfoAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.AuthenticatorInfo!>!
-Yubico.YubiKit.WebAuthn.Client.IWebAuthnBackend.GetNextAssertionAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse!>!
-Yubico.YubiKit.WebAuthn.Client.IWebAuthnBackend.GetPinRetriesAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<int?>!
-Yubico.YubiKit.WebAuthn.Client.IWebAuthnBackend.GetPinUvTokenAsync(Yubico.YubiKit.WebAuthn.Client.PinUvAuthMethod method, Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions permissions, string? rpId, System.ReadOnlyMemory<byte>? pinBytes, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.PinUvAuthTokenSession!>!
-Yubico.YubiKit.WebAuthn.Client.IWebAuthnBackend.MakeCredentialAsync(Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse!>!
-Yubico.YubiKit.WebAuthn.Client.PinUvAuthMethod
-Yubico.YubiKit.WebAuthn.Client.PinUvAuthMethod.Pin = 0 -> Yubico.YubiKit.WebAuthn.Client.PinUvAuthMethod
-Yubico.YubiKit.WebAuthn.Client.PinUvAuthMethod.Uv = 1 -> Yubico.YubiKit.WebAuthn.Client.PinUvAuthMethod
-Yubico.YubiKit.WebAuthn.Client.PinUvAuthTokenSession
-Yubico.YubiKit.WebAuthn.Client.PinUvAuthTokenSession.Dispose() -> void
-Yubico.YubiKit.WebAuthn.Client.PinUvAuthTokenSession.Protocol.get -> Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol!
-Yubico.YubiKit.WebAuthn.Client.PinUvAuthTokenSession.Token.get -> System.ReadOnlySpan<byte>
 Yubico.YubiKit.WebAuthn.Client.PublicSuffixChecker
 Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions
 Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions.<Clone>$() -> Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions!
@@ -161,36 +106,25 @@ Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.SignCount.get -
 Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.SignCount.init -> void
 Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.Transports.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.WebAuthn.WebAuthnTransport>?
 Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.Transports.init -> void
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.WebAuthnStatus() -> void
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.WebAuthnStatus(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus! original) -> void
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.Deconstruct(out Yubico.YubiKit.WebAuthn.WebAuthnClientError! Error) -> void
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.Equals(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed? other) -> bool
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.Error.get -> Yubico.YubiKit.WebAuthn.WebAuthnClientError!
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.Error.init -> void
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.WebAuthnStatusFailed(Yubico.YubiKit.WebAuthn.WebAuthnClientError! Error) -> void
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.Deconstruct(out T Result) -> void
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.Equals(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>? other) -> bool
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.Result.get -> T
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.Result.init -> void
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.WebAuthnStatusFinished(T Result) -> void
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing.Equals(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing? other) -> bool
-Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing.WebAuthnStatusProcessing() -> void
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClient
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.DisposeAsync() -> System.Threading.Tasks.ValueTask
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.GetAssertionAsync(Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions! options, System.ReadOnlyMemory<byte>? pinBytes = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential!>!>!
-Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.GetAssertionStreamAsync(Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions! options, System.ReadOnlyMemory<byte>? pinBytes = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus!>!
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.MakeCredentialAsync(Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions! options, System.ReadOnlyMemory<byte>? pinBytes = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse!>!
-Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.MakeCredentialStreamAsync(Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions! options, System.ReadOnlyMemory<byte>? pinBytes = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus!>!
-Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.WebAuthnClient(Yubico.YubiKit.Fido2.IFidoSession! fidoSession, Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, Yubico.YubiKit.WebAuthn.Client.PublicSuffixChecker! isPublicSuffix, System.Collections.Generic.IReadOnlySet<string!>? enterpriseRpIds = null, Yubico.YubiKit.Core.Credentials.ICredentialPrompt? prompt = null) -> void
-Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.WebAuthnClient(Yubico.YubiKit.WebAuthn.Client.IWebAuthnBackend! backend, Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, System.Func<string!, bool>! isPublicSuffix, System.Collections.Generic.IReadOnlySet<string!>? enterpriseRpIds = null, Yubico.YubiKit.Core.Credentials.ICredentialPrompt? prompt = null) -> void
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.WebAuthnClient(Yubico.YubiKit.Fido2.IFidoSession! fidoSession, Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, Yubico.YubiKit.WebAuthn.Client.PublicSuffixChecker! isPublicSuffix, Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions? options = null) -> void
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClientData
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClientData.Hash.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClientData.JsonBytes.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClientData.Type.get -> string!
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.<Clone>$() -> Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions!
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.CredentialPrompt.get -> Yubico.YubiKit.Core.Credentials.ICredentialPrompt?
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.CredentialPrompt.init -> void
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.EnterpriseRpIds.get -> System.Collections.Generic.IReadOnlySet<string!>!
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.EnterpriseRpIds.init -> void
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.Equals(Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions? other) -> bool
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.MaxPromptAttempts.get -> int
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.MaxPromptAttempts.init -> void
+Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.WebAuthnClientOptions() -> void
 Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin
 Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.Equals(Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin? other) -> bool
 Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.Host.get -> string!
@@ -383,7 +317,7 @@ Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.Prf.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.RegistrationExtensionOutputs(Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredProtectOutput? CredProtect = null, Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput? CredBlob = null, Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput? MinPinLength = null, Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobRegistrationOutput? LargeBlob = null, Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredPropsOutput? CredProps = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? PreviewSign = null) -> void
 Yubico.YubiKit.WebAuthn.IYubiKeyExtensions
 Yubico.YubiKit.WebAuthn.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!)
-Yubico.YubiKit.WebAuthn.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CreateWebAuthnClientAsync(Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, Yubico.YubiKit.WebAuthn.Client.PublicSuffixChecker! isPublicSuffix, System.Collections.Generic.IReadOnlySet<string!>? enterpriseRpIds = null, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.WebAuthnClient!>!
+Yubico.YubiKit.WebAuthn.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CreateWebAuthnClientAsync(Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, Yubico.YubiKit.WebAuthn.Client.PublicSuffixChecker! isPublicSuffix, Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions? options = null, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? sessionOptions = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.WebAuthnClient!>!
 Yubico.YubiKit.WebAuthn.Preferences.AttestationPreference
 Yubico.YubiKit.WebAuthn.Preferences.AttestationPreference.Direct = 2 -> Yubico.YubiKit.WebAuthn.Preferences.AttestationPreference
 Yubico.YubiKit.WebAuthn.Preferences.AttestationPreference.Enterprise = 3 -> Yubico.YubiKit.WebAuthn.Preferences.AttestationPreference
@@ -422,41 +356,22 @@ Yubico.YubiKit.WebAuthn.WebAuthnTransport
 Yubico.YubiKit.WebAuthn.WebAuthnTransport.Equals(Yubico.YubiKit.WebAuthn.WebAuthnTransport other) -> bool
 Yubico.YubiKit.WebAuthn.WebAuthnTransport.Value.get -> string!
 Yubico.YubiKit.WebAuthn.WebAuthnTransport.WebAuthnTransport() -> void
-abstract Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.<Clone>$() -> Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus!
-const Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.MaxPromptAttempts = 3 -> int
+const Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.DefaultMaxPromptAttempts = 3 -> int
 override Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions.Equals(object? obj) -> bool
 override Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions.GetHashCode() -> int
 override Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions.ToString() -> string!
 override Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse.Equals(object? obj) -> bool
 override Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse.GetHashCode() -> int
 override Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.ToString() -> string!
 override Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions.Equals(object? obj) -> bool
 override Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions.GetHashCode() -> int
 override Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions.ToString() -> string!
 override Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.Equals(object? obj) -> bool
 override Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.GetHashCode() -> int
 override Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.<Clone>$() -> Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed!
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.<Clone>$() -> Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>!
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing.<Clone>$() -> Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing!
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing.ToString() -> string!
+override Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.Equals(object? obj) -> bool
+override Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.GetHashCode() -> int
+override Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.ToString() -> string!
 override Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.Equals(object? obj) -> bool
 override Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.GetHashCode() -> int
 override Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.ToString() -> string!
@@ -522,32 +437,19 @@ override Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.GetHash
 override Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.ToString() -> string!
 override Yubico.YubiKit.WebAuthn.WebAuthnTransport.GetHashCode() -> int
 override Yubico.YubiKit.WebAuthn.WebAuthnTransport.ToString() -> string!
-override sealed Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.Equals(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus? other) -> bool
-override sealed Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.Equals(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus? other) -> bool
-override sealed Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing.Equals(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus? other) -> bool
 static Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject.Create(Yubico.YubiKit.WebAuthn.WebAuthnAuthenticatorData! authenticatorData, Yubico.YubiKit.Fido2.Credentials.AttestationStatement! statement) -> Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject!
 static Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject.Decode(System.ReadOnlyMemory<byte> cbor) -> Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject!
 static Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions.operator !=(Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions? left, Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions.operator ==(Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions? left, Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationOptions? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse.operator !=(Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse? left, Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse.operator ==(Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse? left, Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.operator !=(Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest? left, Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest.operator ==(Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest? left, Yubico.YubiKit.WebAuthn.Client.BackendGetAssertionRequest? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.operator !=(Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest? left, Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest.operator ==(Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest? left, Yubico.YubiKit.WebAuthn.Client.BackendMakeCredentialRequest? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions.operator !=(Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions? left, Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions.operator ==(Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions? left, Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationOptions? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.operator !=(Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse? left, Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.operator ==(Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse? left, Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.operator !=(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus? left, Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.operator ==(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus? left, Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.operator !=(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed? left, Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed.operator ==(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed? left, Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFailed? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.operator !=(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>? left, Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>.operator ==(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>? left, Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusFinished<T>? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing.operator !=(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing? left, Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing? right) -> bool
-static Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing.operator ==(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing? left, Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatusProcessing? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.WebAuthnClientData.Create(string! type, System.ReadOnlyMemory<byte> challenge, Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, bool? crossOrigin = null, string? topOrigin = null) -> Yubico.YubiKit.WebAuthn.Client.WebAuthnClientData!
+static Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.operator !=(Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions? left, Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions? right) -> bool
+static Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions.operator ==(Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions? left, Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.TryParse(string! url, out Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin? origin) -> bool
 static Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.operator !=(Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin? left, Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin? right) -> bool
 static Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.operator ==(Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin? left, Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin? right) -> bool
@@ -593,7 +495,7 @@ static Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.operator !
 static Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.operator ==(Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs? left, Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs? right) -> bool
 static Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.operator !=(Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs? left, Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs? right) -> bool
 static Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.operator ==(Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs? left, Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs? right) -> bool
-static Yubico.YubiKit.WebAuthn.IYubiKeyExtensions.CreateWebAuthnClientAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, Yubico.YubiKit.WebAuthn.Client.PublicSuffixChecker! isPublicSuffix, System.Collections.Generic.IReadOnlySet<string!>? enterpriseRpIds = null, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.WebAuthnClient!>!
+static Yubico.YubiKit.WebAuthn.IYubiKeyExtensions.CreateWebAuthnClientAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, Yubico.YubiKit.WebAuthn.Client.PublicSuffixChecker! isPublicSuffix, Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions? options = null, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? sessionOptions = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.WebAuthnClient!>!
 static Yubico.YubiKit.WebAuthn.WebAuthnAuthenticatorData.Decode(System.ReadOnlyMemory<byte> rawAuthData) -> Yubico.YubiKit.WebAuthn.WebAuthnAuthenticatorData!
 static Yubico.YubiKit.WebAuthn.WebAuthnTransport.Unknown(string! value) -> Yubico.YubiKit.WebAuthn.WebAuthnTransport
 static Yubico.YubiKit.WebAuthn.WebAuthnTransport.operator !=(Yubico.YubiKit.WebAuthn.WebAuthnTransport left, Yubico.YubiKit.WebAuthn.WebAuthnTransport right) -> bool
@@ -605,7 +507,4 @@ static readonly Yubico.YubiKit.WebAuthn.WebAuthnTransport.Nfc -> Yubico.YubiKit.
 static readonly Yubico.YubiKit.WebAuthn.WebAuthnTransport.SmartCard -> Yubico.YubiKit.WebAuthn.WebAuthnTransport
 static readonly Yubico.YubiKit.WebAuthn.WebAuthnTransport.Usb -> Yubico.YubiKit.WebAuthn.WebAuthnTransport
 virtual Yubico.YubiKit.WebAuthn.Client.PublicSuffixChecker.Invoke(string! domain) -> bool
-virtual Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.EqualityContract.get -> System.Type!
-virtual Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.Equals(Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus? other) -> bool
-virtual Yubico.YubiKit.WebAuthn.Client.Status.WebAuthnStatus.PrintMembers(System.Text.StringBuilder! builder) -> bool
 ~override Yubico.YubiKit.WebAuthn.WebAuthnTransport.Equals(object obj) -> bool

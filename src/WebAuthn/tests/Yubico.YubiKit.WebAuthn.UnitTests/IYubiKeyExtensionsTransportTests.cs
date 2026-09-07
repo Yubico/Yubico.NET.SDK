@@ -76,7 +76,7 @@ public class IYubiKeyExtensionsTransportTests
             () => device.CreateWebAuthnClientAsync(
                 Origin,
                 NeverPublicSuffix,
-                options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },
+                sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },
                 cancellationToken: Ct));
 
         Assert.Equal(typeof(ISmartCardConnection), device.RequestedConnection);
@@ -92,7 +92,7 @@ public class IYubiKeyExtensionsTransportTests
             () => device.CreateWebAuthnClientAsync(
                 Origin,
                 NeverPublicSuffix,
-                options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },
+                sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },
                 cancellationToken: Ct));
 
         Assert.Null(device.RequestedConnection);
@@ -109,7 +109,7 @@ public class IYubiKeyExtensionsTransportTests
             () => device.CreateWebAuthnClientAsync(
                 Origin,
                 NeverPublicSuffix,
-                options: new SessionCreationOptions { ScpKeyParameters = scp },
+                sessionOptions: new SessionCreationOptions { ScpKeyParameters = scp },
                 cancellationToken: Ct));
 
         Assert.Equal(typeof(ISmartCardConnection), device.RequestedConnection);
@@ -129,7 +129,7 @@ public class IYubiKeyExtensionsTransportTests
             () => device.CreateWebAuthnClientAsync(
                 Origin,
                 NeverPublicSuffix,
-                options: new SessionCreationOptions { PreferredConnectionType = invalid },
+                sessionOptions: new SessionCreationOptions { PreferredConnectionType = invalid },
                 cancellationToken: Ct));
 
         Assert.Null(device.RequestedConnection);
@@ -145,7 +145,7 @@ public class IYubiKeyExtensionsTransportTests
             () => device.CreateWebAuthnClientAsync(
                 Origin,
                 NeverPublicSuffix,
-                options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp },
+                sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp },
                 cancellationToken: Ct));
 
         Assert.Null(device.RequestedConnection);

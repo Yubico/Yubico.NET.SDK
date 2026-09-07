@@ -4,3 +4,6 @@
 # Marp/npx scratch, if it ever lands here
 .marp/
 node_modules/
+
+# marp --watch output; carries a livereload client, never commit it
+deck.dev.html

@@ -14,11 +14,16 @@ cd docs/demo
 ./watch.sh
 ```
 
-Then edit any file in `slides/`. Save, and `deck.html` reloads in the browser
-within about a second. No clicking, no cache-busting.
+Then edit any file in `slides/`. Save, and the browser reloads within about a
+second. No clicking, no cache-busting.
 
-`watch.sh` does not rebuild the PDF on every keystroke. When you want a fresh
-`deck.pdf`:
+While watching, the deck is served at **`/deck.dev.html`**, not `/deck.html`.
+Marp's watch mode injects a livereload client into whatever it writes, so it
+writes to a throwaway file rather than dirtying the committed `deck.html`.
+`deck.dev.html` is gitignored and deleted when you stop.
+
+`watch.sh` does not rebuild the PDF on every keystroke. When you are done
+editing, run this to refresh both committed artifacts:
 
 ```bash
 ./build.sh

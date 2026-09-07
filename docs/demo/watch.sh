@@ -9,10 +9,15 @@
 #
 # Two processes run:
 #   1. a small watcher that re-concatenates slides/*.md -> deck.md on change
-#   2. marp --watch, which rebuilds deck.html and pushes the reload
+#   2. marp --watch, which rebuilds deck.dev.html and pushes the reload
+#
+# Output goes to deck.dev.html, NOT deck.html. Marp's watch mode injects a
+# livereload websocket client into its output; writing that into the committed
+# deck.html would dirty the working tree on every session. deck.dev.html is
+# gitignored and removed on exit.
 #
 # The PDF is NOT regenerated on every keystroke -- run ./build.sh when you want
-# a fresh deck.pdf.
+# a fresh deck.pdf (and a clean deck.html).
 #
 # Ctrl-C stops both.
 
@@ -25,8 +30,9 @@ cleanup() {
   [ -n "${WATCH_PID:-}" ] && kill "$WATCH_PID" 2>/dev/null || true
   [ -n "${HTTP_PID:-}"  ] && kill "$HTTP_PID"  2>/dev/null || true
   wait 2>/dev/null || true
+  rm -f deck.dev.html
   echo
-  echo "stopped."
+  echo "stopped. run ./build.sh to refresh deck.html and deck.pdf."
 }
 trap cleanup EXIT INT TERM
 
@@ -71,7 +77,7 @@ PY
 WATCH_PID=$!
 
 # --- 2. static server, so inline-SVG zoom works (file:// is CORS-blocked) ---
-if ! curl -s -o /dev/null --max-time 1 "http://localhost:$PORT/deck.html"; then
+if ! curl -s -o /dev/null --max-time 1 "http://localhost:$PORT/diagrams.html"; then
   python3 -m http.server "$PORT" --bind 127.0.0.1 >/dev/null 2>&1 &
   HTTP_PID=$!
 fi
@@ -79,7 +85,7 @@ fi
 cat <<EOF
 
   editing  slides/*.md   ->  deck.html reloads automatically
-  deck     http://localhost:$PORT/deck.html
+  deck     http://localhost:$PORT/deck.dev.html
   diagrams http://localhost:$PORT/diagrams.html
 
   ./build.sh   regenerate deck.pdf as well
@@ -89,4 +95,4 @@ EOF
 
 # --- 3. marp watch: rebuilds deck.html + livereload -------------------------
 npx --yes @marp-team/marp-cli@latest deck.md \
-  --watch --html --allow-local-files -o deck.html
+  --watch --html --allow-local-files -o deck.dev.html

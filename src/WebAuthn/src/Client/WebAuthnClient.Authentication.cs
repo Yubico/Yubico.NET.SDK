@@ -232,21 +232,19 @@ public sealed partial class WebAuthnClient
                 .ToList();
         }
 
-        // Build PIN/UV auth params
+        // Build extensions CBOR via pipeline
+        var extensionsCbor = ExtensionPipeline.BuildAuthenticationExtensionsCbor(
+            options.Extensions,
+            options.AllowCredentials);
+
         ReadOnlyMemory<byte>? pinUvAuthParam = null;
         byte? pinUvAuthProtocol = null;
 
         if (tokenSession is not null)
         {
-            // Compute pinUvAuthParam = HMAC(token, clientDataHash)
-            pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token, clientData.Hash.Span);
             pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
+            pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token.Span, clientData.Hash.Span);
         }
-
-        // Build extensions CBOR via pipeline
-        var extensionsCbor = ExtensionPipeline.BuildAuthenticationExtensionsCbor(
-            options.Extensions,
-            options.AllowCredentials);
 
         return new BackendGetAssertionRequest
         {

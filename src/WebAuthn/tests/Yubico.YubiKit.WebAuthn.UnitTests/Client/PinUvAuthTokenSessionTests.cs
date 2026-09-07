@@ -51,7 +51,7 @@ public class PinUvAuthTokenSessionTests
 
         // A copy would leave a second live plaintext token that no one zeroes.
         Assert.True(
-            session.Token == token.AsSpan(),
+            session.Token.Span == token.AsSpan(),
             "the session must expose the caller's array, not a private copy of it");
     }
 

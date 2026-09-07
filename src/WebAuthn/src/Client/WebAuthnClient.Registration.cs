@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Buffers;
-using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Fido2;
@@ -244,8 +243,6 @@ public sealed partial class WebAuthnClient
             return (null, tokenSession, false);
         }
 
-        // ToArray() creates a copy; pre-flight needs to pass token across async boundary.
-        var tokenCopy = tokenSession.Token.ToArray();
         try
         {
             var matchedExclude = await Internal.ExcludeListPreflight.FindFirstMatchAsync(
@@ -253,7 +250,7 @@ public sealed partial class WebAuthnClient
                 options.Rp.Id,
                 options.ExcludeCredentials,
                 info,
-                tokenCopy,
+                tokenSession.Token,
                 tokenSession.Protocol,
                 cancellationToken).ConfigureAwait(false);
 
@@ -280,10 +277,6 @@ public sealed partial class WebAuthnClient
                 "This authenticator may not support silent excludeList probing.",
                 preflightEx);
         }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(tokenCopy);
-        }
     }
 
     private BackendMakeCredentialRequest BuildMakeCredentialRequest(
@@ -307,17 +300,6 @@ public sealed partial class WebAuthnClient
             optionsDict["uv"] = uvDecision.UvOption.Value;
         }
 
-        // Compute PIN/UV auth parameter if we have a token
-        ReadOnlyMemory<byte>? pinUvAuthParam = null;
-        byte? pinUvAuthProtocol = null;
-
-        if (tokenSession is not null)
-        {
-            var authParam = tokenSession.Protocol.Authenticate(tokenSession.Token, clientData.Hash.Span);
-            pinUvAuthParam = authParam;
-            pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
-        }
-
         // Build extensions CBOR via pipeline
         var extensionsCbor = ExtensionPipeline.BuildRegistrationExtensionsCbor(options.Extensions, options);
 
@@ -327,14 +309,25 @@ public sealed partial class WebAuthnClient
             ? matchedExclude is not null ? new[] { matchedExclude } : Array.Empty<PublicKeyCredentialDescriptor>()
             : options.ExcludeCredentials;
 
+        var pubKeyCredParams = options.PubKeyCredParams
+            .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
+            .ToList();
+
+        ReadOnlyMemory<byte>? pinUvAuthParam = null;
+        byte? pinUvAuthProtocol = null;
+
+        if (tokenSession is not null)
+        {
+            pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
+            pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token.Span, clientData.Hash.Span);
+        }
+
         return new BackendMakeCredentialRequest
         {
             ClientDataHash = clientData.Hash,
             Rp = options.Rp,
             User = options.User,
-            PubKeyCredParams = options.PubKeyCredParams
-                .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
-                .ToList(),
+            PubKeyCredParams = pubKeyCredParams,
             ExcludeList = excludeList,
             Extensions = extensionsCbor,
             Options = optionsDict.Count > 0 ? optionsDict : null,

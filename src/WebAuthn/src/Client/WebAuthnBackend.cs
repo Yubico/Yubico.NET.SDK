@@ -129,10 +129,11 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
         {
             // The copy is load-bearing, not defensive: the finally below zeroes whatever is in
-            // options, and callers reuse one pinUvAuthParam across several backend calls (see
-            // ExcludeListPreflight's chunk loop). Zeroing the caller's buffer here would make
-            // every call after the first send an all-zero parameter. The caller zeroes the
-            // original when it is done with it.
+            // options, and the parameter belongs to the caller, which zeroes it once the ceremony
+            // is done with it. Without the copy this method would be destroying a buffer it does
+            // not own. Unlike GetAssertionAsync there is no multi-call reuse to protect here -
+            // registration builds a fresh request per attempt and sends it once - so ownership,
+            // not reuse, is what makes the copy necessary.
             options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
             options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
         }

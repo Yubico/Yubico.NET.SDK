@@ -43,10 +43,10 @@ internal sealed class PinUvAuthTokenSession : IDisposable
     public IPinUvAuthProtocol Protocol { get; }
 
     /// <summary>
-    /// Gets the token bytes as a read-only span.
+    /// Gets the token bytes.
     /// </summary>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
-    public ReadOnlySpan<byte> Token
+    public ReadOnlyMemory<byte> Token
     {
         get
         {

@@ -33,6 +33,10 @@ V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arriv
 
 Earlier v2 alphas also exposed these events as an `IObservable<DeviceEvent>` (`YubiKeyManager.DeviceChanges`), briefly with Rx-style `Subscribe(Action<T>)` and query operators appearing transitively. That property has been removed outright, with no shim: `WatchAsync` is the only device-change stream. Filtering that used `Where` becomes an `if` inside the `await foreach`, and each `await foreach` is an independent watcher, so several parts of an application can consume the stream concurrently.
 
+### Physical Device Correlation
+
+V1 had no built-in way to answer "are these two device references the same physical key?" across discovery events; callers either opened a session and compared `DeviceInfo.SerialNumber`, or compared per-transport device paths. V2's `IYubiKey` now exposes `SerialNumber` (`int?`, populated by discovery without opening a session, `null` until a read succeeds and possibly forever on devices like the Security Key series that never report one) and `SameDeviceAs(IYubiKey other)`, which returns a tri-state `DeviceCorrelation` (`Unknown`/`Same`/`Different`) rather than a plain `bool`. `Unknown` means "cannot correlate", not "different" or "same" - do not coerce it to either for deduplication or collection equality. See `core-device-serial-and-correlation` in `v1-to-v2-map.yml`; this complements, not replaces, the `recipe-management-device-info` Management-session path for `FirmwareVersion` and the rest of `DeviceInfo`.
+
 ### HID Interface Type Classification
 
 V1's `IHidDevice.UsagePage` (`HidUsagePage`: `Unknown`, `Fido`, `Keyboard`) classified a device from the HID UsagePage field alone; `Keyboard = 1` was actually the Generic Desktop usage page, not specifically a keyboard, so v1 code paired it with `Usage` to detect the YubiKey OTP interface. V2 classifies from the full UsagePage+Usage pair through `IHidDevice.InterfaceType` (`HidInterfaceType`: `Unknown`, `Fido`, `Otp`). Migrate `UsagePage == HidUsagePage.Fido` to `InterfaceType == HidInterfaceType.Fido`, and `UsagePage == HidUsagePage.Keyboard` (v1's OTP-interface check) to `InterfaceType == HidInterfaceType.Otp`. See `hid-usage-page-to-interface-type` in `v1-to-v2-map.yml`. Most applications should prefer `YubiKeyManager`/`IYubiKey` discovery and `ConnectionType` over raw `IHidDevice` interface classification.
@@ -498,9 +502,13 @@ PIN-only management-key mode (`IPivSession.GetPinOnlyModeAsync`/`SetPinOnlyModeA
 
 Use `Yubico.YubiKit.Fido2` for FIDO2/WebAuthn operations. Review transport selection, PIN/UV flows, credential management, and authenticator state assumptions manually.
 
+Typed response models now preserve the original CBOR envelope for fields this SDK version does not yet model: `AuthenticatorInfo.RawData`, `FingerprintSensorInfo.RawData`, `EnrollmentSampleResult.RawData`, `CredentialMetadata.RawData`, and `RelyingPartyInfo.RawData`. This does not change any typed member; it is a forward-compatibility escape hatch for code that previously had to reach for ad hoc CBOR parsing to read a field the typed model omitted. See `fido2-forward-compat-raw-data` in `v1-to-v2-map.yml`.
+
 ### WebAuthn
 
 Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new package built on top of `Yubico.YubiKit.Fido2` (`IFidoSession`); v1 had no equivalent package. `WebAuthnClient` accepts an optional `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) that supplies a PIN on demand instead of requiring `pinBytes` up front, and owns a bounded retry loop instead of v1 FIDO2 code's global, unbounded `KeyCollector` pattern; see `webauthn-credential-prompt` in `v1-to-v2-map.yml`.
+
+The prompt and retry-attempt count now configure through a single `WebAuthnClientOptions` record (`MaxPromptAttempts`, `CredentialPrompt`, `EnterpriseRpIds`) passed to `WebAuthnClient`'s constructor or `IYubiKeyExtensions.CreateWebAuthnClientAsync`, replacing earlier positional `enterpriseRpIds`/`prompt` parameters. Earlier v2 alphas also exposed a streaming ceremony-status API (`WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync`, returning `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed`); it was removed outright with no shim, leaving the plain async `MakeCredentialAsync`/`GetAssertionAsync` as the only ceremony entry points. See `webauthn-client-construction-and-streams` in `v1-to-v2-map.yml`.
 
 ### OATH
 

@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" font-family="Helvetica,Arial,sans-serif">
+  <style>
+    .t { font-size: 15px; fill: #1a1a1a; }
+    .s { font-size: 13px; fill: #444; }
+    .h { font-size: 17px; font-weight: bold; fill: #1a1a1a; }
+    .bad { fill: #fdecea; stroke: #d64545; stroke-width: 1.5; }
+    .good { fill: #e8f5e9; stroke: #2e7d32; stroke-width: 1.5; }
+    .box { fill: #f5f5f5; stroke: #999; stroke-width: 1.2; }
+    .arr { stroke: #666; stroke-width: 1.5; fill: none; marker-end: url(#a); }
+  </style>
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- BEFORE -->
+  <text x="20" y="26" class="h">v1 — timer polling</text>
+  <rect x="20" y="40" width="380" height="46" rx="4" class="bad"/>
+  <text x="34" y="60" class="t">PeriodicTimer (500 ms)</text>
+  <text x="34" y="78" class="s">fires whether or not anything changed</text>
+
+  <line x1="210" y1="86" x2="210" y2="112" class="arr"/>
+
+  <rect x="20" y="112" width="380" height="64" rx="4" class="bad"/>
+  <text x="34" y="132" class="t">Task.Run() async-over-sync scan</text>
+  <text x="34" y="150" class="s">PC/SC: SCardGetStatusChange(timeout = 0)</text>
+  <text x="34" y="167" class="s">HID: full platform enumeration, every cycle</text>
+
+  <line x1="210" y1="176" x2="210" y2="202" class="arr"/>
+
+  <rect x="20" y="202" width="380" height="40" rx="4" class="box"/>
+  <text x="34" y="227" class="t">Cache update → notifications</text>
+
+  <text x="20" y="276" class="s">✗ 500 ms detection latency</text>
+  <text x="20" y="296" class="s">✗ CPU burned polling an idle bus</text>
+  <text x="20" y="316" class="s">✗ full re-enumeration every cycle</text>
+  <text x="20" y="336" class="s">✗ Windows HID not implemented</text>
+  <text x="20" y="356" class="s">✗ async-over-sync anti-pattern</text>
+
+  <!-- divider -->
+  <line x1="450" y1="20" x2="450" y2="400" stroke="#ddd" stroke-width="2"/>
+
+  <!-- AFTER -->
+  <text x="480" y="26" class="h">v2 — OS notifications + coalescing</text>
+  <rect x="480" y="40" width="400" height="64" rx="4" class="good"/>
+  <text x="494" y="60" class="t">Platform listeners</text>
+  <text x="494" y="78" class="s">SmartCard: SCardGetStatusChange(1000 ms)</text>
+  <text x="494" y="95" class="s">HID: Windows / macOS / Linux udev events</text>
+
+  <line x1="680" y1="104" x2="680" y2="126" class="arr"/>
+
+  <rect x="480" y="126" width="400" height="30" rx="4" class="box"/>
+  <text x="494" y="146" class="s">DeviceMonitorSignal — capacity-one, single reader</text>
+
+  <line x1="680" y1="156" x2="680" y2="178" class="arr"/>
+
+  <rect x="480" y="178" width="400" height="80" rx="4" class="good"/>
+  <text x="494" y="198" class="t">Coalescing loop</text>
+  <text x="494" y="216" class="s">200 ms quiet period; each new hint re-arms it</text>
+  <text x="494" y="233" class="s">capped at 5 × 200 ms = 1 s during a hint storm</text>
+  <text x="494" y="250" class="s">interval scan only as fallback</text>
+
+  <line x1="680" y1="258" x2="680" y2="280" class="arr"/>
+
+  <rect x="480" y="280" width="400" height="46" rx="4" class="box"/>
+  <text x="494" y="300" class="t">RescanCoreAsync → repository diff</text>
+  <text x="494" y="318" class="s">Added / Removed only for genuine changes</text>
+
+  <line x1="680" y1="326" x2="680" y2="348" class="arr"/>
+
+  <rect x="480" y="348" width="400" height="36" rx="4" class="good"/>
+  <text x="494" y="371" class="t">WatchAsync() → IAsyncEnumerable&lt;DeviceEvent&gt;</text>
+</svg>

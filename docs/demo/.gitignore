@@ -1,0 +1,6 @@
+# Transient runtime state from ./view.sh and ./watch.sh
+.view-server.pid
+
+# Marp/npx scratch, if it ever lands here
+.marp/
+node_modules/

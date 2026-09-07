@@ -3,6 +3,7 @@
 #
 #   ./build.sh          -> deck.md, deck.html, deck.pdf
 #   ./build.sh md       -> deck.md only (fast; no node/npx needed)
+#   ./build.sh map      -> print which deck slide numbers each source file owns
 #
 # SOURCE OF TRUTH is slides/*.md, concatenated in filename order behind
 # header.md. Never hand-edit deck.md, deck.html or deck.pdf -- they are
@@ -13,6 +14,31 @@
 
 set -euo pipefail
 cd "$(dirname "$0")"
+
+# Print the source-file -> slide-number map. Use this to keep README.md honest
+# after adding, deleting or reordering slides.
+if [ "${1:-}" = "map" ]; then
+  python3 - <<'PY'
+import glob, re
+n = 0
+rows = []
+for f in sorted(glob.glob("slides/*.md")):
+    blocks = open(f).read().split("\n---\n")
+    start = n + 1
+    n += len(blocks)
+    m = re.search(r"^#+ (.+)$", blocks[0], re.M)
+    t = re.sub(r"\*\*|`", "", m.group(1)) if m else "(lead/title)"
+    rows.append((f.replace("slides/", ""),
+                 str(start) if len(blocks) == 1 else f"{start}-{n}",
+                 t[:46]))
+w = max(len(r[0]) for r in rows)
+print(f"{'file'.ljust(w)}  {'slides':>7}  topic")
+for a, b, c in rows:
+    print(f"{a.ljust(w)}  {b:>7}  {c}")
+print(f"\n{n} slides")
+PY
+  exit 0
+fi
 
 OUT=deck.md
 

@@ -31,6 +31,7 @@ Other entry points:
 | `./watch.sh` | live-editing loop, browser auto-reload |
 | `./build.sh` | full build: `deck.md` + `deck.html` + `deck.pdf` |
 | `./build.sh md` | just re-concatenate `deck.md`, no Node needed, instant |
+| `./build.sh map` | print the file → slide-number map below, freshly computed |
 | `./view.sh` | serve over HTTP, open the standalone diagram viewer |
 | `./view.sh deck` | serve over HTTP, open the deck |
 
@@ -40,6 +41,9 @@ Other entry points:
 
 Files concatenate in filename order. One file usually holds 2–3 slides,
 separated by a `---` line.
+
+This table goes stale the moment you add or delete a slide. Regenerate it with
+`./build.sh map` rather than trusting it.
 
 | File | Slides | Topic |
 |---|---|---|

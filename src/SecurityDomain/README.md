@@ -82,7 +82,7 @@ await using var session = await SecurityDomainSession.CreateAsync(
 
 // Security Domain cannot detect firmware. FirmwareVersionOverride is its only exact
 // version source and controls feature gates; without it, the session assumes 5.3.0.
-// The property remains provisional until the stable API baseline.
+// The property is retained on the public API for this reason.
 
 // With SCP03 authentication
 using var scpParams = Scp03KeyParameters.Default;

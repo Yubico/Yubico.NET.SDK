@@ -48,4 +48,21 @@ public sealed class SessionCreationOptions
     ///     directly controls feature gates; without it, that session conservatively assumes version 5.3.0.
     /// </summary>
     public FirmwareVersion? FirmwareVersionOverride { get; init; }
+
+    /// <summary>
+    ///     Creates a copy with the specified preferred connection type.
+    /// </summary>
+    /// <param name="connectionType">The preferred connection type for the copy.</param>
+    /// <returns>A new instance containing the copied settings and specified preferred connection type.</returns>
+    /// <remarks>
+    ///     This method is the single place that must be updated when a property is added to this type.
+    /// </remarks>
+    public SessionCreationOptions WithPreferredConnectionType(ConnectionType connectionType) =>
+        new()
+        {
+            ProtocolConfiguration = ProtocolConfiguration,
+            ScpKeyParameters = ScpKeyParameters,
+            PreferredConnectionType = connectionType,
+            FirmwareVersionOverride = FirmwareVersionOverride
+        };
 }

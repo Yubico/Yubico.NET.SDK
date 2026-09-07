@@ -49,7 +49,7 @@ public sealed class YubicoOtpChallengeResponseSlotConfiguration : SlotConfigurat
                 nameof(aesKey));
         }
 
-        aesKey.CopyTo(_key);
+        SetKey(aesKey);
 
         _tktFlags |= TicketFlag.ChalResp;
         _cfgFlags |= ConfigFlag.ChalYubico;

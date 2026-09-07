@@ -35,6 +35,7 @@ public static class IYubiKeyExtensions
         /// <summary>
         /// Gets FIDO2 authenticator information from a YubiKey asynchronously.
         /// </summary>
+        /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <returns>
         /// An <see cref="AuthenticatorInfo"/> containing detailed information about the 
@@ -54,9 +55,11 @@ public static class IYubiKeyExtensions
         /// Console.WriteLine($"Supports CTAP2.1: {info.Versions.Contains("FIDO_2_1")}");
         /// </code>
         /// </example>
-        public async Task<AuthenticatorInfo> GetFidoInfoAsync(CancellationToken cancellationToken = default)
+        public async Task<AuthenticatorInfo> GetFidoInfoAsync(
+            SessionCreationOptions? options = null,
+            CancellationToken cancellationToken = default)
         {
-            await using var fidoSession = await yubiKey.CreateFidoSessionAsync(cancellationToken: cancellationToken)
+            await using var fidoSession = await yubiKey.CreateFidoSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
             return await fidoSession.GetInfoAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -122,14 +125,14 @@ public static class IYubiKeyExtensions
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            var configuration = options?.ProtocolConfiguration;
             var scpKeyParams = options?.ScpKeyParameters;
             var preferredConnectionType = options?.PreferredConnectionType;
-            var firmwareVersionOverride = options?.FirmwareVersionOverride;
             var transport = yubiKey.ResolveFidoSessionTransport(
                 scpKeyParams is not null && preferredConnectionType is null
                     ? ConnectionType.SmartCard
                     : preferredConnectionType);
+            var sessionOptions = (options ?? new SessionCreationOptions())
+                .WithPreferredConnectionType(transport);
 
             return await yubiKey.CreateSessionOverTransportAsync(
                     transport,
@@ -138,13 +141,7 @@ public static class IYubiKeyExtensions
                         var session = await FidoSession
                             .CreateAsync(
                                 connection,
-                                new SessionCreationOptions
-                                {
-                                    ProtocolConfiguration = configuration,
-                                    ScpKeyParameters = scpKeyParams,
-                                    PreferredConnectionType = transport,
-                                    FirmwareVersionOverride = firmwareVersionOverride
-                                },
+                                sessionOptions,
                                 ct)
                             .ConfigureAwait(false);
 

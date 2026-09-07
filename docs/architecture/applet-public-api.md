@@ -9,7 +9,7 @@ defaulted cancellation token. Use `await using` for every returned session.
 
 `SessionCreationOptions` is consumed during creation and is not retained. It groups only cross-cutting creation
 concerns: protocol configuration, borrowed secure-channel parameters, preferred connection type, and the
-provisional effective firmware-version override. A direct factory treats `PreferredConnectionType` as an
+effective firmware-version override. A direct factory treats `PreferredConnectionType` as an
 assertion. A device factory uses it for selection. Supplying secure-channel parameters without a preference
 continues to force SmartCard where that behavior already existed.
 
@@ -39,11 +39,13 @@ check-only silently won. An enum makes every valid mode explicit.
 ## Compatibility process
 
 The ten shipping SDK projects use `Microsoft.CodeAnalysis.PublicApiAnalyzers`. Their current 2.0-alpha surfaces are
-reviewed in `PublicAPI.Unshipped.txt`; `PublicAPI.Shipped.txt` remains only the nullable header until the stable
-baseline is accepted. A public change therefore requires a declaration diff during review. Before 2.0 stable,
-resolve the firmware override decision and move the accepted declarations to the shipped files. Once a stable
-baseline package exists, enable package validation against the preceding stable version. Never add an optional
-parameter to an already shipped signature; add an overload or an options property.
+reviewed in `PublicAPI.Unshipped.txt`; `PublicAPI.Shipped.txt` remains only the nullable header throughout the alpha
+series and is populated at the first beta release. While the shipped files are empty, surface changes are ordinary
+declaration edits; once populated, every break requires an explicit `*REMOVED*` entry, which is the right ratchet for
+beta rather than alpha churn. Nothing from this decision round gates that transition: F8 has no public API deadline,
+and expanding the convenience set is future feature work rather than a deferred API decision. Once a stable baseline
+package exists, enable package validation against the preceding stable version. Never add an optional parameter to an
+already shipped signature; add an overload or an options property.
 
 ### Adding an interface member
 
@@ -67,33 +69,36 @@ proliferation is not the default.
 | NAM | Naming | Normalize equivalent names while preserving protocol terms |
 | SUR | Surface minimization | No applet dependency-injection APIs |
 | CMP | Compatibility | Public API declarations and later package validation |
-| CNV | Convenience layer | Deferred: existing one-shot methods remain normalized but are not expanded |
-| VER | Firmware override | Provisional: retain for the alpha and reassess before the stable baseline; Security Domain cannot detect firmware and depends on the override as its only exact version input |
+| CNV | Convenience layer | Resolved: normalized, not expanded; all ten one-shot conveniences accept `SessionCreationOptions`, while adding new conveniences is future feature work rather than a deferred API decision |
+| VER | Firmware override | Resolved: retain `FirmwareVersionOverride`; all eight sessions consume it, and Security Domain depends on it as its only exact version source |
 
-The general one-shot convenience-operation taxonomy and the final disposition of `FirmwareVersionOverride` are
-deliberately deferred. This consolidation does not change wire encoding, transport fallback, connection ownership,
-or security lifecycle behavior.
+CNV is normalized, not expanded. Expanding the set beyond the existing ten conveniences remains future feature work
+and must not be reopened as a deferred public API question. `FirmwareVersionOverride` remains public: all eight
+sessions consume it, and Security Domain cannot detect firmware at all, making it that applet's only exact version
+source rather than an override. Its XML documentation records this exception; without a supplied value, Security
+Domain conservatively assumes firmware 5.3.0.
 
-The VER decision must account for Security Domain: unlike the other applets, it does not detect firmware during
-initialization. `FirmwareVersionOverride` is therefore its only exact version input and directly controls feature
-gates; when omitted, Security Domain conservatively assumes firmware 5.3.0. This is recorded context, not a
-resolution of VER.
+## Resolved decisions
 
-## Deferred decisions
+| Finding | Resolution |
+|---|---|
+| F2 | **RESOLVED:** The Core `CreateAppletSessionAsync<TSession>` template remains correctly refused; the narrower defect was eight factories rebuilding options field by field, fixed by `SessionCreationOptions.WithPreferredConnectionType`. |
+| F7 / CNV | **RESOLVED:** The ten one-shot conveniences now have a uniform `SessionCreationOptions?`-then-cancellation shape, pinned by `OneShotDeviceExtensions_UseUniformOptionsAndCancellationShape` in `src/PublicApi/`. |
+| VER | **RESOLVED — RETAIN:** `FirmwareVersionOverride` stays public and is consumed by all eight sessions; its XML documentation records that Security Domain cannot detect firmware and uses it as its only exact version source. |
+| WebAuthn conventions | **RESOLVED:** The existing `WebAuthnDeviceFactory_UsesSessionOptionsAndCancellationShape` facade convention in `src/PublicApi/` is sufficient; no further facade-specific conventions are warranted at this time. |
 
-| Finding | Deferred decision | Deadline |
-|---|---|---|
-| F2 | Do not add a Core `CreateAppletSessionAsync<TSession>` template or rewrite the eight device extensions to forward the options object. Reconsider only with evidence that the repeated snapshots cause defects. | Before `PublicAPI.Shipped.txt` is populated. |
-| F7 / CNV | Do not change which one-shot convenience extensions accept `SessionCreationOptions`. Decide the convenience taxonomy and whether those signatures should converge in the dedicated CNV round. | Before `PublicAPI.Shipped.txt` is populated if any signature will change. |
-| F8 | Do not relocate `src/PublicApi/`. It is documented in its local README and CLAUDE guidance and in the root module table as a test-only cross-module convention project with no shipping assembly. | No public API deadline; revisit only with an authorized repository-layout change. |
-| WebAuthn conventions | WebAuthn is a client facade, not an `ApplicationSession`; do not add it to applet session/interface lists. It is referenced by the convention project, and its device factory has a dedicated options-and-cancellation shape convention. Reassess whether other facade-specific conventions are warranted. | Before `PublicAPI.Shipped.txt` is populated. |
+## Deferred repository-layout decision
 
-## Known pre-existing surface defects
+F8 remains deferred with no deadline: do not relocate `src/PublicApi/`. Its local README and CLAUDE guidance and the
+root module table already identify it as a test-only cross-module convention project with no shipping assembly.
+Revisit it only as part of an authorized repository-layout change.
 
-Resolve these before populating `PublicAPI.Shipped.txt`; they are intentionally not changed by this consolidation:
+## Resolved pre-existing surface defects
 
-- `Yubico.YubiKit.YubiOtp.SlotConfiguration` exposes protected mutable `byte[]` fields `_key`, `_uid`, and `_fixed`.
-  `_key` can contain AES or HMAC key material, so declaring the current shape shipped would bless mutable secret
-  storage on a public abstract type.
-- `Yubico.YubiKit.Core.Sessions.ApplicationIds` exposes application identifiers as mutable process-wide `byte[]`
-  values. A consumer can corrupt later application selection globally by mutating an element.
+- **RESOLVED:** `Yubico.YubiKit.YubiOtp.SlotConfiguration` no longer exposes protected mutable `_fixed`, `_uid`,
+  `_key`, or `_fixedSize` storage. Derived classes use protected copy-in setters that validate length and never
+  surrender the array, so key material cannot be aliased out of a derived type.
+- **RESOLVED:** `Yubico.YubiKit.Core.Sessions.ApplicationIds` is a static class exposing `ReadOnlyMemory<byte>`
+  properties rather than mutable process-wide `byte[]` fields, and each read returns a fresh copy.
+  `ReadOnlyMemory<byte>` alone would not have been sufficient, because `MemoryMarshal.TryGetArray` recovers the
+  backing array; copying is what removes the process-wide write.

@@ -55,6 +55,35 @@ containing `NotSupportedException`; the concrete SDK session supplies the real i
 logic in the interface. A large optional subsystem may instead use a companion type, but capability-interface
 proliferation is not the default.
 
+### Reconciling the declaration files after a rebase
+
+The declaration files record full signatures **including parameter names**. A rename on the trunk therefore
+invalidates every entry it touches while producing no textual conflict at all, so a rebase can leave the files
+stale in ways nothing flags until the analyzer runs. Expect one `RS0017` (declared but not found) and one
+`RS0016` (found but not declared) per renamed signature.
+
+The analyzer names the exact string to remove and to add, so reconciliation is mechanical and should be driven
+from its output rather than by hand. What must not be mechanical is accepting the result:
+
+> **Classify every changed entry against a known trunk change.** An entry explained by a rename, a deliberate
+> removal, or a type becoming internal is fine. An entry you cannot explain is a suspected merge error, not a
+> record to accept.
+
+That step is the whole point. Regenerating the files from analyzer output means regenerating them *from the
+code* — so at the one moment they are supposed to be an independent check on the merge, they stop being one. If
+the merge silently dropped a default, changed nullability, or widened an accessibility, a blind regeneration
+records the mistake as the new truth and the review diff looks intentional.
+
+A practical audit: diff the declaration files against their pre-rebase state and confirm each removal pairs with
+an addition that differs only in the way the known trunk change predicts.
+
+```bash
+git diff <pre-rebase-ref> HEAD -- '*PublicAPI.Unshipped.txt'
+```
+
+Unpaired removals should map to something the trunk deleted or made internal; unpaired additions should map to
+something the trunk added. Anything left over needs explaining before the PR is pushed.
+
 ## Taxonomy
 
 | ID | Category | Decision |

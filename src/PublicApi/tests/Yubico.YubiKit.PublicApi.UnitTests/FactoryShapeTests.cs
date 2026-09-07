@@ -38,6 +38,9 @@ public sealed class FactoryShapeTests
     /// caller's behalf, so it is meaningful only here. Folding the latter into the former would put a
     /// property on <see cref="WebAuthnClientOptions"/> that is silently ignored whenever a caller
     /// constructs the client directly - with nothing from the compiler or at runtime to say so.
+    /// Neither is named plain <c>options</c>: <see cref="ValidateFactory"/> reserves that name for
+    /// <see cref="SessionCreationOptions"/> on every other factory, so using it here for either type
+    /// would make one name mean two things across the SDK.
     /// </remarks>
     [Fact]
     public void WebAuthnDeviceFactory_UsesSessionOptionsAndCancellationShape()
@@ -51,12 +54,12 @@ public sealed class FactoryShapeTests
             receiver => Assert.Equal(typeof(IYubiKey), receiver.ParameterType),
             origin => Assert.Equal("origin", origin.Name),
             suffixChecker => Assert.Equal("isPublicSuffix", suffixChecker.Name),
-            options =>
+            clientOptions =>
             {
-                Assert.Equal("options", options.Name);
-                Assert.Equal(typeof(WebAuthnClientOptions), options.ParameterType);
-                Assert.True(options.IsOptional);
-                Assert.Null(options.RawDefaultValue);
+                Assert.Equal("clientOptions", clientOptions.Name);
+                Assert.Equal(typeof(WebAuthnClientOptions), clientOptions.ParameterType);
+                Assert.True(clientOptions.IsOptional);
+                Assert.Null(clientOptions.RawDefaultValue);
             },
             sessionOptions =>
             {

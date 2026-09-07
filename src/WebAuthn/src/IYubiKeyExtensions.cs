@@ -32,9 +32,10 @@ public static class IYubiKeyExtensions
         /// </summary>
         /// <param name="origin">The WebAuthn origin for client data JSON.</param>
         /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
-        /// <param name="options">
-        /// Optional client configuration (enterprise RP IDs, credential prompt, prompt-attempt
-        /// limit) forwarded to the created <see cref="WebAuthnClient"/>.
+        /// <param name="clientOptions">
+        /// Optional configuration for the client itself (enterprise RP IDs, credential prompt,
+        /// prompt-attempt limit), forwarded to the created <see cref="WebAuthnClient"/>. Unrelated to
+        /// <paramref name="sessionOptions"/>, which configures the session rather than the client.
         /// </param>
         /// <param name="sessionOptions">
         /// Optional settings for the underlying FIDO2 session (SCP key parameters, protocol
@@ -51,12 +52,12 @@ public static class IYubiKeyExtensions
         /// rejects public suffixes such as <c>com</c> and <c>co.uk</c> before any CTAP operation runs.
         /// This method adds no independent session-creation logic; <paramref name="sessionOptions"/> is
         /// validated and applied by the underlying FIDO2 <c>CreateFidoSessionAsync</c>, while
-        /// <paramref name="options"/> is forwarded to the returned <see cref="WebAuthnClient"/>.
+        /// <paramref name="clientOptions"/> is forwarded to the returned <see cref="WebAuthnClient"/>.
         /// </remarks>
         public async Task<WebAuthnClient> CreateWebAuthnClientAsync(
             WebAuthnOrigin origin,
             PublicSuffixChecker isPublicSuffix,
-            WebAuthnClientOptions? options = null,
+            WebAuthnClientOptions? clientOptions = null,
             SessionCreationOptions? sessionOptions = null,
             CancellationToken cancellationToken = default)
         {
@@ -68,7 +69,7 @@ public static class IYubiKeyExtensions
 
             try
             {
-                return new WebAuthnClient(fidoSession, origin, isPublicSuffix, options);
+                return new WebAuthnClient(fidoSession, origin, isPublicSuffix, clientOptions);
             }
             catch
             {

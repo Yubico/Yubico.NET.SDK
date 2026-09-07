@@ -22,9 +22,9 @@ on:
         required: true
         type: boolean
       version:
-        description: 'Version'
+        description: 'Version (optional; a unique prerelease is generated when omitted)'
         required: false
-        default: "0.0.0-prerelease.YYYYMMDD.B"
+        default: ""
         type: string
   schedule:
     - cron: '0 0 * * *' # Every day at midnight
@@ -58,7 +58,7 @@ jobs:
             }
             & ./build-windows.ps1 -Version $baseVersion
           } else {
-            & ./build-windows.ps1
+            & ./build-windows.ps1 -Version "0.0.0"
           }
       - name: Verify no VC++ Redistributable dependency
         shell: cmd
@@ -87,7 +87,10 @@ jobs:
           $failed = $false
           foreach ($arch in @('win-x64', 'win-x86', 'win-arm64')) {
               Write-Host "=== Checking $arch\Yubico.NativeShims.dll ==="
-              & $script "$PWD\Yubico.NativeShims\$arch\Yubico.NativeShims.dll"
+              & pwsh -NoProfile -File $script "$PWD\Yubico.NativeShims\$arch\Yubico.NativeShims.dll"
+              if ($LASTEXITCODE -ne 0) { $failed = $true }
+              Write-Host "=== Checking $arch\static\Yubico.NativeShims.lib ==="
+              & pwsh -NoProfile -File $script "$PWD\Yubico.NativeShims\$arch\static\Yubico.NativeShims.lib"
               if ($LASTEXITCODE -ne 0) { $failed = $true }
           }
           if ($failed) { exit 1 }
@@ -95,15 +98,21 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: win-x64
-          path: Yubico.NativeShims/win-x64/**
+          path: |
+            Yubico.NativeShims/win-x64/*.dll
+            Yubico.NativeShims/win-x64/static/**
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: win-x86
-          path: Yubico.NativeShims/win-x86/**
+          path: |
+            Yubico.NativeShims/win-x86/*.dll
+            Yubico.NativeShims/win-x86/static/**
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: win-arm64
-          path: Yubico.NativeShims/win-arm64/**
+          path: |
+            Yubico.NativeShims/win-arm64/*.dll
+            Yubico.NativeShims/win-arm64/static/**
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: nuspec
@@ -127,66 +136,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - name: Install Zig (pinned version)
-        run: |
-          ZIG_VERSION="0.15.2"
-          ZIG_ARCH="x86_64-linux"
-          ZIG_TARBALL="zig-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz"
-          ZIG_URL="https://ziglang.org/download/${ZIG_VERSION}/${ZIG_TARBALL}"
-          ZIG_MINISIG_URL="${ZIG_URL}.minisig"
-          # Official Zig minisign public key
-          ZIG_PUBKEY="RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U"
-
-          echo "Installing minisign for signature verification..."
-          sudo apt-get update -qq
-          sudo apt-get install -y minisign
-
-          echo "Downloading Zig ${ZIG_VERSION}..."
-          wget -q "${ZIG_URL}"
-          wget -q "${ZIG_MINISIG_URL}"
-
-          echo "Verifying signature with minisign..."
-          minisign -Vm "${ZIG_TARBALL}" -P "${ZIG_PUBKEY}"
-
-          echo "✅ Signature verified! Extracting and installing..."
-          tar -xf "${ZIG_TARBALL}"
-          sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
-          echo "/usr/local/zig" >> $GITHUB_PATH
-
-          echo "Zig installed successfully:"
-          /usr/local/zig/zig version
-      - name: Setup Zig CC wrappers
-        run: |
-          echo 'Creating Zig CC wrapper scripts'
-          mkdir -p $HOME/zig-wrappers
-
-          # Create x86_64 C compiler wrapper
-          cat > $HOME/zig-wrappers/zig-cc << 'EOF'
-          #!/bin/bash
-          exec zig cc -target x86_64-linux-gnu.2.23 -O2 -s "$@"
-          EOF
-
-          # Create x86_64 C++ compiler wrapper
-          cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
-          #!/bin/bash
-          exec zig c++ -target x86_64-linux-gnu.2.23 -O2 -s "$@"
-          EOF
-
-          chmod +x $HOME/zig-wrappers/zig-cc
-          chmod +x $HOME/zig-wrappers/zig-c++
-
-          echo "CC=$HOME/zig-wrappers/zig-cc" >> $GITHUB_ENV
-          echo "CXX=$HOME/zig-wrappers/zig-c++" >> $GITHUB_ENV
-      - name: Verify Zig wrappers
-        run: |
-          echo "Verifying Zig wrapper scripts..."
-          test -x $HOME/zig-wrappers/zig-cc || { echo "ERROR: zig-cc not executable"; exit 1; }
-          test -x $HOME/zig-wrappers/zig-c++ || { echo "ERROR: zig-c++ not executable"; exit 1; }
-
-          echo "Testing zig-cc wrapper:"
-          $HOME/zig-wrappers/zig-cc --version | grep -q "zig" || { echo "ERROR: zig-cc not using Zig"; exit 1; }
-
-          echo "✅ Zig wrappers verified successfully"
+      - name: Install and configure Zig
+        run: bash Yubico.NativeShims/ci/setup-zig.sh x86_64-linux-gnu.2.23
       - run: |
           echo 'Running build script: Linux (amd64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
@@ -194,83 +145,37 @@ jobs:
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
             bash ./build-linux-amd64.sh "$BASE_VERSION"
           else
-            bash ./build-linux-amd64.sh
+            bash ./build-linux-amd64.sh "0.0.0"
           fi
       - name: Test on Ubuntu 18.04 (glibc 2.27)
         working-directory: Yubico.NativeShims
         run: |
           echo "Testing binary compatibility on Ubuntu 18.04 (close to target glibc 2.23)..."
           docker run --rm \
-            -v $PWD/linux-x64:/test:ro \
+            -v $PWD:/test:ro \
             ubuntu:18.04 \
-            bash -c '
-              set -e
-              apt-get update -qq
-              apt-get install -y libpcsclite1 file binutils
-              cd /test
-              echo "Testing on Ubuntu 18.04 (glibc 2.27)..."
-              ldd --version | head -n1
-              echo ""
-              echo "Library dependencies:"
-              ldd *.so || true
-              echo ""
-              echo "GLIBC version requirements:"
-              readelf -V *.so | grep GLIBC_2 | sort -u
-              echo ""
-              echo "✅ Binary compatible with Ubuntu 18.04 (glibc 2.27)"
-            '
+            bash /test/tests/check_linux_runtime_compat.sh /test/linux-x64/libYubico.NativeShims.so
       - name: Test on Ubuntu 20.04 (glibc 2.31)
         working-directory: Yubico.NativeShims
         run: |
           echo "Testing binary compatibility on Ubuntu 20.04..."
           docker run --rm \
-            -v $PWD/linux-x64:/test:ro \
+            -v $PWD:/test:ro \
             ubuntu:20.04 \
-            bash -c '
-              set -e
-              apt-get update -qq
-              apt-get install -y libpcsclite1 file binutils
-              cd /test
-              echo "Files found:"
-              ls -lh *.so
-              echo ""
-              echo "File types:"
-              file *.so
-              echo ""
-              echo "Library dependencies:"
-              ldd *.so || true
-              echo ""
-              echo "GLIBC version requirements:"
-              readelf -V *.so | grep GLIBC_2 | sort -u
-              echo ""
-              echo "✅ Binary loads successfully on Ubuntu 20.04 (glibc 2.31)"
-            '
+            bash /test/tests/check_linux_runtime_compat.sh /test/linux-x64/libYubico.NativeShims.so
       - name: Test on Debian 10 (glibc 2.28)
         working-directory: Yubico.NativeShims
         run: |
           echo "Testing binary compatibility on Debian 10 (target: glibc 2.23)..."
           docker run --rm \
-            -v $PWD/linux-x64:/test:ro \
+            -v $PWD:/test:ro \
             debian:10 \
-            bash -c '
-              set -e
-              # Debian 10 is EOL, update sources to use archive repository
-              sed -i "s|http://deb.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
-              sed -i "s|http://security.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
-              sed -i "/buster-updates/d" /etc/apt/sources.list
-              apt-get update -qq
-              apt-get install -y libpcsclite1 file binutils
-              cd /test
-              echo "Testing on Debian 10 (glibc 2.28, target is 2.23)..."
-              ldd --version | head -n1
-              ldd *.so
-              readelf -V *.so | grep GLIBC_2 | sort -u
-              echo "✅ Binary compatible with Debian 10 (glibc 2.28)"
-            '
+            bash /test/tests/check_linux_runtime_compat.sh /test/linux-x64/libYubico.NativeShims.so
       - name: Verify export table matches canonical symbol list
         working-directory: Yubico.NativeShims
         run: |
           bash tests/check_exports.sh linux-x64/libYubico.NativeShims.so
+          bash tests/check_exports.sh linux-x64/static/libYubico.NativeShims.a
       - name: Verify >= 64 KB page alignment of LOAD segments
         working-directory: Yubico.NativeShims
         run: |
@@ -278,7 +183,9 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: linux-x64
-          path: Yubico.NativeShims/linux-x64/*.so
+          path: |
+            Yubico.NativeShims/linux-x64/*.so
+            Yubico.NativeShims/linux-x64/static/**
           
   build-linux-arm64:
     name: Build Linux (arm64)
@@ -292,66 +199,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - name: Install Zig (pinned version)
-        run: |
-          ZIG_VERSION="0.15.2"
-          ZIG_ARCH="x86_64-linux"
-          ZIG_TARBALL="zig-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz"
-          ZIG_URL="https://ziglang.org/download/${ZIG_VERSION}/${ZIG_TARBALL}"
-          ZIG_MINISIG_URL="${ZIG_URL}.minisig"
-          # Official Zig minisign public key
-          ZIG_PUBKEY="RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U"
-
-          echo "Installing minisign for signature verification..."
-          sudo apt-get update -qq
-          sudo apt-get install -y minisign
-
-          echo "Downloading Zig ${ZIG_VERSION}..."
-          wget -q "${ZIG_URL}"
-          wget -q "${ZIG_MINISIG_URL}"
-
-          echo "Verifying signature with minisign..."
-          minisign -Vm "${ZIG_TARBALL}" -P "${ZIG_PUBKEY}"
-
-          echo "✅ Signature verified! Extracting and installing..."
-          tar -xf "${ZIG_TARBALL}"
-          sudo mv "zig-${ZIG_ARCH}-${ZIG_VERSION}" /usr/local/zig
-          echo "/usr/local/zig" >> $GITHUB_PATH
-
-          echo "Zig installed successfully:"
-          /usr/local/zig/zig version
-      - name: Setup Zig CC wrappers
-        run: |
-          echo 'Creating Zig CC wrapper scripts for ARM64 cross-compilation'
-          mkdir -p $HOME/zig-wrappers
-
-          # Create aarch64 C compiler wrapper
-          cat > $HOME/zig-wrappers/zig-cc << 'EOF'
-          #!/bin/bash
-          exec zig cc -target aarch64-linux-gnu.2.23 -O2 -s "$@"
-          EOF
-
-          # Create aarch64 C++ compiler wrapper
-          cat > $HOME/zig-wrappers/zig-c++ << 'EOF'
-          #!/bin/bash
-          exec zig c++ -target aarch64-linux-gnu.2.23 -O2 -s "$@"
-          EOF
-
-          chmod +x $HOME/zig-wrappers/zig-cc
-          chmod +x $HOME/zig-wrappers/zig-c++
-
-          echo "CC=$HOME/zig-wrappers/zig-cc" >> $GITHUB_ENV
-          echo "CXX=$HOME/zig-wrappers/zig-c++" >> $GITHUB_ENV
-      - name: Verify Zig wrappers
-        run: |
-          echo "Verifying Zig wrapper scripts..."
-          test -x $HOME/zig-wrappers/zig-cc || { echo "ERROR: zig-cc not executable"; exit 1; }
-          test -x $HOME/zig-wrappers/zig-c++ || { echo "ERROR: zig-c++ not executable"; exit 1; }
-
-          echo "Testing zig-cc wrapper:"
-          $HOME/zig-wrappers/zig-cc --version | grep -q "zig" || { echo "ERROR: zig-cc not using Zig"; exit 1; }
-
-          echo "✅ Zig wrappers verified successfully"
+      - name: Install and configure Zig
+        run: bash Yubico.NativeShims/ci/setup-zig.sh aarch64-linux-gnu.2.23
       - run: |
           echo 'Running build script: Linux (arm64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
@@ -359,7 +208,7 @@ jobs:
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
             bash ./build-linux-arm64.sh "$BASE_VERSION"
           else
-            bash ./build-linux-arm64.sh
+            bash ./build-linux-arm64.sh "0.0.0"
           fi
       - name: Set up QEMU for ARM64 testing
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
@@ -370,77 +219,31 @@ jobs:
         run: |
           echo "Testing ARM64 binary compatibility on Ubuntu 18.04 (close to target glibc 2.23)..."
           docker run --rm --platform linux/arm64 \
-            -v $PWD/linux-arm64:/test:ro \
+            -v $PWD:/test:ro \
             ubuntu:18.04 \
-            bash -c '
-              set -e
-              apt-get update -qq
-              apt-get install -y libpcsclite1 file binutils
-              cd /test
-              echo "Testing on Ubuntu 18.04 (glibc 2.27)..."
-              ldd --version | head -n1
-              echo ""
-              echo "Library dependencies:"
-              ldd *.so || true
-              echo ""
-              echo "GLIBC version requirements:"
-              readelf -V *.so | grep GLIBC_2 | sort -u
-              echo ""
-              echo "✅ ARM64 binary compatible with Ubuntu 18.04 (glibc 2.27)"
-            '
+            bash /test/tests/check_linux_runtime_compat.sh /test/linux-arm64/libYubico.NativeShims.so
       - name: Test on Ubuntu 20.04 (glibc 2.31)
         working-directory: Yubico.NativeShims
         run: |
           echo "Testing ARM64 binary compatibility on Ubuntu 20.04..."
           docker run --rm --platform linux/arm64 \
-            -v $PWD/linux-arm64:/test:ro \
+            -v $PWD:/test:ro \
             ubuntu:20.04 \
-            bash -c '
-              set -e
-              apt-get update -qq
-              apt-get install -y libpcsclite1 file binutils
-              cd /test
-              echo "Files found:"
-              ls -lh *.so
-              echo ""
-              echo "File types:"
-              file *.so
-              echo ""
-              echo "Library dependencies:"
-              ldd *.so || true
-              echo ""
-              echo "GLIBC version requirements:"
-              readelf -V *.so | grep GLIBC_2 | sort -u
-              echo ""
-              echo "✅ ARM64 binary loads successfully on Ubuntu 20.04 (glibc 2.31)"
-            '
+            bash /test/tests/check_linux_runtime_compat.sh /test/linux-arm64/libYubico.NativeShims.so
       - name: Test on Debian 10 (glibc 2.28)
         working-directory: Yubico.NativeShims
         run: |
           echo "Testing ARM64 binary compatibility on Debian 10 (target: glibc 2.23)..."
           docker run --rm --platform linux/arm64 \
-            -v $PWD/linux-arm64:/test:ro \
+            -v $PWD:/test:ro \
             debian:10 \
-            bash -c '
-              set -e
-              # Debian 10 is EOL, update sources to use archive repository
-              sed -i "s|http://deb.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
-              sed -i "s|http://security.debian.org|http://archive.debian.org|g" /etc/apt/sources.list
-              sed -i "/buster-updates/d" /etc/apt/sources.list
-              apt-get update -qq
-              apt-get install -y libpcsclite1 file binutils
-              cd /test
-              echo "Testing on Debian 10 (glibc 2.28, target is 2.23)..."
-              ldd --version | head -n1
-              ldd *.so
-              readelf -V *.so | grep GLIBC_2 | sort -u
-              echo "✅ ARM64 binary compatible with Debian 10 (glibc 2.28)"
-            '
+            bash /test/tests/check_linux_runtime_compat.sh /test/linux-arm64/libYubico.NativeShims.so
       - name: Verify export table matches canonical symbol list
         working-directory: Yubico.NativeShims
         run: |
           # nm reads ELF metadata regardless of target arch — works on x86_64 host inspecting aarch64 .so
           bash tests/check_exports.sh linux-arm64/libYubico.NativeShims.so
+          bash tests/check_exports.sh linux-arm64/static/libYubico.NativeShims.a
       - name: Verify 16 KB/64 KB page alignment of LOAD segments
         working-directory: Yubico.NativeShims
         run: |
@@ -449,7 +252,9 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: linux-arm64
-          path: Yubico.NativeShims/linux-arm64/*.so
+          path: |
+            Yubico.NativeShims/linux-arm64/*.so
+            Yubico.NativeShims/linux-arm64/static/**
 
   build-macos:
     name: Build macOS
@@ -463,15 +268,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: global.json
       - run: |
           echo 'Running build script: macOS'
           cd Yubico.NativeShims
           if [ ! -z "${{ github.event.inputs.version }}" ]; then
             BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
-            sh ./build-macOS.sh "$BASE_VERSION"
+            bash ./build-macOS.sh "$BASE_VERSION"
           else
-            sh ./build-macOS.sh
+            bash ./build-macOS.sh "0.0.0"
           fi
+      - name: Validate static package targets
+        working-directory: Yubico.NativeShims
+        run: bash tests/check_static_package.sh
       - name: Verify export tables match canonical symbol list
         working-directory: Yubico.NativeShims
         run: |
@@ -479,18 +290,27 @@ jobs:
           for arch in osx-x64 osx-arm64; do
               echo "=== Checking $arch/libYubico.NativeShims.dylib ==="
               bash tests/check_exports.sh "$arch/libYubico.NativeShims.dylib"
+              echo "=== Checking $arch/static/libYubico.NativeShims.a ==="
+              bash tests/check_exports.sh "$arch/static/libYubico.NativeShims.a"
+              bash tests/check_macos_archive.sh "$arch/static/libYubico.NativeShims.a" 12.0
           done
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: osx-x64
-          path: Yubico.NativeShims/osx-x64/**
+          path: |
+            Yubico.NativeShims/osx-x64/*.dylib
+            Yubico.NativeShims/osx-x64/static/**
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: osx-arm64
-          path: Yubico.NativeShims/osx-arm64/**
+          path: |
+            Yubico.NativeShims/osx-arm64/*.dylib
+            Yubico.NativeShims/osx-arm64/static/**
 
   pack:
     name: Package artifacts
+    outputs:
+      package-version: ${{ steps.package-metadata.outputs.package-version }}
     permissions:
       id-token: write
       contents: read
@@ -499,7 +319,7 @@ jobs:
     runs-on: windows-2022
     needs: [build-windows, build-linux-amd64, build-linux-arm64, build-macos]
     env:
-      PACKAGE_VERSION: ${{ github.event.inputs.version != '' && github.event.inputs.version || '1.0.0' }}
+      PACKAGE_VERSION: ${{ inputs.version != '' && inputs.version || format('0.0.0-prerelease.{0}.{1}', github.run_id, github.run_attempt) }}
       GITHUB_REPO_URL: https://github.com/${{ github.repository }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
@@ -509,18 +329,81 @@ jobs:
 
       - name: Download contents, set metadata and package
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
-      - run: |
-          mv nuspec/*.nuspec .
-          mv nuspec/readme.md .
-          $nuspec = [xml](gc Yubico.NativeShims.nuspec)
-          $repo = $nuspec.CreateElement("repository")
+      - name: Set package metadata
+        id: package-metadata
+        shell: pwsh
+        run: |
+          if ($env:PACKAGE_VERSION -notmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?$') {
+            throw "Version must use canonical three-component SemVer: $env:PACKAGE_VERSION"
+          }
+          "package-version=$env:PACKAGE_VERSION" >> $env:GITHUB_OUTPUT
+          Move-Item nuspec/*.nuspec .
+          Move-Item nuspec/readme.md .
+          $nuspec = [xml](Get-Content Yubico.NativeShims.nuspec -Raw)
+          $repo = $nuspec.CreateElement("repository", $nuspec.DocumentElement.NamespaceURI)
           $repo.SetAttribute("url","$env:GITHUB_REPO_URL")
           $repo.SetAttribute("type","git")
           $nuspec.package.metadata.AppendChild($repo)
           $nuspec.package.metadata.version = "$env:PACKAGE_VERSION"
           $nuspec.Save("Yubico.NativeShims.nuspec")
-          cat Yubico.NativeShims.nuspec
-      - run: nuget pack Yubico.NativeShims.nuspec
+          Get-Content Yubico.NativeShims.nuspec
+      - name: Verify static archives and pack
+        shell: pwsh
+        run: |
+          nuget pack Yubico.NativeShims.nuspec
+          if ($LASTEXITCODE -ne 0) { throw "nuget pack failed with exit code $LASTEXITCODE." }
+
+          $packages = @(Get-ChildItem -File -Filter 'Yubico.NativeShims.*.nupkg')
+          if ($packages.Count -ne 1) {
+            throw "Expected exactly one NativeShims package, found $($packages.Count)."
+          }
+
+          $package = $packages[0]
+          $packageZip = Join-Path $PWD 'NativeShims-package.zip'
+          $packageContents = Join-Path $PWD 'NativeShims-package-contents'
+          Copy-Item -LiteralPath $package.FullName -Destination $packageZip
+          Expand-Archive -LiteralPath $packageZip -DestinationPath $packageContents
+
+          $expectedNativeFiles = @(
+            'runtimes/linux-arm64/native/libYubico.NativeShims.so'
+            'runtimes/linux-x64/native/libYubico.NativeShims.so'
+            'runtimes/osx-arm64/native/libYubico.NativeShims.dylib'
+            'runtimes/osx-x64/native/libYubico.NativeShims.dylib'
+            'runtimes/win-arm64/native/Yubico.NativeShims.dll'
+            'runtimes/win-x64/native/Yubico.NativeShims.dll'
+            'runtimes/win-x86/native/Yubico.NativeShims.dll'
+            'buildTransitive/static/linux-arm64/libYubico.NativeShims.a'
+            'buildTransitive/static/linux-x64/libYubico.NativeShims.a'
+            'buildTransitive/static/osx-arm64/libYubico.NativeShims.a'
+            'buildTransitive/static/osx-x64/libYubico.NativeShims.a'
+            'buildTransitive/static/win-arm64/Yubico.NativeShims.lib'
+            'buildTransitive/static/win-x64/Yubico.NativeShims.lib'
+            'buildTransitive/static/win-x86/Yubico.NativeShims.lib'
+          ) | Sort-Object
+          $actualNativeFiles = @(
+            Get-ChildItem -LiteralPath (Join-Path $packageContents 'runtimes') -Recurse -File
+            Get-ChildItem -LiteralPath (Join-Path $packageContents 'buildTransitive/static') -Recurse -File
+          ) | ForEach-Object {
+            [IO.Path]::GetRelativePath($packageContents, $_.FullName).Replace('\', '/')
+          } | Sort-Object
+
+          $nativeManifestDiff = @(Compare-Object $expectedNativeFiles $actualNativeFiles)
+          if ($nativeManifestDiff.Count -ne 0) {
+            throw "Native package manifest mismatch:`n$($nativeManifestDiff | Out-String)"
+          }
+
+          $archives = @(Get-ChildItem -Directory | Where-Object {
+              $_.Name -match '^(win|linux|osx)-'
+            } | ForEach-Object {
+              Get-ChildItem -LiteralPath (Join-Path $_.FullName 'static') -File
+            })
+          "### NativeShims package measurements" >> $env:GITHUB_STEP_SUMMARY
+          "| Artifact | Bytes |" >> $env:GITHUB_STEP_SUMMARY
+          "| --- | ---: |" >> $env:GITHUB_STEP_SUMMARY
+          "| $($package.Name) | $($package.Length) |" >> $env:GITHUB_STEP_SUMMARY
+          foreach ($archive in $archives) {
+            "| $($archive.FullName) | $($archive.Length) |" >> $env:GITHUB_STEP_SUMMARY
+          }
 
       - name: Upload Nuget Package
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
@@ -532,19 +415,194 @@ jobs:
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
         with:
           subject-path: |
-            Yubico.NativeShims/**/*.dll
-            Yubico.NativeShims/**/*.so
-            Yubico.NativeShims/**/*.dylib
+            win-*/*.dll
+            win-*/static/*.lib
+            linux-*/*.so
+            linux-*/static/*.a
+            osx-*/*.dylib
+            osx-*/static/*.a
             Yubico.NativeShims.*.nupkg
+
+  verify-native-aot:
+    name: Native AOT (${{ matrix.rid }})
+    needs: pack
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            runner: windows-2022
+            os: windows
+            host-arch: amd64
+          - rid: win-x86
+            runner: windows-2022
+            os: windows
+            host-arch: amd64
+          - rid: win-arm64
+            runner: windows-11-arm
+            os: windows
+            host-arch: arm64
+          - rid: linux-x64
+            runner: ubuntu-24.04
+            os: linux
+          - rid: linux-arm64
+            runner: ubuntu-24.04-arm
+            os: linux
+          - rid: osx-x64
+            runner: macos-15-intel
+            os: macos
+          - rid: osx-arm64
+            runner: macos-14
+            os: macos
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Install x86 .NET runtime for framework-dependent checks
+        if: ${{ matrix.rid == 'win-x86' }}
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: global.json
+          architecture: x86
+
+      - name: Use x64 SDK with x86 runtime discovery
+        if: ${{ matrix.rid == 'win-x86' }}
+        shell: pwsh
+        run: |
+          "DOTNET_ROOT_X86=$env:DOTNET_ROOT" >> $env:GITHUB_ENV
+          "DOTNET_ROOT=$env:ProgramFiles\dotnet" >> $env:GITHUB_ENV
+          "$env:ProgramFiles\dotnet" >> $env:GITHUB_PATH
+
+      - name: Install Linux Native AOT prerequisites
+        if: ${{ matrix.os == 'linux' }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y clang zlib1g-dev libpcsclite-dev binutils
+
+      - name: Download current-run package
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: NuGet Package NativeShims
+          path: artifacts/package-source
+
+      - name: Verify exact package in all consumer modes
+        shell: pwsh
+        env:
+          NATIVE_SHIMS_VERSION: ${{ needs.pack.outputs.package-version }}
+        run: |
+          & Yubico.NativeShims/tests/verify_package.ps1 `
+            -PackageSource artifacts/package-source `
+            -PackageVersion $env:NATIVE_SHIMS_VERSION `
+            -RuntimeIdentifier '${{ matrix.rid }}' `
+            -TargetOS '${{ matrix.os }}' `
+            -PackagesPath "artifacts/packages/${{ matrix.rid }}" `
+            -ArtifactsRoot artifacts
+
+      - name: Inspect dynamic dependencies
+        shell: pwsh
+        run: |
+          $outputPath = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}'
+          $executable = Join-Path $outputPath $(if ('${{ matrix.os }}' -eq 'windows') { 'NativeAotProbe.exe' } else { 'NativeAotProbe' })
+
+          switch ('${{ matrix.os }}') {
+            'windows' {
+              $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+              if (-not (Test-Path -LiteralPath $vswhere)) {
+                $vswhere = "${env:ProgramFiles}\Microsoft Visual Studio\Installer\vswhere.exe"
+              }
+              if (-not (Test-Path -LiteralPath $vswhere)) {
+                throw "vswhere.exe was not found."
+              }
+              $installationPath = (& $vswhere -latest -products * -property installationPath | Select-Object -First 1)
+              $devShell = Join-Path $installationPath 'Common7/Tools/Launch-VsDevShell.ps1'
+              if (-not (Test-Path -LiteralPath $devShell)) {
+                throw "Visual Studio developer shell not found: $devShell"
+              }
+              & $devShell -SkipAutomaticLocation -Arch '${{ matrix.host-arch }}'
+              $dependencies = (& dumpbin /dependents $executable 2>&1 | Out-String)
+            }
+            'linux' {
+              $dependencies = (& readelf -d $executable 2>&1 | Out-String)
+            }
+            'macos' {
+              $dependencies = (& otool -L $executable 2>&1 | Out-String)
+            }
+          }
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Dependency inspection failed with exit code $LASTEXITCODE.`n$dependencies"
+          }
+          Write-Host $dependencies
+          if ($dependencies -match '(?i)(Yubico\.NativeShims|lib(?:crypto|ssl))') {
+            throw "Published executable dynamically depends on NativeShims or OpenSSL."
+          }
+          "### Native AOT ${{ matrix.rid }}" >> $env:GITHUB_STEP_SUMMARY
+          "* Executable bytes: $((Get-Item -LiteralPath $executable).Length)" >> $env:GITHUB_STEP_SUMMARY
+          "* NativeShims/OpenSSL dynamic dependencies: 0" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Verify hardened Linux dynamic exports
+        if: ${{ matrix.os == 'linux' }}
+        shell: pwsh
+        env:
+          NATIVE_SHIMS_VERSION: ${{ needs.pack.outputs.package-version }}
+        run: |
+          $executable = Join-Path $env:GITHUB_WORKSPACE 'artifacts/publish/${{ matrix.rid }}/NativeAotProbe'
+          $packageRoot = Join-Path $env:GITHUB_WORKSPACE "artifacts/packages/${{ matrix.rid }}/yubico.nativeshims/$($env:NATIVE_SHIMS_VERSION.ToLowerInvariant())"
+          $archiveDirectory = Join-Path $packageRoot 'buildTransitive/static/${{ matrix.rid }}'
+          $archives = @(Get-ChildItem -LiteralPath $archiveDirectory -File -Filter '*.a')
+          if ($archives.Count -ne 1) {
+            throw "Expected exactly one installed static archive, found $($archives.Count)."
+          }
+
+          $archiveOutput = @(& nm -g --defined-only $archives[0].FullName 2>&1)
+          if ($LASTEXITCODE -ne 0) {
+            throw "nm failed for the static archive with exit code $LASTEXITCODE.`n$($archiveOutput -join [Environment]::NewLine)"
+          }
+          $dynamicOutput = @(& nm -D --defined-only $executable 2>&1)
+          if ($LASTEXITCODE -ne 0) {
+            throw "nm failed for the executable with exit code $LASTEXITCODE.`n$($dynamicOutput -join [Environment]::NewLine)"
+          }
+
+          $archiveSymbols = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+          foreach ($line in $archiveOutput) {
+            if ($line -match '\s[A-Za-z]\s+(\S+)$') {
+              [void]$archiveSymbols.Add(($Matches[1] -replace '@.*$', ''))
+            }
+          }
+          $leakedSymbols = @()
+          foreach ($line in $dynamicOutput) {
+            if ($line -match '\s[A-Za-z]\s+(\S+)$') {
+              $symbol = $Matches[1] -replace '@.*$', ''
+              if ($archiveSymbols.Contains($symbol)) {
+                $leakedSymbols += $symbol
+              }
+            }
+          }
+          $leakedSymbols = @($leakedSymbols | Sort-Object -Unique)
+          "* Static archive symbols exported dynamically: $($leakedSymbols.Count)" >> $env:GITHUB_STEP_SUMMARY
+          if ($leakedSymbols.Count -ne 0) {
+            throw "Static archive symbols remain dynamically exported:`n$($leakedSymbols -join [Environment]::NewLine)"
+          }
 
   publish-internal:
     name: Publish to internal NuGet
     runs-on: windows-2022
-    needs: pack
+    needs: verify-native-aot
     environment: Internal NuGet feed
     permissions:
       packages: write
-    if: ${{ github.event.inputs.push-to-dev == 'true' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.push-to-dev }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1

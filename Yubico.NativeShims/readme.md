@@ -26,7 +26,7 @@ Yubico.NativeShims is a cross-platform C library designed to bridge the gap in n
 
 - Requires XCode
 - pkg-config (brew install pkg-config) 
-- Navigate to Yubico.NativeShims folder and run `sh ./build-macos.sh`.
+- Navigate to Yubico.NativeShims folder and run `bash ./build-macOS.sh`.
 
 ### Linux Build
 
@@ -35,5 +35,13 @@ Yubico.NativeShims is a cross-platform C library designed to bridge the gap in n
 - Run `sh ./build-linux-amd64` or `sh ./build-linux-arm64` depending on the target architecture.
 
 Refer to the provided scripts and GitHub Actions CI workflows for detailed building instructions across different platforms and architectures.
+
+## Native AOT
+
+The NuGet package includes a merged static archive for each supported runtime identifier. When a downstream application publishes with `PublishAot` set to `true`, package targets direct-link Yubico.NativeShims and its OpenSSL cryptography dependency, link the platform smart-card library (`winscard`, `pcsclite`, or the macOS PCSC framework), and omit the redundant shared NativeShims library from the publish output. Unsupported runtime identifiers and missing archives fail the publish with a clear error instead of falling back to dynamic loading.
+
+The package does not enable Native AOT. That deployment decision belongs to the downstream application. This support is additive: ordinary builds, non-AOT publishes, dynamic P/Invoke behavior, and the .NET Framework 4.7.2 package targets continue to use the existing shared libraries.
+
+Source builds produce both shared and merged static libraries by default. Pass `-DYUBICO_BUILD_STATIC=OFF` only for a shared-only development build.
 
 ---

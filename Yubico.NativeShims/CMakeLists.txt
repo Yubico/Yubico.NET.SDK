@@ -80,7 +80,7 @@ if (APPLE OR UNIX)
                 message(WARNING "No stack protection supported.")
             endif ()
         endif()
-    elseif()
+    else()
         message(WARNING "No compatible compiler found for setting additional security compiler flags.")
     endif()
 
@@ -112,10 +112,29 @@ find_pcscd()
 find_package(OpenSSL REQUIRED)
 
 # =============================================================================
-# Build target
+# Build targets
 # =============================================================================
 
 add_library(Yubico.NativeShims SHARED)
+
+option(YUBICO_BUILD_STATIC "Build the merged NativeShims and OpenSSL static archive" ON)
+if(YUBICO_BUILD_STATIC)
+    add_library(Yubico.NativeShims.Static STATIC)
+    set_target_properties(
+        Yubico.NativeShims.Static
+        PROPERTIES
+            OUTPUT_NAME "Yubico.NativeShims"
+            ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/static"
+            ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/static"
+            ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_BINARY_DIR}/static"
+            ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_CURRENT_BINARY_DIR}/static"
+            ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_CURRENT_BINARY_DIR}/static"
+        )
+
+    # Keep compiler-specific LTO objects out of the package archive so Native AOT
+    # consumers can link it with the platform toolchain selected by the .NET SDK.
+    set_property(TARGET Yubico.NativeShims.Static PROPERTY INTERPROCEDURAL_OPTIMIZATION FALSE)
+endif()
 
 # Link-time optimization (cross-file inlining, dead code elimination)
 include(CheckIPOSupported)
@@ -140,20 +159,31 @@ target_include_directories(
         "${PROJECT_BINARY_DIR}"
         )
 
+if(YUBICO_BUILD_STATIC)
+    target_include_directories(
+        Yubico.NativeShims.Static
+        PUBLIC
+            "${PROJECT_BINARY_DIR}"
+            )
+endif()
+
 # =============================================================================
 # Sources
 # =============================================================================
 
-target_sources(
-    Yubico.NativeShims
-    PRIVATE
-        pcsc.c              # Smart card (PC/SC) shim
-        ssl.bignum.c        # OpenSSL BIGNUM operations
-        ssl.ecgroup.c       # OpenSSL EC group operations
-        ssl.ecpoint.c       # OpenSSL EC point operations
-        ssl.gcmevp.c        # OpenSSL AES-GCM via EVP interface
-        ssl.cmac.c          # OpenSSL CMAC operations
-        )
+set(NATIVE_SHIMS_SOURCES
+    pcsc.c              # Smart card (PC/SC) shim
+    ssl.bignum.c        # OpenSSL BIGNUM operations
+    ssl.ecgroup.c       # OpenSSL EC group operations
+    ssl.ecpoint.c       # OpenSSL EC point operations
+    ssl.gcmevp.c        # OpenSSL AES-GCM via EVP interface
+    ssl.cmac.c          # OpenSSL CMAC operations
+    )
+
+target_sources(Yubico.NativeShims PRIVATE ${NATIVE_SHIMS_SOURCES})
+if(YUBICO_BUILD_STATIC)
+    target_sources(Yubico.NativeShims.Static PRIVATE ${NATIVE_SHIMS_SOURCES})
+endif()
 
 if(WIN32)
     target_sources(
@@ -175,3 +205,34 @@ target_link_libraries(
         ${PCSC_CUSTOM_LIBS}     # Cross-compilation overrides
         OpenSSL::Crypto         # libcrypto (static via vcpkg on Windows)
         )
+
+if(YUBICO_BUILD_STATIC)
+    # PC/SC remains a final-consumer dependency. OpenSSL supplies include paths
+    # here and is merged into the package archive by the post-build step below.
+    target_link_libraries(Yubico.NativeShims.Static PRIVATE OpenSSL::Crypto)
+
+    if(APPLE)
+        find_program(NATIVE_SHIMS_LIBTOOL libtool REQUIRED)
+        set(NATIVE_SHIMS_MERGE_PLATFORM "APPLE")
+    elseif(WIN32)
+        set(NATIVE_SHIMS_MERGE_PLATFORM "WINDOWS")
+    else()
+        set(NATIVE_SHIMS_MERGE_PLATFORM "LINUX")
+    endif()
+
+    add_custom_command(
+        TARGET Yubico.NativeShims.Static
+        POST_BUILD
+        COMMAND
+            ${CMAKE_COMMAND}
+            "-DMERGE_PLATFORM=${NATIVE_SHIMS_MERGE_PLATFORM}"
+            "-DINPUT_ARCHIVE=$<TARGET_FILE:Yubico.NativeShims.Static>"
+            "-DDEPENDENCY_ARCHIVE=$<TARGET_FILE:OpenSSL::Crypto>"
+            "-DOUTPUT_ARCHIVE=$<TARGET_FILE:Yubico.NativeShims.Static>"
+            "-DAR=${CMAKE_AR}"
+            "-DLIBTOOL=${NATIVE_SHIMS_LIBTOOL}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge_static_libraries.cmake"
+        COMMENT "Merging NativeShims and OpenSSL into $<TARGET_FILE_NAME:Yubico.NativeShims.Static>"
+        VERBATIM
+        )
+endif()

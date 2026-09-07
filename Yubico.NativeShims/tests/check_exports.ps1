@@ -1,7 +1,7 @@
-# Validate that a built Yubico.NativeShims.dll exports exactly the canonical
-# set of symbols defined in expected_symbols.txt.
+# Validate that a built Yubico.NativeShims DLL or static library contains
+# exactly the canonical Native_* symbol set.
 #
-# Usage:  pwsh check_exports.ps1 <path-to-Yubico.NativeShims.dll>
+# Usage:  pwsh check_exports.ps1 <path-to-Yubico.NativeShims.{dll,lib}>
 #
 # Requires: dumpbin.exe on PATH (provided by VC++ Build Tools / vcvars).
 # Catches: symbols dropped from exports.msvc, drift between the .def file and
@@ -21,7 +21,7 @@ $scriptDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $expectedFile = Join-Path $scriptDir 'expected_symbols.txt'
 
 if (-not (Test-Path $LibraryPath)) {
-    Write-Error "shared library not found: $LibraryPath"
+    Write-Error "native library not found: $LibraryPath"
     exit 2
 }
 if (-not (Test-Path $expectedFile)) {
@@ -35,18 +35,16 @@ $expected = Get-Content $expectedFile |
     ForEach-Object { $_.Trim() } |
     Sort-Object -Unique
 
-# Extract exported names from the DLL via dumpbin /exports.
-# Output format includes a header and a "name" column at the end of each
-# export line. We grep for lines containing a Native_* token.
-$dumpbinOutput = & dumpbin /exports $LibraryPath 2>&1
+$dumpbinMode = if ([IO.Path]::GetExtension($LibraryPath) -eq '.lib') { '/linkermember:1' } else { '/exports' }
+$dumpbinOutput = & dumpbin $dumpbinMode $LibraryPath 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Error "dumpbin failed (exit $LASTEXITCODE). Make sure VC++ Build Tools are on PATH (run vcvars*.bat first)."
     exit 2
 }
 
 $actual = $dumpbinOutput |
-    Select-String -Pattern '\bNative_\w+' -AllMatches |
-    ForEach-Object { $_.Matches.Value } |
+    Select-String -Pattern '\b_?Native_\w+' -AllMatches |
+    ForEach-Object { $_.Matches.Value.TrimStart('_') } |
     Sort-Object -Unique
 
 $missing = $expected | Where-Object { $actual -notcontains $_ }
@@ -71,6 +69,6 @@ if ($extra) {
 }
 
 if ($status -eq 0) {
-    Write-Host "PASS: export table matches expected symbol list"
+    Write-Host "PASS: native symbol table matches expected symbol list"
 }
 exit $status

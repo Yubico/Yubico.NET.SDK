@@ -14,7 +14,9 @@ Merge inputs per interface: `Connection` · `IsUsb` · `Pid` · `Serial` · `Dev
 
 **NFC never merges.** Neither does a PC/SC reader of unknown kind — only USB-attached
 interfaces are merge candidates. Correlation uses an internal, machine-local
-interface-set key.
+interface-set key. (REVIEW: Then we need an brief explainer how NFC keys are discovered/cached/dealt with)
+
+
 
 <!-- Anchors: src/Core/src/Devices/CompositeDeviceMerger.cs:19-30 (doc), :40-48 (descriptor);
      PhysicalIdentityKeyFor src/Core/src/Devices/YubiKeyDevice.cs:123,
@@ -27,7 +29,7 @@ interface-set key.
 | Surface | Guarantee |
 |---|---|
 | `DeviceId` | **Diagnostic only.** Not durable identity. (REVIEW: Consider if this should be removed from public API) |
-| `SerialNumber` | Latched. `null` → value, **never** back to `null`. |
+| `SerialNumber` | `null` → value, **never** back to `null`. |
 | Interface-set key | Internal, machine-local, never public |
 | `Equals` / `GetHashCode` | **Referential** — same object, or not equal |
 
@@ -36,10 +38,6 @@ interface-set key.
 - It can flip `null` → value **after** publication, with **no** device event.
 - A key whose interface set changes is **republished as a new object** that inherits
   nothing from its predecessor.
-
-> Full `DeviceInfo` stays internal: capabilities, flags and config are mutable via
-> Management, so a cached copy goes stale. The serial is the one burned-in field.
-> Need the rest? `await key.GetDeviceInfoAsync()` reads it live.
 
 <!-- Anchors: device-identity.md D1 :61-65, D2 :67-98 (latch :76-77, null-forever :73-75,
      late arrival :80-81, republication :82-84), D6 :161, D7 :179;

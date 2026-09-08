@@ -93,10 +93,9 @@ Map<Credential, @Nullable Code> codes = oath.calculateCodes();
 
 </div>
 
-**Delta:** the closest convergence in the deck — .NET's
+**Delta:** naming, the closest convergence in the deck — .NET's
 `IReadOnlyDictionary<Credential, Code?>` and Android's `Map<Credential, @Nullable Code>`
-express the same touch-required semantics. .NET makes it a compiler-enforced `Code?`
-rather than an annotation.
+express the same touch-required semantics.
 
 <!-- Anchors: .NET src/Oath/src/IYubiKeyExtensions.cs:39,
      PublicAPI.Unshipped.txt:50,87; python yubikit/oath.py:265,447;

@@ -10,8 +10,10 @@
 
 - **Async on the golden path** — every applet operation is `async`; the few sync
   members that remain are deliberate lifecycle and transaction escapes
-- **Install only what you use** — ten packages; all ten assemblies total 1.41 MiB
-- **Native AOT** — 11.7 MiB resident, whole SDK linked (REVIEW: needs brief explanation)
+- **Install only what you use** — ten packages, not one monolith; a PIV app ships
+  742 KiB against v1's unavoidable 890 KiB
+- **Native AOT** — ships as a standalone native binary: no JIT, no runtime install,
+  11.7 MiB resident with the whole SDK linked
 - **Event-driven discovery** — OS notifications
 - **One session shape** — learn one applet, you know the rest
 

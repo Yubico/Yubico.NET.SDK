@@ -30,9 +30,11 @@ style: |
 
 - **Async on the golden path** — every applet operation is `async`; the few sync
   members that remain are deliberate lifecycle and transaction escapes
-- **Install only what you use** — ten packages; all ten assemblies total 1.41 MiB
-- **Native AOT** — 11.7 MiB resident, whole SDK linked
-- **Event-driven discovery** — OS notifications, not a 500 ms polling timer
+- **Install only what you use** — ten packages, not one monolith; a PIV app ships
+  742 KiB against v1's unavoidable 890 KiB
+- **Native AOT** — ships as a standalone native binary: no JIT, no runtime install,
+  11.7 MiB resident with the whole SDK linked
+- **Event-driven discovery** — OS notifications
 - **One session shape** — learn one applet, you know the rest
 
 <br>
@@ -53,22 +55,52 @@ Branch `yubikit` @ `d04d59aa` · 2026-09-07
 ```csharp
 // 1. HOST APP asks the SDK for devices
 var keys = await YubiKeyManager.FindAllAsync();
-
-// 2. SDK returns IYubiKey handles
 IYubiKey key = keys[0];
 
-// 3. SESSION opened over a transport the SDK resolves
+// 2. SESSION — convenience: the session owns a hidden connection
 await using var piv = await key.CreatePivSessionAsync();
 
-// 4. YUBIKEY executes; the session speaks the applet protocol
+// 3. YUBIKEY executes; the session speaks the applet protocol
 var cert = await piv.GetCertificateAsync(PivSlot.Authentication);
 ```
 
 Every layer boundary is `async`. There is no synchronous escape hatch on the golden path.
 
+---
+
+## Three ways to open a session
+
+```csharp
+// A. Convenience — SDK resolves the transport, owns and disposes the connection
+await using var piv = await key.CreatePivSessionAsync();
+
+// B. Convenience + options — force a transport, add a secure channel
+await using var piv = await key.CreatePivSessionAsync(
+    new SessionCreationOptions
+    {
+        PreferredConnectionType = ConnectionType.SmartCard,
+        ScpKeyParameters = scpKeyParams,
+    });
+
+// C. Bring your own connection — you own it, you dispose both
+await using var conn = await key.ConnectAsync<ISmartCardConnection>();
+await using var piv  = await PivSession.CreateAsync(conn);
+await using var mgmt = await ManagementSession.CreateAsync(conn);   // after piv is disposed
+```
+
+**A** for one-shot work. **B** when the default transport is wrong, or you need SCP.
+**C** when several applets share one connection — sequentially; one connection admits
+one live session.
+
 <!-- Anchors: FindAllAsync src/Core/src/PublicAPI.Unshipped.txt:985;
      CreatePivSessionAsync src/Piv/src/IYubiKeyExtensions.cs:38;
-     GetCertificateAsync src/Piv/src/PublicAPI.Unshipped.txt:191 -->
+     GetCertificateAsync src/Piv/src/PublicAPI.Unshipped.txt:191;
+     PivSession.CreateAsync src/Piv/src/PivSession.cs:130;
+     ConnectAsync<T> src/Core/src/Abstractions/IYubiKey.cs:164;
+     SessionCreationOptions fields docs/architecture/applet-public-api.md:10-13;
+     SCP-over-session real call site
+     src/Management/tests/.../ManagementSessionSimpleTests.cs:212-217;
+     one-session-per-connection src/Core/src/Sessions/ConnectionSessionGuard.cs:44-52 -->
 
 
 ---
@@ -101,7 +133,7 @@ FIDO2 · WebAuthn. YubiOTP rides OTP-HID, a third framing.
 
 | Applet | Default transport order |
 |---|---|
-| **Management** | `SmartCard` → `HidFido` → `HidOtp` — **three** |
+| **Management** | `SmartCard` → `HidFido` → `HidOtp` |
 | **FIDO2** | `HidFido` → `SmartCard` |
 | **WebAuthn** | inherits FIDO2's order |
 | **YubiOTP** | `SmartCard` → `HidOtp` |
@@ -139,19 +171,31 @@ await using var mgmt = await key.CreateManagementSessionAsync(
 // Cached — the repository's current view
 var keys = await YubiKeyManager.FindAllAsync();
 
-// Force a fresh scan, or narrow by transport
+// Fresh scan, or narrowed by transport
 var scan = await YubiKeyManager.FindAllAsync(
     ConnectionType.SmartCard, forceRescan: true);
 ```
 
-Discovery is **publish-first and degraded-state tolerant** — a key is published as soon
-as it is enumerated, even if its metadata read has not succeeded.
+**Is `forceRescan` obsolete now that discovery is event-driven?** No — but its job
+has narrowed to exactly one case:
 
-Canonical Rust instead withholds publication until metadata is read. That difference is
-deliberate, and it is why `SerialNumber` can arrive late (next slide).
+| | Cache freshness | Need `forceRescan`? |
+|---|---|---|
+| **Monitoring on** | the monitor keeps it fresh | **no** — it is redundant |
+| **Monitoring off** | first call scans, then the cache never updates | **yes** — the only way to refresh |
+
+So it is the escape hatch for callers who want a one-shot look and never call
+`StartMonitoring()`. If you are monitoring, stop passing it.
+
+Discovery is **publish-first and degraded-state tolerant** — a key is published as soon
+as it is enumerated, even if its metadata read has not succeeded. Canonical Rust
+instead withholds publication until metadata is read, which is why `SerialNumber` can
+arrive late here and not there.
 
 <!-- Anchors: PublicAPI.Unshipped.txt:984-985;
-     docs/architecture/device-identity.md:93-96 -->
+     caching + "monitoring keeps cache fresh" src/Core/src/Devices/YubiKeyManager.cs:286-300;
+     race-condition guidance docs/usage/device-discovery.md:202-209;
+     publish-first docs/architecture/device-identity.md:93-96 -->
 
 
 ---
@@ -165,18 +209,41 @@ device, an OTP HID device. The SDK merges them into one `IYubiKey`.
 USB PC/SC reader  ─┐
 FIDO HID device   ─┼─→  CompositeDeviceMerger  ─→  one IYubiKey
 OTP HID device    ─┘
+
+NFC reader        ───→  stands alone, never merged
 ```
 
 Merge inputs per interface: `Connection` · `IsUsb` · `Pid` · `Serial` · `DeviceInfo` ·
 `TopologyKey` (Windows Container ID; `null` on macOS and Linux)
 
-**NFC never merges.** Neither does a PC/SC reader of unknown kind — only USB-attached
-interfaces are merge candidates. Correlation uses an internal, machine-local
-interface-set key.
-
 <!-- Anchors: src/Core/src/Devices/CompositeDeviceMerger.cs:19-30 (doc), :40-48 (descriptor);
-     PhysicalIdentityKeyFor src/Core/src/Devices/YubiKeyDevice.cs:123,
-     used YubiKeyDeviceRepository.cs:112 -->
+     NFC/unknown-kind never merge :24-27, :119-124;
+     PhysicalIdentityKeyFor src/Core/src/Devices/YubiKeyDevice.cs:123 -->
+
+---
+
+## What happens to an NFC key
+
+NFC is **discovered and monitored exactly like USB** — the same
+`SCardGetStatusChange` listener covers NFC readers, so tap and remove raise the
+same `Added` / `Removed` events, and the same repository cache holds them.
+
+What differs is **grouping**, and only grouping:
+
+- Merging needs USB evidence — Product ID from the reader name, or a Windows
+  Container ID. An NFC reader has neither.
+- So an NFC-presented key is **published standalone**, with a transport-shaped
+  `DeviceId` (`pcsc:*`), not a `ykphysical:*` one.
+- Tap the same key over USB and NFC at once and you get **two `IYubiKey` objects**.
+  The SDK will not claim they are one physical key, because nothing proved it.
+- The honest correlator is `SerialNumber` — read it from both and compare.
+
+This is conservative on purpose: a wrong merge is worse than no merge.
+
+<!-- Anchors: NFC never merges src/Core/src/Devices/CompositeDeviceMerger.cs:24-27,
+     standalone :119-124; no topology probe for non-USB
+     src/Core/src/Devices/FindYubiKeys.cs:191;
+     transport-shaped DeviceId docs/architecture/device-identity.md:179 (D7) -->
 
 ---
 
@@ -185,7 +252,7 @@ interface-set key.
 | Surface | Guarantee |
 |---|---|
 | `DeviceId` | **Diagnostic only.** Not durable identity. |
-| `SerialNumber` | Latched. `null` → value, **never** back to `null`. |
+| `SerialNumber` | `null` → value, **never** back to `null`. |
 | Interface-set key | Internal, machine-local, never public |
 | `Equals` / `GetHashCode` | **Referential** — same object, or not equal |
 
@@ -195,13 +262,15 @@ interface-set key.
 - A key whose interface set changes is **republished as a new object** that inherits
   nothing from its predecessor.
 
-> Full `DeviceInfo` stays internal: capabilities, flags and config are mutable via
-> Management, so a cached copy goes stale. The serial is the one burned-in field.
-> Need the rest? `await key.GetDeviceInfoAsync()` reads it live.
+> **Why keep `DeviceId` public at all?** Its prefix encodes *which evidence tier
+> produced it*: `pcsc:*` / `hid:*` for a lone interface, `ykphysical:*` only once
+> grouping actually proved a physical key. That makes it genuinely useful in logs
+> and bug reports. Removing it was considered and rejected for that reason — but
+> it is the interface-set key, kept internal, that would be the wrong thing to expose.
 
 <!-- Anchors: device-identity.md D1 :61-65, D2 :67-98 (latch :76-77, null-forever :73-75,
-     late arrival :80-81, republication :82-84), D6 :161, D7 :179;
-     shortcut src/Management/src/PublicAPI.Unshipped.txt:33 -->
+     late arrival :80-81, republication :82-84), D6 :161, D7 :179-184;
+     "not as the current interface-set string" :188-190 -->
 
 
 ---
@@ -225,7 +294,6 @@ public class DeviceEvent { IYubiKey Device; DeviceAction Action; DateTime Timest
 The monitoring **control** surface is five members: `StartMonitoring()`,
 `StartMonitoring(TimeSpan)`, `StopMonitoring()`, `WatchAsync(ct)`, `IsMonitoring`.
 `Shutdown()` / `ShutdownAsync()` also stop monitoring as part of tearing the manager down.
-**No `IObservable`. No Rx dependency. BCL types only.**
 
 <!-- Anchors: src/Core/src/PublicAPI.Unshipped.txt:986-992 (incl. Shutdown :987, ShutdownAsync :988);
      ShutdownAsync stops monitoring src/Core/src/Devices/YubiKeyManager.cs:216;
@@ -256,40 +324,69 @@ OS notification.
 
 ---
 
-## Observability: what changed underneath
+## Observability: logging
 
-![w:1150](assets/observability-before-after.svg)
+**Off by default.** No output, no logger, no overhead until you opt in.
 
-<!-- Anchors: docs/architecture/event-driven-device-discovery.md;
-     ThrottleInterval=200ms src/Core/src/Devices/YubiKeyDeviceMonitorService.cs:61;
-     MaxCoalesceInterval=5x :66; interval fallback :579-580 -->
+```csharp
+// Silent — the default
+var keys = await YubiKeyManager.FindAllAsync();
+
+// One line, before you touch the SDK
+YubiKitLogging.Configure(loggerFactory);
+```
+
+Six documented setups: static, DI, ASP.NET Core, `appsettings.json`, Serilog, none.
+Categories are class names — `Yubico.YubiKit.Piv.PivSession`,
+`Yubico.YubiKit.Core.Transports.SmartCard.*` — so you can filter per applet or
+per transport.
+
+| Level | What lands there |
+|---|---|
+| `Trace` | Raw APDU / CBOR bytes, protocol steps |
+| `Debug` | State transitions, cache updates |
+| `Information` | Session creation, major operations |
+| `Warning` / `Error` | Recoverable fallback / operation failure |
+
+**Never logged:** PINs, PUKs, passwords, private keys, session keys.
+Serial numbers and credential IDs are public identifiers and may appear at `Debug`.
+
+<!-- Anchors: docs/LOGGING.md:5-14 (quick start), :17-20 (off by default),
+     :22-137 (six methods), :139-151 (categories), :153-161 (levels),
+     :201-212 (security), :219 (never inject ILogger) -->
 
 ---
 
-## Observability: three contracts worth knowing
+## Logging: we already agree across the SDKs
 
-**1 — `WatchAsync` subscribes on first iteration, not when called.**
-Start the `await foreach` *before* the action you expect to trigger an event, or you
-will miss anything raised in the gap.
+| SDK | Default | Facade | Enable | Logger obtained |
+|---|---|---|---|---|
+| **.NET v2** | silent | `Microsoft.Extensions.Logging` | `YubiKitLogging.Configure(f)` | **static** |
+| ykman (py) | silent | stdlib `logging` | `init_logging(level)` | per-module |
+| ykman (rust) | silent | `log` crate | install a `log` impl | macros, per call site |
+| yubikit-android | silent | **slf4j** | add a binding | per-class |
+| yubikit-swift | silent | `OSLog` | on by platform | static, per domain |
 
-**2 — Overflow faults the stream; it does not drop.**
-Each enumeration owns a 256-event buffer. Overflow throws `InvalidOperationException`
-on *that* stream only. Device events are **deltas**, so a silent drop would
-desynchronise you — recover by re-enumerating and calling `FindAllAsync`.
+Three conventions we already share, without ever having agreed them:
 
-**3 — `StartMonitoring(interval)` while already running is a silent no-op.**
-The new interval is ignored, not applied, and no error is raised. Stop and start to
-change it. Deliberate: partial application would be worse, and throwing would make an
-idempotent start unsafe to call defensively.
+1. **A facade, never a concrete logger.** Every SDK binds to an abstraction and lets
+   the host pick the sink.
+2. **Silent until configured.** No SDK here prints anything out of the box.
+3. **Raw protocol bytes go to `Trace`.** Android says so explicitly; .NET puts APDU
+   and CBOR there too.
 
-> Logging is opt-in and static: `YubiKitLogging.Configure(loggerFactory)`, one line,
-> before you touch the SDK. **Never inject `ILogger`** — that house rule is what keeps
-> the SDK usable without a DI container.
+> **Nobody injects a logger into a session.** All five obtain one statically or
+> per-module. .NET v2's "never inject `ILogger`" is not a .NET quirk — it is the
+> house style everywhere, and it is what keeps the SDK usable without a DI container.
+>
+> Worth knowing: Android *used* to have a settable static `Logger.setLogger()` and
+> deliberately moved off it to slf4j, calling the old approach "not scalable".
 
-<!-- Anchors: WatcherBufferCapacity=256 src/Core/src/Devices/DeviceEventHub.cs:51,
-     overflow :242; subscribe-on-first-iteration docs/usage/device-discovery.md:90-92;
-     StartMonitoring no-op src/Core/src/Devices/YubiKeyDeviceMonitorService.cs:296-303;
-     logging docs/LOGGING.md:5-14, :219 -->
+<!-- Anchors: .NET docs/LOGGING.md:219;
+     python yubikit/core/__init__.py:31,44 (getLogger(__name__)), ykman/logging.py:57,67;
+     rust crates/yubikit/Cargo.toml:30 (log crate), src/piv.rs:1210 (log::debug!);
+     android doc/Logging_Migration.adoc:5-7 (slf4j move, "not scalable"), :10 (TRACE for raw data);
+     swift@1.4.0 YubiKit/YubiKit/Utilities/Logger+Extensions.swift:17-39 (HasLogger, OSLog) -->
 
 
 ---
@@ -339,9 +436,6 @@ await using var s = await key.CreateXSessionAsync(options, cancellationToken);
 - `XSession.CreateAsync(connection, ...)` — session borrows yours
 - Both take `SessionCreationOptions?` then a defaulted `CancellationToken`
 - Always `await using`
-
-**Test-enforced, not conventional** — `AppletSessionShapeTests` enumerates the eight
-sessions and asserts the shape holds for each.
 
 > **WebAuthn is the deliberate exception.** It is not an applet session. It returns a
 > `WebAuthnClient`, takes a required origin and public-suffix checker, and has its own
@@ -485,10 +579,9 @@ Map<Credential, @Nullable Code> codes = oath.calculateCodes();
 
 </div>
 
-**Delta:** the closest convergence in the deck — .NET's
+**Delta:** naming, the closest convergence in the deck — .NET's
 `IReadOnlyDictionary<Credential, Code?>` and Android's `Map<Credential, @Nullable Code>`
-express the same touch-required semantics. .NET makes it a compiler-enforced `Code?`
-rather than an annotation.
+express the same touch-required semantics.
 
 <!-- Anchors: .NET src/Oath/src/IYubiKeyExtensions.cs:39,
      PublicAPI.Unshipped.txt:50,87; python yubikit/oath.py:265,447;
@@ -613,7 +706,7 @@ GlobalPlatform key management — SCP03 and SCP11, certificates, CA identifiers.
 
 ```csharp
 await using var sd = await key.CreateSecurityDomainSessionAsync();
-var certs = await sd.GetCertificatesAsync(keyReference);
+var keyInfo = await sd.GetKeyInfoAsync();
 ```
 
 <div class="cols">
@@ -632,13 +725,14 @@ let keyInfo = try await s.getKeyInformation()
 
 </div>
 
-**Delta:** in .NET, SCP is *also* a creation option on every other applet — pass
-`SessionCreationOptions { ScpKeyParameters = ... }` and any session runs over a secure
-channel. Supplying it without a transport preference **forces SmartCard**.
+**Delta:** same operation, three spellings — .NET abbreviates to `GetKeyInfoAsync`
+where Python and Swift both write *Information*. Bigger point: in .NET, SCP is *also*
+a creation option on every other applet — pass `ScpKeyParameters` in
+`SessionCreationOptions` and any session runs over a secure channel.
 
 <!-- Anchors: .NET src/SecurityDomain/src/IYubiKeyExtensions.cs:45,
-     PublicAPI.Unshipped.txt:22; SCP-as-option
-     src/Management/tests/.../ManagementSessionSimpleTests.cs:215-217,
+     GetKeyInfoAsync PublicAPI.Unshipped.txt:24;
+     SCP-as-option src/Management/tests/.../ManagementSessionSimpleTests.cs:215-217,
      SCP-forces-SmartCard src/Management/src/IYubiKeyExtensions.cs:109;
      python yubikit/securitydomain.py:100,122;
      swift@1.4.0 SecurityDomainSession.swift:55,124 -->
@@ -686,7 +780,7 @@ The two programmable slots — Yubico OTP, static password, HMAC-SHA1 challenge-
 
 ```csharp
 await using var otp = await key.CreateYubiOtpSessionAsync();
-var serial = await otp.GetSerialNumberAsync();
+var response = await otp.CalculateHmacSha1Async(Slot.Two, challenge);
 ```
 
 <div class="cols">
@@ -694,7 +788,7 @@ var serial = await otp.GetSerialNumberAsync();
 **ykman (Python)**
 ```python
 otp = YubiOtpSession(conn)
-state = otp.get_config_state()
+r = otp.calculate_hmac_sha1(SLOT.TWO, challenge)
 ```
 
 **yubikit-android**
@@ -705,13 +799,16 @@ byte[] r = otp.calculateHmacSha1(Slot.TWO, challenge, null);
 
 </div>
 
-**Delta:** despite the name, .NET's YubiOTP session is **dual-transport and prefers
-SmartCard** — `SmartCard → HidOtp`. On a CCID-enabled key the snippet above runs over
-APDU, not HID. `yubikit-swift` has no YubiOTP slot session at all.
+**Delta:** the one applet where all four SDKs agree almost exactly — same operation,
+same slot enum, same argument order. The .NET difference is that its session is
+**dual-transport and prefers SmartCard** (`SmartCard → HidOtp`), so on a CCID-enabled
+key this runs over APDU, not HID. `yubikit-swift` has no YubiOTP session at all.
 
 <!-- Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102,
-     transport order :144-145, PublicAPI.Unshipped.txt:166;
-     python yubikit/yubiotp.py:708,779; android YubiOtpSession.java:253,447;
+     transport order :144-145, CalculateHmacSha1Async PublicAPI.Unshipped.txt:72;
+     python yubikit/yubiotp.py:708, calculate_hmac_sha1 :901;
+     android YubiOtpSession.java:253,447;
+     rust crates/yubikit/src/yubiotp.rs:1165 (calculate_hmac_sha1);
      swift@1.4.0 absent Capability.swift:20 -->
 
 
@@ -751,11 +848,19 @@ APDU, not HID. `yubikit-swift` has no YubiOTP slot session at all.
 
 ---
 
-## Footprint: what you ship
+## Footprint: monolith vs modular
 
-**Managed assemblies** (Release, `net10.0`) — install only what you use:
+**v1** ships two assemblies. You take all of it, always.
 
-| Assembly | KiB | | Assembly | KiB |
+| v1 assembly | KiB |
+|---|--:|
+| `Yubico.YubiKey` | 676 |
+| `Yubico.Core` | 215 |
+| **total, unavoidable** | **890** |
+
+**v2** ships ten. You reference what you use.
+
+| Package | KiB | | Package | KiB |
 |---|--:|---|---|--:|
 | Core | 577 | | WebAuthn | 130 |
 | Fido2 | 197 | | OpenPgp | 110 |
@@ -763,40 +868,57 @@ APDU, not HID. `yubikit-swift` has no YubiOTP slot session at all.
 | SecurityDomain | 56 | | YubiOtp | 56 |
 | YubiHsm | 51 | | Management | 37 |
 
-**All ten: 1,441 KiB = 1.41 MiB.** A PIV-only app pays Core + Piv = **742 KiB**.
+| Scenario | KiB | vs v1 |
+|---|--:|---|
+| **v2, PIV app** (Core + Piv) | **742** | **−148, 17 % smaller** |
+| v2, all ten | 1,441 | +550, 62 % larger |
 
-*These are assembly sizes from `bin/Release/net10.0`, not `.nupkg` sizes.*
+A PIV-only app ships **less** than v1 while getting async and AOT. Taking everything
+costs more — but v2 also ships a WebAuthn client layer that v1 has no equivalent of.
 
-**Native AOT**, verification host linking all ten libraries:
+*Not apples-to-apples: v1 targets `netstandard2.1`, v2 targets `net10.0`.*
+
+---
+
+## Footprint: Native AOT
+
+Verification host linking all ten libraries — a whole-SDK upper bound.
 
 | | Native AOT | Framework-dependent |
 |---|--:|--:|
 | Executable | **3.11 MiB** | — |
 | NativeShims sidecar | 3.71 MiB | 3.71 MiB |
 | **Peak RSS** | **11.7 MiB** | 51.5 MiB → **4.4× less** |
-| **CPU (user + sys)** | **~20 ms** | ~170 ms |
+| **CPU (user + sys)** | **~20 ms** | ~170 ms → **~an order of magnitude less** |
 | Wall, median of 10 | 528 ms | 628 ms |
+
+**What "11.7 MiB resident" means.** Native AOT compiles to a standalone native
+executable — no JIT, no runtime install, no warm-up. The process starts already
+compiled, so it allocates a fraction of the managed heap a JIT'd process needs. For a
+CLI, an installer, a service, or anything short-lived, that is the difference between
+feeling instant and feeling like a .NET app.
 
 ---
 
 ## Footprint: how these were collected
 
 **Machine.** Apple M1, 8 cores, 16 GB, macOS 15.7.7, .NET SDK 10.0.100, RID `osx-arm64`.
-Repo @ `d04d59aa`. **6 YubiKeys physically attached.**
+v2 @ `d04d59aa`. v1 @ `fd16960a`, `netstandard2.1`. **6 YubiKeys physically attached.**
 
 | Number | Provenance |
 |---|---|
-| Assembly sizes | **Measured** — `stat` on `bin/Release/net10.0/*.dll` |
-| AOT exe, RSS, CPU, wall | **Measured** — `dotnet publish -r osx-arm64 -p:PublishAot=true` of `verification/NativeAotVerification`; `/usr/bin/time -l`; wall = median of 10 after 3 warm-ups; RSS and CPU from a single representative run |
+| v2 assembly sizes | **Measured** — `stat` on `bin/Release/net10.0/*.dll` |
+| v1 assembly sizes | **Measured** — `dotnet build -c Release -f netstandard2.1` |
+| AOT exe, RSS, CPU, wall | **Measured** — `dotnet publish -r osx-arm64 -p:PublishAot=true` of `verification/NativeAotVerification`; `/usr/bin/time -l`; wall = median of 10 after 3 warm-ups; RSS and CPU from one representative run |
 | Framework-dependent baseline | **Measured** — same project, `-p:PublishAot=false --self-contained false` |
 | AOT link coverage, support contract | **Quoted** — PR #578, `docs/NATIVE-AOT.md` |
 | Recurring AOT CI | **CI** — `native-aot.yml` run `34121554932` on `yubikit`, macOS arm64, **hardware-free** (asserts `Found 0 YubiKey(s)`) |
 
 ⚠️ **Two caveats.** Wall time is dominated by I/O enumerating six attached keys, not by
 startup: subtracting CPU leaves **508 ms** (AOT) and **458 ms** (framework-dependent) of
-non-CPU time — same order, ~11 % apart, and both far larger than either CPU figure.
-Second, `/usr/bin/time -l` quantises CPU to 10 ms, so "20 ms vs 170 ms" is two ticks
-against seventeen: **treat the CPU ratio as "roughly an order of magnitude", not 8.5×.**
+non-CPU time. Second, `/usr/bin/time -l` quantises CPU to 10 ms, so "20 ms vs 170 ms" is
+two ticks against seventeen — **the ratio is order-of-magnitude, not 8.5× to two
+significant figures.**
 
 BenchmarkDotNet throughput and allocation were **not collected** — the project does not
 compile at this SHA (`DEFERRED.md` #1). Single machine, single run set: **ballpark**.
@@ -815,7 +937,6 @@ WebAuthn is the deliberate exception: it returns a client, not a session.
 One connection, one live session, enforced at runtime.
 
 **Device events are one API.** `StartMonitoring()` + `await foreach WatchAsync()`.
-No Rx, no `IObservable`, BCL types only.
 
 **Identity is honest about what it cannot promise.** `DeviceId` is diagnostic;
 `SerialNumber` may be `null` forever and can arrive late without an event.

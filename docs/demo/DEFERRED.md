@@ -21,3 +21,13 @@ Repository pinned at `d04d59aae63981588f6dc047eb0d788b681a8b8d`.
 - **high** — actively misleads a reader or consumer of the API.
 - **medium** — incorrect but self-evident, or confined to internal documentation.
 - **low** — cosmetic, stale wording, or a minor inconsistency.
+
+## Open API questions raised during deck review (2026-09-08)
+
+Not defects. Design questions worth a decision, recorded so they are not lost.
+
+| # | Area | Question |
+|---|---|---|
+| Q-A | `YubiKeyManager.FindAllAsync(forceRescan:)` | While monitoring is active the monitor keeps the cache fresh, so `forceRescan` is redundant; without monitoring it is the *only* refresh path (`src/Core/src/Devices/YubiKeyManager.cs:286-300`). Should `FindAllAsync` start monitoring implicitly, or should `forceRescan` be marked obsolete in favour of an explicit `RescanAsync`? Today a caller who never monitors and never passes `forceRescan` silently reads a cache that can be arbitrarily stale. |
+| Q-B | `IYubiKey.DeviceId` | Raised: should this leave the public API? Current position is keep-as-diagnostic: the prefix encodes evidence tier (`pcsc:*`/`hid:*` for a lone interface, `ykphysical:*` only once grouping proved a physical key — `docs/architecture/device-identity.md:179-184`). D1 (`:61-65`) already rejects exposing the interface-set string. If it stays, the XML doc should state "diagnostic, not durable identity" on the member itself, not only in the architecture doc. |
+| Q-C | `ISecurityDomainSession.GetKeyInfoAsync` | .NET abbreviates where every peer spells it out: Python `get_key_information()`, Swift `getKeyInformation()`, Android `getKeyInformation()`. Gratuitous naming divergence on a cross-SDK-visible operation. Still in `PublicAPI.Unshipped.txt:24`, so renaming is cheap now. |

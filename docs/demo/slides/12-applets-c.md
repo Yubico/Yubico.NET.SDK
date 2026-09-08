@@ -4,7 +4,7 @@ GlobalPlatform key management — SCP03 and SCP11, certificates, CA identifiers.
 
 ```csharp
 await using var sd = await key.CreateSecurityDomainSessionAsync();
-var certs = await sd.GetCertificatesAsync(keyReference); (REVIEW: why are we not demonstrating getting key information, as we do in Python and Swift)
+var keyInfo = await sd.GetKeyInfoAsync();
 ```
 
 <div class="cols">
@@ -23,13 +23,14 @@ let keyInfo = try await s.getKeyInformation()
 
 </div>
 
-**Delta:** in .NET, SCP is *also* a creation option on every other applet — pass
-`SessionCreationOptions { ScpKeyParameters = ... }` and any session runs over a secure
-channel. Supplying it without a transport preference **forces SmartCard**.
+**Delta:** same operation, three spellings — .NET abbreviates to `GetKeyInfoAsync`
+where Python and Swift both write *Information*. Bigger point: in .NET, SCP is *also*
+a creation option on every other applet — pass `ScpKeyParameters` in
+`SessionCreationOptions` and any session runs over a secure channel.
 
 <!-- Anchors: .NET src/SecurityDomain/src/IYubiKeyExtensions.cs:45,
-     PublicAPI.Unshipped.txt:22; SCP-as-option
-     src/Management/tests/.../ManagementSessionSimpleTests.cs:215-217,
+     GetKeyInfoAsync PublicAPI.Unshipped.txt:24;
+     SCP-as-option src/Management/tests/.../ManagementSessionSimpleTests.cs:215-217,
      SCP-forces-SmartCard src/Management/src/IYubiKeyExtensions.cs:109;
      python yubikit/securitydomain.py:100,122;
      swift@1.4.0 SecurityDomainSession.swift:55,124 -->
@@ -75,11 +76,9 @@ YubiHSM Auth module; `yubikit-swift` has only the `Capability.hsmAuth` bit.
 
 The two programmable slots — Yubico OTP, static password, HMAC-SHA1 challenge-response.
 
-(REVIEW: why are we showcasing different aspects of the YubiOTP session across SDKs? We should aim for consistency in the examples shown for each SDK) 
-
 ```csharp
 await using var otp = await key.CreateYubiOtpSessionAsync();
-var serial = await otp.GetSerialNumberAsync();
+var response = await otp.CalculateHmacSha1Async(Slot.Two, challenge);
 ```
 
 <div class="cols">
@@ -87,7 +86,7 @@ var serial = await otp.GetSerialNumberAsync();
 **ykman (Python)**
 ```python
 otp = YubiOtpSession(conn)
-state = otp.get_config_state()
+r = otp.calculate_hmac_sha1(SLOT.TWO, challenge)
 ```
 
 **yubikit-android**
@@ -98,11 +97,14 @@ byte[] r = otp.calculateHmacSha1(Slot.TWO, challenge, null);
 
 </div>
 
-**Delta:** despite the name, .NET's YubiOTP session is **dual-transport and prefers
-SmartCard** — `SmartCard → HidOtp`. On a CCID-enabled key the snippet above runs over
-APDU, not HID. `yubikit-swift` has no YubiOTP slot session at all.
+**Delta:** the one applet where all four SDKs agree almost exactly — same operation,
+same slot enum, same argument order. The .NET difference is that its session is
+**dual-transport and prefers SmartCard** (`SmartCard → HidOtp`), so on a CCID-enabled
+key this runs over APDU, not HID. `yubikit-swift` has no YubiOTP session at all.
 
 <!-- Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102,
-     transport order :144-145, PublicAPI.Unshipped.txt:166;
-     python yubikit/yubiotp.py:708,779; android YubiOtpSession.java:253,447;
+     transport order :144-145, CalculateHmacSha1Async PublicAPI.Unshipped.txt:72;
+     python yubikit/yubiotp.py:708, calculate_hmac_sha1 :901;
+     android YubiOtpSession.java:253,447;
+     rust crates/yubikit/src/yubiotp.rs:1165 (calculate_hmac_sha1);
      swift@1.4.0 absent Capability.swift:20 -->

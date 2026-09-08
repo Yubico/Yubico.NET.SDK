@@ -52,24 +52,25 @@ This table goes stale the moment you add or delete a slide. Regenerate it with
 
 | File | Slides | Topic |
 |---|---|---|
-| `00-intro.md` | 1 | Title and the five headline claims |
-| `01-pipeline.md` | 2–3 | Layered-stack diagram, then the pipeline in code |
-| `02-transports.md` | 4–7 | Connection diagram, APDU sequence, CTAP sequence, transport-order table |
-| `03-discovery.md` | 8–9 | Discovery diagram, discovery API |
-| `04-identity-merging.md` | 10–11 | Merging, then identity guarantees |
-| `05-observability-events.md` | 12–13 | Device-event API, peer comparison |
-| `06-observability-architecture.md` | 14–15 | v1→v2 diagram, the three contracts |
-| `08-raw-access-tiers.md` | 16 | Tier 0 / 1 / 2 |
-| `09-session-model.md` | 17–18 | Session shape, connection ownership |
-| `10-applets-a.md` | 19–21 | Management, PIV, OATH |
-| `11-applets-b.md` | 22–24 | OpenPGP, FIDO2, WebAuthn |
-| `12-applets-c.md` | 25–27 | SecurityDomain, YubiHSM Auth, YubiOTP |
-| `13-coverage-matrix.md` | 28 | Coverage across all five SDKs |
-| `14-footprint.md` | 29–30 | Sizes and measurements, provenance |
-| `15-takeaways.md` | 31 | Closing |
+| `00-intro.md` | 1 | Title and the headline claims |
+| `01-pipeline.md` | 2–4 | Layered stack, pipeline in code, three ways to open a session |
+| `02-transports.md` | 5–8 | Connection diagram, APDU seq, CTAP seq, transport-order table |
+| `03-discovery.md` | 9–10 | Discovery diagram, discovery API and `forceRescan` |
+| `04-identity-merging.md` | 11–13 | Merging, NFC handling, identity guarantees |
+| `05-observability-events.md` | 14–15 | Device-event API, peer comparison |
+| `07-logging.md` | 16–17 | Logging setup, cross-SDK logging conventions |
+| `08-raw-access-tiers.md` | 18 | Tier 0 / 1 / 2 |
+| `09-session-model.md` | 19–20 | Session shape, connection ownership |
+| `10-applets-a.md` | 21–23 | Management, PIV, OATH |
+| `11-applets-b.md` | 24–26 | OpenPGP, FIDO2, WebAuthn |
+| `12-applets-c.md` | 27–29 | SecurityDomain, YubiHSM Auth, YubiOTP |
+| `13-coverage-matrix.md` | 30 | Coverage across all five SDKs |
+| `14-footprint.md` | 31–33 | v1 vs v2 sizes, Native AOT, provenance |
+| `15-takeaways.md` | 34 | Closing |
 
-There is no `07-`. Logging was folded into `06-`, and `08-` was reused for the
-tier slide. Numbering is only for ordering — rename freely, order follows.
+There is no `06-`. That topic (the v1→v2 event architecture and the three stream
+contracts) was cut during review; its logging half became `07-logging.md`.
+Numbering is only for ordering — rename freely, order follows.
 
 ---
 

@@ -381,3 +381,66 @@ OATH delta.
   members plus two teardown members. Anchor widened from `:989-992` to `:986-992`, which
   was previously narrowed in a way that made the exhaustiveness claim read true against
   its own citation.
+
+---
+
+# Round-5: review changes (2026-09-08)
+
+Added after Dennis reviewed the deck and pushed edits. Slide 06 (v1→v2 event
+architecture + the three stream contracts) was deleted as low-value for this
+audience; its logging content was kept and expanded into its own topic.
+
+## Logging (new slides 16-17)
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| L1 | .NET v2 produces **no log output** by default, deliberately | doc | `docs/LOGGING.md:17-20` |
+| L2 | One-line opt-in: `YubiKitLogging.Configure(loggerFactory)` | doc | `docs/LOGGING.md:5-14` |
+| L3 | Six documented configuration methods | doc | `docs/LOGGING.md:22-137` |
+| L4 | Categories are class names, filterable per applet/transport | doc | `docs/LOGGING.md:139-151` |
+| L5 | `Trace` carries raw APDU/CBOR; Debug/Info/Warning/Error as listed | doc | `docs/LOGGING.md:153-161` |
+| L6 | PINs, PUKs, passwords, private and session keys are never logged | doc | `docs/LOGGING.md:201-212` |
+| L7 | House rule: static `YubiKitLogging`, **never** inject `ILogger` | doc | `docs/LOGGING.md:219` |
+| L8 | Python uses stdlib `logging`, per-module `getLogger(__name__)` | peer | `yubikey-manager@4ca60f70:yubikit/core/__init__.py:31,44` |
+| L9 | Python enable: `init_logging(level)` / `set_log_level(level)` | peer | `ykman/logging.py:57,67` |
+| L10 | Rust uses the `log` crate facade, macros at call sites | peer | `rust@90940e9b:crates/yubikit/Cargo.toml:30`; `src/piv.rs:1210` |
+| L11 | Android moved to **slf4j**, calling a settable static logger "not scalable" | peer | `yubikit-android@f4626856:doc/Logging_Migration.adoc:5,7` |
+| L12 | Android puts raw communication data at `TRACE` | peer | `doc/Logging_Migration.adoc:10` |
+| L13 | Swift uses `OSLog` via a `HasLogger` protocol with static per-domain loggers | peer | `swift@1.4.0:YubiKit/YubiKit/Utilities/Logger+Extensions.swift:17-39` |
+| L14 | **No SDK here injects a logger into a session** — all static or per-module | peer | L8, L10, L11, L13 taken together |
+
+## Answers to the review questions
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| Q1 | `forceRescan` is redundant while monitoring (the monitor keeps the cache fresh) and is the only refresh path when not monitoring | code | `src/Core/src/Devices/YubiKeyManager.cs:286-300` (caching remarks); `docs/usage/device-discovery.md:202-209` |
+| Q2 | NFC is discovered and monitored like USB; only **grouping** differs | code | `src/Core/src/Devices/CompositeDeviceMerger.cs:24-27`, `:119-124`; `src/Core/src/Devices/FindYubiKeys.cs:191` |
+| Q3 | An NFC-presented key is published standalone with a transport-shaped `DeviceId` | doc | `docs/architecture/device-identity.md:179-184` (D7) |
+| Q4 | `DeviceId` prefix encodes the evidence tier: `pcsc:*`/`hid:*` alone, `ykphysical:*` only once grouping proved a physical key | doc | `docs/architecture/device-identity.md:179-184` |
+| Q5 | The rejected-for-public-API surface is the interface-set string, not `DeviceId` | doc | `docs/architecture/device-identity.md:61-65` (D1), `:188-190` |
+| Q6 | `ISecurityDomainSession.GetKeyInfoAsync` exists | code | `src/SecurityDomain/src/PublicAPI.Unshipped.txt:24` |
+| Q7 | `IYubiOtpSession.CalculateHmacSha1Async(Slot, ReadOnlyMemory<byte>, ct)` exists | code | `src/YubiOtp/src/PublicAPI.Unshipped.txt:72` |
+| Q8 | All four peers expose `calculate_hmac_sha1`-shaped OTP challenge-response | peer | python `yubikit/yubiotp.py:901`; rust `crates/yubikit/src/yubiotp.rs:1165`; android `YubiOtpSession.java:447` |
+
+## v1 vs v2 footprint (new slide 31)
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| V1 | v1 `Yubico.YubiKey.dll` = 691,712 B = 676 KiB | measured | `dotnet build -c Release -f netstandard2.1`, v1 repo @ `fd16960a` |
+| V2 | v1 `Yubico.Core.dll` = 220,160 B = 215 KiB | measured | same build |
+| V3 | v1 unavoidable total = 911,872 B = **890 KiB**, 2 assemblies | measured | sum of V1+V2 |
+| V4 | v2 PIV app = Core + Piv = **742 KiB**, 17 % smaller than v1 | measured | 577 + 165 |
+| V5 | v2 all ten = **1,441 KiB**, 62 % larger than v1 | measured | sum of the ten |
+| V6 | v1 has **no** WebAuthn client layer; it ships Fido2/CTAP2 only | code | `Yubico.YubiKey/src/Yubico/YubiKey/` — `Fido2/` present, no `WebAuthn*` path exists |
+| V7 | TFMs differ: v1 `netstandard2.1`, v2 `net10.0` — not apples-to-apples | code | `Yubico.YubiKey/src/Yubico.YubiKey.csproj:23`; v2 `net10.0` |
+
+## Withdrawn in round 5
+
+- **"8.5× less CPU"**, re-added during review, is withdrawn again. It contradicts
+  the quantisation caveat on the same slide: `/usr/bin/time -l` reports CPU at 10 ms
+  resolution, so 20 ms vs 170 ms is two ticks against seventeen and the true ratio
+  spans roughly 5×-18×. The slide now says "~an order of magnitude less", which is
+  defensible at that resolution.
+- **"No `IObservable`. No Rx dependency. BCL types only."** removed from slides 14
+  and 34 by review. Still true (`rg DeviceChanges src/` is empty), simply not worth
+  the line for this audience.

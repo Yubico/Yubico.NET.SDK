@@ -444,3 +444,52 @@ audience; its logging content was kept and expanded into its own topic.
 - **"No `IObservable`. No Rx dependency. BCL types only."** removed from slides 14
   and 34 by review. Still true (`rg DeviceChanges src/` is empty), simply not worth
   the line for this audience.
+
+---
+
+# Round-6: follow-up review (2026-09-08)
+
+## Discovery: two operation models (slides 10-11)
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| M1 | Model A (one-shot) and Model B (monitored) differ only in who keeps the cache fresh | code | `src/Core/src/Devices/YubiKeyManager.cs:286-300` |
+| M2 | Without monitoring, `FindAllAsync` scans once then returns that snapshot until `forceRescan: true` | code | `src/Core/src/Devices/YubiKeyManager.cs:288-289` ("returns cached results unless cache is empty"), `:296-300` |
+| M3 | While monitoring, the monitor keeps the cache fresh, so `forceRescan` is redundant | code | `src/Core/src/Devices/YubiKeyManager.cs:299` ("While monitoring: Returns cached results (monitoring keeps cache fresh)") |
+| M4 | Neither model can promise a key arriving mid-scan appears in that scan | doc | `docs/usage/device-discovery.md:202-209` |
+
+## DeviceId: evidence-tier encoding and persona (slide 15)
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| I1 | Lone HID interface is `hid:{readerName}:{usage:X4}` | code | `src/Core/src/Devices/HidConnectionSlot.cs:33` |
+| I2 | Grouped by USB Product ID mints `ykphysical:pid:{PID:X4}` | code | `src/Core/src/Devices/CompositeDeviceMerger.cs:109` |
+| I3 | Grouped by Windows Container ID mints `ykphysical:topology:{id}` | code | `src/Core/src/Devices/CompositeDeviceMerger.cs:172` |
+| I4 | Serial-confirmed grouping mints the durable `ykphysical:{serial}` | code | `src/Core/src/Devices/CompositeDeviceMerger.cs:348`, rationale `:243` |
+| I5 | The prefix is truthful about the evidence tier; `ykphysical:*` only when grouping proved a physical key | doc | `docs/architecture/device-identity.md:179-184` (D7) |
+| I6 | `DeviceId` can change while the device stays present, so it is not durable identity | code | `src/Core/src/Devices/YubiKeyDevice.cs:119` |
+
+## v1 vs v2 size: why the saving is only 17 % (slide 34)
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| S1 | v1 `Yubico.Core` 215 KiB → v2 `Core` 577 KiB, a **2.7×** floor increase | measured | `stat` on both Release builds |
+| S2 | v1 source is 113,439 LOC across 727 files | measured | `find … -name '*.cs'` excluding `obj/` and `bin/`, then `wc -l` |
+| S3 | v2 source is 77,512 LOC across 572 files | measured | same method over `src/*/src` |
+| S4 | v1 = 8.0 bytes of assembly per line; v2 = 19.0 — **2.4×** | measured | 911,872 B ÷ 113,439; 1,475,584 B ÷ 77,512 |
+| S5 | v1 has **1** `async Task`-shaped method; v2 has **488** | measured | `rg -c 'async\s+(Task\|ValueTask\|IAsyncEnumerable)'`; v1 has only 2 lines containing `async` at all, in 2 files |
+| S6 | v2 declares 94 `record` types | measured | `rg -c 'record (struct \|class )?\w'` over `src/*/src` |
+| S7 | v2 has 35 % less source but 62 % more binary than v1 | measured | derived from S2, S3 and the assembly totals |
+
+**Explicitly a proxy, not a causal measurement.** Bytes-per-line does not isolate
+async state machines from records, nullable metadata, generics or TFM differences.
+The slide says so. The strong part of the claim is S5: v1 is essentially synchronous
+(2 lines mentioning `async`), v2 is async throughout, and async state machines are
+known to be IL-expensive.
+
+## Withdrawn in round 6
+
+- The framing "v2 PIV app is 17 % smaller, therefore modularity wins" is retained but
+  no longer presented without its cause. The saving is capped by `Core` growing 2.7×,
+  and the overall binary grows despite less source. Presenting only the favourable
+  number would have been selective.

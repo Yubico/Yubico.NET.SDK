@@ -165,36 +165,75 @@ await using var mgmt = await key.CreateManagementSessionAsync(
 
 ---
 
-## Discovery API
+## Two operation models
+
+**A — One-shot.** Ask, act, exit. No monitoring.
 
 ```csharp
-// Cached — the repository's current view
 var keys = await YubiKeyManager.FindAllAsync();
-
-// Fresh scan, or narrowed by transport
-var scan = await YubiKeyManager.FindAllAsync(
-    ConnectionType.SmartCard, forceRescan: true);
+await using var piv = await keys[0].CreatePivSessionAsync();
+// ... do the work, then exit
 ```
 
-**Is `forceRescan` obsolete now that discovery is event-driven?** No — but its job
-has narrowed to exactly one case:
+**B — Long-lived.** Start monitoring, react to arrivals for the process lifetime.
 
-| | Cache freshness | Need `forceRescan`? |
+```csharp
+YubiKeyManager.StartMonitoring();
+
+await foreach (var e in YubiKeyManager.WatchAsync(ct))
+{
+    if (e.Action == DeviceAction.Added)
+        await OnKeyInserted(e.Device);
+}
+```
+
+Same `IYubiKey`, same sessions. The models differ only in **who keeps the cache fresh.**
+
+---
+
+## Which model serves whom
+
+| | **A — One-shot** | **B — Monitored** |
 |---|---|---|
-| **Monitoring on** | the monitor keeps it fresh | **no** — it is redundant |
-| **Monitoring off** | first call scans, then the cache never updates | **yes** — the only way to refresh |
+| Who | CLI tools, scripts, CI, installers | Desktop apps, daemons, services, tray UIs |
+| Lifetime | seconds | hours |
+| Cache kept fresh by | **you**, via `forceRescan` | the monitor |
+| `forceRescan: true` | needed on every re-poll | **redundant — drop it** |
+| Cost when idle | none | one listener, no polling |
 
-So it is the escape hatch for callers who want a one-shot look and never call
-`StartMonitoring()`. If you are monitoring, stop passing it.
+```csharp
+// A — polling loop without monitoring: MUST force, or you re-read a stale cache
+while (!ct.IsCancellationRequested)
+{
+    var keys = await YubiKeyManager.FindAllAsync(forceRescan: true);
+    ...
+    await Task.Delay(1000, ct);
+}
+```
+
+> **The trap.** Model A without `forceRescan` scans once, then returns that first
+> snapshot **forever**. It looks like it works, because the first call is correct.
+> Either pass `forceRescan: true`, or switch to model B.
+
+`ykman`'s CLI is model A. `yubikit-android` and `yubikit-swift` apps are model B.
+Most .NET desktop consumers want B; most .NET tooling wants A.
+
+---
+
+## Discovery guarantees
 
 Discovery is **publish-first and degraded-state tolerant** — a key is published as soon
 as it is enumerated, even if its metadata read has not succeeded. Canonical Rust
 instead withholds publication until metadata is read, which is why `SerialNumber` can
 arrive late here and not there.
 
-<!-- Anchors: PublicAPI.Unshipped.txt:984-985;
+Both models inherit this. Neither model can promise a key that arrives *during* a scan
+appears in that scan's result.
+
+<!-- Anchors: FindAllAsync src/Core/src/PublicAPI.Unshipped.txt:984-985;
      caching + "monitoring keeps cache fresh" src/Core/src/Devices/YubiKeyManager.cs:286-300;
-     race-condition guidance docs/usage/device-discovery.md:202-209;
+     monitoring surface PublicAPI.Unshipped.txt:986-992;
+     race conditions docs/usage/device-discovery.md:202-209;
      publish-first docs/architecture/device-identity.md:93-96 -->
 
 
@@ -262,11 +301,25 @@ This is conservative on purpose: a wrong merge is worse than no merge.
 - A key whose interface set changes is **republished as a new object** that inherits
   nothing from its predecessor.
 
-> **Why keep `DeviceId` public at all?** Its prefix encodes *which evidence tier
-> produced it*: `pcsc:*` / `hid:*` for a lone interface, `ykphysical:*` only once
-> grouping actually proved a physical key. That makes it genuinely useful in logs
-> and bug reports. Removing it was considered and rejected for that reason — but
-> it is the interface-set key, kept internal, that would be the wrong thing to expose.
+### Who actually wants `DeviceId`?
+
+Its value is that the **prefix names the evidence tier** that produced it:
+
+| Shape | Means |
+|---|---|
+| `hid:{reader}:{usage}` | a lone HID interface — nothing proved a physical key |
+| `pcsc:*` | a lone smart-card reader, e.g. anything over NFC |
+| `ykphysical:pid:{PID}` | grouped by USB Product ID |
+| `ykphysical:topology:{id}` | grouped by Windows Container ID |
+| `ykphysical:{serial}` | grouped **and** serial-confirmed — the strongest |
+
+**The persona is whoever is holding a log at 2am.** Support engineers triaging a
+customer trace, and SDK maintainers reading a bug report, both need to answer *"did
+discovery think these were one key or two, and on what evidence?"* — and `DeviceId`
+answers exactly that, in one string, without a debugger.
+
+**Not for application developers.** If you are writing app logic, use `SerialNumber`.
+`DeviceId` is not durable: it changes when evidence changes, by design.
 
 <!-- Anchors: device-identity.md D1 :61-65, D2 :67-98 (latch :76-77, null-forever :73-75,
      late arrival :80-81, republication :82-84), D6 :161, D7 :179-184;
@@ -854,15 +907,15 @@ key this runs over APDU, not HID. `yubikit-swift` has no YubiOTP session at all.
 
 | v1 assembly | KiB |
 |---|--:|
-| `Yubico.YubiKey` | 676 |
-| `Yubico.Core` | 215 |
+| `Yubico.YubiKey` — every applet | 676 |
+| `Yubico.Core` — transports, protocols | 215 |
 | **total, unavoidable** | **890** |
 
 **v2** ships ten. You reference what you use.
 
 | Package | KiB | | Package | KiB |
 |---|--:|---|---|--:|
-| Core | 577 | | WebAuthn | 130 |
+| **Core** | **577** | | WebAuthn | 130 |
 | Fido2 | 197 | | OpenPgp | 110 |
 | Piv | 165 | | Oath | 62 |
 | SecurityDomain | 56 | | YubiOtp | 56 |
@@ -870,13 +923,46 @@ key this runs over APDU, not HID. `yubikit-swift` has no YubiOTP session at all.
 
 | Scenario | KiB | vs v1 |
 |---|--:|---|
-| **v2, PIV app** (Core + Piv) | **742** | **−148, 17 % smaller** |
+| **v2, PIV app** (Core + Piv) | **742** | −148, **17 % smaller** |
 | v2, all ten | 1,441 | +550, 62 % larger |
 
-A PIV-only app ships **less** than v1 while getting async and AOT. Taking everything
-costs more — but v2 also ships a WebAuthn client layer that v1 has no equivalent of.
+---
 
-*Not apples-to-apples: v1 targets `netstandard2.1`, v2 targets `net10.0`.*
+## Why is the saving only 17 %?
+
+Fair question. Modularity should win bigger. Two things cap it.
+
+**1. `Core` is the floor, and it grew 2.7×.** v1's shared layer was 215 KiB; v2's is
+577 KiB. A PIV app pays that before it pays for PIV. The nine applets are cheap
+(37–197 KiB each) — skipping eight of them is where the 148 KiB actually comes from.
+
+**2. v2 emits far more IL per line of source.**
+
+| | v1 | v2 |
+|---|--:|--:|
+| Source | 113,439 LOC | 77,512 LOC |
+| Assemblies | 890 KiB | 1,441 KiB |
+| **Bytes per line** | **8.0** | **19.0** — 2.4× |
+| `async` methods | **1** | **488** |
+| `record` types | — | 94 |
+
+v2 has **35 % less source** and **62 % more binary**. Every `async` method compiles to
+a generated state-machine type — fields for each local that survives an `await`, a
+`MoveNext` switch, builder plumbing. Every `record` generates `Equals`, `GetHashCode`,
+`ToString`, `PrintMembers`, `Clone`, `Deconstruct` and two operators.
+
+**So the size story is a trade, not a win.** async-everywhere and value-semantics cost
+roughly 2.4× the IL per line. Modularity buys most of that back — but only for
+consumers who skip applets. Take all ten and you pay for the trade in full.
+
+*Not apples-to-apples: v1 targets `netstandard2.1`, v2 targets `net10.0`. v1 has no
+WebAuthn client layer at all.*
+
+<!-- Anchors: v1 sizes measured, repo @fd16960a, dotnet build -c Release -f netstandard2.1;
+     v2 sizes stat on bin/Release/net10.0;
+     LOC via find+wc over src, excluding obj/bin;
+     async counts via rg 'async (Task|ValueTask|IAsyncEnumerable)';
+     v1 WebAuthn absence: no WebAuthn path under Yubico.YubiKey/src -->
 
 ---
 
@@ -898,6 +984,8 @@ compiled, so it allocates a fraction of the managed heap a JIT'd process needs. 
 CLI, an installer, a service, or anything short-lived, that is the difference between
 feeling instant and feeling like a .NET app.
 
+Note this cuts against the IL-size trade above: the IL grows, but AOT never ships it.
+
 ---
 
 ## Footprint: how these were collected
@@ -908,20 +996,20 @@ v2 @ `d04d59aa`. v1 @ `fd16960a`, `netstandard2.1`. **6 YubiKeys physically atta
 | Number | Provenance |
 |---|---|
 | v2 assembly sizes | **Measured** — `stat` on `bin/Release/net10.0/*.dll` |
-| v1 assembly sizes | **Measured** — `dotnet build -c Release -f netstandard2.1` |
-| AOT exe, RSS, CPU, wall | **Measured** — `dotnet publish -r osx-arm64 -p:PublishAot=true` of `verification/NativeAotVerification`; `/usr/bin/time -l`; wall = median of 10 after 3 warm-ups; RSS and CPU from one representative run |
+| v1 assembly sizes | **Measured** — `dotnet build -c Release -f netstandard2.1` at `fd16960a` |
+| LOC, async and record counts | **Measured** — `find`+`wc` and `rg` over `src`, excluding `obj/` and `bin/` |
+| AOT exe, RSS, CPU, wall | **Measured** — `dotnet publish -r osx-arm64 -p:PublishAot=true` of `verification/NativeAotVerification`; `/usr/bin/time -l`; wall = median of 10 after 3 warm-ups |
 | Framework-dependent baseline | **Measured** — same project, `-p:PublishAot=false --self-contained false` |
 | AOT link coverage, support contract | **Quoted** — PR #578, `docs/NATIVE-AOT.md` |
-| Recurring AOT CI | **CI** — `native-aot.yml` run `34121554932` on `yubikit`, macOS arm64, **hardware-free** (asserts `Found 0 YubiKey(s)`) |
+| Recurring AOT CI | **CI** — `native-aot.yml` run `34121554932` on `yubikit`, macOS arm64, **hardware-free** |
 
-⚠️ **Two caveats.** Wall time is dominated by I/O enumerating six attached keys, not by
-startup: subtracting CPU leaves **508 ms** (AOT) and **458 ms** (framework-dependent) of
-non-CPU time. Second, `/usr/bin/time -l` quantises CPU to 10 ms, so "20 ms vs 170 ms" is
-two ticks against seventeen — **the ratio is order-of-magnitude, not 8.5× to two
-significant figures.**
-
-BenchmarkDotNet throughput and allocation were **not collected** — the project does not
-compile at this SHA (`DEFERRED.md` #1). Single machine, single run set: **ballpark**.
+⚠️ **Caveats.** Wall time is dominated by I/O enumerating six attached keys, not
+startup: subtracting CPU leaves 508 ms (AOT) and 458 ms (framework-dependent).
+`/usr/bin/time -l` quantises CPU to 10 ms, so 20 vs 170 ms is two ticks against
+seventeen — **order-of-magnitude, not 8.5× to two significant figures.** Bytes-per-line
+is a proxy, not a causal measurement: it does not isolate async from records, nullable
+metadata or generics. BenchmarkDotNet numbers were **not** collected (`DEFERRED.md` #1).
+Single machine, single run set: **ballpark**.
 
 
 ---

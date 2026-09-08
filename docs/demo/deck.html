@@ -32,7 +32,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h1 id="yubikit-net-v2">YubiKit .NET <strong>v2</strong></h1>
 <h3 id="a-tour-for-people-who-live-in-the-other-sdks">A tour for people who live in the other SDKs</h3>
 <p><code>yubikey-manager</code> · <code>yubikit-android</code> · <code>yubikit-swift</code> · <code>python-fido2</code></p>
@@ -74,7 +74,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="host-app-%E2%86%92-sdk-%E2%86%92-session-%E2%86%92-yubikey">Host App → SDK → Session → YubiKey</h2>
 <p><img src="assets/L2-layered-stack.svg" alt="" style="height:530px;" /></p>
 </section>
@@ -102,7 +102,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="the-pipeline-in-code">The pipeline in code</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-comment">// 1. HOST APP asks the SDK for devices</span>
 <span class="hljs-keyword">var</span> keys = <span class="hljs-keyword">await</span> YubiKeyManager.FindAllAsync();
@@ -140,7 +140,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="three-ways-to-open-a-session">Three ways to open a session</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-comment">// A. Convenience — SDK resolves the transport, owns and disposes the connection</span>
 <span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> piv = <span class="hljs-keyword">await</span> key.CreatePivSessionAsync();
@@ -186,7 +186,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="transports-and-interfaces">Transports and interfaces</h2>
 <p><img src="assets/L4-connection.svg" alt="" style="height:520px;" /></p>
 </section>
@@ -214,7 +214,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="command-invocation-smart-card--apdu">Command invocation: smart card / APDU</h2>
 <p><img src="assets/L3-apdu-sequence.svg" alt="" style="width:1120px;" /></p>
 <p>PIV · OATH · OpenPGP · Management · SecurityDomain · YubiHSM Auth</p>
@@ -243,7 +243,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="command-invocation-fido-hid--ctap">Command invocation: FIDO HID / CTAP</h2>
 <p><img src="assets/L3b-fido2-ctap-sequence.svg" alt="" style="width:1000px;" /></p>
 <p>FIDO2 · WebAuthn. YubiOTP rides OTP-HID, a third framing.</p>
@@ -272,7 +272,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="applets-are-not-one-transport-each">Applets are not one-transport-each</h2>
 <p><code>[Flags] ConnectionType</code>: <code>Unknown=0</code> · <code>Hid=1</code> · <code>HidFido=2</code> · <code>HidOtp=4</code> · <code>SmartCard=8</code> · <code>All</code></p>
 <table>
@@ -339,7 +339,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="device-discovery">Device discovery</h2>
 <p><img src="assets/L4-discovery.svg" alt="" style="height:520px;" /></p>
 </section>
@@ -367,44 +367,23 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="discovery-api">Discovery API</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-comment">// Cached — the repository&#x27;s current view</span>
-<span class="hljs-keyword">var</span> keys = <span class="hljs-keyword">await</span> YubiKeyManager.FindAllAsync();
-
-<span class="hljs-comment">// Fresh scan, or narrowed by transport</span>
-<span class="hljs-keyword">var</span> scan = <span class="hljs-keyword">await</span> YubiKeyManager.FindAllAsync(
-    ConnectionType.SmartCard, forceRescan: <span class="hljs-literal">true</span>);
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="two-operation-models">Two operation models</h2>
+<p><strong>A — One-shot.</strong> Ask, act, exit. No monitoring.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">var</span> keys = <span class="hljs-keyword">await</span> YubiKeyManager.FindAllAsync();
+<span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> piv = <span class="hljs-keyword">await</span> keys[<span class="hljs-number">0</span>].CreatePivSessionAsync();
+<span class="hljs-comment">// ... do the work, then exit</span>
 </code></pre>
-<p><strong>Is <code>forceRescan</code> obsolete now that discovery is event-driven?</strong> No — but its job<br />
-has narrowed to exactly one case:</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Cache freshness</th>
-<th>Need <code>forceRescan</code>?</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Monitoring on</strong></td>
-<td>the monitor keeps it fresh</td>
-<td><strong>no</strong> — it is redundant</td>
-</tr>
-<tr>
-<td><strong>Monitoring off</strong></td>
-<td>first call scans, then the cache never updates</td>
-<td><strong>yes</strong> — the only way to refresh</td>
-</tr>
-</tbody>
-</table>
-<p>So it is the escape hatch for callers who want a one-shot look and never call<br />
-<code>StartMonitoring()</code>. If you are monitoring, stop passing it.</p>
-<p>Discovery is <strong>publish-first and degraded-state tolerant</strong> — a key is published as soon<br />
-as it is enumerated, even if its metadata read has not succeeded. Canonical Rust<br />
-instead withholds publication until metadata is read, which is why <code>SerialNumber</code> can<br />
-arrive late here and not there.</p>
+<p><strong>B — Long-lived.</strong> Start monitoring, react to arrivals for the process lifetime.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp">YubiKeyManager.StartMonitoring();
+
+<span class="hljs-keyword">await</span> <span class="hljs-keyword">foreach</span> (<span class="hljs-keyword">var</span> e <span class="hljs-keyword">in</span> YubiKeyManager.WatchAsync(ct))
+{
+    <span class="hljs-keyword">if</span> (e.Action == DeviceAction.Added)
+        <span class="hljs-keyword">await</span> OnKeyInserted(e.Device);
+}
+</code></pre>
+<p>Same <code>IYubiKey</code>, same sessions. The models differ only in <strong>who keeps the cache fresh.</strong></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -430,18 +409,59 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="merging-one-physical-key-many-interfaces">Merging: one physical key, many interfaces</h2>
-<p>A single YubiKey appears as <strong>several OS-level devices</strong> — a PC/SC reader, a FIDO HID<br />
-device, an OTP HID device. The SDK merges them into one <code>IYubiKey</code>.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code>USB PC/SC reader  ─┐
-FIDO HID device   ─┼─→  CompositeDeviceMerger  ─→  one IYubiKey
-OTP HID device    ─┘
-
-NFC reader        ───→  stands alone, never merged
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="which-model-serves-whom">Which model serves whom</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>A — One-shot</strong></th>
+<th><strong>B — Monitored</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who</td>
+<td>CLI tools, scripts, CI, installers</td>
+<td>Desktop apps, daemons, services, tray UIs</td>
+</tr>
+<tr>
+<td>Lifetime</td>
+<td>seconds</td>
+<td>hours</td>
+</tr>
+<tr>
+<td>Cache kept fresh by</td>
+<td><strong>you</strong>, via <code>forceRescan</code></td>
+<td>the monitor</td>
+</tr>
+<tr>
+<td><code>forceRescan: true</code></td>
+<td>needed on every re-poll</td>
+<td><strong>redundant — drop it</strong></td>
+</tr>
+<tr>
+<td>Cost when idle</td>
+<td>none</td>
+<td>one listener, no polling</td>
+</tr>
+</tbody>
+</table>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-comment">// A — polling loop without monitoring: MUST force, or you re-read a stale cache</span>
+<span class="hljs-keyword">while</span> (!ct.IsCancellationRequested)
+{
+    <span class="hljs-keyword">var</span> keys = <span class="hljs-keyword">await</span> YubiKeyManager.FindAllAsync(forceRescan: <span class="hljs-literal">true</span>);
+    ...
+    <span class="hljs-keyword">await</span> Task.Delay(<span class="hljs-number">1000</span>, ct);
+}
 </code></pre>
-<p>Merge inputs per interface: <code>Connection</code> · <code>IsUsb</code> · <code>Pid</code> · <code>Serial</code> · <code>DeviceInfo</code> ·<br />
-<code>TopologyKey</code> (Windows Container ID; <code>null</code> on macOS and Linux)</p>
+<blockquote>
+<p><strong>The trap.</strong> Model A without <code>forceRescan</code> scans once, then returns that first<br />
+snapshot <strong>forever</strong>. It looks like it works, because the first call is correct.<br />
+Either pass <code>forceRescan: true</code>, or switch to model B.</p>
+</blockquote>
+<p><code>ykman</code>'s CLI is model A. <code>yubikit-android</code> and <code>yubikit-swift</code> apps are model B.<br />
+Most .NET desktop consumers want B; most .NET tooling wants A.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -467,22 +487,14 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="what-happens-to-an-nfc-key">What happens to an NFC key</h2>
-<p>NFC is <strong>discovered and monitored exactly like USB</strong> — the same<br />
-<code>SCardGetStatusChange</code> listener covers NFC readers, so tap and remove raise the<br />
-same <code>Added</code> / <code>Removed</code> events, and the same repository cache holds them.</p>
-<p>What differs is <strong>grouping</strong>, and only grouping:</p>
-<ul>
-<li>Merging needs USB evidence — Product ID from the reader name, or a Windows<br />
-Container ID. An NFC reader has neither.</li>
-<li>So an NFC-presented key is <strong>published standalone</strong>, with a transport-shaped<br />
-<code>DeviceId</code> (<code>pcsc:*</code>), not a <code>ykphysical:*</code> one.</li>
-<li>Tap the same key over USB and NFC at once and you get <strong>two <code>IYubiKey</code> objects</strong>.<br />
-The SDK will not claim they are one physical key, because nothing proved it.</li>
-<li>The honest correlator is <code>SerialNumber</code> — read it from both and compare.</li>
-</ul>
-<p>This is conservative on purpose: a wrong merge is worse than no merge.</p>
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="discovery-guarantees">Discovery guarantees</h2>
+<p>Discovery is <strong>publish-first and degraded-state tolerant</strong> — a key is published as soon<br />
+as it is enumerated, even if its metadata read has not succeeded. Canonical Rust<br />
+instead withholds publication until metadata is read, which is why <code>SerialNumber</code> can<br />
+arrive late here and not there.</p>
+<p>Both models inherit this. Neither model can promise a key that arrives <em>during</em> a scan<br />
+appears in that scan's result.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -508,7 +520,85 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="merging-one-physical-key-many-interfaces">Merging: one physical key, many interfaces</h2>
+<p>A single YubiKey appears as <strong>several OS-level devices</strong> — a PC/SC reader, a FIDO HID<br />
+device, an OTP HID device. The SDK merges them into one <code>IYubiKey</code>.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code>USB PC/SC reader  ─┐
+FIDO HID device   ─┼─→  CompositeDeviceMerger  ─→  one IYubiKey
+OTP HID device    ─┘
+
+NFC reader        ───→  stands alone, never merged
+</code></pre>
+<p>Merge inputs per interface: <code>Connection</code> · <code>IsUsb</code> · <code>Pid</code> · <code>Serial</code> · <code>DeviceInfo</code> ·<br />
+<code>TopologyKey</code> (Windows Container ID; <code>null</code> on macOS and Linux)</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+" lang="en-US" data-marpit-pagination="14" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="what-happens-to-an-nfc-key">What happens to an NFC key</h2>
+<p>NFC is <strong>discovered and monitored exactly like USB</strong> — the same<br />
+<code>SCardGetStatusChange</code> listener covers NFC readers, so tap and remove raise the<br />
+same <code>Added</code> / <code>Removed</code> events, and the same repository cache holds them.</p>
+<p>What differs is <strong>grouping</strong>, and only grouping:</p>
+<ul>
+<li>Merging needs USB evidence — Product ID from the reader name, or a Windows<br />
+Container ID. An NFC reader has neither.</li>
+<li>So an NFC-presented key is <strong>published standalone</strong>, with a transport-shaped<br />
+<code>DeviceId</code> (<code>pcsc:*</code>), not a <code>ykphysical:*</code> one.</li>
+<li>Tap the same key over USB and NFC at once and you get <strong>two <code>IYubiKey</code> objects</strong>.<br />
+The SDK will not claim they are one physical key, because nothing proved it.</li>
+<li>The honest correlator is <code>SerialNumber</code> — read it from both and compare.</li>
+</ul>
+<p>This is conservative on purpose: a wrong merge is worse than no merge.</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+" lang="en-US" data-marpit-pagination="15" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="identity-what-is-stable-what-is-not">Identity: what is stable, what is not</h2>
 <table>
 <thead>
@@ -543,15 +633,46 @@ Security Key series reports no serial at all.</li>
 <li>A key whose interface set changes is <strong>republished as a new object</strong> that inherits<br />
 nothing from its predecessor.</li>
 </ul>
-<blockquote>
-<p><strong>Why keep <code>DeviceId</code> public at all?</strong> Its prefix encodes <em>which evidence tier<br />
-produced it</em>: <code>pcsc:*</code> / <code>hid:*</code> for a lone interface, <code>ykphysical:*</code> only once<br />
-grouping actually proved a physical key. That makes it genuinely useful in logs<br />
-and bug reports. Removing it was considered and rejected for that reason — but<br />
-it is the interface-set key, kept internal, that would be the wrong thing to expose.</p>
-</blockquote>
+<h3 id="who-actually-wants-deviceid">Who actually wants <code>DeviceId</code>?</h3>
+<p>Its value is that the <strong>prefix names the evidence tier</strong> that produced it:</p>
+<table>
+<thead>
+<tr>
+<th>Shape</th>
+<th>Means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hid:{reader}:{usage}</code></td>
+<td>a lone HID interface — nothing proved a physical key</td>
+</tr>
+<tr>
+<td><code>pcsc:*</code></td>
+<td>a lone smart-card reader, e.g. anything over NFC</td>
+</tr>
+<tr>
+<td><code>ykphysical:pid:{PID}</code></td>
+<td>grouped by USB Product ID</td>
+</tr>
+<tr>
+<td><code>ykphysical:topology:{id}</code></td>
+<td>grouped by Windows Container ID</td>
+</tr>
+<tr>
+<td><code>ykphysical:{serial}</code></td>
+<td>grouped <strong>and</strong> serial-confirmed — the strongest</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The persona is whoever is holding a log at 2am.</strong> Support engineers triaging a<br />
+customer trace, and SDK maintainers reading a bug report, both need to answer <em>&quot;did<br />
+discovery think these were one key or two, and on what evidence?&quot;</em> — and <code>DeviceId</code><br />
+answers exactly that, in one string, without a debugger.</p>
+<p><strong>Not for application developers.</strong> If you are writing app logic, use <code>SerialNumber</code>.<br />
+<code>DeviceId</code> is not durable: it changes when evidence changes, by design.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -563,7 +684,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="14" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="16" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -575,7 +696,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="observability-the-whole-device-event-api">Observability: the whole device-event API</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp">YubiKeyManager.StartMonitoring();                 <span class="hljs-comment">// events don&#x27;t flow until this</span>
 
@@ -591,7 +712,7 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 <code>StartMonitoring(TimeSpan)</code>, <code>StopMonitoring()</code>, <code>WatchAsync(ct)</code>, <code>IsMonitoring</code>.<br />
 <code>Shutdown()</code> / <code>ShutdownAsync()</code> also stop monitoring as part of tearing the manager down.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -603,7 +724,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="15" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="17" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -615,7 +736,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="how-the-peers-surface-device-changes">How the peers surface device changes</h2>
 <table>
 <thead>
@@ -655,7 +776,7 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 does not. And Swift's <code>makeConnection()</code> is a 1-second poll loop internally, not an<br />
 OS notification.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -667,7 +788,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="16" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="18" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -679,7 +800,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="observability-logging">Observability: logging</h2>
 <p><strong>Off by default.</strong> No output, no logger, no overhead until you opt in.</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-comment">// Silent — the default</span>
@@ -721,7 +842,7 @@ per transport.</p>
 <p><strong>Never logged:</strong> PINs, PUKs, passwords, private keys, session keys.<br />
 Serial numbers and credential IDs are public identifiers and may appear at <code>Debug</code>.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -733,7 +854,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="17" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="19" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -745,7 +866,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="logging-we-already-agree-across-the-sdks">Logging: we already agree across the SDKs</h2>
 <table>
 <thead>
@@ -811,7 +932,7 @@ house style everywhere, and it is what keeps the SDK usable without a DI contain
 deliberately moved off it to slf4j, calling the old approach &quot;not scalable&quot;.</p>
 </blockquote>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -823,7 +944,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="18" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="20" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -835,7 +956,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="going-below-the-applet-api-three-tiers">Going below the applet API: three tiers</h2>
 <table>
 <thead>
@@ -878,7 +999,7 @@ one-connection-per-key and one-session-per-connection.</p>
 there is a place to do that, and it is Tier 1, not Tier 2.</p>
 </blockquote>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="21" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -890,7 +1011,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="19" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="21" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -902,7 +1023,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="one-session-shape--for-eight-of-the-nine">One session shape — for eight of the nine</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> s = <span class="hljs-keyword">await</span> key.CreateXSessionAsync(options, cancellationToken);
 </code></pre>
@@ -920,7 +1041,7 @@ factory test. The test file says so in as many words:<br />
 <em>&quot;WebAuthn is not an applet session and has its own factory test.&quot;</em></p>
 </blockquote>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="22" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -932,7 +1053,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="20" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="22" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -944,7 +1065,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="ownership-who-disposes-the-connection">Ownership: who disposes the connection</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-comment">// Convenience — the session owns a hidden connection and disposes it</span>
 <span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> piv = <span class="hljs-keyword">await</span> key.CreatePivSessionAsync();
@@ -988,92 +1109,6 @@ N+1 over the same connection. Prefer <code>DisposeAsync</code>; sync <code>Dispo
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="21" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
-h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
-section.lead { text-align: center; }
-section.lead h1 { font-size: 52px; }
-code { font-size: 0.86em; }
-pre { font-size: 0.80em; line-height: 1.35; }
-table { font-size: 0.84em; }
-blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
-.cols pre { font-size: 0.74em; }
-img { display: block; margin: 0 auto; }
-section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="21" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
-h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
-section.lead { text-align: center; }
-section.lead h1 { font-size: 52px; }
-code { font-size: 0.86em; }
-pre { font-size: 0.80em; line-height: 1.35; }
-table { font-size: 0.84em; }
-blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
-.cols pre { font-size: 0.74em; }
-img { display: block; margin: 0 auto; }
-section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="management">Management</h2>
-<p>Read device info, toggle capabilities, write device config.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">var</span> info = <span class="hljs-keyword">await</span> key.GetDeviceInfoAsync();   <span class="hljs-comment">// no session needed</span>
-</code></pre>
-<div class="cols">
-<p><strong>ykman (Python)</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">mgmt = ManagementSession(conn)
-info = mgmt.read_device_info()
-</code></pre>
-<p><strong>yubikit-swift</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-swift"><span class="hljs-keyword">let</span> s <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> <span class="hljs-type">Management</span>.<span class="hljs-type">Session</span>.makeSession(connection: connection)
-<span class="hljs-keyword">let</span> info <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> s.getDeviceInfo()
-</code></pre>
-</div>
-<p><strong>Delta:</strong> .NET gives Management a device-level shortcut — no session boilerplate for the<br />
-most common read. It is also the widest applet: three transports, <code>SmartCard → HidFido → HidOtp</code>. Swift covers two, with <code>SmartCardConnection</code> and <code>FIDOConnection</code> overloads.</p>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="22" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
-h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
-section.lead { text-align: center; }
-section.lead h1 { font-size: 52px; }
-code { font-size: 0.86em; }
-pre { font-size: 0.80em; line-height: 1.35; }
-table { font-size: 0.84em; }
-blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
-.cols pre { font-size: 0.74em; }
-img { display: block; margin: 0 auto; }
-section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="22" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
-h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
-section.lead { text-align: center; }
-section.lead h1 { font-size: 52px; }
-code { font-size: 0.86em; }
-pre { font-size: 0.80em; line-height: 1.35; }
-table { font-size: 0.84em; }
-blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
-.cols pre { font-size: 0.74em; }
-img { display: block; margin: 0 auto; }
-section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="piv">PIV</h2>
-<p>Certificates, key pairs, PIN/PUK, attestation.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> piv = <span class="hljs-keyword">await</span> key.CreatePivSessionAsync();
-<span class="hljs-keyword">var</span> cert = <span class="hljs-keyword">await</span> piv.GetCertificateAsync(PivSlot.Authentication);
-</code></pre>
-<div class="cols">
-<p><strong>ykman (Python)</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">piv = PivSession(conn)
-cert = piv.get_certificate(SLOT.AUTHENTICATION)
-</code></pre>
-<p><strong>yubikit-android</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-java"><span class="hljs-type">PivSession</span> <span class="hljs-variable">piv</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">PivSession</span>(smartCardConnection);
-<span class="hljs-type">X509Certificate</span> <span class="hljs-variable">cert</span> <span class="hljs-operator">=</span> piv.getCertificate(Slot.AUTHENTICATION);
-</code></pre>
-</div>
-<p><strong>Delta:</strong> all three return a real certificate type — <code>X509Certificate2</code>,<br />
-<code>x509.Certificate</code>, <code>java.security.cert.X509Certificate</code>. The .NET difference is<br />
-<strong>nullability</strong>: an empty slot returns <code>null</code> rather than throwing.</p>
-</section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="23" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
@@ -1098,25 +1133,23 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="oath">OATH</h2>
-<p>TOTP and HOTP credentials, calculate codes, applet password.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> oath = <span class="hljs-keyword">await</span> key.CreateOathSessionAsync();
-<span class="hljs-keyword">var</span> codes = <span class="hljs-keyword">await</span> oath.CalculateAllAsync();
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="management">Management</h2>
+<p>Read device info, toggle capabilities, write device config.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">var</span> info = <span class="hljs-keyword">await</span> key.GetDeviceInfoAsync();   <span class="hljs-comment">// no session needed</span>
 </code></pre>
 <div class="cols">
 <p><strong>ykman (Python)</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">oath = OathSession(conn)
-creds = oath.list_credentials()
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">mgmt = ManagementSession(conn)
+info = mgmt.read_device_info()
 </code></pre>
-<p><strong>yubikit-android</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-java"><span class="hljs-type">OathSession</span> <span class="hljs-variable">oath</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">OathSession</span>(conn);
-Map&lt;Credential, <span class="hljs-meta">@Nullable</span> Code&gt; codes = oath.calculateCodes();
+<p><strong>yubikit-swift</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-swift"><span class="hljs-keyword">let</span> s <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> <span class="hljs-type">Management</span>.<span class="hljs-type">Session</span>.makeSession(connection: connection)
+<span class="hljs-keyword">let</span> info <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> s.getDeviceInfo()
 </code></pre>
 </div>
-<p><strong>Delta:</strong> naming, the closest convergence in the deck — .NET's<br />
-<code>IReadOnlyDictionary&lt;Credential, Code?&gt;</code> and Android's <code>Map&lt;Credential, @Nullable Code&gt;</code><br />
-express the same touch-required semantics.</p>
+<p><strong>Delta:</strong> .NET gives Management a device-level shortcut — no session boilerplate for the<br />
+most common read. It is also the widest applet: three transports, <code>SmartCard → HidFido → HidOtp</code>. Swift covers two, with <code>SmartCardConnection</code> and <code>FIDOConnection</code> overloads.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="24" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -1142,24 +1175,25 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="openpgp">OpenPGP</h2>
-<p>Card data, key slots, sign / decrypt / authenticate, PIN management.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> pgp = <span class="hljs-keyword">await</span> key.CreateOpenPgpSessionAsync();
-<span class="hljs-keyword">var</span> data = <span class="hljs-keyword">await</span> pgp.GetApplicationRelatedDataAsync();
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="piv">PIV</h2>
+<p>Certificates, key pairs, PIN/PUK, attestation.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> piv = <span class="hljs-keyword">await</span> key.CreatePivSessionAsync();
+<span class="hljs-keyword">var</span> cert = <span class="hljs-keyword">await</span> piv.GetCertificateAsync(PivSlot.Authentication);
 </code></pre>
 <div class="cols">
 <p><strong>ykman (Python)</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">pgp = OpenPgpSession(conn)
-data = pgp.get_application_related_data()
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">piv = PivSession(conn)
+cert = piv.get_certificate(SLOT.AUTHENTICATION)
 </code></pre>
 <p><strong>yubikit-android</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-java"><span class="hljs-type">OpenPgpSession</span> <span class="hljs-variable">pgp</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">OpenPgpSession</span>(conn);
-<span class="hljs-type">ApplicationRelatedData</span> <span class="hljs-variable">d</span> <span class="hljs-operator">=</span> pgp.getApplicationRelatedData();
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-java"><span class="hljs-type">PivSession</span> <span class="hljs-variable">piv</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">PivSession</span>(smartCardConnection);
+<span class="hljs-type">X509Certificate</span> <span class="hljs-variable">cert</span> <span class="hljs-operator">=</span> piv.getCertificate(Slot.AUTHENTICATION);
 </code></pre>
 </div>
-<p><strong>Delta:</strong> <code>yubikit-swift</code> has <strong>no OpenPGP session at all</strong> — only a <code>Capability.openPGP</code><br />
-bit. If you work in Swift, this applet is entirely new to you.</p>
+<p><strong>Delta:</strong> all three return a real certificate type — <code>X509Certificate2</code>,<br />
+<code>x509.Certificate</code>, <code>java.security.cert.X509Certificate</code>. The .NET difference is<br />
+<strong>nullability</strong>: an empty slot returns <code>null</code> rather than throwing.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="25" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -1185,25 +1219,25 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="fido2--the-ctap2-layer">FIDO2 — the CTAP2 layer</h2>
-<p>Raw CTAP2: <code>GetInfo</code>, <code>MakeCredential</code>, <code>GetAssertion</code>, credential management, bio.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> fido = <span class="hljs-keyword">await</span> key.CreateFidoSessionAsync();
-<span class="hljs-keyword">var</span> info = <span class="hljs-keyword">await</span> fido.GetInfoAsync();
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="oath">OATH</h2>
+<p>TOTP and HOTP credentials, calculate codes, applet password.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> oath = <span class="hljs-keyword">await</span> key.CreateOathSessionAsync();
+<span class="hljs-keyword">var</span> codes = <span class="hljs-keyword">await</span> oath.CalculateAllAsync();
 </code></pre>
 <div class="cols">
-<p><strong>python-fido2</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">ctap2 = Ctap2(dev)
-info = ctap2.info      <span class="hljs-comment"># cached at construction</span>
+<p><strong>ykman (Python)</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">oath = OathSession(conn)
+creds = oath.list_credentials()
 </code></pre>
-<p><strong>yubikit-swift</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-swift"><span class="hljs-keyword">let</span> s <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> <span class="hljs-type">CTAP2</span>.<span class="hljs-type">Session</span>.makeSession(connection: connection)
-<span class="hljs-keyword">let</span> info <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> s.getInfo()
+<p><strong>yubikit-android</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-java"><span class="hljs-type">OathSession</span> <span class="hljs-variable">oath</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">OathSession</span>(conn);
+Map&lt;Credential, <span class="hljs-meta">@Nullable</span> Code&gt; codes = oath.calculateCodes();
 </code></pre>
 </div>
-<p><strong>Delta:</strong> <code>python-fido2</code> runs <code>GET_INFO</code> <strong>inside the constructor</strong> and caches it; .NET<br />
-keeps construction cheap and the round-trip explicit and cancellable. Note FIDO2 is<br />
-dual-transport: <code>HidFido</code> first, then SmartCard — NFC, or USB-CCID on <strong>firmware 5.8.0+</strong>.</p>
+<p><strong>Delta:</strong> naming, the closest convergence in the deck — .NET's<br />
+<code>IReadOnlyDictionary&lt;Credential, Code?&gt;</code> and Android's <code>Map&lt;Credential, @Nullable Code&gt;</code><br />
+express the same touch-required semantics.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="26" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -1229,27 +1263,24 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="webauthn--the-layer-above-ctap2">WebAuthn — the layer above CTAP2</h2>
-<p>Origin checks, client data, attestation, extensions, PIN/UV orchestration.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp">_ = WebAuthnOrigin.TryParse(<span class="hljs-string">&quot;https://example.com&quot;</span>, <span class="hljs-keyword">out</span> <span class="hljs-keyword">var</span> origin);
-<span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> client = <span class="hljs-keyword">await</span> key.CreateWebAuthnClientAsync(
-    origin!, isPublicSuffix: d =&gt; d <span class="hljs-keyword">is</span> <span class="hljs-string">&quot;com&quot;</span> <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;org&quot;</span> <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;net&quot;</span>);
-<span class="hljs-keyword">var</span> reg = <span class="hljs-keyword">await</span> client.MakeCredentialAsync(options, pinBytes);
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="openpgp">OpenPGP</h2>
+<p>Card data, key slots, sign / decrypt / authenticate, PIN management.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> pgp = <span class="hljs-keyword">await</span> key.CreateOpenPgpSessionAsync();
+<span class="hljs-keyword">var</span> data = <span class="hljs-keyword">await</span> pgp.GetApplicationRelatedDataAsync();
 </code></pre>
 <div class="cols">
-<p><strong>python-fido2</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">result = client.make_credential(create_options[<span class="hljs-string">&quot;publicKey&quot;</span>])
+<p><strong>ykman (Python)</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">pgp = OpenPgpSession(conn)
+data = pgp.get_application_related_data()
 </code></pre>
-<p><strong>yubikit-swift</strong> <em>(release/1.4.0)</em></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-swift"><span class="hljs-keyword">let</span> client <span class="hljs-operator">=</span> <span class="hljs-type">WebAuthn</span>.<span class="hljs-type">Client</span>(session: session, origin: <span class="hljs-keyword">try</span> .<span class="hljs-keyword">init</span>(<span class="hljs-string">&quot;https://example.com&quot;</span>),
-                             isPublicSuffix: { publicSuffixList.contains(<span class="hljs-variable">$0</span>) })
-<span class="hljs-keyword">let</span> r <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> client.makeCredential(options, authorization: .pin(<span class="hljs-string">&quot;1234&quot;</span>)).value
+<p><strong>yubikit-android</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-java"><span class="hljs-type">OpenPgpSession</span> <span class="hljs-variable">pgp</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">OpenPgpSession</span>(conn);
+<span class="hljs-type">ApplicationRelatedData</span> <span class="hljs-variable">d</span> <span class="hljs-operator">=</span> pgp.getApplicationRelatedData();
 </code></pre>
 </div>
-<p><strong>Delta:</strong> both .NET and Swift demand an <strong>origin and a public-suffix checker up front</strong> —<br />
-you cannot accidentally skip origin validation. <code>python-fido2</code> also ships the<br />
-relying-party half (<code>Fido2Server</code>); v2 is client-side only.</p>
+<p><strong>Delta:</strong> <code>yubikit-swift</code> has <strong>no OpenPGP session at all</strong> — only a <code>Capability.openPGP</code><br />
+bit. If you work in Swift, this applet is entirely new to you.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="27" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -1275,26 +1306,25 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="securitydomain-scp">SecurityDomain (SCP)</h2>
-<p>GlobalPlatform key management — SCP03 and SCP11, certificates, CA identifiers.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> sd = <span class="hljs-keyword">await</span> key.CreateSecurityDomainSessionAsync();
-<span class="hljs-keyword">var</span> keyInfo = <span class="hljs-keyword">await</span> sd.GetKeyInfoAsync();
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="fido2--the-ctap2-layer">FIDO2 — the CTAP2 layer</h2>
+<p>Raw CTAP2: <code>GetInfo</code>, <code>MakeCredential</code>, <code>GetAssertion</code>, credential management, bio.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> fido = <span class="hljs-keyword">await</span> key.CreateFidoSessionAsync();
+<span class="hljs-keyword">var</span> info = <span class="hljs-keyword">await</span> fido.GetInfoAsync();
 </code></pre>
 <div class="cols">
-<p><strong>ykman (Python)</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">sd = SecurityDomainSession(conn)
-keys = sd.get_key_information()
+<p><strong>python-fido2</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">ctap2 = Ctap2(dev)
+info = ctap2.info      <span class="hljs-comment"># cached at construction</span>
 </code></pre>
 <p><strong>yubikit-swift</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-swift"><span class="hljs-keyword">let</span> s <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> <span class="hljs-type">SecurityDomainSession</span>.makeSession(connection: connection)
-<span class="hljs-keyword">let</span> keyInfo <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> s.getKeyInformation()
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-swift"><span class="hljs-keyword">let</span> s <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> <span class="hljs-type">CTAP2</span>.<span class="hljs-type">Session</span>.makeSession(connection: connection)
+<span class="hljs-keyword">let</span> info <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> s.getInfo()
 </code></pre>
 </div>
-<p><strong>Delta:</strong> same operation, three spellings — .NET abbreviates to <code>GetKeyInfoAsync</code><br />
-where Python and Swift both write <em>Information</em>. Bigger point: in .NET, SCP is <em>also</em><br />
-a creation option on every other applet — pass <code>ScpKeyParameters</code> in<br />
-<code>SessionCreationOptions</code> and any session runs over a secure channel.</p>
+<p><strong>Delta:</strong> <code>python-fido2</code> runs <code>GET_INFO</code> <strong>inside the constructor</strong> and caches it; .NET<br />
+keeps construction cheap and the round-trip explicit and cancellable. Note FIDO2 is<br />
+dual-transport: <code>HidFido</code> first, then SmartCard — NFC, or USB-CCID on <strong>firmware 5.8.0+</strong>.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="28" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -1320,24 +1350,27 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="yubihsm-auth">YubiHSM Auth</h2>
-<p>Store and use credentials that authenticate to a YubiHSM 2.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> hsm = <span class="hljs-keyword">await</span> key.CreateHsmAuthSessionAsync();
-<span class="hljs-keyword">var</span> creds = <span class="hljs-keyword">await</span> hsm.ListCredentialsAsync();
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="webauthn--the-layer-above-ctap2">WebAuthn — the layer above CTAP2</h2>
+<p>Origin checks, client data, attestation, extensions, PIN/UV orchestration.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp">_ = WebAuthnOrigin.TryParse(<span class="hljs-string">&quot;https://example.com&quot;</span>, <span class="hljs-keyword">out</span> <span class="hljs-keyword">var</span> origin);
+<span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> client = <span class="hljs-keyword">await</span> key.CreateWebAuthnClientAsync(
+    origin!, isPublicSuffix: d =&gt; d <span class="hljs-keyword">is</span> <span class="hljs-string">&quot;com&quot;</span> <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;org&quot;</span> <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;net&quot;</span>);
+<span class="hljs-keyword">var</span> reg = <span class="hljs-keyword">await</span> client.MakeCredentialAsync(options, pinBytes);
 </code></pre>
 <div class="cols">
-<p><strong>ykman (Python)</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">hsm = HsmAuthSession(conn)
-creds = hsm.list_credentials()
+<p><strong>python-fido2</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">result = client.make_credential(create_options[<span class="hljs-string">&quot;publicKey&quot;</span>])
 </code></pre>
-<p><strong>ykman (rust)</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-rust"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">s</span> = HsmAuthSession::<span class="hljs-title function_ invoke__">new</span>(conn).<span class="hljs-title function_ invoke__">map_err</span>(|(e, _)| e)?;
-<span class="hljs-keyword">let</span> <span class="hljs-variable">creds</span> = s.<span class="hljs-title function_ invoke__">list_credentials</span>()?;
+<p><strong>yubikit-swift</strong> <em>(release/1.4.0)</em></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-swift"><span class="hljs-keyword">let</span> client <span class="hljs-operator">=</span> <span class="hljs-type">WebAuthn</span>.<span class="hljs-type">Client</span>(session: session, origin: <span class="hljs-keyword">try</span> .<span class="hljs-keyword">init</span>(<span class="hljs-string">&quot;https://example.com&quot;</span>),
+                             isPublicSuffix: { publicSuffixList.contains(<span class="hljs-variable">$0</span>) })
+<span class="hljs-keyword">let</span> r <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> client.makeCredential(options, authorization: .pin(<span class="hljs-string">&quot;1234&quot;</span>)).value
 </code></pre>
 </div>
-<p><strong>Delta:</strong> only .NET, Python and rust implement this. <code>yubikit-android</code> has <strong>no</strong><br />
-YubiHSM Auth module; <code>yubikit-swift</code> has only the <code>Capability.hsmAuth</code> bit.</p>
+<p><strong>Delta:</strong> both .NET and Swift demand an <strong>origin and a public-suffix checker up front</strong> —<br />
+you cannot accidentally skip origin validation. <code>python-fido2</code> also ships the<br />
+relying-party half (<code>Fido2Server</code>); v2 is client-side only.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="29" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -1363,26 +1396,26 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
-<h2 id="yubiotp">YubiOTP</h2>
-<p>The two programmable slots — Yubico OTP, static password, HMAC-SHA1 challenge-response.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> otp = <span class="hljs-keyword">await</span> key.CreateYubiOtpSessionAsync();
-<span class="hljs-keyword">var</span> response = <span class="hljs-keyword">await</span> otp.CalculateHmacSha1Async(Slot.Two, challenge);
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="securitydomain-scp">SecurityDomain (SCP)</h2>
+<p>GlobalPlatform key management — SCP03 and SCP11, certificates, CA identifiers.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> sd = <span class="hljs-keyword">await</span> key.CreateSecurityDomainSessionAsync();
+<span class="hljs-keyword">var</span> keyInfo = <span class="hljs-keyword">await</span> sd.GetKeyInfoAsync();
 </code></pre>
 <div class="cols">
 <p><strong>ykman (Python)</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">otp = YubiOtpSession(conn)
-r = otp.calculate_hmac_sha1(SLOT.TWO, challenge)
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">sd = SecurityDomainSession(conn)
+keys = sd.get_key_information()
 </code></pre>
-<p><strong>yubikit-android</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-java"><span class="hljs-type">YubiOtpSession</span> <span class="hljs-variable">otp</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">YubiOtpSession</span>(otpConnection);
-<span class="hljs-type">byte</span>[] <span class="hljs-variable">r</span> <span class="hljs-operator">=</span> otp.calculateHmacSha1(Slot.TWO, challenge, <span class="hljs-literal">null</span>);
+<p><strong>yubikit-swift</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-swift"><span class="hljs-keyword">let</span> s <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> <span class="hljs-type">SecurityDomainSession</span>.makeSession(connection: connection)
+<span class="hljs-keyword">let</span> keyInfo <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-keyword">await</span> s.getKeyInformation()
 </code></pre>
 </div>
-<p><strong>Delta:</strong> the one applet where all four SDKs agree almost exactly — same operation,<br />
-same slot enum, same argument order. The .NET difference is that its session is<br />
-<strong>dual-transport and prefers SmartCard</strong> (<code>SmartCard → HidOtp</code>), so on a CCID-enabled<br />
-key this runs over APDU, not HID. <code>yubikit-swift</code> has no YubiOTP session at all.</p>
+<p><strong>Delta:</strong> same operation, three spellings — .NET abbreviates to <code>GetKeyInfoAsync</code><br />
+where Python and Swift both write <em>Information</em>. Bigger point: in .NET, SCP is <em>also</em><br />
+a creation option on every other applet — pass <code>ScpKeyParameters</code> in<br />
+<code>SessionCreationOptions</code> and any session runs over a secure channel.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="30" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -1408,7 +1441,95 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="yubihsm-auth">YubiHSM Auth</h2>
+<p>Store and use credentials that authenticate to a YubiHSM 2.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> hsm = <span class="hljs-keyword">await</span> key.CreateHsmAuthSessionAsync();
+<span class="hljs-keyword">var</span> creds = <span class="hljs-keyword">await</span> hsm.ListCredentialsAsync();
+</code></pre>
+<div class="cols">
+<p><strong>ykman (Python)</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">hsm = HsmAuthSession(conn)
+creds = hsm.list_credentials()
+</code></pre>
+<p><strong>ykman (rust)</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-rust"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">s</span> = HsmAuthSession::<span class="hljs-title function_ invoke__">new</span>(conn).<span class="hljs-title function_ invoke__">map_err</span>(|(e, _)| e)?;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">creds</span> = s.<span class="hljs-title function_ invoke__">list_credentials</span>()?;
+</code></pre>
+</div>
+<p><strong>Delta:</strong> only .NET, Python and rust implement this. <code>yubikit-android</code> has <strong>no</strong><br />
+YubiHSM Auth module; <code>yubikit-swift</code> has only the <code>Capability.hsmAuth</code> bit.</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="31" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+" lang="en-US" data-marpit-pagination="31" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="yubiotp">YubiOTP</h2>
+<p>The two programmable slots — Yubico OTP, static password, HMAC-SHA1 challenge-response.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> otp = <span class="hljs-keyword">await</span> key.CreateYubiOtpSessionAsync();
+<span class="hljs-keyword">var</span> response = <span class="hljs-keyword">await</span> otp.CalculateHmacSha1Async(Slot.Two, challenge);
+</code></pre>
+<div class="cols">
+<p><strong>ykman (Python)</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python">otp = YubiOtpSession(conn)
+r = otp.calculate_hmac_sha1(SLOT.TWO, challenge)
+</code></pre>
+<p><strong>yubikit-android</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-java"><span class="hljs-type">YubiOtpSession</span> <span class="hljs-variable">otp</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">YubiOtpSession</span>(otpConnection);
+<span class="hljs-type">byte</span>[] <span class="hljs-variable">r</span> <span class="hljs-operator">=</span> otp.calculateHmacSha1(Slot.TWO, challenge, <span class="hljs-literal">null</span>);
+</code></pre>
+</div>
+<p><strong>Delta:</strong> the one applet where all four SDKs agree almost exactly — same operation,<br />
+same slot enum, same argument order. The .NET difference is that its session is<br />
+<strong>dual-transport and prefers SmartCard</strong> (<code>SmartCard → HidOtp</code>), so on a CCID-enabled<br />
+key this runs over APDU, not HID. <code>yubikit-swift</code> has no YubiOTP session at all.</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="32" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+" lang="en-US" data-marpit-pagination="32" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="applet-coverage-across-the-sdks">Applet coverage across the SDKs</h2>
 <table>
 <thead>
@@ -1501,7 +1622,7 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 <code>Fido2Server</code>, the relying-party half no other SDK here ships.</p>
 <p><strong>.NET v2 and the rust experiment are the only two with all nine in one repo.</strong></p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="31" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="33" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -1513,7 +1634,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="31" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="33" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -1525,7 +1646,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="footprint-monolith-vs-modular">Footprint: monolith vs modular</h2>
 <p><strong>v1</strong> ships two assemblies. You take all of it, always.</p>
 <table>
@@ -1537,11 +1658,11 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 </thead>
 <tbody>
 <tr>
-<td><code>Yubico.YubiKey</code></td>
+<td><code>Yubico.YubiKey</code> — every applet</td>
 <td style="text-align:right">676</td>
 </tr>
 <tr>
-<td><code>Yubico.Core</code></td>
+<td><code>Yubico.Core</code> — transports, protocols</td>
 <td style="text-align:right">215</td>
 </tr>
 <tr>
@@ -1563,8 +1684,8 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 </thead>
 <tbody>
 <tr>
-<td>Core</td>
-<td style="text-align:right">577</td>
+<td><strong>Core</strong></td>
+<td style="text-align:right"><strong>577</strong></td>
 <td></td>
 <td>WebAuthn</td>
 <td style="text-align:right">130</td>
@@ -1611,7 +1732,7 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 <tr>
 <td><strong>v2, PIV app</strong> (Core + Piv)</td>
 <td style="text-align:right"><strong>742</strong></td>
-<td><strong>−148, 17 % smaller</strong></td>
+<td>−148, <strong>17 % smaller</strong></td>
 </tr>
 <tr>
 <td>v2, all ten</td>
@@ -1620,11 +1741,8 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 </tr>
 </tbody>
 </table>
-<p>A PIV-only app ships <strong>less</strong> than v1 while getting async and AOT. Taking everything<br />
-costs more — but v2 also ships a WebAuthn client layer that v1 has no equivalent of.</p>
-<p><em>Not apples-to-apples: v1 targets <code>netstandard2.1</code>, v2 targets <code>net10.0</code>.</em></p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="32" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="34" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -1636,7 +1754,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="32" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="34" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -1648,7 +1766,84 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
+<h2 id="why-is-the-saving-only-17">Why is the saving only 17 %?</h2>
+<p>Fair question. Modularity should win bigger. Two things cap it.</p>
+<p><strong>1. <code>Core</code> is the floor, and it grew 2.7×.</strong> v1's shared layer was 215 KiB; v2's is<br />
+577 KiB. A PIV app pays that before it pays for PIV. The nine applets are cheap<br />
+(37–197 KiB each) — skipping eight of them is where the 148 KiB actually comes from.</p>
+<p><strong>2. v2 emits far more IL per line of source.</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align:right">v1</th>
+<th style="text-align:right">v2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source</td>
+<td style="text-align:right">113,439 LOC</td>
+<td style="text-align:right">77,512 LOC</td>
+</tr>
+<tr>
+<td>Assemblies</td>
+<td style="text-align:right">890 KiB</td>
+<td style="text-align:right">1,441 KiB</td>
+</tr>
+<tr>
+<td><strong>Bytes per line</strong></td>
+<td style="text-align:right"><strong>8.0</strong></td>
+<td style="text-align:right"><strong>19.0</strong> — 2.4×</td>
+</tr>
+<tr>
+<td><code>async</code> methods</td>
+<td style="text-align:right"><strong>1</strong></td>
+<td style="text-align:right"><strong>488</strong></td>
+</tr>
+<tr>
+<td><code>record</code> types</td>
+<td style="text-align:right">—</td>
+<td style="text-align:right">94</td>
+</tr>
+</tbody>
+</table>
+<p>v2 has <strong>35 % less source</strong> and <strong>62 % more binary</strong>. Every <code>async</code> method compiles to<br />
+a generated state-machine type — fields for each local that survives an <code>await</code>, a<br />
+<code>MoveNext</code> switch, builder plumbing. Every <code>record</code> generates <code>Equals</code>, <code>GetHashCode</code>,<br />
+<code>ToString</code>, <code>PrintMembers</code>, <code>Clone</code>, <code>Deconstruct</code> and two operators.</p>
+<p><strong>So the size story is a trade, not a win.</strong> async-everywhere and value-semantics cost<br />
+roughly 2.4× the IL per line. Modularity buys most of that back — but only for<br />
+consumers who skip applets. Take all ten and you pay for the trade in full.</p>
+<p><em>Not apples-to-apples: v1 targets <code>netstandard2.1</code>, v2 targets <code>net10.0</code>. v1 has no<br />
+WebAuthn client layer at all.</em></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="35" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+" lang="en-US" data-marpit-pagination="35" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
+section.lead { text-align: center; }
+section.lead h1 { font-size: 52px; }
+code { font-size: 0.86em; }
+pre { font-size: 0.80em; line-height: 1.35; }
+table { font-size: 0.84em; }
+blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+.cols pre { font-size: 0.74em; }
+img { display: block; margin: 0 auto; }
+section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="footprint-native-aot">Footprint: Native AOT</h2>
 <p>Verification host linking all ten libraries — a whole-SDK upper bound.</p>
 <table>
@@ -1692,8 +1887,9 @@ executable — no JIT, no runtime install, no warm-up. The process starts alread
 compiled, so it allocates a fraction of the managed heap a JIT'd process needs. For a<br />
 CLI, an installer, a service, or anything short-lived, that is the difference between<br />
 feeling instant and feeling like a .NET app.</p>
+<p>Note this cuts against the IL-size trade above: the IL grows, but AOT never ships it.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="33" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="36" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -1705,7 +1901,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" data-marpit-pagination="33" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" data-marpit-pagination="36" style="--paginate:true;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -1717,7 +1913,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="footprint-how-these-were-collected">Footprint: how these were collected</h2>
 <p><strong>Machine.</strong> Apple M1, 8 cores, 16 GB, macOS 15.7.7, .NET SDK 10.0.100, RID <code>osx-arm64</code>.<br />
 v2 @ <code>d04d59aa</code>. v1 @ <code>fd16960a</code>, <code>netstandard2.1</code>. <strong>6 YubiKeys physically attached.</strong></p>
@@ -1735,11 +1931,15 @@ v2 @ <code>d04d59aa</code>. v1 @ <code>fd16960a</code>, <code>netstandard2.1</co
 </tr>
 <tr>
 <td>v1 assembly sizes</td>
-<td><strong>Measured</strong> — <code>dotnet build -c Release -f netstandard2.1</code></td>
+<td><strong>Measured</strong> — <code>dotnet build -c Release -f netstandard2.1</code> at <code>fd16960a</code></td>
+</tr>
+<tr>
+<td>LOC, async and record counts</td>
+<td><strong>Measured</strong> — <code>find</code>+<code>wc</code> and <code>rg</code> over <code>src</code>, excluding <code>obj/</code> and <code>bin/</code></td>
 </tr>
 <tr>
 <td>AOT exe, RSS, CPU, wall</td>
-<td><strong>Measured</strong> — <code>dotnet publish -r osx-arm64 -p:PublishAot=true</code> of <code>verification/NativeAotVerification</code>; <code>/usr/bin/time -l</code>; wall = median of 10 after 3 warm-ups; RSS and CPU from one representative run</td>
+<td><strong>Measured</strong> — <code>dotnet publish -r osx-arm64 -p:PublishAot=true</code> of <code>verification/NativeAotVerification</code>; <code>/usr/bin/time -l</code>; wall = median of 10 after 3 warm-ups</td>
 </tr>
 <tr>
 <td>Framework-dependent baseline</td>
@@ -1751,19 +1951,19 @@ v2 @ <code>d04d59aa</code>. v1 @ <code>fd16960a</code>, <code>netstandard2.1</co
 </tr>
 <tr>
 <td>Recurring AOT CI</td>
-<td><strong>CI</strong> — <code>native-aot.yml</code> run <code>34121554932</code> on <code>yubikit</code>, macOS arm64, <strong>hardware-free</strong> (asserts <code>Found 0 YubiKey(s)</code>)</td>
+<td><strong>CI</strong> — <code>native-aot.yml</code> run <code>34121554932</code> on <code>yubikit</code>, macOS arm64, <strong>hardware-free</strong></td>
 </tr>
 </tbody>
 </table>
-<p><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/26a0.svg" data-marp-twemoji=""/> <strong>Two caveats.</strong> Wall time is dominated by I/O enumerating six attached keys, not by<br />
-startup: subtracting CPU leaves <strong>508 ms</strong> (AOT) and <strong>458 ms</strong> (framework-dependent) of<br />
-non-CPU time. Second, <code>/usr/bin/time -l</code> quantises CPU to 10 ms, so &quot;20 ms vs 170 ms&quot; is<br />
-two ticks against seventeen — <strong>the ratio is order-of-magnitude, not 8.5× to two<br />
-significant figures.</strong></p>
-<p>BenchmarkDotNet throughput and allocation were <strong>not collected</strong> — the project does not<br />
-compile at this SHA (<code>DEFERRED.md</code> #1). Single machine, single run set: <strong>ballpark</strong>.</p>
+<p><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/26a0.svg" data-marp-twemoji=""/> <strong>Caveats.</strong> Wall time is dominated by I/O enumerating six attached keys, not<br />
+startup: subtracting CPU leaves 508 ms (AOT) and 458 ms (framework-dependent).<br />
+<code>/usr/bin/time -l</code> quantises CPU to 10 ms, so 20 vs 170 ms is two ticks against<br />
+seventeen — <strong>order-of-magnitude, not 8.5× to two significant figures.</strong> Bytes-per-line<br />
+is a proxy, not a causal measurement: it does not isolate async from records, nullable<br />
+metadata or generics. BenchmarkDotNet numbers were <strong>not</strong> collected (<code>DEFERRED.md</code> #1).<br />
+Single machine, single run set: <strong>ballpark</strong>.</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="34" data-paginate="true" data-class="lead" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="37" data-paginate="true" data-class="lead" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -1775,7 +1975,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-" lang="en-US" class="lead" data-marpit-pagination="34" style="--paginate:true;--class:lead;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
+" lang="en-US" class="lead" data-marpit-pagination="37" style="--paginate:true;--class:lead;--theme:default;--style:section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
 section.lead { text-align: center; }
 section.lead h1 { font-size: 52px; }
@@ -1787,7 +1987,7 @@ blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
 .cols pre { font-size: 0.74em; }
 img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
-;" data-marpit-pagination-total="34" data-size="16:9">
+;" data-marpit-pagination-total="37" data-size="16:9">
 <h2 id="takeaways">Takeaways</h2>
 <p><strong>One shape, eight applet sessions</strong> — test-enforced, not conventional.<br />
 WebAuthn is the deliberate exception: it returns a client, not a session.</p>
@@ -1818,68 +2018,69 @@ changes are still cheap. Now is the time to complain.</p>
      YubiOtp src/YubiOtp/src/IYubiKeyExtensions.cs:144-145;
      SCP-forces-SmartCard Management:109, Fido2:132, YubiOtp:110;
      single-transport Piv:46 Oath:47 OpenPgp:45 SecurityDomain:53 YubiHsm:49;
-     ConnectionType src/Core/src/Devices/ConnectionType.cs:19-25</p></div><div class="bespoke-marp-note" data-index="9" tabindex="0"><p>Anchors: PublicAPI.Unshipped.txt:984-985;
+     ConnectionType src/Core/src/Devices/ConnectionType.cs:19-25</p></div><div class="bespoke-marp-note" data-index="11" tabindex="0"><p>Anchors: FindAllAsync src/Core/src/PublicAPI.Unshipped.txt:984-985;
      caching + &quot;monitoring keeps cache fresh&quot; src/Core/src/Devices/YubiKeyManager.cs:286-300;
-     race-condition guidance docs/usage/device-discovery.md:202-209;
-     publish-first docs/architecture/device-identity.md:93-96</p></div><div class="bespoke-marp-note" data-index="10" tabindex="0"><p>Anchors: src/Core/src/Devices/CompositeDeviceMerger.cs:19-30 (doc), :40-48 (descriptor);
+     monitoring surface PublicAPI.Unshipped.txt:986-992;
+     race conditions docs/usage/device-discovery.md:202-209;
+     publish-first docs/architecture/device-identity.md:93-96</p></div><div class="bespoke-marp-note" data-index="12" tabindex="0"><p>Anchors: src/Core/src/Devices/CompositeDeviceMerger.cs:19-30 (doc), :40-48 (descriptor);
      NFC/unknown-kind never merge :24-27, :119-124;
-     PhysicalIdentityKeyFor src/Core/src/Devices/YubiKeyDevice.cs:123</p></div><div class="bespoke-marp-note" data-index="11" tabindex="0"><p>Anchors: NFC never merges src/Core/src/Devices/CompositeDeviceMerger.cs:24-27,
+     PhysicalIdentityKeyFor src/Core/src/Devices/YubiKeyDevice.cs:123</p></div><div class="bespoke-marp-note" data-index="13" tabindex="0"><p>Anchors: NFC never merges src/Core/src/Devices/CompositeDeviceMerger.cs:24-27,
      standalone :119-124; no topology probe for non-USB
      src/Core/src/Devices/FindYubiKeys.cs:191;
-     transport-shaped DeviceId docs/architecture/device-identity.md:179 (D7)</p></div><div class="bespoke-marp-note" data-index="12" tabindex="0"><p>Anchors: device-identity.md D1 :61-65, D2 :67-98 (latch :76-77, null-forever :73-75,
+     transport-shaped DeviceId docs/architecture/device-identity.md:179 (D7)</p></div><div class="bespoke-marp-note" data-index="14" tabindex="0"><p>Anchors: device-identity.md D1 :61-65, D2 :67-98 (latch :76-77, null-forever :73-75,
      late arrival :80-81, republication :82-84), D6 :161, D7 :179-184;
-     &quot;not as the current interface-set string&quot; :188-190</p></div><div class="bespoke-marp-note" data-index="13" tabindex="0"><p>Anchors: src/Core/src/PublicAPI.Unshipped.txt:986-992 (incl. Shutdown :987, ShutdownAsync :988);
+     &quot;not as the current interface-set string&quot; :188-190</p></div><div class="bespoke-marp-note" data-index="15" tabindex="0"><p>Anchors: src/Core/src/PublicAPI.Unshipped.txt:986-992 (incl. Shutdown :987, ShutdownAsync :988);
      ShutdownAsync stops monitoring src/Core/src/Devices/YubiKeyManager.cs:216;
-     src/Core/src/DeviceEvent.cs:19-30; docs/usage/device-discovery.md:126</p></div><div class="bespoke-marp-note" data-index="14" tabindex="0"><p>Anchors: ykman ykman/device.py:108; rust monitor.rs:1113, examples/monitor_yubikeys.rs:87;
+     src/Core/src/DeviceEvent.cs:19-30; docs/usage/device-discovery.md:126</p></div><div class="bespoke-marp-note" data-index="16" tabindex="0"><p>Anchors: ykman ykman/device.py:108; rust monitor.rs:1113, examples/monitor_yubikeys.rs:87;
      android YubiKitManager.java:82-84, UsbYubiKeyDevice.java:154;
      swift@1.4.0 Connection.swift:32, USBSmartCardConnection.swift:53-55;
-     python-fido2 fido2/hid/__init__.py:275-278</p></div><div class="bespoke-marp-note" data-index="15" tabindex="0"><p>Anchors: docs/LOGGING.md:5-14 (quick start), :17-20 (off by default),
+     python-fido2 fido2/hid/__init__.py:275-278</p></div><div class="bespoke-marp-note" data-index="17" tabindex="0"><p>Anchors: docs/LOGGING.md:5-14 (quick start), :17-20 (off by default),
      :22-137 (six methods), :139-151 (categories), :153-161 (levels),
-     :201-212 (security), :219 (never inject ILogger)</p></div><div class="bespoke-marp-note" data-index="16" tabindex="0"><p>Anchors: .NET docs/LOGGING.md:219;
+     :201-212 (security), :219 (never inject ILogger)</p></div><div class="bespoke-marp-note" data-index="18" tabindex="0"><p>Anchors: .NET docs/LOGGING.md:219;
      python yubikit/core/__init__.py:31,44 (getLogger(__name__)), ykman/logging.py:57,67;
      rust crates/yubikit/Cargo.toml:30 (log crate), src/piv.rs:1210 (log::debug!);
      android doc/Logging_Migration.adoc:5-7 (slf4j move, &quot;not scalable&quot;), :10 (TRACE for raw data);
-     swift@1.4.0 YubiKit/YubiKit/Utilities/Logger+Extensions.swift:17-39 (HasLogger, OSLog)</p></div><div class="bespoke-marp-note" data-index="17" tabindex="0"><p>Anchors: docs/architecture/raw-access-tiers.md:6-16 (T0), :19-33 (T1),
+     swift@1.4.0 YubiKit/YubiKit/Utilities/Logger+Extensions.swift:17-39 (HasLogger, OSLog)</p></div><div class="bespoke-marp-note" data-index="19" tabindex="0"><p>Anchors: docs/architecture/raw-access-tiers.md:6-16 (T0), :19-33 (T1),
      :136-145 (T2), :30-33 (safety still applies);
      src/Core/src/Devices/YubiKeyConnectionExtensions.cs:37,90,108;
      Tier 2 signature takes ReadOnlyMemory&lt;byte&gt; src/Core/src/PublicAPI.Unshipped.txt:655
-     (Tier 1 takes ApduCommand, :535)</p></div><div class="bespoke-marp-note" data-index="18" tabindex="0"><p>Anchors: grammar docs/architecture/applet-public-api.md:3-9;
+     (Tier 1 takes ApduCommand, :535)</p></div><div class="bespoke-marp-note" data-index="20" tabindex="0"><p>Anchors: grammar docs/architecture/applet-public-api.md:3-9;
      eight sessions src/PublicApi/tests/.../AppletSessionShapeTests.cs:16-26;
-     exclusion FactoryShapeTests.cs:56, WebAuthn factory shape :94-127</p></div><div class="bespoke-marp-note" data-index="19" tabindex="0"><p>Anchors: real call site src/Management/tests/.../ManagementSessionSimpleTests.cs:40-43;
+     exclusion FactoryShapeTests.cs:56, WebAuthn factory shape :94-127</p></div><div class="bespoke-marp-note" data-index="21" tabindex="0"><p>Anchors: real call site src/Management/tests/.../ManagementSessionSimpleTests.cs:40-43;
      OwnConnection src/Piv/src/IYubiKeyExtensions.cs:59;
      rules docs/architecture/raw-access-tiers.md:149-152,158-159;
      enforcement src/Core/src/Sessions/ConnectionSessionGuard.cs:44-52;
      peers: python yubikit/core/__init__.py:182; rust management.rs:34;
-     android SmartCardProtocol.java:125-127; swift@1.4.0 PIVSession.swift:67</p></div><div class="bespoke-marp-note" data-index="20" tabindex="0"><p>Anchors: .NET shortcut src/Management/src/PublicAPI.Unshipped.txt:33,
+     android SmartCardProtocol.java:125-127; swift@1.4.0 PIVSession.swift:67</p></div><div class="bespoke-marp-note" data-index="22" tabindex="0"><p>Anchors: .NET shortcut src/Management/src/PublicAPI.Unshipped.txt:33,
      transports src/Management/src/IYubiKeyExtensions.cs:143-144;
      python yubikit/support.py:83, yubikit/management.py:598;
-     swift@1.4.0 ManagementSession.swift:142 (SmartCard), :159 (FIDO), :72</p></div><div class="bespoke-marp-note" data-index="21" tabindex="0"><p>Anchors: .NET src/Piv/src/IYubiKeyExtensions.cs:38,
+     swift@1.4.0 ManagementSession.swift:142 (SmartCard), :159 (FIDO), :72</p></div><div class="bespoke-marp-note" data-index="23" tabindex="0"><p>Anchors: .NET src/Piv/src/IYubiKeyExtensions.cs:38,
      PublicAPI.Unshipped.txt:191 (X509Certificate2?);
-     python yubikit/piv.py:1258; android PivSession.java:882</p></div><div class="bespoke-marp-note" data-index="22" tabindex="0"><p>Anchors: .NET src/Oath/src/IYubiKeyExtensions.cs:39,
+     python yubikit/piv.py:1258; android PivSession.java:882</p></div><div class="bespoke-marp-note" data-index="24" tabindex="0"><p>Anchors: .NET src/Oath/src/IYubiKeyExtensions.cs:39,
      PublicAPI.Unshipped.txt:50,87; python yubikit/oath.py:265,447;
-     android OathSession.java:391</p></div><div class="bespoke-marp-note" data-index="23" tabindex="0"><p>Anchors: .NET src/OpenPgp/src/IYubiKeyExtensions.cs:37,
+     android OathSession.java:391</p></div><div class="bespoke-marp-note" data-index="25" tabindex="0"><p>Anchors: .NET src/OpenPgp/src/IYubiKeyExtensions.cs:37,
      PublicAPI.Unshipped.txt:181; python yubikit/openpgp.py:987,1088;
-     android OpenPgpSession.java:154,266; swift@1.4.0 absent, Capability.swift:24</p></div><div class="bespoke-marp-note" data-index="24" tabindex="0"><p>Anchors: .NET src/Fido2/src/IYubiKeyExtensions.cs:124,
+     android OpenPgpSession.java:154,266; swift@1.4.0 absent, Capability.swift:24</p></div><div class="bespoke-marp-note" data-index="26" tabindex="0"><p>Anchors: .NET src/Fido2/src/IYubiKeyExtensions.cs:124,
      PublicAPI.Unshipped.txt:609, transports :189-190, FW5.8 :95;
      python-fido2 fido2/ctap2/base.py:246-262 (get_info at :252), :304-309;
-     swift@1.4.0 CTAPSession+Creation.swift:25, CTAPSession.swift:49</p></div><div class="bespoke-marp-note" data-index="25" tabindex="0"><p>Anchors: .NET src/WebAuthn/src/IYubiKeyExtensions.cs:57-62,
+     swift@1.4.0 CTAPSession+Creation.swift:25, CTAPSession.swift:49</p></div><div class="bespoke-marp-note" data-index="27" tabindex="0"><p>Anchors: .NET src/WebAuthn/src/IYubiKeyExtensions.cs:57-62,
      PublicAPI.Unshipped.txt:111-112, real call site
      src/WebAuthn/tests/.../WebAuthnClientFactoryTests.cs:42-45;
      python-fido2 fido2/client/__init__.py:1066-1179, fido2/server.py:158;
-     swift@1.4.0 FIDO/WebAuthn/Client/Client.swift:34-41 (doc), :95 (init)</p></div><div class="bespoke-marp-note" data-index="26" tabindex="0"><p>Anchors: .NET src/SecurityDomain/src/IYubiKeyExtensions.cs:45,
+     swift@1.4.0 FIDO/WebAuthn/Client/Client.swift:34-41 (doc), :95 (init)</p></div><div class="bespoke-marp-note" data-index="28" tabindex="0"><p>Anchors: .NET src/SecurityDomain/src/IYubiKeyExtensions.cs:45,
      GetKeyInfoAsync PublicAPI.Unshipped.txt:24;
      SCP-as-option src/Management/tests/.../ManagementSessionSimpleTests.cs:215-217,
      SCP-forces-SmartCard src/Management/src/IYubiKeyExtensions.cs:109;
      python yubikit/securitydomain.py:100,122;
-     swift@1.4.0 SecurityDomainSession.swift:55,124</p></div><div class="bespoke-marp-note" data-index="27" tabindex="0"><p>Anchors: .NET src/YubiHsm/src/IYubiKeyExtensions.cs:41,
+     swift@1.4.0 SecurityDomainSession.swift:55,124</p></div><div class="bespoke-marp-note" data-index="29" tabindex="0"><p>Anchors: .NET src/YubiHsm/src/IYubiKeyExtensions.cs:41,
      PublicAPI.Unshipped.txt:36; python yubikit/hsmauth.py:223,250;
      rust crates/yubikit/src/hsmauth.rs:32,383;
-     android absent settings.gradle.kts:35-39; swift@1.4.0 absent Capability.swift:30</p></div><div class="bespoke-marp-note" data-index="28" tabindex="0"><p>Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102,
+     android absent settings.gradle.kts:35-39; swift@1.4.0 absent Capability.swift:30</p></div><div class="bespoke-marp-note" data-index="30" tabindex="0"><p>Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102,
      transport order :144-145, CalculateHmacSha1Async PublicAPI.Unshipped.txt:72;
      python yubikit/yubiotp.py:708, calculate_hmac_sha1 :901;
      android YubiOtpSession.java:253,447;
      rust crates/yubikit/src/yubiotp.rs:1165 (calculate_hmac_sha1);
-     swift@1.4.0 absent Capability.swift:20</p></div><div class="bespoke-marp-note" data-index="29" tabindex="0"><p>Anchors — rust @90940e9 crates/yubikit/src/: management.rs, piv.rs, oath.rs,
+     swift@1.4.0 absent Capability.swift:20</p></div><div class="bespoke-marp-note" data-index="31" tabindex="0"><p>Anchors — rust @90940e9 crates/yubikit/src/: management.rs, piv.rs, oath.rs,
      openpgp.rs, ctap2/mod.rs, webauthn/client.rs, securitydomain.rs, hsmauth.rs,
      yubiotp.rs (all verified present).
      android @f462685: SecurityDomainSession core/.../smartcard/scp/,
@@ -1888,6 +2089,10 @@ changes are still cheap. Now is the time to complain.</p>
      Capability.swift:24,30,20 carry only the bits.
      python @4ca60f7: delegation ykman/diagnostics.py:207, dependency pyproject.toml:21;
      python-fido2 @5bc9d3a Ctap2 ctap2/base.py:246, Fido2Client client/__init__.py:1066,
-     Fido2Server server.py:158.</p></div><div class="bespoke-marp-note" data-index="33" tabindex="0"><p>Anchors: eight sessions AppletSessionShapeTests.cs:16-26;
+     Fido2Server server.py:158.</p></div><div class="bespoke-marp-note" data-index="33" tabindex="0"><p>Anchors: v1 sizes measured, repo @fd16960a, dotnet build -c Release -f netstandard2.1;
+     v2 sizes stat on bin/Release/net10.0;
+     LOC via find+wc over src, excluding obj/bin;
+     async counts via rg 'async (Task|ValueTask|IAsyncEnumerable)';
+     v1 WebAuthn absence: no WebAuthn path under Yubico.YubiKey/src</p></div><div class="bespoke-marp-note" data-index="36" tabindex="0"><p>Anchors: eight sessions AppletSessionShapeTests.cs:16-26;
      version Directory.Packages.props:6; all other claims anchored on their own slides</p></div><script>/*!! License: https://unpkg.com/@marp-team/marp-cli@4.5.1/lib/bespoke.js.LICENSE.txt */
 !function(){"use strict";function e(e){return e&&e.__esModule&&Object.prototype.hasOwnProperty.call(e,"default")?e.default:e}var t,n,r=(n||(n=1,t={from:function(e,t){var n,r=1===(e.parent||e).nodeType?e.parent||e:document.querySelector(e.parent||e),o=[].filter.call("string"==typeof e.slides?r.querySelectorAll(e.slides):e.slides||r.children,function(e){return"SCRIPT"!==e.nodeName}),i={},a=function(e,t){return(t=t||{}).index=o.indexOf(e),t.slide=e,t},s=function(e,t){i[e]=(i[e]||[]).filter(function(e){return e!==t})},l=function(e,t){return(i[e]||[]).reduce(function(e,n){return e&&!1!==n(t)},!0)},c=function(e,t){o[e]&&(n&&l("deactivate",a(n,t)),n=o[e],l("activate",a(n,t)))},d=function(e,t){var r=o.indexOf(n)+e;l(e>0?"next":"prev",a(n,t))&&c(r,t)},u={off:s,on:function(e,t){return(i[e]||(i[e]=[])).push(t),s.bind(null,e,t)},fire:l,slide:function(e,t){if(!arguments.length)return o.indexOf(n);l("slide",a(o[e],t))&&c(e,t)},next:d.bind(null,1),prev:d.bind(null,-1),parent:r,slides:o,destroy:function(e){l("destroy",a(n,e)),i={}}};return(t||[]).forEach(function(e){e(u)}),n||c(0),u}}),t),o=e(r);const i=document.body,a=(...e)=>history.replaceState(...e),s="",l="presenter",c="next",d="overview",u=["",l,d,c],f="bespoke-marp-",m=`data-${f}`,g=(e,{protocol:t,host:n,pathname:r,hash:o}=location)=>{const i=e.toString();return`${t}//${n}${r}${i?"?":""}${i}${o}`},p=()=>i.dataset.bespokeView,v=e=>new URLSearchParams(location.search).get(e),h=(e,t={})=>{const n={location,setter:a,...t},r=new URLSearchParams(n.location.search);for(const t of Object.keys(e)){const n=e[t];"string"==typeof n?r.set(t,n):r.delete(t)}try{n.setter({...window.history.state??{}},"",g(r,n.location))}catch(e){console.error(e)}},w=(()=>{const e="bespoke-marp";try{return localStorage.setItem(e,e),localStorage.removeItem(e),!0}catch{return!1}})(),y=e=>{try{return localStorage.getItem(e)}catch{return null}},b=(e,t)=>{try{return localStorage.setItem(e,t),!0}catch{return!1}},k=e=>{try{return localStorage.removeItem(e),!0}catch{return!1}},x=(e,t)=>{const n="aria-hidden";t?e.setAttribute(n,"true"):e.removeAttribute(n)},E=e=>{e.parent.classList.add(`${f}parent`),e.slides.forEach(e=>e.classList.add(`${f}slide`)),e.on("activate",t=>{const n=`${f}active`,r=t.slide,o=r.classList,i=!o.contains(n);if(e.slides.forEach(e=>{e.classList.remove(n),x(e,!0)}),o.add(n),x(r,!1),i){const e=`${n}-ready`;o.add(e),document.body.clientHeight,o.remove(e)}})},$=e=>{let t=0,n=0;Object.defineProperty(e,"fragments",{enumerable:!0,value:e.slides.map(e=>[null,...e.querySelectorAll("[data-marpit-fragment]")])});const r=r=>void 0!==e.fragments[t][n+r],o=(r,o)=>{t=r,n=o,e.fragments.forEach((e,t)=>{e.forEach((e,n)=>{if(null==e)return;const i=t<r||t===r&&n<=o;e.setAttribute(`${m}fragment`,(i?"":"in")+"active");const a=`${m}current-fragment`;t===r&&n===o?e.setAttribute(a,"current"):e.removeAttribute(a)})}),e.fragmentIndex=o;const i={slide:e.slides[r],index:r,fragments:e.fragments[r],fragmentIndex:o};e.fire("fragment",i)};e.on("next",({fragment:i=!0})=>{if(i){if(r(1))return o(t,n+1),!1;const i=t+1;e.fragments[i]&&o(i,0)}else{const r=e.fragments[t].length;if(n+1<r)return o(t,r-1),!1;const i=e.fragments[t+1];i&&o(t+1,i.length-1)}}),e.on("prev",({fragment:i=!0})=>{if(r(-1)&&i)return o(t,n-1),!1;const a=t-1;e.fragments[a]&&o(a,e.fragments[a].length-1)}),e.on("slide",({index:t,fragment:n})=>{let r=0;if(void 0!==n){const o=e.fragments[t];if(o){const{length:e}=o;r=-1===n?e-1:Math.min(Math.max(n,0),e-1)}}o(t,r)}),o(0,0)},L=document,S=()=>!(!L.fullscreenEnabled&&!L.webkitFullscreenEnabled),P=()=>!(!L.fullscreenElement&&!L.webkitFullscreenElement),_=e=>{e.fullscreen=()=>{S()&&(async()=>{P()?(L.exitFullscreen||L.webkitExitFullscreen)?.call(L):((e=L.body)=>{(e.requestFullscreen||e.webkitRequestFullscreen)?.call(e)})()})()},document.addEventListener("keydown",t=>{"f"!==t.key&&"F11"!==t.key||t.altKey||t.ctrlKey||t.metaKey||!S()||(e.fullscreen(),t.preventDefault())})},O=`${f}inactive`,T=(e=2e3)=>({parent:t,fire:n})=>{const r=t.classList,o=e=>n(`marp-${e?"":"in"}active`);let i;const a=()=>{i&&clearTimeout(i),i=setTimeout(()=>{r.add(O),o()},e),r.contains(O)&&(r.remove(O),o(!0))};for(const e of["mousedown","mousemove","touchend"])document.addEventListener(e,a);setTimeout(a,0)},I=["AUDIO","BUTTON","INPUT","SELECT","TEXTAREA","VIDEO"],M=e=>{e.parent.addEventListener("keydown",e=>{if(!e.target)return;const t=e.target;(I.includes(t.nodeName)||"true"===t.contentEditable)&&e.stopPropagation()})},A=e=>{window.addEventListener("load",()=>{for(const t of e.slides){const e=t.querySelector("marp-auto-scaling, [data-auto-scaling], [data-marp-fitting]");t.setAttribute(`${m}load`,e?"":"hideable")}})},C=({interval:e=250}={})=>t=>{document.addEventListener("keydown",e=>{if(" "===e.key&&e.shiftKey)t.prev();else if("ArrowLeft"===e.key||"ArrowUp"===e.key||"PageUp"===e.key)t.prev({fragment:!e.shiftKey});else if(" "!==e.key||e.shiftKey)if("ArrowRight"===e.key||"ArrowDown"===e.key||"PageDown"===e.key)t.next({fragment:!e.shiftKey});else if("End"===e.key)t.slide(t.slides.length-1,{fragment:-1});else{if("Home"!==e.key)return;t.slide(0)}else t.next();e.preventDefault()});let n,r,o=0;t.parent.addEventListener("wheel",i=>{let a=!1;const s=(e,t)=>{e&&(a=a||((e,t)=>((e,t)=>{const n="X"===t?"Width":"Height";return e[`client${n}`]<e[`scroll${n}`]})(e,t)&&((e,t)=>{const{overflow:n}=e,r=e[`overflow${t}`];return"auto"===n||"scroll"===n||"auto"===r||"scroll"===r})(getComputedStyle(e),t))(e,t)),e?.parentElement&&s(e.parentElement,t)};if(0!==i.deltaX&&s(i.target,"X"),0!==i.deltaY&&s(i.target,"Y"),a)return;i.preventDefault();const l=Math.sqrt(i.deltaX**2+i.deltaY**2);if(void 0!==i.wheelDelta){if(void 0===i.webkitForce&&Math.abs(i.wheelDelta)<40)return;if(i.deltaMode===i.DOM_DELTA_PIXEL&&l<4)return}else if(i.deltaMode===i.DOM_DELTA_PIXEL&&l<12)return;r&&clearTimeout(r),r=setTimeout(()=>{n=0},e);const c=Date.now()-o<e,d=l<=n;if(n=l,c||d)return;let u;(i.deltaX>0||i.deltaY>0)&&(u="next"),(i.deltaX<0||i.deltaY<0)&&(u="prev"),u&&(t[u](),o=Date.now())})},D=(e=`.${f}osc`)=>{const t=document.querySelector(e);if(!t)return()=>{};const n=(e,n)=>{t.querySelectorAll(`[${m}osc=${JSON.stringify(e)}]`).forEach(n)};if(S()||n("fullscreen",e=>e.style.display="none"),!w){const e=(e,t)=>{e.disabled=!0,e.title=`${t} is disabled due to restricted localStorage.`};n("presenter",t=>e(t,"Presenter view")),n("overview",t=>e(t,"Overview view"))}return e=>{t.addEventListener("click",t=>{if(t.target instanceof HTMLElement){const{bespokeMarpOsc:n}=t.target.dataset;n&&t.target.blur();const r={fragment:!t.shiftKey};"next"===n?e.next(r):"prev"===n?e.prev(r):"fullscreen"===n?e?.fullscreen():"presenter"===n?e.openPresenterView():"overview"===n&&e.toggleOverviewView()}}),e.parent.appendChild(t),e.on("activate",({index:t})=>{n("page",n=>n.textContent=`Page ${t+1} of ${e.slides.length}`)}),e.on("fragment",({index:t,fragments:r,fragmentIndex:o})=>{n("prev",e=>e.disabled=0===t&&0===o),n("next",n=>n.disabled=t===e.slides.length-1&&o===r.length-1)}),e.on("marp-active",()=>x(t,!1)),e.on("marp-inactive",()=>x(t,!0)),S()&&(e=>{for(const t of["","webkit"])L.addEventListener(t+"fullscreenchange",e)})(()=>n("fullscreen",e=>e.classList.toggle("exit",S()&&P())))}},N=e=>{if(e.syncKey&&"string"==typeof e.syncKey)return!0;throw new Error("The current instance of Bespoke.js is incompatible with Marp bespoke sync plugin.")},B=(e={})=>{const t=e.key||window.history.state?.marpBespokeSyncKey||Math.random().toString(36).slice(2),n=`bespoke-marp-sync-${t}`;var r;r={marpBespokeSyncKey:t},h({},{setter:(e,...t)=>a({...e,...r},...t)});const o=()=>{const e=y(n);return e?JSON.parse(e):Object.create(null)},i=e=>{const t=o(),r={...t,...e(t)};return b(n,JSON.stringify(r)),r},s=()=>{window.removeEventListener("pageshow",s),i(e=>({reference:(e.reference||0)+1}))};return e=>{s(),Object.defineProperty(e,"syncKey",{value:t,enumerable:!0});let r=!0;setTimeout(()=>{e.on("fragment",e=>{r&&i(()=>({index:e.index,fragmentIndex:e.fragmentIndex}))})},0),window.addEventListener("storage",t=>{if(t.key===n&&t.oldValue&&t.newValue){const n=JSON.parse(t.oldValue),o=JSON.parse(t.newValue);if(n.index!==o.index||n.fragmentIndex!==o.fragmentIndex)try{r=!1,e.slide(o.index,{fragment:o.fragmentIndex,forSync:!0})}finally{r=!0}}});const a=()=>{const{reference:e}=o();void 0===e||e<=1?k(n):i(()=>({reference:e-1}))};window.addEventListener("pagehide",e=>{e.persisted&&window.addEventListener("pageshow",s),a()}),e.on("destroy",a)}},K=e=>{w&&document.addEventListener("keydown",t=>{("o"!==t.key||t.altKey||t.ctrlKey||t.metaKey)&&"Escape"!==t.key||(t.preventDefault(),e())})};let q=null;const V=({closeOnSelect:e=!0}={})=>t=>{N(t);const n=n=>{const r=(()=>{if(!q||!q.isConnected){q=document.createElement("div"),q.className=`${f}overview`,q.inert=!0;const n=document.createElement("iframe");n.src=(()=>{const n=new URLSearchParams(location.search);return n.set("view","overview"),n.set("sync",t.syncKey),e&&n.set("closeOnSelect","1"),g(n)})(),q.append(n),document.body.append(q)}return q})(),o=n??!r.dataset.open;setTimeout(()=>{if(r.dataset.open=o?"1":"",r.inert=!o,t.skipTransition=o,o){const e=r.querySelector("iframe");try{e?.contentWindow?.focus()}catch{e?.focus()}}else window.focus()},0)};Object.defineProperties(t,{toggleOverviewView:{enumerable:!0,value:n}}),window.addEventListener("message",e=>{e.origin===window.origin&&"closeOverview"===e.data&&n(!1)}),K(n)},j=e=>{const{title:t}=document;document.title="[Overview]"+(t?` - ${t}`:"");const n=!!v("closeOnSelect"),r=()=>{window.parent.postMessage("closeOverview","null"===window.origin?"*":window.origin)};if(e.slides.forEach((t,o)=>{t.tabIndex=0;const i=()=>{e.slide(o,{fragment:-1}),n&&r()};t.addEventListener("click",i),t.addEventListener("keydown",e=>{"Enter"!==e.key&&" "!==e.key||(e.preventDefault(),i())})}),window.addEventListener("keydown",t=>{const n=e.slide(),r=t=>{const r=t=>{const n=e.slides[t].getBoundingClientRect();return[Math.round((n.left+n.right)/2),Math.round((n.top+n.bottom)/2)]};let o=null,i=n;do{const e=r(i);if(o){if(Math.abs(e[0]-o[0])<2)return i}else o=e;i+=t}while(i>=0&&i<e.slides.length);return n};if("ArrowLeft"===t.key)e.slide(Math.max(n-1,0),{fragment:-1});else if("ArrowRight"===t.key)e.slide(Math.min(n+1,e.slides.length-1),{fragment:-1});else if("ArrowUp"===t.key)e.slide(r(-1),{fragment:-1});else if("ArrowDown"===t.key)e.slide(r(1),{fragment:-1});else if("End"===t.key)e.slide(e.slides.length-1,{fragment:-1});else{if("Home"!==t.key)return;e.slide(0,{fragment:-1})}t.preventDefault();const o=e.slide();e.slides[o]?.focus?.(),e.slides[o]?.scrollIntoView?.({behavior:"smooth",block:"nearest"})}),e.on("slide",({index:t})=>{e.slides[t]?.scrollIntoView?.({behavior:"smooth",block:"nearest"})}),window.parent!==window){K(r);const e=document.createElement("header");e.className=`${f}overview-header`;const t=document.createElement("button");t.className=`${f}overview-close`,t.type="button",t.title="Close overview",t.textContent=t.title,t.addEventListener("click",r),e.append(t),document.body.prepend(e)}},F=()=>{const e=p();return{[s]:V(),[l]:V({closeOnSelect:!1}),[d]:j}[e]},U=e=>{window.addEventListener("message",t=>{if(t.origin!==window.origin)return;const[n,r]=t.data.split(":");if("navigate"===n){const[t,n]=r.split(",");let o=Number.parseInt(t,10),i=Number.parseInt(n,10)+1;i>=e.fragments[o].length&&(o+=1,i=0),e.slide(o,{fragment:i})}})};var R,X,H,W,J,Y,z,G={exports:{}},Q=(R||(R=1,G.exports=(X=["area","base","br","col","command","embed","hr","img","input","keygen","link","meta","param","source","track","wbr"],H=function(e){return String(e).replace(/[&<>"']/g,function(e){return"&"+W[e]+";"})},W={"&":"amp","<":"lt",">":"gt",'"':"quot","'":"apos"},J="dangerouslySetInnerHTML",Y={className:"class",htmlFor:"for"},z={},function(e,t){var n=[],r="";t=t||{};for(var o=arguments.length;o-- >2;)n.push(arguments[o]);if("function"==typeof e)return t.children=n.reverse(),e(t);if(e){if(r+="<"+e,t)for(var i in t)!1!==t[i]&&null!=t[i]&&i!==J&&(r+=" "+(Y[i]?Y[i]:H(i))+'="'+H(t[i])+'"');r+=">"}if(-1===X.indexOf(e)){if(t[J])r+=t[J].__html;else for(;n.length;){var a=n.pop();if(a)if(a.pop)for(var s=a.length;s--;)n.push(a[s]);else r+=!0===z[a]?a:H(a)}r+=e?"</"+e+">":""}return z[r]=!0,r})),G.exports),Z=e(Q);const ee=({children:e})=>Z(null,null,...e),te=`${f}presenter-`,ne={container:`${te}container`,dragbar:`${te}dragbar-container`,next:`${te}next`,nextContainer:`${te}next-container`,noteContainer:`${te}note-container`,noteWrapper:`${te}note-wrapper`,noteButtons:`${te}note-buttons`,infoContainer:`${te}info-container`,infoPageArea:`${te}info-page-area`,infoPage:`${te}info-page`,infoPagePrev:`${te}info-page-prev`,infoPageNext:`${te}info-page-next`,noteButtonsBigger:`${te}note-bigger`,noteButtonsSmaller:`${te}note-smaller`,infoTime:`${te}info-time`,infoTimer:`${te}info-timer`},re=e=>{const{title:t}=document;document.title="[Presenter view]"+(t?` - ${t}`:"");const n={},r=e=>(n[e]=n[e]||document.querySelector(`.${e}`),n[e]);document.body.appendChild((e=>{const t=document.createElement("div");return t.className=ne.container,t.appendChild(e),t.insertAdjacentHTML("beforeend",Z(ee,null,Z("div",{class:ne.nextContainer},Z("iframe",{class:ne.next,src:"?view=next"})),Z("div",{class:ne.dragbar}),Z("div",{class:ne.noteContainer},Z("div",{class:ne.noteWrapper}),Z("div",{class:ne.noteButtons},Z("button",{class:ne.noteButtonsSmaller,tabindex:"-1",title:"Smaller notes font size"},"Smaller notes font size"),Z("button",{class:ne.noteButtonsBigger,tabindex:"-1",title:"Bigger notes font size"},"Bigger notes font size"))),Z("div",{class:ne.infoContainer},Z("div",{class:ne.infoPageArea},Z("button",{class:ne.infoPagePrev,tabindex:"-1",title:"Previous"},"Previous"),Z("button",{class:ne.infoPage}),Z("button",{class:ne.infoPageNext,tabindex:"-1",title:"Next"},"Next")),Z("time",{class:ne.infoTime,title:"Current time"}),Z("time",{class:ne.infoTimer,title:"Timer"})))),t})(e.parent)),(e=>{let t=!1;r(ne.dragbar).addEventListener("mousedown",()=>{t=!0,r(ne.dragbar).classList.add("active")}),window.addEventListener("mouseup",()=>{t=!1,r(ne.dragbar).classList.remove("active")}),window.addEventListener("mousemove",e=>{if(!t)return;const n=e.clientX/document.documentElement.clientWidth*100;r(ne.container).style.setProperty("--bespoke-marp-presenter-split-ratio",`${Math.max(0,Math.min(100,n))}%`)}),r(ne.nextContainer).addEventListener("click",()=>e.next());const n=r(ne.next),o=(i=n,(e,t)=>i.contentWindow?.postMessage(`navigate:${e},${t}`,"null"===window.origin?"*":window.origin));var i;n.addEventListener("load",()=>{r(ne.nextContainer).classList.add("active"),o(e.slide(),e.fragmentIndex),e.on("fragment",({index:e,fragmentIndex:t})=>o(e,t))});const a=document.querySelectorAll(".bespoke-marp-note");a.forEach(e=>{e.addEventListener("keydown",e=>e.stopPropagation()),r(ne.noteWrapper).appendChild(e)}),e.on("activate",()=>a.forEach(t=>t.classList.toggle("active",t.dataset.index==e.slide())));let s=0;const l=e=>{s=Math.max(-5,s+e),r(ne.noteContainer).style.setProperty("--bespoke-marp-note-font-scale",(1.2**s).toFixed(4))},c=()=>l(1),d=()=>l(-1),u=r(ne.noteButtonsBigger),f=r(ne.noteButtonsSmaller);u.addEventListener("click",()=>{u.blur(),c()}),f.addEventListener("click",()=>{f.blur(),d()}),document.addEventListener("keydown",e=>{"+"===e.key&&c(),"-"===e.key&&d()},!0);const m=r(ne.infoPage);e.on("activate",({index:t})=>{m.textContent=`${t+1} / ${e.slides.length}`}),m.addEventListener("click",()=>{m.blur(),e.toggleOverviewView()});const g=r(ne.infoPagePrev),p=r(ne.infoPageNext);g.addEventListener("click",t=>{g.blur(),e.prev({fragment:!t.shiftKey})}),p.addEventListener("click",t=>{p.blur(),e.next({fragment:!t.shiftKey})}),e.on("fragment",({index:t,fragments:n,fragmentIndex:r})=>{g.disabled=0===t&&0===r,p.disabled=t===e.slides.length-1&&r===n.length-1});let v=new Date;const h=()=>{const e=new Date,t=e=>`${Math.floor(e)}`.padStart(2,"0"),n=e.getTime()-v.getTime(),o=t(n/1e3%60),i=t(n/1e3/60%60),a=t(n/36e5%24);r(ne.infoTime).textContent=e.toLocaleTimeString(),r(ne.infoTimer).textContent=`${a}:${i}:${o}`};h(),setInterval(h,250),r(ne.infoTimer).addEventListener("click",()=>{v=new Date})})(e)},oe=e=>{N(e),Object.defineProperties(e,{openPresenterView:{enumerable:!0,value:ie},presenterUrl:{enumerable:!0,get:ae}}),w&&document.addEventListener("keydown",t=>{"p"!==t.key||t.altKey||t.ctrlKey||t.metaKey||(t.preventDefault(),e.openPresenterView())})};function ie(){const{max:e,floor:t}=Math,n=e(t(.85*window.innerWidth),640),r=e(t(.85*window.innerHeight),360);return window.open(this.presenterUrl,te+this.syncKey,`width=${n},height=${r},menubar=no,toolbar=no`)}function ae(){const e=new URLSearchParams(location.search);return e.set("view","presenter"),e.set("sync",this.syncKey),g(e)}const se=e=>{const t=p();return t===c&&e.appendChild(document.createElement("span")),{[s]:oe,[l]:re,[c]:U}[t]},le=e=>{e.on("activate",t=>{document.querySelectorAll(".bespoke-progress-parent > .bespoke-progress-bar").forEach(n=>{n.style.flexBasis=100*t.index/(e.slides.length-1)+"%"})})},ce=e=>{const t=Number.parseInt(e,10);return Number.isNaN(t)?null:t},de=(e={})=>{const t={history:!0,...e};return e=>{let n=!0;const r=e=>{const t=n;try{return n=!0,e()}finally{n=t}},o=(t={fragment:!0})=>{let n=t.fragment?ce(v("f")||""):null;((t,n)=>{const{min:r,max:o}=Math,{fragments:i,slides:a}=e,s=o(0,r(t,a.length-1)),l=o(0,r(n||0,i[s].length-1));s===e.slide()&&l===e.fragmentIndex||e.slide(s,{fragment:l})})((()=>{if(location.hash){const[t]=location.hash.slice(1).split(":~:");if(/^\d+$/.test(t))return(ce(t)??1)-1;const r=document.getElementById(t)||document.querySelector(`a[name="${CSS.escape(t)}"]`);if(r){const{length:t}=e.slides;for(let o=0;o<t;o+=1)if(e.slides[o].contains(r)){const t=e.fragments?.[o],i=r.closest("[data-marpit-fragment]");if(t&&i){const e=t.indexOf(i);e>=0&&(n=e)}return o}}}return 0})(),n)};e.on("fragment",({index:e,fragmentIndex:r})=>{n||h({f:0===r||r.toString()},{location:{...location,hash:`#${e+1}`},setter:(...e)=>t.history?history.pushState(...e):history.replaceState(...e)})}),setTimeout(()=>{o(),window.addEventListener("hashchange",()=>r(()=>{o({fragment:!1}),h({f:void 0})})),window.addEventListener("popstate",()=>{n||r(()=>o())}),n=!1},0)}},{PI:ue,abs:fe,sqrt:me,atan2:ge}=Math,pe={passive:!0},ve=({slope:e=-.7,swipeThreshold:t=30}={})=>n=>{let r;const o=n.parent,i=e=>{const t=o.getBoundingClientRect();return{x:e.pageX-(t.left+t.right)/2,y:e.pageY-(t.top+t.bottom)/2}};o.addEventListener("touchstart",({touches:e})=>{r=1===e.length?i(e[0]):void 0},pe),o.addEventListener("touchmove",e=>{if(r)if(1===e.touches.length){e.preventDefault();const t=i(e.touches[0]),n=t.x-r.x,o=t.y-r.y;r.delta=me(fe(n)**2+fe(o)**2),r.radian=ge(n,o)}else r=void 0}),o.addEventListener("touchend",o=>{if(r){if(r.delta&&r.delta>=t&&r.radian){const t=(r.radian-e+ue)%(2*ue)-ue;n[t<0?"next":"prev"](),o.stopPropagation()}r=void 0}},pe)},he=new Map;he.clear(),he.set("none",{backward:{both:void 0,incoming:void 0,outgoing:void 0},forward:{both:void 0,incoming:void 0,outgoing:void 0}});const we={both:"",outgoing:"outgoing-",incoming:"incoming-"},ye={forward:"",backward:"-backward"},be=e=>`--marp-bespoke-transition-animation-${e}`,ke=e=>`--marp-transition-${e}`,xe=be("name"),Ee=be("duration"),$e=e=>new Promise(t=>{const n={},r=document.createElement("div"),o=e=>{r.remove(),t(e)};r.addEventListener("animationstart",()=>o(n)),Object.assign(r.style,{animationName:e,animationDuration:"1s",animationFillMode:"both",animationPlayState:"paused",position:"absolute",pointerEvents:"none"}),document.body.appendChild(r);const i=getComputedStyle(r).getPropertyValue(ke("duration"));i&&Number.parseFloat(i)>=0&&(n.defaultDuration=i),((e,t)=>{requestAnimationFrame(()=>{e.style.animationPlayState="running",requestAnimationFrame(()=>t(void 0))})})(r,o)}),Le=async e=>he.has(e)?he.get(e):(e=>{const t={},n=[];for(const[r,o]of Object.entries(we))for(const[i,a]of Object.entries(ye)){const s=`marp-${o}transition${a}-${e}`;n.push($e(s).then(e=>{t[i]=t[i]||{},t[i][r]=e?{...e,name:s}:void 0}))}return Promise.all(n).then(()=>t)})(e).then(t=>(he.set(e,t),t)),Se=e=>Object.values(e).flatMap(Object.values).every(e=>!e),Pe=(e,{type:t,backward:n})=>{const r=e[n?"backward":"forward"],o=(()=>{const e=r[t],n=e=>({[xe]:e.name});if(e)return n(e);if(r.both){const e=n(r.both);return"incoming"===t&&(e[be("direction")]="reverse"),e}})();return!o&&n?Pe(e,{type:t,backward:!1}):o||{[xe]:"__bespoke_marp_transition_no_animation__"}},_e=e=>{if(e)try{const t=JSON.parse(e);if((e=>{if("object"!=typeof e)return!1;const t=e;return"string"==typeof t.name&&(void 0===t.duration||"string"==typeof t.duration)})(t))return t}catch{}},Oe="_tSId",Te="_tA",Ie="bespoke-marp-transition-warming-up",Me=window.matchMedia("(prefers-reduced-motion: reduce)"),Ae="__bespoke_marp_transition_reduced_outgoing__",Ce="__bespoke_marp_transition_reduced_incoming__",De={forward:{both:void 0,incoming:{name:Ce},outgoing:{name:Ae}},backward:{both:void 0,incoming:{name:Ce},outgoing:{name:Ae}}},Ne=e=>{if(!document.startViewTransition)return;const t=t=>(void 0!==t&&(e._tD=t),e._tD);let n;t(!1),((...e)=>{CSS.registerProperty({name:ke("duration"),syntax:"<time>",inherits:!0,initialValue:"-1s"});const t=[...new Set(e).values()];return Promise.all(t.map(e=>Le(e))).then()})(...Array.from(document.querySelectorAll("section[data-transition], section[data-transition-back]")).flatMap(e=>[e.dataset.transition,e.dataset.transitionBack].flatMap(e=>{const t=_e(e);return[t?.name,t?.builtinFallback?`__builtin__${t.name}`:void 0]}).filter(e=>!!e))).then(()=>{document.querySelectorAll("style").forEach(e=>{e.innerHTML=e.innerHTML.replace(/--marp-transition-duration:[^;}]*[;}]/g,e=>e.slice(0,-1)+"!important"+e.slice(-1))})});const r=(n,{back:r,cond:o})=>i=>{const a=t();if(a)return!!i[Te]||!("object"!=typeof a||(a.skipTransition(),!i.forSync));if(e.skipTransition)return!0;if(!o(i))return!0;const s=e.slides[e.slide()],l=()=>i.back??r,c="data-transition"+(l()?"-back":""),d=s.querySelector(`section[${c}]`);if(!d)return!0;const u=_e(d.getAttribute(c)??void 0);return!u||((async(e,{builtinFallback:t=!0}={})=>{let n=await Le(e);if(Se(n)){if(!t)return;return n=await Le(`__builtin__${e}`),Se(n)?void 0:n}return n})(u.name,{builtinFallback:u.builtinFallback}).then(e=>{if(!e){t(!0);try{n(i)}finally{t(!1)}return}let r=e;Me.matches&&(console.warn("Use a constant animation to transition because preferring reduced motion by viewer has detected."),r=De);const o=document.getElementById(Oe);o&&o.remove();const a=document.createElement("style");a.id=Oe,document.head.appendChild(a),((e,t)=>{const n=[`:root{${ke("direction")}:${t.backward?-1:1};}`,":root:has(.bespoke-marp-inactive){cursor:none;}"],r=t=>{const n=e[t].both?.defaultDuration||e[t].outgoing?.defaultDuration||e[t].incoming?.defaultDuration;return"forward"===t?n:n||r("forward")},o=t.duration||r(t.backward?"backward":"forward");void 0!==o&&n.push(`::view-transition-group(*){${Ee}:${o};}`);const i=e=>Object.entries(e).map(([e,t])=>`${e}:${t};`).join("");return n.push(`::view-transition-old(root){${i(Pe(e,{...t,type:"outgoing"}))}}`,`::view-transition-new(root){${i(Pe(e,{...t,type:"incoming"}))}}`),n})(r,{backward:l(),duration:u.duration}).forEach(e=>a.sheet?.insertRule(e));const s=document.documentElement.classList;s.add(Ie);let c=!1;const d=()=>{c||(n(i),c=!0,s.remove(Ie))},f=()=>{t(!1),a.remove(),s.remove(Ie)};try{t(!0);const e=document.startViewTransition(d);t(e),e.finished.finally(f)}catch(e){console.error(e),d(),f()}}),!1)};e.on("prev",r(t=>e.prev({...t,[Te]:!0}),{back:!0,cond:e=>e.index>0&&!((e.fragment??1)&&n.fragmentIndex>0)})),e.on("next",r(t=>e.next({...t,[Te]:!0}),{cond:t=>t.index+1<e.slides.length&&!(n.fragmentIndex+1<n.fragments.length)})),setTimeout(()=>{e.on("slide",r(t=>e.slide(t.index,{...t,[Te]:!0}),{cond:t=>{const n=e.slide();return t.index!==n&&(t.back=t.index<n,!0)}}))},0),e.on("fragment",e=>{n=e})};let Be;const Ke=()=>(void 0===Be&&(Be="wakeLock"in navigator&&navigator.wakeLock),Be),qe=async()=>{const e=Ke();if(e)try{return await e.request("screen")}catch(e){console.warn(e)}return null},Ve=async()=>{if(!Ke())return;let e;const t=()=>{e&&"visible"===document.visibilityState&&qe()};for(const e of["visibilitychange","fullscreenchange"])document.addEventListener(e,t);return e=await qe(),e};((e=document.getElementById(":$p"))=>{(()=>{const e=v("view");i.dataset.bespokeView=u.some(t=>t&&t===e)?e:""})();const t=(e=>{const t=v(e);return h({[e]:void 0}),t})("sync")||void 0;o.from(e,((...e)=>{const t=u.findIndex(e=>p()===e);return e.map(([e,n])=>e[t]&&n).filter(e=>e)})([[1,1,1,0],B({key:t})],[[1,1,0,1],se(e)],[[1,1,0,0],M],[[1,1,1,1],E],[[1,0,0,0],T()],[[1,1,1,1],A],[[1,1,1,1],de({history:!1})],[[1,1,0,0],C()],[[1,1,1,0],_],[[1,0,0,0],le],[[1,1,0,0],ve()],[[1,0,0,0],D()],[[1,1,1,0],F()],[[1,0,0,0],Ne],[[1,1,1,1],$],[[1,1,1,0],Ve]))})()}();</script></body></html>

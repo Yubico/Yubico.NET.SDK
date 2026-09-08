@@ -60,11 +60,25 @@ This is conservative on purpose: a wrong merge is worse than no merge.
 - A key whose interface set changes is **republished as a new object** that inherits
   nothing from its predecessor.
 
-> **Why keep `DeviceId` public at all?** Its prefix encodes *which evidence tier
-> produced it*: `pcsc:*` / `hid:*` for a lone interface, `ykphysical:*` only once
-> grouping actually proved a physical key. That makes it genuinely useful in logs
-> and bug reports. Removing it was considered and rejected for that reason — but
-> it is the interface-set key, kept internal, that would be the wrong thing to expose.
+### Who actually wants `DeviceId`?
+
+Its value is that the **prefix names the evidence tier** that produced it:
+
+| Shape | Means |
+|---|---|
+| `hid:{reader}:{usage}` | a lone HID interface — nothing proved a physical key |
+| `pcsc:*` | a lone smart-card reader, e.g. anything over NFC |
+| `ykphysical:pid:{PID}` | grouped by USB Product ID |
+| `ykphysical:topology:{id}` | grouped by Windows Container ID |
+| `ykphysical:{serial}` | grouped **and** serial-confirmed — the strongest |
+
+**The persona is whoever is holding a log at 2am.** Support engineers triaging a
+customer trace, and SDK maintainers reading a bug report, both need to answer *"did
+discovery think these were one key or two, and on what evidence?"* — and `DeviceId`
+answers exactly that, in one string, without a debugger.
+
+**Not for application developers.** If you are writing app logic, use `SerialNumber`.
+`DeviceId` is not durable: it changes when evidence changes, by design.
 
 <!-- Anchors: device-identity.md D1 :61-65, D2 :67-98 (latch :76-77, null-forever :73-75,
      late arrival :80-81, republication :82-84), D6 :161, D7 :179-184;

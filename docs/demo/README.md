@@ -55,18 +55,18 @@ This table goes stale the moment you add or delete a slide. Regenerate it with
 | `00-intro.md` | 1 | Title and the headline claims |
 | `01-pipeline.md` | 2–4 | Layered stack, pipeline in code, three ways to open a session |
 | `02-transports.md` | 5–8 | Connection diagram, APDU seq, CTAP seq, transport-order table |
-| `03-discovery.md` | 9–10 | Discovery diagram, discovery API and `forceRescan` |
-| `04-identity-merging.md` | 11–13 | Merging, NFC handling, identity guarantees |
-| `05-observability-events.md` | 14–15 | Device-event API, peer comparison |
-| `07-logging.md` | 16–17 | Logging setup, cross-SDK logging conventions |
-| `08-raw-access-tiers.md` | 18 | Tier 0 / 1 / 2 |
-| `09-session-model.md` | 19–20 | Session shape, connection ownership |
-| `10-applets-a.md` | 21–23 | Management, PIV, OATH |
-| `11-applets-b.md` | 24–26 | OpenPGP, FIDO2, WebAuthn |
-| `12-applets-c.md` | 27–29 | SecurityDomain, YubiHSM Auth, YubiOTP |
-| `13-coverage-matrix.md` | 30 | Coverage across all five SDKs |
-| `14-footprint.md` | 31–33 | v1 vs v2 sizes, Native AOT, provenance |
-| `15-takeaways.md` | 34 | Closing |
+| `03-discovery.md` | 9–12 | Discovery diagram, two operation models, guarantees |
+| `04-identity-merging.md` | 13–15 | Merging, NFC handling, identity and DeviceId personas |
+| `05-observability-events.md` | 16–17 | Device-event API, peer comparison |
+| `07-logging.md` | 18–19 | Logging setup, cross-SDK logging conventions |
+| `08-raw-access-tiers.md` | 20 | Tier 0 / 1 / 2 |
+| `09-session-model.md` | 21–22 | Session shape, connection ownership |
+| `10-applets-a.md` | 23–25 | Management, PIV, OATH |
+| `11-applets-b.md` | 26–28 | OpenPGP, FIDO2, WebAuthn |
+| `12-applets-c.md` | 29–31 | SecurityDomain, YubiHSM Auth, YubiOTP |
+| `13-coverage-matrix.md` | 32 | Coverage across all five SDKs |
+| `14-footprint.md` | 33–36 | v1 vs v2 sizes, why only 17 %, Native AOT, provenance |
+| `15-takeaways.md` | 37 | Closing |
 
 There is no `06-`. That topic (the v1→v2 event architecture and the three stream
 contracts) was cut during review; its logging half became `07-logging.md`.

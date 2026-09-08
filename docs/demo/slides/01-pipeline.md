@@ -15,6 +15,7 @@ IYubiKey key = keys[0];
 
 // 3. SESSION opened over a transport the SDK resolves
 await using var piv = await key.CreatePivSessionAsync();
+(REVIEW: Can we add the some more examples, e.g. using SessionCreationOptions, also the await using var conn = await key.ConnectAsync<ISmartCardConnection>(); variant, and PivSession)
 
 // 4. YUBIKEY executes; the session speaks the applet protocol
 var cert = await piv.GetCertificateAsync(PivSlot.Authentication);

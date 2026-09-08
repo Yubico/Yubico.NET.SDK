@@ -26,7 +26,7 @@ FIDO2 · WebAuthn. YubiOTP rides OTP-HID, a third framing.
 
 | Applet | Default transport order |
 |---|---|
-| **Management** | `SmartCard` → `HidFido` → `HidOtp` — **three** |
+| **Management** | `SmartCard` → `HidFido` → `HidOtp` |
 | **FIDO2** | `HidFido` → `SmartCard` |
 | **WebAuthn** | inherits FIDO2's order |
 | **YubiOTP** | `SmartCard` → `HidOtp` |

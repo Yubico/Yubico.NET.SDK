@@ -9,7 +9,6 @@ WebAuthn is the deliberate exception: it returns a client, not a session.
 One connection, one live session, enforced at runtime.
 
 **Device events are one API.** `StartMonitoring()` + `await foreach WatchAsync()`.
-No Rx, no `IObservable`, BCL types only.
 
 **Identity is honest about what it cannot promise.** `DeviceId` is diagnostic;
 `SerialNumber` may be `null` forever and can arrive late without an event.

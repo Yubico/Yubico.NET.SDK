@@ -12,7 +12,7 @@ var keys = await YubiKeyManager.FindAllAsync();
 
 // Force a fresh scan, or narrow by transport
 var scan = await YubiKeyManager.FindAllAsync(
-    ConnectionType.SmartCard, forceRescan: true);
+    ConnectionType.SmartCard, forceRescan: true); (REVIEW: Consider if this does not belong in the SDK at all any longer, now replaced by event-driven discovery)
 ```
 
 Discovery is **publish-first and degraded-state tolerant** — a key is published as soon

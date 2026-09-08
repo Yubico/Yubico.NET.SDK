@@ -4,7 +4,7 @@ GlobalPlatform key management — SCP03 and SCP11, certificates, CA identifiers.
 
 ```csharp
 await using var sd = await key.CreateSecurityDomainSessionAsync();
-var certs = await sd.GetCertificatesAsync(keyReference);
+var certs = await sd.GetCertificatesAsync(keyReference); (REVIEW: why are we not demonstrating getting key information, as we do in Python and Swift)
 ```
 
 <div class="cols">
@@ -74,6 +74,8 @@ YubiHSM Auth module; `yubikit-swift` has only the `Capability.hsmAuth` bit.
 ## YubiOTP
 
 The two programmable slots — Yubico OTP, static password, HMAC-SHA1 challenge-response.
+
+(REVIEW: why are we showcasing different aspects of the YubiOTP session across SDKs? We should aim for consistency in the examples shown for each SDK) 
 
 ```csharp
 await using var otp = await key.CreateYubiOtpSessionAsync();

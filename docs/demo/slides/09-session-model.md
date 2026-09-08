@@ -10,9 +10,6 @@ await using var s = await key.CreateXSessionAsync(options, cancellationToken);
 - Both take `SessionCreationOptions?` then a defaulted `CancellationToken`
 - Always `await using`
 
-**Test-enforced, not conventional** — `AppletSessionShapeTests` enumerates the eight
-sessions and asserts the shape holds for each.
-
 > **WebAuthn is the deliberate exception.** It is not an applet session. It returns a
 > `WebAuthnClient`, takes a required origin and public-suffix checker, and has its own
 > factory test. The test file says so in as many words:

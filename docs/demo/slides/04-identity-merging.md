@@ -26,7 +26,7 @@ interface-set key.
 
 | Surface | Guarantee |
 |---|---|
-| `DeviceId` | **Diagnostic only.** Not durable identity. |
+| `DeviceId` | **Diagnostic only.** Not durable identity. (REVIEW: Consider if this should be removed from public API) |
 | `SerialNumber` | Latched. `null` → value, **never** back to `null`. |
 | Interface-set key | Internal, machine-local, never public |
 | `Equals` / `GetHashCode` | **Referential** — same object, or not equal |

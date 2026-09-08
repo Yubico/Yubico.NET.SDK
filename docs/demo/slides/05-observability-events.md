@@ -17,7 +17,6 @@ public class DeviceEvent { IYubiKey Device; DeviceAction Action; DateTime Timest
 The monitoring **control** surface is five members: `StartMonitoring()`,
 `StartMonitoring(TimeSpan)`, `StopMonitoring()`, `WatchAsync(ct)`, `IsMonitoring`.
 `Shutdown()` / `ShutdownAsync()` also stop monitoring as part of tearing the manager down.
-**No `IObservable`. No Rx dependency. BCL types only.**
 
 <!-- Anchors: src/Core/src/PublicAPI.Unshipped.txt:986-992 (incl. Shutdown :987, ShutdownAsync :988);
      ShutdownAsync stops monitoring src/Core/src/Devices/YubiKeyManager.cs:216;

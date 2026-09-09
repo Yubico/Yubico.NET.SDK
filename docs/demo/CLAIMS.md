@@ -4,6 +4,8 @@ Every factual claim in the deck, mapped to the source that grounds it.
 
 **Repository:** `Yubico.YubiKit.NET.SDK`, branch `yubikit`, `d04d59aae63981588f6dc047eb0d788b681a8b8d`
 
+**V1 predecessor:** `Yubico.NET.SDK`, branch `origin/develop`, `f57aa2d6b8c88c3ff53bafcc73496b07f5a00428`
+
 **Peer repositories:**
 
 | Repo | Branch | SHA |
@@ -493,3 +495,25 @@ known to be IL-expensive.
   no longer presented without its cause. The saving is capped by `Core` growing 2.7×,
   and the overall binary grows despite less source. Presenting only the favourable
   number would have been selective.
+
+---
+
+# Round-7: interaction contracts (2026-09-09)
+
+## Human interaction across the SDKs
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| IC1 | v1 centralizes secret input, touch notification, and FIDO cancellation in `KeyCollector` / `KeyEntryData` | code | `Yubico.NET.SDK@f57aa2d6:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.cs:104`; `Fido2Session.MakeCredential.cs:168-173`; `KeyEntryData.cs:33,202` |
+| IC2 | v2 uses asynchronous, exactly-sized owned byte buffers for on-demand secret input | code | `src/Core/src/Credentials/ICredentialPrompt.cs:20-67,98-116` |
+| IC3 | v2 PIV and YubiHSM Auth touch callbacks are predictive; PIV cached touch and firmware before 5.3 prevent exact timing | code | `src/Piv/src/PivSession.cs:80-100`; `src/YubiHsm/src/HsmAuthSession.cs:892-933` |
+| IC4 | v2 WebAuthn has no progress stream or touch callback | doc | `src/WebAuthn/CLAUDE.md`, "No Progress Stream Or Interaction Callback" |
+| IC5 | v2 CTAP HID consumes keepalive packets and sends `CTAPHID_CANCEL` when the caller cancels during that wait | code | `src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs:232-270`; constants `CtapConstants.cs:16,18` |
+| IC6 | Once a v2 logical exchange is admitted it drains uncancelled, and overlapping operations are refused, to protect framing and SCP state | code | `src/Core/src/Utilities/ExchangeGuard.cs:17-30,44-63` |
+| IC7 | Swift 1.4 exposes `processing`, `waitingForUserVerification`, `waitingForUser`, and `finished` as an async status stream; waiting states carry cancel closures | peer | `swift@c76ae973:FIDO/WebAuthn/WebAuthn.swift:37-61`; keepalive mapping `CTAP2Backend+MakeCredential.swift:142` |
+| IC8 | Android exposes keepalive status and cancellation through `CommandState` | peer | `yubikit-android@f462685:core/.../CommandState.java:24-65`; `FidoProtocol.java:122,150` |
+| IC9 | Rust and python-fido2 expose exact touch notification from CTAP keepalive plus cancellation and credential interaction hooks | peer | `rust@90940e9:webauthn/client.rs:74-78`; `ctap2/session.rs:90-97`; `python-fido2@5bc9d3a:client/__init__.py:243-265,359-363`; `hid/__init__.py:205-231` |
+| IC10 | PIV key generation is awaitable in .NET v2 and Swift, but synchronous in .NET v1, Android, Rust, and Python | code / peer | v2 `src/Piv/src/PivSession.cs:452-463`; Swift `PIVSession.swift:255-262`; v1 `PivSession.KeyPairs.cs:48,162`; Android `PivSession.java:1098`; Rust `piv.rs:2019`; Python `yubikit/piv.py:1379` |
+| IC11 | CTAP keepalive distinguishes processing from waiting for user presence, and CTAP HID defines a cancel command | spec | FIDO CTAP 2.3, sections "CTAPHID_KEEPALIVE" and "CTAPHID_CANCEL": `https://fidoalliance.org/specs/fido-v2.3-rd-20251023/fido-client-to-authenticator-protocol-v2.3-rd-20251023.html` |
+| IC12 | User presence and user verification are separate WebAuthn concepts | spec | W3C WebAuthn Level 3: `https://www.w3.org/TR/webauthn-3/#sctn-user-presence` and `#user-verification` |
+| IC13 | Interaction APIs must remain cross-platform and UI-agnostic, must not prescribe an application executor, and every referenced dependency is checked for Native AOT compatibility | code / doc | `src/Core/src/Credentials/ICredentialPrompt.cs:25-35`; `src/Core/src/Native/SdkPlatformInfo.cs:43-53`; `Directory.Build.targets:17-24`; `docs/research/native-aot-readiness.md:181-195` |

@@ -64,9 +64,10 @@ This table goes stale the moment you add or delete a slide. Regenerate it with
 | `10-applets-a.md` | 23–25 | Management, PIV, OATH |
 | `11-applets-b.md` | 26–28 | OpenPGP, FIDO2, WebAuthn |
 | `12-applets-c.md` | 29–31 | SecurityDomain, YubiHSM Auth, YubiOTP |
-| `13-coverage-matrix.md` | 32 | Coverage across all five SDKs |
-| `14-footprint.md` | 33–36 | v1 vs v2 sizes, why only 17 %, Native AOT, provenance |
-| `15-takeaways.md` | 37 | Closing |
+| `12-interaction-contracts.md` | 32 | Cancellation, touch, secret input, long-running work |
+| `13-coverage-matrix.md` | 33 | Coverage across all five SDKs |
+| `14-footprint.md` | 34–37 | v1 vs v2 sizes, why only 17 %, Native AOT, provenance |
+| `15-takeaways.md` | 38 | Closing |
 
 There is no `06-`. That topic (the v1→v2 event architecture and the three stream
 contracts) was cut during review; its logging half became `07-logging.md`.

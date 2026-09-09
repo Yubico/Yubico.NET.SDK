@@ -18,6 +18,8 @@ One connection, one live session, enforced at runtime.
 <br>
 
 `docs/architecture/` · `docs/usage/device-discovery.md` · `docs/NATIVE-AOT.md`
+[Run the single-file WebAuthn + previewSign demo](https://github.com/Yubico/Yubico.NET.SDK/blob/demo/v2-slide-deck/webauthn-demo.cs)
+
 Status **2.0.0-alpha.2** — public API still in `PublicAPI.Unshipped.txt`, so breaking
 changes are still cheap. Now is the time to complain.
 

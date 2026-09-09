@@ -146,8 +146,9 @@ public class PreviewSignTests
         byte[] ikm = RandomNumberGenerator.GetBytes(32);
         byte[] ctx = Encoding.ASCII.GetBytes("integration-test-ctx");
 
-        // Convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey
-        var fido2GeneratedKey = ConvertToFido2GeneratedKey(keyHandle, arkgSeedKey);
+        var fido2GeneratedKey = Fido2Extensions.PreviewSignGeneratedKey.FromArkgSeedKey(
+            keyHandle,
+            arkgSeedKey);
 
         var derivedKey = fido2GeneratedKey.DerivePublicKey(ikm, ctx);
         Assert.Equal(65, derivedKey.PublicKey.Length); // SEC1 uncompressed
@@ -207,40 +208,4 @@ public class PreviewSignTests
         Assert.True(verified, "Signature verification should succeed for derived public key");
     }
 
-    /// <summary>
-    /// Helper to convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey.
-    /// </summary>
-    /// <remarks>
-    /// WARNING -- EXPERIMENTAL -- test only: this ARKG bridge exists for integration-test coverage and must not be
-    /// treated as production cryptographic guidance.
-    /// <para>
-    /// This bridges the WebAuthn layer (which exposes CoseKey directly) to the Fido2 layer
-    /// (which has the DerivePublicKey method). Uses reflection because PreviewSignGeneratedKey's
-    /// constructor is internal to the Fido2 assembly.
-    /// </para>
-    /// </remarks>
-    private static Fido2.Extensions.PreviewSignGeneratedKey ConvertToFido2GeneratedKey(
-        ReadOnlyMemory<byte> keyHandle,
-        Fido2.Cose.CoseArkgP256SeedKey arkgSeedKey)
-    {
-        var generatedKeyType = typeof(Fido2.Extensions.PreviewSignGeneratedKey);
-        var constructor = generatedKeyType.GetConstructor(
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
-            null,
-            [typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(Fido2.Cose.CoseAlgorithm)],
-            null);
-
-        if (constructor is null)
-        {
-            throw new InvalidOperationException(
-                "PreviewSignGeneratedKey constructor not found. This indicates a breaking change in the Fido2 layer.");
-        }
-
-        return (Fido2.Extensions.PreviewSignGeneratedKey)constructor.Invoke([
-            keyHandle,
-            arkgSeedKey.BlPublicKey,
-            arkgSeedKey.KemPublicKey,
-            arkgSeedKey.Algorithm
-        ]);
-    }
 }

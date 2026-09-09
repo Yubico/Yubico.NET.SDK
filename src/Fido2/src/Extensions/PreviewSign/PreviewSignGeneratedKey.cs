@@ -84,6 +84,25 @@ public sealed class PreviewSignGeneratedKey
     }
 
     /// <summary>
+    /// Creates generated ARKG key material from the seed key returned by a WebAuthn previewSign registration.
+    /// </summary>
+    /// <param name="keyHandle">The generated signing key handle returned by previewSign.</param>
+    /// <param name="seedKey">The ARKG-P256 seed key returned by previewSign.</param>
+    /// <returns>Generated key material ready for <see cref="DerivePublicKey"/>.</returns>
+    public static PreviewSignGeneratedKey FromArkgSeedKey(
+        ReadOnlyMemory<byte> keyHandle,
+        CoseArkgP256SeedKey seedKey)
+    {
+        ArgumentNullException.ThrowIfNull(seedKey);
+
+        return new PreviewSignGeneratedKey(
+            keyHandle,
+            seedKey.BlPublicKey,
+            seedKey.KemPublicKey,
+            seedKey.DerivedKeyAlgorithm);
+    }
+
+    /// <summary>
     /// Derives a public key using the ARKG-P256 algorithm.
     /// </summary>
     /// <remarks>

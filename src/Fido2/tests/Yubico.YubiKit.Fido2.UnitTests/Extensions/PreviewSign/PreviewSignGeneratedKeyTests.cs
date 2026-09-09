@@ -44,6 +44,24 @@ public class PreviewSignGeneratedKeyTests
         "dac2a1b197cc10d2376559ad6df6bc107318d5cfb90def9f4a1f5347e086c2cd");
 
     [Fact]
+    public void FromArkgSeedKey_MapsWebAuthnKeyMaterial()
+    {
+        byte[] deviceKeyHandle = [0x01, 0x02, 0x03];
+        var seedKey = new CoseArkgP256SeedKey(
+            CoseAlgorithm.ArkgP256SeedKey,
+            CoseAlgorithm.Esp256,
+            PkKem,
+            PkBl);
+
+        var generatedKey = PreviewSignGeneratedKey.FromArkgSeedKey(deviceKeyHandle, seedKey);
+
+        Assert.Equal(deviceKeyHandle, generatedKey.KeyHandle.ToArray());
+        Assert.Equal(PkBl, generatedKey.BlindingPublicKey.ToArray());
+        Assert.Equal(PkKem, generatedKey.KemPublicKey.ToArray());
+        Assert.Equal(CoseAlgorithm.Esp256, generatedKey.DerivedKeyAlgorithm);
+    }
+
+    [Fact]
     public void DerivePublicKey_WithKnownKATVector_ProducesExpectedDerivedKey()
     {
         // Arrange

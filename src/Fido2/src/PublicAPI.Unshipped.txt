@@ -553,6 +553,7 @@ Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.BlindingPublicKey.init -
 Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.DerivePublicKey(System.ReadOnlySpan<byte> ikm, System.ReadOnlySpan<byte> ctx) -> Yubico.YubiKit.Fido2.Extensions.PreviewSignDerivedKey!
 Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.DerivedKeyAlgorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
 Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.DerivedKeyAlgorithm.init -> void
+static Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.FromArkgSeedKey(System.ReadOnlyMemory<byte> keyHandle, Yubico.YubiKit.Fido2.Cose.CoseArkgP256SeedKey! seedKey) -> Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey!
 Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.KemPublicKey.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.KemPublicKey.init -> void
 Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey.KeyHandle.get -> System.ReadOnlyMemory<byte>

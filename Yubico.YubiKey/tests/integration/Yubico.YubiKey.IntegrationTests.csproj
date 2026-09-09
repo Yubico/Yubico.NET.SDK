@@ -35,7 +35,7 @@ limitations under the License. -->
     <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.11" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
     <PackageReference Include="System.Formats.Asn1" Version="10.0.11" />
-    <PackageReference Include="Xunit.SkippableFact" Version="1.5.61" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.5.85" />
     <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
     <ProjectReference Include="..\unit\Yubico.YubiKey.UnitTests.csproj" />
     <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj" />

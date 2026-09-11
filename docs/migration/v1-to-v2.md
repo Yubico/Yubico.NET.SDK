@@ -106,7 +106,7 @@ below before diagnosing behavior changes.
 | A direct applet factory with a mismatched `SessionCreationOptions.PreferredConnectionType` | All eight direct factories now throw `ArgumentException` before device input/output. |
 | Public `DeviceConfig.GetBytes(reboot, currentLockCode, newLockCode)` | Removed. Pass `SetDeviceConfigOptions` to `SetDeviceConfigAsync`; wire encoding is session implementation detail. |
 | Named PIV arguments `ChangePukAsync(pukUtf8: ...)`, `RecoverPinOnlyModeAsync(pin: ...)`, or `SetPinOnlyModeAsync(pin: ...)` | Rename them to `currentPukUtf8:` or `pinUtf8:` as appropriate. |
-| Named OpenPGP `Kdf.Process(..., pinUtf8Bytes: ...)` argument | Rename it to `pinUtf8:`. |
+| Named OpenPGP `Kdf.Process(..., pinUtf8Bytes: ...)` argument | Rename it to `pin:`. The parameter is `ReadOnlySpan<byte> pin`; it carries UTF-8 bytes but does not use the `Utf8` suffix. |
 
 The following dependency-injection APIs were removed rather than replaced. Call the normalized static factory or
 the corresponding `IYubiKey.CreateXSessionAsync` extension directly:
@@ -585,7 +585,7 @@ Use `Yubico.YubiKit.YubiHsm` for YubiHSM 2 workflows. Review connector/session c
 
 A dedicated `HsmAuthRetryException.RetriesRemaining` and an `HsmAuthSession.OnTouchRequired` callback were restored after an initial v2 gap; see `yubihsm-retry-exception` and `yubihsm-touch-notify` in `v1-to-v2-map.yml`. `HsmAuthCredential.Counter` was hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics; see `yubihsm-credential-retries-remaining-rename`.
 
-Credential passwords moved from `string` to UTF-8 `ReadOnlyMemory<byte>` across nine `IHsmAuthSession`/`HsmAuthSession` members (parameters renamed with the `...Utf8` suffix), closing a v1 regression rather than introducing one, since v1's equivalent path already used byte-based passwords; see `yubihsm-credential-password-bytes` in `v1-to-v2-map.yml`.
+Credential passwords moved from `string` to UTF-8 `ReadOnlyMemory<byte>` across nine `IHsmAuthSession`/`HsmAuthSession` members, closing a v1 regression rather than introducing one, since v1's equivalent path already used byte-based passwords; see `yubihsm-credential-password-bytes` in `v1-to-v2-map.yml`. The parameters are named plainly — `credentialPassword`, `derivationPassword`, `currentPassword`, `newPassword`, and `password` — with no `Utf8` suffix; `refactor(fido2,openpgp,oath)!: drop Utf8 param suffix from secret parameters` (`5af953f6`) applied the same convention to FIDO2, OpenPGP, and OATH. PIV is the exception and still uses `pinUtf8`, `pukUtf8`, and friends.
 
 ## Manual Low-Level Command Cases
 

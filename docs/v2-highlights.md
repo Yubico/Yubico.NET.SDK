@@ -1,11 +1,11 @@
 # What's new in YubiKit .NET v2
 
-Last updated: 2026-08-31
+Last updated: 2026-09-11
 
 V2 is a ground-up rewrite of the YubiKey .NET SDK. It speaks to YubiKey
 applications v1 never supported, it's async from top to bottom, you install
-only the pieces you actually use, and it compiles to a native binary with no
-.NET runtime required on the machine.
+only the pieces you actually use, and it supports Native AOT deployment with
+no .NET runtime required on the machine.
 
 It also breaks a lot of things on purpose. This page covers both halves —
 what you get, and what it costs you — so you can decide whether v2 is worth
@@ -37,13 +37,48 @@ documentation rather than here.
 
 ## Async all the way down
 
-Every public API in v2 is `async`/`await`. There are no synchronous wrappers
-anywhere, and that's deliberate rather than half-finished.
+Every device operation in v2 is `async`/`await`. There are no synchronous
+wrappers anywhere, and that's deliberate rather than half-finished.
 
 Talking to a YubiKey is mostly waiting on a YubiKey, and v2's API shape now
 reflects that honestly. The tradeoff is real: if you're writing a small
 console tool or a script, you'll be writing async code where v1 let you get
 away without it.
+
+## Device events without reactive dependencies
+
+`YubiKeyManager.WatchAsync` exposes device arrivals and removals as an
+`IAsyncEnumerable`, with no Reactive Extensions dependency and the same async
+model as the rest of the SDK. Call `StartMonitoring` first, and start the
+`await foreach` before the action you expect to produce an event — a watcher
+subscribes on first enumeration, not when the method is called.
+
+Each watcher has its own bounded buffer, so consumers do not block or
+interfere with one another. If a consumer falls too far behind, its stream
+faults instead of silently dropping device state; call `FindAllAsync` to
+resynchronise.
+
+## One physical key, safely owned
+
+`IYubiKey` represents a physical key when discovery has enough evidence to
+group its interfaces. `SerialNumber` and the tri-state `SameDeviceAs` help you
+correlate references; when the evidence is ambiguous, discovery splits
+interfaces rather than guessing.
+
+Within your process, a grouped physical key admits one live connection, and
+that connection one live session. Conflicting acquisition throws
+`ConnectionInUseException` before another applet or transport can disrupt work
+already in progress. Another process holding the same interface still surfaces
+an ordinary platform `SCardException`.
+
+## One session grammar across applets
+
+All eight applet sessions share the same creation pattern:
+`IYubiKey.CreateXSessionAsync` for a session that owns its connection, or
+`XSession.CreateAsync` for one that borrows yours. `SessionCreationOptions`
+carries cross-cutting creation policy — protocol configuration, secure-channel
+parameters, connection preference, and firmware-version override — so those
+concerns work the same way across applets.
 
 ## Install only what you use
 
@@ -64,13 +99,19 @@ deliver.
 
 ## Native AOT
 
-V2 compiles to a single self-contained native binary with `PublishAot=true`,
-and runs on machines with no .NET runtime installed. All ten libraries are
-covered.
+All ten published libraries carry Native AOT compatibility metadata and are
+analyzer-checked and link-verified. Publish with `PublishAot=true` to produce
+a platform-specific native executable that runs with no .NET runtime
+installed.
 
-Verified against real YubiKey hardware on macOS arm64, Windows x64, and
-Linux x64. Runtime coverage under AOT still varies by library — we're
-deepening it before general availability.
+Core discovery has physical-device evidence on macOS Apple Silicon, Windows
+x64, and Linux x64. Deeper Management, PIV, and device-monitoring runtime
+evidence is currently macOS-only; the remaining applets are link-verified but
+not yet runtime-exercised under Native AOT.
+
+Stable deployments are not a single standalone binary: ship the complete
+publish output, which includes the platform-specific `Yubico.NativeShims`
+native library.
 
 ## Why v2 breaks so much, on purpose
 
@@ -94,12 +135,12 @@ list and the reasoning behind each one.
 **Post-quantum algorithms (ML-DSA, ML-KEM)** aren't in the .NET SDK yet.
 We're coordinating parity timing across the SDKs before putting a date on it.
 
-**A unified way to collect PINs and touch.** V1 had the `KeyCollector`
-delegate — one callback shape shared across PIV, FIDO2, OATH, U2F, and
-YubiHSM Auth. V2 has no callback equivalent: sessions take credentials as
-direct method parameters, matching Yubico's other SDKs, so your application
-owns the authentication flow. Whether v2 should additionally offer a
-unified pattern for interactive flows is still an open design question.
+**A unified way to collect credentials and touch is only partly addressed.**
+Applet sessions deliberately take credentials as direct parameters, so your
+application owns those flows. Core now provides `ICredentialPrompt`, and
+`WebAuthnClient` uses it with a bounded retry loop that defaults to three
+attempts. It is not adopted across the other applets, and there is no unified
+touch pattern, so the broader gap remains.
 
 [The v1 to v2 comparison](v1-to-v2-comparison.md) has the full inventory of
 what's changed, restored, still open, or deliberately not coming.

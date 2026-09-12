@@ -198,6 +198,7 @@ public class SmartCardBackendTests
 
         Assert.Equal(4, result.Length);
         Assert.Equal(0x01, result.Span[0]);
+        Assert.Equal(new byte[] { 0x01, 0x02, 0x03, 0x04 }, response.Data.ToArray());
     }
 
     [Fact]
@@ -248,6 +249,30 @@ public class SmartCardBackendTests
                 TestContext.Current.CancellationToken).AsTask());
 
         Assert.Same(expected, actual);
+        Assert.All(response.Data.ToArray(), value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenTransportTimesOut_ResolvesFailedAndPreservesTimeout()
+    {
+        var expected = new TimeoutException("Transport timed out.");
+        _protocol.TransmitAndReceiveAsync(
+                Arg.Any<ApduCommand>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<ApduResponse>(expected));
+        var prompt = new ThrowingPrompt();
+        var backend = CreateBackend();
+
+        TimeoutException actual = await Assert.ThrowsAsync<TimeoutException>(() => backend.SendAndReceiveAsync(
+            ConfigSlot.ChalHmac1,
+            ReadOnlyMemory<byte>.Empty,
+            4,
+            UserPresenceNotification.Create(prompt, CreateContext()),
+            TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Same(expected, actual);
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Outcomes));
     }
 
     [Fact]
@@ -368,6 +393,7 @@ public class SmartCardBackendTests
         Exception? resolutionException = null) : IUserPresencePrompt
     {
         public int ResolutionCount { get; private set; }
+        public List<UserPresenceOutcome> Outcomes { get; } = [];
 
         public ValueTask OnUserPresenceRequestedAsync(
             UserPresenceContext context,
@@ -381,6 +407,7 @@ public class SmartCardBackendTests
             CancellationToken cancellationToken)
         {
             ResolutionCount++;
+            Outcomes.Add(outcome);
             return resolutionException is null
                 ? default
                 : ValueTask.FromException(resolutionException);

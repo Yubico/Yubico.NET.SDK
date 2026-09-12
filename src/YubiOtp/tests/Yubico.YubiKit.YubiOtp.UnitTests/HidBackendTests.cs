@@ -99,6 +99,7 @@ public class HidBackendTests
         Assert.Equal(20, result.Length);
         Assert.Equal(0xAA, result.Span[0]);
         Assert.Equal(0xFF, result.Span[19]);
+        Assert.Equal(responseWithCrc, result.ToArray().Concat(responseWithCrc[^2..]).ToArray());
     }
 
     [Fact]
@@ -209,6 +210,40 @@ public class HidBackendTests
                 TestContext.Current.CancellationToken).AsTask());
 
         Assert.Same(expected, actual);
+        Assert.All(responseWithCrc, value => Assert.Equal(0, value));
+    }
+
+    [Theory]
+    [InlineData(true, UserPresenceOutcome.TimedOut)]
+    [InlineData(false, UserPresenceOutcome.Failed)]
+    public async Task SendAndReceiveAsync_TimeoutClassification_RequiresObservedTouchTimeout(
+        bool touchSpecific,
+        UserPresenceOutcome expectedOutcome)
+    {
+        Exception expected = touchSpecific
+            ? new OtpHidTouchTimeoutException("Touch timed out.")
+            : new TimeoutException("Transport timed out.");
+        var prompt = new RecordingPrompt();
+        UserPresenceContext context = CreateContext();
+        _protocol.SendAndReceiveAsync(
+                Arg.Any<byte>(),
+                Arg.Any<ReadOnlyMemory<byte>>(),
+                Arg.Any<UserPresenceNotification>(),
+                Arg.Any<CancellationToken>())
+            .Returns(callInfo => RequestAndThrowAsync(
+                callInfo.ArgAt<UserPresenceNotification>(2),
+                expected));
+        var backend = new HidBackend(_protocol);
+
+        Exception actual = await Assert.ThrowsAsync(expected.GetType(), () => backend.SendAndReceiveAsync(
+            ConfigSlot.ChalHmac1,
+            new byte[64],
+            20,
+            UserPresenceNotification.Create(prompt, context),
+            TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Same(expected, actual);
+        Assert.Equal(expectedOutcome, Assert.Single(prompt.Outcomes));
     }
 
     [Fact]
@@ -231,6 +266,7 @@ public class HidBackendTests
                 TestContext.Current.CancellationToken).AsTask());
 
         Assert.Equal("Invalid CRC in OTP HID response.", actual.Message);
+        Assert.All(invalidResponse, value => Assert.Equal(0, value));
     }
 
     [Fact]
@@ -355,6 +391,32 @@ public class HidBackendTests
         Application = "YubiOTP",
         Scope = "One"
     };
+
+    private static async Task<ReadOnlyMemory<byte>> RequestAndThrowAsync(
+        UserPresenceNotification notification,
+        Exception exception)
+    {
+        await notification.RequestAsync(UserPresenceBasis.DeviceWaiting, CancellationToken.None);
+        throw exception;
+    }
+
+    private sealed class RecordingPrompt : IUserPresencePrompt
+    {
+        public List<UserPresenceOutcome> Outcomes { get; } = [];
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken) => default;
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            Outcomes.Add(outcome);
+            return default;
+        }
+    }
 
     private sealed class ThrowingPrompt(
         Exception? requestException = null,

@@ -55,6 +55,9 @@ then the Core protocol requests the operation's shared handle once with `DeviceW
 terminal resolution after response-length and CRC validation. SmartCard has no in-flight wait signal, so
 `SmartCardBackend` owns both the `PolicyRequires` request and terminal resolution when cached OTP status
 identifies the selected slot as touch-triggered. Unknown and non-touch SmartCard slot state remains silent.
+Only expiration of an OTP HID wait after the device reports the touch-wait flag resolves as `TimedOut`;
+transport and readiness timeouts, including all SmartCard timeouts, resolve as `Failed`. Challenge-response
+output remains backend-owned until successful resolution and is cleared if the callback prevents transfer.
 Notification context uses application `YubiOTP` and the slot enum name as its scope; configuration and status
 operations never notify.
 

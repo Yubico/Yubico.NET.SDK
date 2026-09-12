@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -68,20 +69,36 @@ public sealed partial class OpenPgpSession
 
         var decAttrs = _appData.Discretionary.AlgorithmAttributesDec;
         var payload = FormatDecryptPayload(decAttrs, ciphertext.Span);
-        UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(KeyRef.Dec, cancellationToken).ConfigureAwait(false));
+        try
+        {
+            UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+                await GetUserPresenceContextAsync(KeyRef.Dec, cancellationToken).ConfigureAwait(false));
 
-        // PSO: DECIPHER — INS=0x2A, P1=0x80, P2=0x86
-        var command = new ApduCommand(0x00, (int)Ins.Pso, 0x80, 0x86, payload);
-        return await RunWithUserPresenceNotificationAsync(
-                userPresenceNotification,
-                async token =>
-                {
-                    var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
-                    return response.Data;
-                },
-                cancellationToken)
-            .ConfigureAwait(false);
+            // PSO: DECIPHER — INS=0x2A, P1=0x80, P2=0x86
+            var command = new ApduCommand(0x00, (int)Ins.Pso, 0x80, 0x86, payload);
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
+                        try
+                        {
+                            await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
+                                .ConfigureAwait(false);
+                            return response.Data.ToArray();
+                        }
+                        finally
+                        {
+                            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+                        }
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(payload);
+        }
     }
 
     /// <inheritdoc />

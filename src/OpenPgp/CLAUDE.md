@@ -130,4 +130,5 @@ UIF (`KeyRef.Att`). A failed UIF read falls back to `PolicyMayRequire` without r
 operation; cancellation still propagates. Firmware without UIF support stays silent because it cannot configure
 that policy. A direct GET DATA is issued only when the cached application-related data omitted that key's UIF.
 No OpenPGP status word is currently verified as a user-presence timeout, so terminal outcomes are limited to
-`Completed`, `Cancelled`, and `Failed`.
+`Completed`, `Cancelled`, and `Failed`. Decryption resolves successfully before materializing the caller's
+plaintext copy; the raw response is cleared whether resolution succeeds or throws.

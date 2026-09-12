@@ -109,7 +109,11 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         UserPresenceNotification.Create(_userPresencePrompt, context);
 
     /// <summary>Runs an ordinary operation with request, outcome mapping, and terminal resolution.</summary>
-    /// <typeparam name="TResult">The operation result type.</typeparam>
+    /// <typeparam name="TResult">
+    ///     The operation result type. An operation that creates caller-owned sensitive data or immutable secret
+    ///     material must resolve <paramref name="notification" /> before transferring or materializing that result,
+    ///     and must clear any owned intermediate data if resolution fails.
+    /// </typeparam>
     /// <param name="notification">The non-null per-operation notification handle.</param>
     /// <param name="operation">The operation to run after the request callback succeeds.</param>
     /// <param name="cancellationToken">The operation cancellation token.</param>
@@ -136,11 +140,20 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     /// <summary>
     ///     Runs an operation that owns request timing while this method owns outcome mapping and terminal resolution.
     /// </summary>
-    /// <typeparam name="TResult">The operation result type.</typeparam>
+    /// <typeparam name="TResult">
+    ///     The operation result type. An operation that creates caller-owned sensitive data or immutable secret
+    ///     material must resolve <paramref name="notification" /> before transferring or materializing that result,
+    ///     and must clear any owned intermediate data if resolution fails.
+    /// </typeparam>
     /// <param name="notification">The non-null per-operation notification handle.</param>
     /// <param name="operation">The operation that may request at its transport boundary.</param>
     /// <param name="cancellationToken">The operation cancellation token.</param>
     /// <returns>The operation result.</returns>
+    /// <remarks>
+    ///     This method provides fallback resolution for failure and cancellation paths. It cannot reclaim a result
+    ///     already produced by <paramref name="operation" /> if the terminal callback then fails, so the result's
+    ///     producing owner must explicitly resolve successful sensitive operations before ownership transfer.
+    /// </remarks>
     internal async Task<TResult> RunWithUserPresenceResolutionAsync<TResult>(
         UserPresenceNotification notification,
         Func<CancellationToken, Task<TResult>> operation,

@@ -276,11 +276,12 @@ public class OathSessionTests
             new SessionCreationOptions { UserPresencePrompt = prompt },
             TestContext.Current.CancellationToken);
 
-        _ = await session.CalculateAsync(
+        ReadOnlyMemory<byte> result = await session.CalculateAsync(
             CreateCredential(touchRequired),
             new byte[8],
             TestContext.Current.CancellationToken);
 
+        Assert.Equal(new byte[] { 0x01, 0x02, 0x03, 0x04 }, result.ToArray());
         Assert.Empty(prompt.Requested);
         Assert.Empty(prompt.Resolved);
         Assert.Contains(connection.TransmittedCommands, command => command[1] == OathConstants.InsCalculate);
@@ -372,6 +373,27 @@ public class OathSessionTests
                 TestContext.Current.CancellationToken));
 
         Assert.Same(expected, actual);
+    }
+
+    [Theory]
+    [InlineData(new byte[] { 0x06, 0x00, 0x00, 0x01 })]
+    [InlineData(new byte[] { 0x09, 0x00, 0x00, 0x00, 0x01 })]
+    public async Task CalculateCodeAsync_WhenTruncatedResponseIsMalformed_ResolvesFailed(byte[] truncated)
+    {
+        byte[] response = [OathConstants.TagTruncated, (byte)truncated.Length, .. truncated, 0x90, 0x00];
+        var connection = new RecordingSmartCardConnection(SelectResponse(), response);
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        _ = await Assert.ThrowsAsync<BadResponseException>(() => session.CalculateCodeAsync(
+            CreateCredential(touchRequired: true),
+            timestamp: 1_704_067_200,
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
     }
 
     [Fact]

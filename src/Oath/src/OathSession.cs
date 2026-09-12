@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
@@ -403,15 +404,25 @@ public sealed class OathSession : ApplicationSession, IOathSession
                     {
                         var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
                         var response = await SendAsync(command, token).ConfigureAwait(false);
-
-                        using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
-                        foreach (var tlv in responseTlvs)
+                        try
                         {
-                            if (tlv.Tag == OathConstants.TagResponse)
-                                return tlv.Value.ToArray();
-                        }
+                            using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
+                            foreach (var tlv in responseTlvs)
+                            {
+                                if (tlv.Tag != OathConstants.TagResponse)
+                                    continue;
 
-                        throw new BadResponseException("No TAG_RESPONSE in CALCULATE response.");
+                                await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
+                                    .ConfigureAwait(false);
+                                return tlv.Value.ToArray();
+                            }
+
+                            throw new BadResponseException("No TAG_RESPONSE in CALCULATE response.");
+                        }
+                        finally
+                        {
+                            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+                        }
                     },
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -460,15 +471,26 @@ public sealed class OathSession : ApplicationSession, IOathSession
                         // P2=0x01 requests truncated response
                         var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x01, data);
                         var response = await SendAsync(command, token).ConfigureAwait(false);
-
-                        using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
-                        foreach (var tlv in responseTlvs)
+                        try
                         {
-                            if (tlv.Tag == OathConstants.TagTruncated)
-                                return Code.FormatCode(credential, ts, tlv.Value.Span);
-                        }
+                            using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
+                            foreach (var tlv in responseTlvs)
+                            {
+                                if (tlv.Tag != OathConstants.TagTruncated)
+                                    continue;
 
-                        throw new BadResponseException("No TAG_TRUNCATED in CALCULATE response.");
+                                Code.ParsedCode parsedCode = Code.ParseCode(credential, tlv.Value.Span);
+                                await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
+                                    .ConfigureAwait(false);
+                                return Code.FormatCode(credential, ts, parsedCode);
+                            }
+
+                            throw new BadResponseException("No TAG_TRUNCATED in CALCULATE response.");
+                        }
+                        finally
+                        {
+                            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+                        }
                     },
                     cancellationToken)
                 .ConfigureAwait(false);

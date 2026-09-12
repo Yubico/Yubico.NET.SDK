@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -257,6 +258,32 @@ public class TouchNotificationTests
                 TestContext.Current.CancellationToken));
 
         Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task SignOrDecryptAsync_WhenSuccessResponseIsMalformed_ResolvesFailedAndPreservesParseError()
+    {
+        var connection = CreateInitializedConnection(
+            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            [0x7D, 0x00, 0x90, 0x00]);
+        var prompt = new RecordingUserPresencePrompt
+        {
+            ResolutionException = new InvalidOperationException("resolution failed")
+        };
+        await using var session = await CreateSessionAsync(connection, prompt);
+
+        ApduException actual = await Assert.ThrowsAsync<ApduException>(() => session.SignOrDecryptAsync(
+            PivSlot.Authentication,
+            PivAlgorithm.EccP256,
+            new byte[32],
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal("Invalid crypto response format", actual.Message);
+        AssertNotification(
+            prompt,
+            UserPresenceBasis.PolicyRequires,
+            PivSlot.Authentication,
+            UserPresenceOutcome.Failed);
     }
 
     [Fact]

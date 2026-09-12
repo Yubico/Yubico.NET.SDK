@@ -66,9 +66,8 @@ public class PivCryptographicOperationsTests
         Assert.Equal(payload, result.ToArray());
 
         Assert.NotNull(backend.CapturedRawDataArray);
-        int dataLength = backend.CapturedCount - 2; // exclude trailing SW bytes
         Assert.All(
-            backend.CapturedRawDataArray!.AsSpan(backend.CapturedOffset, dataLength).ToArray(),
+            backend.CapturedRawDataArray!.AsSpan(backend.CapturedOffset, backend.CapturedCount).ToArray(),
             b => Assert.Equal(0, b));
     }
 
@@ -96,9 +95,8 @@ public class PivCryptographicOperationsTests
         Assert.Equal(sharedSecret, result.ToArray());
 
         Assert.NotNull(backend.CapturedRawDataArray);
-        int dataLength = backend.CapturedCount - 2;
         Assert.All(
-            backend.CapturedRawDataArray!.AsSpan(backend.CapturedOffset, dataLength).ToArray(),
+            backend.CapturedRawDataArray!.AsSpan(backend.CapturedOffset, backend.CapturedCount).ToArray(),
             b => Assert.Equal(0, b));
     }
 
@@ -128,7 +126,7 @@ public class PivCryptographicOperationsTests
         Assert.All(backend.CapturedCommandDataArray!, b => Assert.Equal(0, b));
         Assert.All(
             backend.CapturedRawDataArray!
-                .AsSpan(backend.CapturedOffset, backend.CapturedCount - 2)
+                .AsSpan(backend.CapturedOffset, backend.CapturedCount)
                 .ToArray(),
             b => Assert.Equal(0, b));
     }
@@ -161,9 +159,26 @@ public class PivCryptographicOperationsTests
         Assert.All(backend.CapturedCommandDataArray!, b => Assert.Equal(0, b));
         Assert.All(
             backend.CapturedRawDataArray!
-                .AsSpan(backend.CapturedOffset, backend.CapturedCount - 2)
+                .AsSpan(backend.CapturedOffset, backend.CapturedCount)
                 .ToArray(),
             b => Assert.Equal(0, b));
+    }
+
+    [Fact]
+    public async Task ResolveAndTransferCryptoResultAsync_WhenResolutionThrows_ZeroesParsedResult()
+    {
+        byte[] parsedResult = Enumerable.Range(1, 32).Select(i => (byte)i).ToArray();
+        var expected = new InvalidOperationException("resolution failed");
+        UserPresenceNotification notification = UserPresenceNotification.Create(
+            new ThrowingResolutionPrompt(expected),
+            CreateContext());
+        await notification.RequestAsync(TestContext.Current.CancellationToken);
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            PivCryptographicOperations.ResolveAndTransferCryptoResultAsync(parsedResult, notification));
+
+        Assert.Same(expected, actual);
+        Assert.All(parsedResult, value => Assert.Equal(0, value));
     }
 
     private static UserPresenceContext CreateContext() => new()

@@ -151,7 +151,7 @@ public class YubiOtpSessionTests
     }
 
     [Fact]
-    public async Task CalculateHmacSha1Async_TouchWaitTimeout_ResolvesTimedOut()
+    public async Task CalculateHmacSha1Async_SmartCardTransportTimeout_ResolvesFailed()
     {
         var prompt = new RecordingUserPresencePrompt();
         var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
@@ -164,7 +164,7 @@ public class YubiOtpSessionTests
             new byte[] { 0x01 },
             TestContext.Current.CancellationToken));
 
-        Assert.Equal(UserPresenceOutcome.TimedOut, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
     }
 
     [Fact]

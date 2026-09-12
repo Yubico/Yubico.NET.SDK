@@ -204,7 +204,7 @@ public sealed class OpenPgpSessionWireTests
             HashAlgorithmName.SHA256,
             TestContext.Current.CancellationToken);
         byte[] ciphertext = [0x01, 0x02];
-        _ = await session.DecryptAsync(
+        ReadOnlyMemory<byte> decrypted = await session.DecryptAsync(
             ciphertext,
             TestContext.Current.CancellationToken);
         _ = await session.AuthenticateAsync(
@@ -213,6 +213,7 @@ public sealed class OpenPgpSessionWireTests
             TestContext.Current.CancellationToken);
 
         Assert.Equal(["Sig", "Dec", "Aut"], prompt.Requested.Select(entry => entry.Context.Scope));
+        Assert.Equal(new byte[] { 0x01, 0x02, 0x03 }, decrypted.ToArray());
         Assert.All(prompt.Requested, entry =>
         {
             Assert.Equal("OpenPGP", entry.Context.Application);
@@ -446,6 +447,29 @@ public sealed class OpenPgpSessionWireTests
             TestContext.Current.CancellationToken));
 
         Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task DecryptAsync_WhenResolutionFailsAfterSuccess_PropagatesResolutionException()
+    {
+        var expected = new InvalidOperationException("resolution failed");
+        var connection = CreateInitializedConnectionWithUifs(
+            sig: null,
+            dec: Uif.On,
+            aut: null,
+            att: null,
+            CryptoResponse());
+        var prompt = new RecordingUserPresencePrompt(connection, resolutionException: expected);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            session.DecryptAsync(new byte[] { 0x01, 0x02 }, TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+        Assert.Equal(UserPresenceOutcome.Completed, Assert.Single(prompt.Resolved).Outcome);
     }
 
     [Fact]

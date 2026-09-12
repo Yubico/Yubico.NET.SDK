@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
@@ -57,9 +59,11 @@ internal sealed class HidBackend : IFidoBackend
         // Send the full CTAP request (command byte + CBOR payload) via CTAPHID_CBOR
         var outcome = UserPresenceOutcome.Failed;
         Exception? primaryException = null;
+        ReadOnlyMemory<byte> response = default;
+        var responseTransferred = false;
         try
         {
-            var response = await _protocol.SendVendorCommandAsync(
+            response = await _protocol.SendVendorCommandAsync(
                     CtapConstants.CtapHidCbor,
                     request,
                     userPresenceNotification,
@@ -85,7 +89,10 @@ internal sealed class HidBackend : IFidoBackend
             _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
                 status, response.Length - 1);
 
+            await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
+
             // Return the response data (without status byte)
+            responseTransferred = true;
             return response[1..];
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
@@ -102,6 +109,10 @@ internal sealed class HidBackend : IFidoBackend
         finally
         {
             await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+            if (!responseTransferred && !response.IsEmpty)
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+            }
         }
     }
 }

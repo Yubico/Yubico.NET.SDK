@@ -50,11 +50,13 @@ public class OtpHidProtocolTests
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
-    private static OtpHidProtocol CreateProtocolWithMock(MockHidConnection mock)
+    private static OtpHidProtocol CreateProtocolWithMock(
+        MockHidConnection mock,
+        TimeSpan? touchTimeout = null)
     {
         // Queue initial status report for initialization (firmware 5.4.3)
         mock.QueueReport([0x00, 0x05, 0x04, 0x03, 0x00, 0x00, 0x00, 0x00]);
-        return new OtpHidProtocol(new OtpHidConnection(mock));
+        return new OtpHidProtocol(new OtpHidConnection(mock), touchTimeout: touchTimeout);
     }
 
     [Fact]
@@ -130,6 +132,27 @@ public class OtpHidProtocolTests
         Assert.Equal("YubiOTP", requested.Application);
         Assert.Equal("One", requested.Scope);
         Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenObservedTouchWaitExpires_ThrowsTouchSpecificTimeoutAndResets()
+    {
+        var mock = new MockHidConnection();
+        var protocol = CreateProtocolWithMock(mock, touchTimeout: TimeSpan.Zero);
+        QueueUntilTouchWait(mock);
+        var prompt = new RecordingUserPresencePrompt();
+
+        OtpHidTouchTimeoutException exception = await Assert.ThrowsAsync<OtpHidTouchTimeoutException>(() =>
+            protocol.SendAndReceiveAsync(
+                0x30,
+                ReadOnlyMemory<byte>.Empty,
+                CreatePresenceNotification(prompt),
+                TestContext.Current.CancellationToken));
+
+        Assert.IsAssignableFrom<TimeoutException>(exception);
+        Assert.Single(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+        Assert.Equal(OtpConstants.DummyReportWrite, mock.SentReports[^1][OtpConstants.FeatureReportDataSize]);
     }
 
     [Fact]

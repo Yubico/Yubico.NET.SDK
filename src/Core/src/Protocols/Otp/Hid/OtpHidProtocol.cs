@@ -45,6 +45,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     private readonly DisposalGate _disposalGate = new();
     private readonly ILogger<OtpHidProtocol> _logger;
     private readonly ArrayPool<byte> _bufferPool;
+    // Production keeps the device's 14-second touch window; the internal override makes timeout tests deterministic.
+    private readonly TimeSpan _touchTimeout;
     private FirmwareVersion? _firmwareVersion;
     private bool _initialized;
     private bool _disposed;
@@ -52,11 +54,13 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     public OtpHidProtocol(
         IOtpHidConnection connection,
         ILogger<OtpHidProtocol>? logger = null,
-        ArrayPool<byte>? bufferPool = null)
+        ArrayPool<byte>? bufferPool = null,
+        TimeSpan? touchTimeout = null)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         _logger = logger ?? NullLogger<OtpHidProtocol>.Instance;
         _bufferPool = bufferPool ?? ArrayPool<byte>.Shared;
+        _touchTimeout = touchTimeout ?? TimeSpan.FromSeconds(14);
     }
 
     public FirmwareVersion? FirmwareVersion => _firmwareVersion;
@@ -388,9 +392,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         CancellationToken callerToken)
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        const int timeLimitMs = 14000; // 14 seconds for touch (YubiKey times out at 15)
 
-        while (stopwatch.ElapsedMilliseconds < timeLimitMs)
+        while (stopwatch.Elapsed < _touchTimeout)
         {
             if (callerToken.IsCancellationRequested)
             {
@@ -420,7 +423,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
 
         await ResetStateAfterAbandonmentAsync("user-presence timeout", exchangeToken)
             .ConfigureAwait(false);
-        throw new TimeoutException("Timeout waiting for user touch");
+        throw new OtpHidTouchTimeoutException("Timeout waiting for user touch");
     }
 
     private async Task ResetStateAfterAbandonmentAsync(

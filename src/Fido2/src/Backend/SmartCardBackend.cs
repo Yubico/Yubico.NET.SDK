@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -74,6 +76,8 @@ internal sealed class SmartCardBackend : IFidoBackend
 
         Exception? primaryException = null;
         var outcome = UserPresenceOutcome.Failed;
+        ReadOnlyMemory<byte> responseData = default;
+        var responseTransferred = false;
         try
         {
             await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
@@ -91,7 +95,7 @@ internal sealed class SmartCardBackend : IFidoBackend
             };
 
             var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
-            var responseData = apduResponse.Data;
+            responseData = apduResponse.Data;
 
             // First byte of response data is the CTAP status
             if (responseData.Length < 1)
@@ -112,7 +116,10 @@ internal sealed class SmartCardBackend : IFidoBackend
             _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
                 status, responseData.Length - 1);
 
+            await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
+
             // Return the response data (without status byte)
+            responseTransferred = true;
             return responseData[1..];
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
@@ -129,6 +136,10 @@ internal sealed class SmartCardBackend : IFidoBackend
         finally
         {
             await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+            if (!responseTransferred && !responseData.IsEmpty)
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(responseData).Span);
+            }
         }
     }
 }

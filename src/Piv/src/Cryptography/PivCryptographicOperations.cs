@@ -114,6 +114,7 @@ internal static class PivCryptographicOperations
             await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            byte[]? result = null;
             try
             {
                 if (!response.IsOK())
@@ -129,14 +130,23 @@ internal static class PivCryptographicOperations
                         $"Sign/decrypt operation failed for slot 0x{(byte)slot:X2}");
                 }
 
-                await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
-
                 // Parse response: TAG 0x7C [ TAG 0x82 (response data) ]
-                return ParseCryptoResponse(response.Data);
+                result = ParseCryptoResponse(response.Data);
+                ReadOnlyMemory<byte> transferredResult = await ResolveAndTransferCryptoResultAsync(
+                        result,
+                        userPresenceNotification)
+                    .ConfigureAwait(false);
+                result = null;
+                return transferredResult;
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.Data).Span);
+                if (result is not null)
+                {
+                    CryptographicOperations.ZeroMemory(result);
+                }
+
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
             }
         }
         finally
@@ -341,6 +351,7 @@ internal static class PivCryptographicOperations
             await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
             var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            byte[]? result = null;
             try
             {
                 if (!response.IsOK())
@@ -355,14 +366,23 @@ internal static class PivCryptographicOperations
                         $"ECDH operation failed for slot 0x{(byte)slot:X2}");
                 }
 
-                await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
-
                 // Parse response: TAG 0x7C [ TAG 0x82 (shared secret) ]
-                return ParseCryptoResponse(response.Data);
+                result = ParseCryptoResponse(response.Data);
+                ReadOnlyMemory<byte> transferredResult = await ResolveAndTransferCryptoResultAsync(
+                        result,
+                        userPresenceNotification)
+                    .ConfigureAwait(false);
+                result = null;
+                return transferredResult;
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.Data).Span);
+                if (result is not null)
+                {
+                    CryptographicOperations.ZeroMemory(result);
+                }
+
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
             }
         }
         finally
@@ -427,34 +447,40 @@ internal static class PivCryptographicOperations
         }
     }
 
-    private static ReadOnlyMemory<byte> ParseCryptoResponse(ReadOnlyMemory<byte> data)
+    private static byte[] ParseCryptoResponse(ReadOnlyMemory<byte> data)
+    {
+        // Parse outer TLV (0x7C - Dynamic Auth Template)
+        using var outer = Tlv.Create(data.Span);
+        if (outer.Tag != 0x7C)
+        {
+            throw new ApduException("Invalid crypto response format");
+        }
+
+        // Parse inner TLV (0x82 - Response data)
+        using var inner = Tlv.Create(outer.Value.Span);
+        if (inner.Tag != 0x82)
+        {
+            throw new ApduException("Invalid crypto response - expected TAG 0x82");
+        }
+
+        // Copy the value before the Tlv objects are disposed. The caller owns this buffer until transfer.
+        return inner.Value.ToArray();
+    }
+
+    /// <summary>Resolves successful user presence before transferring an owned cryptographic result.</summary>
+    internal static async Task<ReadOnlyMemory<byte>> ResolveAndTransferCryptoResultAsync(
+        byte[] result,
+        UserPresenceNotification userPresenceNotification)
     {
         try
         {
-            // Parse outer TLV (0x7C - Dynamic Auth Template)
-            using var outer = Tlv.Create(data.Span);
-            if (outer.Tag != 0x7C)
-            {
-                throw new ApduException("Invalid crypto response format");
-            }
-
-            // Parse inner TLV (0x82 - Response data)
-            using var inner = Tlv.Create(outer.Value.Span);
-            if (inner.Tag != 0x82)
-            {
-                throw new ApduException("Invalid crypto response - expected TAG 0x82");
-            }
-
-            // Copy the value before the Tlv objects are disposed
-            return inner.Value.ToArray();
+            await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
+            return result;
         }
-        finally
+        catch
         {
-            // `data` is the raw AUTHENTICATE response payload, which for DecryptAsync/CalculateSecretAsync
-            // carries the device's raw decrypted plaintext / ECDH shared secret in the clear. Zero it
-            // unconditionally once the needed value has been copied out above - matching the approach
-            // already applied to PivDataObjectProtocol.GetObjectAsync's equivalent response buffer.
-            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(data).Span);
+            CryptographicOperations.ZeroMemory(result);
+            throw;
         }
     }
 

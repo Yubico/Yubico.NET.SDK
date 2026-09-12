@@ -100,8 +100,8 @@ var sharedSecret = await session.CalculateSecretAsync(
 
 Supply an `IUserPresencePrompt` when creating the session. The same prompt receives a request
 immediately before a private-key APDU that requires or may require touch, followed by one
-resolution notification when that device APDU ends. For RSA decryption, resolution precedes local
-padding removal:
+resolution notification after a successful response has been validated. Malformed success responses
+resolve as failed. For RSA decryption, successful resolution precedes local padding removal:
 
 ```csharp
 var options = new SessionCreationOptions

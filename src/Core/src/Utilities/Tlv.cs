@@ -184,8 +184,14 @@ public sealed class Tlv : IDisposable
     {
         var buffer = data;
         var (tag, _, value) = ParseData(ref buffer);
-
-        return new Tlv(tag, value);
+        try
+        {
+            return new Tlv(tag, value);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(value);
+        }
     }
 
     internal static (int Tag, int Length, byte[] Value) ParseData(ref ReadOnlySpan<byte> buffer)

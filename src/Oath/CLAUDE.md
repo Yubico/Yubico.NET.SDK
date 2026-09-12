@@ -94,4 +94,6 @@ When `SessionCreationOptions.UserPresencePrompt` is supplied, `CalculateAsync` a
 issue `PolicyRequires` immediately before CALCULATE only for credentials whose `TouchRequired` value is
 `true`. The scope is the public display identity (`issuer:name` or `name`); secret material is never included.
 Successful, cancelled, and failed operations resolve as `Completed`, `Cancelled`, and `Failed`. OATH status
-words do not currently provide verified evidence for mapping a failure to `TimedOut`.
+words do not currently provide verified evidence for mapping a failure to `TimedOut`. CALCULATE output is
+validated before successful resolution; sensitive response copies are cleared if resolution fails, and the
+immutable `Code.Value` string is not formatted until the callback succeeds.

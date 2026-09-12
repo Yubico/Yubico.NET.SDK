@@ -60,8 +60,9 @@ User-presence notification is configured only through
 compatibility adapter. Private-key operations map `Always` to `PolicyRequires`, `Cached` to
 `PolicyMayRequire`, and leave `Never`, `Default`, and empty slots silent. Unknown or unavailable
 metadata maps conservatively to `PolicyMayRequire`. Requests occur immediately before the
-cryptographic APDU and are resolved as soon as the private-key APDU completes, before local RSA
-padding removal, with `CancellationToken.None`; PIV does not report
+cryptographic APDU and are resolved after its successful response has been parsed, before transferring
+the parsed output or performing local RSA padding removal, with `CancellationToken.None`. Malformed
+success responses therefore resolve as `Failed`, and raw or untransferred parsed output is cleared. PIV does not report
 `TimedOut` because these exchanges provide no confirmed touch-timeout status.
 
 ## Critical Security Requirements

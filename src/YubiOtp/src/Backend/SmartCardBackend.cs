@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
@@ -129,6 +131,8 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
         Exception? primaryException = null;
         var outcome = UserPresenceOutcome.Failed;
+        ReadOnlyMemory<byte> responseData = default;
+        var responseTransferred = false;
 
         try
         {
@@ -145,25 +149,22 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
             var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
+            responseData = response.Data;
 
-            if (response.Data.Length < expectedLength)
+            if (responseData.Length < expectedLength)
             {
                 throw new BadResponseException(
-                    $"Expected {expectedLength} bytes from slot {slot}, got {response.Data.Length}.");
+                    $"Expected {expectedLength} bytes from slot {slot}, got {responseData.Length}.");
             }
 
             outcome = UserPresenceOutcome.Completed;
-            return response.Data[..expectedLength];
+            await userPresenceNotification.ResolveAsync(outcome).ConfigureAwait(false);
+            responseTransferred = true;
+            return responseData[..expectedLength];
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
             outcome = UserPresenceOutcome.Cancelled;
-            primaryException = ex;
-            throw;
-        }
-        catch (TimeoutException ex)
-        {
-            outcome = UserPresenceOutcome.TimedOut;
             primaryException = ex;
             throw;
         }
@@ -175,6 +176,10 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         finally
         {
             await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+            if (!responseTransferred && !responseData.IsEmpty)
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(responseData).Span);
+            }
         }
     }
 

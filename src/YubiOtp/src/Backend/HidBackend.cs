@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
@@ -78,9 +80,11 @@ internal sealed class HidBackend : IYubiOtpBackend
 
         Exception? primaryException = null;
         var outcome = UserPresenceOutcome.Failed;
+        ReadOnlyMemory<byte> response = default;
+        var responseTransferred = false;
         try
         {
-            var response = await _protocol.SendAndReceiveAsync(
+            response = await _protocol.SendAndReceiveAsync(
                     (byte)slot,
                     data,
                     userPresenceNotification,
@@ -101,6 +105,8 @@ internal sealed class HidBackend : IYubiOtpBackend
             }
 
             outcome = UserPresenceOutcome.Completed;
+            await userPresenceNotification.ResolveAsync(outcome).ConfigureAwait(false);
+            responseTransferred = true;
             return response[..expectedLength];
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
@@ -109,7 +115,7 @@ internal sealed class HidBackend : IYubiOtpBackend
             primaryException = ex;
             throw;
         }
-        catch (TimeoutException ex)
+        catch (OtpHidTouchTimeoutException ex)
         {
             outcome = UserPresenceOutcome.TimedOut;
             primaryException = ex;
@@ -123,6 +129,10 @@ internal sealed class HidBackend : IYubiOtpBackend
         finally
         {
             await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+            if (!responseTransferred && !response.IsEmpty)
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+            }
         }
     }
 }

@@ -238,6 +238,8 @@ resolution after the response is fully drained and the CTAP status is known. Sma
 equivalent in-flight signal, so `SmartCardBackend` owns both the policy request and resolution;
 MakeCredential and GetAssertion emit `PolicyRequires` immediately before the APDU unless their
 effective `UserPresence` option is `false`. Their scope is the RP ID.
+Successful response ownership transfers only after terminal resolution succeeds; a callback failure clears
+the untransferred backend response, including secret-derived extension output.
 
 Selection and Reset carry null-scope context for an authoritative HID keep-alive, but do not predict
 touch on SmartCard. Generic `SendCborRequestAsync` calls do not infer touch semantics. Bio enrollment

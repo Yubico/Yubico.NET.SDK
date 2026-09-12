@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
@@ -51,8 +52,16 @@ internal static class PivCryptographicOperations
         PivSlot slot,
         PivAlgorithm algorithm,
         ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default) =>
-        SignOrDecryptCoreAsync(backend, logger, slot, algorithm, data, cancellationToken);
+        SignOrDecryptCoreAsync(
+            backend,
+            logger,
+            slot,
+            algorithm,
+            data,
+            userPresenceNotification,
+            cancellationToken);
 
     private static async Task<ReadOnlyMemory<byte>> SignOrDecryptCoreAsync(
         IPivBackend backend,
@@ -60,6 +69,7 @@ internal static class PivCryptographicOperations
         PivSlot slot,
         PivAlgorithm algorithm,
         ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken)
     {
         logger.LogDebug("PIV: Signing/decrypting with slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
@@ -101,23 +111,33 @@ internal static class PivCryptographicOperations
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
-            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
-            if (!response.IsOK())
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            try
             {
-                // Check if PIN verification is required
-                if (response.SW == 0x6982)
+                if (!response.IsOK())
                 {
-                    throw new InvalidOperationException(
-                        "Security status not satisfied. PIN verification may be required before this operation.");
+                    // Check if PIN verification is required
+                    if (response.SW == 0x6982)
+                    {
+                        throw new InvalidOperationException(
+                            "Security status not satisfied. PIN verification may be required before this operation.");
+                    }
+
+                    throw ApduException.FromStatusWord(response.SW,
+                        $"Sign/decrypt operation failed for slot 0x{(byte)slot:X2}");
                 }
 
-                throw ApduException.FromStatusWord(response.SW,
-                    $"Sign/decrypt operation failed for slot 0x{(byte)slot:X2}");
-            }
+                await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
 
-            // Parse response: TAG 0x7C [ TAG 0x82 (response data) ]
-            return ParseCryptoResponse(response.Data);
+                // Parse response: TAG 0x7C [ TAG 0x82 (response data) ]
+                return ParseCryptoResponse(response.Data);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.Data).Span);
+            }
         }
         finally
         {
@@ -130,17 +150,16 @@ internal static class PivCryptographicOperations
     internal static async Task<ReadOnlyMemory<byte>> DecryptAsync(
         IPivBackend backend,
         ILogger logger,
-        Func<PivSlot, CancellationToken, Task<PivSlotMetadata?>> getSlotMetadataAsync,
-        Func<PivSlot, CancellationToken, Task> notifyTouchIfRequiredAsync,
+        PivSlotMetadata? metadata,
         PivSlot slot,
         ReadOnlyMemory<byte> cipherText,
         RSAEncryptionPadding padding,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(padding);
         logger.LogDebug("PIV: DecryptAsync slot 0x{Slot:X2}", (byte)slot);
 
-        var metadata = await getSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
         if (metadata is null || !metadata.Value.Algorithm.IsRsa())
         {
             throw new ArgumentException(
@@ -165,8 +184,15 @@ internal static class PivCryptographicOperations
         }
 
         // Perform the raw RSA private key operation on the YubiKey
-        await notifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
-        var rawDecrypted = await SignOrDecryptCoreAsync(backend, logger, slot, algorithm, cipherText, cancellationToken).ConfigureAwait(false);
+        var rawDecrypted = await SignOrDecryptCoreAsync(
+                backend,
+                logger,
+                slot,
+                algorithm,
+                cipherText,
+                userPresenceNotification,
+                cancellationToken)
+            .ConfigureAwait(false);
 
         // Strip padding using a dummy RSA key — same technique as Python yubikey-manager's _unpad_message.
         // We generate a temporary RSA key of the same size, use textbook RSA (encrypt with public key)
@@ -261,6 +287,7 @@ internal static class PivCryptographicOperations
         ILogger logger,
         PivSlot slot,
         IPublicKey peerPublicKey,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Calculating shared secret with slot 0x{Slot:X2}", (byte)slot);
@@ -311,22 +338,32 @@ internal static class PivCryptographicOperations
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, data);
-            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
-            if (!response.IsOK())
+            var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            try
             {
-                if (response.SW == 0x6982)
+                if (!response.IsOK())
                 {
-                    throw new InvalidOperationException(
-                        "Security status not satisfied. PIN verification may be required before this operation.");
+                    if (response.SW == 0x6982)
+                    {
+                        throw new InvalidOperationException(
+                            "Security status not satisfied. PIN verification may be required before this operation.");
+                    }
+
+                    throw ApduException.FromStatusWord(response.SW,
+                        $"ECDH operation failed for slot 0x{(byte)slot:X2}");
                 }
 
-                throw ApduException.FromStatusWord(response.SW,
-                    $"ECDH operation failed for slot 0x{(byte)slot:X2}");
-            }
+                await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
 
-            // Parse response: TAG 0x7C [ TAG 0x82 (shared secret) ]
-            return ParseCryptoResponse(response.Data);
+                // Parse response: TAG 0x7C [ TAG 0x82 (shared secret) ]
+                return ParseCryptoResponse(response.Data);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.Data).Span);
+            }
         }
         finally
         {

@@ -61,19 +61,19 @@ var request = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, R
 
 ---
 
-### 5. No Progress/Touch Callback for Long Operations ✅ FIXED
-**Issue**: Operations requiring touch provide no callback mechanism to prompt users.
+### 5. User-presence notifications for long operations ✅ FIXED
+**Issue**: Operations requiring touch need a lifecycle-aware notification mechanism to prompt users.
 
-**Resolution**: Added `OnTouchRequired` callback property to `PivSession`:
+**Resolution**: Supply `IUserPresencePrompt` through `SessionCreationOptions`:
 
 ```csharp
-session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
+var options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };
+await using var session = await device.CreatePivSessionAsync(options, cancellationToken);
 await session.SignOrDecryptAsync(slot, data, cancellationToken);
 ```
 
-The callback fires before operations with `TouchPolicy.Always` or `TouchPolicy.Cached`. On firmware < 5.3, it fires conservatively for all crypto operations.
-
-**Security Note**: The callback receives NO operation context (no slot, algorithm, or data) to prevent information leakage.
+The prompt receives request and resolution notifications. `TouchPolicy.Always` is required,
+`Cached` is advisory, and unavailable metadata is reported conservatively.
 
 ---
 

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Yubico.YubiKit.Cli.Shared.Device;
+using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
@@ -44,9 +45,13 @@ public sealed class YkDeviceContext
     public ConnectionType? PreferredConnection { get; init; }
 
     /// <summary>
-    ///     Gets fresh session creation options carrying the command's selected transport.
+    ///     Gets fresh session creation options carrying the selected transport and shared terminal prompt.
     /// </summary>
-    public SessionCreationOptions SessionOptions => new() { PreferredConnectionType = PreferredConnection };
+    public SessionCreationOptions SessionOptions => new()
+    {
+        PreferredConnectionType = PreferredConnection,
+        UserPresencePrompt = ConsoleUserPresencePrompt.Instance
+    };
 
     /// <summary>
     ///     Returns a human-readable device banner line, preferring the part number from

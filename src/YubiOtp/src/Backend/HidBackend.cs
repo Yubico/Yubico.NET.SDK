@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
@@ -68,26 +69,60 @@ internal sealed class HidBackend : IYubiOtpBackend
         ConfigSlot slot,
         ReadOnlyMemory<byte> data,
         int expectedLength,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(userPresenceNotification);
+
         Logger.LogDebug("HidBackend SendAndReceive: slot={Slot}, expectedLength={Length}", slot, expectedLength);
 
-        var response = await _protocol.SendAndReceiveAsync((byte)slot, data, cancellationToken)
-            .ConfigureAwait(false);
-
-        // CRC validation: response contains [data...][crc_lo][crc_hi]
-        var totalLength = expectedLength + 2;
-        if (response.Length < totalLength)
+        Exception? primaryException = null;
+        var outcome = UserPresenceOutcome.Failed;
+        try
         {
-            throw new BadResponseException(
-                $"Response too short for CRC validation. Expected at least {totalLength} bytes, got {response.Length}.");
-        }
+            var response = await _protocol.SendAndReceiveAsync(
+                    (byte)slot,
+                    data,
+                    userPresenceNotification,
+                    cancellationToken)
+                .ConfigureAwait(false);
 
-        if (!ChecksumUtils.CheckCrc(response.Span, totalLength))
+            // CRC validation: response contains [data...][crc_lo][crc_hi]
+            var totalLength = expectedLength + 2;
+            if (response.Length < totalLength)
+            {
+                throw new BadResponseException(
+                    $"Response too short for CRC validation. Expected at least {totalLength} bytes, got {response.Length}.");
+            }
+
+            if (!ChecksumUtils.CheckCrc(response.Span, totalLength))
+            {
+                throw new BadResponseException("Invalid CRC in OTP HID response.");
+            }
+
+            outcome = UserPresenceOutcome.Completed;
+            return response[..expectedLength];
+        }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
-            throw new BadResponseException("Invalid CRC in OTP HID response.");
+            outcome = UserPresenceOutcome.Cancelled;
+            primaryException = ex;
+            throw;
         }
-
-        return response[..expectedLength];
+        catch (TimeoutException ex)
+        {
+            outcome = UserPresenceOutcome.TimedOut;
+            primaryException = ex;
+            throw;
+        }
+        catch (Exception ex)
+        {
+            primaryException = ex;
+            throw;
+        }
+        finally
+        {
+            await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+        }
     }
 }

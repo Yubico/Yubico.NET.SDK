@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -45,6 +46,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     private bool _disposed;
     private int _released;
     private bool _ownsConnection;
+    private readonly IUserPresencePrompt? _userPresencePrompt;
 
     protected ILogger Logger { get; }
     internal IProtocol? Protocol { get; set; }
@@ -77,11 +79,99 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     /// </summary>
     /// <param name="connection">The connection the session will run over.</param>
     protected ApplicationSession(IConnection connection)
+        : this(connection, userPresencePrompt: null)
+    {
+    }
+
+    /// <summary>
+    ///     Records the connection and caller-owned user-presence notification service this session will use.
+    /// </summary>
+    /// <param name="connection">The connection the session will run over.</param>
+    /// <param name="userPresencePrompt">
+    ///     The optional notification service to retain for the session lifetime. The session does not dispose it.
+    /// </param>
+    protected ApplicationSession(IConnection connection, IUserPresencePrompt? userPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
         Logger = YubiKitLogging.CreateLogger(GetType().FullName ?? GetType().Name);
         Connection = connection;
+        _userPresencePrompt = userPresencePrompt;
+    }
+
+    /// <summary>Gets whether this session retained a user-presence prompt.</summary>
+    internal bool IsUserPresenceNotificationEnabled => _userPresencePrompt is not null;
+
+    /// <summary>Creates the non-null notification handle for one operation.</summary>
+    /// <param name="context">The optional policy context determined by the applet session.</param>
+    /// <returns>An enabled per-operation handle, or the shared no-op handle.</returns>
+    internal UserPresenceNotification CreateUserPresenceNotification(UserPresenceContext? context) =>
+        UserPresenceNotification.Create(_userPresencePrompt, context);
+
+    /// <summary>Runs an ordinary operation with request, outcome mapping, and terminal resolution.</summary>
+    /// <typeparam name="TResult">The operation result type.</typeparam>
+    /// <param name="notification">The non-null per-operation notification handle.</param>
+    /// <param name="operation">The operation to run after the request callback succeeds.</param>
+    /// <param name="cancellationToken">The operation cancellation token.</param>
+    /// <returns>The operation result.</returns>
+    internal async Task<TResult> RunWithUserPresenceNotificationAsync<TResult>(
+        UserPresenceNotification notification,
+        Func<CancellationToken, Task<TResult>> operation,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(notification);
+        ArgumentNullException.ThrowIfNull(operation);
+
+        return await RunWithUserPresenceResolutionAsync(
+                notification,
+                async token =>
+                {
+                    await notification.RequestAsync(token).ConfigureAwait(false);
+                    return await operation(token).ConfigureAwait(false);
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Runs an operation that owns request timing while this method owns outcome mapping and terminal resolution.
+    /// </summary>
+    /// <typeparam name="TResult">The operation result type.</typeparam>
+    /// <param name="notification">The non-null per-operation notification handle.</param>
+    /// <param name="operation">The operation that may request at its transport boundary.</param>
+    /// <param name="cancellationToken">The operation cancellation token.</param>
+    /// <returns>The operation result.</returns>
+    internal async Task<TResult> RunWithUserPresenceResolutionAsync<TResult>(
+        UserPresenceNotification notification,
+        Func<CancellationToken, Task<TResult>> operation,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(notification);
+        ArgumentNullException.ThrowIfNull(operation);
+
+        var outcome = UserPresenceOutcome.Failed;
+        Exception? primaryException = null;
+        try
+        {
+            TResult result = await operation(cancellationToken).ConfigureAwait(false);
+            outcome = UserPresenceOutcome.Completed;
+            return result;
+        }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            outcome = UserPresenceOutcome.Cancelled;
+            primaryException = ex;
+            throw;
+        }
+        catch (Exception ex)
+        {
+            primaryException = ex;
+            throw;
+        }
+        finally
+        {
+            await notification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+        }
     }
 
     /// <summary>

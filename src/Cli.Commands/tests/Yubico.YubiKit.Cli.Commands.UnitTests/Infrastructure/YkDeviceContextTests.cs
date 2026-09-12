@@ -3,6 +3,7 @@
 
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Device;
+using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 
@@ -30,6 +31,8 @@ public sealed class YkDeviceContextTests
 
         Assert.Equal(ConnectionType.SmartCard, first.PreferredConnectionType);
         Assert.Equal(ConnectionType.SmartCard, second.PreferredConnectionType);
+        Assert.Same(ConsoleUserPresencePrompt.Instance, first.UserPresencePrompt);
+        Assert.Same(ConsoleUserPresencePrompt.Instance, second.UserPresencePrompt);
         Assert.NotSame(first, second);
     }
 

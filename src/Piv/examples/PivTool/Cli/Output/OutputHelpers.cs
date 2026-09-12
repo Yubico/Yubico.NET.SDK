@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using Spectre.Console;
+using Yubico.YubiKit.Cli.Shared.Output;
+using Yubico.YubiKit.Core.Sessions;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 
@@ -21,6 +23,11 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 /// </summary>
 public static class OutputHelpers
 {
+    public static SessionCreationOptions UserPresenceOptions { get; } = new()
+    {
+        UserPresencePrompt = ConsoleUserPresencePrompt.Instance
+    };
+
     /// <summary>
     /// Displays a section header with a rule.
     /// </summary>
@@ -193,18 +200,6 @@ public static class OutputHelpers
     public static void WriteTouchRequired()
     {
         AnsiConsole.MarkupLine("[yellow]👆 Touch your YubiKey now...[/]");
-    }
-
-    /// <summary>
-    /// Sets up touch notification callback on a PIV session.
-    /// </summary>
-    /// <param name="session">The PIV session (IPivSession or PivSession).</param>
-    public static void SetupTouchNotification(IPivSession session)
-    {
-        if (session is PivSession pivSession)
-        {
-            pivSession.OnTouchRequired = WriteTouchRequired;
-        }
     }
 
     /// <summary>

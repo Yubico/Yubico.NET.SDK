@@ -15,6 +15,7 @@
 using NSubstitute;
 using System.Linq;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.YubiOtp.Backend;
@@ -192,7 +193,8 @@ public class SmartCardBackendTests
             ConfigSlot.DeviceSerial,
             ReadOnlyMemory<byte>.Empty,
             4,
-            CancellationToken.None);
+            UserPresenceNotification.None,
+            cancellationToken: CancellationToken.None);
 
         Assert.Equal(4, result.Length);
         Assert.Equal(0x01, result.Span[0]);
@@ -218,7 +220,83 @@ public class SmartCardBackendTests
                 ConfigSlot.DeviceSerial,
                 ReadOnlyMemory<byte>.Empty,
                 4,
-                CancellationToken.None).AsTask());
+                UserPresenceNotification.None,
+                cancellationToken: CancellationToken.None).AsTask());
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenResolutionThrowsAfterSuccess_PropagatesResolutionException()
+    {
+        var response = new ApduResponse(new byte[] { 0x01, 0x02, 0x03, 0x04, 0x90, 0x00 });
+        _protocol.TransmitAndReceiveAsync(
+                Arg.Any<ApduCommand>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+        var expected = new InvalidOperationException("resolution failed");
+        var backend = CreateBackend();
+        UserPresenceNotification notification = UserPresenceNotification.Create(
+            new ThrowingPrompt(resolutionException: expected),
+            CreateContext());
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            backend.SendAndReceiveAsync(
+                ConfigSlot.ChalHmac1,
+                ReadOnlyMemory<byte>.Empty,
+                4,
+                notification,
+                TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenOperationAndResolutionThrow_PreservesOperationException()
+    {
+        var response = new ApduResponse(new byte[] { 0x01, 0x02, 0x90, 0x00 });
+        _protocol.TransmitAndReceiveAsync(
+                Arg.Any<ApduCommand>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+        var backend = CreateBackend();
+        UserPresenceNotification notification = UserPresenceNotification.Create(
+            new ThrowingPrompt(resolutionException: new InvalidOperationException("resolution failed")),
+            CreateContext());
+
+        BadResponseException actual = await Assert.ThrowsAsync<BadResponseException>(() =>
+            backend.SendAndReceiveAsync(
+                ConfigSlot.ChalHmac1,
+                ReadOnlyMemory<byte>.Empty,
+                4,
+                notification,
+                TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Contains("Expected 4 bytes", actual.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenRequestThrows_DoesNotTransmitOrResolve()
+    {
+        var expected = new InvalidOperationException("request failed");
+        var prompt = new ThrowingPrompt(requestException: expected);
+        var backend = CreateBackend();
+        UserPresenceNotification notification = UserPresenceNotification.Create(prompt, CreateContext());
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            backend.SendAndReceiveAsync(
+                ConfigSlot.ChalHmac1,
+                ReadOnlyMemory<byte>.Empty,
+                4,
+                notification,
+                TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Same(expected, actual);
+        Assert.Equal(0, prompt.ResolutionCount);
+        await _protocol.DidNotReceive().TransmitAndReceiveAsync(
+            Arg.Any<ApduCommand>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -240,7 +318,8 @@ public class SmartCardBackendTests
             ConfigSlot.ChalHmac2,
             new byte[64],
             20,
-            CancellationToken.None);
+            UserPresenceNotification.None,
+            cancellationToken: CancellationToken.None);
 
         await _protocol.Received(1).TransmitAndReceiveAsync(
             Arg.Is<ApduCommand>(a => a.P1 == (byte)ConfigSlot.ChalHmac2),
@@ -275,6 +354,37 @@ public class SmartCardBackendTests
         // The exact key bytes (not a hash, not padding) must appear at their wire offsets.
         Assert.Equal(hmacKey[..16], configBytes[22..38]);
         Assert.Equal(hmacKey[16..20], configBytes[16..20]);
+    }
+
+    private static UserPresenceContext CreateContext() => new()
+    {
+        Basis = UserPresenceBasis.PolicyRequires,
+        Application = "YubiOTP",
+        Scope = "One"
+    };
+
+    private sealed class ThrowingPrompt(
+        Exception? requestException = null,
+        Exception? resolutionException = null) : IUserPresencePrompt
+    {
+        public int ResolutionCount { get; private set; }
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken) => requestException is null
+                ? default
+                : ValueTask.FromException(requestException);
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            ResolutionCount++;
+            return resolutionException is null
+                ? default
+                : ValueTask.FromException(resolutionException);
+        }
     }
 
     [Fact]
@@ -320,7 +430,12 @@ public class SmartCardBackendTests
             .Returns(Task.FromResult(response));
 
         var backend = CreateBackend();
-        await backend.SendAndReceiveAsync(ConfigSlot.ChalYubico1, challenge, 16, CancellationToken.None);
+        await backend.SendAndReceiveAsync(
+            ConfigSlot.ChalYubico1,
+            challenge,
+            16,
+            UserPresenceNotification.None,
+            cancellationToken: CancellationToken.None);
 
         await _protocol.Received(1).TransmitAndReceiveAsync(
             Arg.Is<ApduCommand>(a =>

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.YubiOtp.Backend;
@@ -58,11 +59,13 @@ internal interface IYubiOtpBackend
     /// <param name="slot">The config slot command byte.</param>
     /// <param name="data">The data to send (e.g., challenge bytes).</param>
     /// <param name="expectedLength">The expected response data length (excluding CRC).</param>
+    /// <param name="userPresenceNotification">The non-null notification handle for the operation.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The response data from the YubiKey.</returns>
     ValueTask<ReadOnlyMemory<byte>> SendAndReceiveAsync(
         ConfigSlot slot,
         ReadOnlyMemory<byte> data,
         int expectedLength,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken);
 }

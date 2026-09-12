@@ -3,6 +3,7 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -29,12 +30,15 @@ public class OtpHidProtocolTests
         public void QueueReport(byte[] report) => _reportsToReturn.Enqueue(report);
         public IReadOnlyList<byte[]> SentReports => _reportsSent;
         public int ReportsRemaining => _reportsToReturn.Count;
+        public Action<byte[]>? OnReportDequeued { get; set; }
 
         public byte[] GetReport()
         {
             if (_reportsToReturn.Count == 0)
                 throw new InvalidOperationException("No reports queued - test setup incomplete");
-            return _reportsToReturn.Dequeue();
+            byte[] report = _reportsToReturn.Dequeue();
+            OnReportDequeued?.Invoke(report);
+            return report;
         }
 
         public void SetReport(byte[] report)
@@ -103,6 +107,128 @@ public class OtpHidProtocolTests
         // sleep-first loop added at least 10 x 50ms before these writes, so a loose 200ms budget
         // catches that regression without relying on BenchmarkDotNet in normal unit runs.
         Assert.True(stopwatch.ElapsedMilliseconds < 200, $"Ready-to-write polling took {stopwatch.ElapsedMilliseconds}ms");
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_TouchWait_RequestsOnceWithoutResolving()
+    {
+        var mock = new MockHidConnection();
+        var protocol = CreateProtocolWithMock(mock);
+        QueueTouchExchange(mock, repeatedWaitReport: true);
+        var prompt = new RecordingUserPresencePrompt();
+        var context = CreatePresenceContext();
+
+        ReadOnlyMemory<byte> result = await protocol.SendAndReceiveAsync(
+            0x30,
+            ReadOnlyMemory<byte>.Empty,
+            UserPresenceNotification.Create(prompt, context),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(6, result.Length);
+        UserPresenceContext requested = Assert.Single(prompt.Requested);
+        Assert.Equal(UserPresenceBasis.DeviceWaiting, requested.Basis);
+        Assert.Equal("YubiOTP", requested.Application);
+        Assert.Equal("One", requested.Scope);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_CancelledDuringTouch_ResetsStateWithoutResolving()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var mock = new MockHidConnection();
+        var protocol = CreateProtocolWithMock(mock);
+        QueueUntilTouchWait(mock);
+        var prompt = new RecordingUserPresencePrompt(() => cancellation.Cancel());
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => protocol.SendAndReceiveAsync(
+            0x30,
+            ReadOnlyMemory<byte>.Empty,
+            CreatePresenceNotification(prompt),
+            cancellation.Token));
+
+        Assert.Single(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+        Assert.Equal(OtpConstants.DummyReportWrite, mock.SentReports[^1][OtpConstants.FeatureReportDataSize]);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_RequestCallbackFails_ResetsStateBeforePropagating()
+    {
+        var mock = new MockHidConnection();
+        var protocol = CreateProtocolWithMock(mock);
+        QueueUntilTouchWait(mock);
+        var expected = new InvalidOperationException("Prompt failed.");
+        var prompt = new RecordingUserPresencePrompt(() => throw expected);
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendAndReceiveAsync(
+                0x30,
+                ReadOnlyMemory<byte>.Empty,
+                CreatePresenceNotification(prompt),
+                TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+        Assert.Empty(prompt.Resolved);
+        Assert.Equal(OtpConstants.DummyReportWrite, mock.SentReports[^1][OtpConstants.FeatureReportDataSize]);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_CancelledDuringTouchWithoutPrompt_ResetsStateAndCancels()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var mock = new MockHidConnection();
+        var protocol = CreateProtocolWithMock(mock);
+        QueueUntilTouchWait(mock);
+        mock.OnReportDequeued = report =>
+        {
+            if ((report[OtpConstants.FeatureReportDataSize] & OtpConstants.ResponseTimeoutWaitFlag) != 0)
+                cancellation.Cancel();
+        };
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => protocol.SendAndReceiveAsync(
+            0x30,
+            ReadOnlyMemory<byte>.Empty,
+            cancellation.Token));
+
+        Assert.Equal(OtpConstants.DummyReportWrite, mock.SentReports[^1][OtpConstants.FeatureReportDataSize]);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenTouchCompletionAndCancellationSharePoll_ReturnsDeviceCompletion()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var mock = new MockHidConnection();
+        var protocol = CreateProtocolWithMock(mock);
+        QueueTouchExchange(mock, repeatedWaitReport: false);
+        var prompt = new RecordingUserPresencePrompt();
+        var touchSeen = false;
+        mock.OnReportDequeued = report =>
+        {
+            byte status = report[OtpConstants.FeatureReportDataSize];
+            if ((status & OtpConstants.ResponseTimeoutWaitFlag) != 0)
+            {
+                touchSeen = true;
+            }
+            else if (touchSeen)
+            {
+                cancellation.Cancel();
+                mock.OnReportDequeued = null;
+            }
+        };
+
+        ReadOnlyMemory<byte> response = await protocol.SendAndReceiveAsync(
+            0x30,
+            ReadOnlyMemory<byte>.Empty,
+            CreatePresenceNotification(prompt),
+            cancellation.Token);
+
+        Assert.Equal(6, response.Length);
+        Assert.Single(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+        Assert.DoesNotContain(
+            mock.SentReports,
+            report => report[OtpConstants.FeatureReportDataSize] == OtpConstants.DummyReportWrite);
     }
 
     [Fact]
@@ -245,6 +371,46 @@ public class OtpHidProtocolTests
         connection.Enqueue(Status(programmingSequence: 2));
     }
 
+    private static UserPresenceContext CreatePresenceContext() => new()
+    {
+        Basis = UserPresenceBasis.PolicyMayRequire,
+        Application = "YubiOTP",
+        Scope = "One"
+    };
+
+    private static UserPresenceNotification CreatePresenceNotification(IUserPresencePrompt prompt) =>
+        UserPresenceNotification.Create(prompt, CreatePresenceContext());
+
+    private static void QueueTouchExchange(MockHidConnection connection, bool repeatedWaitReport)
+    {
+        QueueUntilTouchWait(connection);
+        if (repeatedWaitReport)
+        {
+            connection.QueueReport(TouchWaitReport());
+        }
+
+        connection.QueueReport(Status(programmingSequence: 2));
+        connection.QueueReport(Status(programmingSequence: 2));
+    }
+
+    private static void QueueUntilTouchWait(MockHidConnection connection)
+    {
+        connection.QueueReport(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+        {
+            connection.QueueReport(Status(programmingSequence: 1));
+        }
+
+        connection.QueueReport(TouchWaitReport());
+    }
+
+    private static byte[] TouchWaitReport()
+    {
+        byte[] report = Status(programmingSequence: 1);
+        report[OtpConstants.FeatureReportDataSize] = OtpConstants.ResponseTimeoutWaitFlag;
+        return report;
+    }
+
     private static void QueueDataExchange(RetainingOtpHidConnection connection, bool completeResponse)
     {
         connection.Enqueue(Status(versionMajor: 5));
@@ -318,5 +484,33 @@ public class OtpHidProtocolTests
         public override byte[] Rent(int minimumLength) => new byte[minimumLength];
 
         public override void Return(byte[] array, bool clearArray = false) => ReturnedArray = array;
+    }
+
+    private sealed class RecordingUserPresencePrompt(
+        Action? onRequested = null,
+        Exception? resolvedException = null) : IUserPresencePrompt
+    {
+        public List<UserPresenceContext> Requested { get; } = [];
+        public List<(UserPresenceContext Context, UserPresenceOutcome Outcome, CancellationToken CancellationToken)> Resolved { get; } = [];
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken)
+        {
+            Requested.Add(context);
+            onRequested?.Invoke();
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            Resolved.Add((context, outcome, cancellationToken));
+            return resolvedException is null
+                ? ValueTask.CompletedTask
+                : ValueTask.FromException(resolvedException);
+        }
     }
 }

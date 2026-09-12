@@ -13,7 +13,10 @@
 // limitations under the License.
 
 using System.Reflection;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Tests.Shared;
@@ -128,6 +131,349 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal(0x6E, operationCommands[2][3]);
     }
 
+    [Theory]
+    [InlineData(Uif.On, UserPresenceBasis.PolicyRequires)]
+    [InlineData(Uif.Fixed, UserPresenceBasis.PolicyRequires)]
+    [InlineData(Uif.Cached, UserPresenceBasis.PolicyMayRequire)]
+    [InlineData(Uif.CachedFixed, UserPresenceBasis.PolicyMayRequire)]
+    [InlineData(Uif.Off, null)]
+    public async Task SignAsync_MapsSignatureUifToNotification(
+        Uif uif,
+        UserPresenceBasis? expectedBasis)
+    {
+        var connection = CreateInitializedConnectionWithUifs(
+            sig: uif,
+            dec: null,
+            aut: null,
+            att: null,
+            CryptoResponse());
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+        int commandsBeforeOperation = connection.TransmittedCommands.Count;
+
+        _ = await session.SignAsync(
+            "message"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, connection.TransmittedCommands.Count(command =>
+            command[1] == 0xCA && command[2] == 0x00 && command[3] == (byte)DataObject.UifSig));
+
+        if (expectedBasis is null)
+        {
+            Assert.Empty(prompt.Requested);
+            Assert.Empty(prompt.Resolved);
+            return;
+        }
+
+        var requested = Assert.Single(prompt.Requested);
+        Assert.Equal("OpenPGP", requested.Context.Application);
+        Assert.Equal("Sig", requested.Context.Scope);
+        Assert.Equal(expectedBasis, requested.Context.Basis);
+        Assert.Equal(commandsBeforeOperation, requested.CommandCount);
+
+        var resolved = Assert.Single(prompt.Resolved);
+        Assert.Same(requested.Context, resolved.Context);
+        Assert.Equal(UserPresenceOutcome.Completed, resolved.Outcome);
+        Assert.Equal(CancellationToken.None, resolved.CancellationToken);
+        Assert.Equal(commandsBeforeOperation + 1, resolved.CommandCount);
+    }
+
+    [Fact]
+    public async Task CryptoOperations_UseTheirRelevantKeyRefScopes()
+    {
+        var connection = CreateInitializedConnectionWithUifs(
+            Uif.On,
+            Uif.On,
+            Uif.On,
+            att: null,
+            CryptoResponse(),
+            CryptoResponse(),
+            CryptoResponse());
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        _ = await session.SignAsync(
+            "sign"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            TestContext.Current.CancellationToken);
+        byte[] ciphertext = [0x01, 0x02];
+        _ = await session.DecryptAsync(
+            ciphertext,
+            TestContext.Current.CancellationToken);
+        _ = await session.AuthenticateAsync(
+            "authenticate"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(["Sig", "Dec", "Aut"], prompt.Requested.Select(entry => entry.Context.Scope));
+        Assert.All(prompt.Requested, entry =>
+        {
+            Assert.Equal("OpenPGP", entry.Context.Application);
+            Assert.Equal(UserPresenceBasis.PolicyRequires, entry.Context.Basis);
+        });
+        Assert.All(prompt.Resolved, entry => Assert.Equal(UserPresenceOutcome.Completed, entry.Outcome));
+    }
+
+    [Fact]
+    public async Task SignAsync_WhenUifReadFails_NotifiesMayRequireAndStillSigns()
+    {
+        var connection = CreateInitializedConnection([0x6A, 0x88], CryptoResponse());
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        var signature = await session.SignAsync(
+            "message"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([0x01, 0x02, 0x03], signature.ToArray());
+        Assert.Equal(UserPresenceBasis.PolicyMayRequire, Assert.Single(prompt.Requested).Context.Basis);
+        Assert.Equal(UserPresenceOutcome.Completed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Contains(connection.TransmittedCommands, command =>
+            command[1] == (byte)Ins.Pso && command[2] == 0x9E && command[3] == 0x9A);
+    }
+
+    [Fact]
+    public async Task SignAsync_WhenRequestCallbackFails_DoesNotTransmitCryptoApduOrResolve()
+    {
+        var expected = new InvalidOperationException("prompt failed");
+        var connection = CreateInitializedConnectionWithUifs(
+            Uif.On,
+            dec: null,
+            aut: null,
+            att: null,
+            CryptoResponse());
+        var prompt = new RecordingUserPresencePrompt(connection, expected);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => session.SignAsync(
+            "message"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, exception);
+        Assert.DoesNotContain(connection.TransmittedCommands, command =>
+            command[1] == (byte)Ins.Pso && command[2] == 0x9E && command[3] == 0x9A);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task SignAsync_WhenCancelledAfterRequest_ResolvesAsCancelledWithoutTransmittingCryptoApdu()
+    {
+        using var cancellationSource = new CancellationTokenSource();
+        var connection = CreateInitializedConnectionWithUifs(
+            Uif.On,
+            dec: null,
+            aut: null,
+            att: null,
+            CryptoResponse());
+        var prompt = new RecordingUserPresencePrompt(
+            connection,
+            cancelAfterRequest: cancellationSource);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        _ = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.SignAsync(
+            "message"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            cancellationSource.Token));
+
+        Assert.Equal(UserPresenceOutcome.Cancelled, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Equal(CancellationToken.None, prompt.Resolved[0].CancellationToken);
+        Assert.DoesNotContain(connection.TransmittedCommands, command =>
+            command[1] == (byte)Ins.Pso && command[2] == 0x9E && command[3] == 0x9A);
+    }
+
+    [Fact]
+    public async Task AttestKeyAsync_UsesAttestationUifAndResolvesFailure()
+    {
+        var connection = CreateInitializedConnectionWithUifs(
+            sig: null,
+            dec: null,
+            aut: null,
+            att: Uif.On,
+            [0x6A, 0x80]);
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        _ = await Assert.ThrowsAsync<ApduException>(() =>
+            session.AttestKeyAsync(KeyRef.Sig, TestContext.Current.CancellationToken));
+
+        var requested = Assert.Single(prompt.Requested);
+        Assert.Equal("Att", requested.Context.Scope);
+        Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Context.Basis);
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.DoesNotContain(connection.TransmittedCommands, command =>
+            command[1] == 0xCA && command[3] == (byte)DataObject.UifAtt);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == (byte)Ins.GetAttestation);
+    }
+
+    [Fact]
+    public async Task SetUifAsync_UpdatesPolicyUsedBySubsequentOperation()
+    {
+        var connection = CreateInitializedConnectionWithUifs(
+            Uif.Off,
+            dec: null,
+            aut: null,
+            att: null,
+            OkResponse(),
+            CryptoResponse());
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        await session.SetUifAsync(KeyRef.Sig, Uif.On, TestContext.Current.CancellationToken);
+        _ = await session.SignAsync(
+            "message"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(UserPresenceBasis.PolicyRequires, Assert.Single(prompt.Requested).Context.Basis);
+        Assert.DoesNotContain(connection.TransmittedCommands.Skip(3), command =>
+            command[1] == 0xCA && command[3] == (byte)DataObject.UifSig);
+    }
+
+    [Theory]
+    [InlineData(KeyMutation.Generate)]
+    [InlineData(KeyMutation.Import)]
+    [InlineData(KeyMutation.Delete)]
+    public async Task KeyMutationRefresh_ClearsSetUifPolicyOverride(KeyMutation mutation)
+    {
+        byte[][] trailingResponses = mutation switch
+        {
+            KeyMutation.Generate =>
+            [
+                OkResponse(),
+                OkResponse(),
+                OkResponse(),
+                ApplicationRelatedDataResponse(Uif.Off),
+                CryptoResponse()
+            ],
+            KeyMutation.Import =>
+            [
+                OkResponse(),
+                OkResponse(),
+                ApplicationRelatedDataResponse(Uif.Off),
+                CryptoResponse()
+            ],
+            KeyMutation.Delete =>
+            [
+                OkResponse(),
+                OkResponse(),
+                OkResponse(),
+                ApplicationRelatedDataResponse(Uif.Off),
+                CryptoResponse()
+            ],
+            _ => throw new ArgumentOutOfRangeException(nameof(mutation))
+        };
+        var connection = CreateInitializedConnectionWithUifs(
+            Uif.Off,
+            dec: null,
+            aut: null,
+            att: null,
+            trailingResponses);
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        await session.SetUifAsync(KeyRef.Sig, Uif.On, TestContext.Current.CancellationToken);
+        byte[] exponent = [0x01];
+        byte[] primeP = [0x02];
+        byte[] primeQ = [0x03];
+        await (mutation switch
+        {
+            KeyMutation.Generate => session.GenerateKeyAsync(
+                KeyRef.Sig,
+                RsaAttributes.Create(RsaSize.Rsa2048),
+                TestContext.Current.CancellationToken),
+            KeyMutation.Import => session.PutKeyAsync(
+                KeyRef.Sig,
+                new RsaKeyTemplate(KeyRef.Sig, exponent, primeP, primeQ),
+                cancellationToken: TestContext.Current.CancellationToken),
+            KeyMutation.Delete => session.DeleteKeyAsync(KeyRef.Sig, TestContext.Current.CancellationToken),
+            _ => throw new ArgumentOutOfRangeException(nameof(mutation))
+        });
+        _ = await session.SignAsync(
+            "message"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            TestContext.Current.CancellationToken);
+
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task SignAsync_WhenResolutionFailsAfterSuccess_PropagatesResolutionException()
+    {
+        var expected = new InvalidOperationException("resolution failed");
+        var connection = CreateInitializedConnectionWithUifs(
+            Uif.On,
+            dec: null,
+            aut: null,
+            att: null,
+            CryptoResponse());
+        var prompt = new RecordingUserPresencePrompt(connection, resolutionException: expected);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() => session.SignAsync(
+            "message"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task SignAsync_WhenOperationAndResolutionFail_PreservesOperationException()
+    {
+        var connection = CreateInitializedConnectionWithUifs(
+            Uif.On,
+            dec: null,
+            aut: null,
+            att: null,
+            [0x6A, 0x80]);
+        var prompt = new RecordingUserPresencePrompt(
+            connection,
+            resolutionException: new InvalidOperationException("resolution failed"));
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        ApduException actual = await Assert.ThrowsAsync<ApduException>(() => session.SignAsync(
+            "message"u8.ToArray(),
+            HashAlgorithmName.SHA256,
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(unchecked((short)0x6A80), actual.SW);
+        Assert.Single(prompt.Resolved);
+    }
+
     [Fact]
     public async Task VerifyPinAsync_TransmitsVerifyWithUserPinPayload()
     {
@@ -234,12 +580,32 @@ public sealed class OpenPgpSessionWireTests
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(), .. trailingResponses]);
 
+    private static RecordingSmartCardConnection CreateInitializedConnectionWithUifs(
+        Uif? sig,
+        Uif? dec,
+        Uif? aut,
+        Uif? att,
+        params byte[][] trailingResponses) =>
+        new([
+            OkResponse(),
+            VersionResponse(),
+            ApplicationRelatedDataResponse(sig, dec, aut, att),
+            .. trailingResponses
+        ]);
+
     private static byte[] LastCommand(RecordingSmartCardConnection connection) =>
         connection.TransmittedCommands[^1];
 
     private static ReadOnlySpan<byte> CommandData(byte[] command) =>
         // Short APDU format: CLA INS P1 P2 Lc Data; the recorder reports SupportsExtendedApdu=false.
         command.AsSpan(5, command[4]);
+
+    public enum KeyMutation
+    {
+        Generate,
+        Import,
+        Delete
+    }
 
     private sealed class ThrowingKdf(Exception exception) : Kdf
     {
@@ -253,6 +619,44 @@ public sealed class OpenPgpSessionWireTests
         public override void Dispose() => throw exception;
     }
 
+    private sealed class RecordingUserPresencePrompt(
+        RecordingSmartCardConnection connection,
+        Exception? requestException = null,
+        CancellationTokenSource? cancelAfterRequest = null,
+        Exception? resolutionException = null) : IUserPresencePrompt
+    {
+        public List<(UserPresenceContext Context, int CommandCount)> Requested { get; } = [];
+
+        public List<(
+            UserPresenceContext Context,
+            UserPresenceOutcome Outcome,
+            CancellationToken CancellationToken,
+            int CommandCount)> Resolved
+        { get; } = [];
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken)
+        {
+            Requested.Add((context, connection.TransmittedCommands.Count));
+            cancelAfterRequest?.Cancel();
+            return requestException is null
+                ? ValueTask.CompletedTask
+                : ValueTask.FromException(requestException);
+        }
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            Resolved.Add((context, outcome, cancellationToken, connection.TransmittedCommands.Count));
+            return resolutionException is null
+                ? ValueTask.CompletedTask
+                : ValueTask.FromException(resolutionException);
+        }
+    }
+
     // SW 9000: successful APDU response with no data.
     private static byte[] OkResponse() => [0x90, 0x00];
 
@@ -261,9 +665,18 @@ public sealed class OpenPgpSessionWireTests
 
     private static byte[] PwStatusResponse() => [0x00, 0x7F, 0x7F, 0x7F, 0x03, 0x00, 0x03, 0x90, 0x00];
 
-    private static byte[] ApplicationRelatedDataResponse() => [.. BuildApplicationRelatedData(), 0x90, 0x00];
+    private static byte[] UifResponse(Uif uif) => [(byte)uif, (byte)GeneralFeatureManagement.Button, 0x90, 0x00];
 
-    private static byte[] BuildApplicationRelatedData()
+    private static byte[] CryptoResponse() => [0x01, 0x02, 0x03, 0x90, 0x00];
+
+    private static byte[] ApplicationRelatedDataResponse(
+        Uif? sig = null,
+        Uif? dec = null,
+        Uif? aut = null,
+        Uif? att = null) =>
+        [.. BuildApplicationRelatedData(sig, dec, aut, att), 0x90, 0x00];
+
+    private static byte[] BuildApplicationRelatedData(Uif? sig, Uif? dec, Uif? aut, Uif? att)
     {
         // AID: D276000124010304000612345678 (OpenPGP v3.4, Yubico, serial 12345678).
         byte[] aid = [0xD2, 0x76, 0x00, 0x01, 0x24, 0x01, 0x03, 0x04, 0x00, 0x06, 0x12, 0x34, 0x56, 0x78];
@@ -275,7 +688,7 @@ public sealed class OpenPgpSessionWireTests
         var caFingerprints = new byte[60];
         var generationTimes = new byte[12];
 
-        var discretionaryTlvs = new Tlv[]
+        var discretionaryTlvs = new List<Tlv>
         {
             new(0xC0, extendedCapabilities),
             new(0xC1, rsa2048Attributes),
@@ -286,11 +699,15 @@ public sealed class OpenPgpSessionWireTests
             new(0xC6, caFingerprints),
             new(0xCD, generationTimes),
         };
+        AddUif(discretionaryTlvs, DataObject.UifSig, sig);
+        AddUif(discretionaryTlvs, DataObject.UifDec, dec);
+        AddUif(discretionaryTlvs, DataObject.UifAut, aut);
+        AddUif(discretionaryTlvs, DataObject.UifAtt, att);
 
         byte[] discretionaryContent;
         try
         {
-            discretionaryContent = TlvHelper.EncodeList(discretionaryTlvs).ToArray();
+            discretionaryContent = TlvHelper.EncodeList(discretionaryTlvs.ToArray()).ToArray();
         }
         finally
         {
@@ -322,5 +739,11 @@ public sealed class OpenPgpSessionWireTests
 
         using var result = new Tlv(0x6E, outerContent);
         return result.AsMemory().ToArray();
+    }
+
+    private static void AddUif(List<Tlv> tlvs, DataObject dataObject, Uif? uif)
+    {
+        if (uif is { } value)
+            tlvs.Add(new Tlv((int)dataObject, value.ToBytes()));
     }
 }

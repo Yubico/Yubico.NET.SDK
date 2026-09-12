@@ -64,8 +64,6 @@ Yubico.YubiKit.Piv.IPivSession.ImportKeyAsync(Yubico.YubiKit.Piv.PivSlot slot, Y
 Yubico.YubiKit.Piv.IPivSession.IsManagementKeyAuthenticated.get -> bool
 Yubico.YubiKit.Piv.IPivSession.ManagementKeyType.get -> Yubico.YubiKit.Piv.PivManagementKeyType
 Yubico.YubiKit.Piv.IPivSession.MoveKeyAsync(Yubico.YubiKit.Piv.PivSlot sourceSlot, Yubico.YubiKit.Piv.PivSlot destinationSlot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.Piv.IPivSession.OnTouchRequired.get -> System.Action?
-Yubico.YubiKit.Piv.IPivSession.OnTouchRequired.set -> void
 Yubico.YubiKit.Piv.IPivSession.PutObjectAsync(int objectId, System.ReadOnlyMemory<byte>? data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.IPivSession.RecoverPinOnlyModeAsync(System.ReadOnlyMemory<byte> pinUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.PivPinOnlyMode>!
 Yubico.YubiKit.Piv.IPivSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
@@ -202,8 +200,6 @@ Yubico.YubiKit.Piv.PivSession.ImportKeyAsync(Yubico.YubiKit.Piv.PivSlot slot, Yu
 Yubico.YubiKit.Piv.PivSession.IsManagementKeyAuthenticated.get -> bool
 Yubico.YubiKit.Piv.PivSession.ManagementKeyType.get -> Yubico.YubiKit.Piv.PivManagementKeyType
 Yubico.YubiKit.Piv.PivSession.MoveKeyAsync(Yubico.YubiKit.Piv.PivSlot sourceSlot, Yubico.YubiKit.Piv.PivSlot destinationSlot, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.Piv.PivSession.OnTouchRequired.get -> System.Action?
-Yubico.YubiKit.Piv.PivSession.OnTouchRequired.set -> void
 Yubico.YubiKit.Piv.PivSession.PutObjectAsync(int objectId, System.ReadOnlyMemory<byte>? data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Piv.PivSession.RecoverPinOnlyModeAsync(System.ReadOnlyMemory<byte> pinUtf8, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Piv.PivPinOnlyMode>!
 Yubico.YubiKit.Piv.PivSession.ResetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!

@@ -80,8 +80,9 @@ public static class KeyGenerationMenu
         };
 
         // Authenticate management key
-        await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
-        OutputHelpers.SetupTouchNotification(session);
+        await using var session = await selection.Device.CreatePivSessionAsync(
+            OutputHelpers.UserPresenceOptions,
+            cancellationToken);
         using var mgmtKey = PinPrompt.GetManagementKeyWithDefault("Management key");
 
         if (mgmtKey is null)

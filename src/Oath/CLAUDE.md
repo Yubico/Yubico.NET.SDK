@@ -13,6 +13,8 @@ The OATH module implements TOTP (RFC 6238) and HOTP (RFC 4226) one-time password
 - **Two-phase init** — private constructor + static `CreateAsync` (matches Management/SecurityDomain)
 - **Credential policy ownership** — `CredentialData.RequireTouch` travels with creation policy
 - **Read-only aggregate results** — `CalculateAllAsync` returns `IReadOnlyDictionary<Credential, Code?>`
+- **User-presence notifications** — individual calculations notify only when `Credential.TouchRequired` is `true`;
+  `CalculateAllAsync` remains silent because it reports touch-required credentials without waiting on them
 
 ## Key Files
 
@@ -85,3 +87,11 @@ input buffer and the returned key live in the XML documentation for the member.
 - Unit tests: `tests/Yubico.YubiKit.Oath.UnitTests/`
 - Integration tests: `tests/Yubico.YubiKit.Oath.IntegrationTests/`
 - **ALWAYS use `dotnet toolchain.cs test`** — never `dotnet test` directly
+
+## User-presence notifications
+
+When `SessionCreationOptions.UserPresencePrompt` is supplied, `CalculateAsync` and `CalculateCodeAsync`
+issue `PolicyRequires` immediately before CALCULATE only for credentials whose `TouchRequired` value is
+`true`. The scope is the public display identity (`issuer:name` or `name`); secret material is never included.
+Successful, cancelled, and failed operations resolve as `Completed`, `Cancelled`, and `Failed`. OATH status
+words do not currently provide verified evidence for mapping a failure to `TimedOut`.

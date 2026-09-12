@@ -35,6 +35,8 @@ SmartCard-only (`ISmartCardConnection`). OpenPGP spec is SmartCard/CCID only. Ap
 - `FirmwareVersion _version` — firmware for feature gating
 - `ApplicationRelatedData _appData` — cached card state (refreshable)
 - `Kdf? _kdf` — active KDF configuration (lazy-loaded)
+- User-presence policy uses the UIF already parsed into cached application-related data. If that per-key
+  entry is absent, the operation falls back to one direct UIF read. `SetUifAsync` updates the session cache
 
 Public key generation uses `GenerateKeyAsync(KeyRef, AlgorithmAttributes, CancellationToken)`. User PIN reset is
 split into reset-code and prior-administrator-authentication methods so no input is conditionally ignored.
@@ -118,3 +120,14 @@ See `tests/CLAUDE.md` for test runner requirements.
 - PrivateKeyTemplate TLV encoding, PwStatus parsing, CurveOid mapping
 
 **Integration tests** use `[Theory] [WithYubiKey]` with firmware version gating.
+
+## User-presence notifications
+
+When `SessionCreationOptions.UserPresencePrompt` is supplied, signing, decryption, authentication, and
+attestation use the relevant cached UIF before the cryptographic APDU. `On`/`Fixed` map to `PolicyRequires`,
+`Cached`/`CachedFixed` map to `PolicyMayRequire`, and `Off` is silent. Attestation uses the attestation-key
+UIF (`KeyRef.Att`). A failed UIF read falls back to `PolicyMayRequire` without replacing the cryptographic
+operation; cancellation still propagates. Firmware without UIF support stays silent because it cannot configure
+that policy. A direct GET DATA is issued only when the cached application-related data omitted that key's UIF.
+No OpenPGP status word is currently verified as a user-presence timeout, so terminal outcomes are limited to
+`Completed`, `Cancelled`, and `Failed`.

@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
 
@@ -35,12 +36,20 @@ public sealed partial class OpenPgpSession
         var payload = FormatSignPayload(sigAttrs, message.Span, hashAlgorithm);
         try
         {
+            UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+                await GetUserPresenceContextAsync(KeyRef.Sig, cancellationToken).ConfigureAwait(false));
+
             // PSO: COMPUTE DIGITAL SIGNATURE — INS=0x2A, P1=0x9E, P2=0x9A
             var command = new ApduCommand(0x00, (int)Ins.Pso, 0x9E, 0x9A, payload);
-            var response = await TransmitWithResponseAsync(command, cancellationToken)
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
+                        return FormatSignResponse(sigAttrs, response.Data);
+                    },
+                    cancellationToken)
                 .ConfigureAwait(false);
-
-            return FormatSignResponse(sigAttrs, response.Data);
         }
         finally
         {
@@ -59,13 +68,20 @@ public sealed partial class OpenPgpSession
 
         var decAttrs = _appData.Discretionary.AlgorithmAttributesDec;
         var payload = FormatDecryptPayload(decAttrs, ciphertext.Span);
+        UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+            await GetUserPresenceContextAsync(KeyRef.Dec, cancellationToken).ConfigureAwait(false));
 
         // PSO: DECIPHER — INS=0x2A, P1=0x80, P2=0x86
         var command = new ApduCommand(0x00, (int)Ins.Pso, 0x80, 0x86, payload);
-        var response = await TransmitWithResponseAsync(command, cancellationToken)
+        return await RunWithUserPresenceNotificationAsync(
+                userPresenceNotification,
+                async token =>
+                {
+                    var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
+                    return response.Data;
+                },
+                cancellationToken)
             .ConfigureAwait(false);
-
-        return response.Data;
     }
 
     /// <inheritdoc />
@@ -82,12 +98,20 @@ public sealed partial class OpenPgpSession
         var payload = FormatSignPayload(autAttrs, data.Span, hashAlgorithm);
         try
         {
+            UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+                await GetUserPresenceContextAsync(KeyRef.Aut, cancellationToken).ConfigureAwait(false));
+
             // INTERNAL AUTHENTICATE — INS=0x88, P1=0x00, P2=0x00
             var command = new ApduCommand(0x00, (int)Ins.InternalAuthenticate, 0x00, 0x00, payload);
-            var response = await TransmitWithResponseAsync(command, cancellationToken)
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
+                        return FormatSignResponse(autAttrs, response.Data);
+                    },
+                    cancellationToken)
                 .ConfigureAwait(false);
-
-            return FormatSignResponse(autAttrs, response.Data);
         }
         finally
         {

@@ -47,6 +47,17 @@ OTP HID path:
 2. Extract firmware version from protocol or status bytes
 3. `InitializeProtocolAsync` → configure protocol
 
+## User-presence notifications
+
+When `SessionCreationOptions.UserPresencePrompt` is supplied, only HMAC-SHA1 and Yubico OTP
+challenge-response operations can notify it. OTP HID waits until the device reports the touch-wait flag,
+then the Core protocol requests the operation's shared handle once with `DeviceWaiting`; `HidBackend` owns
+terminal resolution after response-length and CRC validation. SmartCard has no in-flight wait signal, so
+`SmartCardBackend` owns both the `PolicyRequires` request and terminal resolution when cached OTP status
+identifies the selected slot as touch-triggered. Unknown and non-touch SmartCard slot state remains silent.
+Notification context uses application `YubiOTP` and the slot enum name as its scope; configuration and status
+operations never notify.
+
 ## Slot Configuration Model
 
 52-byte wire format struct assembled by `SlotConfiguration.GetConfig()`:

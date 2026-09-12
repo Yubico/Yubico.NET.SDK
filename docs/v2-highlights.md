@@ -1,6 +1,6 @@
 # What's new in YubiKit .NET v2
 
-Last updated: 2026-09-11
+Last updated: 2026-09-12
 
 V2 is a ground-up rewrite of the YubiKey .NET SDK. It speaks to YubiKey
 applications v1 never supported, it's async from top to bottom, you install
@@ -77,8 +77,8 @@ All eight applet sessions share the same creation pattern:
 `IYubiKey.CreateXSessionAsync` for a session that owns its connection, or
 `XSession.CreateAsync` for one that borrows yours. `SessionCreationOptions`
 carries cross-cutting creation policy — protocol configuration, secure-channel
-parameters, connection preference, and firmware-version override — so those
-concerns work the same way across applets.
+parameters, connection preference, firmware-version override, and a caller-owned
+`IUserPresencePrompt` — so those concerns work the same way across applets.
 
 ## Install only what you use
 
@@ -135,12 +135,13 @@ list and the reasoning behind each one.
 **Post-quantum algorithms (ML-DSA, ML-KEM)** aren't in the .NET SDK yet.
 We're coordinating parity timing across the SDKs before putting a date on it.
 
-**A unified way to collect credentials and touch is only partly addressed.**
-Applet sessions deliberately take credentials as direct parameters, so your
-application owns those flows. Core now provides `ICredentialPrompt`, and
-`WebAuthnClient` uses it with a bounded retry loop that defaults to three
-attempts. It is not adopted across the other applets, and there is no unified
-touch pattern, so the broader gap remains.
+**Credential collection is only partly unified.** Applet sessions deliberately
+take most credentials as direct parameters, so your application owns those
+flows. Core provides `ICredentialPrompt`, and `WebAuthnClient` uses it with a
+bounded retry loop that defaults to three attempts, but other applets have not
+adopted it generally. Touch notification is no longer part of this gap:
+`IUserPresencePrompt` is shared by PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP,
+and YubiHSM Auth through `SessionCreationOptions.UserPresencePrompt`.
 
 [The v1 to v2 comparison](v1-to-v2-comparison.md) has the full inventory of
 what's changed, restored, still open, or deliberately not coming.

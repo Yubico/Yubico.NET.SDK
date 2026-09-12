@@ -35,8 +35,9 @@ public static class DeviceInfoMenu
                 DisplayDeviceDetails(deviceInfo);
 
                 // Get PIV-specific retry info
-                await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
-                OutputHelpers.SetupTouchNotification(session);
+                await using var session = await selection.Device.CreatePivSessionAsync(
+                    OutputHelpers.UserPresenceOptions,
+                    cancellationToken);
                 var retryResult = await DeviceInfoQuery.GetPivRetryInfoAsync(session, cancellationToken);
 
                 if (retryResult.Success)

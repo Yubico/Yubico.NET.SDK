@@ -40,12 +40,9 @@ public static class Decryption
     /// <returns>Result containing decrypted data or error information.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// var options = new SessionCreationOptions { UserPresencePrompt = userPresencePrompt };
+    /// await using var session = await device.CreatePivSessionAsync(options, ct);
     /// await session.VerifyPinAsync(pin, ct);
-    /// 
-    /// // Set touch callback on PivSession if needed
-    /// if (session is PivSession pivSession)
-    ///     pivSession.OnTouchRequired = () => Console.WriteLine("Touch required");
     /// 
     /// var result = await Decryption.DecryptDataAsync(
     ///     session,

@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -57,8 +58,11 @@ internal sealed class SmartCardBackend : IFidoBackend
 
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(userPresenceNotification);
+
         if (request.Length < 1)
         {
             throw new ArgumentException("Request must contain at least the command byte.", nameof(request));
@@ -68,34 +72,63 @@ internal sealed class SmartCardBackend : IFidoBackend
             "Sending CTAP CBOR via SmartCard: command=0x{Command:X2}, payload={Length} bytes",
             request.Span[0], request.Length - 1);
 
-        // For SmartCard transport, the CTAP request is wrapped in an APDU:
-        // CLA=0x80, INS=0x10, P1=0x00, P2=0x00, Data=CTAP request
-        var apdu = new ApduCommand
+        Exception? primaryException = null;
+        var outcome = UserPresenceOutcome.Failed;
+        try
         {
-            Cla = 0x80,
-            Ins = CtapHidCbor,
-            P1 = 0x00,
-            P2 = 0x00,
-            Data = request,
-            Le = 0  // Maximum response length
-        };
+            await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
-        var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
-        var responseData = apduResponse.Data;
+            // For SmartCard transport, the CTAP request is wrapped in an APDU:
+            // CLA=0x80, INS=0x10, P1=0x00, P2=0x00, Data=CTAP request
+            var apdu = new ApduCommand
+            {
+                Cla = 0x80,
+                Ins = CtapHidCbor,
+                P1 = 0x00,
+                P2 = 0x00,
+                Data = request,
+                Le = 0  // Maximum response length
+            };
 
-        // First byte of response data is the CTAP status
-        if (responseData.Length < 1)
-        {
-            throw new Ctap.CtapException(CtapStatus.Other, "Empty response from authenticator");
+            var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var responseData = apduResponse.Data;
+
+            // First byte of response data is the CTAP status
+            if (responseData.Length < 1)
+            {
+                throw new Ctap.CtapException(CtapStatus.Other, "Empty response from authenticator");
+            }
+
+            var status = (CtapStatus)responseData.Span[0];
+            outcome = status switch
+            {
+                CtapStatus.Success => UserPresenceOutcome.Completed,
+                CtapStatus.KeepAliveCancel => UserPresenceOutcome.Cancelled,
+                CtapStatus.UserActionTimeout => UserPresenceOutcome.TimedOut,
+                _ => UserPresenceOutcome.Failed
+            };
+            Ctap.CtapException.ThrowIfError(status);
+
+            _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
+                status, responseData.Length - 1);
+
+            // Return the response data (without status byte)
+            return responseData[1..];
         }
-
-        var status = (CtapStatus)responseData.Span[0];
-        Ctap.CtapException.ThrowIfError(status);
-
-        _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
-            status, responseData.Length - 1);
-
-        // Return the response data (without status byte)
-        return responseData[1..];
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            outcome = UserPresenceOutcome.Cancelled;
+            primaryException = ex;
+            throw;
+        }
+        catch (Exception ex)
+        {
+            primaryException = ex;
+            throw;
+        }
+        finally
+        {
+            await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+        }
     }
 }

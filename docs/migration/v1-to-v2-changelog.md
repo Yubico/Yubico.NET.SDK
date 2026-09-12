@@ -147,3 +147,18 @@
 - No-impact items confirmed in this range that need no guide or map changes: `fix(piv): treat an alpha or beta key as at least firmware 5.8.0` (`73c9069b`) and `fix(yubihsm,openpgp): keep the firmware override across a reset` (`23097afb`) are internal behavior corrections with unchanged public signatures - the first fixes a management-key-type default for development firmware, the second makes `SessionCreationOptions.FirmwareVersionOverride` survive a reset as this guide already describes it, rather than changing what the guide says; `fix: reconcile the applet API consolidation with the rebased trunk` (`8bb67505`) is a merge-conflict fix producing the same shapes recorded above; `build(tests): stop generating a second entry point for the test project` (`aa8df8a0`) and `test(securitydomain,yubihsm): make integration suites order-independent` (`8ac650f4`) are test/build-only; `docs: refresh v2 highlights and comparison for current yubikit` (`8cad63ed`) updates `docs/v2-highlights.md` and `docs/v1-to-v2-comparison.md`, which are outside this guide's v1-to-v2 API mapping scope; `build: drop Microsoft.SourceLink.GitHub to clear CVE-2026-62900` (`76164376`) is a build-dependency change with no public API impact.
 - `api-added.txt`/`api-removed.txt`/`public-api-candidates.txt` only surfaced the `CustomSlotConfiguration`/`SessionCreationOptions`/`YkDeviceContext` shapes already covered by the prior range's changelog entry and the alpha.2 -> alpha.3 table; `namespace-changes.txt` showed only an unrelated test-project using-directive addition; `package-changes.txt` showed only the `Microsoft.SourceLink.GitHub` removal noted above.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `761643765ec63e619df029a1d7ef686b77bbde63`.
+
+## 2026-09-12 - Unified user-presence prompt
+
+- Added `SessionCreationOptions.UserPresencePrompt` and the shared `IUserPresencePrompt` request/resolution
+  contract for PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth touch notifications.
+- FIDO HID and OTP HID can report a live `DeviceWaiting` signal. Smart-card paths report policy certainty;
+  cached or unknown policy is advisory and does not infer a smart-card timeout.
+- Removed the alpha-only PIV and YubiHSM Auth `OnTouchRequired` callbacks outright. Migrate them, v1
+  `TouchNotificationCallback`, and YubiOTP `UseTouchNotifier` to the session option; no compatibility adapter was
+  added.
+- Credential acquisition remains distinct: most applet PIN, PUK, password, and key parameters stay explicit,
+  while `ICredentialPrompt` remains the on-demand credential contract used by WebAuthn.
+- Incidental bug fix: OTP HID restarts its response timeout after a completed touch wait, so time spent waiting
+  for touch no longer consumes the post-touch response budget. This timing behavior remains deferred for live
+  hardware verification; no deterministic clock seam was added solely for this polling detail.

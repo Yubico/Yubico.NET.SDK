@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -31,12 +32,14 @@ public sealed class SessionCreationOptionsTests
             InsSendRemaining = 0xA5
         };
         var firmwareVersion = new FirmwareVersion(5, 7, 2);
+        var userPresencePrompt = new TestUserPresencePrompt();
         var options = new SessionCreationOptions
         {
             ProtocolConfiguration = configuration,
             ScpKeyParameters = scpKeyParameters,
             PreferredConnectionType = ConnectionType.HidFido,
-            FirmwareVersionOverride = firmwareVersion
+            FirmwareVersionOverride = firmwareVersion,
+            UserPresencePrompt = userPresencePrompt
         };
 
         SessionCreationOptions copy = options.WithPreferredConnectionType(ConnectionType.SmartCard);
@@ -46,6 +49,14 @@ public sealed class SessionCreationOptionsTests
         Assert.Same(scpKeyParameters, copy.ScpKeyParameters);
         Assert.Equal(ConnectionType.SmartCard, copy.PreferredConnectionType);
         Assert.Same(firmwareVersion, copy.FirmwareVersionOverride);
+        Assert.Same(userPresencePrompt, copy.UserPresencePrompt);
         Assert.Equal(ConnectionType.HidFido, options.PreferredConnectionType);
+    }
+
+    private sealed class TestUserPresencePrompt : IUserPresencePrompt
+    {
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken) => default;
     }
 }

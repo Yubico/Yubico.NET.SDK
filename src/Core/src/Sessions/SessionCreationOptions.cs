@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -22,8 +23,9 @@ namespace Yubico.YubiKit.Core.Sessions;
 ///     Configures cross-cutting behavior when an application session is created.
 /// </summary>
 /// <remarks>
-///     Factories snapshot these values when called and do not retain this object. The caller retains ownership
-///     and disposal responsibility for <see cref="ScpKeyParameters" />.
+///     Factories snapshot these values when called and do not retain this object. Sessions retain the referenced
+///     <see cref="UserPresencePrompt" /> for their lifetime without taking ownership of it. The caller retains
+///     ownership and disposal responsibility for both that service and <see cref="ScpKeyParameters" />.
 /// </remarks>
 public sealed class SessionCreationOptions
 {
@@ -50,6 +52,15 @@ public sealed class SessionCreationOptions
     public FirmwareVersion? FirmwareVersionOverride { get; init; }
 
     /// <summary>
+    ///     Gets the optional service notified while session operations require or may require physical user
+    ///     presence.
+    /// </summary>
+    /// <remarks>
+    ///     A session retains the referenced service for its lifetime. The SDK does not own or dispose it.
+    /// </remarks>
+    public IUserPresencePrompt? UserPresencePrompt { get; init; }
+
+    /// <summary>
     ///     Creates a copy with the specified preferred connection type.
     /// </summary>
     /// <param name="connectionType">The preferred connection type for the copy.</param>
@@ -63,6 +74,7 @@ public sealed class SessionCreationOptions
             ProtocolConfiguration = ProtocolConfiguration,
             ScpKeyParameters = ScpKeyParameters,
             PreferredConnectionType = connectionType,
-            FirmwareVersionOverride = FirmwareVersionOverride
+            FirmwareVersionOverride = FirmwareVersionOverride,
+            UserPresencePrompt = UserPresencePrompt
         };
 }

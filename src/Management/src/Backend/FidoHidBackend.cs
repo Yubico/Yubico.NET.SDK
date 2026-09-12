@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
@@ -39,7 +40,11 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {
-        await _hidProtocol.SendVendorCommandAsync(CtapWriteConfig, config, cancellationToken)
+        await _hidProtocol.SendVendorCommandAsync(
+                CtapWriteConfig,
+                config,
+                UserPresenceNotification.None,
+                cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -47,7 +52,11 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        await _hidProtocol.SendVendorCommandAsync(CtapYubikeyDeviceConfig, data, cancellationToken)
+        await _hidProtocol.SendVendorCommandAsync(
+                CtapYubikeyDeviceConfig,
+                data,
+                UserPresenceNotification.None,
+                cancellationToken)
             .ConfigureAwait(false);
     }
 

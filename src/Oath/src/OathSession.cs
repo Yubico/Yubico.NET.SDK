@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -57,8 +58,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
     private OathSession(
         ISmartCardConnection connection,
-        ScpKeyParameters? scpKeyParams = null)
-        : base(connection)
+        ScpKeyParameters? scpKeyParams = null,
+        IUserPresencePrompt? userPresencePrompt = null)
+        : base(connection, userPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
@@ -79,12 +81,15 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var configuration = options?.ProtocolConfiguration;
         var scpKeyParams = options?.ScpKeyParameters;
         var firmwareVersionOverride = options?.FirmwareVersionOverride;
+        var userPresencePrompt = options?.UserPresencePrompt;
 
         ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(connection, () => new OathSession(connection, scpKeyParams));
+        var session = Construct(
+            connection,
+            () => new OathSession(connection, scpKeyParams, userPresencePrompt));
         try
         {
             await session.InitializeAsync(
@@ -388,19 +393,28 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
         byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
+        UserPresenceNotification userPresenceNotification =
+            CreateUserPresenceNotification(CreateUserPresenceContext(credential));
         try
         {
-            var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
-            var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x00, data);
+                        var response = await SendAsync(command, token).ConfigureAwait(false);
 
-            using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
-            foreach (var tlv in responseTlvs)
-            {
-                if (tlv.Tag == OathConstants.TagResponse)
-                    return tlv.Value.ToArray();
-            }
+                        using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
+                        foreach (var tlv in responseTlvs)
+                        {
+                            if (tlv.Tag == OathConstants.TagResponse)
+                                return tlv.Value.ToArray();
+                        }
 
-            throw new BadResponseException("No TAG_RESPONSE in CALCULATE response.");
+                        throw new BadResponseException("No TAG_RESPONSE in CALCULATE response.");
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
         finally
         {
@@ -435,25 +449,49 @@ public sealed class OathSession : ApplicationSession, IOathSession
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
 
         byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
+        UserPresenceNotification userPresenceNotification =
+            CreateUserPresenceNotification(CreateUserPresenceContext(credential));
         try
         {
-            // P2=0x01 requests truncated response
-            var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x01, data);
-            var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        // P2=0x01 requests truncated response
+                        var command = new ApduCommand(0x00, OathConstants.InsCalculate, 0x00, 0x01, data);
+                        var response = await SendAsync(command, token).ConfigureAwait(false);
 
-            using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
-            foreach (var tlv in responseTlvs)
-            {
-                if (tlv.Tag == OathConstants.TagTruncated)
-                    return Code.FormatCode(credential, ts, tlv.Value.Span);
-            }
+                        using var responseTlvs = TlvHelper.DecodeList(response.Data.Span);
+                        foreach (var tlv in responseTlvs)
+                        {
+                            if (tlv.Tag == OathConstants.TagTruncated)
+                                return Code.FormatCode(credential, ts, tlv.Value.Span);
+                        }
 
-            throw new BadResponseException("No TAG_TRUNCATED in CALCULATE response.");
+                        throw new BadResponseException("No TAG_TRUNCATED in CALCULATE response.");
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(data);
         }
+    }
+
+    private UserPresenceContext? CreateUserPresenceContext(Credential credential)
+    {
+        if (!IsUserPresenceNotificationEnabled || credential.TouchRequired is not true)
+            return null;
+
+        return new UserPresenceContext
+        {
+            Application = "OATH",
+            Scope = credential.Issuer is not null
+                ? $"{credential.Issuer}:{credential.Name}"
+                : credential.Name,
+            Basis = UserPresenceBasis.PolicyRequires
+        };
     }
 
     /// <inheritdoc />

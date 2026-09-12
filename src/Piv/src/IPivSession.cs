@@ -44,13 +44,6 @@ public interface IPivSession : IApplicationSession
     /// </remarks>
     bool IsManagementKeyAuthenticated { get; }
 
-    /// <summary>Gets or sets a parameterless callback invoked before an operation may require touch.</summary>
-    /// <remarks>
-    ///     The callback intentionally receives no operation context so it cannot disclose the slot, algorithm,
-    ///     or data involved. It must not call back into this session.
-    /// </remarks>
-    Action? OnTouchRequired { get; set; }
-
     // Session management
 
     /// <summary>

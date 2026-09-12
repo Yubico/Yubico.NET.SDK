@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Fido2.Ctap;
 
@@ -24,8 +25,6 @@ namespace Yubico.YubiKit.Fido2.Backend;
 /// </summary>
 internal sealed class HidBackend : IFidoBackend
 {
-    private const byte CtapHidCbor = 0x10;  // CTAPHID_CBOR command
-
     private readonly IFidoHidProtocol _protocol;
     private readonly ILogger _logger;
 
@@ -41,8 +40,11 @@ internal sealed class HidBackend : IFidoBackend
 
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(userPresenceNotification);
+
         if (request.Length < 1)
         {
             throw new ArgumentException("Request must contain at least the command byte.", nameof(request));
@@ -53,22 +55,53 @@ internal sealed class HidBackend : IFidoBackend
             request.Span[0], request.Length - 1);
 
         // Send the full CTAP request (command byte + CBOR payload) via CTAPHID_CBOR
-        var response = await _protocol.SendVendorCommandAsync(CtapHidCbor, request, cancellationToken)
-            .ConfigureAwait(false);
-
-        // First byte is the CTAP status
-        if (response.Length < 1)
+        var outcome = UserPresenceOutcome.Failed;
+        Exception? primaryException = null;
+        try
         {
-            throw new Ctap.CtapException(CtapStatus.Other, "Empty response from authenticator");
+            var response = await _protocol.SendVendorCommandAsync(
+                    CtapConstants.CtapHidCbor,
+                    request,
+                    userPresenceNotification,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            // First byte is the CTAP status
+            if (response.Length < 1)
+            {
+                throw new Ctap.CtapException(CtapStatus.Other, "Empty response from authenticator");
+            }
+
+            var status = (CtapStatus)response.Span[0];
+            outcome = status switch
+            {
+                CtapStatus.Success => UserPresenceOutcome.Completed,
+                CtapStatus.KeepAliveCancel => UserPresenceOutcome.Cancelled,
+                CtapStatus.UserActionTimeout => UserPresenceOutcome.TimedOut,
+                _ => UserPresenceOutcome.Failed
+            };
+            Ctap.CtapException.ThrowIfError(status);
+
+            _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
+                status, response.Length - 1);
+
+            // Return the response data (without status byte)
+            return response[1..];
         }
-
-        var status = (CtapStatus)response.Span[0];
-        Ctap.CtapException.ThrowIfError(status);
-
-        _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
-            status, response.Length - 1);
-
-        // Return the response data (without status byte)
-        return response[1..];
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            outcome = UserPresenceOutcome.Cancelled;
+            primaryException = ex;
+            throw;
+        }
+        catch (Exception ex)
+        {
+            primaryException = ex;
+            throw;
+        }
+        finally
+        {
+            await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+        }
     }
 }

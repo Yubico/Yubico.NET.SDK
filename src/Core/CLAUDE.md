@@ -75,6 +75,17 @@ Background listeners and native/resource-manager retry loops must block, back of
 
 If a change touches Core runtime loops, polling paths, recovery logic, or listener lifecycle cleanup, run `dotnet toolchain.cs -- resilience --fast` in addition to the normal focused tests. Prefer adding or extending no-hardware `Category=RuntimeResilience` coverage before considering live diagnostics.
 
+### User-presence notification ownership
+
+`ApplicationSession` creates one non-null `UserPresenceNotification` for each operation. Pass that
+same handle down every participating layer; use `UserPresenceNotification.None` for deliberately
+silent raw, management, and device-information paths. A transport may request the handle when it
+observes a live wait, but the layer that can classify the complete operation outcome owns terminal
+resolution. In particular, Core FIDO and OTP HID protocols request only; their applet backends
+resolve after CTAP status or CRC validation. Policy-driven SmartCard operations normally request
+and resolve at the applet operation boundary. Do not pass nullable prompt/context pairs through
+downstream APIs or create competing lifecycle owners.
+
 ### APDU Processing Pipeline
 
 The APDU processing pipeline uses the decorator pattern:
@@ -268,7 +279,9 @@ example, SCP); applet-specific authentication is exposed by the concrete applet 
 
 Prefer using `IsSupported(feature)` / `EnsureSupports(feature)` on `IApplicationSession` rather than duplicating firmware gates in each module.
 
-Applet factories consume `SessionCreationOptions` without retaining it. Secure-channel parameters remain borrowed.
+Applet factories snapshot `SessionCreationOptions` without retaining the options object. Secure-channel parameters
+remain borrowed. A session retains the caller-owned `UserPresencePrompt` service reference for its lifetime but
+never disposes it; this is the sole retained-service exception.
 
 ## Test Infrastructure
 

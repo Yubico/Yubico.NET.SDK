@@ -16,8 +16,10 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -233,6 +235,167 @@ public class OathSessionTests
     }
 
     [Fact]
+    public async Task CalculateCodeAsync_WhenTouchIsRequired_NotifiesAroundCalculateCommand()
+    {
+        var connection = new RecordingSmartCardConnection(SelectResponse(), TruncatedResponse());
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+        var credential = CreateCredential(touchRequired: true);
+        int commandsBeforeCalculation = connection.TransmittedCommands.Count;
+
+        _ = await session.CalculateCodeAsync(
+            credential,
+            timestamp: 1_704_067_200,
+            TestContext.Current.CancellationToken);
+
+        var requested = Assert.Single(prompt.Requested);
+        Assert.Equal("OATH", requested.Context.Application);
+        Assert.Equal("issuer:alice", requested.Context.Scope);
+        Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Context.Basis);
+        Assert.Equal(commandsBeforeCalculation, requested.CommandCount);
+
+        var resolved = Assert.Single(prompt.Resolved);
+        Assert.Same(requested.Context, resolved.Context);
+        Assert.Equal(UserPresenceOutcome.Completed, resolved.Outcome);
+        Assert.Equal(CancellationToken.None, resolved.CancellationToken);
+        Assert.Equal(commandsBeforeCalculation + 1, resolved.CommandCount);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(null)]
+    public async Task CalculateAsync_WhenTouchIsNotRequiredOrUnknown_RemainsSilent(bool? touchRequired)
+    {
+        var connection = new RecordingSmartCardConnection(SelectResponse(), FullResponse());
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        _ = await session.CalculateAsync(
+            CreateCredential(touchRequired),
+            new byte[8],
+            TestContext.Current.CancellationToken);
+
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+        Assert.Contains(connection.TransmittedCommands, command => command[1] == OathConstants.InsCalculate);
+    }
+
+    [Fact]
+    public async Task CalculateAllAsync_WhenResponseReportsTouchRequired_RemainsSilent()
+    {
+        byte[] credentialId = Encoding.UTF8.GetBytes("issuer:alice");
+        byte[] calculateAllResponse = [
+            OathConstants.TagName, (byte)credentialId.Length, .. credentialId,
+            OathConstants.TagTouch, 0x00,
+            0x90, 0x00
+        ];
+        var connection = new RecordingSmartCardConnection(SelectResponse(), calculateAllResponse);
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        var result = await session.CalculateAllAsync(
+            1_704_067_200,
+            TestContext.Current.CancellationToken);
+
+        var entry = Assert.Single(result);
+        Assert.True(entry.Key.TouchRequired);
+        Assert.Null(entry.Value);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task CalculateCodeAsync_WhenRequestCallbackFails_DoesNotTransmitCalculateOrResolve()
+    {
+        var expected = new InvalidOperationException("prompt failed");
+        var connection = new RecordingSmartCardConnection(SelectResponse(), TruncatedResponse());
+        var prompt = new RecordingUserPresencePrompt(connection, expected);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+        int commandsBeforeCalculation = connection.TransmittedCommands.Count;
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            session.CalculateCodeAsync(
+                CreateCredential(touchRequired: true),
+                timestamp: 1_704_067_200,
+                TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, exception);
+        Assert.Equal(commandsBeforeCalculation, connection.TransmittedCommands.Count);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task CalculateCodeAsync_WhenCalculateFails_ResolvesAsFailed()
+    {
+        var connection = new RecordingSmartCardConnection(SelectResponse(), [0x6A, 0x80]);
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        _ = await Assert.ThrowsAsync<ApduException>(() => session.CalculateCodeAsync(
+            CreateCredential(touchRequired: true),
+            timestamp: 1_704_067_200,
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
+    }
+
+    [Fact]
+    public async Task CalculateCodeAsync_WhenResolutionFailsAfterSuccess_PropagatesResolutionException()
+    {
+        var expected = new InvalidOperationException("resolution failed");
+        var connection = new RecordingSmartCardConnection(SelectResponse(), TruncatedResponse());
+        var prompt = new RecordingUserPresencePrompt(connection, resolutionException: expected);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            session.CalculateCodeAsync(
+                CreateCredential(touchRequired: true),
+                timestamp: 1_704_067_200,
+                TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task CalculateCodeAsync_WhenCalculateAndResolutionFail_PreservesCalculateException()
+    {
+        var connection = new RecordingSmartCardConnection(SelectResponse(), [0x6A, 0x80]);
+        var prompt = new RecordingUserPresencePrompt(
+            connection,
+            resolutionException: new InvalidOperationException("resolution failed"));
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        ApduException actual = await Assert.ThrowsAsync<ApduException>(() => session.CalculateCodeAsync(
+            CreateCredential(touchRequired: true),
+            timestamp: 1_704_067_200,
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(unchecked((short)0x6A80), actual.SW);
+        Assert.Single(prompt.Resolved);
+    }
+
+    [Fact]
     public async Task PutCredentialAsync_Totp_SendsOrderedPutPayload()
     {
         byte[] secret = [
@@ -404,6 +567,58 @@ public class OathSessionTests
         0x71, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         0x90, 0x00
     ];
+
+    private static Credential CreateCredential(bool? touchRequired) =>
+        new(
+            "device-id",
+            Encoding.UTF8.GetBytes("issuer:alice"),
+            "issuer",
+            "alice",
+            OathType.Totp,
+            OathConstants.DefaultPeriod,
+            touchRequired);
+
+    private static byte[] TruncatedResponse() =>
+        [OathConstants.TagTruncated, 0x05, 0x06, 0x00, 0x00, 0x00, 0x01, 0x90, 0x00];
+
+    private static byte[] FullResponse() =>
+        [OathConstants.TagResponse, 0x04, 0x01, 0x02, 0x03, 0x04, 0x90, 0x00];
+
+    private sealed class RecordingUserPresencePrompt(
+        RecordingSmartCardConnection connection,
+        Exception? requestException = null,
+        Exception? resolutionException = null) : IUserPresencePrompt
+    {
+        public List<(UserPresenceContext Context, int CommandCount)> Requested { get; } = [];
+
+        public List<(
+            UserPresenceContext Context,
+            UserPresenceOutcome Outcome,
+            CancellationToken CancellationToken,
+            int CommandCount)> Resolved
+        { get; } = [];
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken)
+        {
+            Requested.Add((context, connection.TransmittedCommands.Count));
+            return requestException is null
+                ? ValueTask.CompletedTask
+                : ValueTask.FromException(requestException);
+        }
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            Resolved.Add((context, outcome, cancellationToken, connection.TransmittedCommands.Count));
+            return resolutionException is null
+                ? ValueTask.CompletedTask
+                : ValueTask.FromException(resolutionException);
+        }
+    }
 
     /// <summary>Like <see cref="RecordingSmartCardConnection" />, but disposal is observable.</summary>
     private sealed class DisposeCountingConnection(params byte[][] responses) : ISmartCardConnection

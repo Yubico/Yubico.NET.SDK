@@ -58,7 +58,8 @@ Yubico.YubiKit.Fido2/
 │   ├── Credentials/                # MakeCredential/GetAssertion types
 │   │   ├── AuthenticatorData.cs
 │   │   ├── AttestedCredentialData.cs
-│   │   ├── CredentialOptions.cs
+│   │   ├── GetAssertionOptions.cs
+│   │   ├── MakeCredentialOptions.cs
 │   │   ├── MakeCredentialResponse.cs
 │   │   ├── GetAssertionResponse.cs
 │   │   └── PublicKeyCredentialTypes.cs
@@ -227,6 +228,21 @@ var creds = await credMgmt.EnumerateCredentialsAsync(rpIdHash);
 // Delete credential
 await credMgmt.DeleteCredentialAsync(credentialId);
 ```
+
+### User-presence notifications
+
+Supply `SessionCreationOptions.UserPresencePrompt` when creating a `FidoSession` to receive touch
+notifications. On HID, `FidoHidProtocol` requests the operation's shared notification handle with
+`DeviceWaiting` when CTAPHID keep-alive status `0x02` is first observed. `HidBackend` owns terminal
+resolution after the response is fully drained and the CTAP status is known. SmartCard has no
+equivalent in-flight signal, so `SmartCardBackend` owns both the policy request and resolution;
+MakeCredential and GetAssertion emit `PolicyRequires` immediately before the APDU unless their
+effective `UserPresence` option is `false`. Their scope is the RP ID.
+
+Selection and Reset carry null-scope context for an authoritative HID keep-alive, but do not predict
+touch on SmartCard. Generic `SendCborRequestAsync` calls do not infer touch semantics. Bio enrollment
+and other helpers that currently route through that generic API remain silent until their individual
+user-presence behavior is modeled explicitly.
 
 ## CBOR Encoding Pattern
 
@@ -400,7 +416,7 @@ if (!FidoSession.FeatureBioEnrollment.IsSupported(firmwareVersion))
 
 3. **Protocol Reuse**: PIN/UV auth protocols maintain state (shared secret). Create once per session.
 
-4. **User Presence**: Many operations (MakeCredential, GetAssertion, Reset) require user touch. Tests must account for this.
+4. **User Presence**: Configure `SessionCreationOptions.UserPresencePrompt` for SDK notifications; do not infer touch from generic CBOR traffic. Hardware tests that actually require touch must still use the `RequiresUserPresence` trait.
 
 5. **Extension Order**: Extensions map keys must be in canonical order when encoding.
 

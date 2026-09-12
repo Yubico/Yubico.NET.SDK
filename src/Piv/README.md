@@ -96,6 +96,31 @@ var sharedSecret = await session.CalculateSecretAsync(
     cancellationToken);
 ```
 
+### User-presence notifications
+
+Supply an `IUserPresencePrompt` when creating the session. The same prompt receives a request
+immediately before a private-key APDU that requires or may require touch, followed by one
+resolution notification when that device APDU ends. For RSA decryption, resolution precedes local
+padding removal:
+
+```csharp
+var options = new SessionCreationOptions
+{
+    UserPresencePrompt = userPresencePrompt
+};
+
+await using var session = await device.CreatePivSessionAsync(options, cancellationToken);
+```
+
+`PivTouchPolicy.Always` reports `PolicyRequires`; `Cached` reports `PolicyMayRequire` because the
+SDK cannot observe the device's touch cache. `Never`, `Default`, and an empty slot are silent.
+Unavailable, unsupported, failed, or unrecognized metadata is handled conservatively as
+`PolicyMayRequire`. The context uses `Application="PIV"` and the `PivSlot` name as `Scope`.
+
+Migration: the alpha `PivSession.OnTouchRequired` and `IPivSession.OnTouchRequired` properties
+were replaced by `SessionCreationOptions.UserPresencePrompt`. Configure the prompt before session
+creation; there is no mutable per-session callback adapter.
+
 ### Retry Attempts
 
 ```csharp

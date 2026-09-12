@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
@@ -34,7 +35,6 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
     private readonly ISmartCardProtocol _protocol;
     private readonly FirmwareVersion _firmwareVersion;
-
     private byte _lastProgSeq;
 
     public SmartCardBackend(
@@ -120,29 +120,62 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         ConfigSlot slot,
         ReadOnlyMemory<byte> data,
         int expectedLength,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken)
     {
-        var apdu = new ApduCommand
-        {
-            Cla = 0,
-            Ins = YubiOtpConstants.InsConfig,
-            P1 = (byte)slot,
-            P2 = 0,
-            Data = data
-        };
+        ArgumentNullException.ThrowIfNull(userPresenceNotification);
 
         Logger.LogDebug("SmartCardBackend SendAndReceive: slot={Slot}, expectedLength={Length}", slot, expectedLength);
 
-        var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+        Exception? primaryException = null;
+        var outcome = UserPresenceOutcome.Failed;
 
-        if (response.Data.Length < expectedLength)
+        try
         {
-            throw new BadResponseException(
-                $"Expected {expectedLength} bytes from slot {slot}, got {response.Data.Length}.");
-        }
+            await userPresenceNotification.RequestAsync(cancellationToken).ConfigureAwait(false);
 
-        return response.Data[..expectedLength];
+            var apdu = new ApduCommand
+            {
+                Cla = 0,
+                Ins = YubiOtpConstants.InsConfig,
+                P1 = (byte)slot,
+                P2 = 0,
+                Data = data
+            };
+
+            var response = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            if (response.Data.Length < expectedLength)
+            {
+                throw new BadResponseException(
+                    $"Expected {expectedLength} bytes from slot {slot}, got {response.Data.Length}.");
+            }
+
+            outcome = UserPresenceOutcome.Completed;
+            return response.Data[..expectedLength];
+        }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            outcome = UserPresenceOutcome.Cancelled;
+            primaryException = ex;
+            throw;
+        }
+        catch (TimeoutException ex)
+        {
+            outcome = UserPresenceOutcome.TimedOut;
+            primaryException = ex;
+            throw;
+        }
+        catch (Exception ex)
+        {
+            primaryException = ex;
+            throw;
+        }
+        finally
+        {
+            await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+        }
     }
 
     private async Task<ReadOnlyMemory<byte>> ReadStatusAsync(CancellationToken cancellationToken)

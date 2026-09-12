@@ -16,7 +16,7 @@ The PIV module implements YubiKey PIV smart-card operations through a single pub
 
 Current structure:
 
-- `PivSession.cs` - public facade, lifecycle, authentication state, touch notification, and one-hop delegation.
+- `PivSession.cs` - public facade, lifecycle, authentication state, user-presence notification, and one-hop delegation.
 - `IPivSession.cs` - public session contract.
 - `IYubiKeyExtensions.cs` - `IYubiKey.CreatePivSessionAsync(...)` convenience creation.
 - `Authentication/` - PIN, PUK, and management-key protocol helpers.
@@ -54,6 +54,15 @@ PivSession public method
   -> parse response
   -> zero sensitive source/intermediate buffers in finally
 ```
+
+User-presence notification is configured only through
+`SessionCreationOptions.UserPresencePrompt`; the removed alpha `OnTouchRequired` property has no
+compatibility adapter. Private-key operations map `Always` to `PolicyRequires`, `Cached` to
+`PolicyMayRequire`, and leave `Never`, `Default`, and empty slots silent. Unknown or unavailable
+metadata maps conservatively to `PolicyMayRequire`. Requests occur immediately before the
+cryptographic APDU and are resolved as soon as the private-key APDU completes, before local RSA
+padding removal, with `CancellationToken.None`; PIV does not report
+`TimedOut` because these exchanges provide no confirmed touch-timeout status.
 
 ## Critical Security Requirements
 
@@ -131,6 +140,9 @@ Key generation and import keep required domain inputs positional while policy mo
 ## Test Infrastructure
 
 Unit tests should use fake SmartCard protocol/connection seams where possible to assert APDU/TLV bytes and parser behavior without hardware.
+User-presence tests use a recording `IUserPresencePrompt` and fake SmartCard responses; they assert
+policy basis, PIV slot scope, request/resolution pairing, callback failure behavior, and that
+metadata already loaded by an operation is not fetched again.
 
 Integration tests must use `[Theory]` plus `[WithYubiKey]` from `Tests.Shared`:
 

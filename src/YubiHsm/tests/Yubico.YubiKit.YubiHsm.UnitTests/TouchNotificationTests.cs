@@ -1,7 +1,7 @@
 // Copyright 2026 Yubico AB
 //
-// Licensed under the Apache License, Version 2.0 (the "License").
-// You may not use this file except in compliance with the License.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
@@ -14,256 +14,238 @@
 
 using System.Text;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 
-using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
-/// <summary>
-///     Proves ISC-32: touch-requiring YubiHSM Auth operations expose an in-flight notification
-///     callback, fired before the blocking CALCULATE exchange, using a fake protocol.
-/// </summary>
 public class TouchNotificationTests
 {
     [Fact]
-    public async Task OnTouchRequired_Property_IsNullableAndSettable()
-    {
-        var connection = CreateInitializedConnection();
-        await using var session = await HsmAuthSession.CreateAsync(
-            connection,
-            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        Assert.Null(session.OnTouchRequired);
-
-        session.OnTouchRequired = () => { };
-
-        Assert.NotNull(session.OnTouchRequired);
-    }
-
-    [Fact]
-    public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialRequiresTouch_InvokesCallbackBeforeCalculateCommand()
+    public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialRequiresTouch_RequestsBeforeCalculateAndResolvesCompleted()
     {
         var connection = CreateInitializedConnection(
             ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8),
             SessionKeyResponse());
-        await using var session = await HsmAuthSession.CreateAsync(
-            connection,
-            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
-            cancellationToken: TestContext.Current.CancellationToken);
+        var prompt = new RecordingUserPresencePrompt(() => connection.TransmittedCommands.Count);
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
 
-        var commandCountWhenNotified = -1;
-        session.OnTouchRequired = () => commandCountWhenNotified = connection.TransmittedCommands.Count;
+        using var keys = await CalculateSymmetricAsync(session, TestContext.Current.CancellationToken);
 
-        using var keys = await session.CalculateSessionKeysSymmetricAsync(
-            "cred",
-            Sequence(0x40, 16),
-            "pass"u8.ToArray(),
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        Assert.NotEqual(-1, commandCountWhenNotified);
-        // SELECT (1) + LIST (2) were sent by the time the callback fired; CALCULATE (3) had not.
-        Assert.Equal(2, commandCountWhenNotified);
-        Assert.Equal(3, connection.TransmittedCommands.Count);
-        Assert.Equal(0x03, connection.TransmittedCommands[^1][1]); // last command is CALCULATE
         Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
+        Assert.Equal(2, prompt.CommandCountAtRequest);
+        Assert.Equal(0x03, connection.TransmittedCommands[^1][1]);
+        AssertNotification(prompt, UserPresenceBasis.PolicyRequires, UserPresenceOutcome.Completed);
     }
 
     [Fact]
-    public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialDoesNotRequireTouch_DoesNotInvokeCallback()
-    {
-        var connection = CreateInitializedConnection(
-            ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x00, counter: 8),
-            SessionKeyResponse());
-        await using var session = await HsmAuthSession.CreateAsync(
-            connection,
-            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        var invoked = false;
-        session.OnTouchRequired = () => invoked = true;
-
-        using var keys = await session.CalculateSessionKeysSymmetricAsync(
-            "cred",
-            Sequence(0x40, 16),
-            "pass"u8.ToArray(),
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        Assert.False(invoked);
-        Assert.Equal(3, connection.TransmittedCommands.Count); // SELECT + LIST + CALCULATE
-    }
-
-    [Fact]
-    public async Task CalculateSessionKeysSymmetricAsync_WhenCallbackNotRegistered_DoesNotQueryCredentialList()
-    {
-        // Only SELECT + CALCULATE responses are queued. If the implementation queried
-        // ListCredentialsAsync despite no subscriber, the connection would throw for the
-        // missing third queued response, failing this test.
-        var connection = CreateInitializedConnection(SessionKeyResponse());
-        await using var session = await HsmAuthSession.CreateAsync(
-            connection,
-            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        using var keys = await session.CalculateSessionKeysSymmetricAsync(
-            "cred",
-            Sequence(0x40, 16),
-            "pass"u8.ToArray(),
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        Assert.Equal(2, connection.TransmittedCommands.Count); // SELECT + CALCULATE only
-        Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
-    }
-
-    [Fact]
-    public async Task CalculateSessionKeysAsymmetricAsync_WhenCredentialRequiresTouch_InvokesCallbackBeforeCalculateCommand()
+    public async Task CalculateSessionKeysAsymmetricAsync_WhenCredentialRequiresTouch_RequestsAndResolvesCompleted()
     {
         var connection = CreateInitializedConnection(
             ListResponse("cred", HsmAuthAlgorithm.EcP256YubicoAuthentication, touchByte: 0x01, counter: 3),
             SessionKeyResponse());
-        await using var session = await HsmAuthSession.CreateAsync(
-            connection,
-            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        var invoked = false;
-        session.OnTouchRequired = () => invoked = true;
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 6, 0));
 
         using var keys = await session.CalculateSessionKeysAsymmetricAsync(
             "cred",
             Sequence(0x40, 130),
-            Sequence(0x60, 8),
+            Sequence(0x60, 65),
             "pass"u8.ToArray(),
             Sequence(0x70, 8),
             TestContext.Current.CancellationToken);
 
-        Assert.True(invoked);
         Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
+        AssertNotification(prompt, UserPresenceBasis.PolicyRequires, UserPresenceOutcome.Completed);
     }
 
     [Fact]
-    public async Task CalculateSessionKeysSymmetricAsync_WhenTouchSemanticsUnknown_InvokesCallbackConservatively()
+    public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialDoesNotRequireTouch_RemainsSilent()
     {
-        // Touch byte 0x02 does not map to a known true/false value; HsmAuthCredential.TouchRequired
-        // parses this as null. The callback should still fire conservatively.
+        var connection = CreateInitializedConnection(
+            ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x00, counter: 8),
+            SessionKeyResponse());
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
+
+        using var keys = await CalculateSymmetricAsync(session, TestContext.Current.CancellationToken);
+
+        Assert.Empty(prompt.Requests);
+        Assert.Empty(prompt.Resolutions);
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_WithoutPrompt_DoesNotListCredentials()
+    {
+        var connection = CreateInitializedConnection(SessionKeyResponse());
+        await using var session = await HsmAuthSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
+            TestContext.Current.CancellationToken);
+
+        using var keys = await CalculateSymmetricAsync(session, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, connection.TransmittedCommands.Count);
+        Assert.Equal(0x03, connection.TransmittedCommands[^1][1]);
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialTouchPolicyIsUnknown_RequestsConservatively()
+    {
         var connection = CreateInitializedConnection(
             ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x02, counter: 8),
             SessionKeyResponse());
-        await using var session = await HsmAuthSession.CreateAsync(
-            connection,
-            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
-            cancellationToken: TestContext.Current.CancellationToken);
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
 
-        var invoked = false;
-        session.OnTouchRequired = () => invoked = true;
+        using var keys = await CalculateSymmetricAsync(session, TestContext.Current.CancellationToken);
 
-        using var keys = await session.CalculateSessionKeysSymmetricAsync(
-            "cred",
-            Sequence(0x40, 16),
-            "pass"u8.ToArray(),
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        Assert.True(invoked);
-        Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
+        AssertNotification(prompt, UserPresenceBasis.PolicyMayRequire, UserPresenceOutcome.Completed);
     }
 
     [Fact]
-    public async Task CalculateSessionKeysSymmetricAsync_WhenOnTouchRequiredCallbackThrows_PropagatesExactlyOnceWithoutBeingCaught()
+    public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialIsMissing_RemainsSilent()
     {
-        // Regression test: NotifyTouchIfRequiredAsync must not wrap the OnTouchRequired.Invoke()
-        // call in the same try/catch that guards the ListCredentialsAsync query. If it did, a
-        // throwing callback would be caught by the generic "failed to query credential list"
-        // handler, misdiagnosed, and invoked a second time (which would then throw unhandled).
+        var connection = CreateInitializedConnection(
+            ListResponse("other", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8),
+            SessionKeyResponse());
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
+
+        using var keys = await CalculateSymmetricAsync(session, TestContext.Current.CancellationToken);
+
+        Assert.Empty(prompt.Requests);
+        Assert.Empty(prompt.Resolutions);
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_WhenListFails_RequestsConservatively()
+    {
+        var connection = CreateInitializedConnection([0x6A, 0x80], SessionKeyResponse());
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
+
+        using var keys = await CalculateSymmetricAsync(session, TestContext.Current.CancellationToken);
+
+        AssertNotification(prompt, UserPresenceBasis.PolicyMayRequire, UserPresenceOutcome.Completed);
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_WhenCalculateFails_ResolvesFailed()
+    {
+        var connection = CreateInitializedConnection(
+            ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8),
+            [0x69, 0x82]);
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
+
+        await Assert.ThrowsAnyAsync<Exception>(() =>
+            CalculateSymmetricAsync(session, TestContext.Current.CancellationToken));
+
+        AssertNotification(prompt, UserPresenceBasis.PolicyRequires, UserPresenceOutcome.Failed);
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_WhenPromptThrows_DoesNotCalculateOrResolve()
+    {
         var connection = CreateInitializedConnection(
             ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8),
             SessionKeyResponse());
-        await using var session = await HsmAuthSession.CreateAsync(
-            connection,
-            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        var invocationCount = 0;
-        session.OnTouchRequired = () =>
+        var prompt = new RecordingUserPresencePrompt
         {
-            invocationCount++;
-            throw new InvalidOperationException("callback boom");
+            RequestException = new InvalidOperationException("prompt failed")
         };
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
 
-        var thrown = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            session.CalculateSessionKeysSymmetricAsync(
-                "cred",
-                Sequence(0x40, 16),
-                "pass"u8.ToArray(),
-                cancellationToken: TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            CalculateSymmetricAsync(session, TestContext.Current.CancellationToken));
 
-        Assert.Equal("callback boom", thrown.Message);
-        Assert.Equal(1, invocationCount);
-        // SELECT (1) + LIST (2) were sent; CALCULATE must never be sent once the callback throws.
+        Assert.Equal("prompt failed", exception.Message);
         Assert.Equal(2, connection.TransmittedCommands.Count);
+        Assert.Single(prompt.Requests);
+        Assert.Empty(prompt.Resolutions);
     }
 
     [Fact]
-    public async Task CalculateSessionKeysSymmetricAsync_WhenCallbackClearedWhileListPending_InvokesCapturedCallbackOnceAndSucceeds()
+    public async Task CalculateSessionKeysSymmetricAsync_WhenCancelledAfterRequest_ResolvesCancelledWithoutCalculating()
     {
-        var connection = new GatedListSmartCardConnection(OkResponse(), SessionKeyResponse());
-        await using var session = await HsmAuthSession.CreateAsync(
-            connection,
-            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
-            cancellationToken: TestContext.Current.CancellationToken);
+        using var cancellationSource = new CancellationTokenSource();
+        var connection = CreateInitializedConnection(
+            ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8),
+            SessionKeyResponse());
+        var prompt = new RecordingUserPresencePrompt
+        {
+            Requested = cancellationSource.Cancel
+        };
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
 
-        var invocationCount = 0;
-        session.OnTouchRequired = () => invocationCount++;
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            CalculateSymmetricAsync(session, cancellationSource.Token));
 
-        var operation = session.CalculateSessionKeysSymmetricAsync(
-            "cred",
-            Sequence(0x40, 16),
-            "pass"u8.ToArray(),
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        await connection.ListCommandReceived.WaitAsync(TestContext.Current.CancellationToken);
-        session.OnTouchRequired = null;
-        connection.CompleteList(
-            ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8));
-
-        using var keys = await operation;
-
-        Assert.Equal(1, invocationCount);
-        Assert.Equal(3, connection.TransmittedCommands.Count);
-        Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
+        Assert.Equal(2, connection.TransmittedCommands.Count);
+        AssertNotification(prompt, UserPresenceBasis.PolicyRequires, UserPresenceOutcome.Cancelled);
     }
 
     [Fact]
-    public async Task CalculateSessionKeysSymmetricAsync_WhenCallbackReplacedWhileFailingListPending_InvokesCapturedCallbackOnceAndSucceeds()
+    public async Task CalculateSessionKeysSymmetricAsync_WhenResolutionFailsAfterSuccess_PropagatesResolutionException()
     {
-        var connection = new GatedListSmartCardConnection(OkResponse(), SessionKeyResponse());
-        await using var session = await HsmAuthSession.CreateAsync(
+        var expected = new InvalidOperationException("resolution failed");
+        var connection = CreateInitializedConnection(
+            ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8),
+            SessionKeyResponse());
+        var prompt = new RecordingUserPresencePrompt { ResolutionException = expected };
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            CalculateSymmetricAsync(session, TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_WhenCalculateAndResolutionFail_PreservesCalculateException()
+    {
+        var connection = CreateInitializedConnection(
+            ListResponse("cred", HsmAuthAlgorithm.Aes128YubicoAuthentication, touchByte: 0x01, counter: 8),
+            [0x69, 0x82]);
+        var prompt = new RecordingUserPresencePrompt
+        {
+            ResolutionException = new InvalidOperationException("resolution failed")
+        };
+        await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 4, 3));
+
+        ApduException actual = await Assert.ThrowsAsync<ApduException>(() =>
+            CalculateSymmetricAsync(session, TestContext.Current.CancellationToken));
+
+        Assert.Equal((short)0x6982, actual.SW);
+        Assert.Single(prompt.Resolutions);
+    }
+
+    private static Task<HsmAuthSession> CreateSessionAsync(
+        RecordingSmartCardConnection connection,
+        IUserPresencePrompt prompt,
+        FirmwareVersion firmwareVersion) =>
+        HsmAuthSession.CreateAsync(
             connection,
-            options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
-            cancellationToken: TestContext.Current.CancellationToken);
+            new SessionCreationOptions
+            {
+                FirmwareVersionOverride = firmwareVersion,
+                UserPresencePrompt = prompt
+            },
+            TestContext.Current.CancellationToken);
 
-        var originalInvocationCount = 0;
-        var replacementInvocationCount = 0;
-        session.OnTouchRequired = () => originalInvocationCount++;
-
-        var operation = session.CalculateSessionKeysSymmetricAsync(
+    private static Task<SessionKeys> CalculateSymmetricAsync(
+        HsmAuthSession session,
+        CancellationToken cancellationToken) =>
+        session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
             "pass"u8.ToArray(),
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        await connection.ListCommandReceived.WaitAsync(TestContext.Current.CancellationToken);
-        session.OnTouchRequired = () => replacementInvocationCount++;
-        connection.FailList(new InvalidOperationException("LIST failed"));
-
-        using var keys = await operation;
-
-        Assert.Equal(1, originalInvocationCount);
-        Assert.Equal(0, replacementInvocationCount);
-        Assert.Equal(3, connection.TransmittedCommands.Count);
-        Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
-    }
+            cancellationToken: cancellationToken);
 
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), .. trailingResponses]);
@@ -295,65 +277,53 @@ public class TouchNotificationTests
         return [0x72, (byte)value.Length, .. value, 0x90, 0x00];
     }
 
-    private sealed class GatedListSmartCardConnection(params byte[][] nonListResponses) : ISmartCardConnection
+    private static void AssertNotification(
+        RecordingUserPresencePrompt prompt,
+        UserPresenceBasis basis,
+        UserPresenceOutcome outcome)
     {
-        private readonly Queue<byte[]> _nonListResponses = new(nonListResponses);
-        private readonly TaskCompletionSource _listCommandReceived =
-            new(TaskCreationOptions.RunContinuationsAsynchronously);
-        private readonly TaskCompletionSource<ReadOnlyMemory<byte>> _listResponse =
-            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        var request = Assert.Single(prompt.Requests);
+        Assert.Equal(basis, request.Context.Basis);
+        Assert.Equal("YubiHSM Auth", request.Context.Application);
+        Assert.Equal("cred", request.Context.Scope);
 
-        public Task ListCommandReceived => _listCommandReceived.Task;
+        var resolution = Assert.Single(prompt.Resolutions);
+        Assert.Same(request.Context, resolution.Context);
+        Assert.Equal(outcome, resolution.Outcome);
+        Assert.Equal(CancellationToken.None, resolution.CancellationToken);
+    }
 
-        public List<byte[]> TransmittedCommands { get; } = [];
+    private sealed class RecordingUserPresencePrompt(Func<int>? getCommandCount = null) : IUserPresencePrompt
+    {
+        public List<(UserPresenceContext Context, CancellationToken CancellationToken)> Requests { get; } = [];
+        public List<(UserPresenceContext Context, UserPresenceOutcome Outcome, CancellationToken CancellationToken)> Resolutions { get; } = [];
+        public int? CommandCountAtRequest { get; private set; }
+        public Action? Requested { get; init; }
+        public Exception? RequestException { get; init; }
+        public Exception? ResolutionException { get; init; }
 
-        public Transport Transport { get; } = Transport.Usb;
-
-        public ConnectionType Type { get; } = ConnectionType.SmartCard;
-
-        public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
-            ReadOnlyMemory<byte> command,
-            CancellationToken cancellationToken = default)
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            TransmittedCommands.Add(command.ToArray());
+            Requests.Add((context, cancellationToken));
+            CommandCountAtRequest = getCommandCount?.Invoke();
+            Requested?.Invoke();
 
-            if (command.Span.Length > 1 && command.Span[1] == HsmAuthSession.InsList)
-            {
-                _listCommandReceived.SetResult();
-                return await _listResponse.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            if (_nonListResponses.Count == 0)
-            {
-                throw new InvalidOperationException("No response enqueued for transmission.");
-            }
-
-            return _nonListResponses.Dequeue();
+            return RequestException is null
+                ? default
+                : ValueTask.FromException(RequestException);
         }
 
-        public void CompleteList(ReadOnlyMemory<byte> response) => _listResponse.SetResult(response);
-
-        public void FailList(Exception exception) => _listResponse.SetException(exception);
-
-        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
-            NullDisposable.Instance;
-
-        public bool SupportsExtendedApdu() => false;
-
-        public void Dispose()
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
         {
-        }
-
-        public ValueTask DisposeAsync() => default;
-
-        private sealed class NullDisposable : IDisposable
-        {
-            public static NullDisposable Instance { get; } = new();
-
-            public void Dispose()
-            {
-            }
+            Resolutions.Add((context, outcome, cancellationToken));
+            return ResolutionException is null
+                ? default
+                : ValueTask.FromException(ResolutionException);
         }
     }
 }

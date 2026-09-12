@@ -306,28 +306,6 @@ public class PivSessionTests
     }
 
     [Fact]
-    public async Task DecryptAsync_WithTouchPolicyAlways_NotifiesBeforePrivateKeyOperation()
-    {
-        var connection = CreateInitializedConnection(
-            Rsa1024TouchAlwaysMetadataResponse(),
-            Rsa1024TouchAlwaysMetadataResponse(),
-            [0x7C, 0x02, 0x82, 0x00, 0x90, 0x00]);
-        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
-        var callbackCount = 0;
-        session.OnTouchRequired = () => callbackCount++;
-
-        var exception = await Record.ExceptionAsync(() => session.DecryptAsync(
-            PivSlot.Authentication,
-            new byte[128],
-            RSAEncryptionPadding.Pkcs1,
-            TestContext.Current.CancellationToken));
-
-        Assert.NotNull(exception);
-        Assert.Equal(1, callbackCount);
-        Assert.Contains(connection.TransmittedCommands, command => command[1] == 0x87);
-    }
-
-    [Fact]
     public async Task GenerateKeyAsync_WithPolicies_TransmitsGenerateAsymmetricCommand()
     {
         var connection = CreateInitializedConnection(EccP256PublicKeyResponse());
@@ -796,15 +774,6 @@ public class PivSessionTests
 
     // PIN metadata TLVs: default flag(05) and retry counts(06), then SW 9000.
     private static byte[] PinMetadataResponse() => [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x03, 0x90, 0x00];
-
-    // Slot metadata TLVs: algorithm(01), PIN/touch policy(02), generated flag(03), then SW 9000.
-    private static byte[] Rsa1024TouchAlwaysMetadataResponse() =>
-    [
-        0x01, 0x01, (byte)PivAlgorithm.Rsa1024,
-        0x02, 0x02, (byte)PivPinPolicy.Default, (byte)PivTouchPolicy.Always,
-        0x03, 0x01, 0x01,
-        0x90, 0x00
-    ];
 
     private static byte[] EccP256PublicKeyResponse()
     {

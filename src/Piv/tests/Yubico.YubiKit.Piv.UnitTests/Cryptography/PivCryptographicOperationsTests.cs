@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Piv.Backend;
 using Yubico.YubiKit.Piv.Cryptography;
@@ -58,7 +59,8 @@ public class PivCryptographicOperationsTests
             PivSlot.Authentication,
             PivAlgorithm.EccP256,
             new byte[32],
-            TestContext.Current.CancellationToken);
+            UserPresenceNotification.None,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Sanity: the returned (distinct, correctly-unwrapped) copy still has the real data.
         Assert.Equal(payload, result.ToArray());
@@ -88,7 +90,8 @@ public class PivCryptographicOperationsTests
             NullLogger.Instance,
             PivSlot.KeyManagement,
             peerPublicKey,
-            TestContext.Current.CancellationToken);
+            UserPresenceNotification.None,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(sharedSecret, result.ToArray());
 
@@ -99,8 +102,81 @@ public class PivCryptographicOperationsTests
             b => Assert.Equal(0, b));
     }
 
+    [Fact]
+    public async Task SignOrDecryptAsync_WhenResolutionThrows_ZeroesCommandAndResponseBuffers()
+    {
+        byte[] payload = Enumerable.Range(1, 32).Select(i => (byte)i).ToArray();
+        byte[] inner = [0x82, (byte)payload.Length, .. payload];
+        byte[] wrapped = [0x7C, (byte)inner.Length, .. inner];
+        var backend = new CryptoCapturingBackend(wrapped);
+        var expected = new InvalidOperationException("resolution failed");
+        UserPresenceNotification notification = UserPresenceNotification.Create(
+            new ThrowingResolutionPrompt(expected),
+            CreateContext());
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            PivCryptographicOperations.SignOrDecryptAsync(
+                backend,
+                NullLogger.Instance,
+                PivSlot.Authentication,
+                PivAlgorithm.EccP256,
+                new byte[32],
+                notification,
+                TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+        Assert.All(backend.CapturedCommandDataArray!, b => Assert.Equal(0, b));
+        Assert.All(
+            backend.CapturedRawDataArray!
+                .AsSpan(backend.CapturedOffset, backend.CapturedCount - 2)
+                .ToArray(),
+            b => Assert.Equal(0, b));
+    }
+
+    [Fact]
+    public async Task CalculateSecretAsync_WhenResolutionThrows_ZeroesCommandAndResponseBuffers()
+    {
+        byte[] sharedSecret = Enumerable.Range(1, 32).Select(i => (byte)i).ToArray();
+        byte[] inner = [0x82, (byte)sharedSecret.Length, .. sharedSecret];
+        byte[] wrapped = [0x7C, (byte)inner.Length, .. inner];
+        var backend = new CryptoCapturingBackend(wrapped);
+        var expected = new InvalidOperationException("resolution failed");
+        UserPresenceNotification notification = UserPresenceNotification.Create(
+            new ThrowingResolutionPrompt(expected),
+            CreateContext());
+        using var peer = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        var peerPublicKey = Yubico.YubiKit.Core.Cryptography.ECPublicKey.CreateFromParameters(
+            peer.PublicKey.ExportParameters());
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            PivCryptographicOperations.CalculateSecretAsync(
+                backend,
+                NullLogger.Instance,
+                PivSlot.KeyManagement,
+                peerPublicKey,
+                notification,
+                TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+        Assert.All(backend.CapturedCommandDataArray!, b => Assert.Equal(0, b));
+        Assert.All(
+            backend.CapturedRawDataArray!
+                .AsSpan(backend.CapturedOffset, backend.CapturedCount - 2)
+                .ToArray(),
+            b => Assert.Equal(0, b));
+    }
+
+    private static UserPresenceContext CreateContext() => new()
+    {
+        Basis = UserPresenceBasis.PolicyRequires,
+        Application = "PIV",
+        Scope = PivSlot.Authentication.ToString()
+    };
+
     private sealed class CryptoCapturingBackend(byte[] responseWithoutSw) : IPivBackend
     {
+        public byte[]? CapturedCommandDataArray { get; private set; }
+
         public byte[]? CapturedRawDataArray { get; private set; }
 
         public int CapturedOffset { get; private set; }
@@ -115,6 +191,9 @@ public class PivCryptographicOperationsTests
             bool throwOnError = true,
             CancellationToken cancellationToken = default)
         {
+            Assert.True(MemoryMarshal.TryGetArray(command.Data, out var commandSegment));
+            CapturedCommandDataArray = commandSegment.Array;
+
             var response = new ApduResponse(responseWithoutSw, unchecked((short)0x9000));
 
             Assert.True(MemoryMarshal.TryGetArray(response.RawData, out var segment));
@@ -124,5 +203,17 @@ public class PivCryptographicOperationsTests
 
             return Task.FromResult(response);
         }
+    }
+
+    private sealed class ThrowingResolutionPrompt(Exception exception) : IUserPresencePrompt
+    {
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken) => default;
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken) => ValueTask.FromException(exception);
     }
 }

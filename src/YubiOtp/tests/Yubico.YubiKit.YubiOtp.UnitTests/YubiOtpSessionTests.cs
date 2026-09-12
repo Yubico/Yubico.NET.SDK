@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -87,17 +88,131 @@ public class YubiOtpSessionTests
         Assert.Equal(9, programmingSequence);
     }
 
+    [Fact]
+    public async Task CalculateHmacSha1Async_TouchConfiguredSmartCard_NotifiesPolicyRequires()
+    {
+        var prompt = new RecordingUserPresencePrompt();
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
+        using var sessionLease = session;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult((ReadOnlyMemory<byte>)CreateApduResponseData(20)));
+
+        _ = await session.CalculateHmacSha1Async(
+            Slot.One,
+            new byte[] { 0x01 },
+            TestContext.Current.CancellationToken);
+
+        UserPresenceContext requested = Assert.Single(prompt.Requested);
+        Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Basis);
+        Assert.Equal("YubiOTP", requested.Application);
+        Assert.Equal(Slot.One.ToString(), requested.Scope);
+        var resolved = Assert.Single(prompt.Resolved);
+        Assert.Same(requested, resolved.Context);
+        Assert.Equal(UserPresenceOutcome.Completed, resolved.Outcome);
+        Assert.Equal(CancellationToken.None, resolved.CancellationToken);
+    }
+
+    [Fact]
+    public async Task CalculateYubicoOtpAsync_NonTouchSmartCard_DoesNotNotify()
+    {
+        var prompt = new RecordingUserPresencePrompt();
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x01, prompt);
+        using var sessionLease = session;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult((ReadOnlyMemory<byte>)CreateApduResponseData(16)));
+
+        _ = await session.CalculateYubicoOtpAsync(
+            Slot.One,
+            new byte[6],
+            TestContext.Current.CancellationToken);
+
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task PutConfigurationAsync_TouchConfiguredSmartCard_DoesNotNotify()
+    {
+        var prompt = new RecordingUserPresencePrompt();
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
+        using var _ = session;
+        byte[] statusResponse = [5, 7, 0, 10, 0x05, 0, 0x90, 0x00];
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult((ReadOnlyMemory<byte>)statusResponse));
+        using var configuration = new HmacSha1SlotConfiguration(new byte[20]);
+
+        await session.PutConfigurationAsync(
+            Slot.One,
+            configuration,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task CalculateHmacSha1Async_TouchWaitTimeout_ResolvesTimedOut()
+    {
+        var prompt = new RecordingUserPresencePrompt();
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
+        using var _ = session;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<ReadOnlyMemory<byte>>(new TimeoutException("Touch timed out.")));
+
+        await Assert.ThrowsAsync<TimeoutException>(() => session.CalculateHmacSha1Async(
+            Slot.One,
+            new byte[] { 0x01 },
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(UserPresenceOutcome.TimedOut, Assert.Single(prompt.Resolved).Outcome);
+    }
+
+    [Fact]
+    public async Task CalculateHmacSha1Async_CallerCancellation_ResolvesCancelled()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var prompt = new RecordingUserPresencePrompt(() => cancellation.Cancel());
+        var (_, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
+        using var _ = session;
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.CalculateHmacSha1Async(
+            Slot.One,
+            new byte[] { 0x01 },
+            cancellation.Token));
+
+        Assert.Equal(UserPresenceOutcome.Cancelled, Assert.Single(prompt.Resolved).Outcome);
+    }
+
+    [Fact]
+    public async Task CalculateHmacSha1Async_ResponseFailure_ResolvesFailed()
+    {
+        var prompt = new RecordingUserPresencePrompt();
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
+        using var _ = session;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult((ReadOnlyMemory<byte>)CreateApduResponseData(2)));
+
+        await Assert.ThrowsAsync<BadResponseException>(() => session.CalculateHmacSha1Async(
+            Slot.One,
+            new byte[] { 0x01 },
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
+    }
+
     /// <summary>
     /// Creates an initialized YubiOtpSession backed by a fake (substitute) SmartCard
     /// connection, with the SELECT/init sequence already consumed.
     /// </summary>
-    private static async Task<(ISmartCardConnection Connection, YubiOtpSession Session)> CreateFakeSessionAsync()
+    private static async Task<(ISmartCardConnection Connection, YubiOtpSession Session)> CreateFakeSessionAsync(
+        byte touchLow = 0,
+        IUserPresencePrompt? userPresencePrompt = null)
     {
         var connection = Substitute.For<ISmartCardConnection>();
         connection.Type.Returns(ConnectionType.SmartCard);
         connection.Transport.Returns(Transport.Usb);
         byte[] managementResponse = [.. "YubiKey 5.7.0"u8, 0x90, 0x00];
-        byte[] otpResponse = [5, 7, 0, 9, 0, 0, 0x90, 0x00];
+        byte[] otpResponse = [5, 7, 0, 9, touchLow, 0, 0x90, 0x00];
         connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
             .Returns(
                 Task.FromResult((ReadOnlyMemory<byte>)managementResponse),
@@ -105,11 +220,21 @@ public class YubiOtpSessionTests
 
         var session = await YubiOtpSession.CreateAsync(
             connection,
+            userPresencePrompt is null
+                ? null
+                : new SessionCreationOptions { UserPresencePrompt = userPresencePrompt },
             cancellationToken: TestContext.Current.CancellationToken);
 
         connection.ClearReceivedCalls();
 
         return (connection, session);
+    }
+
+    private static byte[] CreateApduResponseData(int responseLength)
+    {
+        var response = new byte[responseLength + 2];
+        response[^2] = 0x90;
+        return response;
     }
 
     public class KeyLengthPreflightValidation
@@ -420,6 +545,30 @@ public class YubiOtpSessionTests
         }
 
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private sealed class RecordingUserPresencePrompt(Action? onRequested = null) : IUserPresencePrompt
+    {
+        public List<UserPresenceContext> Requested { get; } = [];
+        public List<(UserPresenceContext Context, UserPresenceOutcome Outcome, CancellationToken CancellationToken)> Resolved { get; } = [];
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken)
+        {
+            Requested.Add(context);
+            onRequested?.Invoke();
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            Resolved.Add((context, outcome, cancellationToken));
+            return ValueTask.CompletedTask;
+        }
     }
 
     private sealed class ProbeSession(IConnection connection) : ApplicationSession(connection);

@@ -131,6 +131,24 @@ mappings:
       - yubikit:src/Fido2/src/FidoSession.cs
     notes: Check construction, async disposal, transport, authentication, and connection reuse semantics before migrating mechanically.
     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+  - id: user-presence-prompt
+    status: assisted
+    confidence: high
+    migration_kind: behavior
+    v1: PIV/YubiHSM Auth TouchNotificationCallback, Fido2Session KeyCollector touch notifications, and YubiOTP UseTouchNotifier
+    v2: SessionCreationOptions.UserPresencePrompt (Yubico.YubiKit.Core.Credentials.IUserPresencePrompt)
+    evidence:
+      - yubikit:src/Core/src/Credentials/IUserPresencePrompt.cs
+      - yubikit:src/Core/src/Sessions/SessionCreationOptions.cs
+      - yubikit:src/Piv/src/PivSession.cs
+      - yubikit:src/Fido2/src/FidoSession.cs
+      - yubikit:src/Oath/src/OathSession.cs
+      - yubikit:src/OpenPgp/src/OpenPgpSession.cs
+      - yubikit:src/YubiOtp/src/YubiOtpSession.cs
+      - yubikit:src/YubiHsm/src/HsmAuthSession.cs
+      - yubikit:docs/usage/user-interaction.md
+    notes: V2 uses one asynchronous, cancellable request/resolution contract for touch notification across PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. FIDO HID and OTP HID can report DeviceWaiting from live transport status. Smart-card paths use PolicyRequires when policy is known and PolicyMayRequire for cached or unknown policy; they do not infer a smart-card timeout. YubiHSM Auth specifically remains silent when a requested label is absent from a successful LIST, while an unknown touch value on a found credential or LIST failure maps to PolicyMayRequire. The same UserPresenceContext instance correlates Requested and Resolved. This is not PIN KeyCollector parity; most PIN, PUK, password, and key inputs remain direct parameters, and retry behavior remains operation-specific. The alpha-only PIV and YubiHSM Auth OnTouchRequired properties were removed outright with no compatibility adapter.
+    last_reviewed_commit: 2918ae0774e182a58cbc98c03c27defc5d18bc43
   - id: applet-piv
     status: assisted
     confidence: high
@@ -140,8 +158,8 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Piv/PivSession.cs
       - yubikit:src/Piv/
-    notes: Security-sensitive operations still require manual behavior review.
-    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+    notes: Security-sensitive operations still require manual behavior review. PIV PIN, PUK, and management-key inputs remain explicit. Migrate v1 TouchNotificationCallback or the removed alpha PivSession.OnTouchRequired property to SessionCreationOptions.UserPresencePrompt; PIV touch notifications are policy-based.
+    last_reviewed_commit: 2918ae0774e182a58cbc98c03c27defc5d18bc43
   - id: applet-fido2
     status: assisted
     confidence: high
@@ -151,8 +169,8 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.cs
       - yubikit:src/Fido2/
-    notes: Review PIN/UV and transport behavior manually.
-    last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
+    notes: Review PIN/UV and transport behavior manually. PIN and UV inputs remain distinct from touch notification. Supply SessionCreationOptions.UserPresencePrompt for touch; FIDO HID can report DeviceWaiting from an authenticator keep-alive, while SmartCard notification is policy-based.
+    last_reviewed_commit: 2918ae0774e182a58cbc98c03c27defc5d18bc43
   - id: applet-oath
     status: assisted
     confidence: high
@@ -439,13 +457,14 @@ mappings:
     confidence: high
     migration_kind: behavior
     v1: YubiHsmAuthSession touch-required notification during CalculateSessionKeys* (interactive KeyCollector-adjacent callback)
-    v2: HsmAuthSession.OnTouchRequired (TouchNotificationCallback delegate property)
+    v2: SessionCreationOptions.UserPresencePrompt (IUserPresencePrompt) supplied when creating HsmAuthSession
     evidence:
-      - yubikit:src/YubiHsm/src/TouchNotification.cs
+      - yubikit:src/Core/src/Credentials/IUserPresencePrompt.cs
+      - yubikit:src/Core/src/Sessions/SessionCreationOptions.cs
       - yubikit:src/YubiHsm/src/HsmAuthSession.cs
-      - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot had no in-flight "please touch now" signal (historical gap 13). The `yubikit-gaps` remediation effort added `HsmAuthSession.OnTouchRequired`, a settable `TouchNotificationCallback?` invoked before a CALCULATE session-key exchange when the target credential's touch requirement is known to be set or cannot be determined. It intentionally receives no credential label or algorithm (to avoid leaking which credential is in use), must not block, and must not call back into the session.
-    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+      - yubikit:docs/usage/user-interaction.md
+    notes: The initial v2 snapshot had no "please touch" signal (historical gap 13), and an intermediate alpha added HsmAuthSession.OnTouchRequired. That alpha property was removed outright in favor of the cross-applet IUserPresencePrompt supplied through SessionCreationOptions. A known touch-required credential produces PolicyRequires; an unknown touch value on a found credential or LIST failure produces PolicyMayRequire and should be debounced; a credential label absent from a successful LIST remains silent. Context includes the credential label as Scope, so terminal implementations may omit Scope to avoid exposing metadata. Implementations must return promptly and must not call back into the session. See user-presence-prompt for the shared contract.
+    last_reviewed_commit: 2918ae0774e182a58cbc98c03c27defc5d18bc43
   - id: yubihsm-credential-retries-remaining-rename
     status: automatic
     confidence: high
@@ -492,8 +511,8 @@ mappings:
       - yubikit:src/WebAuthn/src/Client/WebAuthnClient.cs
       - yubikit:src/WebAuthn/src/Client/WebAuthnClientOptions.cs
       - yubikit:src/WebAuthn/CLAUDE.md
-    notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Fido2 (IFidoSession); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt (set via WebAuthnClientOptions.CredentialPrompt - see `webauthn-client-construction-and-streams` for the options-record construction change), an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (WebAuthnClientOptions.MaxPromptAttempts, default 3, now caller-configurable); returning null from the prompt means the user declined, not a retry request. This replaces the KeyCollector pattern only for WebAuthn; the lower-level Yubico.YubiKit.Fido2.IFidoSession still takes PIN bytes explicitly and has no prompt integration. Review the prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
-    last_reviewed_commit: 277920d9de48d4aedad7ecc5d00201a015b5a297
+    notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Fido2 (IFidoSession); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt (set via WebAuthnClientOptions.CredentialPrompt - see `webauthn-client-construction-and-streams` for the options-record construction change), an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (WebAuthnClientOptions.MaxPromptAttempts, default 3, now caller-configurable); returning null from the prompt means the user declined, not a retry request. This replaces the credential-collection part of KeyCollector only for WebAuthn; the lower-level Yubico.YubiKit.Fido2.IFidoSession still takes PIN bytes explicitly. Touch is separate and no longer a gap; supply IUserPresencePrompt through the FIDO SessionCreationOptions, and FIDO HID reports DeviceWaiting from the authenticator's live user-presence-needed keep-alive. Review the credential prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
+    last_reviewed_commit: 2918ae0774e182a58cbc98c03c27defc5d18bc43
   - id: yubihsm-credential-password-bytes
     status: assisted
     confidence: high

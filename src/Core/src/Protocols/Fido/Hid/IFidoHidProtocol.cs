@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0 (the "License").
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
@@ -23,17 +24,32 @@ internal interface IFidoHidProtocol : IProtocol
     /// <param name="cancellationToken">Cancellation token.</param>
     Task InitializeAsync(CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Sends a CTAP vendor command and receives the response.
-    /// Used for Management application over HID.
-    /// </summary>
-    /// <param name="command">The CTAP command byte (e.g., 0xC2 for READ_CONFIG).</param>
+    /// <summary>Sends a raw CTAP HID command without an SDK user-presence notification.</summary>
+    /// <param name="command">The CTAP command byte.</param>
     /// <param name="data">The command payload.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The response data from the YubiKey.</returns>
     Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
         byte command,
         ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default) =>
+        SendVendorCommandAsync(command, data, UserPresenceNotification.None, cancellationToken);
+
+    /// <summary>
+    /// Sends a CTAP vendor command and receives the response.
+    /// Used for Management application over HID.
+    /// </summary>
+    /// <param name="command">The CTAP command byte (e.g., 0xC2 for READ_CONFIG).</param>
+    /// <param name="data">The command payload.</param>
+    /// <param name="userPresenceNotification">
+    ///     The non-null operation handle requested only for authoritative user-presence keep-alive status.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The response data from the YubiKey.</returns>
+    Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+        byte command,
+        ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default);
 
     /// <summary>

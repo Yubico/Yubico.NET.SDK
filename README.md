@@ -47,6 +47,7 @@ dotnet add package Yubico.YubiKit.YubiOtp --prerelease
 dotnet add package Yubico.YubiKit.OpenPgp --prerelease
 dotnet add package Yubico.YubiKit.SecurityDomain --prerelease
 dotnet add package Yubico.YubiKit.Management --prerelease
+dotnet add package Yubico.YubiKit.YubiHsm --prerelease
 ```
 
 ## Quick Start
@@ -54,39 +55,56 @@ dotnet add package Yubico.YubiKit.Management --prerelease
 ### Basic Device Detection
 
 ```csharp
-using Yubico.YubiKit.Core;
+using System.Security.Cryptography;
+using System.Text;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Piv;
 
 // Discover connected YubiKeys
 var devices = await YubiKeyManager.FindAllAsync();
-
-foreach (var device in devices)
+if (devices.Count == 0)
 {
-    await using var session = await device.CreateManagementSessionAsync();
-    var deviceInfo = await session.GetDeviceInfoAsync();
-    
-    Console.WriteLine($"YubiKey {deviceInfo.FirmwareVersion}");
-    Console.WriteLine($"Serial: {deviceInfo.SerialNumber}");
+    return;
 }
+
+IYubiKey device = devices[0];
+
+await using var managementSession = await device.CreateManagementSessionAsync();
+var deviceInfo = await managementSession.GetDeviceInfoAsync();
+
+Console.WriteLine($"YubiKey {deviceInfo.FirmwareVersion}");
+Console.WriteLine($"Serial: {deviceInfo.SerialNumber}");
 ```
+
+Later snippets assume these directives and a `device` obtained the same way.
 
 ### PIV Digital Signature
 
 ```csharp
-using Yubico.YubiKit.Piv;
-
 await using var pivSession = await device.CreatePivSessionAsync();
 
-// Sign data with PIV slot
-byte[] dataToSign = Encoding.UTF8.GetBytes("Hello, YubiKey!");
-byte[] signature = await pivSession.SignOrDecryptAsync(PivSlot.Authentication, dataToSign);
+// The YubiKey signs a digest, not a message. This overload reads the slot's
+// algorithm from metadata, which needs firmware 5.3.0 or later; the slot's PIN
+// and touch policies still apply, so verify the PIN first.
+byte[] pin = Encoding.UTF8.GetBytes("123456");
+try
+{
+    await pivSession.VerifyPinAsync(pin);
+    byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("Hello, YubiKey!"));
+    ReadOnlyMemory<byte> signature = await pivSession.SignOrDecryptAsync(PivSlot.Authentication, digest);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+}
 ```
 
 ### FIDO2 Registration
 
 ```csharp
-using Yubico.YubiKit.Fido2;
-
 await using var fidoSession = await device.CreateFidoSessionAsync();
 
 // Query authenticator capabilities without requiring user presence
@@ -96,16 +114,18 @@ Console.WriteLine(string.Join(", ", info.Versions));
 
 ## Project Structure
 
-- **Yubico.YubiKit.Core** - Device discovery, connection management, APDU protocol handling
-- **Yubico.YubiKit.Management** - Device information and capability queries
-- **Yubico.YubiKit.Piv** - PIV smart card operations
-- **Yubico.YubiKit.Fido2** - FIDO2/WebAuthn authentication
-- **Yubico.YubiKit.WebAuthn** - WebAuthn API over FIDO2
-- **Yubico.YubiKit.Oath** - TOTP/HOTP one-time passwords
-- **Yubico.YubiKit.YubiOtp** - Yubico OTP configuration
-- **Yubico.YubiKit.OpenPgp** - OpenPGP card implementation
-- **Yubico.YubiKit.SecurityDomain** - Secure channel (SCP03/SCP11) and key management
-- **Yubico.YubiKit.YubiHsm** - YubiHSM Auth applet operations on YubiKey
+Each module README covers requirements, installation, a first working call, common operations, and constraints.
+
+- **[Yubico.YubiKit.Core](src/Core/README.md)** - Device discovery, connection management, APDU protocol handling
+- **[Yubico.YubiKit.Management](src/Management/README.md)** - Device information and capability configuration
+- **[Yubico.YubiKit.Piv](src/Piv/README.md)** - PIV smart card operations
+- **[Yubico.YubiKit.Fido2](src/Fido2/README.md)** - FIDO2 CTAP authenticator operations
+- **[Yubico.YubiKit.WebAuthn](src/WebAuthn/README.md)** - WebAuthn client API over FIDO2
+- **[Yubico.YubiKit.Oath](src/Oath/README.md)** - TOTP/HOTP one-time passwords
+- **[Yubico.YubiKit.YubiOtp](src/YubiOtp/README.md)** - Yubico OTP slot configuration and challenge-response
+- **[Yubico.YubiKit.OpenPgp](src/OpenPgp/README.md)** - OpenPGP card implementation
+- **[Yubico.YubiKit.SecurityDomain](src/SecurityDomain/README.md)** - Secure channel (SCP03/SCP11) and key management
+- **[Yubico.YubiKit.YubiHsm](src/YubiHsm/README.md)** - YubiHSM Auth applet operations on YubiKey
 
 ## Native AOT
 

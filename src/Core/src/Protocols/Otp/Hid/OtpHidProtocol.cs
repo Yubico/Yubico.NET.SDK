@@ -273,10 +273,9 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             {
                 _logger.LogDebug("Touch pending, waiting for user interaction...");
                 await notifyUserPresenceAsync().ConfigureAwait(false);
-                await WaitForTouchCompleteAsync(exchangeToken, callerToken).ConfigureAwait(false);
+                report = await WaitForTouchCompleteAsync(exchangeToken, callerToken).ConfigureAwait(false);
+                statusByte = report.Span[OtpConstants.FeatureReportDataSize];
                 stopwatch.Restart();
-                // After touch completes, continue polling
-                continue;
             }
 
             // Check for ReadPending flag - data is ready
@@ -328,7 +327,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     {
         const int maximumResponseLength = (OtpConstants.SequenceMask + 1) * OtpConstants.FeatureReportDataSize;
         byte[] responseBuffer = _bufferPool.Rent(maximumResponseLength);
-        var previousSeq = -1;
+        var expectedSequence = 0;
         var responseLength = 0;
 
         try
@@ -343,19 +342,27 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                 // Check if ReadPending is still set
                 if ((statusByte & OtpConstants.ResponsePendingFlag) == 0)
                 {
-                    // End of data chain
-                    _logger.LogDebug("End of data chain (ReadPending cleared)");
-                    break;
+                    await ResetStateAfterAbandonmentAsync("incomplete OTP HID response", cancellationToken)
+                        .ConfigureAwait(false);
+                    throw new BadResponseException("Incomplete OTP HID response transfer.");
                 }
 
                 var packetSeq = statusByte & OtpConstants.SequenceMask;
 
-                // Check for sequence reset (second time seeing seq=0 means end of transmission)
-                if (packetSeq == 0 && previousSeq != -1)
+                // Sequence zero is the terminal marker only after at least one data packet.
+                if (packetSeq == 0 && responseLength != 0)
                 {
                     await ResetStateAsync(cancellationToken).ConfigureAwait(false);
                     _logger.LogDebug("Transmission complete (seq reset to 0)");
                     break;
+                }
+
+                if (packetSeq != expectedSequence)
+                {
+                    await ResetStateAfterAbandonmentAsync("malformed OTP HID response sequence", cancellationToken)
+                        .ConfigureAwait(false);
+                    throw new BadResponseException(
+                        $"Unexpected OTP HID response sequence {packetSeq}; expected {expectedSequence}.");
                 }
 
                 if (responseLength > maximumResponseLength - OtpConstants.FeatureReportDataSize)
@@ -365,7 +372,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                 report.Span[..OtpConstants.FeatureReportDataSize]
                     .CopyTo(responseBuffer.AsSpan(responseLength));
                 responseLength += OtpConstants.FeatureReportDataSize;
-                previousSeq = packetSeq;
+                expectedSequence++;
 
                 _logger.LogTrace("Added packet seq={Seq}, total={Total} bytes", packetSeq, responseLength);
 
@@ -387,7 +394,10 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     /// <summary>
     /// Waits for touch to complete (TouchPending flag to clear).
     /// </summary>
-    private async Task WaitForTouchCompleteAsync(
+    /// <param name="exchangeToken">Uncancellable token for the admitted protocol exchange.</param>
+    /// <param name="callerToken">Caller token used as a cancellation signal while waiting for touch.</param>
+    /// <returns>The first report that no longer indicates a touch wait.</returns>
+    private async Task<ReadOnlyMemory<byte>> WaitForTouchCompleteAsync(
         CancellationToken exchangeToken,
         CancellationToken callerToken)
     {
@@ -410,7 +420,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) == 0)
             {
                 _logger.LogDebug("Touch completed after {Ms}ms", stopwatch.ElapsedMilliseconds);
-                return;
+                return report;
             }
 
             if (callerToken.IsCancellationRequested)

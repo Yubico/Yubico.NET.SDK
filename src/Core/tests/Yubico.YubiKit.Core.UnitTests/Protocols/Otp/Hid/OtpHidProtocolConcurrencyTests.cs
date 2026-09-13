@@ -240,12 +240,16 @@ public class OtpHidProtocolConcurrencyTests
             var payload = _frameBuffer.AsSpan(0, OtpConstants.SlotDataSize).ToArray();
             var responsePayload = Responder(slot, payload);
 
-            // Serve the response as one pending-data report (7 payload bytes, ResponsePendingFlag,
-            // sequence 0); the following idle status report ends the chain.
+            // Serve the response as one pending-data report followed by the protocol's pending
+            // sequence-zero terminal marker.
             var dataReport = new byte[OtpConstants.FeatureReportSize];
             responsePayload.AsSpan(0, OtpConstants.FeatureReportDataSize).CopyTo(dataReport);
             dataReport[OtpConstants.FeatureReportDataSize] = OtpConstants.ResponsePendingFlag;
             _pendingReads.Enqueue(dataReport);
+
+            var terminalReport = new byte[OtpConstants.FeatureReportSize];
+            terminalReport[OtpConstants.FeatureReportDataSize] = OtpConstants.ResponsePendingFlag;
+            _pendingReads.Enqueue(terminalReport);
         }
     }
 }

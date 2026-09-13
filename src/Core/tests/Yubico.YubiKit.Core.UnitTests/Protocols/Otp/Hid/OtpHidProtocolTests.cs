@@ -173,6 +173,13 @@ public class OtpHidProtocolTests
         Assert.Single(prompt.Requested);
         Assert.Empty(prompt.Resolved);
         Assert.Equal(OtpConstants.DummyReportWrite, mock.SentReports[^1][OtpConstants.FeatureReportDataSize]);
+
+        QueueStatusOnlyExchangeAfterInitialization(mock);
+        ReadOnlyMemory<byte> response = await protocol.SendAndReceiveAsync(
+            0x13,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken);
+        Assert.Equal(6, response.Length);
     }
 
     [Fact]
@@ -369,6 +376,91 @@ public class OtpHidProtocolTests
     }
 
     [Fact]
+    public async Task SendAndReceiveAsync_ProcessingThenDataResponse_ProcessesFirstDataReport()
+    {
+        var connection = new RetainingOtpHidConnection();
+        QueueExchangePrelude(connection);
+        connection.Enqueue(BusyReport());
+        connection.Enqueue(DataReport(sequence: 0, startValue: 1));
+        connection.Enqueue(DataReport(sequence: 1, startValue: 8));
+        connection.Enqueue(DataReport(sequence: 0, startValue: 0));
+        var protocol = new OtpHidProtocol(connection);
+
+        ReadOnlyMemory<byte> response = await protocol.SendAndReceiveAsync(
+            0x13,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(Enumerable.Range(1, 14).Select(value => (byte)value), response.ToArray());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SendAndReceiveAsync_MalformedDataSequence_ResetsAndThrowsBadResponse(
+        bool firstPacketIsSequenceZero)
+    {
+        var connection = new RetainingOtpHidConnection();
+        QueueExchangePrelude(connection);
+        if (firstPacketIsSequenceZero)
+        {
+            connection.Enqueue(DataReport(sequence: 0, startValue: 1));
+            connection.Enqueue(DataReport(sequence: 2, startValue: 8));
+        }
+        else
+        {
+            connection.Enqueue(DataReport(sequence: 1, startValue: 1));
+        }
+        var protocol = new OtpHidProtocol(connection);
+
+        await Assert.ThrowsAsync<BadResponseException>(() => protocol.SendAndReceiveAsync(
+            0x13,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(OtpConstants.DummyReportWrite, connection.SentReportSnapshots[^1][OtpConstants.FeatureReportDataSize]);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenPendingClearsBeforeTerminalMarker_ResetsAndThrowsBadResponse()
+    {
+        var connection = new RetainingOtpHidConnection();
+        QueueExchangePrelude(connection);
+        connection.Enqueue(DataReport(sequence: 0, startValue: 1));
+        connection.Enqueue(Status(programmingSequence: 1));
+        var protocol = new OtpHidProtocol(connection);
+
+        await Assert.ThrowsAsync<BadResponseException>(() => protocol.SendAndReceiveAsync(
+            0x13,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(OtpConstants.DummyReportWrite, connection.SentReportSnapshots[^1][OtpConstants.FeatureReportDataSize]);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_MaximumContiguousSequenceRange_ReturnsAllPackets()
+    {
+        var connection = new RetainingOtpHidConnection();
+        QueueExchangePrelude(connection);
+        for (byte sequence = 0; sequence <= OtpConstants.SequenceMask; sequence++)
+        {
+            connection.Enqueue(DataReport(sequence, sequence));
+        }
+        connection.Enqueue(DataReport(sequence: 0, startValue: 0));
+        var protocol = new OtpHidProtocol(connection);
+
+        ReadOnlyMemory<byte> response = await protocol.SendAndReceiveAsync(
+            0x13,
+            ReadOnlyMemory<byte>.Empty,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal((OtpConstants.SequenceMask + 1) * OtpConstants.FeatureReportDataSize, response.Length);
+        Assert.Equal(0, response.Span[0]);
+        Assert.Equal(OtpConstants.SequenceMask + OtpConstants.FeatureReportDataSize - 1, response.Span[^1]);
+    }
+
+    [Fact]
     public async Task SendAndReceiveAsync_WhenDataResponseReceiveFails_ZerosRentedAccumulationBuffer()
     {
         var connection = new RetainingOtpHidConnection();
@@ -394,6 +486,14 @@ public class OtpHidProtocolTests
         connection.Enqueue(Status(programmingSequence: 2));
     }
 
+    private static void QueueStatusOnlyExchangeAfterInitialization(MockHidConnection connection)
+    {
+        connection.QueueReport(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            connection.QueueReport(Status(programmingSequence: 1));
+        connection.QueueReport(Status(programmingSequence: 2));
+    }
+
     private static UserPresenceContext CreatePresenceContext() => new()
     {
         Basis = UserPresenceBasis.PolicyMayRequire,
@@ -412,7 +512,6 @@ public class OtpHidProtocolTests
             connection.QueueReport(TouchWaitReport());
         }
 
-        connection.QueueReport(Status(programmingSequence: 2));
         connection.QueueReport(Status(programmingSequence: 2));
     }
 
@@ -436,10 +535,7 @@ public class OtpHidProtocolTests
 
     private static void QueueDataExchange(RetainingOtpHidConnection connection, bool completeResponse)
     {
-        connection.Enqueue(Status(versionMajor: 5));
-        connection.Enqueue(Status(programmingSequence: 1));
-        for (int i = 0; i < 10; i++)
-            connection.Enqueue(Status(programmingSequence: 1));
+        QueueExchangePrelude(connection);
 
         connection.Enqueue(DataReport(sequence: 0, startValue: 1));
         if (completeResponse)
@@ -447,6 +543,21 @@ public class OtpHidProtocolTests
             connection.Enqueue(DataReport(sequence: 1, startValue: 8));
             connection.Enqueue(DataReport(sequence: 0, startValue: 0));
         }
+    }
+
+    private static void QueueExchangePrelude(RetainingOtpHidConnection connection)
+    {
+        connection.Enqueue(Status(versionMajor: 5));
+        connection.Enqueue(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            connection.Enqueue(Status(programmingSequence: 1));
+    }
+
+    private static byte[] BusyReport()
+    {
+        byte[] report = Status(programmingSequence: 1);
+        report[OtpConstants.FeatureReportDataSize] = 0x01;
+        return report;
     }
 
     private static byte[] DataReport(byte sequence, byte startValue)

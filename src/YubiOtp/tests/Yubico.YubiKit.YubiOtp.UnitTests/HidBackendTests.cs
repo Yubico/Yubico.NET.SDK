@@ -13,9 +13,12 @@
 // limitations under the License.
 
 using NSubstitute;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
+using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.YubiOtp.Backend;
 
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
@@ -100,6 +103,43 @@ public class HidBackendTests
         Assert.Equal(0xAA, result.Span[0]);
         Assert.Equal(0xFF, result.Span[19]);
         Assert.Equal(responseWithCrc, result.ToArray().Concat(responseWithCrc[^2..]).ToArray());
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_TouchCompletionDataReport_IsRetainedThroughCrcValidation()
+    {
+        byte[] key = Enumerable.Range(1, 20).Select(value => (byte)value).ToArray();
+        byte[] challenge = Enumerable.Range(21, 32).Select(value => (byte)value).ToArray();
+        byte[] expectedHmac = HMACSHA1.HashData(key, challenge);
+        byte[] responseWithCrc = MakeResponseWithCrc(expectedHmac);
+        var rawResponse = new byte[28];
+        responseWithCrc.CopyTo(rawResponse, 0);
+
+        var connection = new ScriptedOtpHidConnection();
+        connection.Enqueue(Status(versionMajor: 5));
+        connection.Enqueue(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            connection.Enqueue(Status(programmingSequence: 1));
+        connection.Enqueue(TouchWaitReport());
+        for (byte sequence = 0; sequence < 4; sequence++)
+            connection.Enqueue(DataReport(sequence, rawResponse.AsSpan(sequence * 7, 7)));
+        connection.Enqueue(DataReport(sequence: 0, new byte[7]));
+
+        var prompt = Substitute.For<IUserPresencePrompt>();
+        UserPresenceContext context = CreateContext();
+        using var protocol = new OtpHidProtocol(connection, touchTimeout: TimeSpan.FromSeconds(1));
+        var backend = new HidBackend(protocol);
+
+        ReadOnlyMemory<byte> actual = await backend.SendAndReceiveAsync(
+            ConfigSlot.ChalHmac1,
+            challenge,
+            expectedHmac.Length,
+            UserPresenceNotification.Create(prompt, context),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(expectedHmac, actual.ToArray());
+        await prompt.Received(1).OnUserPresenceRequestedAsync(context, Arg.Any<CancellationToken>());
+        Assert.Equal(0, connection.ReportsRemaining);
     }
 
     [Fact]
@@ -391,6 +431,53 @@ public class HidBackendTests
         Application = "YubiOTP",
         Scope = "One"
     };
+
+    private static byte[] Status(byte versionMajor = 0, byte programmingSequence = 0) =>
+        [0x00, versionMajor, 0x04, 0x03, programmingSequence, 0x00, 0x00, 0x00];
+
+    private static byte[] TouchWaitReport()
+    {
+        byte[] report = Status(programmingSequence: 1);
+        report[OtpConstants.FeatureReportDataSize] = OtpConstants.ResponseTimeoutWaitFlag;
+        return report;
+    }
+
+    private static byte[] DataReport(byte sequence, ReadOnlySpan<byte> data)
+    {
+        var report = new byte[OtpConstants.FeatureReportSize];
+        data.CopyTo(report);
+        report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.ResponsePendingFlag | sequence);
+        return report;
+    }
+
+    private sealed class ScriptedOtpHidConnection : IOtpHidConnection
+    {
+        private readonly Queue<ReadOnlyMemory<byte>> _reports = new();
+
+        public int FeatureReportSize => OtpConstants.FeatureReportSize;
+        public ConnectionType Type => ConnectionType.HidOtp;
+        public int ReportsRemaining => _reports.Count;
+
+        public void Enqueue(ReadOnlyMemory<byte> report) => _reports.Enqueue(report);
+
+        public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.CompletedTask;
+        }
+
+        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(_reports.Dequeue());
+        }
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
 
     private static async Task<ReadOnlyMemory<byte>> RequestAndThrowAsync(
         UserPresenceNotification notification,

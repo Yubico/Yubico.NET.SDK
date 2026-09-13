@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -103,25 +104,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     private ISmartCardProtocol _protocol = null!;
     private IHsmAuthBackend _backend = null!;
 
-    /// <summary>
-    ///     Gets or sets a callback invoked when a session-key calculation may require the user
-    ///     to physically touch the YubiKey.
-    /// </summary>
-    /// <remarks>
-    ///     Each session-key calculation snapshots the callback before querying the credential
-    ///     list. Changes made while that query is in flight apply only to later calculations.
-    /// </remarks>
-    /// <example>
-    ///     <code>
-    /// session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
-    /// </code>
-    /// </example>
-    public Action? OnTouchRequired { get; set; }
-
     private HsmAuthSession(
         ISmartCardConnection connection,
-        ScpKeyParameters? scpKeyParams = null)
-        : base(connection)
+        ScpKeyParameters? scpKeyParams = null,
+        IUserPresencePrompt? userPresencePrompt = null)
+        : base(connection, userPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
@@ -150,7 +137,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(connection, () => new HsmAuthSession(connection, scpKeyParams));
+        var session = Construct(
+            connection,
+            () => new HsmAuthSession(connection, scpKeyParams, options?.UserPresencePrompt));
         try
         {
             await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken)
@@ -444,7 +433,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateContextLength(context, SymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        await NotifyTouchIfRequiredAsync(label, cancellationToken).ConfigureAwait(false);
+        UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+            await GetUserPresenceContextAsync(label, cancellationToken).ConfigureAwait(false));
 
         byte[]? credPwBytes = null;
         Memory<byte> data = default;
@@ -466,17 +456,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
-            var response = await TransmitWithRetryCheckAsync(
-                command, ThrowOnCredentialPasswordFailure, "CALCULATE symmetric session keys", cancellationToken);
-
-            try
-            {
-                return SessionKeys.Parse(response.Data.Span);
-            }
-            finally
-            {
-                ZeroApduResponse(response);
-            }
+            return await CalculateSessionKeysAsync(
+                    command,
+                    userPresenceNotification,
+                    "CALCULATE symmetric session keys",
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
         finally
         {
@@ -568,7 +553,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateContextLength(context, AsymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        await NotifyTouchIfRequiredAsync(label, cancellationToken).ConfigureAwait(false);
+        UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+            await GetUserPresenceContextAsync(label, cancellationToken).ConfigureAwait(false));
 
         byte[]? credPwBytes = null;
         Memory<byte> data = default;
@@ -586,17 +572,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 new Tlv(TagCredentialPassword, credPwBytes));
 
             var command = new ApduCommand { Ins = InsCalculate, Data = data };
-            var response = await TransmitWithRetryCheckAsync(
-                command, ThrowOnCredentialPasswordFailure, "CALCULATE asymmetric session keys", cancellationToken);
-
-            try
-            {
-                return SessionKeys.Parse(response.Data.Span);
-            }
-            finally
-            {
-                ZeroApduResponse(response);
-            }
+            return await CalculateSessionKeysAsync(
+                    command,
+                    userPresenceNotification,
+                    "CALCULATE asymmetric session keys",
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
         finally
         {
@@ -889,24 +870,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         return response;
     }
 
-    /// <summary>
-    ///     Notifies <see cref="OnTouchRequired" /> before a CALCULATE session-key exchange when
-    ///     the target credential's touch requirement is set or cannot be determined.
-    /// </summary>
-    /// <remarks>
-    ///     Short-circuits with no device I/O when no callback is registered, so callers who do
-    ///     not opt in observe no behavior or performance change.
-    /// </remarks>
-    private async Task NotifyTouchIfRequiredAsync(string label, CancellationToken cancellationToken)
+    private async Task<UserPresenceContext?> GetUserPresenceContextAsync(
+        string label,
+        CancellationToken cancellationToken)
     {
-        Action? callback = OnTouchRequired;
-        if (callback is null)
-            return;
+        if (!IsUserPresenceNotificationEnabled)
+            return null;
 
-        // The try/catch below guards only the credential-list query. callback.Invoke() is
-        // called unconditionally outside of it so a throwing caller callback propagates normally
-        // to the caller instead of being caught by the query's error handling, misdiagnosed as a
-        // query failure, and invoked a second time.
         IReadOnlyList<HsmAuthCredential> credentials;
         try
         {
@@ -916,21 +886,72 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             Logger.LogDebug(
                 ex, "YubiHSM Auth: failed to query credential list for touch policy, notifying conservatively");
-            callback.Invoke();
-            return;
+            return CreateUserPresenceContext(label, UserPresenceBasis.PolicyMayRequire);
         }
 
         var credential = credentials.FirstOrDefault(
             c => string.Equals(c.Label, label, StringComparison.Ordinal));
 
-        // Unknown touch semantics (null) are treated conservatively: notify so the caller
-        // can prompt the user before the blocking CALCULATE exchange. A missing credential
-        // means the subsequent CALCULATE call will fail for an unrelated reason, so no
-        // notification is warranted.
-        if (credential is { TouchRequired: not false })
+        if (credential is null)
+            return null;
+
+        UserPresenceBasis? basis = credential.TouchRequired switch
         {
-            callback.Invoke();
-        }
+            true => UserPresenceBasis.PolicyRequires,
+            false => null,
+            null => UserPresenceBasis.PolicyMayRequire
+        };
+
+        return basis is { } value ? CreateUserPresenceContext(label, value) : null;
+    }
+
+    private static UserPresenceContext CreateUserPresenceContext(string label, UserPresenceBasis basis) =>
+        new()
+        {
+            Basis = basis,
+            Application = "YubiHSM Auth",
+            Scope = label
+        };
+
+    private async Task<SessionKeys> CalculateSessionKeysAsync(
+        ApduCommand command,
+        UserPresenceNotification userPresenceNotification,
+        string operationName,
+        CancellationToken cancellationToken)
+    {
+        return await RunWithUserPresenceNotificationAsync(
+                userPresenceNotification,
+                async token =>
+                {
+                    var response = await TransmitWithRetryCheckAsync(
+                            command,
+                            ThrowOnCredentialPasswordFailure,
+                            operationName,
+                            token)
+                        .ConfigureAwait(false);
+
+                    try
+                    {
+                        SessionKeys sessionKeys = SessionKeys.Parse(response.Data.Span);
+                        try
+                        {
+                            await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
+                                .ConfigureAwait(false);
+                            return sessionKeys;
+                        }
+                        catch
+                        {
+                            sessionKeys.Dispose();
+                            throw;
+                        }
+                    }
+                    finally
+                    {
+                        ZeroApduResponse(response);
+                    }
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static void ValidateManagementKey(ReadOnlySpan<byte> managementKey)

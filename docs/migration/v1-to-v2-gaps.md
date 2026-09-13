@@ -26,7 +26,7 @@ Ranked roughly by blast radius. Full detail for each is in the module sections b
 | 1 | No .NET Framework/netstandard support — v2 is net10.0-only, v1 supported net472/netstandard2.0/2.1 | Cross-cutting | Blocker (for that consumer segment) |
 | 2 | U2F protocol entirely removed — no register/authenticate, no `U2fSession` equivalent | FIDO2 | Major/Blocker for U2F-only consumers |
 | 3 | PIV PIN-only mode gone — `PivSession.Pinonly.cs`/PIN-derived management key has no v2 equivalent | PIV | Major |
-| 4 | `KeyCollector` delegate pattern removed everywhere — each applet (Piv/Oath/Fido2/YubiHsm) handles PIN/PUK/touch with direct parameters. A shared async SDK-to-application prompt primitive, `ICredentialPrompt`, now exists in Core but is adopted only by WebAuthn so far; the application-initiated `ISecureCredentialReader` terminal helper serves a different role | Cross-cutting | Major |
+| 4 | `KeyCollector` delegate pattern removed — credential collection and retry remain mostly application-controlled. `ICredentialPrompt` is adopted by WebAuthn, while `IUserPresencePrompt` now provides shared touch notification across PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. This is not PIN/PUK/password/key `KeyCollector` parity | Cross-cutting | Major |
 | 5 | Legacy pre-5.0 firmware mode switching removed from public API (`SetLegacyDeviceConfiguration`) — YubiKey NEO/4 users can't reconfigure interfaces at all | Management | Major |
 | 6 | Pluggable crypto primitives gone (`IAesGcmPrimitives`/`IEcdhPrimitives`/`ICmacPrimitives` extension points) | Core | Major |
 | 7 | `TlvReader`/`TlvWriter` typed sequential API gone, replaced by a much thinner `Tlv`/`TlvHelper` | Core | Major |
@@ -34,8 +34,8 @@ Ranked roughly by blast radius. Full detail for each is in the module sections b
 | 9 | Exception hierarchy shrank (10→8 types) — `TlvException`, `SecureChannelException`, `KeyboardConnectionException` have no v2 equivalent; SecurityDomain/YubiOtp/OpenPgp/Management/YubiHsm/Oath have zero dedicated exception types | Cross-cutting | Major |
 | 10 | PIV typed data objects gone (CHUID/CCC/AdminData/KeyHistory) — replaced by raw get/put-object with no parsed fields | PIV | Major |
 | 11 | OATH loses `IsPasswordProtected` signal and auto-retry-on-lock behavior; exception on wrong password is now generic, not `SecurityException` | OATH | Major |
-| 12 | YubiOTP loses: string+keyboard-layout static passwords, Yubico-OTP-algorithm challenge-response, touch-notify callback, NDEF read-back, and silently hashes/pads wrong-length HMAC keys instead of throwing | YubiOTP | Major |
-| 13 | YubiHSM Auth loses interactive retry (`Try*`) and touch-notify callback; possible mislabeled retry-counter field (`Counter` vs "retries remaining") needs hardware verification | YubiHsm | Major/needs-check |
+| 12 | YubiOTP still lacks NDEF read-back and some generation conveniences. Keyboard-aware static passwords and Yubico-OTP challenge-response were restored; touch notification now uses the shared `IUserPresencePrompt` | YubiOTP | Minor |
+| 13 | YubiHSM Auth still lacks v1's interactive `Try*` retry loops. Typed retry reporting and touch notification were restored; touch now uses the shared `IUserPresencePrompt` rather than the removed alpha `OnTouchRequired` callback | YubiHsm | Major |
 | 14 | Logging is silent by default — v1 auto-configured console logging at Error level; v2 defaults to `NullLoggerFactory` until explicitly configured | Core | Minor (but easy to miss) |
 | 15 | No meta-package — v1 was 1 package, v2 is 9 with nothing bundling "all applets" | Cross-cutting | Minor |
 
@@ -91,7 +91,7 @@ v2 location: `src/Piv/src/**`
   **Severity**: Major | **Confidence**: High
 
 - **Feature/API**: `KeyCollector` delegate pattern driving interactive PIN/PUK/management-key collection with retry/cancel semantics, used across nearly every PIV operation
-  **v2 status**: Missing — callers must pass PIN/PUK/management-key bytes directly with no built-in retry-loop callback.
+  **v2 status**: Partially addressed — callers still pass PIN/PUK/management-key bytes directly with no built-in retry-loop callback. Touch notification is separate and now uses `SessionCreationOptions.UserPresencePrompt`/`IUserPresencePrompt`; the alpha-only `PivSession.OnTouchRequired` callback was removed outright.
   **User impact**: Apps must hand-roll retry loops around each async call using `InvalidPinException.RetriesRemaining`.
   **Severity**: Major | **Confidence**: High
 
@@ -121,7 +121,7 @@ v2 location: `src/Piv/src/**`
   **v2 status**: Behavior-changed — only throwing variants exist; retry info surfaced via `InvalidPinException.RetriesRemaining` or `GetPinMetadataAsync`/`GetPukMetadataAsync`. Deliberate async/exception-first style shift, not a capability loss.
   **Severity**: Minor | **Confidence**: Medium
 
-**Verified improvement, no gap**: key generation/import (all algorithms incl. Ed25519/X25519), all 20 retired slots, Move/Delete key, AttestKey, GetMetadata, management-key ops (incl. touch policy, AES/3DES), PIN/PUK verify/change/unblock/retry-count, biometric UV + temporary PIN — v2 additionally adds touch-notification callbacks and algorithm-auto-detecting `SignOrDecryptAsync`.
+**Verified improvement, no gap**: key generation/import (all algorithms incl. Ed25519/X25519), all 20 retired slots, Move/Delete key, AttestKey, GetMetadata, management-key ops (incl. touch policy, AES/3DES), PIN/PUK verify/change/unblock/retry-count, biometric UV + temporary PIN — v2 additionally adds shared `IUserPresencePrompt` touch notification and algorithm-auto-detecting `SignOrDecryptAsync`.
 
 ---
 
@@ -136,10 +136,9 @@ v2 locations: `src/Fido2/src/**`, `src/WebAuthn/src/**`
   **Severity**: Major (Blocker for U2F-only consumers) | **Confidence**: High
 
 - **Feature/API**: `KeyCollector` delegate for PIN/touch/UV prompts on `Fido2Session`
-  **v2 status**: Present-but-renamed/Behavior-changed — `Fido2Session` exposes explicit async methods (`SetPinAsync`, `ChangePinAsync`, `GetPinUvAuthTokenUsingPinAsync/UsingUvAsync`) with no callback. At the WebAuthn layer the closest analog is `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`), an optional async SDK-to-application prompt supplied to `WebAuthnClient`: the SDK calls it when a ceremony needs a PIN and owns a bounded retry loop with a fresh, zeroed secret for each attempt. The synchronous `ISecureCredentialReader` is instead an application-initiated terminal input helper and does not replace this callback.
-  WebAuthn ceremonies are plain awaitable methods; there is no progress stream and no interaction callback. Abandonment is via the cancellation token.
-  Touch remains a gap: WebAuthn has no dedicated in-flight touch signal, so UI can only prompt speculatively while a ceremony may be waiting for user presence.
-  No 1:1 analog; arguably more explicit/testable, but requires a rewrite.
+  **v2 status**: Split by responsibility — `FidoSession` exposes explicit async PIN/UV methods (`SetPinAsync`, `ChangePinAsync`, `GetPinUvAuthTokenUsingPinAsync/UsingUvAsync`). At the WebAuthn layer, `ICredentialPrompt` is an optional async SDK-to-application PIN prompt with a bounded retry loop and a fresh, zeroed secret for each attempt. The synchronous `ISecureCredentialReader` remains an application-initiated terminal helper.
+  Touch notification uses the separate `IUserPresencePrompt` supplied through `SessionCreationOptions`. FIDO HID and therefore WebAuthn over HID report the authenticator's live `DeviceWaiting` signal; smart-card FIDO notification is policy-based. WebAuthn ceremonies remain plain awaitable methods with cancellation, not progress streams.
+  There is no one-to-one `KeyCollector` analog for PIN/UV collection, but touch is no longer a gap.
   **Severity**: Minor (migration friction, not capability loss) | **Confidence**: High
 
 - **Feature/API**: COSE named constants `ES512` (-36) and `ECDHwHKDF256` (-25)
@@ -209,7 +208,7 @@ v2 location: `src/YubiOtp/src/**`
   **Severity**: Major | **Confidence**: High
 
 - **Feature/API**: Touch-required notification callback during challenge-response (`UseTouchNotifier(Action)`)
-  **v2 status**: Missing — no touch-prompt hook on `CalculateHmacSha1Async`.
+  **v2 status**: Restored through the cross-applet `SessionCreationOptions.UserPresencePrompt`/`IUserPresencePrompt` contract for both HMAC-SHA1 and Yubico OTP challenge-response. OTP HID reports `DeviceWaiting` from live transport status; the smart-card path uses known slot policy.
   **Severity**: Minor | **Confidence**: Medium
 
 - **Feature/API**: Reading back a programmed NDEF tag over NFC (`ReadNdefTag()`)
@@ -285,18 +284,17 @@ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations onl
   **Severity**: Major | **Confidence**: High
 
 - **Feature/API**: Touch-required notification callback before/during physical touch wait
-  **v2 status**: Missing — no in-flight "please touch now" signal; touch requirement only discoverable after the fact via `ListCredentialsAsync`.
-  **User impact**: Operation appears to hang with no UI cue.
-  **Severity**: Major | **Confidence**: High
+  **v2 status**: Restored through `SessionCreationOptions.UserPresencePrompt`/`IUserPresencePrompt`. Known touch-required credentials report `PolicyRequires`; an unknown touch value on a found credential or an unavailable credential list reports `PolicyMayRequire`; and a label absent from a successful list remains silent. The intermediate alpha `HsmAuthSession.OnTouchRequired` callback was removed outright with no adapter.
+  **User impact**: Applications can use one prompt implementation across applets, but should debounce advisory `PolicyMayRequire` notifications.
+  **Severity**: No remaining touch gap | **Confidence**: High
 
 - **Feature/API**: Structured retry-count reporting (`out int? retriesRemaining` / typed `RetriesRemaining` property)
-  **v2 status**: Behavior-changed/Degraded — retry count embedded only in the exception's string message; callers must derive it from `SW` via `SWConstants.ExtractRetryCount`.
+  **v2 status**: Behavior-changed — single-attempt operations throw `HsmAuthRetryException` with a typed `RetriesRemaining` property. Automatic retry loops remain application-owned.
   **Severity**: Minor | **Confidence**: Medium
 
-- **Feature/API**: `ListCredentials` trailing-byte semantics — v1 documents it as "retries remaining before deletion"; v2's equivalent field (`Counter`) is documented as "number of times this credential has been used" — **opposite meaning**, unconfirmed by any test in either branch.
-  **v2 status**: Behavior-changed (possible mislabel) — **needs hardware verification**.
-  **User impact**: If v2's doc is wrong, a "N attempts remaining" UI built on `Counter` could badly misreport imminent credential-deletion risk.
-  **Severity**: Major | **Confidence**: Medium
+- **Feature/API**: `ListCredentials` trailing-byte semantics (retries remaining before deletion)
+  **v2 status**: Fixed and hardware-verified — the field decremented after a failed credential-password attempt and was renamed `HsmAuthCredential.RetriesRemaining` to match v1 semantics.
+  **Severity**: No remaining gap | **Confidence**: High
 
 - **Feature/API**: Explicit live application-version query (`GetApplicationVersion()`)
   **v2 status**: Missing as public method — version is cached from SELECT response, refreshed only on `ResetAsync`; functionally equivalent for normal use via `FirmwareVersion`, but no on-demand re-check.
@@ -359,9 +357,9 @@ v2 location: `src/Management/src/**`
   **User impact**: Simple synchronous console-app/script consumers must adopt async/await throughout, including `await using` for disposal — a non-trivial rewrite for straightforward use cases v1 didn't require.
   **Severity**: Major (understandable architecturally, but a real DX cost) | **Confidence**: High
 
-- **`KeyCollector` delegate pattern**: removed entirely. v1 had one callback shape shared across Piv/Fido2/Oath/U2f/YubiHsmAuth (31 files reference it). v2 has zero matches for `KeyCollector`/`IAsyncKeyCollector`/`PinCollector`/`IPinProvider`/`IUserVerifier` — most applets take credentials as direct parameters.
-  Partially addressed: `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) is a shared async, context-carrying, cancellable SDK-to-application prompt primitive intended as the one reusable callback shape. It is currently consumed only by `WebAuthnClient`; other applets remain direct-parameter and would adopt the same interface if they grow interactive needs. `ISecureCredentialReader` remains a separate synchronous, application-initiated terminal helper.
-  **User impact**: A caller cannot yet wire one prompt across all applets. Prompting patterns still differ per applet outside WebAuthn.
+- **`KeyCollector` delegate pattern**: removed entirely. V1 used it for both credential acquisition and touch. V2 splits those responsibilities. Most applets still take PIN, PUK, password, and key material as direct parameters; `ICredentialPrompt` is currently consumed by `WebAuthnClient`, and retry behavior remains applet-specific. `ISecureCredentialReader` remains a separate synchronous, application-initiated terminal helper.
+  Touch is mostly addressed: `IUserPresencePrompt` is one async, cancellable request/resolution contract wired through `SessionCreationOptions.UserPresencePrompt` across PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. HID FIDO and OTP paths can report `DeviceWaiting`; smart-card paths use policy certainty, with cached or unknown policy reported as `PolicyMayRequire` and no inferred timeout.
+  **User impact**: A caller can wire one touch prompt across the supported applets, but cannot treat it as credential collection or PIN `KeyCollector` parity.
   **Severity**: Major | **Confidence**: High
 
 - **Logging**: not a regression — both v1 and v2 use a global static logger factory (no per-instance DI). v2 additionally adds `UseTemporary(ILoggerFactory)` for test isolation. (Separate from the "silent by default" finding under Core above, which is a real behavior change in default output, not architecture.)
@@ -379,14 +377,17 @@ v2 location: `src/Management/src/**`
 ## Verified strong/full parity summary (no action needed)
 
 - Device discovery/hot-plug, transports (HID/CCID/NFC), platform interop (Windows/macOS/Linux)
-- PIV key management, algorithms, slots, metadata, attestation (v2 adds touch callbacks + algorithm auto-detection)
-- FIDO2 CTAP2 surface (GetInfo, PIN protocols, bio enrollment, credential mgmt, config, largeBlob, extensions)
+- PIV key management, algorithms, slots, metadata, attestation (v2 adds shared touch notification + algorithm auto-detection)
+- FIDO2 CTAP2 surface (GetInfo, PIN protocols, live HID touch notification, bio enrollment, credential mgmt, config, largeBlob, extensions)
 - SCP03/SCP11 core protocol, key management, cert store
 - Management device-info read / device-config write (firmware ≥5.0 path)
 - OATH credential types/algorithms, PBKDF2, calculate-all semantics
+- Cross-applet touch notification for PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth
 - YubiHSM Auth's new capabilities (password change, on-device EC keygen, derived credentials, zeroizing `SessionKeys`)
 
 ## Items needing hardware/live verification before acting
 
-1. **YubiHsm `Counter` field** — possible flip from "retries remaining" (v1) to "usage counter" (v2); needs a real hardware check against near-zero-retry credentials.
-2. **YubiOtp FIPS-mode query and legacy device-info/config commands** — unverified whether these relocated to `Management` or were dropped entirely.
+1. **YubiOtp FIPS-mode query and legacy device-info/config commands** — unverified whether these relocated to `Management` or were dropped entirely.
+
+User-presence callback ordering and debounce behavior have no-hardware coverage. Live timing and physical-touch
+behavior remain separate human-coordinated hardware verification.

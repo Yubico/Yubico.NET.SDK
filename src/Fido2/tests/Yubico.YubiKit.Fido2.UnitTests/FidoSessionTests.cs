@@ -3,10 +3,14 @@ using NSubstitute;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Fido2.Backend;
+using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Fido2.Ctap;
 
 namespace Yubico.YubiKit.Fido2.UnitTests;
 
@@ -178,6 +182,163 @@ public class FidoSessionTests
         Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
     }
 
+    [Fact]
+    public async Task MakeCredentialAsync_WithSmartCardPrompt_NotifiesRequiredRpScopeAndTimeout()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00],
+            [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00],
+            [(byte)CtapStatus.UserActionTimeout, 0x90, 0x00]);
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await FidoSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        CtapException exception = await Assert.ThrowsAsync<CtapException>(() =>
+            session.MakeCredentialAsync(
+                new byte[32],
+                new PublicKeyCredentialRpEntity("example.com"),
+                new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
+                [PublicKeyCredentialParameters.CreateES256()],
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(CtapStatus.UserActionTimeout, exception.Status);
+        UserPresenceContext requested = Assert.Single(prompt.Requested);
+        Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Basis);
+        Assert.Equal("FIDO2", requested.Application);
+        Assert.Equal("example.com", requested.Scope);
+        var resolved = Assert.Single(prompt.Resolved);
+        Assert.Same(requested, resolved.Context);
+        Assert.Equal(UserPresenceOutcome.TimedOut, resolved.Outcome);
+        Assert.Equal(CancellationToken.None, resolved.CancellationToken);
+    }
+
+    [Fact]
+    public async Task SmartCardBackend_WhenResolutionThrowsAfterSuccess_PropagatesResolutionException()
+    {
+        var connection = new DisposeTrackingSmartCardConnection([0x00, 0xAA, 0x90, 0x00]);
+        var expected = new InvalidOperationException("resolution failed");
+        var prompt = new RecordingUserPresencePrompt(resolutionException: expected);
+        var backend = new SmartCardBackend(new PcscProtocol(connection));
+        UserPresenceNotification notification =
+            UserPresenceNotification.Create(prompt, CreatePolicyContext());
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            backend.SendCborAsync(
+                new byte[] { (byte)CtapCommand.MakeCredential },
+                notification,
+                TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task SmartCardBackend_WhenOperationAndResolutionThrow_PreservesOperationException()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [(byte)CtapStatus.UserActionTimeout, 0x90, 0x00]);
+        var resolutionException = new InvalidOperationException("resolution failed");
+        var prompt = new RecordingUserPresencePrompt(resolutionException: resolutionException);
+        var backend = new SmartCardBackend(new PcscProtocol(connection));
+        UserPresenceNotification notification =
+            UserPresenceNotification.Create(prompt, CreatePolicyContext());
+
+        CtapException actual = await Assert.ThrowsAsync<CtapException>(() => backend.SendCborAsync(
+            new byte[] { (byte)CtapCommand.MakeCredential },
+            notification,
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(CtapStatus.UserActionTimeout, actual.Status);
+        Assert.Single(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task SmartCardBackend_WhenRequestThrows_DoesNotTransmitOrResolve()
+    {
+        var connection = new DisposeTrackingSmartCardConnection([0x00, 0xAA, 0x90, 0x00]);
+        var expected = new InvalidOperationException("request failed");
+        var prompt = new RecordingUserPresencePrompt(requestException: expected);
+        var backend = new SmartCardBackend(new PcscProtocol(connection));
+        UserPresenceNotification notification =
+            UserPresenceNotification.Create(prompt, CreatePolicyContext());
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            backend.SendCborAsync(
+                new byte[] { (byte)CtapCommand.MakeCredential },
+                notification,
+                TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+        Assert.Empty(connection.TransmittedCommands);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task GetAssertionAsync_WithUserPresenceFalse_DoesNotNotifySmartCardPrompt()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00],
+            [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00],
+            [(byte)CtapStatus.NoCredentials, 0x90, 0x00]);
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await FidoSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        CtapException exception = await Assert.ThrowsAsync<CtapException>(() =>
+            session.GetAssertionAsync(
+                "example.com",
+                new byte[32],
+                new GetAssertionOptions { UserPresence = false },
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(CtapStatus.NoCredentials, exception.Status);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task SendCborRequestAsync_WithPrompt_DoesNotInferUserPresence()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00],
+            [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00],
+            [0x00, 0x90, 0x00]);
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await FidoSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        _ = await session.SendCborRequestAsync(
+            new byte[] { CtapCommand.Selection },
+            TestContext.Current.CancellationToken);
+
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task SelectionAsync_WithSmartCardPrompt_DoesNotPredictUserPresence()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00],
+            [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00],
+            [0x00, 0x90, 0x00]);
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await FidoSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        await session.SelectionAsync(TestContext.Current.CancellationToken);
+
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+    }
+
     private static byte[] MinimalGetInfoResponse()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -189,6 +350,13 @@ public class FidoSessionTests
         writer.WriteEndMap();
         return writer.Encode();
     }
+
+    private static UserPresenceContext CreatePolicyContext() => new()
+    {
+        Basis = UserPresenceBasis.PolicyRequires,
+        Application = "FIDO2",
+        Scope = "example.com"
+    };
 
     private sealed class DisposeTrackingSmartCardConnection(params byte[][] responses) : ISmartCardConnection
     {
@@ -257,6 +425,37 @@ public class FidoSessionTests
 
         public void Dispose()
         {
+        }
+    }
+
+    private sealed class RecordingUserPresencePrompt(
+        Exception? requestException = null,
+        Exception? resolutionException = null) : IUserPresencePrompt
+    {
+        public List<UserPresenceContext> Requested { get; } = [];
+        public List<(UserPresenceContext Context, UserPresenceOutcome Outcome, CancellationToken CancellationToken)>
+            Resolved
+        { get; } = [];
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken)
+        {
+            Requested.Add(context);
+            return requestException is null
+                ? default
+                : ValueTask.FromException(requestException);
+        }
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            Resolved.Add((context, outcome, cancellationToken));
+            return resolutionException is null
+                ? default
+                : ValueTask.FromException(resolutionException);
         }
     }
 }

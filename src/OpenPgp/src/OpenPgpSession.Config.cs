@@ -57,6 +57,7 @@ public sealed partial class OpenPgpSession
 
         await PutDataAsync(keyRef.UifDo(), uif.ToBytes(), cancellationToken)
             .ConfigureAwait(false);
+        _updatedUifs[keyRef] = uif;
     }
 
     /// <inheritdoc />

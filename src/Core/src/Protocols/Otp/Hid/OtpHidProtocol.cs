@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -44,6 +45,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     private readonly DisposalGate _disposalGate = new();
     private readonly ILogger<OtpHidProtocol> _logger;
     private readonly ArrayPool<byte> _bufferPool;
+    // Production keeps the device's 14-second touch window; the internal override makes timeout tests deterministic.
+    private readonly TimeSpan _touchTimeout;
     private FirmwareVersion? _firmwareVersion;
     private bool _initialized;
     private bool _disposed;
@@ -51,11 +54,13 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     public OtpHidProtocol(
         IOtpHidConnection connection,
         ILogger<OtpHidProtocol>? logger = null,
-        ArrayPool<byte>? bufferPool = null)
+        ArrayPool<byte>? bufferPool = null,
+        TimeSpan? touchTimeout = null)
     {
         _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         _logger = logger ?? NullLogger<OtpHidProtocol>.Instance;
         _bufferPool = bufferPool ?? ArrayPool<byte>.Shared;
+        _touchTimeout = touchTimeout ?? TimeSpan.FromSeconds(14);
     }
 
     public FirmwareVersion? FirmwareVersion => _firmwareVersion;
@@ -97,7 +102,12 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             Array.Fill(scanMap, (byte)'c');
             try
             {
-                await SendAndReceiveCoreUnderGuardAsync(0x12, scanMap, cancellationToken).ConfigureAwait(false);
+                await SendAndReceiveCoreUnderGuardAsync(
+                        0x12,
+                        scanMap,
+                        UserPresenceNotification.None,
+                        exchangeToken: cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch
             {
@@ -113,12 +123,24 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         _logger.LogDebug("OTP protocol initialized, firmware version: {Version}", _firmwareVersion);
     }
 
+    public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+        byte slot,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default) =>
+        SendAndReceiveAsync(
+            slot,
+            data,
+            UserPresenceNotification.None,
+            cancellationToken: cancellationToken);
+
     public async Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
         byte slot,
         ReadOnlyMemory<byte> data,
-        CancellationToken cancellationToken = default)
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(userPresenceNotification);
 
         if (data.Length > OtpConstants.SlotDataSize)
         {
@@ -129,7 +151,13 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                 async exchangeToken =>
                 {
                     await EnsureInitializedUnderGuardAsync(exchangeToken).ConfigureAwait(false);
-                    return await SendAndReceiveCoreUnderGuardAsync(slot, data, exchangeToken).ConfigureAwait(false);
+                    return await SendAndReceiveCoreUnderGuardAsync(
+                            slot,
+                            data,
+                            userPresenceNotification,
+                            exchangeToken,
+                            cancellationToken)
+                        .ConfigureAwait(false);
                 },
                 cancellationToken)
             .ConfigureAwait(false);
@@ -142,7 +170,9 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     private async Task<ReadOnlyMemory<byte>> SendAndReceiveCoreUnderGuardAsync(
         byte slot,
         ReadOnlyMemory<byte> data,
-        CancellationToken cancellationToken)
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken exchangeToken,
+        CancellationToken callerToken = default)
     {
         // Pad data to slot data size (64 bytes)
         var payload = new byte[OtpConstants.SlotDataSize];
@@ -151,10 +181,15 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         {
             _logger.LogTrace("Sending OTP slot command 0x{Slot:X2} with {Length} bytes payload", slot, data.Length);
 
-            var programmingSequence = await SendFrameAsync(slot, payload, cancellationToken).ConfigureAwait(false);
+            var programmingSequence = await SendFrameAsync(slot, payload, exchangeToken).ConfigureAwait(false);
 
             // Read response using Java-style single polling loop
-            return await ReadFrameJavaStyleAsync(programmingSequence, cancellationToken).ConfigureAwait(false);
+            return await ReadFrameJavaStyleAsync(
+                    programmingSequence,
+                    userPresenceNotification,
+                    exchangeToken,
+                    callerToken)
+                .ConfigureAwait(false);
         }
         finally
         {
@@ -168,27 +203,48 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     /// 2. Then read data packets using the frame reader pattern
     /// </summary>
     /// <param name="programmingSequence">The programming sequence before the command was sent.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <param name="userPresenceNotification">The non-null handle for the SDK operation.</param>
+    /// <param name="exchangeToken">Uncancellable token for the admitted protocol exchange.</param>
+    /// <param name="callerToken">Caller token used as a cancellation signal while the device waits for touch.</param>
     private async Task<ReadOnlyMemory<byte>> ReadFrameJavaStyleAsync(
         int programmingSequence,
-        CancellationToken cancellationToken)
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken exchangeToken,
+        CancellationToken callerToken)
     {
         _logger.LogDebug("ReadFrameJavaStyleAsync starting, programmingSequence={ProgSeq}", programmingSequence);
 
         // Phase 1: Wait for ReadPending flag (legacy C# WaitForReadPending approach)
-        var (firstReport, hasData) = await WaitForReadyToReadAsync(programmingSequence, cancellationToken)
+        var (firstReport, hasData) = await WaitForReadyToReadAsync(
+                programmingSequence,
+                async () =>
+                {
+                    try
+                    {
+                        await userPresenceNotification.RequestAsync(UserPresenceBasis.DeviceWaiting, callerToken)
+                            .ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        await ResetStateAfterAbandonmentAsync("user-presence callback failure", exchangeToken)
+                            .ConfigureAwait(false);
+                        throw;
+                    }
+                },
+                exchangeToken,
+                callerToken)
             .ConfigureAwait(false);
 
         if (!hasData)
         {
             // Status-only response (config command, sequence updated)
-            var status = firstReport.Slice(1, 6).ToArray();
-            _logger.LogDebug("Status-only response received ({ByteCount} bytes)", status.Length);
-            return status;
+            ReadOnlyMemory<byte> statusResponse = firstReport.Slice(1, 6).ToArray();
+            _logger.LogDebug("Status-only response received ({ByteCount} bytes)", statusResponse.Length);
+            return statusResponse;
         }
 
         // Phase 2: Read data packets (legacy C# frame reader pattern)
-        return await ReadDataPacketsAsync(firstReport, cancellationToken).ConfigureAwait(false);
+        return await ReadDataPacketsAsync(firstReport, exchangeToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -197,14 +253,16 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     /// </summary>
     private async Task<(ReadOnlyMemory<byte> Report, bool HasData)> WaitForReadyToReadAsync(
         int programmingSequence,
-        CancellationToken cancellationToken)
+        Func<ValueTask> notifyUserPresenceAsync,
+        CancellationToken exchangeToken,
+        CancellationToken callerToken)
     {
         const int timeLimitMs = 3000; // 3s: HMAC-SHA1 slot writes can take ~1s on some firmware
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         while (stopwatch.ElapsedMilliseconds < timeLimitMs)
         {
-            var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
+            var report = await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
             var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
 
             _logger.LogTrace("WaitForReadyToRead: statusByte=0x{Status:X2}, report={ByteCount} bytes",
@@ -214,9 +272,10 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) != 0)
             {
                 _logger.LogDebug("Touch pending, waiting for user interaction...");
-                await WaitForTouchCompleteAsync(cancellationToken).ConfigureAwait(false);
-                // After touch completes, continue polling
-                continue;
+                await notifyUserPresenceAsync().ConfigureAwait(false);
+                report = await WaitForTouchCompleteAsync(exchangeToken, callerToken).ConfigureAwait(false);
+                statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+                stopwatch.Restart();
             }
 
             // Check for ReadPending flag - data is ready
@@ -254,7 +313,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             _logger.LogTrace("Device busy (statusByte=0x{Status:X2}), continuing poll", statusByte);
         }
 
-        await ResetStateAsync(cancellationToken).ConfigureAwait(false);
+        await ResetStateAsync(exchangeToken).ConfigureAwait(false);
         throw new TimeoutException($"Timeout waiting for device response after {stopwatch.ElapsedMilliseconds}ms");
     }
 
@@ -268,7 +327,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     {
         const int maximumResponseLength = (OtpConstants.SequenceMask + 1) * OtpConstants.FeatureReportDataSize;
         byte[] responseBuffer = _bufferPool.Rent(maximumResponseLength);
-        var previousSeq = -1;
+        var expectedSequence = 0;
         var responseLength = 0;
 
         try
@@ -283,19 +342,27 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                 // Check if ReadPending is still set
                 if ((statusByte & OtpConstants.ResponsePendingFlag) == 0)
                 {
-                    // End of data chain
-                    _logger.LogDebug("End of data chain (ReadPending cleared)");
-                    break;
+                    await ResetStateAfterAbandonmentAsync("incomplete OTP HID response", cancellationToken)
+                        .ConfigureAwait(false);
+                    throw new BadResponseException("Incomplete OTP HID response transfer.");
                 }
 
                 var packetSeq = statusByte & OtpConstants.SequenceMask;
 
-                // Check for sequence reset (second time seeing seq=0 means end of transmission)
-                if (packetSeq == 0 && previousSeq != -1)
+                // Sequence zero is the terminal marker only after at least one data packet.
+                if (packetSeq == 0 && responseLength != 0)
                 {
                     await ResetStateAsync(cancellationToken).ConfigureAwait(false);
                     _logger.LogDebug("Transmission complete (seq reset to 0)");
                     break;
+                }
+
+                if (packetSeq != expectedSequence)
+                {
+                    await ResetStateAfterAbandonmentAsync("malformed OTP HID response sequence", cancellationToken)
+                        .ConfigureAwait(false);
+                    throw new BadResponseException(
+                        $"Unexpected OTP HID response sequence {packetSeq}; expected {expectedSequence}.");
                 }
 
                 if (responseLength > maximumResponseLength - OtpConstants.FeatureReportDataSize)
@@ -305,7 +372,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                 report.Span[..OtpConstants.FeatureReportDataSize]
                     .CopyTo(responseBuffer.AsSpan(responseLength));
                 responseLength += OtpConstants.FeatureReportDataSize;
-                previousSeq = packetSeq;
+                expectedSequence++;
 
                 _logger.LogTrace("Added packet seq={Seq}, total={Total} bytes", packetSeq, responseLength);
 
@@ -327,26 +394,60 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     /// <summary>
     /// Waits for touch to complete (TouchPending flag to clear).
     /// </summary>
-    private async Task WaitForTouchCompleteAsync(CancellationToken cancellationToken)
+    /// <param name="exchangeToken">Uncancellable token for the admitted protocol exchange.</param>
+    /// <param name="callerToken">Caller token used as a cancellation signal while waiting for touch.</param>
+    /// <returns>The first report that no longer indicates a touch wait.</returns>
+    private async Task<ReadOnlyMemory<byte>> WaitForTouchCompleteAsync(
+        CancellationToken exchangeToken,
+        CancellationToken callerToken)
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        const int timeLimitMs = 14000; // 14 seconds for touch (YubiKey times out at 15)
 
-        while (stopwatch.ElapsedMilliseconds < timeLimitMs)
+        while (stopwatch.Elapsed < _touchTimeout)
         {
-            await Task.Delay(250, cancellationToken).ConfigureAwait(false);
+            if (callerToken.IsCancellationRequested)
+            {
+                await ResetStateAfterAbandonmentAsync("caller cancellation", exchangeToken)
+                    .ConfigureAwait(false);
+                callerToken.ThrowIfCancellationRequested();
+            }
 
-            var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
+            await Task.Delay(250, exchangeToken).ConfigureAwait(false);
+
+            var report = await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
             var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
 
             if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) == 0)
             {
                 _logger.LogDebug("Touch completed after {Ms}ms", stopwatch.ElapsedMilliseconds);
-                return;
+                return report;
+            }
+
+            if (callerToken.IsCancellationRequested)
+            {
+                await ResetStateAfterAbandonmentAsync("caller cancellation", exchangeToken)
+                    .ConfigureAwait(false);
+                callerToken.ThrowIfCancellationRequested();
             }
         }
 
-        throw new TimeoutException("Timeout waiting for user touch");
+        await ResetStateAfterAbandonmentAsync("user-presence timeout", exchangeToken)
+            .ConfigureAwait(false);
+        throw new OtpHidTouchTimeoutException("Timeout waiting for user touch");
+    }
+
+    private async Task ResetStateAfterAbandonmentAsync(
+        string reason,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await ResetStateAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Unable to reset OTP HID state after {Reason}", reason);
+        }
     }
 
     public async Task<ReadOnlyMemory<byte>> ReadStatusAsync(CancellationToken cancellationToken = default)

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
@@ -66,6 +67,10 @@ public sealed class RawFidoHidSession : ApplicationSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        return FidoProtocol.SendVendorCommandAsync(command, payload, cancellationToken);
+        return FidoProtocol.SendVendorCommandAsync(
+            command,
+            payload,
+            UserPresenceNotification.None,
+            cancellationToken);
     }
 }

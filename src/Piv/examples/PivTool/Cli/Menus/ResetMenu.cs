@@ -48,8 +48,9 @@ public static class ResetMenu
 
         OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
-        await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
-        OutputHelpers.SetupTouchNotification(session);
+        await using var session = await selection.Device.CreatePivSessionAsync(
+            OutputHelpers.UserPresenceOptions,
+            cancellationToken);
 
         await AnsiConsole.Status()
             .StartAsync("Resetting PIV application...", async ctx =>

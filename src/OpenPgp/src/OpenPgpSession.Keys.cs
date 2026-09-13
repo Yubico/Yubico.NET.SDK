@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 namespace Yubico.YubiKit.OpenPgp;
@@ -88,6 +89,7 @@ public sealed partial class OpenPgpSession
         // Refresh cached app data after key import
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
+        _updatedUifs.Clear();
     }
 
     /// <inheritdoc />
@@ -115,6 +117,7 @@ public sealed partial class OpenPgpSession
         // Refresh cached app data
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
+        _updatedUifs.Clear();
     }
 
     /// <inheritdoc />
@@ -151,11 +154,25 @@ public sealed partial class OpenPgpSession
         // certificate slot for the key. We then read it back with GetCertificateAsync.
         // This matches ykman canonical: send_apdu → get_certificate(key_ref).
         var command = new ApduCommand(0x80, (int)Ins.GetAttestation, (int)keyRef, 0x00);
-        await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+        UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+            await GetUserPresenceContextAsync(KeyRef.Att, cancellationToken).ConfigureAwait(false));
+        return await RunWithUserPresenceNotificationAsync(
+                userPresenceNotification,
+                async token =>
+                {
+                    await TransmitAsync(command, token).ConfigureAwait(false);
 
-        var cert = await GetCertificateAsync(keyRef, cancellationToken).ConfigureAwait(false);
-        return cert ?? throw new InvalidOperationException(
-            $"Attestation certificate was not found in slot {keyRef} after GET_ATTESTATION.");
+                    var cert = await GetCertificateAsync(keyRef, token).ConfigureAwait(false);
+                    if (cert is null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Attestation certificate was not found in slot {keyRef} after GET_ATTESTATION.");
+                    }
+
+                    return cert;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -246,5 +263,6 @@ public sealed partial class OpenPgpSession
         // Refresh cached app data after key generation
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
+        _updatedUifs.Clear();
     }
 }

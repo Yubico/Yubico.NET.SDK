@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
@@ -40,6 +41,24 @@ internal interface IOtpHidProtocol : IProtocol
         byte slot,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sends an SDK operation's slot command and reports an observed in-flight touch wait.
+    /// Raw and expert callers use the overload without notification parameters.
+    /// </summary>
+    /// <param name="slot">The slot/command byte.</param>
+    /// <param name="data">The command payload.</param>
+    /// <param name="userPresenceNotification">
+    ///     The non-null operation handle requested only when the device reports a touch wait.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The response data from the YubiKey (including CRC if present).</returns>
+    Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+        byte slot,
+        ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken) =>
+        SendAndReceiveAsync(slot, data, cancellationToken);
 
     /// <summary>
     /// Reads the current status bytes from the YubiKey.

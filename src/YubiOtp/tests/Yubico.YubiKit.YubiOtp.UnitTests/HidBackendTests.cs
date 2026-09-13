@@ -13,8 +13,12 @@
 // limitations under the License.
 
 using NSubstitute;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
+using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.YubiOtp.Backend;
 
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
@@ -83,6 +87,7 @@ public class HidBackendTests
         _protocol.SendAndReceiveAsync(
                 Arg.Any<byte>(),
                 Arg.Any<ReadOnlyMemory<byte>>(),
+                Arg.Any<UserPresenceNotification>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(responseWithCrc));
 
@@ -91,11 +96,94 @@ public class HidBackendTests
             ConfigSlot.ChalHmac1,
             new byte[64],
             20,
-            CancellationToken.None);
+            UserPresenceNotification.None,
+            cancellationToken: CancellationToken.None);
 
         Assert.Equal(20, result.Length);
         Assert.Equal(0xAA, result.Span[0]);
         Assert.Equal(0xFF, result.Span[19]);
+        Assert.Equal(responseWithCrc, result.ToArray().Concat(responseWithCrc[^2..]).ToArray());
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_TouchCompletionDataReport_IsRetainedThroughCrcValidation()
+    {
+        byte[] key = Enumerable.Range(1, 20).Select(value => (byte)value).ToArray();
+        byte[] challenge = Enumerable.Range(21, 32).Select(value => (byte)value).ToArray();
+        byte[] expectedHmac = HMACSHA1.HashData(key, challenge);
+        byte[] responseWithCrc = MakeResponseWithCrc(expectedHmac);
+        var rawResponse = new byte[28];
+        responseWithCrc.CopyTo(rawResponse, 0);
+
+        var connection = new ScriptedOtpHidConnection();
+        connection.Enqueue(Status(versionMajor: 5));
+        connection.Enqueue(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            connection.Enqueue(Status(programmingSequence: 1));
+        connection.Enqueue(TouchWaitReport());
+        for (byte sequence = 0; sequence < 4; sequence++)
+            connection.Enqueue(DataReport(sequence, rawResponse.AsSpan(sequence * 7, 7)));
+        connection.Enqueue(DataReport(sequence: 0, new byte[7]));
+
+        var prompt = Substitute.For<IUserPresencePrompt>();
+        UserPresenceContext context = CreateContext();
+        using var protocol = new OtpHidProtocol(connection, touchTimeout: TimeSpan.FromSeconds(1));
+        var backend = new HidBackend(protocol);
+
+        ReadOnlyMemory<byte> actual = await backend.SendAndReceiveAsync(
+            ConfigSlot.ChalHmac1,
+            challenge,
+            expectedHmac.Length,
+            UserPresenceNotification.Create(prompt, context),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(expectedHmac, actual.ToArray());
+        await prompt.Received(1).OnUserPresenceRequestedAsync(context, Arg.Any<CancellationToken>());
+        Assert.Equal(0, connection.ReportsRemaining);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WithPresenceContext_DefersResolutionUntilValidationCompletes()
+    {
+        byte[] responseWithCrc = MakeResponseWithCrc(new byte[20]);
+        var prompt = Substitute.For<IUserPresencePrompt>();
+        var context = new UserPresenceContext
+        {
+            Basis = UserPresenceBasis.DeviceWaiting,
+            Application = "YubiOTP",
+            Scope = "One"
+        };
+        _protocol.SendAndReceiveAsync(
+                Arg.Any<byte>(),
+                Arg.Any<ReadOnlyMemory<byte>>(),
+                Arg.Any<UserPresenceNotification>(),
+                Arg.Any<CancellationToken>())
+            .Returns(async callInfo =>
+            {
+                UserPresenceNotification notification = callInfo.ArgAt<UserPresenceNotification>(2);
+                await notification.RequestAsync(UserPresenceBasis.DeviceWaiting, CancellationToken.None);
+                return (ReadOnlyMemory<byte>)responseWithCrc;
+            });
+        var backend = new HidBackend(_protocol);
+        UserPresenceNotification notification = UserPresenceNotification.Create(prompt, context);
+
+        _ = await backend.SendAndReceiveAsync(
+            ConfigSlot.ChalHmac1,
+            new byte[64],
+            20,
+            notification,
+            TestContext.Current.CancellationToken);
+
+        await _protocol.Received(1).SendAndReceiveAsync(
+            (byte)ConfigSlot.ChalHmac1,
+            Arg.Any<ReadOnlyMemory<byte>>(),
+            notification,
+            Arg.Any<CancellationToken>());
+        await prompt.Received(1).OnUserPresenceRequestedAsync(context, Arg.Any<CancellationToken>());
+        await prompt.Received(1).OnUserPresenceResolvedAsync(
+            context,
+            UserPresenceOutcome.Completed,
+            CancellationToken.None);
     }
 
     [Fact]
@@ -106,20 +194,142 @@ public class HidBackendTests
         data[20] = 0xFF;
         data[21] = 0xFF;
 
+        var prompt = Substitute.For<IUserPresencePrompt>();
+        var context = new UserPresenceContext
+        {
+            Basis = UserPresenceBasis.DeviceWaiting,
+            Application = "YubiOTP",
+            Scope = "One"
+        };
         _protocol.SendAndReceiveAsync(
                 Arg.Any<byte>(),
                 Arg.Any<ReadOnlyMemory<byte>>(),
+                Arg.Any<UserPresenceNotification>(),
                 Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<ReadOnlyMemory<byte>>(data));
+            .Returns(async callInfo =>
+            {
+                UserPresenceNotification notification = callInfo.ArgAt<UserPresenceNotification>(2);
+                await notification.RequestAsync(UserPresenceBasis.DeviceWaiting, CancellationToken.None);
+                return (ReadOnlyMemory<byte>)data;
+            });
 
-        var backend = CreateBackend();
+        var backend = new HidBackend(_protocol);
+        UserPresenceNotification notification = UserPresenceNotification.Create(prompt, context);
 
         await Assert.ThrowsAsync<BadResponseException>(
             () => backend.SendAndReceiveAsync(
                 ConfigSlot.ChalHmac1,
                 new byte[64],
                 20,
+                notification,
                 CancellationToken.None).AsTask());
+
+        await prompt.Received(1).OnUserPresenceResolvedAsync(
+            context,
+            UserPresenceOutcome.Failed,
+            CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenResolutionThrowsAfterValidation_PropagatesResolutionException()
+    {
+        byte[] responseWithCrc = MakeResponseWithCrc(new byte[20]);
+        var expected = new InvalidOperationException("resolution failed");
+        var prompt = new ThrowingPrompt(resolutionException: expected);
+        UserPresenceContext context = CreateContext();
+        ConfigurePresenceResponse(responseWithCrc);
+        var backend = new HidBackend(_protocol);
+        UserPresenceNotification notification = UserPresenceNotification.Create(prompt, context);
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            backend.SendAndReceiveAsync(
+                ConfigSlot.ChalHmac1,
+                new byte[64],
+                20,
+                notification,
+                TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Same(expected, actual);
+        Assert.All(responseWithCrc, value => Assert.Equal(0, value));
+    }
+
+    [Theory]
+    [InlineData(true, UserPresenceOutcome.TimedOut)]
+    [InlineData(false, UserPresenceOutcome.Failed)]
+    public async Task SendAndReceiveAsync_TimeoutClassification_RequiresObservedTouchTimeout(
+        bool touchSpecific,
+        UserPresenceOutcome expectedOutcome)
+    {
+        Exception expected = touchSpecific
+            ? new OtpHidTouchTimeoutException("Touch timed out.")
+            : new TimeoutException("Transport timed out.");
+        var prompt = new RecordingPrompt();
+        UserPresenceContext context = CreateContext();
+        _protocol.SendAndReceiveAsync(
+                Arg.Any<byte>(),
+                Arg.Any<ReadOnlyMemory<byte>>(),
+                Arg.Any<UserPresenceNotification>(),
+                Arg.Any<CancellationToken>())
+            .Returns(callInfo => RequestAndThrowAsync(
+                callInfo.ArgAt<UserPresenceNotification>(2),
+                expected));
+        var backend = new HidBackend(_protocol);
+
+        Exception actual = await Assert.ThrowsAsync(expected.GetType(), () => backend.SendAndReceiveAsync(
+            ConfigSlot.ChalHmac1,
+            new byte[64],
+            20,
+            UserPresenceNotification.Create(prompt, context),
+            TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Same(expected, actual);
+        Assert.Equal(expectedOutcome, Assert.Single(prompt.Outcomes));
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenValidationAndResolutionThrow_PreservesValidationException()
+    {
+        byte[] invalidResponse = new byte[22];
+        var prompt = new ThrowingPrompt(
+            resolutionException: new InvalidOperationException("resolution failed"));
+        UserPresenceContext context = CreateContext();
+        ConfigurePresenceResponse(invalidResponse);
+        var backend = new HidBackend(_protocol);
+        UserPresenceNotification notification = UserPresenceNotification.Create(prompt, context);
+
+        BadResponseException actual = await Assert.ThrowsAsync<BadResponseException>(() =>
+            backend.SendAndReceiveAsync(
+                ConfigSlot.ChalHmac1,
+                new byte[64],
+                20,
+                notification,
+                TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Equal("Invalid CRC in OTP HID response.", actual.Message);
+        Assert.All(invalidResponse, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public async Task SendAndReceiveAsync_WhenRequestThrows_DoesNotResolve()
+    {
+        byte[] responseWithCrc = MakeResponseWithCrc(new byte[20]);
+        var expected = new InvalidOperationException("request failed");
+        var prompt = new ThrowingPrompt(requestException: expected);
+        UserPresenceContext context = CreateContext();
+        ConfigurePresenceResponse(responseWithCrc);
+        var backend = new HidBackend(_protocol);
+        UserPresenceNotification notification = UserPresenceNotification.Create(prompt, context);
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            backend.SendAndReceiveAsync(
+                ConfigSlot.ChalHmac1,
+                new byte[64],
+                20,
+                notification,
+                TestContext.Current.CancellationToken).AsTask());
+
+        Assert.Same(expected, actual);
+        Assert.Equal(0, prompt.ResolutionCount);
     }
 
     [Fact]
@@ -131,6 +341,7 @@ public class HidBackendTests
         _protocol.SendAndReceiveAsync(
                 Arg.Any<byte>(),
                 Arg.Any<ReadOnlyMemory<byte>>(),
+                Arg.Any<UserPresenceNotification>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(data));
 
@@ -141,7 +352,8 @@ public class HidBackendTests
                 ConfigSlot.DeviceSerial,
                 ReadOnlyMemory<byte>.Empty,
                 4,
-                CancellationToken.None).AsTask());
+                UserPresenceNotification.None,
+                cancellationToken: CancellationToken.None).AsTask());
     }
 
     [Fact]
@@ -153,15 +365,22 @@ public class HidBackendTests
         _protocol.SendAndReceiveAsync(
                 Arg.Any<byte>(),
                 Arg.Any<ReadOnlyMemory<byte>>(),
+                Arg.Any<UserPresenceNotification>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(responseWithCrc));
 
         var backend = CreateBackend();
-        await backend.SendAndReceiveAsync(ConfigSlot.ChalHmac2, new byte[64], 4, CancellationToken.None);
+        await backend.SendAndReceiveAsync(
+            ConfigSlot.ChalHmac2,
+            new byte[64],
+            4,
+            UserPresenceNotification.None,
+            cancellationToken: CancellationToken.None);
 
         await _protocol.Received(1).SendAndReceiveAsync(
             (byte)ConfigSlot.ChalHmac2,
             Arg.Any<ReadOnlyMemory<byte>>(),
+            Arg.Any<UserPresenceNotification>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -174,6 +393,7 @@ public class HidBackendTests
         _protocol.SendAndReceiveAsync(
                 Arg.Any<byte>(),
                 Arg.Any<ReadOnlyMemory<byte>>(),
+                Arg.Any<UserPresenceNotification>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(responseWithCrc));
 
@@ -182,10 +402,130 @@ public class HidBackendTests
             ConfigSlot.DeviceSerial,
             ReadOnlyMemory<byte>.Empty,
             4,
-            CancellationToken.None);
+            UserPresenceNotification.None,
+            cancellationToken: CancellationToken.None);
 
         Assert.Equal(4, result.Length);
         Assert.Equal(0x00, result.Span[0]);
         Assert.Equal(0x87, result.Span[3]);
+    }
+
+    private void ConfigurePresenceResponse(byte[] response)
+    {
+        _protocol.SendAndReceiveAsync(
+                Arg.Any<byte>(),
+                Arg.Any<ReadOnlyMemory<byte>>(),
+                Arg.Any<UserPresenceNotification>(),
+                Arg.Any<CancellationToken>())
+            .Returns(async callInfo =>
+            {
+                UserPresenceNotification notification = callInfo.ArgAt<UserPresenceNotification>(2);
+                await notification.RequestAsync(UserPresenceBasis.DeviceWaiting, CancellationToken.None);
+                return (ReadOnlyMemory<byte>)response;
+            });
+    }
+
+    private static UserPresenceContext CreateContext() => new()
+    {
+        Basis = UserPresenceBasis.DeviceWaiting,
+        Application = "YubiOTP",
+        Scope = "One"
+    };
+
+    private static byte[] Status(byte versionMajor = 0, byte programmingSequence = 0) =>
+        [0x00, versionMajor, 0x04, 0x03, programmingSequence, 0x00, 0x00, 0x00];
+
+    private static byte[] TouchWaitReport()
+    {
+        byte[] report = Status(programmingSequence: 1);
+        report[OtpConstants.FeatureReportDataSize] = OtpConstants.ResponseTimeoutWaitFlag;
+        return report;
+    }
+
+    private static byte[] DataReport(byte sequence, ReadOnlySpan<byte> data)
+    {
+        var report = new byte[OtpConstants.FeatureReportSize];
+        data.CopyTo(report);
+        report[OtpConstants.FeatureReportDataSize] = (byte)(OtpConstants.ResponsePendingFlag | sequence);
+        return report;
+    }
+
+    private sealed class ScriptedOtpHidConnection : IOtpHidConnection
+    {
+        private readonly Queue<ReadOnlyMemory<byte>> _reports = new();
+
+        public int FeatureReportSize => OtpConstants.FeatureReportSize;
+        public ConnectionType Type => ConnectionType.HidOtp;
+        public int ReportsRemaining => _reports.Count;
+
+        public void Enqueue(ReadOnlyMemory<byte> report) => _reports.Enqueue(report);
+
+        public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.CompletedTask;
+        }
+
+        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(_reports.Dequeue());
+        }
+
+        public void Dispose()
+        {
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private static async Task<ReadOnlyMemory<byte>> RequestAndThrowAsync(
+        UserPresenceNotification notification,
+        Exception exception)
+    {
+        await notification.RequestAsync(UserPresenceBasis.DeviceWaiting, CancellationToken.None);
+        throw exception;
+    }
+
+    private sealed class RecordingPrompt : IUserPresencePrompt
+    {
+        public List<UserPresenceOutcome> Outcomes { get; } = [];
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken) => default;
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            Outcomes.Add(outcome);
+            return default;
+        }
+    }
+
+    private sealed class ThrowingPrompt(
+        Exception? requestException = null,
+        Exception? resolutionException = null) : IUserPresencePrompt
+    {
+        public int ResolutionCount { get; private set; }
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken) => requestException is null
+                ? default
+                : ValueTask.FromException(requestException);
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            ResolutionCount++;
+            return resolutionException is null
+                ? default
+                : ValueTask.FromException(resolutionException);
+        }
     }
 }

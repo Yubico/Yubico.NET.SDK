@@ -250,15 +250,28 @@ disposed by its caller.
 
 ### Touch notification
 
-Credentials can require a physical touch. Register a callback to prompt the user before the
-blocking CALCULATE exchange:
+Credentials can require a physical touch. Supply an `IUserPresencePrompt` through session creation
+options so the application is notified immediately before the blocking CALCULATE exchange and
+again when the operation ends:
 
 ```csharp
-session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
+var options = new SessionCreationOptions
+{
+    UserPresencePrompt = userPresencePrompt
+};
+
+await using var session = await yubiKey.CreateHsmAuthSessionAsync(options, cancellationToken);
 ```
 
-The callback fires only when the target credential requires touch, or when the touch policy
-cannot be determined. It short-circuits with no device I/O if no callback is registered.
+A credential with `TouchRequired=true` reports `PolicyRequires`; `false` is silent. A missing
+credential is also silent. An unknown touch value on a found credential, or a failed LIST command,
+reports `PolicyMayRequire` conservatively.
+The context uses `Application="YubiHSM Auth"` and the credential label as `Scope`. If no prompt is
+configured, the calculation does not issue LIST solely for notification.
+
+Migration: the alpha `HsmAuthSession.OnTouchRequired` and `IHsmAuthSession.OnTouchRequired`
+properties were replaced by `SessionCreationOptions.UserPresencePrompt`. Configure the prompt at
+session creation; there is no obsolete callback adapter.
 
 ### Management key and reset
 

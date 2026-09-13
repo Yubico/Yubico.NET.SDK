@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Buffers.Binary;
 using System.Runtime.InteropServices;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
@@ -85,7 +87,7 @@ public class FidoHidProtocolTests
             CreateContinuationPacket(0x01020304, sequence: 1, responsePayload.AsSpan(CtapConstants.InitDataSize)));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -102,7 +104,7 @@ public class FidoHidProtocolTests
             CreateContinuationPacket(0x05060708, sequence: 0, responsePayload.AsSpan(CtapConstants.InitDataSize)));
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("channel", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -118,7 +120,7 @@ public class FidoHidProtocolTests
             CreateInitPacket(0x05060708, CtapConstants.CtapVendorFirst, responsePayload));
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("channel", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -135,7 +137,7 @@ public class FidoHidProtocolTests
             protocol.SendVendorCommandAsync(
                 CtapConstants.CtapVendorFirst,
                 ReadOnlyMemory<byte>.Empty,
-                TestContext.Current.CancellationToken));
+                cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("command", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -154,7 +156,7 @@ public class FidoHidProtocolTests
         ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
             command,
             ReadOnlyMemory<byte>.Empty,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(new byte[] { 0xAA }, response.ToArray());
     }
@@ -171,27 +173,36 @@ public class FidoHidProtocolTests
             protocol.SendVendorCommandAsync(
                 CtapConstants.CtapVendorFirst,
                 ReadOnlyMemory<byte>.Empty,
-                TestContext.Current.CancellationToken));
+                cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("CTAP HID error", exception.Message, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("0x06", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public async Task SendVendorCommandAsync_KeepAliveThenMatchingResponse_Succeeds()
+    public async Task SendVendorCommandAsync_RepeatedUserPresenceKeepAlive_NotifiesOnceAndCompletes()
     {
         var connection = new FakeFidoHidConnection();
         var protocol = new FidoHidProtocol(connection);
+        var prompt = new RecordingUserPresencePrompt();
+        var context = CreateUserPresenceContext();
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [0x01]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0x00]));
 
         ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             ReadOnlyMemory<byte>.Empty,
+            UserPresenceNotification.Create(prompt, context),
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(new byte[] { 0xAA }, response.ToArray());
+        Assert.Equal(new byte[] { 0x00 }, response.ToArray());
+        UserPresenceContext requested = Assert.Single(prompt.Requested);
+        Assert.Equal(UserPresenceBasis.DeviceWaiting, requested.Basis);
+        Assert.Equal("FIDO2", requested.Application);
+        Assert.Equal("example.com", requested.Scope);
+        Assert.Empty(prompt.Resolved);
     }
 
     [Fact]
@@ -203,7 +214,7 @@ public class FidoHidProtocolTests
         connection.QueueResponsePackets([0x01, 0x02, 0x03]);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("exactly", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -218,7 +229,7 @@ public class FidoHidProtocolTests
         connection.QueueResponsePackets(packet[..CtapConstants.InitHeaderSize]);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("exactly", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -238,7 +249,7 @@ public class FidoHidProtocolTests
             continuation[..CtapConstants.ContinuationHeaderSize]);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("exactly", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -254,7 +265,7 @@ public class FidoHidProtocolTests
             CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("channel", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -273,7 +284,7 @@ public class FidoHidProtocolTests
             CreateInitPacket(0x01020304, CtapConstants.CtapHidPing, responsePayload.AsSpan(CtapConstants.InitDataSize)));
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("continuation", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -294,7 +305,7 @@ public class FidoHidProtocolTests
         var response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             ReadOnlyMemory<byte>.Empty,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(responsePayload, response.ToArray());
     }
@@ -312,7 +323,7 @@ public class FidoHidProtocolTests
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             ReadOnlyMemory<byte>.Empty,
-            TestContext.Current.CancellationToken));
+            cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("init", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -334,7 +345,7 @@ public class FidoHidProtocolTests
         _ = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             callerPayload,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(expectedCallerPayload, callerPayload);
         Assert.Equal(2, connection.SentPacketSnapshots.Count);
@@ -365,7 +376,7 @@ public class FidoHidProtocolTests
         await Assert.ThrowsAsync<IOException>(() => protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             callerPayload,
-            TestContext.Current.CancellationToken));
+            cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, callerPayload);
         ReadOnlyMemory<byte> retained = Assert.Single(connection.RetainedSentPackets);
@@ -394,7 +405,7 @@ public class FidoHidProtocolTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             ReadOnlyMemory<byte>.Empty,
-            TestContext.Current.CancellationToken));
+            cancellationToken: TestContext.Current.CancellationToken));
 
         byte[] partialResponseBuffer = allocatedBuffers[^1];
         Assert.Equal(responsePayload.Length, partialResponseBuffer.Length);
@@ -419,11 +430,59 @@ public class FidoHidProtocolTests
         ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             ReadOnlyMemory<byte>.Empty,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(MemoryMarshal.TryGetArray(response, out ArraySegment<byte> responseSegment));
         Assert.Same(allocatedBuffers[^1], responseSegment.Array);
         Assert.Equal(responsePayload, response.ToArray());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SendVendorCommandAsync_KeepAliveWithoutUserPresenceNeeded_DoesNotNotify(
+        bool zeroLength)
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        var prompt = new RecordingUserPresencePrompt();
+        connection.QueueResponsePackets(
+            CreateInitPacket(
+                0x01020304,
+                CtapConstants.CtapHidKeepAlive,
+                zeroLength ? ReadOnlySpan<byte>.Empty : [0x01]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+
+        ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty,
+            CreateUserPresenceNotification(prompt),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(0xAA, response.Span[0]);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Fact]
+    public async Task SendVendorCommandAsync_NonCborResponseStartingWithUnknownStatus_DoesNotMapOutcome()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        var prompt = new RecordingUserPresencePrompt();
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+
+        ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty,
+            CreateUserPresenceNotification(prompt),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(0xAA, response.Span[0]);
+        Assert.Single(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     /// <summary>
@@ -446,6 +505,8 @@ public class FidoHidProtocolTests
     {
         var connection = new FakeFidoHidConnection();
         var protocol = new FidoHidProtocol(connection);
+        var prompt = new RecordingUserPresencePrompt();
+        var context = CreateUserPresenceContext();
         using var cts = new CancellationTokenSource();
 
         // The authenticator reports it is waiting for a touch, then answers the cancel with
@@ -467,11 +528,14 @@ public class FidoHidProtocolTests
             protocol.SendVendorCommandAsync(
                 CtapConstants.CtapVendorFirst,
                 ReadOnlyMemory<byte>.Empty,
+                UserPresenceNotification.Create(prompt, context),
                 cts.Token));
 
         Assert.Equal(
             1,
             connection.SentPacketSnapshots.Count(packet => IsCommand(packet, CtapConstants.CtapHidCancel)));
+        Assert.Single(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
 
         // The symptom the fix exists to prevent: before it, the abandoned user-presence request
         // left the channel busy and the next exchange failed until the key was re-plugged.
@@ -482,9 +546,73 @@ public class FidoHidProtocolTests
         var afterCancel = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             ReadOnlyMemory<byte>.Empty,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(0xAA, afterCancel.Span[0]);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task SendVendorCommandAsync_WhenUserPresenceCallbackThrows_CancelsDrainsAndPropagates()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        var expected = new InvalidOperationException("prompt failed");
+        var prompt = new RecordingUserPresencePrompt(expected);
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0x2D]));
+
+        Exception actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendVendorCommandAsync(
+                CtapConstants.CtapVendorFirst,
+                ReadOnlyMemory<byte>.Empty,
+                CreateUserPresenceNotification(prompt),
+                TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+        Assert.Contains(
+            nameof(RecordingUserPresencePrompt.OnUserPresenceRequestedAsync),
+            actual.StackTrace,
+            StringComparison.Ordinal);
+        Assert.Equal(
+            1,
+            connection.SentPacketSnapshots.Count(packet => IsCommand(packet, CtapConstants.CtapHidCancel)));
+        Assert.Empty(prompt.Resolved);
+
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+
+        ReadOnlyMemory<byte> afterFailure = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(0xAA, afterFailure.Span[0]);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task SendVendorCommandAsync_WhenCallbackAndTerminalValidationFail_PreservesProtocolErrorAndLogsCallback()
+    {
+        var connection = new FakeFidoHidConnection();
+        var logger = new RecordingLogger();
+        var protocol = new FidoHidProtocol(connection, logger);
+        var promptFailure = new InvalidOperationException("prompt failed");
+        var prompt = new RecordingUserPresencePrompt(promptFailure);
+        connection.QueueResponsePackets(
+            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(0x01020304, CtapConstants.CtapHidInit, [0xAA]));
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendVendorCommandAsync(
+                CtapConstants.CtapVendorFirst,
+                ReadOnlyMemory<byte>.Empty,
+                CreateUserPresenceNotification(prompt),
+                TestContext.Current.CancellationToken));
+
+        Assert.Contains("does not match request command", actual.Message, StringComparison.Ordinal);
+        Assert.Contains(promptFailure, logger.Exceptions);
     }
 
     /// <summary>
@@ -519,7 +647,7 @@ public class FidoHidProtocolTests
             protocol.SendVendorCommandAsync(
                 CtapConstants.CtapVendorFirst,
                 ReadOnlyMemory<byte>.Empty,
-                cts.Token));
+                cancellationToken: cts.Token));
 
         // The continuation frame was consumed, so the next exchange sees its own response rather
         // than the tail of the abandoned one.
@@ -530,7 +658,7 @@ public class FidoHidProtocolTests
         var afterCancel = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             ReadOnlyMemory<byte>.Empty,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(1, afterCancel.Length);
         Assert.Equal(0xAA, afterCancel.Span[0]);
@@ -550,7 +678,7 @@ public class FidoHidProtocolTests
         var response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
             ReadOnlyMemory<byte>.Empty,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(0xAA, response.Span[0]);
         Assert.DoesNotContain(
@@ -560,6 +688,16 @@ public class FidoHidProtocolTests
 
     /// <summary>CTAP HID keep-alive status byte meaning a touch is awaited.</summary>
     private const byte KeepAliveUpNeeded = 0x02;
+
+    private static UserPresenceContext CreateUserPresenceContext() => new()
+    {
+        Basis = UserPresenceBasis.PolicyRequires,
+        Application = "FIDO2",
+        Scope = "example.com"
+    };
+
+    private static UserPresenceNotification CreateUserPresenceNotification(IUserPresencePrompt prompt) =>
+        UserPresenceNotification.Create(prompt, CreateUserPresenceContext());
 
     private static bool IsCommand(byte[] packet, byte command) =>
         (packet[4] & ~CtapConstants.InitPacketMask) == command;
@@ -679,5 +817,56 @@ public class FidoHidProtocolTests
             payload[16] = 0;
             return CreateInitPacket(CtapConstants.BroadcastChannelId, CtapConstants.CtapHidInit, payload);
         }
+    }
+
+    private sealed class RecordingUserPresencePrompt(
+        Exception? requestedException = null,
+        Exception? resolvedException = null) : IUserPresencePrompt
+    {
+        public List<UserPresenceContext> Requested { get; } = [];
+        public List<(UserPresenceContext Context, UserPresenceOutcome Outcome, CancellationToken CancellationToken)>
+            Resolved
+        { get; } = [];
+
+        public ValueTask OnUserPresenceRequestedAsync(
+            UserPresenceContext context,
+            CancellationToken cancellationToken)
+        {
+            Requested.Add(context);
+            if (requestedException is not null)
+            {
+                throw requestedException;
+            }
+
+            return default;
+        }
+
+        public ValueTask OnUserPresenceResolvedAsync(
+            UserPresenceContext context,
+            UserPresenceOutcome outcome,
+            CancellationToken cancellationToken)
+        {
+            Resolved.Add((context, outcome, cancellationToken));
+            return resolvedException is null
+                ? default
+                : ValueTask.FromException(resolvedException);
+        }
+    }
+
+    private sealed class RecordingLogger : ILogger<FidoHidProtocol>
+    {
+        public List<Exception?> Exceptions { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state)
+            where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter) => Exceptions.Add(exception);
     }
 }

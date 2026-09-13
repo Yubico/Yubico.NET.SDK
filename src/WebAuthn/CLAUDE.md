@@ -21,7 +21,7 @@ The WebAuthn module implements the W3C Web Authentication API (Level 2/3) on top
 
 **Key Dependencies:**
 - **One-way dependency on Fido2**: WebAuthn builds on FIDO2/CTAP primitives but FIDO2 does NOT depend on WebAuthn
-- **Core**: Shared types, logging, memory management, `ICredentialPrompt`
+- **Core**: Shared types, logging, memory management, `ICredentialPrompt`, `IUserPresencePrompt`
 
 **Key Directories:**
 ```
@@ -212,15 +212,17 @@ Known gap: extension-driven permissions are not aggregated before the decision, 
 write does not yet contribute `LargeBlobWrite` to `requestedPermissions`. The logic handles that
 permission correctly once something requests it.
 
-### No Progress Stream Or Interaction Callback
+### User-presence notification
 
-WebAuthn ceremonies are plain awaitable methods: `MakeCredentialAsync` and `GetAssertionAsync`.
-There is no progress stream, no touch signal, and no user-verification callback. To abandon a
-ceremony, cancel the token you passed to it. A PIN comes from `pinBytes` or
-`WebAuthnClientOptions.CredentialPrompt`, and nothing else.
+WebAuthn ceremonies remain plain awaitable methods with no progress stream. A FIDO2 session created
+with `SessionCreationOptions.UserPresencePrompt` now provides touch notifications underneath
+`MakeCredentialAsync` and `GetAssertionAsync`: HID reports the authoritative CTAPHID wait signal,
+while SmartCard reports the effective required-UP policy before its APDU. Device-factory callers pass
+the prompt in the `SessionCreationOptions` already forwarded to FIDO2; callers supplying an existing
+`IFidoSession` must configure the prompt when that session is created.
 
-If UX needs a touch prompt, show concise factual guidance based on the ceremony shape, not on an
-in-flight signal from the SDK.
+The prompt is informational, not a user-verification input. To abandon a ceremony, cancel its token.
+A PIN still comes only from `pinBytes` or `WebAuthnClientOptions.CredentialPrompt`.
 
 ### RP ID Validation
 
@@ -385,6 +387,5 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
    makeCredential at all, so never send it; the authenticator's default of `true` applies. `up=false`
    is legitimate only on the silent exclude-list pre-flight getAssertion probe
    (`Internal/ExcludeListPreflight.cs`).
-8. **Touch guidance is speculative only** — WebAuthn exposes no dedicated "touch now" callback.
-   If UX needs a touch prompt, show concise factual guidance based on the ceremony shape,
-   not on an in-flight signal from the SDK.
+8. **Touch notification comes from the FIDO2 session** — configure
+   `SessionCreationOptions.UserPresencePrompt`; `WebAuthnClientOptions` does not duplicate it.

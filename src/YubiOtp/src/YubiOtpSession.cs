@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
@@ -34,6 +35,8 @@ namespace Yubico.YubiKit.YubiOtp;
 /// </summary>
 public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 {
+    private const string UserPresenceApplication = "YubiOTP";
+
     private static readonly Feature FeatureSerial = new("Serial Number Read", 2, 2, 0);
     private static readonly Feature FeatureHmacSha1 = new("HMAC-SHA1 Challenge-Response", 2, 2, 0);
     private static readonly Feature FeatureYubicoOtpChallengeResponse = new("Yubico OTP Challenge-Response", 2, 2, 0);
@@ -94,8 +97,9 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
     private YubiOtpSession(
         IConnection connection,
-        ScpKeyParameters? scpKeyParams = null)
-        : base(EnsureSupportedConnection(connection))
+        ScpKeyParameters? scpKeyParams = null,
+        IUserPresencePrompt? userPresencePrompt = null)
+        : base(EnsureSupportedConnection(connection), userPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
         _scpKeyParams = scpKeyParams;
@@ -126,12 +130,15 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         var configuration = options?.ProtocolConfiguration;
         var scpKeyParams = options?.ScpKeyParameters;
         var firmwareVersionOverride = options?.FirmwareVersionOverride;
+        var userPresencePrompt = options?.UserPresencePrompt;
 
         ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(connection, () => new YubiOtpSession(connection, scpKeyParams));
+        var session = Construct(
+            connection,
+            () => new YubiOtpSession(connection, scpKeyParams, userPresencePrompt));
         try
         {
             await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
@@ -198,7 +205,8 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                 ConfigSlot.DeviceSerial,
                 ReadOnlyMemory<byte>.Empty,
                 4,
-                cancellationToken)
+                UserPresenceNotification.None,
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         // Serial is big-endian 4 bytes
@@ -372,6 +380,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                     configSlot,
                     paddedChallenge,
                     YubiOtpConstants.HmacResponseSize,
+                    CreateUserPresenceNotification(CreateUserPresenceContext(configSlot)),
                     cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -409,6 +418,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                 configSlot,
                 challenge,
                 YubiOtpConstants.YubicoOtpResponseSize,
+                CreateUserPresenceNotification(CreateUserPresenceContext(configSlot)),
                 cancellationToken)
             .ConfigureAwait(false);
     }
@@ -586,11 +596,59 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return 0;
     }
 
+    private UserPresenceContext? CreateUserPresenceContext(ConfigSlot configSlot)
+    {
+        if (!IsUserPresenceNotificationEnabled)
+        {
+            return null;
+        }
+
+        Slot slot = configSlot is ConfigSlot.ChalHmac1 or ConfigSlot.ChalYubico1
+            ? Slot.One
+            : Slot.Two;
+
+        if (_protocol is IOtpHidProtocol)
+        {
+            return new UserPresenceContext
+            {
+                Basis = UserPresenceBasis.DeviceWaiting,
+                Application = UserPresenceApplication,
+                Scope = slot.ToString()
+            };
+        }
+
+        if (_protocol is not ISmartCardProtocol || !IsKnownTouchTriggered(slot))
+        {
+            return null;
+        }
+
+        return new UserPresenceContext
+        {
+            Basis = UserPresenceBasis.PolicyRequires,
+            Application = UserPresenceApplication,
+            Scope = slot.ToString()
+        };
+    }
+
+    private bool IsKnownTouchTriggered(Slot slot)
+    {
+        if (_status.Length < YubiOtpConstants.StatusBytesLength)
+        {
+            return false;
+        }
+
+        var state = new ConfigState(_status.Span);
+        return state.FirmwareVersion.IsAtLeast(3, 0, 0) && state.IsTouchTriggered(slot);
+    }
+
     private static IYubiOtpBackend CreateBackend(IProtocol protocol) =>
         protocol switch
         {
             // Initial prog_seq and firmware version will be set after SELECT.
-            ISmartCardProtocol smartCard => new SmartCardBackend(smartCard, new FirmwareVersion(), 0),
+            ISmartCardProtocol smartCard => new SmartCardBackend(
+                smartCard,
+                new FirmwareVersion(),
+                0),
             IOtpHidProtocol otpHid => new HidBackend(otpHid),
             _ => throw new NotSupportedException(
                 $"Protocol type {protocol.GetType().Name} is not supported by YubiOtpSession. " +

@@ -76,6 +76,9 @@ Every v2 applet package exposes an `IYubiKey.Create{Applet}SessionAsync(...)` ex
 
 Creation policy is grouped in `SessionCreationOptions`. Applet dependency-injection registration methods and
 session-factory delegates from earlier v2 alphas were removed; call the static factory or `IYubiKey` extension.
+`SessionCreationOptions.UserPresencePrompt` carries one `IUserPresencePrompt` implementation across PIV,
+FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. This is touch notification only; PIN, PUK, password,
+and key parameters remain explicit unless an applet documents a separate credential-prompt or retry helper.
 
 ### 2.0.0-alpha.1 -> 2.0.0-alpha.2 applet API normalization
 
@@ -92,7 +95,7 @@ below before diagnosing behavior changes.
 | `PivSession.StoreCertificateAsync(slot, certificate, compress, cancellationToken)` | Pass `PivCertificateCompression.Automatic` or `PivCertificateCompression.Always`. |
 | `PivSession.VerifyUvAsync(requestTemporaryPin, checkOnly, cancellationToken)` | Pass `PivUserVerification.Verify`, `VerifyAndRequestTemporaryPin`, or `CheckOnly`. The old `(true, true)` input had no distinct meaning: check-only won. |
 | `PivSession.ImportKeyAsync(slot, key, pinPolicy, touchPolicy, cancellationToken)` | Put policies in `PivKeyCreationOptions` and pass it as the third argument. |
-| PIV/YubiHSM `TouchNotificationCallback` | Assign an `Action?` to `OnTouchRequired`. |
+| PIV/YubiHSM alpha `TouchNotificationCallback` / `OnTouchRequired` | Set `SessionCreationOptions.UserPresencePrompt` to an `IUserPresencePrompt`. The alpha callbacks were removed outright; there is no compatibility adapter. |
 | `ManagementSession.Transport` | Use inherited `ConnectionType`. |
 | `SetDeviceConfigAsync(config, reboot, currentLockCode, newLockCode, cancellationToken)` | Pass `new SetDeviceConfigOptions { Reboot = ..., CurrentLockCode = ..., NewLockCode = ... }`. |
 | Any of the eight `XSession.CreateAsync(connection, configuration, scpKeyParams[, firmwareVersion], cancellationToken)` factories | `XSession.CreateAsync(connection, SessionCreationOptions?, cancellationToken)`. The eight applets are Management, PIV, FIDO2, OATH, OpenPGP, Security Domain, YubiOTP, and YubiHSM Auth. |
@@ -544,15 +547,24 @@ Use `Yubico.YubiKit.Piv` for PIV operations. Review authentication, PIN/PUK hand
 
 PIN-only management-key mode (`IPivSession.GetPinOnlyModeAsync`/`SetPinOnlyModeAsync`/`RecoverPinOnlyModeAsync`) and typed CHUID/CCC/AdminData/KeyHistory data objects (`Yubico.YubiKit.Piv.DataObjects`) were restored after an initial v2 gap; see `piv-pin-only-mode` and `piv-typed-data-objects` in `v1-to-v2-map.yml`. Enabling a new PIN-derived (as opposed to PIN-protected) management key is not supported in v2.
 
+Migrate v1 touch notification and the removed alpha `PivSession.OnTouchRequired` callback to
+`SessionCreationOptions.UserPresencePrompt`. This does not collect or retry a PIN, PUK, or management key.
+
 ### FIDO2
 
 Use `Yubico.YubiKit.Fido2` for FIDO2/WebAuthn operations. Review transport selection, PIN/UV flows, credential management, and authenticator state assumptions manually.
+
+Touch notification uses `SessionCreationOptions.UserPresencePrompt`. FIDO HID can report the live
+`DeviceWaiting` signal; smart-card FIDO uses policy-based notification. PIN and UV input remain separate.
 
 Typed response models now preserve the original CBOR envelope for fields this SDK version does not yet model: `AuthenticatorInfo.RawData`, `FingerprintSensorInfo.RawData`, `EnrollmentSampleResult.RawData`, `CredentialMetadata.RawData`, and `RelyingPartyInfo.RawData`. This does not change any typed member; it is a forward-compatibility escape hatch for code that previously had to reach for ad hoc CBOR parsing to read a field the typed model omitted. See `fido2-forward-compat-raw-data` in `v1-to-v2-map.yml`.
 
 ### WebAuthn
 
 Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new package built on top of `Yubico.YubiKit.Fido2` (`IFidoSession`); v1 had no equivalent package. `WebAuthnClient` accepts an optional `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) that supplies a PIN on demand instead of requiring `pinBytes` up front, and owns a bounded retry loop instead of v1 FIDO2 code's global, unbounded `KeyCollector` pattern; see `webauthn-credential-prompt` in `v1-to-v2-map.yml`.
+
+WebAuthn touch notification is the separate `IUserPresencePrompt` supplied in the FIDO session's
+`SessionCreationOptions`; over FIDO HID it receives the authenticator's live wait signal.
 
 The prompt and retry-attempt count now configure through a single `WebAuthnClientOptions` record (`MaxPromptAttempts`, `CredentialPrompt`, `EnterpriseRpIds`) passed to `WebAuthnClient`'s constructor or `IYubiKeyExtensions.CreateWebAuthnClientAsync`, replacing earlier positional `enterpriseRpIds`/`prompt` parameters. Earlier v2 alphas also exposed a streaming ceremony-status API (`WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync`, returning `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed`); it was removed outright with no shim, leaving the plain async `MakeCredentialAsync`/`GetAssertionAsync` as the only ceremony entry points. See `webauthn-client-construction-and-streams` in `v1-to-v2-map.yml`.
 
@@ -562,17 +574,25 @@ Use `Yubico.YubiKit.Oath` for TOTP/HOTP credential management and code calculati
 
 `IOathSession.IsPasswordProtected` (device-password state independent of session unlock state), `AuthenticateAndRetryAsync` (module-appropriate authenticate-and-retry), and the dedicated `OathException`/`OathFailureReason` type were restored after an initial v2 gap; see `oath-password-protection-state`, `oath-authenticate-and-retry`, and `oath-exception` in `v1-to-v2-map.yml`.
 
+Touch-required credential calculations notify `SessionCreationOptions.UserPresencePrompt` from policy evidence.
+
 ### YubiOTP
 
 Use `Yubico.YubiKit.YubiOtp` for Yubico OTP configuration and slot operations. Review slot numbering, configuration flags, and write/update behavior manually.
 
 A keyboard-layout-aware `StaticPasswordSlotConfiguration(string, KeyboardLayout)` constructor and Yubico-OTP-algorithm challenge-response (`YubicoOtpChallengeResponseSlotConfiguration`/`CalculateYubicoOtpAsync`) were restored after an initial v2 gap; see `yubiotp-static-password-keyboard` and `yubiotp-yubico-otp-challenge-response` in `v1-to-v2-map.yml`. HMAC-SHA1 and Yubico OTP key inputs of invalid length now fail before any device I/O instead of being silently hashed or padded.
 
+Migrate v1 `UseTouchNotifier` to `SessionCreationOptions.UserPresencePrompt`. OTP HID reports a live
+`DeviceWaiting` signal; smart-card challenge-response notification is policy-based.
+
 ### OpenPGP
 
 Use `Yubico.YubiKit.OpenPgp` for OpenPGP card operations. Review key slots, PIN policy, management key behavior, and command-level assumptions manually.
 
 PIN verification failures throw a dedicated `OpenPgpInvalidPinException` with a typed `RetriesRemaining`; see `openpgp-exception` in `v1-to-v2-map.yml`.
+
+OpenPGP user-interaction-flag policy notifies `SessionCreationOptions.UserPresencePrompt`; cached or unknown
+policy is advisory and may not result in a device wait.
 
 ### Security Domain
 
@@ -584,7 +604,14 @@ Secure-channel handshake/authentication failures (during session creation or pos
 
 Use `Yubico.YubiKit.YubiHsm` for YubiHSM 2 workflows. Review connector/session creation, authentication, object identifiers, capabilities, and command behavior manually.
 
-A dedicated `HsmAuthRetryException.RetriesRemaining` and an `HsmAuthSession.OnTouchRequired` callback were restored after an initial v2 gap; see `yubihsm-retry-exception` and `yubihsm-touch-notify` in `v1-to-v2-map.yml`. `HsmAuthCredential.Counter` was hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics; see `yubihsm-credential-retries-remaining-rename`.
+A dedicated `HsmAuthRetryException.RetriesRemaining` was restored after an initial v2 gap. Migrate v1 touch
+notification, or the removed alpha `HsmAuthSession.OnTouchRequired` callback, to
+`SessionCreationOptions.UserPresencePrompt`; known touch-required credentials produce a required policy
+notification, an unknown touch value or LIST failure is advisory, and a credential absent from a successful
+LIST remains silent. See `yubihsm-retry-exception`,
+`yubihsm-touch-notify`, and `user-presence-prompt` in `v1-to-v2-map.yml`. `HsmAuthCredential.Counter` was
+hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics;
+see `yubihsm-credential-retries-remaining-rename`.
 
 Credential passwords moved from `string` to UTF-8 `ReadOnlyMemory<byte>` across nine `IHsmAuthSession`/`HsmAuthSession` members, closing a v1 regression rather than introducing one, since v1's equivalent path already used byte-based passwords; see `yubihsm-credential-password-bytes` in `v1-to-v2-map.yml`. The parameters are named plainly — `credentialPassword`, `derivationPassword`, `currentPassword`, `newPassword`, and `password` — with no `Utf8` suffix; `refactor(fido2,openpgp,oath)!: drop Utf8 param suffix from secret parameters` (`5af953f6`) applied the same convention to FIDO2, OpenPGP, and OATH. PIV is the exception and still uses `pinUtf8`, `pukUtf8`, and friends.
 

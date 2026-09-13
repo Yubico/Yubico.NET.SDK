@@ -13,7 +13,9 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
 
@@ -35,12 +37,24 @@ public sealed partial class OpenPgpSession
         var payload = FormatSignPayload(sigAttrs, message.Span, hashAlgorithm);
         try
         {
+            UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+                await GetUserPresenceContextAsync(KeyRef.Sig, cancellationToken).ConfigureAwait(false));
+
             // PSO: COMPUTE DIGITAL SIGNATURE — INS=0x2A, P1=0x9E, P2=0x9A
             var command = new ApduCommand(0x00, (int)Ins.Pso, 0x9E, 0x9A, payload);
-            var response = await TransmitWithResponseAsync(command, cancellationToken)
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
+                        return await FormatResolveAndTransferSignatureAsync(
+                                sigAttrs,
+                                MemoryMarshal.AsMemory(response.RawData),
+                                () => userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed))
+                            .ConfigureAwait(false);
+                    },
+                    cancellationToken)
                 .ConfigureAwait(false);
-
-            return FormatSignResponse(sigAttrs, response.Data);
         }
         finally
         {
@@ -59,13 +73,36 @@ public sealed partial class OpenPgpSession
 
         var decAttrs = _appData.Discretionary.AlgorithmAttributesDec;
         var payload = FormatDecryptPayload(decAttrs, ciphertext.Span);
+        try
+        {
+            UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+                await GetUserPresenceContextAsync(KeyRef.Dec, cancellationToken).ConfigureAwait(false));
 
-        // PSO: DECIPHER — INS=0x2A, P1=0x80, P2=0x86
-        var command = new ApduCommand(0x00, (int)Ins.Pso, 0x80, 0x86, payload);
-        var response = await TransmitWithResponseAsync(command, cancellationToken)
-            .ConfigureAwait(false);
-
-        return response.Data;
+            // PSO: DECIPHER — INS=0x2A, P1=0x80, P2=0x86
+            var command = new ApduCommand(0x00, (int)Ins.Pso, 0x80, 0x86, payload);
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
+                        try
+                        {
+                            await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
+                                .ConfigureAwait(false);
+                            return response.Data.ToArray();
+                        }
+                        finally
+                        {
+                            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+                        }
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(payload);
+        }
     }
 
     /// <inheritdoc />
@@ -82,12 +119,24 @@ public sealed partial class OpenPgpSession
         var payload = FormatSignPayload(autAttrs, data.Span, hashAlgorithm);
         try
         {
+            UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+                await GetUserPresenceContextAsync(KeyRef.Aut, cancellationToken).ConfigureAwait(false));
+
             // INTERNAL AUTHENTICATE — INS=0x88, P1=0x00, P2=0x00
             var command = new ApduCommand(0x00, (int)Ins.InternalAuthenticate, 0x00, 0x00, payload);
-            var response = await TransmitWithResponseAsync(command, cancellationToken)
+            return await RunWithUserPresenceNotificationAsync(
+                    userPresenceNotification,
+                    async token =>
+                    {
+                        var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
+                        return await FormatResolveAndTransferSignatureAsync(
+                                autAttrs,
+                                MemoryMarshal.AsMemory(response.RawData),
+                                () => userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed))
+                            .ConfigureAwait(false);
+                    },
+                    cancellationToken)
                 .ConfigureAwait(false);
-
-            return FormatSignResponse(autAttrs, response.Data);
         }
         finally
         {
@@ -138,21 +187,60 @@ public sealed partial class OpenPgpSession
     }
 
     /// <summary>
-    ///     Formats the response from Sign and Authenticate operations.
-    ///     EC signatures are DER-encoded from the raw (r || s) concatenation.
+    ///     Formats an owned Sign or Authenticate response, resolves completion, and transfers the signature.
+    ///     EC signatures are DER-encoded from the raw (r || s) concatenation; abandoned buffers are cleared.
     /// </summary>
-    private static ReadOnlyMemory<byte> FormatSignResponse(
+    internal static async Task<ReadOnlyMemory<byte>> FormatResolveAndTransferSignatureAsync(
         AlgorithmAttributes attrs,
-        ReadOnlyMemory<byte> response)
+        Memory<byte> ownedRawResponse,
+        Func<ValueTask> resolveCompleted)
     {
-        if (attrs is not EcAttributes || attrs.AlgorithmId == EcAttributes.EddsaAlgorithmId)
-        {
-            // RSA and EdDSA: raw signature bytes
-            return response;
-        }
+        ArgumentNullException.ThrowIfNull(attrs);
+        ArgumentNullException.ThrowIfNull(resolveCompleted);
 
-        // ECDSA: card returns r || s concatenated, encode as DER
-        return EncodeDerSignature(response.Span);
+        byte[]? formattedSignature = null;
+        bool rawResponseTransferred = false;
+        try
+        {
+            ReadOnlyMemory<byte> rawSignature = ownedRawResponse[..^2];
+            ReadOnlyMemory<byte> signature;
+            if (attrs is not EcAttributes || attrs.AlgorithmId == EcAttributes.EddsaAlgorithmId)
+            {
+                // RSA and EdDSA: raw signature bytes
+                signature = rawSignature;
+            }
+            else
+            {
+                // ECDSA: card returns r || s concatenated, encode as DER
+                formattedSignature = EncodeDerSignature(rawSignature.Span);
+                signature = formattedSignature;
+            }
+
+            await resolveCompleted().ConfigureAwait(false);
+
+            if (formattedSignature is null)
+            {
+                rawResponseTransferred = true;
+            }
+            else
+            {
+                formattedSignature = null;
+            }
+
+            return signature;
+        }
+        finally
+        {
+            if (formattedSignature is not null)
+            {
+                CryptographicOperations.ZeroMemory(formattedSignature);
+            }
+
+            if (!rawResponseTransferred)
+            {
+                CryptographicOperations.ZeroMemory(ownedRawResponse.Span);
+            }
+        }
     }
 
     /// <summary>
@@ -203,36 +291,48 @@ public sealed partial class OpenPgpSession
         var s = rawSignature[half..];
 
         var rDer = EncodeAsn1Integer(r);
-        var sDer = EncodeAsn1Integer(s);
-
-        // SEQUENCE { r INTEGER, s INTEGER }
-        var seqLength = rDer.Length + sDer.Length;
-
-        byte[] result;
-        int contentOffset;
-
-        if (seqLength >= 128)
+        byte[]? sDer = null;
+        try
         {
-            // Long-form DER length encoding: 0x30 0x81 <length> <content>
-            result = new byte[3 + seqLength];
-            result[0] = 0x30;
-            result[1] = 0x81;
-            result[2] = (byte)seqLength;
-            contentOffset = 3;
+            sDer = EncodeAsn1Integer(s);
+
+            // SEQUENCE { r INTEGER, s INTEGER }
+            var seqLength = rDer.Length + sDer.Length;
+
+            byte[] result;
+            int contentOffset;
+
+            if (seqLength >= 128)
+            {
+                // Long-form DER length encoding: 0x30 0x81 <length> <content>
+                result = new byte[3 + seqLength];
+                result[0] = 0x30;
+                result[1] = 0x81;
+                result[2] = (byte)seqLength;
+                contentOffset = 3;
+            }
+            else
+            {
+                // Short-form DER length encoding: 0x30 <length> <content>
+                result = new byte[2 + seqLength];
+                result[0] = 0x30;
+                result[1] = (byte)seqLength;
+                contentOffset = 2;
+            }
+
+            rDer.CopyTo(result.AsSpan(contentOffset));
+            sDer.CopyTo(result.AsSpan(contentOffset + rDer.Length));
+
+            return result;
         }
-        else
+        finally
         {
-            // Short-form DER length encoding: 0x30 <length> <content>
-            result = new byte[2 + seqLength];
-            result[0] = 0x30;
-            result[1] = (byte)seqLength;
-            contentOffset = 2;
+            CryptographicOperations.ZeroMemory(rDer);
+            if (sDer is not null)
+            {
+                CryptographicOperations.ZeroMemory(sDer);
+            }
         }
-
-        rDer.CopyTo(result.AsSpan(contentOffset));
-        sDer.CopyTo(result.AsSpan(contentOffset + rDer.Length));
-
-        return result;
     }
 
     /// <summary>

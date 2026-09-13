@@ -1,6 +1,6 @@
 # v1 to v2: what changed, and why
 
-Last updated: 2026-09-11
+Last updated: 2026-09-12
 
 V2 differs from v1 in a lot of places. This page sorts every one of those
 differences into a straight answer: did we do this on purpose, are we still
@@ -62,7 +62,7 @@ All eight applet sessions now use the same two factory shapes:
 `IYubiKey.CreateXSessionAsync` for an owned connection and
 `XSession.CreateAsync` for a borrowed connection. Both accept
 `SessionCreationOptions`, which carries shared connection, secure-channel,
-protocol-configuration, and firmware-version policy. Existing one-shot
+protocol-configuration, firmware-version, and user-presence notification policy. Existing one-shot
 conveniences also accept session options before their cancellation token, so
 callers can apply the same creation policy without opening a session manually.
 
@@ -74,7 +74,7 @@ applications inspect valid fields introduced before the SDK models them.
 
 ## Still being decided
 
-**How far to extend interactive prompting.** Direct credential parameters on
+**How far to extend credential prompting.** Direct credential parameters on
 applet sessions are settled: calls such as `PivSession.VerifyPinAsync(pinUtf8)`
 keep authentication flow under application control. One applet-local exception
 exists — OATH's `AuthenticateAndRetryAsync` takes a password-provider callback
@@ -82,9 +82,11 @@ so it can re-authenticate a locked applet mid-operation. Core now provides
 `ICredentialPrompt`, and `WebAuthnClient` adopts it for on-demand PIN entry
 with a bounded retry loop that defaults to three attempts.
 
-Cross-applet adoption remains open, and no unified touch-notification pattern
-exists. Applet-specific touch callbacks do not amount to the single prompting
-contract v1's `KeyCollector` provided.
+Cross-applet credential acquisition and retry remain open. Touch notification is
+separate and now unified: PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and
+YubiHSM Auth use `IUserPresencePrompt` through
+`SessionCreationOptions.UserPresencePrompt`. This does not restore v1
+`KeyCollector` parity for PIN, PUK, password, or key collection.
 
 ## Decided against
 
@@ -124,7 +126,10 @@ The gaps table above already accounts for these:
   AdminData, and KeyHistory data objects.
 - OATH `IsPasswordProtected` and `AuthenticateAndRetryAsync`, plus a
   dedicated `OathException`.
-- YubiHSM Auth's `HsmAuthRetryException`, the `OnTouchRequired` callback, and
+- The cross-applet `IUserPresencePrompt` touch contract, replacing the alpha-only
+  PIV and YubiHSM Auth `OnTouchRequired` callbacks and covering FIDO2/WebAuthn,
+  OATH, OpenPGP, and YubiOTP as well.
+- YubiHSM Auth's `HsmAuthRetryException` and
   the hardware-verified `Counter` → `RetriesRemaining` rename.
 - YubiHSM Auth password inputs are back to UTF-8 `ReadOnlyMemory<byte>`, as in
   v1, so callers can clear them after use. Its parameters are named plainly

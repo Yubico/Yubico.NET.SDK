@@ -83,6 +83,33 @@ Yubico.YubiKit.Core.Credentials.ICredentialPrompt.RequestSecretAsync(Yubico.Yubi
 Yubico.YubiKit.Core.Credentials.ISecureCredentialReader
 Yubico.YubiKit.Core.Credentials.ISecureCredentialReader.ReadCredential(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Buffers.IMemoryOwner<byte>?
 Yubico.YubiKit.Core.Credentials.ISecureCredentialReader.ReadCredentialWithConfirmation(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Buffers.IMemoryOwner<byte>?
+Yubico.YubiKit.Core.Credentials.IUserPresencePrompt
+Yubico.YubiKit.Core.Credentials.IUserPresencePrompt.OnUserPresenceRequestedAsync(Yubico.YubiKit.Core.Credentials.UserPresenceContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+Yubico.YubiKit.Core.Credentials.IUserPresencePrompt.OnUserPresenceResolvedAsync(Yubico.YubiKit.Core.Credentials.UserPresenceContext! context, Yubico.YubiKit.Core.Credentials.UserPresenceOutcome outcome, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+Yubico.YubiKit.Core.Credentials.UserPresenceBasis
+Yubico.YubiKit.Core.Credentials.UserPresenceBasis.DeviceWaiting = 0 -> Yubico.YubiKit.Core.Credentials.UserPresenceBasis
+Yubico.YubiKit.Core.Credentials.UserPresenceBasis.PolicyMayRequire = 2 -> Yubico.YubiKit.Core.Credentials.UserPresenceBasis
+Yubico.YubiKit.Core.Credentials.UserPresenceBasis.PolicyRequires = 1 -> Yubico.YubiKit.Core.Credentials.UserPresenceBasis
+Yubico.YubiKit.Core.Credentials.UserPresenceContext
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.Application.get -> string!
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.Application.init -> void
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.Basis.get -> Yubico.YubiKit.Core.Credentials.UserPresenceBasis
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.Basis.init -> void
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.<Clone>$() -> Yubico.YubiKit.Core.Credentials.UserPresenceContext!
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.Equals(Yubico.YubiKit.Core.Credentials.UserPresenceContext? other) -> bool
+override Yubico.YubiKit.Core.Credentials.UserPresenceContext.Equals(object? obj) -> bool
+override Yubico.YubiKit.Core.Credentials.UserPresenceContext.GetHashCode() -> int
+static Yubico.YubiKit.Core.Credentials.UserPresenceContext.operator !=(Yubico.YubiKit.Core.Credentials.UserPresenceContext? left, Yubico.YubiKit.Core.Credentials.UserPresenceContext? right) -> bool
+static Yubico.YubiKit.Core.Credentials.UserPresenceContext.operator ==(Yubico.YubiKit.Core.Credentials.UserPresenceContext? left, Yubico.YubiKit.Core.Credentials.UserPresenceContext? right) -> bool
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.Scope.get -> string?
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.Scope.init -> void
+override Yubico.YubiKit.Core.Credentials.UserPresenceContext.ToString() -> string!
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.UserPresenceContext() -> void
+Yubico.YubiKit.Core.Credentials.UserPresenceOutcome
+Yubico.YubiKit.Core.Credentials.UserPresenceOutcome.Cancelled = 1 -> Yubico.YubiKit.Core.Credentials.UserPresenceOutcome
+Yubico.YubiKit.Core.Credentials.UserPresenceOutcome.Completed = 0 -> Yubico.YubiKit.Core.Credentials.UserPresenceOutcome
+Yubico.YubiKit.Core.Credentials.UserPresenceOutcome.Failed = 3 -> Yubico.YubiKit.Core.Credentials.UserPresenceOutcome
+Yubico.YubiKit.Core.Credentials.UserPresenceOutcome.TimedOut = 2 -> Yubico.YubiKit.Core.Credentials.UserPresenceOutcome
 Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm
 Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm.Aes128 = 1 -> Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm
 Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm.Aes192 = 2 -> Yubico.YubiKit.Core.Cryptography.CmacBlockCipherAlgorithm
@@ -509,6 +536,7 @@ Yubico.YubiKit.Core.ServiceLocator
 Yubico.YubiKit.Core.Sessions.ApplicationIds
 Yubico.YubiKit.Core.Sessions.ApplicationSession
 Yubico.YubiKit.Core.Sessions.ApplicationSession.ApplicationSession(Yubico.YubiKit.Core.Abstractions.IConnection! connection) -> void
+Yubico.YubiKit.Core.Sessions.ApplicationSession.ApplicationSession(Yubico.YubiKit.Core.Abstractions.IConnection! connection, Yubico.YubiKit.Core.Credentials.IUserPresencePrompt? userPresencePrompt) -> void
 Yubico.YubiKit.Core.Sessions.ApplicationSession.Connection.get -> Yubico.YubiKit.Core.Abstractions.IConnection!
 Yubico.YubiKit.Core.Sessions.ApplicationSession.ConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType
 Yubico.YubiKit.Core.Sessions.ApplicationSession.Dispose() -> void
@@ -543,6 +571,8 @@ Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ProtocolConfiguration.init -
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ScpKeyParameters.get -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters?
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.ScpKeyParameters.init -> void
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.SessionCreationOptions() -> void
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.UserPresencePrompt.get -> Yubico.YubiKit.Core.Credentials.IUserPresencePrompt?
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.UserPresencePrompt.init -> void
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.WithPreferredConnectionType(Yubico.YubiKit.Core.Devices.ConnectionType connectionType) -> Yubico.YubiKit.Core.Sessions.SessionCreationOptions!
 Yubico.YubiKit.Core.Transport
 Yubico.YubiKit.Core.Transport.All = Yubico.YubiKit.Core.Transport.Usb | Yubico.YubiKit.Core.Transport.Nfc -> Yubico.YubiKit.Core.Transport

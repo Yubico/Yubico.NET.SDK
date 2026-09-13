@@ -19,6 +19,7 @@ The YubiHSM Auth module implements the **YubiHSM Auth applet** for authenticatin
 2. **Applet-owned backend** — Session code keeps APDU construction, retry extraction, and sensitive-buffer lifecycle; backend remains a thin SmartCard transport wrapper
 3. **Two credential types** — Symmetric (AES-128, all firmware) and Asymmetric (EC P256, firmware 5.6.0+)
 4. **Strict security** — All sensitive buffers zeroed in `finally` blocks; `SessionKeys` is `IDisposable`
+5. **User presence** — Session-key calculations retain `SessionCreationOptions.UserPresencePrompt`; the removed alpha `OnTouchRequired` callback has no compatibility adapter
 
 **Key Files:**
 - [`HsmAuthSession.cs`](src/HsmAuthSession.cs) - Main session class (all APDU operations)
@@ -110,6 +111,13 @@ using var keys = await session.CalculateSessionKeysSymmetricAsync(
 // All key material zeroed automatically on dispose
 ```
 
+For symmetric and asymmetric CALCULATE operations, a listed credential with
+`TouchRequired=true` maps to `PolicyRequires`; `false` is silent. A missing credential is also silent;
+unknown touch values on a found credential and LIST failures map conservatively to `PolicyMayRequire`. Requests use
+`Application="YubiHSM Auth"` and the credential label as scope, occur immediately before the
+CALCULATE APDU, and are resolved once with `CancellationToken.None`. Do not report `TimedOut`
+without a hardware status that confirms a touch timeout.
+
 The symmetric context is `hostChallenge[8] || hsmChallenge[8]`; the HSM challenge and optional
 card cryptogram come from the YubiHSM connector. The asymmetric context is
 `epkOce[65] || epkSd[65]`. Validate these exact lengths before any device I/O, and never generate
@@ -143,6 +151,7 @@ Located in `tests/Yubico.YubiKit.YubiHsm.UnitTests/`. Test pure logic that doesn
 - `RetryExtractionTests` — Status word 0x63Cx parsing
 - `HsmAuthCredentialTests` — Record equality and sorting
 - `Pbkdf2DerivationTests` — Known-answer PBKDF2 derivation
+- `TouchNotificationTests` — Recording-prompt policy mapping, request/resolution lifecycle, and no-hardware CALCULATE ordering
 
 **Run tests:** `dotnet toolchain.cs test` (never `dotnet test` directly)
 

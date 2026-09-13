@@ -4,7 +4,10 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Buffers.Binary;
+using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
@@ -41,6 +44,7 @@ internal class FidoHidProtocol(
     public bool IsChannelInitialized => _channelId.HasValue;
     public FirmwareVersion? FirmwareVersion => _firmwareVersion;
 
+    /// <inheritdoc cref="IProtocol.Configure" />
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {
         InitializeAsync().GetAwaiter().GetResult();
@@ -48,6 +52,7 @@ internal class FidoHidProtocol(
         _logger.LogDebug("HID protocol configured for firmware version {Version}", version);
     }
 
+    /// <inheritdoc cref="IFidoHidProtocol.InitializeAsync" />
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -62,12 +67,22 @@ internal class FidoHidProtocol(
             .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
+    public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+        byte command,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default) =>
+        SendVendorCommandAsync(command, data, UserPresenceNotification.None, cancellationToken);
+
+    /// <inheritdoc cref="IFidoHidProtocol.SendVendorCommandAsync(byte, ReadOnlyMemory{byte}, UserPresenceNotification, CancellationToken)" />
     public async Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
         byte command,
         ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(userPresenceNotification);
 
         _logger.LogTrace("Sending CTAP vendor command 0x{Command:X2} with {Length} bytes",
             command, data.Length);
@@ -80,6 +95,7 @@ internal class FidoHidProtocol(
                             _channelId!.Value,
                             command,
                             data,
+                            userPresenceNotification,
                             exchangeToken,
                             cancellationToken)
                         .ConfigureAwait(false);
@@ -122,7 +138,8 @@ internal class FidoHidProtocol(
                     CtapConstants.BroadcastChannelId,
                     CtapConstants.CtapHidInit,
                     nonce.AsMemory(),
-                    cancellationToken)
+                    UserPresenceNotification.None,
+                    exchangeToken: cancellationToken)
                 .ConfigureAwait(false);
 
             // Verify nonce echo
@@ -167,11 +184,18 @@ internal class FidoHidProtocol(
         uint channelId,
         byte command,
         ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken exchangeToken,
         CancellationToken callerToken = default)
     {
         await SendRequest(channelId, command, data, exchangeToken).ConfigureAwait(false);
-        return await ReceiveResponse(channelId, command, exchangeToken, callerToken).ConfigureAwait(false);
+        return await ReceiveResponse(
+                channelId,
+                command,
+                userPresenceNotification,
+                exchangeToken,
+                callerToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -240,12 +264,14 @@ internal class FidoHidProtocol(
     private async Task<ReadOnlyMemory<byte>> ReceiveResponse(
         uint channelId,
         byte expectedCommand,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken exchangeToken,
         CancellationToken callerToken)
     {
         _logger.LogTrace("Receiving CTAP HID response");
 
         var cancelRequested = false;
+        ExceptionDispatchInfo? promptFailure = null;
 
         // Get initialization packet, handling keep-alive
         var initPacket = await _connection.ReceiveAsync(exchangeToken).ConfigureAwait(false);
@@ -253,16 +279,41 @@ internal class FidoHidProtocol(
         {
             ValidateInitPacket(initPacket.Span, channelId);
 
+            if (promptFailure is null &&
+                GetPacketLength(initPacket.Span) > 0 &&
+                initPacket.Span[CtapConstants.InitHeaderSize] == CtapConstants.KeepAliveStatusUpNeeded)
+            {
+                try
+                {
+                    await userPresenceNotification.RequestAsync(UserPresenceBasis.DeviceWaiting, callerToken)
+                        .ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    promptFailure = ExceptionDispatchInfo.Capture(ex);
+                }
+            }
+
             // Abandoning a ceremony without telling the authenticator leaves it holding a
-            // user-presence request on a channel nobody is servicing: the key keeps asking for a
-            // touch that can no longer be consumed, and the busy channel blocks later opens until
-            // the key is physically re-plugged. CTAPHID_CANCEL is the protocol's way out, and is
-            // only meaningful while the authenticator is still working (that is, right here).
-            if (!cancelRequested && callerToken.IsCancellationRequested)
+            // user-presence request on a channel nobody is servicing. A failed callback has
+            // the same consequence unless this admitted exchange is cancelled and drained.
+            if (!cancelRequested && (callerToken.IsCancellationRequested || promptFailure is not null))
             {
                 _logger.LogDebug("Operation abandoned during keep-alive; sending CTAPHID_CANCEL");
-                await SendRequest(channelId, CtapConstants.CtapHidCancel, ReadOnlyMemory<byte>.Empty, exchangeToken)
-                    .ConfigureAwait(false);
+                try
+                {
+                    await SendRequest(
+                            channelId,
+                            CtapConstants.CtapHidCancel,
+                            ReadOnlyMemory<byte>.Empty,
+                            exchangeToken)
+                        .ConfigureAwait(false);
+                }
+                catch (Exception ex) when (promptFailure is not null)
+                {
+                    _logger.LogWarning(ex, "Unable to send CTAPHID_CANCEL after user-presence callback failed");
+                }
+
                 cancelRequested = true;
             }
 
@@ -270,72 +321,82 @@ internal class FidoHidProtocol(
             initPacket = await _connection.ReceiveAsync(exchangeToken).ConfigureAwait(false);
         }
 
-        ValidateInitPacket(initPacket.Span, channelId);
-
-        var responseLength = GetPacketLength(initPacket.Span);
-        if (responseLength > CtapConstants.MaxPayloadSize)
-            throw new InvalidOperationException($"Response length {responseLength} exceeds max payload size");
-
-        byte responseCommand = GetPacketCommand(initPacket.Span);
-        if (responseCommand == CtapConstants.CtapHidError)
-        {
-            byte errorCode = responseLength > 0 ? initPacket.Span[CtapConstants.InitHeaderSize] : (byte)0x7F;
-            throw new InvalidOperationException($"CTAP HID error response: 0x{errorCode:X2}");
-        }
-
-        byte normalizedExpectedCommand = (byte)(expectedCommand & ~CtapConstants.InitPacketMask);
-        if (responseCommand != normalizedExpectedCommand)
-        {
-            throw new InvalidOperationException(
-                $"CTAP HID response command 0x{responseCommand:X2} does not match request command 0x{expectedCommand:X2}");
-        }
-
-        byte[] responseData = _responseBufferFactory(responseLength);
-        var ownershipTransferred = false;
+        var terminalResponseDrained = false;
         try
         {
-            var initDataLength = Math.Min(responseLength, CtapConstants.InitDataSize);
+            ValidateInitPacket(initPacket.Span, channelId);
 
-            initPacket.Span.Slice(CtapConstants.InitHeaderSize, initDataLength)
-                .CopyTo(responseData);
+            var responseLength = GetPacketLength(initPacket.Span);
+            if (responseLength > CtapConstants.MaxPayloadSize)
+                throw new InvalidOperationException($"Response length {responseLength} exceeds max payload size");
 
-            // Receive continuation packets if needed
-            var bytesReceived = initDataLength;
-            byte expectedSequence = 0;
-            while (bytesReceived < responseLength)
+            byte responseCommand = GetPacketCommand(initPacket.Span);
+            if (responseCommand == CtapConstants.CtapHidError)
             {
-                var contPacket = await _connection.ReceiveAsync(exchangeToken).ConfigureAwait(false);
-                ValidateContinuationPacket(contPacket.Span, channelId, expectedSequence);
-                var contDataLength = Math.Min(
-                    responseLength - bytesReceived,
-                    CtapConstants.ContinuationDataSize);
-
-                contPacket.Span.Slice(CtapConstants.ContinuationHeaderSize, contDataLength)
-                    .CopyTo(responseData.AsSpan(bytesReceived));
-
-                bytesReceived += contDataLength;
-                expectedSequence++;
+                byte errorCode = responseLength > 0 ? initPacket.Span[CtapConstants.InitHeaderSize] : (byte)0x7F;
+                throw new InvalidOperationException($"CTAP HID error response: 0x{errorCode:X2}");
             }
 
-            _logger.LogTrace("Received {Length} bytes in response", responseLength);
-
-            // Only here is the channel provably clean. Throwing any earlier would strand the
-            // remaining frames for the next exchange to misread — the very failure this cancel
-            // exists to prevent — because a touch landing as the caller abandons makes the
-            // answer a real multi-packet response, not the one-byte cancel acknowledgement.
-            // Ownership stays untransferred, so the discarded buffer is zeroed by the finally.
-            if (cancelRequested)
+            byte normalizedExpectedCommand = (byte)(expectedCommand & ~CtapConstants.InitPacketMask);
+            if (responseCommand != normalizedExpectedCommand)
             {
-                callerToken.ThrowIfCancellationRequested();
+                throw new InvalidOperationException(
+                    $"CTAP HID response command 0x{responseCommand:X2} does not match request command 0x{expectedCommand:X2}");
             }
 
-            ownershipTransferred = true;
-            return responseData;
+            byte[] responseData = _responseBufferFactory(responseLength);
+            var ownershipTransferred = false;
+            try
+            {
+                var initDataLength = Math.Min(responseLength, CtapConstants.InitDataSize);
+
+                initPacket.Span.Slice(CtapConstants.InitHeaderSize, initDataLength)
+                    .CopyTo(responseData);
+
+                // Receive continuation packets if needed
+                var bytesReceived = initDataLength;
+                byte expectedSequence = 0;
+                while (bytesReceived < responseLength)
+                {
+                    var contPacket = await _connection.ReceiveAsync(exchangeToken).ConfigureAwait(false);
+                    ValidateContinuationPacket(contPacket.Span, channelId, expectedSequence);
+                    var contDataLength = Math.Min(
+                        responseLength - bytesReceived,
+                        CtapConstants.ContinuationDataSize);
+
+                    contPacket.Span.Slice(CtapConstants.ContinuationHeaderSize, contDataLength)
+                        .CopyTo(responseData.AsSpan(bytesReceived));
+
+                    bytesReceived += contDataLength;
+                    expectedSequence++;
+                }
+
+                _logger.LogTrace("Received {Length} bytes in response", responseLength);
+                terminalResponseDrained = true;
+
+                // Only here is the channel provably clean. Throwing any earlier would strand the
+                // remaining frames for the next exchange to misread. Callback failures therefore
+                // propagate only after the terminal response has been fully drained.
+                promptFailure?.Throw();
+
+                if (cancelRequested)
+                    callerToken.ThrowIfCancellationRequested();
+
+                ownershipTransferred = true;
+                return responseData;
+            }
+            finally
+            {
+                if (!ownershipTransferred)
+                    CryptographicOperations.ZeroMemory(responseData);
+            }
         }
-        finally
+        catch (Exception) when (promptFailure is not null && !terminalResponseDrained)
         {
-            if (!ownershipTransferred)
-                CryptographicOperations.ZeroMemory(responseData);
+            _logger.LogWarning(
+                promptFailure.SourceException,
+                "User-presence callback failed before CTAP HID terminal response validation also failed");
+            throw;
         }
     }
 

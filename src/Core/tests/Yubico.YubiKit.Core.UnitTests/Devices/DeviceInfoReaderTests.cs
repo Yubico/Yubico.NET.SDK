@@ -324,6 +324,7 @@ public class DeviceInfoReaderTests
         public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
             byte command,
             ReadOnlyMemory<byte> data,
+            global::Yubico.YubiKit.Core.Credentials.UserPresenceNotification userPresenceNotification,
             CancellationToken cancellationToken = default)
         {
             RequestedPages.Add(data.Span[0]);

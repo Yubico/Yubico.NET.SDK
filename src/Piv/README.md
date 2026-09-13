@@ -1,193 +1,165 @@
 # Yubico.YubiKit.Piv
 
-The PIV module provides async access to the YubiKey PIV application for certificates, keys, PIN/PUK management, attestation, signing, decryption, and key agreement.
+The PIV application (NIST SP 800-73) turns a YubiKey into a smart card holding private keys and X.509 certificates
+in numbered slots. This package covers PIN, PUK, and management-key authentication, key and certificate management,
+signing, decryption, ECDH key agreement, and attestation, on top of `Yubico.YubiKit.Core` and no other module.
 
-## Session Creation
+> The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+> constraints.
 
-Use the `IYubiKey` extension when starting from a discovered device:
+## Requirements
 
-```csharp
-await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+- .NET 10 on Windows, macOS, or Linux; Linux also needs PC/SC and udev rules ([Linux setup](../../docs/linux-setup.md)).
+- A YubiKey 4 or 5 series device with PIV enabled. SmartCard transport only (USB CCID or NFC), never HID.
+
+| Feature | Minimum firmware |
+| --- | --- |
+| P-384 curve, PIN and touch policies | 4.0.0 |
+| Cached touch policy, key attestation | 4.3.0 |
+| Metadata (PIN, PUK, management key, slot) | 5.3.0 |
+| AES management key | 5.4.0 |
+| Move and delete key, Curve25519, RSA 3072 and 4096 | 5.7.0 |
+
+## Installation
+
+```bash
+dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
+dotnet add package Yubico.YubiKit.Piv --prerelease
 ```
 
-Use direct session creation when you already own a SmartCard connection:
+`Yubico.YubiKit.Core` is installed transitively.
+
+## Getting started
 
 ```csharp
-await using var connection = await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-await using var session = await PivSession.CreateAsync(connection, cancellationToken: cancellationToken);
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Piv;
+
+var devices = await YubiKeyManager.FindAllAsync();
+IYubiKey device = devices[0];
+await using var session = await device.CreatePivSessionAsync();
+
+int pinAttempts = await session.GetPinAttemptsAsync();
+Console.WriteLine($"PIN attempts remaining: {pinAttempts}");
 ```
 
-## Common Operations
+Reading the PIN attempt counter needs no PIN, touch, or management key, and works on every supported
+firmware. Later snippets assume these directives and a `device` obtained the same way.
 
-### Verify PIN
+## Common operations
 
-```csharp
-byte[] pin = Encoding.UTF8.GetBytes("123456");
-try
-{
-    await session.VerifyPinAsync(pin, cancellationToken);
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(pin);
-}
-```
-
-### Authenticate Management Key
+### Authenticate and generate a key pair
 
 ```csharp
+await using var session = await device.CreatePivSessionAsync();
+
 byte[] managementKey = Convert.FromHexString("010203040506070801020304050607080102030405060708");
 try
 {
-    await session.AuthenticateAsync(managementKey, cancellationToken);
+    await session.AuthenticateAsync(managementKey);
 }
 finally
 {
     CryptographicOperations.ZeroMemory(managementKey);
 }
+var keyOptions = new PivKeyCreationOptions { PinPolicy = PivPinPolicy.Once, TouchPolicy = PivTouchPolicy.Never };
+IPublicKey publicKey = await session.GenerateKeyAsync(PivSlot.Authentication, PivAlgorithm.EccP256, keyOptions);
 ```
 
-`PivSession.DefaultManagementKey` exposes the well-known 24-byte default value used by both
-Triple-DES and AES-192 defaults. Use `session.ManagementKeyType` to select the algorithm.
-`session.IsManagementKeyAuthenticated` reports PIV management-key authentication; it is distinct
-from the inherited `IsAuthenticated`, which reports application-protocol authentication such as SCP.
+`IsManagementKeyAuthenticated` reports PIV authentication, distinct from the inherited `IsAuthenticated` (SCP).
 
-### Generate a Key
+### Store and read a certificate
+
+Storing needs management-key authentication, so continue on the `session` from the previous snippet.
 
 ```csharp
-var publicKey = await session.GenerateKeyAsync(
-    PivSlot.Authentication,
-    PivAlgorithm.EccP256,
-    new PivKeyCreationOptions
-    {
-        PinPolicy = PivPinPolicy.Once,
-        TouchPolicy = PivTouchPolicy.Never
-    },
-    cancellationToken);
+using var certificate = X509CertificateLoader.LoadCertificateFromFile("authentication.cer");
+await session.StoreCertificateAsync(PivSlot.Authentication, certificate, PivCertificateCompression.Automatic);
+using X509Certificate2? stored = await session.GetCertificateAsync(PivSlot.Authentication);
 ```
 
-### Store and Read a Certificate
+### Verify the PIN and sign
 
 ```csharp
-await session.StoreCertificateAsync(
-    PivSlot.Authentication,
-    certificate,
-    PivCertificateCompression.Automatic,
-    cancellationToken);
-var stored = await session.GetCertificateAsync(PivSlot.Authentication, cancellationToken);
-```
+await using var session = await device.CreatePivSessionAsync();
 
-### Sign or Decrypt
-
-```csharp
-byte[] digest = SHA256.HashData(data);
-var signature = await session.SignOrDecryptAsync(
-    PivSlot.Authentication,
-    digest,
-    cancellationToken);
-```
-
-### Key Agreement
-
-```csharp
-var sharedSecret = await session.CalculateSecretAsync(
-    PivSlot.KeyManagement,
-    peerPublicKey,
-    cancellationToken);
-```
-
-### User-presence notifications
-
-Supply an `IUserPresencePrompt` when creating the session. The same prompt receives a request
-immediately before a private-key APDU that requires or may require touch, followed by one
-resolution notification after a successful response has been validated. Malformed success responses
-resolve as failed. For RSA decryption, successful resolution precedes local padding removal:
-
-```csharp
-var options = new SessionCreationOptions
+byte[] pin = Encoding.UTF8.GetBytes("123456");
+try
 {
-    UserPresencePrompt = userPresencePrompt
-};
-
-await using var session = await device.CreatePivSessionAsync(options, cancellationToken);
-```
-
-`PivTouchPolicy.Always` reports `PolicyRequires`; `Cached` reports `PolicyMayRequire` because the
-SDK cannot observe the device's touch cache. `Never`, `Default`, and an empty slot are silent.
-Unavailable, unsupported, failed, or unrecognized metadata is handled conservatively as
-`PolicyMayRequire`. The context uses `Application="PIV"` and the `PivSlot` name as `Scope`.
-
-Migration: the alpha `PivSession.OnTouchRequired` and `IPivSession.OnTouchRequired` properties
-were replaced by `SessionCreationOptions.UserPresencePrompt`. Configure the prompt before session
-creation; there is no mutable per-session callback adapter.
-
-### Retry Attempts
-
-```csharp
-var pinMetadata = await session.GetPinMetadataAsync(cancellationToken);
-var pukMetadata = await session.GetPukMetadataAsync(cancellationToken);
-
-await session.SetPinAttemptsAsync(
-    pinAttempts: 5,
-    pukAttempts: 5,
-    cancellationToken);
-```
-
-### Biometric user verification
-
-```csharp
-var temporaryPin = await session.VerifyUvAsync(
-    PivUserVerification.VerifyAndRequestTemporaryPin,
-    cancellationToken);
-```
-
-Use `PivUserVerification.Verify` when no temporary PIN is needed and `CheckOnly` for the explicit check-only
-mode. A returned temporary PIN is caller-owned secret material and must be zeroed after use.
-
-## Security Notes
-
-- PINs, PUKs, management keys, and private-key material are sensitive; zero caller-owned buffers after use.
-- Enabling PIN-protected management-key mode re-authenticates the supplied key before PIN verification or persistent mutation.
-- Disabling PIN-only mode restores the type-appropriate default key before deleting PRINTED, then ADMIN DATA, so failures leave a recoverable boundary.
-- Mixed PIN-only recovery restores a successful PIN-protected authentication after a stale derived candidate fails, or returns no success mode if restoration fails.
-- Successful management-key changes update `ManagementKeyType` and preserve card-session authentication without retaining key bytes. A `SecurityStatusNotSatisfied` response clears recorded authentication; unrelated SET failures preserve the prior authentication state and key type.
-- Any failed management-key authentication attempt clears a previously recorded authenticated state.
-- Initialization and reset refresh the default key type; unavailable metadata uses AES-192 only for reliable firmware 5.7+ and Triple-DES for major-zero/older versions, while unexpected reset refresh errors still propagate.
-- Prefer `Span<byte>`, `Memory<byte>`, and `ReadOnlyMemory<byte>` over strings for secrets.
-- Do not log PINs, PUKs, keys, plaintexts, or sensitive APDU payloads.
-- Reset, PIN/PUK changes, management-key changes, key generation/import/delete, and certificate writes mutate persistent applet state.
-
-## Testing Guidance
-
-Unit tests should prefer fake SmartCard protocol or connection seams that assert APDU/TLV bytes and parser behavior.
-
-Integration tests use `Tests.Shared` with standard xUnit `[Theory]` and `[WithYubiKey]`:
-
-```csharp
-[SkippableTheory]
-[WithYubiKey(Capability = DeviceCapabilities.Piv)]
-public async Task GetPinMetadata_ReadOnly_Succeeds(YubiKeyTestState state)
+    await session.VerifyPinAsync(pin);
+}
+finally
 {
-    await using var session = await state.Device.CreatePivSessionAsync();
-    var metadata = await session.GetPinMetadataAsync();
-    Assert.NotNull(metadata);
+    CryptographicOperations.ZeroMemory(pin);
+}
+byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes("message to sign"));
+ReadOnlyMemory<byte> signature = await session.SignOrDecryptAsync(PivSlot.Authentication, digest);
+```
+
+ECDSA signs the digest you pass, so hash first. This overload reads slot metadata to pick the algorithm and
+needs firmware 5.3.0; older keys need the overload that takes an explicit `PivAlgorithm`.
+
+## User interaction
+
+- Verify the PIN before private-key operations in slots created with `PivPinPolicy.Once` or `Always`.
+- Authenticate the management key before key or certificate writes, retry-limit changes, and key move or delete.
+- Touch follows the slot's `PivTouchPolicy`. `VerifyUvAsync` does fingerprint verification on biometric keys.
+
+Supply an `IUserPresencePrompt` to learn when an operation needs a touch.
+
+```csharp
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
 }
 ```
 
-PIV reset, PIN/PUK mutation, management-key mutation, and key/certificate writes are expected against an allow-listed test device — that is what the harness is for. What needs a human is presence and timing, not destruction: touch-policy ceremonies and physical insert/remove. See [docs/TESTING.md](../../docs/TESTING.md#hardware-authorization).
+```csharp
+var options = new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() };
+await using var session = await device.CreatePivSessionAsync(options);
+```
 
-## Related Example
+The prompt receives one request immediately before the private-key command and one resolution after the
+response is validated. `PivTouchPolicy.Always` maps to `UserPresenceBasis.PolicyRequires`; `Cached` and
+unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is not observable. `Never`,
+`Default`, and an empty slot are silent. Pass a `CancellationToken` to abandon a wait.
 
-The interactive PIV sample lives at `src/Piv/examples/PivTool/`.
+## Constraints
 
-From the repository root:
+- Requesting a non-SmartCard transport through `SessionCreationOptions { PreferredConnectionType = ... }` throws.
+- One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
+  disposes it with `await using`; a session from `CreatePivSessionAsync` owns and disposes the one it opened.
+- `ResetAsync`, `DeleteKeyAsync`, `DeleteCertificateAsync`, `MoveKeyAsync`, `SetManagementKeyAsync`,
+  `SetPinAttemptsAsync`, and `SetPinOnlyModeAsync` change persistent state. `ResetAsync` destroys every key.
+- Firmware gates throw `NotSupportedException`; `PivFeatures.SupportsRsaGeneration` screens ROCA-affected 4.2.6-4.3.4.
+
+## Security notes
+
+- PINs, PUKs, management keys, and temporary PINs cross the API as `ReadOnlyMemory<byte>`. The session never
+  zeroes a buffer you passed in; zero it yourself with `CryptographicOperations.ZeroMemory` in a `finally`.
+- Never log PINs, PUKs, management keys, plaintexts, or signatures. Log metadata only.
+- Factory defaults, including `PivSession.DefaultManagementKey`, are public; use them only after a reset.
+
+## Example
+
+The interactive PivTool sample lives at `src/Piv/examples/PivTool/`.
 
 ```bash
 dotnet run --project src/Piv/examples/PivTool/PivTool.csproj
 ```
 
-## Related Modules
+## Related
 
-- `Yubico.YubiKit.Core` - SmartCard protocol, APDU, TLV, and cryptography primitives.
-- `Yubico.YubiKit.Management` - device information and firmware source of truth.
-- `Yubico.YubiKit.Tests.Shared` - hardware allow-list and integration-test helpers.
+- [Core](../Core/README.md) - device discovery, SmartCard protocol, TLV, and cryptography primitives.
+- [Security Domain](../SecurityDomain/README.md) - SCP03 and SCP11 keys that protect the PIV channel.
+- [User interaction](../../docs/usage/user-interaction.md) and [device discovery](../../docs/usage/device-discovery.md) - cross-module guides.
+- [NIST SP 800-73](https://csrc.nist.gov/pubs/sp/800/73/4/final) - the PIV specification.
+- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.

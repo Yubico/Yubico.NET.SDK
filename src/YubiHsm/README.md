@@ -1,348 +1,185 @@
 # Yubico.YubiKit.YubiHsm
 
-> **Note:** This documentation is subject to change as the module evolves. Please check for updates regularly.
+The YubiHSM Auth applet stores the credentials used to authenticate to a YubiHSM 2 hardware security module, so
+the long-lived HSM authentication keys live on a YubiKey instead of on the host. This package manages those
+credentials and derives the S-ENC, S-MAC, and S-RMAC keys for an HSM session; it does not speak to a connector.
 
-This module provides access to the **YubiHSM Auth** application on a YubiKey. The applet stores
-credentials that are used to authenticate to a YubiHSM 2 hardware security module, so the
-long-lived HSM authentication keys live on the YubiKey instead of on the host.
-
-## Overview
-
-The YubiHSM Auth applet manages:
-- **Symmetric credentials** (AES-128): a K-ENC / K-MAC pair, stored directly or derived from a password via PBKDF2
-- **Asymmetric credentials** (EC P-256): a private key, imported or generated on-device
-- **Session key derivation**: the applet computes S-ENC, S-MAC, and S-RMAC for a YubiHSM 2 session
-- **Management key lifecycle**: the 16-byte key that authorizes credential changes
-- **Credential password changes**: user-authenticated and management-key (admin) variants
-
-This module covers the *applet* only. It does not implement YubiHSM 2 connector or object
-management — it produces the session keys you then use to talk to the HSM.
+> The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+> constraints.
 
 ## Requirements
 
-- **Minimum firmware**: YubiKey 5.4.3
-- **Asymmetric credentials / `GetChallengeAsync`**: 5.6.0+
-- **`GetChallengeAsync` with a credential password**: 5.7.1+
-- **Credential password change**: 5.8.0+
-- **Transport**: SmartCard only (USB CCID or NFC). There is no HID or OTP path.
+- .NET 10 on Windows, macOS, or Linux; Linux also needs PC/SC and udev rules ([Linux setup](../../docs/linux-setup.md)).
+- SmartCard transport only, over USB CCID or NFC. There is no HID or OTP path.
 
-Firmware gates are enforced with `EnsureSupports(...)`, so calling an unsupported operation
-raises a clear error rather than an opaque APDU failure. Use `IsSupported(...)` to branch.
+| Feature | Minimum firmware |
+| --- | --- |
+| YubiHSM Auth applet | 5.4.3 |
+| Asymmetric credentials, `GetChallengeAsync` | 5.6.0 |
+| `GetChallengeAsync` with a credential password | 5.7.1 |
+| Credential password change | 5.8.0 |
 
-## Usage Example
+A credential is identified by a label of 1 to 64 UTF-8 bytes, which is not a secret and stays a plain `string`. A
+symmetric credential holds an AES-128 K-ENC and K-MAC pair, an asymmetric one an EC P-256 private key, and each is
+protected by a credential password of at most 16 UTF-8 bytes. The 16-byte management key authorizes add and delete.
+
+## Installation
+
+```bash
+dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
+dotnet add package Yubico.YubiKit.YubiHsm --prerelease
+```
+
+`Yubico.YubiKit.Core` is installed transitively.
+
+## Getting started
 
 ```csharp
 using System.Security.Cryptography;
+using System.Text;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.YubiHsm;
 
-static async Task UseSymmetricCredentialAsync(
-    IHsmAuthSession session,
-    string label,
-    ReadOnlyMemory<byte> hostChallenge,
-    ReadOnlyMemory<byte> hsmChallenge,
-    ReadOnlyMemory<byte> credentialPassword,
-    ReadOnlyMemory<byte>? cardCryptogram,
-    CancellationToken cancellationToken)
+var devices = await YubiKeyManager.FindAllAsync();
+IYubiKey device = devices[0];
+await using var session = await device.CreateHsmAuthSessionAsync();
+foreach (var credential in await session.ListCredentialsAsync())
 {
-    if (hostChallenge.Length != 8 || hsmChallenge.Length != 8)
-        throw new ArgumentException("The host and HSM challenges must each be 8 bytes.");
-
-    var context = new byte[16];
-    try
-    {
-        hostChallenge.CopyTo(context);
-        hsmChallenge.CopyTo(context.AsMemory(8));
-
-        using var sessionKeys = await session.CalculateSessionKeysSymmetricAsync(
-            label,
-            context,
-            credentialPassword,
-            cardCryptogram,
-            cancellationToken);
-
-        // Use sessionKeys with the YubiHSM connector session.
-    }
-    finally
-    {
-        CryptographicOperations.ZeroMemory(context);
-    }
+    Console.WriteLine($"{credential.Label}: {credential.Algorithm}, {credential.RetriesRemaining} retries");
 }
 ```
 
-## Logging
+Listing credentials needs no password, management key, or touch. `device.ListHsmAuthCredentialsAsync()` does
+the same in one shot. Later snippets assume these directives and a `device` obtained the same way.
 
-This SDK uses `Microsoft.Extensions.Logging`. To enable logs, set the global logger factory once at startup:
+## Common operations
+
+### Store a symmetric credential
 
 ```csharp
-using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
-
-YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
+await using var session = await device.CreateHsmAuthSessionAsync();
+byte[] managementKey = new byte[16]; // The factory default is 16 zero bytes; rotate it before production use.
+byte[] credentialPassword = Encoding.UTF8.GetBytes("hsm-password");
+byte[] keyMaterial = RandomNumberGenerator.GetBytes(32); // K-ENC || K-MAC; escrow it before sending.
+try
 {
-    builder.AddConsole();
-    builder.SetMinimumLevel(LogLevel.Information);
-});
-```
-
-Credential passwords, management keys, and session keys are never logged. Only lengths,
-algorithm identifiers, status words, and other non-secret metadata are.
-
-## Key Concepts
-
-### Credentials
-
-A credential is identified by a **label** (1–64 UTF-8 bytes). The label is not a secret — the
-LIST command echoes it back verbatim — so it is a plain `string` throughout the API.
-
-| Type | Algorithm | Firmware | Stored material |
-|------|-----------|----------|-----------------|
-| Symmetric | AES-128 | 5.4.3+ | K-ENC (16 bytes) + K-MAC (16 bytes) |
-| Asymmetric | EC P-256 | 5.6.0+ | Private key (32 bytes), imported or generated on-device |
-
-### Credential passwords
-
-Every credential is protected by a credential password. Passwords cross the API as **UTF-8
-`ReadOnlyMemory<byte>`**, never `string`:
-
-- The wire format is a fixed 16 bytes. The SDK accepts **at most** 16 UTF-8 bytes and
-  null-pads shorter values for you.
-- **You own the buffer.** The SDK zeroes its own padded copy, but never the array you passed in.
-  Zero it yourself in a `finally`, or hand in a buffer type that zeroes on disposal.
-
-### Management key
-
-A 16-byte key (default: all zeros) authorizing credential add/delete and admin password changes.
-A wrong management key returns SW `0x63Cx` and raises `HsmAuthRetryException`, whose
-`RetriesRemaining` property carries `x` — read the property, do not parse the message.
-
-### Session keys
-
-`SessionKeys` is `IDisposable` and zeroes S-ENC, S-MAC, and S-RMAC on disposal. Always
-`using` it.
-
-## Core API
-
-### Creating a session
-
-```csharp
-// Via the IYubiKey extension (recommended)
-await using var session = await yubiKey.CreateHsmAuthSessionAsync(
-    cancellationToken: cancellationToken);
-
-// Directly from a SmartCard connection, optionally over SCP
-await using var scpSession = await HsmAuthSession.CreateAsync(
-    connection,
-    new SessionCreationOptions { ScpKeyParameters = scpParams },
-    cancellationToken: cancellationToken);
-```
-
-Applet dependency-injection registration is intentionally absent. Call `HsmAuthSession.CreateAsync` or
-`CreateHsmAuthSessionAsync` directly.
-
-The one-shot credential listing method also accepts `SessionCreationOptions`:
-
-```csharp
-var credentials = await yubiKey.ListHsmAuthCredentialsAsync(
-    new SessionCreationOptions { ScpKeyParameters = scpParams },
-    cancellationToken);
-```
-
-### Storing credentials
-
-```csharp
-// Symmetric, explicit keys
-await session.PutCredentialSymmetricAsync(
-    managementKey, label, keyEnc, keyMac, credentialPassword, touchRequired: false);
-
-// Symmetric, PBKDF2-derived keys
-await session.PutCredentialDerivedAsync(
-    managementKey, label, derivationPassword, credentialPassword);
-
-// Asymmetric, explicit private key (fw 5.6.0+)
-await session.PutCredentialAsymmetricAsync(
-    managementKey, label, privateKey, credentialPassword);
-
-// Asymmetric, generated on-device — the private key never leaves the YubiKey (fw 5.6.0+)
-await session.GenerateCredentialAsymmetricAsync(
-    managementKey, label, credentialPassword);
-```
-
-### Listing and deleting
-
-```csharp
-IReadOnlyList<HsmAuthCredential> credentials = await session.ListCredentialsAsync();
-foreach (var credential in credentials)
-{
-    // credential.Label, .Algorithm, .RetriesRemaining, .TouchRequired
+    await session.PutCredentialSymmetricAsync(managementKey, "hsm-prod", keyMaterial.AsMemory(0, 16),
+        keyMaterial.AsMemory(16, 16), credentialPassword, touchRequired: true);
 }
-
-await session.DeleteCredentialAsync(managementKey, label);
-```
-
-### Calculating session keys
-
-```csharp
-using System.Security.Cryptography;
-
-static async Task<SessionKeys> CalculateSymmetricSessionKeysAsync(
-    IHsmAuthSession session,
-    string label,
-    ReadOnlyMemory<byte> hostChallenge,
-    ReadOnlyMemory<byte> hsmChallenge,
-    ReadOnlyMemory<byte> credentialPassword,
-    ReadOnlyMemory<byte>? cardCryptogram,
-    CancellationToken cancellationToken)
+finally
 {
-    if (hostChallenge.Length != 8 || hsmChallenge.Length != 8)
-        throw new ArgumentException("The host and HSM challenges must each be 8 bytes.");
-
-    var context = new byte[16];
-    try
-    {
-        hostChallenge.CopyTo(context);
-        hsmChallenge.CopyTo(context.AsMemory(8));
-        return await session.CalculateSessionKeysSymmetricAsync(
-            label, context, credentialPassword, cardCryptogram, cancellationToken);
-    }
-    finally
-    {
-        CryptographicOperations.ZeroMemory(context);
-    }
-}
-
-static async Task<SessionKeys> CalculateAsymmetricSessionKeysAsync(
-    IHsmAuthSession session,
-    string label,
-    ReadOnlyMemory<byte> epkOce,
-    ReadOnlyMemory<byte> epkSd,
-    ReadOnlyMemory<byte> hsmPublicKey,
-    ReadOnlyMemory<byte> credentialPassword,
-    ReadOnlyMemory<byte> cardCryptogram,
-    CancellationToken cancellationToken)
-{
-    if (epkOce.Length != 65 || epkSd.Length != 65 || hsmPublicKey.Length != 65)
-        throw new ArgumentException("EPK-OCE, EPK-SD, and the HSM public key must each be 65-byte uncompressed points.");
-
-    var context = new byte[130];
-    try
-    {
-        epkOce.CopyTo(context);
-        epkSd.CopyTo(context.AsMemory(65));
-        return await session.CalculateSessionKeysAsymmetricAsync(
-            label, context, hsmPublicKey, credentialPassword, cardCryptogram, cancellationToken);
-    }
-    finally
-    {
-        CryptographicOperations.ZeroMemory(context);
-    }
+    CryptographicOperations.ZeroMemory(keyMaterial);
+    CryptographicOperations.ZeroMemory(credentialPassword);
 }
 ```
 
-Obtain `hostChallenge` or `epkOce` first, then send it to the connector. The connector returns
-`hsmChallenge` or `epkSd` plus `cardCryptogram`; it also supplies `hsmPublicKey` for asymmetric
-authentication. On firmware 5.6.0 and later, `GetChallengeAsync` obtains the YubiKey value. For a
-symmetric credential on older supported firmware, generate a fresh 8-byte host challenge with
-`RandomNumberGenerator.GetBytes(8)`. Pass the exact value sent to the connector into the helper;
-do not call `GetChallengeAsync` again after the exchange. A symmetric `cardCryptogram` is optional,
-but omitting it skips mutual authentication of the HSM. The SDK validates context lengths before
-device I/O but does not implement the connector handshake. The returned `SessionKeys` must be
-disposed by its caller.
+`PutCredentialDerivedAsync` takes a derivation password instead of explicit K-ENC and K-MAC values, while
+`GenerateCredentialAsymmetricAsync` stores an EC P-256 credential whose private key never leaves the device.
 
-### Touch notification
+### Calculate session keys
 
-Credentials can require a physical touch. Supply an `IUserPresencePrompt` through session creation
-options so the application is notified immediately before the blocking CALCULATE exchange and
-again when the operation ends:
+The symmetric context is the 8-byte host challenge followed by the 8-byte HSM challenge. Send the host challenge
+to the connector and pass back that exact value plus the HSM challenge and card cryptogram it returned.
 
 ```csharp
-var options = new SessionCreationOptions
+await using var session = await device.CreateHsmAuthSessionAsync();
+ReadOnlyMemory<byte> hostChallenge = await session.GetChallengeAsync("hsm-prod");
+// Your connector exchange: send hostChallenge, receive the HSM challenge and card cryptogram.
+(ReadOnlyMemory<byte> hsmChallenge, ReadOnlyMemory<byte> cardCryptogram) = await ExchangeWithConnectorAsync(hostChallenge);
+byte[] context = new byte[16];
+byte[] credentialPassword = Encoding.UTF8.GetBytes("hsm-password");
+try
 {
-    UserPresencePrompt = userPresencePrompt
-};
-
-await using var session = await yubiKey.CreateHsmAuthSessionAsync(options, cancellationToken);
+    hostChallenge.CopyTo(context);
+    hsmChallenge.CopyTo(context.AsMemory(8));
+    // sessionKeys.SEnc, sessionKeys.SMac, and sessionKeys.SRmac drive the connector session.
+    using var sessionKeys = await session.CalculateSessionKeysSymmetricAsync("hsm-prod", context, credentialPassword, cardCryptogram);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(context);
+    CryptographicOperations.ZeroMemory(credentialPassword);
+}
 ```
 
-A credential with `TouchRequired=true` reports `PolicyRequires`; `false` is silent. A missing
-credential is also silent. An unknown touch value on a found credential, or a failed LIST command,
-reports `PolicyMayRequire` conservatively.
-The context uses `Application="YubiHSM Auth"` and the credential label as `Scope`. If no prompt is
-configured, the calculation does not issue LIST solely for notification.
+`ExchangeWithConnectorAsync` is your code against the YubiHSM connector; the SDK does not implement that handshake.
+`GetChallengeAsync` needs firmware 5.6.0; on older keys use `RandomNumberGenerator.GetBytes(8)`. The asymmetric
+counterpart takes a 130-byte context of EPK-OCE then EPK-SD, the device public key, and a required cryptogram.
 
-Migration: the alpha `HsmAuthSession.OnTouchRequired` and `IHsmAuthSession.OnTouchRequired`
-properties were replaced by `SessionCreationOptions.UserPresencePrompt`. Configure the prompt at
-session creation; there is no obsolete callback adapter.
-
-### Management key and reset
+### Rotate the management key
 
 ```csharp
-int retries = await session.GetManagementKeyRetriesAsync();
-await session.PutManagementKeyAsync(currentManagementKey, newManagementKey);
-
-// Factory reset: deletes ALL credentials and restores the default management key
-await session.ResetAsync();
+await using var session = await device.CreateHsmAuthSessionAsync();
+Console.WriteLine($"Management key retries: {await session.GetManagementKeyRetriesAsync()}");
+byte[] currentManagementKey = new byte[16];
+byte[] newManagementKey = RandomNumberGenerator.GetBytes(16);
+try
+{
+    await session.PutManagementKeyAsync(currentManagementKey, newManagementKey);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(currentManagementKey);
+    CryptographicOperations.ZeroMemory(newManagementKey);
+}
 ```
 
-### Changing a credential password (fw 5.8.0+)
+## User interaction
+
+A credential stored with `touchRequired: true` needs a physical touch during a session-key calculation; no
+operation needs a PIN. Supply an `IUserPresencePrompt` to be notified around the blocking CALCULATE exchange.
 
 ```csharp
-// Authenticated with the current credential password
-await session.ChangeCredentialPasswordAsync(label, currentPassword, newPassword);
-
-// Admin override, authorized by the management key
-await session.ChangeCredentialPasswordAdminAsync(managementKey, label, newPassword);
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
+}
 ```
 
-## PBKDF2 Key Derivation
-
-`PutCredentialDerivedAsync` derives the symmetric key pair from a password:
-
-- Algorithm: PBKDF2-HMAC-SHA256
-- Salt: `"Yubico"` (UTF-8)
-- Iterations: 10,000
-- Output: 32 bytes → K-ENC = `[0..16]`, K-MAC = `[16..32]`
-
-These constants are fixed by the YubiHSM Auth specification and are pinned by a known-answer
-unit test. The derived buffer is zeroed after use.
-
-## Error Handling
-
-| Condition | Result |
-|-----------|--------|
-| Wrong management key | `HsmAuthRetryException` with `RetriesRemaining` |
-| Wrong credential password | `HsmAuthRetryException` with `RetriesRemaining` |
-| Unsupported firmware | Descriptive exception from `EnsureSupports(...)` |
-| Other APDU failures | `ApduException` carrying `SW` and the command header |
-
-`HsmAuthRetryException` derives from `ApduException`, so existing `catch (ApduException)` sites
-keep working.
-
-## Project Structure
-
-```
-Yubico.YubiKit.YubiHsm/
-├── src/
-│   ├── HsmAuthSession.cs          # Session implementation, all APDU flows
-│   ├── IHsmAuthSession.cs         # Public contract
-│   ├── Backend/HsmAuthBackend.cs  # SmartCard select/send transport wrapper
-│   ├── SessionKeys.cs             # Disposable S-ENC / S-MAC / S-RMAC container
-│   ├── HsmAuthAlgorithm.cs        # Algorithm enum + extension properties
-│   ├── HsmAuthCredential.cs       # LIST response record
-│   ├── HsmAuthRetryException.cs   # Typed retry-count exception
-│   └── IYubiKeyExtensions.cs      # CreateHsmAuthSessionAsync()
-├── examples/HsmAuthTool/          # Interactive CLI example
-└── tests/
-    ├── Yubico.YubiKit.YubiHsm.UnitTests/
-    └── Yubico.YubiKit.YubiHsm.IntegrationTests/
+```csharp
+var options = new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() };
+await using var session = await device.CreateHsmAuthSessionAsync(options);
 ```
 
-## Testing Guidance
+`TouchRequired = true` maps to `UserPresenceBasis.PolicyRequires`; `false` and a missing credential are silent;
+an unknown touch value or a failed LIST maps to `PolicyMayRequire`. Without a prompt the calculation does not
+issue LIST just to notify. Pass a `CancellationToken` to abandon a wait.
 
-Run tests with `dotnet toolchain.cs test` — never `dotnet test` directly. Integration tests
-require a physical YubiKey with firmware 5.4.3+ and an allow-listed serial number. See
-[CLAUDE.md](CLAUDE.md) for detailed test infrastructure information.
+## Constraints
 
-## References
+- Requesting a non-SmartCard transport through `SessionCreationOptions { PreferredConnectionType = ... }` throws.
+- One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
+  disposes it with `await using`; a session from `CreateHsmAuthSessionAsync` owns the one it opened.
+- `ResetAsync` (no undo), `DeleteCredentialAsync`, and `PutManagementKeyAsync` change persistent applet state.
+- Firmware gates throw `NotSupportedException`; below 5.7.1 `GetChallengeAsync` silently drops a supplied password.
+- A wrong management key or credential password throws `HsmAuthRetryException` (an `ApduException`) carrying
+  `RetriesRemaining`; a context of the wrong length throws `ArgumentException` before any device I/O.
+- A credential starts at 8 attempts, and the device permanently deletes it once the counter reaches zero.
 
-- **YubiHSM Auth documentation**: https://developers.yubico.com/YubiHSM2/Usage_Guides/YubiHSM_Auth.html
-- **YubiKey documentation**: https://developers.yubico.com/
+## Security notes
+
+- Credential passwords, management keys, and EC private keys cross the API as `ReadOnlyMemory<byte>`, never
+  `string`. The SDK zeroes its padded copies, never yours; use `CryptographicOperations.ZeroMemory` in a `finally`.
+- `SessionKeys` is `IDisposable` and zeroes S-ENC, S-MAC, and S-RMAC on disposal. Always wrap it in `using`.
+- `PutCredentialDerivedAsync` derives K-ENC and K-MAC with PBKDF2-HMAC-SHA256, salt `"Yubico"`, 10,000 iterations.
+- Never log passwords, key material, challenges, or cryptograms. Log labels, algorithms, and status words only.
+
+## Example
+
+The interactive HsmAuthTool sample lives at `src/YubiHsm/examples/HsmAuthTool/`.
+
+```bash
+dotnet run --project src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj
+```
+
+## Related
+
+- [Core](../Core/README.md) - device discovery, SmartCard protocol, and logging configuration.
+- [Security Domain](../SecurityDomain/README.md) - SCP keys for running this session over a secure channel.
+- [User interaction](../../docs/usage/user-interaction.md) and [device discovery](../../docs/usage/device-discovery.md) - cross-module guides.
+- [YubiHSM Auth](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-yubihsm-auth.html) - the applet.
+- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.

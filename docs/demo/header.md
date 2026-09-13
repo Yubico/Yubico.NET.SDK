@@ -12,7 +12,9 @@ style: |
   pre { font-size: 0.80em; line-height: 1.35; }
   table { font-size: 0.84em; }
   blockquote { border-left: 4px solid #1a4d7a; color: #444; font-size: 0.92em; }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; }
+  .cols { columns: 2; column-gap: 26px; }
+  .cols > * { break-inside: avoid; }
+  .cols > *:first-child { margin-top: 0; }
   .cols pre { font-size: 0.74em; }
   img { display: block; margin: 0 auto; }
   section:has(> p > img) h2 { margin-bottom: 8px; }

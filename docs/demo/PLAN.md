@@ -234,6 +234,9 @@ so the second review compares against the amended contract, not the original.
 **This amendment was originally written with false supporting evidence. Corrected below
 after the second review caught it.**
 
+> The 1.3.0 references in this section are the audit trail of that correction, not live
+> pins. The deck cites exactly one Swift ref: `release/1.4.0` @ `c76ae973`.
+
 ### What was claimed, and why it was wrong
 
 The first version of A1 asserted that `main` was 89 commits behind `release/1.3.0`, that

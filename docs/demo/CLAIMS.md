@@ -2,7 +2,9 @@
 
 Every factual claim in the deck, mapped to the source that grounds it.
 
-**Repository:** `Yubico.YubiKit.NET.SDK`, branch `yubikit`, `d04d59aae63981588f6dc047eb0d788b681a8b8d`
+**Repository:** `Yubico.YubiKit.NET.SDK`, branch `yubikit`, `d628ce5f1c999ab79d0f63180b56799237c7ecdb`
+(was `d04d59aae63981588f6dc047eb0d788b681a8b8d` through Round-7; PR #656 landed the unified
+user-presence API and moved the Round-7 touch anchors — see Round-8.)
 
 **V1 predecessor:** `Yubico.NET.SDK`, branch `origin/develop`, `f57aa2d6b8c88c3ff53bafcc73496b07f5a00428`
 
@@ -344,7 +346,7 @@ OATH delta.
 | # | Claim | Kind | Anchor |
 |---|---|---|---|
 | R1 | `origin/main` @ `f5a01653` **does** contain `FIDO/WebAuthn/Client/Client.swift` | peer | `git cat-file -e origin/main:YubiKit/YubiKit/FIDO/WebAuthn/Client/Client.swift` succeeds. Corrects the false A1 evidence. |
-| R2 | `release/1.3.0` is **fully merged** into `origin/main` (0 commits ahead) | peer | `git rev-list --count origin/main..origin/release/1.3.0` = 0 |
+| R2 | *(historical, retained only as the audit trail for the repin)* `release/1.3.0` was fully merged into `origin/main`, 0 commits ahead | peer | `git rev-list --count origin/main..origin/release/1.3.0` = 0. **No deck claim is pinned to 1.3.0** — `release/1.4.0` @ `c76ae973` is the sole Swift reference. |
 | R3 | `release/1.4.0` is **58 commits ahead** of `origin/main` and dated 2026-09-07 | peer | `git rev-list --count origin/main..origin/release/1.4.0` = 58 |
 | R4 | Swift anchors are branch-sensitive — `CTAPSession.getInfo` is `:42` on `origin/main`, `:49` on `release/1.4.0` | peer | both refs read directly |
 | R5 | Non-CPU wall time is 508 ms (AOT) and 458 ms (framework-dependent), ~11 % apart | measured | 528−20 and 628−170 from the measured table |
@@ -505,15 +507,43 @@ known to be IL-expensive.
 | # | Claim | Kind | Anchor |
 |---|---|---|---|
 | IC1 | v1 centralizes secret input, touch notification, and FIDO cancellation in `KeyCollector` / `KeyEntryData` | code | `Yubico.NET.SDK@f57aa2d6:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.cs:104`; `Fido2Session.MakeCredential.cs:168-173`; `KeyEntryData.cs:33,202` |
-| IC2 | v2 uses asynchronous, exactly-sized owned byte buffers for on-demand secret input | code | `src/Core/src/Credentials/ICredentialPrompt.cs:20-67,98-116` |
-| IC3 | v2 PIV and YubiHSM Auth touch callbacks are predictive; PIV cached touch and firmware before 5.3 prevent exact timing | code | `src/Piv/src/PivSession.cs:80-100`; `src/YubiHsm/src/HsmAuthSession.cs:892-933` |
-| IC4 | v2 WebAuthn has no progress stream or touch callback | doc | `src/WebAuthn/CLAUDE.md`, "No Progress Stream Or Interaction Callback" |
-| IC5 | v2 CTAP HID consumes keepalive packets and sends `CTAPHID_CANCEL` when the caller cancels during that wait | code | `src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs:232-270`; constants `CtapConstants.cs:16,18` |
-| IC6 | Once a v2 logical exchange is admitted it drains uncancelled, and overlapping operations are refused, to protect framing and SCP state | code | `src/Core/src/Utilities/ExchangeGuard.cs:17-30,44-63` |
+| IC2 | v2 uses asynchronous, exactly-sized owned byte buffers for on-demand secret input | code | `src/Core/src/Credentials/ICredentialPrompt.cs:98-116` |
+| ~~IC3~~ | ~~v2 PIV and YubiHSM Auth touch callbacks are predictive; PIV cached touch and firmware before 5.3 prevent exact timing~~ | **WITHDRAWN** | **Stale as of PR #656.** The per-applet `OnTouchRequired` callbacks were removed. The uncertainty itself survives, but it is now a named value rather than an implicit property of the callback. Superseded by UP1, UP3, UP7. |
+| ~~IC4~~ | ~~v2 WebAuthn has no progress stream or touch callback~~ | **WITHDRAWN** | **Half stale as of PR #656.** There is still no progress stream, but a FIDO2 session created with `SessionCreationOptions.UserPresencePrompt` now delivers touch notification under `MakeCredentialAsync` and `GetAssertionAsync`. Superseded by UP2, UP6. |
+| IC5 | v2 CTAP HID consumes keepalive packets and sends `CTAPHID_CANCEL` when the caller cancels during that wait | code | `src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs:284-312`; constants `CtapConstants.cs:16,18-19` |
+| IC6 | Once a v2 logical exchange is admitted it drains uncancelled, and overlapping operations are refused, to protect framing and SCP state | code | `src/Core/src/Utilities/ExchangeGuard.cs:36-63,106-135` |
 | IC7 | Swift 1.4 exposes `processing`, `waitingForUserVerification`, `waitingForUser`, and `finished` as an async status stream; waiting states carry cancel closures | peer | `swift@c76ae973:FIDO/WebAuthn/WebAuthn.swift:37-61`; keepalive mapping `CTAP2Backend+MakeCredential.swift:142` |
 | IC8 | Android exposes keepalive status and cancellation through `CommandState` | peer | `yubikit-android@f462685:core/.../CommandState.java:24-65`; `FidoProtocol.java:122,150` |
 | IC9 | Rust and python-fido2 expose exact touch notification from CTAP keepalive plus cancellation and credential interaction hooks | peer | `rust@90940e9:webauthn/client.rs:74-78`; `ctap2/session.rs:90-97`; `python-fido2@5bc9d3a:client/__init__.py:243-265,359-363`; `hid/__init__.py:205-231` |
-| IC10 | PIV key generation is awaitable in .NET v2 and Swift, but synchronous in .NET v1, Android, Rust, and Python | code / peer | v2 `src/Piv/src/PivSession.cs:452-463`; Swift `PIVSession.swift:255-262`; v1 `PivSession.KeyPairs.cs:48,162`; Android `PivSession.java:1098`; Rust `piv.rs:2019`; Python `yubikit/piv.py:1379` |
+| IC10 | PIV key generation is awaitable in .NET v2 and Swift, but synchronous in .NET v1, Android, Rust, and Python | code / peer | v2 `src/Piv/src/PivSession.cs:433`; Swift `PIVSession.swift:255-262`; v1 `PivSession.KeyPairs.cs:48,162`; Android `PivSession.java:1098`; Rust `piv.rs:2019`; Python `yubikit/piv.py:1379` |
 | IC11 | CTAP keepalive distinguishes processing from waiting for user presence, and CTAP HID defines a cancel command | spec | FIDO CTAP 2.3, sections "CTAPHID_KEEPALIVE" and "CTAPHID_CANCEL": `https://fidoalliance.org/specs/fido-v2.3-rd-20251023/fido-client-to-authenticator-protocol-v2.3-rd-20251023.html` |
 | IC12 | User presence and user verification are separate WebAuthn concepts | spec | W3C WebAuthn Level 3: `https://www.w3.org/TR/webauthn-3/#sctn-user-presence` and `#user-verification` |
 | IC13 | Interaction APIs must remain cross-platform and UI-agnostic, must not prescribe an application executor, and every referenced dependency is checked for Native AOT compatibility | code / doc | `src/Core/src/Credentials/ICredentialPrompt.cs:25-35`; `src/Core/src/Native/SdkPlatformInfo.cs:43-53`; `Directory.Build.targets:17-24`; `docs/research/native-aot-readiness.md:181-195` |
+
+---
+
+# Round-8: unified user presence (2026-09-13)
+
+Grounded on `d628ce5f` — PR #656, `feat(applets)!: unify user-presence notifications`.
+
+## The v2 user-presence contract
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| UP1 | v2 replaces the per-applet touch callbacks with one `IUserPresencePrompt`, configured once through `SessionCreationOptions.UserPresencePrompt` and retained for the session lifetime without the SDK taking ownership | code | `src/Core/src/Credentials/IUserPresencePrompt.cs:31-64`; `src/Core/src/Sessions/SessionCreationOptions.cs:27,61,78` |
+| UP2 | Removing PIV and YubiHSM Auth `OnTouchRequired` is a declared breaking change; four public members disappear from each surface | code / doc | `d628ce5f` commit body, "BREAKING CHANGE: PIV and YubiHSM `OnTouchRequired` are removed; configure `SessionCreationOptions.UserPresencePrompt` instead"; `src/Piv/src/PublicAPI.Unshipped.txt` (`IPivSession` and `PivSession` get/set removed); `src/YubiHsm/src/PublicAPI.Unshipped.txt` (same for `IHsmAuthSession` and `HsmAuthSession`); `docs/migration/v1-to-v2-changelog.md` |
+| UP3 | `UserPresenceBasis` grades the evidence as `DeviceWaiting`, `PolicyRequires`, or `PolicyMayRequire`, so the SDK names its uncertainty instead of hiding it | code | `src/Core/src/Credentials/UserPresenceBasis.cs:18,26,32,42` |
+| UP4 | The outcome vocabulary is `Completed` / `Cancelled` / `TimedOut` / `Failed`, and no value asserts that the user touched the device | code | `src/Core/src/Credentials/UserPresenceOutcome.cs:18-30`; `IUserPresencePrompt.cs:19-24` |
+| UP5 | Request and resolution are exactly-once and paired only after the request callback succeeds; an internal handle enforces that across transport and applet layers | code | `src/Core/src/Credentials/UserPresenceNotification.cs:30,39-48,75-92,100-181`; `docs/usage/user-interaction.md`, "Request and resolution contract" |
+| UP6 | Only FIDO HID and OTP HID can report `DeviceWaiting`; the smart-card paths for PIV, OATH, OpenPGP and YubiHSM Auth report policy evidence only | code | `src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs:284-288`; `src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs:211-230`; `src/YubiOtp/src/YubiOtpSession.cs:599-628`; `src/YubiHsm/src/HsmAuthSession.cs:873-905`; `docs/usage/user-interaction.md`, "Certainty and transport behavior" |
+| UP7 | Cached PIV or OpenPGP policy, unavailable or unknown metadata, and a YubiHSM Auth LIST failure degrade to `PolicyMayRequire` rather than guessing | code | `src/Piv/src/PivSession.cs:832-840`; `src/YubiHsm/src/HsmAuthSession.cs:889-905` |
+| UP8 | `UserPresenceContext` compares by reference and its `ToString()` omits `Scope`, so concurrent equal-valued requests cannot be conflated and display context stays out of logs | code | `src/Core/src/Credentials/UserPresenceContext.cs:27-48` |
+| UP9 | Resolution always receives `CancellationToken.None` so cleanup runs after cancellation, and a resolution exception never displaces an in-flight operation exception | code | `src/Core/src/Credentials/UserPresenceNotification.cs:123-144`; `IUserPresencePrompt.cs:50-58` |
+| UP10 | `ConsoleUserPresencePrompt` is the reference terminal implementation: it writes `Touch your YubiKey.` immediately for certain requests and debounces uncertain ones for ~300 ms | code | `src/Cli.Shared/src/Output/ConsoleUserPresencePrompt.cs:20-23,33,52,79,106` |
+| UP11 | WebAuthn still has no progress stream; touch notification comes from the FIDO2 session and `WebAuthnClientOptions` does not duplicate it | doc | `src/WebAuthn/CLAUDE.md:215-218,390-391` |
+| UP12 | Peer SDKs surface touch only on the FIDO path — PIV exposes touch as policy, never as a notification, in Android, Rust and Swift, and ykman has no PIV touch callback | peer | `yubikit-android@f462685:PivSession.java:84-90,169,185`; `rust@90940e9:crates/yubikit/src/piv.rs:597-612`; `swift@c76ae973:YubiKit/YubiKit/PIV/PIVDataTypes.swift:22-32` (`TouchPolicy` enum) and `PIV/PIVSession.swift:246-267,541-559` (`touchPolicy:` parameter, `requiresTouch: Bool`); `yubikey-manager:yubikit/piv.py` (no touch callback) |
+| UP13 | Swift's interaction signal is structurally FIDO-only: every file containing `StatusStream` at `c76ae973` lives under `YubiKit/YubiKit/FIDO/`, so `.waitingForUser` cannot reach a PIV, OATH or SecurityDomain session | peer | `git grep -l StatusStream c76ae973 -- YubiKit/YubiKit` returns only `FIDO/**` paths plus `BackwardsCompatibility.swift`; stream definition `YubiKit/YubiKit/FIDO/StatusStream.swift`, states `FIDO/WebAuthn/WebAuthn.swift:37-61` |
+
+> **Swift pin:** every claim above was re-read against `release/1.4.0` @ `c76ae973`, the ref
+> this ledger declares. Nothing in Round-8 rests on `release/1.3.0`.
+

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
@@ -425,14 +426,17 @@ public sealed class OpenPgpSessionWireTests
         Assert.Empty(prompt.Resolved);
     }
 
-    [Fact]
-    public async Task SignAsync_WhenResolutionFailsAfterSuccess_PropagatesResolutionException()
+    [Theory]
+    [InlineData(SignatureOperation.Sign)]
+    [InlineData(SignatureOperation.Authenticate)]
+    public async Task SignatureOperation_WhenResolutionFailsAfterSuccess_PropagatesResolutionException(
+        SignatureOperation operation)
     {
         var expected = new InvalidOperationException("resolution failed");
         var connection = CreateInitializedConnectionWithUifs(
             Uif.On,
             dec: null,
-            aut: null,
+            aut: Uif.On,
             att: null,
             CryptoResponse());
         var prompt = new RecordingUserPresencePrompt(connection, resolutionException: expected);
@@ -441,12 +445,84 @@ public sealed class OpenPgpSessionWireTests
             new SessionCreationOptions { UserPresencePrompt = prompt },
             TestContext.Current.CancellationToken);
 
-        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() => session.SignAsync(
-            "message"u8.ToArray(),
-            HashAlgorithmName.SHA256,
-            TestContext.Current.CancellationToken));
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            RunSignatureOperationAsync(session, operation, TestContext.Current.CancellationToken));
 
         Assert.Same(expected, actual);
+        Assert.Equal(UserPresenceOutcome.Completed, Assert.Single(prompt.Resolved).Outcome);
+    }
+
+    [Theory]
+    [InlineData(SignatureEncoding.RsaRaw)]
+    [InlineData(SignatureEncoding.EdDsaRaw)]
+    [InlineData(SignatureEncoding.EcdsaDer)]
+    public async Task FormatResolveAndTransferSignatureAsync_OnSuccess_PreservesTransferredBuffer(
+        SignatureEncoding encoding)
+    {
+        byte[] ownedRawResponse = [0x01, 0x02, 0x03, 0x04, 0x90, 0x00];
+        byte[] originalRawResponse = ownedRawResponse.ToArray();
+
+        ReadOnlyMemory<byte> signature = await OpenPgpSession.FormatResolveAndTransferSignatureAsync(
+            CreateSignatureAttributes(KeyRef.Sig, encoding),
+            ownedRawResponse,
+            () => ValueTask.CompletedTask);
+
+        byte[] expected = encoding is SignatureEncoding.EcdsaDer
+            ? [0x30, 0x08, 0x02, 0x02, 0x01, 0x02, 0x02, 0x02, 0x03, 0x04]
+            : [0x01, 0x02, 0x03, 0x04];
+        Assert.Equal(expected, signature.ToArray());
+        Assert.True(MemoryMarshal.TryGetArray(signature, out ArraySegment<byte> segment));
+        byte[] backingArray = Assert.IsType<byte[]>(segment.Array);
+        if (encoding is SignatureEncoding.EcdsaDer)
+        {
+            Assert.NotSame(ownedRawResponse, backingArray);
+            Assert.All(ownedRawResponse, value => Assert.Equal(0, value));
+        }
+        else
+        {
+            Assert.Same(ownedRawResponse, backingArray);
+            Assert.Equal(originalRawResponse, ownedRawResponse);
+        }
+    }
+
+    [Theory]
+    [InlineData(SignatureEncoding.RsaRaw)]
+    [InlineData(SignatureEncoding.EdDsaRaw)]
+    [InlineData(SignatureEncoding.EcdsaDer)]
+    public async Task FormatResolveAndTransferSignatureAsync_WhenResolutionFails_ZeroesOwnedRawResponse(
+        SignatureEncoding encoding)
+    {
+        byte[] ownedRawResponse = [0x01, 0x02, 0x03, 0x04, 0x90, 0x00];
+        var expected = new InvalidOperationException("resolution failed");
+
+        InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            OpenPgpSession.FormatResolveAndTransferSignatureAsync(
+                CreateSignatureAttributes(KeyRef.Sig, encoding),
+                ownedRawResponse,
+                () => ValueTask.FromException(expected)));
+
+        Assert.Same(expected, actual);
+        Assert.All(ownedRawResponse, value => Assert.Equal(0, value));
+    }
+
+    [Fact]
+    public async Task FormatResolveAndTransferSignatureAsync_WhenFormattingFails_ZeroesOwnedRawResponseWithoutResolving()
+    {
+        byte[] ownedRawResponse = [0x90, 0x00];
+        var resolved = false;
+
+        _ = await Assert.ThrowsAsync<IndexOutOfRangeException>(() =>
+            OpenPgpSession.FormatResolveAndTransferSignatureAsync(
+                EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1),
+                ownedRawResponse,
+                () =>
+                {
+                    resolved = true;
+                    return ValueTask.CompletedTask;
+                }));
+
+        Assert.False(resolved);
+        Assert.All(ownedRawResponse, value => Assert.Equal(0, value));
     }
 
     [Fact]
@@ -617,6 +693,32 @@ public sealed class OpenPgpSessionWireTests
             .. trailingResponses
         ]);
 
+    private static Task<ReadOnlyMemory<byte>> RunSignatureOperationAsync(
+        OpenPgpSession session,
+        SignatureOperation operation,
+        CancellationToken cancellationToken) =>
+        operation switch
+        {
+            SignatureOperation.Sign => session.SignAsync(
+                "message"u8.ToArray(),
+                HashAlgorithmName.SHA256,
+                cancellationToken),
+            SignatureOperation.Authenticate => session.AuthenticateAsync(
+                "message"u8.ToArray(),
+                HashAlgorithmName.SHA256,
+                cancellationToken),
+            _ => throw new ArgumentOutOfRangeException(nameof(operation))
+        };
+
+    private static AlgorithmAttributes CreateSignatureAttributes(KeyRef keyRef, SignatureEncoding encoding) =>
+        encoding switch
+        {
+            SignatureEncoding.RsaRaw => RsaAttributes.Create(RsaSize.Rsa2048),
+            SignatureEncoding.EdDsaRaw => EcAttributes.Create(keyRef, CurveOid.Ed25519),
+            SignatureEncoding.EcdsaDer => EcAttributes.Create(keyRef, CurveOid.Secp256R1),
+            _ => throw new ArgumentOutOfRangeException(nameof(encoding))
+        };
+
     private static byte[] LastCommand(RecordingSmartCardConnection connection) =>
         connection.TransmittedCommands[^1];
 
@@ -629,6 +731,19 @@ public sealed class OpenPgpSessionWireTests
         Generate,
         Import,
         Delete
+    }
+
+    public enum SignatureOperation
+    {
+        Sign,
+        Authenticate
+    }
+
+    public enum SignatureEncoding
+    {
+        RsaRaw,
+        EdDsaRaw,
+        EcdsaDer
     }
 
     private sealed class ThrowingKdf(Exception exception) : Kdf

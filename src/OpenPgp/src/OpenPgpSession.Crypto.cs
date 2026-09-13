@@ -47,7 +47,11 @@ public sealed partial class OpenPgpSession
                     async token =>
                     {
                         var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
-                        return FormatSignResponse(sigAttrs, response.Data);
+                        return await FormatResolveAndTransferSignatureAsync(
+                                sigAttrs,
+                                MemoryMarshal.AsMemory(response.RawData),
+                                () => userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed))
+                            .ConfigureAwait(false);
                     },
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -125,7 +129,11 @@ public sealed partial class OpenPgpSession
                     async token =>
                     {
                         var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
-                        return FormatSignResponse(autAttrs, response.Data);
+                        return await FormatResolveAndTransferSignatureAsync(
+                                autAttrs,
+                                MemoryMarshal.AsMemory(response.RawData),
+                                () => userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed))
+                            .ConfigureAwait(false);
                     },
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -179,21 +187,60 @@ public sealed partial class OpenPgpSession
     }
 
     /// <summary>
-    ///     Formats the response from Sign and Authenticate operations.
-    ///     EC signatures are DER-encoded from the raw (r || s) concatenation.
+    ///     Formats an owned Sign or Authenticate response, resolves completion, and transfers the signature.
+    ///     EC signatures are DER-encoded from the raw (r || s) concatenation; abandoned buffers are cleared.
     /// </summary>
-    private static ReadOnlyMemory<byte> FormatSignResponse(
+    internal static async Task<ReadOnlyMemory<byte>> FormatResolveAndTransferSignatureAsync(
         AlgorithmAttributes attrs,
-        ReadOnlyMemory<byte> response)
+        Memory<byte> ownedRawResponse,
+        Func<ValueTask> resolveCompleted)
     {
-        if (attrs is not EcAttributes || attrs.AlgorithmId == EcAttributes.EddsaAlgorithmId)
-        {
-            // RSA and EdDSA: raw signature bytes
-            return response;
-        }
+        ArgumentNullException.ThrowIfNull(attrs);
+        ArgumentNullException.ThrowIfNull(resolveCompleted);
 
-        // ECDSA: card returns r || s concatenated, encode as DER
-        return EncodeDerSignature(response.Span);
+        byte[]? formattedSignature = null;
+        bool rawResponseTransferred = false;
+        try
+        {
+            ReadOnlyMemory<byte> rawSignature = ownedRawResponse[..^2];
+            ReadOnlyMemory<byte> signature;
+            if (attrs is not EcAttributes || attrs.AlgorithmId == EcAttributes.EddsaAlgorithmId)
+            {
+                // RSA and EdDSA: raw signature bytes
+                signature = rawSignature;
+            }
+            else
+            {
+                // ECDSA: card returns r || s concatenated, encode as DER
+                formattedSignature = EncodeDerSignature(rawSignature.Span);
+                signature = formattedSignature;
+            }
+
+            await resolveCompleted().ConfigureAwait(false);
+
+            if (formattedSignature is null)
+            {
+                rawResponseTransferred = true;
+            }
+            else
+            {
+                formattedSignature = null;
+            }
+
+            return signature;
+        }
+        finally
+        {
+            if (formattedSignature is not null)
+            {
+                CryptographicOperations.ZeroMemory(formattedSignature);
+            }
+
+            if (!rawResponseTransferred)
+            {
+                CryptographicOperations.ZeroMemory(ownedRawResponse.Span);
+            }
+        }
     }
 
     /// <summary>
@@ -244,36 +291,48 @@ public sealed partial class OpenPgpSession
         var s = rawSignature[half..];
 
         var rDer = EncodeAsn1Integer(r);
-        var sDer = EncodeAsn1Integer(s);
-
-        // SEQUENCE { r INTEGER, s INTEGER }
-        var seqLength = rDer.Length + sDer.Length;
-
-        byte[] result;
-        int contentOffset;
-
-        if (seqLength >= 128)
+        byte[]? sDer = null;
+        try
         {
-            // Long-form DER length encoding: 0x30 0x81 <length> <content>
-            result = new byte[3 + seqLength];
-            result[0] = 0x30;
-            result[1] = 0x81;
-            result[2] = (byte)seqLength;
-            contentOffset = 3;
+            sDer = EncodeAsn1Integer(s);
+
+            // SEQUENCE { r INTEGER, s INTEGER }
+            var seqLength = rDer.Length + sDer.Length;
+
+            byte[] result;
+            int contentOffset;
+
+            if (seqLength >= 128)
+            {
+                // Long-form DER length encoding: 0x30 0x81 <length> <content>
+                result = new byte[3 + seqLength];
+                result[0] = 0x30;
+                result[1] = 0x81;
+                result[2] = (byte)seqLength;
+                contentOffset = 3;
+            }
+            else
+            {
+                // Short-form DER length encoding: 0x30 <length> <content>
+                result = new byte[2 + seqLength];
+                result[0] = 0x30;
+                result[1] = (byte)seqLength;
+                contentOffset = 2;
+            }
+
+            rDer.CopyTo(result.AsSpan(contentOffset));
+            sDer.CopyTo(result.AsSpan(contentOffset + rDer.Length));
+
+            return result;
         }
-        else
+        finally
         {
-            // Short-form DER length encoding: 0x30 <length> <content>
-            result = new byte[2 + seqLength];
-            result[0] = 0x30;
-            result[1] = (byte)seqLength;
-            contentOffset = 2;
+            CryptographicOperations.ZeroMemory(rDer);
+            if (sDer is not null)
+            {
+                CryptographicOperations.ZeroMemory(sDer);
+            }
         }
-
-        rDer.CopyTo(result.AsSpan(contentOffset));
-        sDer.CopyTo(result.AsSpan(contentOffset + rDer.Length));
-
-        return result;
     }
 
     /// <summary>

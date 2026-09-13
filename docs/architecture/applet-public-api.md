@@ -7,9 +7,11 @@ Each applet exposes a sealed session, a complete SDK-implemented interface for t
 entry point that borrows an existing connection. Both factories accept `SessionCreationOptions?` followed by a
 defaulted cancellation token. Use `await using` for every returned session.
 
-`SessionCreationOptions` is consumed during creation and is not retained. It groups only cross-cutting creation
-concerns: protocol configuration, borrowed secure-channel parameters, preferred connection type, and the
-effective firmware-version override. A direct factory treats `PreferredConnectionType` as an
+`SessionCreationOptions` is consumed during creation and is not retained. Factories snapshot its values. It groups
+only cross-cutting creation concerns: protocol configuration, borrowed secure-channel parameters, preferred
+connection type, the effective firmware-version override, and a caller-owned user-presence prompt. The prompt
+reference is the sole retained-service exception: a session retains it for the session lifetime without owning or
+disposing it. A direct factory treats `PreferredConnectionType` as an
 assertion. A device factory uses it for selection. Supplying secure-channel parameters without a preference
 continues to force SmartCard where that behavior already existed.
 

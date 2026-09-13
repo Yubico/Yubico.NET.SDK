@@ -44,8 +44,9 @@ public static class PinManagementMenu
             return;
         }
 
-        await using var session = await selection.Device.CreatePivSessionAsync(cancellationToken: cancellationToken);
-        OutputHelpers.SetupTouchNotification(session);
+        await using var session = await selection.Device.CreatePivSessionAsync(
+            OutputHelpers.UserPresenceOptions,
+            cancellationToken);
 
         switch (choice)
         {

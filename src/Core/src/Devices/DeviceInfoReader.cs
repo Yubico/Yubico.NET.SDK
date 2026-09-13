@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -159,7 +160,11 @@ internal static class DeviceInfoReader
         CancellationToken cancellationToken)
     {
         var pagePayload = new byte[] { page };
-        var response = await protocol.SendVendorCommandAsync(CtapReadConfig, pagePayload, cancellationToken)
+        var response = await protocol.SendVendorCommandAsync(
+                CtapReadConfig,
+                pagePayload,
+                UserPresenceNotification.None,
+                cancellationToken)
             .ConfigureAwait(false);
         return response.ToArray();
     }

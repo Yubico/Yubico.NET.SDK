@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
@@ -44,6 +45,8 @@ namespace Yubico.YubiKit.Fido2;
 /// </remarks>
 public sealed class FidoSession : ApplicationSession, IFidoSession
 {
+    private const string UserPresenceApplication = "FIDO2";
+
     /// <summary>
     /// Feature flag for FIDO2 support (requires firmware 5.0+).
     /// </summary>
@@ -86,8 +89,11 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
 
     private IFidoBackend _backend = null!;
 
-    private FidoSession(IConnection connection, ScpKeyParameters? scpKeyParams = null)
-        : base(connection)
+    private FidoSession(
+        IConnection connection,
+        ScpKeyParameters? scpKeyParams = null,
+        IUserPresencePrompt? userPresencePrompt = null)
+        : base(connection, userPresencePrompt)
     {
         _scpKeyParams = scpKeyParams;
         _logger = Logger;
@@ -112,12 +118,15 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         var configuration = options?.ProtocolConfiguration;
         var scpKeyParams = options?.ScpKeyParameters;
         var firmwareVersionOverride = options?.FirmwareVersionOverride;
+        var userPresencePrompt = options?.UserPresencePrompt;
 
         ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(connection, () => new FidoSession(connection, scpKeyParams));
+        var session = Construct(
+            connection,
+            () => new FidoSession(connection, scpKeyParams, userPresencePrompt));
         try
         {
             await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
@@ -185,14 +194,34 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
     public async Task SelectionAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        await SendCborAsync(CtapCommand.Selection, null, cancellationToken).ConfigureAwait(false);
+        await SendCborAsync(
+                CtapCommand.Selection,
+                CreateUserPresenceNotification(ConnectionType is ConnectionType.HidFido
+                    ? new UserPresenceContext
+                    {
+                        Basis = UserPresenceBasis.PolicyMayRequire,
+                        Application = UserPresenceApplication
+                    }
+                    : null),
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        await SendCborAsync(CtapCommand.Reset, null, cancellationToken).ConfigureAwait(false);
+        await SendCborAsync(
+                CtapCommand.Reset,
+                CreateUserPresenceNotification(ConnectionType is ConnectionType.HidFido
+                    ? new UserPresenceContext
+                    {
+                        Basis = UserPresenceBasis.PolicyMayRequire,
+                        Application = UserPresenceApplication
+                    }
+                    : null),
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
         _logger.LogInformation("FIDO application reset completed");
     }
 
@@ -236,7 +265,17 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
 
             _logger.LogDebug("MakeCredential for RP: {RpId}", rp.Id);
 
-            response = await _backend.SendCborAsync(request, cancellationToken)
+            UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+                options?.UserPresence is false
+                    ? null
+                    : new UserPresenceContext
+                    {
+                        Basis = UserPresenceBasis.PolicyRequires,
+                        Application = UserPresenceApplication,
+                        Scope = rp.Id
+                    });
+
+            response = await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -285,7 +324,17 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
 
             _logger.LogDebug("GetAssertion for RP: {RpId}", rpId);
 
-            response = await _backend.SendCborAsync(request, cancellationToken)
+            UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+                options?.UserPresence is false
+                    ? null
+                    : new UserPresenceContext
+                    {
+                        Basis = UserPresenceBasis.PolicyRequires,
+                        Application = UserPresenceApplication,
+                        Scope = rpId
+                    });
+
+            response = await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -313,7 +362,10 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
 
         var request = CtapRequestBuilder.Create(CtapCommand.GetNextAssertion).Build();
 
-        var response = await _backend.SendCborAsync(request, cancellationToken)
+        var response = await _backend.SendCborAsync(
+                request,
+                UserPresenceNotification.None,
+                cancellationToken)
             .ConfigureAwait(false);
 
         return GetAssertionResponse.Decode(response);
@@ -323,12 +375,14 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
     /// Sends a CTAP CBOR command to the authenticator.
     /// </summary>
     /// <param name="command">The CTAP command byte.</param>
+    /// <param name="userPresenceNotification">The non-null notification handle for this SDK operation.</param>
     /// <param name="payload">Optional CBOR-encoded payload.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The CBOR-encoded response data.</returns>
     internal async Task<ReadOnlyMemory<byte>> SendCborAsync(
         byte command,
-        ReadOnlyMemory<byte>? payload,
+        UserPresenceNotification userPresenceNotification,
+        ReadOnlyMemory<byte>? payload = null,
         CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
@@ -346,7 +400,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
             request = new byte[] { command };
         }
 
-        return await _backend.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
+        return await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -355,7 +409,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        return await _backend.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
+        return await _backend.SendCborAsync(request, UserPresenceNotification.None, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static async Task<AuthenticatorInfo> GetInfoCoreAsync(
@@ -363,7 +418,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         CancellationToken cancellationToken)
     {
         var request = CtapRequestBuilder.Create(CtapCommand.GetInfo).Build();
-        var response = await backend.SendCborAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await backend.SendCborAsync(request, UserPresenceNotification.None, cancellationToken)
+            .ConfigureAwait(false);
         return AuthenticatorInfo.Decode(response);
     }
 
@@ -378,7 +434,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         }
     }
 
-    private static IFidoBackend CreateBackend(IProtocol protocol) =>
+    private IFidoBackend CreateBackend(IProtocol protocol) =>
         protocol switch
         {
             ISmartCardProtocol smartCard => new SmartCardBackend(smartCard),

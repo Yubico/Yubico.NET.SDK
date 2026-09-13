@@ -62,6 +62,7 @@ public sealed partial class OpenPgpSession
 
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
+        _updatedUifs.Clear();
         _kdf = null;
 
         _logger.LogInformation("OpenPGP factory reset complete");

@@ -71,10 +71,12 @@
         <None Include="$(MSBuildThisFileDirectory)PACKAGE_README.md" Pack="true" PackagePath="\" Visible="false"/>
     </ItemGroup>
 
-    <!-- Source Link Package (for all projects) -->
-    <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
-    </ItemGroup>
+    <!-- Source Link ships in the .NET SDK (8+) and is enabled by default for GitHub-hosted
+         repositories, so no PackageReference is needed. Referencing Microsoft.SourceLink.GitHub
+         explicitly would override the SDK's copy and drag in the vulnerable
+         Microsoft.Build.Tasks.Git 8.0.0 (CVE-2026-62900), which has no patched 8.0.x release.
+         The Source Link settings above (PublishRepositoryUrl, EmbedUntrackedSources) are read by
+         the SDK's built-in targets. -->
 
     <!-- Determine if this is a test project -->
     <PropertyGroup>

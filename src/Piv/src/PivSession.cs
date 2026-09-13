@@ -17,6 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
@@ -74,32 +75,6 @@ public sealed class PivSession : ApplicationSession, IPivSession
     public bool IsManagementKeyAuthenticated => !IsDisposalStarted && Volatile.Read(ref _isAuthenticated);
 
     /// <summary>
-    /// Gets or sets the callback invoked when a YubiKey operation may require physical touch.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Set this property to receive notifications before operations that may require touch.
-    /// The callback will be invoked for keys with <see cref="PivTouchPolicy.Always"/> or
-    /// <see cref="PivTouchPolicy.Cached"/> touch policies.
-    /// </para>
-    /// <para>
-    /// For <see cref="PivTouchPolicy.Cached"/>, the callback fires conservatively because
-    /// the 15-second cache expiry timing cannot be determined from the API.
-    /// </para>
-    /// <para>
-    /// On firmware older than 5.3 (no metadata support), the callback fires conservatively
-    /// for all cryptographic operations as the touch policy cannot be queried.
-    /// </para>
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// session.OnTouchRequired = () => Console.WriteLine("Touch your YubiKey now...");
-    /// await session.SignOrDecryptAsync(PivSlot.Authentication, data);
-    /// </code>
-    /// </example>
-    public Action? OnTouchRequired { get; set; }
-
-    /// <summary>
     /// Initializes a new PivSession with the specified connection.
     /// </summary>
     /// <remarks>
@@ -112,8 +87,12 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// </remarks>
     /// <param name="connection">The connection to use for PIV operations.</param>
     /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
-    internal PivSession(IConnection connection, ScpKeyParameters? scpKeyParams)
-        : base(connection)
+    /// <param name="userPresencePrompt">Optional user-presence notification service.</param>
+    internal PivSession(
+        IConnection connection,
+        ScpKeyParameters? scpKeyParams,
+        IUserPresencePrompt? userPresencePrompt = null)
+        : base(connection, userPresencePrompt)
     {
         _scpKeyParams = scpKeyParams;
     }
@@ -142,7 +121,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(connection, () => new PivSession(connection, scpKeyParams));
+        var session = Construct(
+            connection,
+            () => new PivSession(connection, scpKeyParams, options?.UserPresencePrompt));
         try
         {
             await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
@@ -510,8 +491,14 @@ public sealed class PivSession : ApplicationSession, IPivSession
     {
         EnsureBackend();
 
-        await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
-        return await PivCryptographicOperations.SignOrDecryptAsync(_backend, Logger, slot, algorithm, data, cancellationToken)
+        UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+            await GetUserPresenceContextAsync(slot, cancellationToken).ConfigureAwait(false));
+        return await SignOrDecryptWithUserPresenceAsync(
+                slot,
+                algorithm,
+                data,
+                userPresenceNotification,
+                cancellationToken)
             .ConfigureAwait(false);
     }
 #pragma warning restore RS0026
@@ -545,7 +532,15 @@ public sealed class PivSession : ApplicationSession, IPivSession
         var slotMetadata = metadata.Value;
         Logger.LogDebug("PIV: Auto-detected algorithm {Algorithm} for slot 0x{Slot:X2}", slotMetadata.Algorithm, (byte)slot);
 
-        return await SignOrDecryptAsync(slot, slotMetadata.Algorithm, data, cancellationToken).ConfigureAwait(false);
+        UserPresenceNotification userPresenceNotification =
+            CreateUserPresenceNotification(CreateUserPresenceContext(slot, slotMetadata));
+        return await SignOrDecryptWithUserPresenceAsync(
+                slot,
+                slotMetadata.Algorithm,
+                data,
+                userPresenceNotification,
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 #pragma warning restore RS0026
 
@@ -557,15 +552,22 @@ public sealed class PivSession : ApplicationSession, IPivSession
     {
         EnsureBackend();
 
-        return await PivCryptographicOperations.DecryptAsync(
-            _backend,
-            Logger,
-            GetSlotMetadataAsync,
-            NotifyTouchIfRequiredAsync,
-            slot,
-            cipherText,
-            padding,
-            cancellationToken)
+        var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
+        UserPresenceNotification userPresenceNotification =
+            CreateUserPresenceNotification(CreateUserPresenceContext(slot, metadata));
+
+        return await RunWithUserPresenceResolutionAsync(
+                userPresenceNotification,
+                token => PivCryptographicOperations.DecryptAsync(
+                    _backend,
+                    Logger,
+                    metadata,
+                    slot,
+                    cipherText,
+                    padding,
+                    userPresenceNotification,
+                    token),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -576,8 +578,18 @@ public sealed class PivSession : ApplicationSession, IPivSession
     {
         EnsureBackend();
 
-        await NotifyTouchIfRequiredAsync(slot, cancellationToken).ConfigureAwait(false);
-        return await PivCryptographicOperations.CalculateSecretAsync(_backend, Logger, slot, peerPublicKey, cancellationToken)
+        UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+            await GetUserPresenceContextAsync(slot, cancellationToken).ConfigureAwait(false));
+        return await RunWithUserPresenceResolutionAsync(
+                userPresenceNotification,
+                token => PivCryptographicOperations.CalculateSecretAsync(
+                    _backend,
+                    Logger,
+                    slot,
+                    peerPublicKey,
+                    userPresenceNotification,
+                    token),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -795,62 +807,75 @@ public sealed class PivSession : ApplicationSession, IPivSession
         await PivBioProtocol.VerifyTemporaryPinAsync(_backend, Logger, temporaryPin, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Notifies the user if touch may be required for the operation on the specified slot.
-    /// </summary>
-    /// <param name="slot">The slot to check for touch policy.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <remarks>
-    /// <para>
-    /// This method queries slot metadata (if supported) to determine the touch policy.
-    /// For <see cref="PivTouchPolicy.Always"/> or <see cref="PivTouchPolicy.Cached"/>,
-    /// the callback is invoked.
-    /// </para>
-    /// <para>
-    /// On older firmware (&lt; 5.3), metadata is not available and the callback is invoked
-    /// conservatively for all operations.
-    /// </para>
-    /// </remarks>
-    private async Task NotifyTouchIfRequiredAsync(PivSlot slot, CancellationToken cancellationToken)
+    private Task<ReadOnlyMemory<byte>> SignOrDecryptWithUserPresenceAsync(
+        PivSlot slot,
+        PivAlgorithm algorithm,
+        ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken)
     {
-        // Short-circuit if no callback registered
-        if (OnTouchRequired is null)
-        {
-            return;
-        }
+        EnsureBackend();
 
-        // Try to query slot metadata for touch policy
-        if (IsSupported(PivFeatures.Metadata))
-        {
-            try
-            {
-                var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
-                if (metadata is null)
-                {
-                    // Slot is empty - no touch needed
-                    return;
-                }
-
-                var touchPolicy = metadata.Value.TouchPolicy;
-                if (touchPolicy is PivTouchPolicy.Always or PivTouchPolicy.Cached)
-                {
-                    Logger.LogDebug("PIV: Touch may be required (policy: {Policy})", touchPolicy);
-                    OnTouchRequired.Invoke();
-                }
-
-                return;
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                Logger.LogDebug(ex, "PIV: Failed to query slot metadata for touch policy, notifying conservatively");
-            }
-        }
-
-        // Fallback: On old firmware or metadata query failure, notify conservatively
-        Logger.LogDebug("PIV: Notifying touch conservatively (metadata unavailable)");
-        OnTouchRequired.Invoke();
+        return RunWithUserPresenceResolutionAsync(
+            userPresenceNotification,
+            token => PivCryptographicOperations.SignOrDecryptAsync(
+                _backend,
+                Logger,
+                slot,
+                algorithm,
+                data,
+                userPresenceNotification,
+                token),
+            cancellationToken);
     }
 
+    private async Task<UserPresenceContext?> GetUserPresenceContextAsync(
+        PivSlot slot,
+        CancellationToken cancellationToken)
+    {
+        if (!IsUserPresenceNotificationEnabled)
+            return null;
+
+        if (!IsSupported(PivFeatures.Metadata))
+            return CreateUserPresenceContext(slot, UserPresenceBasis.PolicyMayRequire);
+
+        try
+        {
+            var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
+            return CreateUserPresenceContext(slot, metadata);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Logger.LogDebug(ex, "PIV: Failed to query slot metadata for touch policy, notifying conservatively");
+            return CreateUserPresenceContext(slot, UserPresenceBasis.PolicyMayRequire);
+        }
+    }
+
+    private static UserPresenceContext? CreateUserPresenceContext(
+        PivSlot slot,
+        PivSlotMetadata? metadata)
+    {
+        if (metadata is null)
+            return null;
+
+        UserPresenceBasis? basis = metadata.Value.TouchPolicy switch
+        {
+            PivTouchPolicy.Always => UserPresenceBasis.PolicyRequires,
+            PivTouchPolicy.Cached => UserPresenceBasis.PolicyMayRequire,
+            PivTouchPolicy.Never or PivTouchPolicy.Default => null,
+            _ => UserPresenceBasis.PolicyMayRequire
+        };
+
+        return basis is { } value ? CreateUserPresenceContext(slot, value) : null;
+    }
+
+    private static UserPresenceContext CreateUserPresenceContext(PivSlot slot, UserPresenceBasis basis) =>
+        new()
+        {
+            Basis = basis,
+            Application = "PIV",
+            Scope = slot.ToString()
+        };
 
     private void EnsureInitialized()
     {

@@ -14,6 +14,7 @@
 
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
+using System.Reflection;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 public class SessionKeysTests
@@ -67,15 +68,15 @@ public class SessionKeysTests
 
         var keys = SessionKeys.Parse(response);
 
-        // Capture references to the internal arrays via Span before disposal
-        var sEncCopy = keys.SEnc.ToArray();
-        var sMacCopy = keys.SMac.ToArray();
-        var sRmacCopy = keys.SRmac.ToArray();
+        // Capture the arrays owned by the parsed result so disposal zeroing is directly observable.
+        byte[] sEnc = GetOwnedKeyBuffer(keys, "_sEnc");
+        byte[] sMac = GetOwnedKeyBuffer(keys, "_sMac");
+        byte[] sRmac = GetOwnedKeyBuffer(keys, "_sRmac");
 
         // Verify keys are non-zero before disposal
-        Assert.Contains(sEncCopy, b => b != 0);
-        Assert.Contains(sMacCopy, b => b != 0);
-        Assert.Contains(sRmacCopy, b => b != 0);
+        Assert.Contains(sEnc, b => b != 0);
+        Assert.Contains(sMac, b => b != 0);
+        Assert.Contains(sRmac, b => b != 0);
 
         // Act
         keys.Dispose();
@@ -84,6 +85,9 @@ public class SessionKeysTests
         Assert.Throws<ObjectDisposedException>(() => _ = keys.SEnc);
         Assert.Throws<ObjectDisposedException>(() => _ = keys.SMac);
         Assert.Throws<ObjectDisposedException>(() => _ = keys.SRmac);
+        Assert.All(sEnc, b => Assert.Equal(0, b));
+        Assert.All(sMac, b => Assert.Equal(0, b));
+        Assert.All(sRmac, b => Assert.Equal(0, b));
     }
 
     [Fact]
@@ -110,4 +114,9 @@ public class SessionKeysTests
 
         Assert.True(response.RawData.Span.ToArray().All(static b => b == 0));
     }
+
+    private static byte[] GetOwnedKeyBuffer(SessionKeys keys, string fieldName) =>
+        Assert.IsType<byte[]>(typeof(SessionKeys)
+            .GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(keys));
 }

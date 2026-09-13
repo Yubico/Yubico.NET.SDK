@@ -35,14 +35,37 @@ public static class TlvHelper
     {
         var tlvs = new List<Tlv>();
         var buffer = tlvData;
-        while (!buffer.IsEmpty)
+        try
         {
-            // Parse and advance the buffer to avoid infinite loop
-            var (tag, _, value) = Tlv.ParseData(ref buffer);
-            tlvs.Add(new Tlv(tag, value));
-        }
+            while (!buffer.IsEmpty)
+            {
+                // Parse and advance the buffer to avoid infinite loop
+                var (tag, _, value) = Tlv.ParseData(ref buffer);
+                Tlv? tlv = null;
+                try
+                {
+                    tlv = new Tlv(tag, value);
+                    tlvs.Add(tlv);
+                    tlv = null;
+                }
+                finally
+                {
+                    tlv?.Dispose();
+                    CryptographicOperations.ZeroMemory(value);
+                }
+            }
 
-        return new DisposableTlvList(tlvs);
+            return new DisposableTlvList(tlvs);
+        }
+        catch
+        {
+            foreach (var tlv in tlvs)
+            {
+                tlv.Dispose();
+            }
+
+            throw;
+        }
     }
 
     public static DisposableTlvList DecodeList(ReadOnlyMemory<byte> tlvData) => DecodeList(tlvData.Span);

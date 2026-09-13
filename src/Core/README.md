@@ -70,6 +70,13 @@ single-interface devices; on a composite device it throws rather than guessing a
 extensions (e.g. `CreateManagementSessionAsync`) select a transport via a documented default order plus an
 optional `preferredConnection` override — see [Physical Device Model](../../docs/architecture/physical-device-model.md).
 
+Applet session factories also accept `SessionCreationOptions.UserPresencePrompt`, the shared notification
+contract for required or possible touch. The session retains the caller-owned prompt without disposing it;
+internally, each operation uses one lifecycle handle so transport-observed requests and applet-classified
+terminal outcomes cannot produce duplicate callbacks. Raw and management paths remain silent unless their
+public contract says otherwise. See [User interaction](../../docs/usage/user-interaction.md) for callback,
+cancellation, and UI guidance.
+
 ```csharp
 using Yubico.YubiKit.Core.Transports.SmartCard;
 

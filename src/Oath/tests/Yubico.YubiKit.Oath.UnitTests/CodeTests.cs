@@ -126,6 +126,25 @@ public class CodeTests
     }
 
     [Fact]
+    public void FormatCode_7Digits_FormatsCorrectly()
+    {
+        var credential = new Credential(
+            deviceId: "testdevice",
+            id: "user"u8.ToArray(),
+            issuer: null,
+            name: "user",
+            oathType: OathType.Totp,
+            period: 30,
+            touchRequired: false);
+
+        byte[] truncated = [0x07, 0x00, 0x00, 0x00, 0x2A];
+
+        var code = Code.FormatCode(credential, 1700000000L, truncated);
+
+        Assert.Equal("0000042", code.Value);
+    }
+
+    [Fact]
     public void FormatCode_HighBitSet_MasksCorrectly()
     {
         var credential = new Credential(

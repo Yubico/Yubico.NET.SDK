@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -68,14 +69,17 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     // ── Fields ────────────────────────────────────────────────────────
 
     private readonly ILogger _logger;
+    private readonly Dictionary<KeyRef, Uif> _updatedUifs = [];
     private IOpenPgpBackend? _backend;
     private ApplicationRelatedData _appData = null!;
     private Kdf? _kdf;
 
     // ── Constructor (private — use CreateAsync) ───────────────────────
 
-    private OpenPgpSession(ISmartCardConnection connection)
-        : base(connection)
+    private OpenPgpSession(
+        ISmartCardConnection connection,
+        IUserPresencePrompt? userPresencePrompt = null)
+        : base(connection, userPresencePrompt)
     {
         _logger = Logger;
     }
@@ -99,12 +103,13 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         var configuration = options?.ProtocolConfiguration;
         var scpKeyParams = options?.ScpKeyParameters;
         var firmwareVersionOverride = options?.FirmwareVersionOverride;
+        var userPresencePrompt = options?.UserPresencePrompt;
 
         ValidatePreferredConnectionType(connection, options);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(connection, () => new OpenPgpSession(connection));
+        var session = Construct(connection, () => new OpenPgpSession(connection, userPresencePrompt));
         try
         {
             await session.InitializeAsync(configuration, scpKeyParams, firmwareVersionOverride, cancellationToken)
@@ -172,6 +177,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
+        _updatedUifs.Clear();
         return _appData;
     }
 
@@ -324,6 +330,56 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ThrowIfDisposed();
         if (_backend is null)
             throw new InvalidOperationException("Session is not initialized.");
+    }
+
+    private async Task<UserPresenceContext?> GetUserPresenceContextAsync(
+        KeyRef keyRef,
+        CancellationToken cancellationToken)
+    {
+        if (!IsUserPresenceNotificationEnabled || !IsSupported(FeatureUif))
+            return null;
+
+        UserPresenceBasis basis;
+        try
+        {
+            Uif? cachedUif = _updatedUifs.TryGetValue(keyRef, out Uif updatedUif)
+                ? updatedUif
+                : keyRef switch
+                {
+                    KeyRef.Sig => _appData.Discretionary.UifSig,
+                    KeyRef.Dec => _appData.Discretionary.UifDec,
+                    KeyRef.Aut => _appData.Discretionary.UifAut,
+                    KeyRef.Att => _appData.Discretionary.UifAtt,
+                    _ => null
+                };
+            Uif uif = cachedUif ?? await GetUifAsync(keyRef, cancellationToken).ConfigureAwait(false);
+            if (uif == Uif.Off)
+                return null;
+
+            basis = uif switch
+            {
+                Uif.On or Uif.Fixed => UserPresenceBasis.PolicyRequires,
+                Uif.Cached or Uif.CachedFixed => UserPresenceBasis.PolicyMayRequire,
+                _ => UserPresenceBasis.PolicyMayRequire
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // UIF is advisory metadata. A failed read must not replace the cryptographic operation.
+            _logger.LogDebug(ex, "Could not read UIF for {Slot}; user presence may be required", keyRef);
+            basis = UserPresenceBasis.PolicyMayRequire;
+        }
+
+        return new UserPresenceContext
+        {
+            Application = "OpenPGP",
+            Scope = keyRef.ToString(),
+            Basis = basis
+        };
     }
 
     /// <summary>

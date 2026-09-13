@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Credentials;
+
 namespace Yubico.YubiKit.Fido2.Backend;
 
 /// <summary>
@@ -33,9 +35,11 @@ internal interface IFidoBackend
     /// Sends a CTAP CBOR command and receives the response.
     /// </summary>
     /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>
+    /// <param name="userPresenceNotification">The non-null notification handle for this operation.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The response data (status byte has already been validated).</returns>
     Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,
+        UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default);
 }

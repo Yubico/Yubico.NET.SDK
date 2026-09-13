@@ -16,6 +16,7 @@ internal static class CtapConstants
     public const byte CtapHidCancel = 0x11;     // Cancel outstanding request
     public const byte CtapHidError = 0x3F;      // Error response
     public const byte CtapHidKeepAlive = 0x3B;  // Processing status notification
+    public const byte KeepAliveStatusUpNeeded = 0x02;
 
     // YubiKey Management Vendor Commands (CTAP_TYPE_INIT | CTAP_VENDOR_FIRST + offset)
     public const byte CtapVendorFirst = 0x40;

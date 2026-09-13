@@ -14,9 +14,8 @@
 
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Tests.Shared;
-
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Tests.Shared;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 public class HsmAuthSessionByteLevelTests
@@ -112,8 +111,6 @@ public class HsmAuthSessionByteLevelTests
             options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 4, 3) },
             cancellationToken: TestContext.Current.CancellationToken);
         var commandCount = connection.TransmittedCommands.Count;
-        var touchCallbackInvoked = false;
-        session.OnTouchRequired = () => touchCallbackInvoked = true;
 
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
             session.CalculateSessionKeysSymmetricAsync(
@@ -123,7 +120,6 @@ public class HsmAuthSessionByteLevelTests
                 cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("context", exception.ParamName);
-        Assert.False(touchCallbackInvoked);
         Assert.Equal(commandCount, connection.TransmittedCommands.Count);
     }
 
@@ -138,8 +134,6 @@ public class HsmAuthSessionByteLevelTests
             options: new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
             cancellationToken: TestContext.Current.CancellationToken);
         var commandCount = connection.TransmittedCommands.Count;
-        var touchCallbackInvoked = false;
-        session.OnTouchRequired = () => touchCallbackInvoked = true;
 
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
             session.CalculateSessionKeysAsymmetricAsync(
@@ -151,7 +145,6 @@ public class HsmAuthSessionByteLevelTests
                 TestContext.Current.CancellationToken));
 
         Assert.Equal("context", exception.ParamName);
-        Assert.False(touchCallbackInvoked);
         Assert.Equal(commandCount, connection.TransmittedCommands.Count);
     }
 

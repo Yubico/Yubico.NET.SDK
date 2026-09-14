@@ -1537,7 +1537,10 @@ List<string> ValidatePackageReadmes(string[] packableProjectPaths)
         """;
 
     var failures = new List<string>();
-    var docsBranch = ReadDocsBranch();
+    if (packableProjectPaths.Length == 0)
+        return failures;
+
+    var docsBranch = ReadDocsBranch(packableProjectPaths[0]);
 
     foreach (var projectPath in packableProjectPaths)
     {
@@ -1579,14 +1582,36 @@ List<string> ValidatePackageReadmes(string[] packableProjectPaths)
 
 // The v2 branch name, read from the single place that owns it. PackageProjectUrl is derived from
 // this property in MSBuild; the package readmes cannot be, because they are packed verbatim.
-string ReadDocsBranch()
+string ReadDocsBranch(string anyPackableProjectPath)
 {
-    var propsPath = Path.Combine(repoRoot, "Directory.Build.props");
-    var match = Regex.Match(File.ReadAllText(propsPath), @"<YubiKitDocsBranch>([^<]+)</YubiKitDocsBranch>");
-    if (!match.Success)
-        throw new InvalidOperationException($"{propsPath}: no <YubiKitDocsBranch> property; package readme links cannot be checked against it");
+    // Ask MSBuild for the evaluated value rather than regexing Directory.Build.props. Pack uses the
+    // evaluated value, so this is the only reading that cannot drift from it if the property is ever
+    // moved behind a Condition, overridden in Directory.Build.targets, or passed on the command line.
+    // Evaluating one project is enough: the property is defined once, repo-wide.
+    var (exitCode, output) = RunDotnetAndCapture(
+    [
+        "msbuild", Path.Combine(repoRoot, anyPackableProjectPath),
+        "-getProperty:YubiKitDocsBranch",
+        "-getProperty:PackageProjectUrl",
+        "-nologo"
+    ]);
+    if (exitCode != 0)
+        throw new InvalidOperationException($"MSBuild evaluation of {anyPackableProjectPath} failed; cannot read YubiKitDocsBranch:\n{output}");
 
-    return match.Groups[1].Value.Trim();
+    using var json = System.Text.Json.JsonDocument.Parse(output);
+    var properties = json.RootElement.GetProperty("Properties");
+    var branch = properties.GetProperty("YubiKitDocsBranch").GetString()?.Trim();
+    var projectUrl = properties.GetProperty("PackageProjectUrl").GetString()?.Trim();
+
+    if (string.IsNullOrEmpty(branch))
+        throw new InvalidOperationException("YubiKitDocsBranch evaluates to empty; package readme links cannot be checked against it");
+
+    // The same property must have produced the project URL nuget.org shows, or the two can disagree.
+    var expectedProjectUrl = $"https://github.com/Yubico/Yubico.NET.SDK/tree/{branch}";
+    if (projectUrl != expectedProjectUrl)
+        throw new InvalidOperationException($"PackageProjectUrl evaluates to '{projectUrl}' but YubiKitDocsBranch is '{branch}'; expected '{expectedProjectUrl}'. Derive PackageProjectUrl from the property.");
+
+    return branch;
 }
 
 static void ValidatePackageReadmeLinks(string relativePath, string text, string docsBranch, List<string> failures)

@@ -3,7 +3,7 @@
 This package is a W3C Web Authentication client over `Yubico.YubiKit.Fido2`. It reduces registration and
 authentication to two calls, handling client data JSON, RP ID validation, and PIN/UV token acquisition on the way to
 CTAP2; every ceremony runs over an `IFidoSession` that the client owns and disposes. It requires a WebAuthn origin and
-a public-suffix checker backed by Public Suffix List data, because RP ID validation is what stops one site from
+client options containing a public-suffix checker backed by Public Suffix List data, because RP ID validation is what stops one site from
 claiming another site's credentials.
 
 > The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
@@ -50,8 +50,11 @@ if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
     throw new InvalidOperationException("The origin is not a secure context.");
 
 // Back this with Public Suffix List data in production.
-PublicSuffixChecker isPublicSuffix = domain => domain is "com" or "net" or "org" or "co.uk";
-await using var client = await device.CreateWebAuthnClientAsync(origin, isPublicSuffix);
+var clientOptions = new WebAuthnClientOptions
+{
+    PublicSuffixChecker = domain => domain is "com" or "net" or "org" or "co.uk"
+};
+await using var client = await device.CreateWebAuthnClientAsync(origin, clientOptions);
 ```
 
 Later snippets assume these directives and a `device` obtained the same way. The client exposes only the two ceremonies
@@ -119,7 +122,7 @@ internal sealed class PinPrompt(Func<CredentialPromptContext, CancellationToken,
 
 ```csharp
 await using var promptingClient = await device.CreateWebAuthnClientAsync(
-    origin, isPublicSuffix, new WebAuthnClientOptions { CredentialPrompt = new PinPrompt(ReadPinAsync) });
+    origin, clientOptions with { CredentialPrompt = new PinPrompt(ReadPinAsync) });
 ```
 
 ## User interaction
@@ -136,7 +139,7 @@ sealed class TouchPrompt : IUserPresencePrompt
 
 ```csharp
 await using var notifyingClient = await device.CreateWebAuthnClientAsync(
-    origin, isPublicSuffix, sessionOptions: new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
+    origin, clientOptions, sessionOptions: new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
 ```
 
 User verification is separate from touch, and `UserVerification` on either options record decides whether a ceremony obtains a PIN/UV token:
@@ -170,3 +173,24 @@ User verification is separate from touch, and `UserVerification` on either optio
 - [user-interaction.md](../../docs/usage/user-interaction.md) and [device-discovery.md](../../docs/usage/device-discovery.md).
 - The [WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/) specification and the [Public Suffix List](https://publicsuffix.org/).
 - [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.
+
+## Migration from earlier v2 development builds
+
+Migration from the earlier v2 development contract is mechanical (there was no shipped v1 WebAuthn package):
+
+```csharp
+// Before
+new WebAuthnClient(fidoSession, origin, isPublicSuffix);
+
+// After
+new WebAuthnClient(
+    fidoSession,
+    origin,
+    new WebAuthnClientOptions
+    {
+        PublicSuffixChecker = isPublicSuffix
+    });
+```
+
+If an earlier `clientOptions` instance is known to be non-null, use
+`clientOptions with { PublicSuffixChecker = isPublicSuffix }` to preserve its configured settings.

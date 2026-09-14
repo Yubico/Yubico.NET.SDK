@@ -44,7 +44,7 @@ public class WebAuthnClientConstructionTests
         var client = new WebAuthnClient(
             fidoSession,
             ParseOrigin("https://example.com"),
-            isPublicSuffix: domain => domain == "com");
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
         var options = new RegistrationOptions
         {
@@ -72,7 +72,7 @@ public class WebAuthnClientConstructionTests
         var client = new WebAuthnClient(
             fidoSession,
             ParseOrigin("https://example.com"),
-            isPublicSuffix: domain => domain == "com");
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
         await client.DisposeAsync();
 
@@ -88,13 +88,13 @@ public class WebAuthnClientConstructionTests
             () => new WebAuthnClient(
                 fidoSession,
                 origin: null!,
-                isPublicSuffix: domain => domain == "com"));
+                new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" }));
 
         await fidoSession.DidNotReceive().DisposeAsync();
     }
 
     [Fact]
-    public async Task Constructor_WithNullPublicSuffixChecker_DoesNotAdoptSession()
+    public async Task Constructor_WithNullOptions_DoesNotAdoptSession()
     {
         var fidoSession = Substitute.For<IFidoSession>();
 
@@ -102,7 +102,7 @@ public class WebAuthnClientConstructionTests
             () => new WebAuthnClient(
                 fidoSession,
                 ParseOrigin("https://example.com"),
-                isPublicSuffix: null!));
+                options: null!));
 
         await fidoSession.DidNotReceive().DisposeAsync();
     }
@@ -114,7 +114,7 @@ public class WebAuthnClientConstructionTests
         var client = new WebAuthnClient(
             fidoSession,
             ParseOrigin("https://login.example.com"),
-            isPublicSuffix: domain => domain == "com");
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
         var options = new AuthenticationOptions
         {
@@ -127,6 +127,54 @@ public class WebAuthnClientConstructionTests
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
         await fidoSession.DidNotReceive().GetInfoAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Ceremonies_WithReusedOptions_InvokeCheckerAndRejectBeforeBackendCalls()
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        var checkedDomains = new List<string>();
+        var clientOptions = new WebAuthnClientOptions
+        {
+            PublicSuffixChecker = domain =>
+            {
+                checkedDomains.Add(domain);
+                return domain == "com";
+            }
+        };
+        await using var client = new WebAuthnClient(
+            backend,
+            ParseOrigin("https://login.example.com"),
+            clientOptions);
+
+        var registrationOptions = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("com", "Public suffix"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [CoseAlgorithm.Es256]
+        };
+        var authenticationOptions = new AuthenticationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = "com"
+        };
+
+        WebAuthnClientError registrationError = await Assert.ThrowsAsync<WebAuthnClientError>(
+            () => client.MakeCredentialAsync(registrationOptions, cancellationToken: TestContext.Current.CancellationToken));
+        WebAuthnClientError authenticationError = await Assert.ThrowsAsync<WebAuthnClientError>(
+            () => client.GetAssertionAsync(authenticationOptions, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, registrationError.Code);
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, authenticationError.Code);
+        Assert.Equal(["com", "com"], checkedDomains);
+        await backend.DidNotReceive().GetCachedInfoAsync(Arg.Any<CancellationToken>());
+        await backend.DidNotReceive().MakeCredentialAsync(
+            Arg.Any<BackendMakeCredentialRequest>(),
+            Arg.Any<CancellationToken>());
+        await backend.DidNotReceive().GetAssertionAsync(
+            Arg.Any<BackendGetAssertionRequest>(),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -147,8 +195,11 @@ public class WebAuthnClientConstructionTests
         var client = new WebAuthnClient(
             fidoSession,
             ParseOrigin("https://example.com"),
-            isPublicSuffix: domain => domain == "com" || domain == "test",
-            new WebAuthnClientOptions { EnterpriseRpIds = new HashSet<string> { "partner.test" } });
+            new WebAuthnClientOptions
+            {
+                PublicSuffixChecker = domain => domain == "com" || domain == "test",
+                EnterpriseRpIds = new HashSet<string> { "partner.test" }
+            });
 
         var options = new RegistrationOptions
         {

@@ -41,7 +41,10 @@ public class WebAuthnClientFactoryTests
         {
             await using var client = await state.Device.CreateWebAuthnClientAsync(
                 origin,
-                isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk",
+                new WebAuthnClientOptions
+                {
+                    PublicSuffixChecker = domain => domain is "com" or "org" or "net" or "co.uk"
+                },
                 sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 
             Assert.NotNull(client);
@@ -79,7 +82,10 @@ public class WebAuthnClientFactoryTests
         var origin = ParseOrigin(TestOriginUrl);
         await using var client = await state.Device.CreateWebAuthnClientAsync(
             origin,
-            isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk",
+            new WebAuthnClientOptions
+            {
+                PublicSuffixChecker = domain => domain is "com" or "org" or "net" or "co.uk"
+            },
             sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 
         var options = new RegistrationOptions

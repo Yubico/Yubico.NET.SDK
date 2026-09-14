@@ -49,8 +49,7 @@ public class WebAuthnClientMakeCredentialTests
         _client = new WebAuthnClient(
             _mockBackend,
             _origin,
-            isPublicSuffix: domain => domain == "com",
-            new WebAuthnClientOptions());
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
     }
 
     [Fact]
@@ -108,8 +107,7 @@ public class WebAuthnClientMakeCredentialTests
         var client = new WebAuthnClient(
             _mockBackend,
             origin!,
-            isPublicSuffix: domain => domain == "com",
-            new WebAuthnClientOptions());
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
         var options = new RegistrationOptions
         {
@@ -140,8 +138,11 @@ public class WebAuthnClientMakeCredentialTests
         var client = new WebAuthnClient(
             _mockBackend,
             _origin,
-            isPublicSuffix: domain => domain == "com",
-            new WebAuthnClientOptions { EnterpriseRpIds = new HashSet<string> { "partner.test" } });
+            new WebAuthnClientOptions
+            {
+                PublicSuffixChecker = domain => domain == "com",
+                EnterpriseRpIds = new HashSet<string> { "partner.test" }
+            });
 
         var options = new RegistrationOptions
         {
@@ -554,7 +555,7 @@ public class WebAuthnClientMakeCredentialTests
         var client = new WebAuthnClient(
             mockBackend,
             _origin,
-            isPublicSuffix: domain => domain == "com");
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
         // Act
         await client.DisposeAsync();

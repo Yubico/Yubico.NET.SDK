@@ -127,20 +127,39 @@ bool hasRk = info.Options?.TryGetValue("rk", out var rk) == true && rk;
 
 ### PIN/UV Auth Protocols
 
+There is no separate initialization step. The protocol object is stateless with respect to the
+authenticator; `ClientPin` performs the `getKeyAgreement` round trip and ECDH encapsulation
+internally on each token request.
+
 ```csharp
 // Protocol V2 (recommended, CTAP 2.1)
 using var protocol = new PinUvAuthProtocolV2();
-await protocol.InitializeAsync(session);
+using var clientPin = new ClientPin(session, protocol);
 
-// Get PIN token with permissions
-var clientPin = new ClientPin(session, protocol);
-var pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-    pin,
-    PinUvAuthTokenPermissions.MakeCredential);
+// Get PIN token with permissions. rpId is required for MakeCredential/GetAssertion permissions.
+byte[]? pinToken = null;
+try
+{
+    pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+        pin,
+        PinUvAuthTokenPermissions.MakeCredential,
+        rpId,
+        cancellationToken);
 
-// Authenticate command
-var authParam = protocol.Authenticate(pinToken, messageHash);
+    // Authenticate command
+    var authParam = protocol.Authenticate(pinToken, clientDataHash);
+    options.WithPinUvAuth(authParam, protocol.Version);
+}
+finally
+{
+    if (pinToken is not null) CryptographicOperations.ZeroMemory(pinToken);
+}
 ```
+
+The returned token is caller-owned; zero it when done (see
+`examples/FidoTool/FidoExamples/MakeCredential.cs`). On authenticators that do not advertise the
+`pinUvAuthToken` option, `GetPinUvAuthTokenUsingPinAsync` falls back to the legacy
+`getPinToken` subcommand and the requested permissions do not apply.
 
 ### Extensions (WebAuthn)
 
@@ -309,8 +328,14 @@ finally
 
 ```csharp
 using var protocol = new PinUvAuthProtocolV2();
-// Protocol disposes ECDH key pair on dispose
+// Dispose() only marks the instance disposed; it holds no key material to release.
 ```
+
+The ephemeral ECDH key pair lives entirely inside a single `Encapsulate` call:
+`PinUvAuthHelpers.PerformEcdhKeyAgreement` creates it with `using var ecdh = ...` and the raw
+shared point `z` is zeroed in that call's `finally`. `Encapsulate` hands the derived shared secret
+to the caller, who owns it — `ClientPin` zeroes it in its own `finally`. Still use `using` on the
+protocol so disposed-instance misuse throws `ObjectDisposedException` rather than silently working.
 
 ## Test Patterns
 

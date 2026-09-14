@@ -108,7 +108,8 @@ await using var client = new WebAuthnClient(
 await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
     origin,
     isPublicSuffix: domain => publicSuffixList.Contains(domain),
-    options: new SessionCreationOptions
+    clientOptions: new WebAuthnClientOptions { CredentialPrompt = myCredentialPrompt },
+    sessionOptions: new SessionCreationOptions
     {
         PreferredConnectionType = ConnectionType.SmartCard,
         ScpKeyParameters = scpKeyParameters
@@ -140,9 +141,12 @@ var matches = await client.GetAssertionAsync(requestOptions, pinBytes: null);
 var assertion = await matches[0].SelectAsync();
 ```
 
-The device factory takes one `SessionCreationOptions` carrier and forwards it unchanged to FIDO2. Required
-WebAuthn inputs remain positional. The earlier overload ending in `scpKeyParams`, `configuration`, and
-`cancellationToken` was removed during the coordinated 2.0 breaking window.
+The device factory takes two independent optional carriers, and mixing them up is the easy mistake:
+`clientOptions` (`WebAuthnClientOptions`) is forwarded to the created `WebAuthnClient`, while
+`sessionOptions` (`SessionCreationOptions`) is forwarded unchanged to `CreateFidoSessionAsync`.
+Required WebAuthn inputs (`origin`, `isPublicSuffix`) remain positional. The earlier overload ending in
+`scpKeyParams`, `configuration`, and `cancellationToken` was removed during the coordinated 2.0
+breaking window.
 
 ### Credential Prompting
 

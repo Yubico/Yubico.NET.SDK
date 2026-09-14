@@ -144,7 +144,7 @@ var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oce
 ### TLV Processing
 
 The canonical usage examples for `DecodeList`, `TryFindValue`, `Tlv`, `EncodeList`, nested encoding, and
-`EncodeAndDisposeList` are in the [Core README](README.md#tlv-processing). Keep the full examples there rather
+`EncodeAndDisposeList` are in [docs/usage/tlv-processing.md](../../docs/usage/tlv-processing.md). Keep the full examples there rather
 than duplicating them in this contributor guide.
 
 Contributor rules:

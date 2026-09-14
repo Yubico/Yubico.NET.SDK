@@ -1,419 +1,166 @@
 # Yubico.YubiKit.Core
 
-Core foundational library for the Yubico.NET.SDK. This module provides device management, connection abstractions, protocol handling, and platform interop for all YubiKey applications.
+Core is the foundation every other module builds on. It discovers YubiKeys, opens and owns connections
+over SmartCard (PC/SC) and HID, runs the ISO 7816-4 APDU pipeline with automatic command chaining,
+implements Secure Channel Protocol (SCP03 and SCP11), and supplies the shared device metadata,
+cryptography, and TLV types. It has no application of its own; install an application module and Core
+comes with it.
 
-## Overview
+> The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+> constraints.
 
-Yubico.YubiKit.Core is the foundation that all other SDK modules build upon. It handles the low-level details of communicating with YubiKey devices across different transport types (SmartCard/PC/SC and HID) and operating systems (Windows, macOS, Linux).
+## Requirements
 
-**Key Capabilities:**
-- 🔍 **Device Discovery** - Automatic detection and monitoring of connected YubiKeys
-- 🔌 **Connection Management** - Unified abstraction over SmartCard (PC/SC) and HID transports
-- 📡 **Protocol Handling** - ISO 7816-4 APDU processing with automatic command chaining
-- 🔐 **Secure Channel Protocol (SCP)** - SCP03, SCP11a/b/c support for secure communication
-- 🖥️ **Platform Interop** - Cross-platform native library loading and device enumeration
-- 🧾 **Device Metadata Models** - Read-only `DeviceInfo`, capability, form-factor, flag, and version qualifier types
-- 🛠️ **Utilities** - TLV processing, cryptographic key types, COSE encoding
+- .NET 10 on Windows, macOS, or Linux; Linux also needs PC/SC and udev rules ([Linux setup](../../docs/linux-setup.md)).
+- A YubiKey 4 series, YubiKey 5 series, or Security Key series device.
+- SmartCard (USB CCID or NFC), HID FIDO, and HID OTP transports. Which of these a given application uses is
+  documented in that application's README.
 
 ## Installation
 
 ```bash
-dotnet add package Yubico.YubiKit.Core
+dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
+dotnet add package Yubico.YubiKit.Core --prerelease
 ```
 
-This package is automatically included when you install any application-specific package (PIV, FIDO2, etc.).
+You only need this line for device discovery, raw sessions, or SCP key parameters without an application
+module. Every application package installs Core transitively.
 
-## Quick Start
-
-### Device Discovery
-
-An `IYubiKey` represents **one physical YubiKey** (which may expose several interfaces — CCID, HID FIDO,
-HID OTP — at once), not a single transport handle. See [Physical Device Model](../../docs/architecture/physical-device-model.md).
-HID interface enumeration is implemented on macOS, Linux, and Windows. Exact composite-grouping
-guarantees and conservative split cases are documented in
-[Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md).
+## Getting started
 
 ```csharp
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Piv;
 
-// One IYubiKey per physical device, even when several interfaces are present.
 var devices = await YubiKeyManager.FindAllAsync();
+IYubiKey device = devices[0];
 
-foreach (var device in devices)
-{
-    Console.WriteLine($"{device.DeviceId}: {device.AvailableConnections}");
-}
+Console.WriteLine($"{device.DeviceId}: {device.AvailableConnections}");
+```
 
-// Force a rescan when device topology may have changed
-var freshDevices = await YubiKeyManager.FindAllAsync(forceRescan: true);
+One `IYubiKey` is one physical YubiKey, even when it exposes several interfaces at once. Discovery needs
+no PIN, touch, or open session. Later snippets assume these directives and a `device` obtained the same way;
+`Yubico.YubiKit.Piv` is referenced only to show an application session.
 
-// Filter discovery. ConnectionType.Hid includes HID FIDO and HID OTP interfaces.
-var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
-var fidoDevices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
+## Common operations
 
-// Select one device, optionally with a predicate.
-var firstDevice = await YubiKeyManager.FindFirstAsync();
-var firstSmartCardDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
+### Open an application session
+
+Application sessions are the intended path. Each module adds a `Create<Application>SessionAsync`
+extension on `IYubiKey` that selects a transport, opens a connection it owns, and selects the applet:
+
+```csharp
+await using var piv = await device.CreatePivSessionAsync();
+```
+
+Pass a `SessionCreationOptions` to override the transport, establish SCP, or receive touch notifications;
+see [User interaction](../../docs/usage/user-interaction.md).
+
+### Select one device
+
+```csharp
+IYubiKey first = await YubiKeyManager.FindFirstAsync();
+IYubiKey? smartCard = await YubiKeyManager.FindFirstOrDefaultAsync(
     device => device.SupportsConnection(ConnectionType.SmartCard));
 ```
 
-`FindFirstAsync` throws `InvalidOperationException` when no device matches;
-`FindFirstOrDefaultAsync` returns `null`. Both are one-shot queries over cached `FindAllAsync`
-discovery: they do not wait for insertion, and the first device is not a stable ordering guarantee.
-They inherit `FindAllAsync` caching and cancellation behavior: the token is passed to discovery,
-but a cached result may complete without observing cancellation.
+`FindFirstAsync` throws `InvalidOperationException` when nothing matches; `FindFirstOrDefaultAsync` returns
+`null`. Both are one-shot queries over the same cached discovery as `FindAllAsync`: they do not wait for a
+key to be inserted, and "first" is not a stable ordering.
 
-### Device Monitoring
-
-`YubiKeyManager.StartMonitoring()` starts platform listeners and performs an initial repository rescan. Listener
-notifications are only rescan hints; public `YubiKeyManager.WatchAsync` events are emitted after discovery
-updates the repository and computes an `Added` or `Removed` diff. This means an OS-level HID notification does
-not by itself mean a public YubiKey device was added or removed. Unchanged interface and connection sets retain
-their published object unless a fresh known serial proves that different hardware occupies the same interfaces;
-that substitution emits `Removed` for the predecessor followed by `Added` for the successor. Without a listener
-event or a scan that observes absence, same-interface cached identity cannot distinguish a replacement.
-
-### Opening a Connection
-
-Open a specific interface with the typed overload. The parameterless `ConnectAsync()` is only for
-single-interface devices; on a composite device it throws rather than guessing a transport. Applet session
-extensions (e.g. `CreateManagementSessionAsync`) select a transport via a documented default order plus an
-optional `preferredConnection` override — see [Physical Device Model](../../docs/architecture/physical-device-model.md).
-
-Applet session factories also accept `SessionCreationOptions.UserPresencePrompt`, the shared notification
-contract for required or possible touch. The session retains the caller-owned prompt without disposing it;
-internally, each operation uses one lifecycle handle so transport-observed requests and applet-classified
-terminal outcomes cannot produce duplicate callbacks. Raw and management paths remain silent unless their
-public contract says otherwise. See [User interaction](../../docs/usage/user-interaction.md) for callback,
-cancellation, and UI guidance.
+### Watch for devices being added and removed
 
 ```csharp
-using Yubico.YubiKit.Core.Transports.SmartCard;
+YubiKeyManager.StartMonitoring();
 
-// Choose one interface for this connection. Dispose it before opening another
-// interface on the same physical YubiKey.
-await using var smartCardConnection = await device.ConnectAsync<ISmartCardConnection>();
+await foreach (DeviceEvent change in YubiKeyManager.WatchAsync())
+{
+    Console.WriteLine($"{change.Action}: {change.Device.DeviceId}");
+}
 ```
 
-### Access Tiers
+`WatchAsync` yields `Added` and `Removed` events computed from a repository diff, not raw OS notifications.
+Subscription starts on first enumeration; events raised before that are not replayed.
 
-Use the highest tier that expresses the operation:
+### Send raw APDUs
 
-1. **Applet sessions (golden path)** provide applet semantics, validation, selection, and firmware gates.
-2. **Raw sessions (supported power-user path)** provide framing, ownership, sequencing, overlap refusal, and
-   optional SmartCard SCP without applet checks.
-3. **Raw connections (expert escape hatch)** expose unguarded byte/report I/O; the caller owns every protocol
-   and recovery concern.
+When no application module models what you need, a raw session gives you framing, ownership, and
+sequencing without applet checks. You own every protocol concern.
 
 ```csharp
-// Tier 0: preferred applet API.
-await using PivSession piv = await device.CreatePivSessionAsync(
-    cancellationToken: cancellationToken);
-PivPinMetadata metadata = await piv.GetPinMetadataAsync(cancellationToken);
-```
+await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();
+await using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(connection);
 
-Tier 1 SmartCard/APDU:
-
-```csharp
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Core.Transports.SmartCard;
-
-await using ISmartCardConnection connection =
-    await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
-await using RawSmartCardSession raw =
-    await RawSmartCardSession.CreateAsync(connection, cancellationToken);
-
-await raw.SelectAsync(applicationId, cancellationToken);
+// firmwareVersion is the device's firmware, read via Management; it sets APDU formatting. Configure first.
 raw.Configure(firmwareVersion);
+await raw.SelectAsync(ApplicationIds.Piv);
 ApduResponse response = await raw.TransmitAndReceiveAsync(
-    new ApduCommand(cla, ins, p1, p2, commandData),
-    throwOnError: false,
-    cancellationToken);
+    new ApduCommand(0x00, 0xCB, 0x3F, 0xFF, requestData),
+    throwOnError: false);
+
+Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
 ```
 
-Tier 1 FIDO HID and OTP HID:
+`RawFidoHidSession` and `RawOtpHidSession` are the HID equivalents, created with
+`device.CreateRawFidoHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
+
+### Use a secure channel
+
+Core owns the SCP key-parameter types; session factories establish the channel from them.
 
 ```csharp
-await using (RawFidoHidSession fido = await device.CreateRawFidoHidSessionAsync(cancellationToken))
-{
-    ReadOnlyMemory<byte> ctapResponse = await fido.SendAndReceiveAsync(
-        ctapHidCommand,
-        ctapPayload,
-        cancellationToken);
-}
+using var keys = new StaticKeys(encKey, macKey, dekKey);
+using var scp = new Scp03KeyParameters(KeyReference.Default, keys);
 
-await using RawOtpHidSession otp = await device.CreateRawOtpHidSessionAsync(cancellationToken);
-ReadOnlyMemory<byte> otpResponse = await otp.SendAndReceiveAsync(
-    commandOrSlot,
-    otpPayload,
-    cancellationToken);
+await using var raw = await device.CreateRawSmartCardSessionAsync(scp, firmwareVersion);
 ```
 
-FIDO raw sessions correlate the final response command and reject `CTAPHID_ERROR`. OTP raw sessions generate the
-outbound CRC but do not infer command-specific inbound CRC lengths; validate known responses with
-`ChecksumUtils.CheckCrc(otpResponse.Span, expectedLength + 2)`. The caller owns sensitive returned-data handling.
-SDK-owned outgoing HID copies are cleared after each send; caller-owned request memory is not modified.
+`Scp03KeyParameters.Default` carries the well-known factory keys for test devices. Manage the keys on the
+device with `Yubico.YubiKit.SecurityDomain`.
 
-`ProtocolFactory` and the `IProtocol` family are internal. Migrate old
-`ProtocolFactory.Create(connection)` code to the corresponding `Raw*Session.CreateAsync(connection)` API.
-See [Raw Access Tiers](../../docs/architecture/raw-access-tiers.md) for complete ownership, SCP, and recovery rules.
+## Constraints
 
-### Secure Channel Protocol (SCP)
+- Choose one interface per connection with the typed `ConnectAsync<TConnection>()`. The parameterless
+  overload is only for single-interface devices and throws on a composite key.
+- A physical YubiKey admits one live connection across the interfaces discovery grouped together. A
+  second attempt in the same process throws `ConnectionInUseException` until the first is disposed. The
+  guard is process-local.
+- One live session per connection. Dispose it before creating another over the same connection.
+- Whoever creates a connection disposes it; use `await using`. A session from a `device.Create...` factory
+  owns the hidden connection it opened. There is no finalizer backstop, and a leaked connection can hold
+  the device lease for the life of the process.
+- Sessions refuse overlapping operations. An exchange already in flight runs to completion.
+- Raw `IConnection` I/O bypasses every guard. Never interleave it with a live session, and dispose and
+  reopen after an interrupted exchange.
+- `ProtocolFactory` and the `IProtocol` family are internal. Use `Raw*Session.CreateAsync(connection)`.
 
-```csharp
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+## Security notes
 
-// Core supplies the key-parameter types consumed by SCP-capable session factories.
-var staticKeys = new StaticKeys(
-    keyRef: 0x01,
-    encKey: encKeyBytes,
-    macKey: macKeyBytes,
-    dekKey: dekKeyBytes
-);
+- SCP key material is caller-owned. `StaticKeys` and the `Scp*KeyParameters` types are `IDisposable` and
+  zero their contents on disposal; zero any source buffers you supplied.
+- Never embed or log real SCP keys, and disable trace logging in production; APDU traces can contain
+  sensitive payloads.
+- `Tlv` and the collection from `TlvHelper.DecodeList` own buffers and must be disposed. The encode helpers
+  do not clear your source buffers or their own returned encodings; for sensitive data, zero both in a
+  `finally`. Full examples: [TLV processing](../../docs/usage/tlv-processing.md).
+- `ApduCommand` stores a reference to your data, not a copy. Zero the source after transmission.
 
-var scp03Params = new Scp03KeyParameters(keyRef, staticKeys);
+## Related
 
-// Always zero sensitive key material
-staticKeys.Dispose();
-```
-
-SCP establishment is an internal `PcscProtocol` capability. Session factories own protocol
-configuration, channel establishment, and cleanup; `PcscProtocolScp` cannot be constructed by consumers.
-
-For raw SCP APDUs, load key parameters from secure storage and pass them to the raw-session factory:
-
-```csharp
-using ScpKeyParameters scpParameters = LoadScpParametersFromSecureStorage();
-await using RawSmartCardSession raw = await device.CreateRawSmartCardSessionAsync(
-    scpParameters,
-    firmwareVersion,
-    new ProtocolConfiguration { ForceShortApdus = true },
-    cancellationToken);
-
-await raw.SelectAsync(applicationId, cancellationToken);
-ApduResponse response = await raw.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken);
-```
-
-Never embed or log real SCP keys. Dispose the key-parameter object and zero caller-owned key buffers according
-to their documented ownership contract. Raw SCP configuration is fixed before channel establishment and cannot
-be changed afterward.
-
-Disposal first refuses new session operations, then drains any admitted exchange before protocol/SCP state and an
-owned hidden connection are torn down. Prefer `DisposeAsync`; synchronous disposal blocks for the same drain and
-must not be called from inside the operation being drained.
-
-### TLV Processing
-
-```csharp
-using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Utilities;
-
-// DecodeList returns a disposable collection whose Tlv buffers are cleared on dispose.
-using var tlvs = TlvHelper.DecodeList(responseData);
-var certificateTlv = tlvs.FirstOrDefault(t => t.Tag == 0x53);
-
-// TryFindValue returns a new buffer containing the matching value.
-if (TlvHelper.TryFindValue(0x53, responseData.Span, out var certificate))
-{
-    // Use certificate.Span. Clear certificate when its contents are sensitive.
-}
-
-// EncodeAndDisposeList is convenient for inline Tlv objects.
-Memory<byte> encodedData = TlvHelper.EncodeAndDisposeList(
-    new Tlv(0x5C, new byte[] { 0x5F, 0xC1, 0x02 }),
-    new Tlv(0x53, certificateData));
-
-// EncodeList leaves disposal to the caller.
-using var tagList = new Tlv(0x5C, new byte[] { 0x5F, 0xC1, 0x02 });
-using var certificateValue = new Tlv(0x53, certificateData);
-Memory<byte> explicitlyOwnedEncoding = TlvHelper.EncodeList([tagList, certificateValue]);
-```
-
-`Tlv` and the collection returned by `DecodeList` own buffers and must be disposed. `EncodeAndDisposeList`
-disposes only the `Tlv` inputs passed to that call; `EncodeList` does not dispose its inputs. Neither method
-clears source buffers supplied to `Tlv` constructors, returned encodings, or intermediate encodings used for
-nesting.
-
-For public, nonsecret nested data, encode the inner elements and use that encoding as the outer value:
-
-```csharp
-Memory<byte> publicKeyBody = TlvHelper.EncodeAndDisposeList(
-    new Tlv(0x81, modulusBytes),
-    new Tlv(0x82, exponentBytes));
-Memory<byte> publicKeyTemplate = TlvHelper.EncodeAndDisposeList(
-    new Tlv(0x7F49, publicKeyBody));
-```
-
-The calls dispose their `Tlv` inputs, but not `modulusBytes`, `exponentBytes`, `publicKeyBody`, or
-`publicKeyTemplate`. These values are public, so the concise example does not clear them.
-
-For sensitive nested data, clear every caller-owned source buffer and every returned or intermediate encoding
-in a `finally` block:
-
-```csharp
-using System.Security.Cryptography;
-
-Memory<byte> innerEncoding = Memory<byte>.Empty;
-Memory<byte> outerEncoding = Memory<byte>.Empty;
-
-try
-{
-    innerEncoding = TlvHelper.EncodeAndDisposeList(
-        new Tlv(0x81, privateKeyBytes));
-    outerEncoding = TlvHelper.EncodeAndDisposeList(
-        new Tlv(0x7F49, innerEncoding));
-
-    UseSensitiveEncoding(outerEncoding.Span);
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(outerEncoding.Span);
-    CryptographicOperations.ZeroMemory(innerEncoding.Span);
-    CryptographicOperations.ZeroMemory(privateKeyBytes);
-}
-```
-
-## Architecture
-
-### Connection Abstraction
-
-A physical `IYubiKey` exposes one or more concrete interfaces; a typed `ConnectAsync<TConnection>()` routes
-to the requested interface.
-
-Discovery first represents each live enumerated PC/SC or HID handle as an internal raw connection slot,
-then merges those slots into the single production `YubiKeyDevice` shape exposed as `IYubiKey`.
-
-```
-IYubiKey (one physical device)
-    │  AvailableConnections / SupportsConnection(...)
-    ↓  ConnectAsync<TConnection>()
-IConnection
-    ├── ISmartCardConnection (PC/SC)
-    ├── IFidoHidConnection (HID FIDO)
-    └── IOtpHidConnection (HID OTP)
-```
-
-### APDU Processing Pipeline
-
-```
-ApduCommand
-    ↓
-[ChainedApduTransmitter]         ← Splits large commands
-    ↓
-[ApduFormatterShort/Extended]    ← Formats for wire protocol
-    ↓
-ISmartCardConnection
-    ↓
-[ChainedResponseReceiver]        ← Reassembles responses
-    ↓
-ApduResponse
-```
-
-### Concurrency
-
-- **Applet and raw sessions refuse overlap.** SmartCard (APDU/SCP), FIDO HID, and OTP HID sessions admit one full logical exchange at a time. An overlapping operation throws immediately; an exchange already in flight runs to completion without caller cancellation so wire state cannot be stranded.
-- **One connection per grouped physical key.** A connection atomically claims every known member interface ID before native open. Discovery skips claimed members, and a connect waits cancellably for active discovery. Conservative standalone records retain one-element scopes when grouping cannot be proven.
-- **One live session per connection.** A second session is refused before any wire operation. Sequential reuse is supported: dispose session A, then create session B over the same caller-owned connection.
-- **Connection ownership follows creation.** A direct `Session.CreateAsync(connection)` borrows the connection and does not dispose it. A `device.Create<App>SessionAsync()` convenience method owns its hidden connection and closes it with the returned session. Always use `await using`; leaking a caller-created connection can retain the physical-device lease and block later opens. There is no finalizer backstop.
-- **Discovery work is bounded independently from caller waits.** Each caller has its own timeout/cancellation, while repeated scans on one finder share at most one underlying read per stable interface and connection type. Grouping does not depend on best-effort metadata, but bounded metadata reads are awaited and may delay scan completion by up to their budget. Activity observed on any transport atomically replaces that finder's identity cache, metadata cache, and read scope; old writes remain in unreachable evidence, and a replacement manager cannot join reads from its predecessor. The reported transport is diagnostic context, not an eviction scope. Completion removes a single-flight entry for later retry; a permanently hung native call remains one operation in its finder scope rather than accumulating one operation per scan.
-- **Monitor hints are bounded occurrence signals.** Concurrent HID/SmartCard callbacks share one capacity-one wake-up signal; storms cannot build a payload queue, while quiet-period debounce, maximum coalescing, and periodic fallback scans remain intact. HID and SmartCard listeners start independently as best-effort latency accelerators; unavailable listeners are cleaned up without aborting monitoring, which can fall back to interval-only rescans.
-- **A monitor generation may do anything except publish stale truth.** Monitor lifecycle is an epoch model, not a state machine: each `StartMonitoring` creates an immutable generation that the loop, manual rescans, and listener callbacks capture once. Every device-snapshot publication is mutually exclusive under one never-disposed gate and is admitted only if its generation is still current, so a scan hung in native I/O can return long after its generation was retired and simply be discarded. Start, stop, and dispose take only a small state lock, so a stalled publication cannot wedge them, and restart after an abandoned stop always succeeds. Dispose drains in-flight publication with a bounded timeout; a publication that outlives the bound may complete afterwards, which the manager's repository disposal silences.
-- **Connections are disposed exactly once, and disposal means disposed.** The registered-connection wrappers run teardown through a one-shot gate: the first caller disposes the inner connection and then releases the ownership lease, and every other caller — sync or async, concurrent or later — observes that same completion. Any disposal call returning therefore implies teardown finished, so a caller cannot reopen an interface whose physical handle is still closing.
-- **Raw connection I/O is unguarded.** Tier 2 connection methods bypass session and exchange guards. Never use them concurrently with a live session or another raw operation. After interrupted or interleaved traffic, dispose and reopen the connection before continuing.
-
-- **Composite grouping is an evidence hierarchy, not a guess.** Interfaces of one physical key are grouped by USB topology (Windows), then serial, then PID completeness, then pigeonhole deduction, falling back to publishing an interface on its own rather than guessing. What this guarantees per platform - including two cases it deliberately cannot solve on macOS and Linux - is documented in [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md).
-
-### Platform Support
-
-The Core module provides platform-specific implementations for:
-- **Windows**: HidD, Cfgmgr32, WinSCard APIs
-- **macOS**: IOKit, CoreFoundation, PC/SC
-- **Linux**: udev, libpcsclite
-
-Platform detection is automatic via `SdkPlatformInfo.OperatingSystem`.
-
-## Key Classes
-
-| Class | Purpose |
-|-------|---------|
-| `YubiKeyManager` | Static entry point for YubiKey discovery and cache management |
-| `IYubiKey` | Represents a physical or virtual YubiKey device |
-| `ISmartCardConnection` | SmartCard (PC/SC) transport connection |
-| `IFidoHidConnection` | HID FIDO transport connection |
-| `IOtpHidConnection` | HID OTP transport connection |
-| `RawSmartCardSession` | Supported explicit application selection and raw APDU exchange |
-| `RawFidoHidSession` | Supported raw CTAP HID logical exchange |
-| `RawOtpHidSession` | Supported raw OTP HID logical exchange |
-| `ApduCommand` / `ApduResponse` | APDU command/response representations |
-| `ScpProtocol` | Secure Channel Protocol wrapper (SCP03, SCP11) |
-| `TlvHelper` / `Tlv` | TLV parsing and construction utilities |
-| `ApplicationSession` | Base class for application-specific sessions |
-
-## Logging
-
-Configure logging at application startup:
-
-```csharp
-using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
-
-YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
-{
-    builder.AddConsole();
-    builder.SetMinimumLevel(LogLevel.Debug);
-});
-```
-
-With dependency injection, configure YubiKit logging from the DI-provided logger factory during startup:
-
-```csharp
-services.AddLogging(builder => builder.AddConsole());
-
-using var provider = services.BuildServiceProvider();
-YubiKitLogging.Configure(provider.GetRequiredService<ILoggerFactory>());
-```
-
-## Firmware Version Considerations
-
-Different YubiKey firmware versions have different capabilities:
-
-```csharp
-// Check firmware version
-if (firmwareVersion.IsAtLeast(FirmwareVersion.V4_0_0))
-{
-    // Extended APDUs supported (up to 2048 bytes)
-}
-
-if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_3_0))
-{
-    // SCP03 available
-}
-
-if (firmwareVersion.IsAtLeast(FirmwareVersion.V5_7_2))
-{
-    // SCP11 protocols available
-}
-```
-
-## Security Considerations
-
-- **Key Zeroing**: Always zero sensitive key material with `CryptographicOperations.ZeroMemory()` or dispose `StaticKeys`
-- **Connection Lifetime**: Don't share connections across threads without synchronization
-- **SCP Keys**: Store SCP keys securely; never log or persist them unencrypted
-- **APDU Logging**: Disable trace logging in production to avoid leaking sensitive APDUs
-
-## Related Modules
-
-- **[Yubico.YubiKit.Management](../Management/)** - Device information and capability queries
-- **[Yubico.YubiKit.Piv](../Piv/)** - PIV smart card operations
-- **[Yubico.YubiKit.Fido2](../Fido2/)** - FIDO2/WebAuthn authentication
-
-## Developer Documentation
-
-For in-depth patterns, test infrastructure, and implementation details, see [CLAUDE.md](CLAUDE.md).
-
-For the physical-device model (one `IYubiKey` per physical key, metadata ownership, applet transport
-selection, session/connection ownership, and migration from per-interface handles), see
-[Physical Device Model](../../docs/architecture/physical-device-model.md).
+- Application modules: [Management](../Management/README.md), [PIV](../Piv/README.md),
+  [FIDO2](../Fido2/README.md), [WebAuthn](../WebAuthn/README.md), [OATH](../Oath/README.md),
+  [YubiOTP](../YubiOtp/README.md), [OpenPGP](../OpenPgp/README.md),
+  [Security Domain](../SecurityDomain/README.md), [YubiHSM Auth](../YubiHsm/README.md).
+- [Physical device model](../../docs/architecture/physical-device-model.md): one `IYubiKey` per key, transport selection, ownership.
+- [Device discovery guarantees](../../docs/architecture/device-discovery-guarantees.md): grouping guarantees per platform.
+- [Raw access tiers](../../docs/architecture/raw-access-tiers.md): applet sessions, raw sessions, raw connections.
+- [Device discovery](../../docs/usage/device-discovery.md), [User interaction](../../docs/usage/user-interaction.md),
+  and [TLV processing](../../docs/usage/tlv-processing.md).
+- [Logging](../../docs/LOGGING.md): configure `YubiKitLogging.LoggerFactory` once at startup.
+- [CLAUDE.md](CLAUDE.md): contributor guidance, internals, and test infrastructure.

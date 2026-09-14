@@ -338,4 +338,40 @@ public static class YubiKeyManager
         bool forceRescan = false,
         CancellationToken cancellationToken = default)
         => EnsureManager().FindAllAsync(type, forceRescan, cancellationToken);
+
+    /// <summary>
+    /// Finds the first connected YubiKey that satisfies an optional predicate.
+    /// </summary>
+    /// <param name="predicate">An optional predicate used to select a device.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel discovery.</param>
+    /// <returns>The first matching YubiKey.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when no matching YubiKey is connected.</exception>
+    /// <remarks>
+    /// This method is a one-shot query over <see cref="FindAllAsync(CancellationToken)"/>. It does not
+    /// wait for insertion, and discovery ordering is not stable. It inherits the caching and cancellation
+    /// behavior of <c>FindAllAsync</c>: the token is passed to discovery, while a cached result may complete
+    /// without observing cancellation. Discovery and predicate exceptions are propagated unchanged.
+    /// </remarks>
+    public static Task<IYubiKey> FindFirstAsync(
+        Func<IYubiKey, bool>? predicate = null,
+        CancellationToken cancellationToken = default) =>
+        EnsureManager().FindFirstAsync(predicate, cancellationToken);
+
+    /// <summary>
+    /// Finds the first connected YubiKey that satisfies an optional predicate, or returns
+    /// <see langword="null"/> when none matches.
+    /// </summary>
+    /// <param name="predicate">An optional predicate used to select a device.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel discovery.</param>
+    /// <returns>The first matching YubiKey, or <see langword="null"/> when none matches.</returns>
+    /// <remarks>
+    /// This method is a one-shot query over <see cref="FindAllAsync(CancellationToken)"/>. It does not
+    /// wait for insertion, and discovery ordering is not stable. It inherits the caching and cancellation
+    /// behavior of <c>FindAllAsync</c>: the token is passed to discovery, while a cached result may complete
+    /// without observing cancellation. Discovery and predicate exceptions are propagated unchanged.
+    /// </remarks>
+    public static Task<IYubiKey?> FindFirstOrDefaultAsync(
+        Func<IYubiKey, bool>? predicate = null,
+        CancellationToken cancellationToken = default) =>
+        EnsureManager().FindFirstOrDefaultAsync(predicate, cancellationToken);
 }

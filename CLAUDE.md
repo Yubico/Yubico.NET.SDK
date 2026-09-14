@@ -507,7 +507,7 @@ public void Configure_FirmwareBelow400_UsesNeoMaxSize()
 [Fact]
 public async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()
 {
-    var device = await YubiKey.FindFirstAsync();
+    var device = await YubiKeyManager.FindFirstAsync();
     using var session = await ManagementSession.CreateAsync(
         device, scpKeyParams: scp03Keys);
 

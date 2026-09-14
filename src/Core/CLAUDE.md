@@ -212,6 +212,11 @@ substitution and emits `Removed` for the predecessor followed by `Added` for a n
 serials never trigger identity-based republication. If no listener event invalidates discovery caches and no scan
 observes absence, same-interface substitution remains unknowable from cached evidence.
 
+Use `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` when absence is exceptional and
+`FindFirstOrDefaultAsync(predicate, cancellationToken)` when it is not. They are thin, one-shot selections over
+cached `FindAllAsync`; they do not wait for insertion, and callers must not treat discovery order as stable. The
+token is passed to discovery, but a cached result may complete without observing cancellation.
+
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
 handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by production discovery.
 

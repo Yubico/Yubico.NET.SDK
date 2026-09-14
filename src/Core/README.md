@@ -51,7 +51,18 @@ var freshDevices = await YubiKeyManager.FindAllAsync(forceRescan: true);
 // Filter discovery. ConnectionType.Hid includes HID FIDO and HID OTP interfaces.
 var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
 var fidoDevices = await YubiKeyManager.FindAllAsync(ConnectionType.HidFido);
+
+// Select one device, optionally with a predicate.
+var firstDevice = await YubiKeyManager.FindFirstAsync();
+var firstSmartCardDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
+    device => device.SupportsConnection(ConnectionType.SmartCard));
 ```
+
+`FindFirstAsync` throws `InvalidOperationException` when no device matches;
+`FindFirstOrDefaultAsync` returns `null`. Both are one-shot queries over cached `FindAllAsync`
+discovery: they do not wait for insertion, and the first device is not a stable ordering guarantee.
+They inherit `FindAllAsync` caching and cancellation behavior: the token is passed to discovery,
+but a cached result may complete without observing cancellation.
 
 ### Device Monitoring
 

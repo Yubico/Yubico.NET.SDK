@@ -19,12 +19,11 @@ app.MapGet("/di-demo/minimal", async (
     CancellationToken cancellationToken
 ) =>
 {
-    // Find all available YubiKeys using static API
-    var yubiKeys = await YubiKeyManager.FindAllAsync(cancellationToken: cancellationToken);
-    if (yubiKeys.Count == 0)
+    var yubiKey = await YubiKeyManager.FindFirstOrDefaultAsync(cancellationToken: cancellationToken);
+    if (yubiKey is null)
         return Results.Problem("No YubiKey detected. Please connect a YubiKey and try again.", statusCode: 503);
 
-    var deviceInfo = await yubiKeys[0].GetDeviceInfoAsync(cancellationToken: cancellationToken);
+    var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken: cancellationToken);
     var yubiInfo = new YubiInfo(
         deviceInfo.SerialNumber?.ToString() ?? "Unknown",
         deviceInfo.FirmwareVersion.ToString()

@@ -221,10 +221,7 @@ V2 exposes detailed device information through the Management package:
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
-var device = (await YubiKeyManager.FindAllAsync(
-    ConnectionType.All,
-    forceRescan: false,
-    cancellationToken: cancellationToken)).First();
+var device = await YubiKeyManager.FindFirstAsync(cancellationToken: cancellationToken);
 await using var session = await device.CreateManagementSessionAsync(
     cancellationToken: cancellationToken);
 

@@ -144,6 +144,24 @@ internal sealed class YubiKeyDeviceManager : IAsyncDisposable
         }
     }
 
+    /// <inheritdoc cref="YubiKeyManager.FindFirstAsync(Func{IYubiKey, bool}?, CancellationToken)" />
+    public async Task<IYubiKey> FindFirstAsync(
+        Func<IYubiKey, bool>? predicate = null,
+        CancellationToken cancellationToken = default) =>
+        await FindFirstOrDefaultAsync(predicate, cancellationToken).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("No matching YubiKey was found.");
+
+    /// <inheritdoc cref="YubiKeyManager.FindFirstOrDefaultAsync(Func{IYubiKey, bool}?, CancellationToken)" />
+    public async Task<IYubiKey?> FindFirstOrDefaultAsync(
+        Func<IYubiKey, bool>? predicate = null,
+        CancellationToken cancellationToken = default)
+    {
+        var devices = await FindAllAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        return predicate is null
+            ? devices.FirstOrDefault()
+            : devices.FirstOrDefault(predicate);
+    }
+
     /// <summary>
     /// Starts monitoring for YubiKey device changes using the default interval.
     /// </summary>

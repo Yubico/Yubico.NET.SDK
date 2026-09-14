@@ -4,7 +4,7 @@ Management application support for YubiKey devices: read device information and 
 applications are enabled per transport, timeouts, device flags, NFC restriction, and the configuration
 lock code.
 
-> ## ALPHA - NOT FOR PRODUCTION
+> ## Alpha - not for production
 >
 > This is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
 > security audit**. No security guarantees are made until that audit is complete. Packages are

@@ -4,7 +4,7 @@ FIDO2 (CTAP) authenticator support for YubiKey devices: read capabilities, creat
 credentials, manage the PIN, and drive credential management, biometric enrollment, large blobs, and
 authenticator configuration. For the higher-level WebAuthn ceremony API, use `Yubico.YubiKit.WebAuthn`.
 
-> ## ALPHA - NOT FOR PRODUCTION
+> ## Alpha - not for production
 >
 > This is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
 > security audit**. No security guarantees are made until that audit is complete. Packages are

@@ -4,7 +4,7 @@ YubiHSM Auth applet support for YubiKey devices. This is **not** a YubiHSM 2 cli
 credentials used to authenticate to a YubiHSM 2 and derives the session keys your own code then uses.
 This package never contacts the HSM itself.
 
-> ## ALPHA - NOT FOR PRODUCTION
+> ## Alpha - not for production
 >
 > This is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
 > security audit**. No security guarantees are made until that audit is complete. Packages are

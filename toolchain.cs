@@ -1529,7 +1529,7 @@ List<string> ValidatePackageReadmes(string[] packableProjectPaths)
     // The canonical alpha banner. Every package readme must carry this block verbatim so a single
     // edit here is the only thing needed to find every copy when the SDK exits alpha.
     const string alphaBanner = """
-        > ## ALPHA - NOT FOR PRODUCTION
+        > ## Alpha - not for production
         >
         > This is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
         > security audit**. No security guarantees are made until that audit is complete. Packages are

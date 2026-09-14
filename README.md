@@ -7,7 +7,7 @@ keys. One package per YubiKey application, all on a shared core.
 This is v2, developed on the `yubikit` branch. v1 lives on `develop`; see the
 [migration guide](docs/migration/v1-to-v2.md) if you are coming from it.
 
-> ## ALPHA - NOT FOR PRODUCTION
+> ## Alpha - not for production
 >
 > The v2 SDK is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
 > security audit**. No security guarantees are made until that audit is complete. Packages are unsigned,
@@ -31,7 +31,8 @@ dotnet add package Yubico.YubiKit.Piv --prerelease
 ```
 
 Substitute the package from the table below. The [feed website](https://yubico.github.io/Yubico.NET.SDK/)
-lists what is currently published.
+lists what is currently published, and the [release notes](scripts/alpha/RELEASE_NOTES.md) track changes between
+alpha builds.
 
 ## Getting started
 

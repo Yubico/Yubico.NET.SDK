@@ -3,7 +3,7 @@
 PIV (Personal Identity Verification) support for YubiKey devices: PIN, PUK, and management-key
 authentication, key and certificate management, signing, decryption, key agreement, and attestation.
 
-> ## ALPHA - NOT FOR PRODUCTION
+> ## Alpha - not for production
 >
 > This is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
 > security audit**. No security guarantees are made until that audit is complete. Packages are

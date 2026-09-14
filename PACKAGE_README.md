@@ -3,7 +3,7 @@
 Fallback package readme. Every shipping module has its own `src/<Module>/PACKAGE_README.md`, packed as
 `README.md`; this file is used only by a packable project that does not have one yet.
 
-> ## ALPHA - NOT FOR PRODUCTION
+> ## Alpha - not for production
 >
 > This is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
 > security audit**. No security guarantees are made until that audit is complete. Packages are

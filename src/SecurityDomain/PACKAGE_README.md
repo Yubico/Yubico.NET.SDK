@@ -4,7 +4,7 @@ Security Domain support for YubiKey devices: inspect, generate, import, rotate, 
 Channel Protocol (SCP) keys other applet sessions use, manage SCP11 certificates and allow lists, and
 factory-reset the application.
 
-> ## ALPHA - NOT FOR PRODUCTION
+> ## Alpha - not for production
 >
 > This is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
 > security audit**. No security guarantees are made until that audit is complete. Packages are

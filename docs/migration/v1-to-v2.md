@@ -202,6 +202,7 @@ Migration notes:
 - Replace synchronous enumeration assumptions with async flow and cancellation support.
 - V2 models one physical YubiKey with one or more available connections. Avoid assuming that the discovered object is a single transport handle.
 - If v1 code filtered by `Transport.HidFido`, `Transport.UsbSmartCard`, or NFC-specific behavior, review the v2 `ConnectionType` choice rather than applying a mechanical enum rename.
+- For the common "just get one matching device" case, prefer `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` (throws `InvalidOperationException` when none match) or `FindFirstOrDefaultAsync(...)` (returns `null`) over `FindAllAsync(...).First()`. See `core-find-first-discovery-helpers` in `v1-to-v2-map.yml` and `docs/usage/device-discovery.md`.
 
 ### Device Info
 
@@ -236,6 +237,7 @@ Migration notes:
 - Some v1 metadata properties moved into richer v2 fields. For example, v1 `FirmwareVersion` often corresponds to `DeviceInfo.FirmwareVersion` for comparisons and `DeviceInfo.VersionName` for display.
 - Reuse one session for multiple Management operations instead of creating repeated one-shot sessions.
 - Configuration changes are persistent and may reboot the device; keep read-only device-info migrations separate from configuration migrations.
+- The snippet uses `YubiKeyManager.FindFirstAsync(...)`, the one-shot single-device discovery helper; see `core-find-first-discovery-helpers` in `v1-to-v2-map.yml`.
 
 ### Applet Session Creation
 

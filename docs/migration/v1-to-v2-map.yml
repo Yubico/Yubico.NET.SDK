@@ -563,6 +563,19 @@ mappings:
       - yubikit:src/Fido2/CLAUDE.md
     notes: Implements the SDK's forward-compatibility doctrine (see the root CLAUDE.md and the new "Forward compatibility and escape hatches" section in src/Fido2/CLAUDE.md) - typed properties still model only known fields, but callers who need a field this SDK version does not yet expose can parse RawData themselves instead of being blocked. Populated only by the Decode(ReadOnlyMemory<byte>) path; empty on caller-constructed instances. Not a v1-to-v2 API mapping (v1 had no raw-response escape hatch here at all), but relevant to anyone porting v1 code that reached into ad hoc CBOR parsing to read fields the typed model omitted. Related, lower-confidence behavior note: the same range's COSE key decoding refactor (`48d49523`, `01eff955`) made CoseKey.Decode tolerant of unexpected CBOR value types for unmodeled parameters/labels (previously an InvalidOperationException) instead of throwing; code that relied on that exception to detect malformed-shaped keys will no longer see it.
     last_reviewed_commit: 277920d9de48d4aedad7ecc5d00201a015b5a297
+  - id: core-find-first-discovery-helpers
+    status: assisted
+    confidence: high
+    migration_kind: member
+    v1: YubiKeyDevice.FindAll().First() / YubiKeyDevice.FindByTransport(...).First()
+    v2: YubiKeyManager.FindFirstAsync(predicate, cancellationToken) / YubiKeyManager.FindFirstOrDefaultAsync(predicate, cancellationToken)
+    evidence:
+      - yubikit:src/Core/src/Devices/YubiKeyManager.cs
+      - yubikit:src/Core/src/Devices/YubiKeyDeviceManager.cs
+      - yubikit:src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceManagerTests.cs
+      - yubikit:docs/usage/device-discovery.md
+    notes: "`feat(core): add first-key discovery helpers` (`6cb3875f`) adds a one-shot convenience over `FindAllAsync` for the common single-device case. `FindFirstAsync(predicate, cancellationToken)` returns the first matching `IYubiKey` or throws `InvalidOperationException` when none match; `FindFirstOrDefaultAsync(predicate, cancellationToken)` returns `null` instead of throwing. Both are one-shot queries over `FindAllAsync`: they do not wait for insertion, discovery ordering is not stable, and they inherit `FindAllAsync`'s caching (a cached result can complete without observing cancellation) and exception-propagation behavior. This supersedes the `devices.First()` / `FindAllAsync(...).First()` idiom shown in `recipe-device-discovery-find-by-transport` and the Common Migration Recipes' Device Discovery and Device Info examples for the common single-device case; `FindAllAsync` remains the entry point for enumerating every connected key or applying explicit `ConnectionType`/`forceRescan` control."
+    last_reviewed_commit: 0501f516e7877188e6d8977cc799f04a837cffed
 manual_review:
   - device discovery call sites
   - low-level HID listener DeviceEvent callback signatures

@@ -26,6 +26,8 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
 |--------|-------------|
 | `FindAllAsync()` | Find all connected YubiKeys |
 | `FindAllAsync(ConnectionType)` | Find YubiKeys by connection type (SmartCard, HID, or All) |
+| `FindFirstAsync(predicate, cancellationToken)` | Find the first match, or throw `InvalidOperationException` |
+| `FindFirstOrDefaultAsync(predicate, cancellationToken)` | Find the first match, or return `null` |
 
 ### Monitoring Methods
 
@@ -55,7 +57,18 @@ var smartCardDevices = await YubiKeyManager.FindAllAsync(ConnectionType.SmartCar
 
 // Find only HID-connected devices (FIDO2, OTP)
 var hidDevices = await YubiKeyManager.FindAllAsync(ConnectionType.Hid);
+
+// Find one device. The predicate is optional.
+var firstDevice = await YubiKeyManager.FindFirstAsync();
+var firstSmartCardDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
+    device => device.SupportsConnection(ConnectionType.SmartCard));
 ```
+
+The first-device methods are one-shot queries over the same cached discovery as `FindAllAsync`.
+They do not wait for a YubiKey to be inserted, and discovery ordering is not stable. Use
+`WatchAsync` when the application needs to wait for device changes. They inherit `FindAllAsync`
+cancellation behavior: the token is passed to discovery, but a cached result may complete without
+observing cancellation.
 
 ## Device Monitoring
 

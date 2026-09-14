@@ -53,11 +53,11 @@ public class CoreTests : IAsyncLifetime
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
-    public async Task GetPcscDevices()
+    public async Task FindFirstOrDefaultAsync_FindsSmartCardDevice()
     {
-        var devices = await TransientScanRetry.ScanAsync(
-            () => YubiKeyManager.FindAllAsync(ConnectionType.SmartCard));
-        var device = devices.FirstOrDefault();
+        var device = await TransientScanRetry.ScanAsync(
+            () => YubiKeyManager.FindFirstOrDefaultAsync(
+                candidate => candidate.SupportsConnection(ConnectionType.SmartCard)));
         Assert.NotNull(device);
     }
 }

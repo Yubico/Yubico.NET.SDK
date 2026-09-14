@@ -58,17 +58,37 @@
         <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-        <!-- Alpha disclaimer surfaced in package metadata via PackageReadmeFile
-             (package page) and PackageReleaseNotes (plain-text fallback). The
-             canonical long-form text lives in PACKAGE_README.md; keep these aligned.
+        <!-- Alpha disclaimer surfaced in package metadata via PackageReleaseNotes (plain-text
+             fallback) and, for packages without their own readme, via the shared
+             PACKAGE_README.md. Every module ships its own package readme; see below.
              Remove when the SDK exits alpha and completes the formal security audit. -->
-        <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
         <PackageReleaseNotes>ALPHA - NOT FOR PRODUCTION. Pre-release, unsigned, subject to change, and not yet security-audited by Yubico. No security guarantees. Package names/namespaces may change. Evaluation / hackathon use only.</PackageReleaseNotes>
     </PropertyGroup>
 
-    <!-- Ship the shared alpha PACKAGE_README.md in every packable package's root. -->
+    <!-- Per-package readme.
+
+         Each packable module ships src/<Module>/PACKAGE_README.md, a short package-page document
+         (what it is, requirements, install, one snippet, links). It is hand-written rather than
+         sliced from the module README on purpose: the package page answers "is this the right
+         package", while src/<Module>/README.md answers "how do I use it". `docs-qa` enforces that
+         each one exists, names its own package in the install command, carries the shared alpha
+         banner verbatim, and uses absolute links only - nuget.org does not resolve relative links.
+
+         The file is packed at the package root as README.md. A packable project without one falls
+         back to the shared root PACKAGE_README.md so pack never fails with NU5039. -->
+    <PropertyGroup Condition="'$(IsTestProject)' != 'true'">
+        <ModulePackageReadme>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../PACKAGE_README.md'))</ModulePackageReadme>
+        <HasModulePackageReadme>false</HasModulePackageReadme>
+        <HasModulePackageReadme Condition="Exists('$(ModulePackageReadme)')">true</HasModulePackageReadme>
+        <PackageReadmeFile Condition="'$(HasModulePackageReadme)' == 'true'">README.md</PackageReadmeFile>
+        <PackageReadmeFile Condition="'$(HasModulePackageReadme)' != 'true'">PACKAGE_README.md</PackageReadmeFile>
+    </PropertyGroup>
+
     <ItemGroup Condition="'$(IsTestProject)' != 'true'">
-        <None Include="$(MSBuildThisFileDirectory)PACKAGE_README.md" Pack="true" PackagePath="\" Visible="false"/>
+        <None Condition="'$(HasModulePackageReadme)' == 'true'"
+              Include="$(ModulePackageReadme)" Pack="true" PackagePath="\README.md" Visible="false"/>
+        <None Condition="'$(HasModulePackageReadme)' != 'true'"
+              Include="$(MSBuildThisFileDirectory)PACKAGE_README.md" Pack="true" PackagePath="\" Visible="false"/>
     </ItemGroup>
 
     <!-- Source Link ships in the .NET SDK (8+) and is enabled by default for GitHub-hosted

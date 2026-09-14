@@ -6,7 +6,7 @@
     <AssemblyName>Yubico.YubiKit.YubiHsm</AssemblyName>
 
     <!-- Package Metadata -->
-    <Description>YubiHSM support for YubiKey devices including hardware security module operations, key management, and cryptographic operations.</Description>
+    <Description>YubiHSM Auth applet support for YubiKey devices. Stores the credentials used to authenticate to a YubiHSM 2 and derives its session keys; it does not communicate with the YubiHSM 2 itself.</Description>
     <PackageTags>yubikey;yubico;yubihsm;hsm;hardware-security-module;crypto</PackageTags>
 
     <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->

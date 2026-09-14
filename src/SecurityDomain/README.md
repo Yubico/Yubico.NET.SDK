@@ -162,4 +162,4 @@ than other operations.
 - [Device discovery](../../docs/usage/device-discovery.md) - finding and monitoring YubiKeys.
 - [GlobalPlatform Card Specification](https://globalplatform.org/specs-library/card-specification-v2-3-1/) -
   the SCP03 and SCP11 source specifications.
-- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

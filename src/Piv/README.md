@@ -162,4 +162,4 @@ dotnet run --project src/Piv/examples/PivTool/PivTool.csproj
 - [Security Domain](../SecurityDomain/README.md) - SCP03 and SCP11 keys that protect the PIV channel.
 - [User interaction](../../docs/usage/user-interaction.md) and [device discovery](../../docs/usage/device-discovery.md) - cross-module guides.
 - [NIST SP 800-73](https://csrc.nist.gov/pubs/sp/800/73/4/final) - the PIV specification.
-- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

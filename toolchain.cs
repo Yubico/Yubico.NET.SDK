@@ -1517,6 +1517,7 @@ List<string> ValidateActiveDocumentation(string[] documentationFiles)
 
         ValidateCodeFences(relativePath, lines, failures);
         ValidateKnownStaleDocPatterns(relativePath, lines, failures);
+        ValidateNoAgentDocReferences(relativePath, lines, failures);
         ValidateLocalMarkdownLinks(relativePath, fullPath, lines, failures);
     }
 
@@ -1641,6 +1642,26 @@ static void ValidateKnownStaleDocPatterns(string relativePath, string[] lines, L
             if (lines[i].Contains(pattern, StringComparison.Ordinal))
                 failures.Add($"{relativePath}:{i + 1}: stale FIDO2 user-presence doc pattern '{pattern}'");
         }
+    }
+}
+
+static void ValidateNoAgentDocReferences(string relativePath, string[] lines, List<string> failures)
+{
+    // CLAUDE.md and AGENTS.md are instructions for coding agents, not documentation for humans.
+    // Human-facing docs must not point readers at them; the developer guide is the contributor entry point.
+    var fileName = Path.GetFileName(relativePath);
+    if (fileName is "CLAUDE.md" or "AGENTS.md")
+        return;
+
+    var isHumanFacing = fileName is "README.md" or "PACKAGE_README.md" ||
+                        relativePath.StartsWith("docs/usage/", StringComparison.OrdinalIgnoreCase);
+    if (!isHumanFacing)
+        return;
+
+    for (var i = 0; i < lines.Length; i++)
+    {
+        if (Regex.IsMatch(lines[i], @"\b(CLAUDE|AGENTS)\.md\b"))
+            failures.Add($"{relativePath}:{i + 1}: human-facing docs must not reference agent instruction files; link docs/DEV-GUIDE.md instead");
     }
 }
 

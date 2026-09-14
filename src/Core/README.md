@@ -163,4 +163,4 @@ device with `Yubico.YubiKit.SecurityDomain`.
 - [Device discovery](../../docs/usage/device-discovery.md), [User interaction](../../docs/usage/user-interaction.md),
   and [TLV processing](../../docs/usage/tlv-processing.md).
 - [Logging](../../docs/LOGGING.md): configure `YubiKitLogging.LoggerFactory` once at startup.
-- [CLAUDE.md](CLAUDE.md): contributor guidance, internals, and test infrastructure.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

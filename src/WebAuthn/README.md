@@ -170,4 +170,4 @@ User verification is separate from touch, and `UserVerification` on either optio
 - [../Fido2/README.md](../Fido2/README.md) - the CTAP layer this package builds on, and [FidoTool](../Fido2/examples/FidoTool/), the interactive sample; this package has none of its own.
 - [user-interaction.md](../../docs/usage/user-interaction.md) and [device-discovery.md](../../docs/usage/device-discovery.md).
 - The [WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/) specification and the [Public Suffix List](https://publicsuffix.org/).
-- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

@@ -170,4 +170,4 @@ dotnet run --project src/YubiOtp/examples/OtpTool/OtpTool.csproj
 - [../../docs/usage/user-interaction.md](../../docs/usage/user-interaction.md) - user-presence notifications.
 - [../../docs/usage/device-discovery.md](../../docs/usage/device-discovery.md) - finding and watching YubiKeys.
 - [Yubico OTP documentation](https://developers.yubico.com/OTP/) - protocol and slot reference.
-- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

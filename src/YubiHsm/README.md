@@ -182,4 +182,4 @@ dotnet run --project src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj
 - [Security Domain](../SecurityDomain/README.md) - SCP keys for running this session over a secure channel.
 - [User interaction](../../docs/usage/user-interaction.md) and [device discovery](../../docs/usage/device-discovery.md) - cross-module guides.
 - [YubiHSM Auth](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-yubihsm-auth.html) - the applet.
-- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

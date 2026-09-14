@@ -165,4 +165,4 @@ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.cspro
 - [user-interaction.md](../../docs/usage/user-interaction.md) and
   [device-discovery.md](../../docs/usage/device-discovery.md).
 - [YubiKey configuration reference](https://developers.yubico.com/yubikey-manager/Config_Reference.html).
-- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

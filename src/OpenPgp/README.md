@@ -180,4 +180,4 @@ dotnet run --project src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj
 - [../Management/README.md](../Management/README.md) - enabling or disabling the OpenPGP application.
 - [user-interaction.md](../../docs/usage/user-interaction.md) and [device-discovery.md](../../docs/usage/device-discovery.md).
 - The [OpenPGP smart card application 3.4](https://gnupg.org/ftp/specs/OpenPGP-smart-card-application-3.4.pdf) specification.
-- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

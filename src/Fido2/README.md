@@ -181,4 +181,4 @@ dotnet run --project src/Fido2/examples/FidoTool/FidoTool.csproj
 - [../WebAuthn/README.md](../WebAuthn/README.md) - the higher-level WebAuthn client built on this module.
 - [user-interaction.md](../../docs/usage/user-interaction.md) and [device-discovery.md](../../docs/usage/device-discovery.md).
 - The [CTAP 2.1](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html) and [WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/) specifications.
-- [CLAUDE.md](CLAUDE.md) - contributor guidance, internals, and test infrastructure.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

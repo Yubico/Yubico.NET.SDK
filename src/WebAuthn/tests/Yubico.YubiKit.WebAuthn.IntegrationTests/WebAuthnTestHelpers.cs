@@ -36,7 +36,10 @@ internal static class WebAuthnTestHelpers
         return new WebAuthnClient(
             session,
             origin!,
-            isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk");
+            new WebAuthnClientOptions
+            {
+                PublicSuffixChecker = domain => domain is "com" or "org" or "net" or "co.uk"
+            });
     }
 
     internal static async Task NormalizePinAsync(FidoSession session)

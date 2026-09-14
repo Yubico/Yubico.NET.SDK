@@ -91,14 +91,13 @@ Logger.LogError(ex, "PreviewSign authentication failed");
 ```csharp
 // Create client from an existing FIDO2 session.
 // The PublicSuffixChecker should be backed by Public Suffix List data.
-// WebAuthnClientOptions is optional; supply a CredentialPrompt to let the SDK ask for a PIN
-// when the ceremony needs it.
+// WebAuthnClientOptions and its PublicSuffixChecker are required. CredentialPrompt remains optional.
 await using var client = new WebAuthnClient(
     fidoSession,
     origin,
-    isPublicSuffix: domain => publicSuffixList.Contains(domain),
     new WebAuthnClientOptions
     {
+        PublicSuffixChecker = domain => publicSuffixList.Contains(domain),
         CredentialPrompt = myCredentialPrompt,
         EnterpriseRpIds = enterpriseRpIds,
         MaxPromptAttempts = 3
@@ -107,8 +106,11 @@ await using var client = new WebAuthnClient(
 // Or create the FIDO2 session and WebAuthn client from a YubiKey device.
 await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
     origin,
-    isPublicSuffix: domain => publicSuffixList.Contains(domain),
-    clientOptions: new WebAuthnClientOptions { CredentialPrompt = myCredentialPrompt },
+    clientOptions: new WebAuthnClientOptions
+    {
+        PublicSuffixChecker = domain => publicSuffixList.Contains(domain),
+        CredentialPrompt = myCredentialPrompt
+    },
     sessionOptions: new SessionCreationOptions
     {
         PreferredConnectionType = ConnectionType.SmartCard,
@@ -141,12 +143,12 @@ var matches = await client.GetAssertionAsync(requestOptions, pinBytes: null);
 var assertion = await matches[0].SelectAsync();
 ```
 
-The device factory takes two independent optional carriers, and mixing them up is the easy mistake:
-`clientOptions` (`WebAuthnClientOptions`) is forwarded to the created `WebAuthnClient`, while
+The device factory takes two independent configuration carriers, and mixing them up is the easy mistake:
+required `clientOptions` (`WebAuthnClientOptions`) is forwarded to the created `WebAuthnClient`, while optional
 `sessionOptions` (`SessionCreationOptions`) is forwarded unchanged to `CreateFidoSessionAsync`.
-Required WebAuthn inputs (`origin`, `isPublicSuffix`) remain positional. The earlier overload ending in
-`scpKeyParams`, `configuration`, and `cancellationToken` was removed during the coordinated 2.0
-breaking window.
+The origin and client options are required; `PublicSuffixChecker` is required within the client options,
+while `CredentialPrompt` remains optional. The earlier standalone public-suffix checker and overload ending
+in `scpKeyParams`, `configuration`, and `cancellationToken` were removed during the coordinated 2.0 breaking window.
 
 ### Credential Prompting
 
@@ -345,7 +347,10 @@ public async Task Registration_WithPreviewSign_ReturnsGeneratedSigningKey(YubiKe
     await using var client = new WebAuthnClient(
         fidoSession,
         origin!,
-        isPublicSuffix: domain => domain is "com" or "org" or "net" or "co.uk");
+        new WebAuthnClientOptions
+        {
+            PublicSuffixChecker = domain => domain is "com" or "org" or "net" or "co.uk"
+        });
 
     
     // Test logic...

@@ -36,6 +36,26 @@ public sealed record WebAuthnClientOptions
 
     private readonly int _maxPromptAttempts = DefaultMaxPromptAttempts;
     private readonly IReadOnlySet<string> _enterpriseRpIds = NoEnterpriseRpIds;
+    private readonly PublicSuffixChecker? _publicSuffixChecker;
+
+    /// <summary>
+    /// Gets the checker used to reject public-suffix RP IDs.
+    /// </summary>
+    /// <remarks>
+    /// Production callers should use a checker backed by Public Suffix List data.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">The property is initialized with <see langword="null"/>.</exception>
+    /// <exception cref="InvalidOperationException">The property was not configured.</exception>
+    public required PublicSuffixChecker PublicSuffixChecker
+    {
+        get => _publicSuffixChecker ?? throw new InvalidOperationException(
+            "PublicSuffixChecker must be configured before creating a WebAuthn client.");
+        init
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            _publicSuffixChecker = value;
+        }
+    }
 
     /// <summary>
     /// Gets the maximum number of times the client asks <see cref="CredentialPrompt"/> for a PIN

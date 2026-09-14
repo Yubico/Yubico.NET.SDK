@@ -31,11 +31,11 @@ public static class IYubiKeyExtensions
         /// Creates a WebAuthn client for the YubiKey asynchronously.
         /// </summary>
         /// <param name="origin">The WebAuthn origin for client data JSON.</param>
-        /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
         /// <param name="clientOptions">
-        /// Optional configuration for the client itself (enterprise RP IDs, credential prompt,
-        /// prompt-attempt limit), forwarded to the created <see cref="WebAuthnClient"/>. Unrelated to
-        /// <paramref name="sessionOptions"/>, which configures the session rather than the client.
+        /// Required configuration for the client itself (public suffix checker, enterprise RP IDs,
+        /// credential prompt, prompt-attempt limit), forwarded to the created
+        /// <see cref="WebAuthnClient"/>. Unrelated to <paramref name="sessionOptions"/>, which
+        /// configures the session rather than the client.
         /// </param>
         /// <param name="sessionOptions">
         /// Optional settings for the underlying FIDO2 session (SCP key parameters, protocol
@@ -56,20 +56,21 @@ public static class IYubiKeyExtensions
         /// </remarks>
         public async Task<WebAuthnClient> CreateWebAuthnClientAsync(
             WebAuthnOrigin origin,
-            PublicSuffixChecker isPublicSuffix,
-            WebAuthnClientOptions? clientOptions = null,
+            WebAuthnClientOptions clientOptions,
             SessionCreationOptions? sessionOptions = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(origin);
-            ArgumentNullException.ThrowIfNull(isPublicSuffix);
+            ArgumentNullException.ThrowIfNull(clientOptions);
+            // Force the runtime guard before session creation can open a device connection.
+            _ = clientOptions.PublicSuffixChecker;
 
             var fidoSession = await yubiKey.CreateFidoSessionAsync(sessionOptions, cancellationToken)
                 .ConfigureAwait(false);
 
             try
             {
-                return new WebAuthnClient(fidoSession, origin, isPublicSuffix, clientOptions);
+                return new WebAuthnClient(fidoSession, origin, clientOptions);
             }
             catch
             {

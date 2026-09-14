@@ -162,3 +162,9 @@
 - Incidental bug fix: OTP HID restarts its response timeout after a completed touch wait, so time spent waiting
   for touch no longer consumes the post-touch response budget. This timing behavior remains deferred for live
   hardware verification; no deterministic clock seam was added solely for this polling detail.
+
+## 2026-09-14 - WebAuthn required client options
+
+- Reviewed the WebAuthn construction records against base commit
+  `a05f96552f504a031823fd8c315df4e37656abff` and updated them for the v2 development change moving the public-suffix checker
+  into required `WebAuthnClientOptions`; no merged commit is claimed for the working-tree refactor.

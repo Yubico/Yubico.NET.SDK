@@ -446,6 +446,8 @@ Target("docs-qa", () =>
     PrintHeader("Validating active documentation");
 
     var failures = ValidateActiveDocumentation(activeDocumentationFiles);
+    failures.AddRange(ValidatePackageReadmes(packableProjects));
+
     if (failures.Count > 0)
     {
         PrintColored($"Found {failures.Count} documentation issue(s):", ConsoleColor.Red);
@@ -456,6 +458,7 @@ Target("docs-qa", () =>
     }
 
     PrintInfo($"Validated {activeDocumentationFiles.Length} active documentation file(s)");
+    PrintInfo($"Validated {packableProjects.Length} package readme(s)");
 });
 
 Target("docs-inventory", () =>
@@ -1515,6 +1518,74 @@ List<string> ValidateActiveDocumentation(string[] documentationFiles)
         ValidateCodeFences(relativePath, lines, failures);
         ValidateKnownStaleDocPatterns(relativePath, lines, failures);
         ValidateLocalMarkdownLinks(relativePath, fullPath, lines, failures);
+    }
+
+    return failures;
+}
+
+List<string> ValidatePackageReadmes(string[] packableProjectPaths)
+{
+    // The canonical alpha banner. Every package readme must carry this block verbatim so a single
+    // edit here is the only thing needed to find every copy when the SDK exits alpha.
+    const string alphaBanner = """
+        > ## ALPHA - NOT FOR PRODUCTION
+        >
+        > This is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
+        > security audit**. No security guarantees are made until that audit is complete. Packages are
+        > unsigned, and package names and namespaces may change. Provided for evaluation only.
+        """;
+
+    var failures = new List<string>();
+
+    foreach (var projectPath in packableProjectPaths)
+    {
+        // src/<Module>/src/<PackageId>.csproj -> src/<Module>/PACKAGE_README.md
+        var packageId = Path.GetFileNameWithoutExtension(projectPath);
+        var projectDir = Path.GetDirectoryName(Path.Combine(repoRoot, projectPath))!;
+        var readmePath = Path.Combine(Path.GetDirectoryName(projectDir)!, "PACKAGE_README.md");
+        var relativePath = Path.GetRelativePath(repoRoot, readmePath).Replace('\\', '/');
+
+        if (!File.Exists(readmePath))
+        {
+            failures.Add($"{relativePath}: missing package readme for {packageId}; see the per-package readme block in Directory.Build.props");
+            continue;
+        }
+
+        var text = File.ReadAllText(readmePath).Replace("\r\n", "\n", StringComparison.Ordinal);
+
+        var installCommand = $"dotnet add package {packageId} --prerelease";
+        if (!text.Contains(installCommand, StringComparison.Ordinal))
+            failures.Add($"{relativePath}: install command must read '{installCommand}'");
+
+        if (!text.Contains(alphaBanner, StringComparison.Ordinal))
+            failures.Add($"{relativePath}: alpha banner is missing or altered; it must match ValidatePackageReadmes in toolchain.cs verbatim");
+
+        var lines = text.Split('\n');
+        var inFence = false;
+        for (var i = 0; i < lines.Length; i++)
+        {
+            // Code fences are not prose; `handlers[i](arg)` is not a broken link.
+            if (IsCodeFenceLine(lines[i]))
+            {
+                inFence = !inFence;
+                continue;
+            }
+
+            if (inFence)
+                continue;
+
+            // Inline links, reference definitions, and autolinks all reach the package page.
+            var targets = Regex.Matches(lines[i], @"\]\(([^)\s]+)")
+                .Concat(Regex.Matches(lines[i], @"^\s*\[[^\]]+\]:\s*(\S+)"))
+                .Concat(Regex.Matches(lines[i], @"<((?:https?|ftp)://[^>\s]+)>"))
+                .Select(match => match.Groups[1].Value);
+
+            foreach (var target in targets)
+            {
+                if (!target.StartsWith("https://", StringComparison.Ordinal))
+                    failures.Add($"{relativePath}:{i + 1}: package readme links must be absolute https, because nuget.org does not resolve '{target}'");
+            }
+        }
     }
 
     return failures;

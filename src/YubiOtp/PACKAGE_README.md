@@ -51,5 +51,5 @@ throws below firmware 2.1.0.
 
 - [YubiOTP module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/YubiOtp/README.md) covers
   slot programming, challenge-response, touch, access codes, and destructive operations.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the other modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
   from source, and release notes.

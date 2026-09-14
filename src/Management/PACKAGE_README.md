@@ -48,5 +48,5 @@ Reading device information needs no PIN, touch, or lock code.
 
 - [Management module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Management/README.md) covers
   transport selection, capability configuration, reboot handling, the lock code, and connection ownership.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the other modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
   from source, and release notes.

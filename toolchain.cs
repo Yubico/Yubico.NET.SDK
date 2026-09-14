@@ -1583,7 +1583,19 @@ List<string> ValidatePackageReadmes(string[] packableProjectPaths)
             foreach (var target in targets)
             {
                 if (!target.StartsWith("https://", StringComparison.Ordinal))
+                {
                     failures.Add($"{relativePath}:{i + 1}: package readme links must be absolute https, because nuget.org does not resolve '{target}'");
+                    continue;
+                }
+
+                // The repository default branch is v1. An unqualified repository link silently lands
+                // a v2 package-page reader on the wrong SDK, which is worse than a broken link.
+                if (Regex.IsMatch(target, @"^https://github\.com/Yubico/Yubico\.NET\.SDK(/|$)") &&
+                    !target.Contains("/tree/", StringComparison.Ordinal) &&
+                    !target.Contains("/blob/", StringComparison.Ordinal))
+                {
+                    failures.Add($"{relativePath}:{i + 1}: repository link '{target}' must name the v2 branch (/tree/<branch> or /blob/<branch>/...); the default branch is v1");
+                }
             }
         }
     }

@@ -50,5 +50,5 @@ Reading the PIN attempt counter needs no PIN, touch, or management key.
 
 - [PIV module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Piv/README.md) covers
   authentication, key and certificate operations, touch policy, constraints, and secret handling.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the other modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
   from source, and release notes.

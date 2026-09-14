@@ -54,5 +54,5 @@ Reading key information needs no secure channel, so this works on an untouched d
 
 - [Security Domain module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/SecurityDomain/README.md) covers
   SCP03 and SCP11 setup, key rotation, certificates and allow lists, reset, and key handling.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the other modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
   from source, and release notes.

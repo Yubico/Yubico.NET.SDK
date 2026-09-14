@@ -38,7 +38,10 @@
         <Authors>Yubico</Authors>
         <Company>Yubico</Company>
         <Copyright>Copyright © Yubico $([System.DateTime]::Now.Year)</Copyright>
-        <PackageProjectUrl>https://github.com/Yubico/Yubico.NET.SDK</PackageProjectUrl>
+        <!-- The repository default branch is v1. Point the nuget.org project link at the v2 branch
+             so a package page does not send people to the wrong SDK. RepositoryUrl stays bare: it is
+             source-control metadata, and Source Link pairs it with the exact commit. -->
+        <PackageProjectUrl>https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Yubico/Yubico.NET.SDK</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

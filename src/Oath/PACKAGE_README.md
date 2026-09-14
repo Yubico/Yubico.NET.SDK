@@ -52,5 +52,5 @@ Listing credentials needs no touch, and no password unless one has been set.
 
 - [OATH module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Oath/README.md) covers
   adding credentials from an otpauth URI, calculating codes, password protection, touch, and constraints.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the other modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
   from source, and release notes.

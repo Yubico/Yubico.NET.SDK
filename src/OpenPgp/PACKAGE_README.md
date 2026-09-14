@@ -50,5 +50,5 @@ Reading application-related data needs no PIN and no touch.
 
 - [OpenPGP module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/OpenPgp/README.md) covers
   PIN verification, key generation, signing, decryption, touch policy, and secret handling.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the other modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
   from source, and release notes.

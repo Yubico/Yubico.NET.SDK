@@ -53,5 +53,5 @@ Listing credentials needs no password, management key, or touch.
 
 - [YubiHSM Auth module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/YubiHsm/README.md) covers
   storing credentials, deriving session keys, the management key, error handling, and secret handling.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the other modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
   from source, and release notes.

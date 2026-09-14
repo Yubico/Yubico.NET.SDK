@@ -55,5 +55,5 @@ read-only call to try first; read authenticator capabilities with FIDO2 `GetInfo
   registration, authentication, PIN prompting, user-verification preferences, and constraints.
 - [FIDO2 module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Fido2/README.md) covers
   the CTAP layer underneath, including per-feature firmware minimums.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the other modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
   from source, and release notes.

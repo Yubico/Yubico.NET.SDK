@@ -52,5 +52,5 @@ Reading authenticator information needs no touch and no PIN.
   credential creation and assertion, PIN and user verification, extensions, transport rules, and secret handling.
 - [WebAuthn module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/WebAuthn/README.md) covers
   the higher-level client built on this package.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the other modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
   from source, and release notes.

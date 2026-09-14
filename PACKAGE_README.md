@@ -23,6 +23,6 @@ Alpha packages are distributed from a public, anonymous feed; no authentication 
 
 ## Documentation
 
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers every module, building from
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers every module, building from
   source, and release notes.
 - License: Apache-2.0

@@ -47,5 +47,5 @@ Discovery needs no PIN, touch, or open session.
 
 - [Core module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Core/README.md) covers
   device discovery and monitoring, connection and session ownership, access tiers, SCP, and TLV handling.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK) covers the application modules, building
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the application modules, building
   from source, and release notes.

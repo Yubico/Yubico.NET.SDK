@@ -49,8 +49,7 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.SecurityDomain;
 
-var devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreateSecurityDomainSessionAsync();
 
 foreach (var keyInfo in await session.GetKeyInfoAsync())

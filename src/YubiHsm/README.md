@@ -43,8 +43,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.YubiHsm;
 
-var devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreateHsmAuthSessionAsync();
 foreach (var credential in await session.ListCredentialsAsync())
 {

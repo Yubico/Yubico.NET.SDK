@@ -38,10 +38,13 @@ using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Piv;
 
-var devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
-
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
 Console.WriteLine($"Serial {device.SerialNumber}: {device.AvailableConnections}");
+
+foreach (var each in await YubiKeyManager.FindAllAsync())
+{
+    Console.WriteLine($"  {each.SerialNumber}: {each.AvailableConnections}");
+}
 ```
 
 One `IYubiKey` is one physical YubiKey, even when it exposes several interfaces at once. `SerialNumber` is

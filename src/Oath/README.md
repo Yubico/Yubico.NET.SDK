@@ -44,8 +44,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Oath;
 
-IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreateOathSessionAsync();
 IReadOnlyList<Credential> credentials = await session.ListCredentialsAsync();
 Console.WriteLine(string.Join('\n', credentials.Select(c => $"{c.Issuer}:{c.Name} ({c.OathType})")));

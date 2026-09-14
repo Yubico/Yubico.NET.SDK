@@ -45,8 +45,7 @@ using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
-var devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
 if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
     throw new InvalidOperationException("The origin is not a secure context.");
 

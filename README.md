@@ -40,17 +40,15 @@ Every application follows one shape: discover a device, create a session for the
 let `await using` dispose it. Discovery alone needs only Core:
 
 ```csharp
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 
-var devices = await YubiKeyManager.FindAllAsync();
-
-foreach (var device in devices)
-{
-    Console.WriteLine($"Serial {device.SerialNumber}: {device.AvailableConnections}");
-}
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+Console.WriteLine($"Serial {device.SerialNumber}: {device.AvailableConnections}");
 ```
 
-One `IYubiKey` is one physical key, whichever interfaces it exposes. From here, an application package adds
+One `IYubiKey` is one physical key, whichever interfaces it exposes. `FindFirstAsync` throws when no key is
+present; `FindAllAsync` returns every connected key, and `FindFirstOrDefaultAsync` takes a predicate. From here, an application package adds
 `device.Create<Application>SessionAsync()`; each package README opens with that step and a first read-only
 call, then covers the common operations. For applet specifics and features, see that documentation.
 

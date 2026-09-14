@@ -42,8 +42,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Piv;
 
-var devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreatePivSessionAsync();
 
 int pinAttempts = await session.GetPinAttemptsAsync();

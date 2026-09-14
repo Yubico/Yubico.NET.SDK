@@ -44,8 +44,7 @@ using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.Fido2.Pin;
 
-var devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreateFidoSessionAsync();
 
 var info = await session.GetInfoAsync();

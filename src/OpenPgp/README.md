@@ -46,8 +46,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.OpenPgp;
 
-IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreateOpenPgpSessionAsync();
 ApplicationRelatedData appData = await session.GetApplicationRelatedDataAsync();
 Console.WriteLine($"OpenPGP card {appData.Aid.Version.Major}.{appData.Aid.Version.Minor}, serial {appData.Aid.Serial}");

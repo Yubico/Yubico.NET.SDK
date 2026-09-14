@@ -49,8 +49,7 @@ using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 using Yubico.YubiKit.YubiOtp;
 
-IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreateYubiOtpSessionAsync();
 ConfigState state = session.GetConfigState();
 Console.WriteLine($"OTP applet firmware {state.FirmwareVersion}");

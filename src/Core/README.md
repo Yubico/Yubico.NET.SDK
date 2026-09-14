@@ -41,11 +41,12 @@ using Yubico.YubiKit.Piv;
 var devices = await YubiKeyManager.FindAllAsync();
 IYubiKey device = devices[0];
 
-Console.WriteLine($"{device.DeviceId}: {device.AvailableConnections}");
+Console.WriteLine($"Serial {device.SerialNumber}: {device.AvailableConnections}");
 ```
 
-One `IYubiKey` is one physical YubiKey, even when it exposes several interfaces at once. Discovery needs
-no PIN, touch, or open session. Later snippets assume these directives and a `device` obtained the same way;
+One `IYubiKey` is one physical YubiKey, even when it exposes several interfaces at once. `SerialNumber` is
+the durable identity; it is `null` on devices that do not report one, such as the Security Key series.
+Discovery needs no PIN, touch, or open session. Later snippets assume these directives and a `device` obtained the same way;
 `Yubico.YubiKit.Piv` is referenced only to show an application session.
 
 ## Common operations
@@ -81,7 +82,7 @@ YubiKeyManager.StartMonitoring();
 
 await foreach (DeviceEvent change in YubiKeyManager.WatchAsync())
 {
-    Console.WriteLine($"{change.Action}: {change.Device.DeviceId}");
+    Console.WriteLine($"{change.Action}: serial {change.Device.SerialNumber}");
 }
 ```
 

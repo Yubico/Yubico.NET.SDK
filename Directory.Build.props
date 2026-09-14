@@ -70,10 +70,10 @@
 
     <!-- Per-package readme.
 
-         Each packable module ships src/<Module>/PACKAGE_README.md, a short package-page document
-         (what it is, requirements, install, one snippet, links). It is hand-written rather than
-         sliced from the module README on purpose: the package page answers "is this the right
-         package", while src/<Module>/README.md answers "how do I use it". `docs-qa` enforces that
+         Each packable module ships src/<Module>/PACKAGE_README.md, a short package-page document:
+         what it is, the alpha banner, install, and links. Nothing else - requirements, snippets, and
+         constraints live in src/<Module>/README.md, which it links to, so the two never drift. The
+         package page answers "is this the right package"; the module README answers "how do I use it". `docs-qa` enforces that
          each one exists, names its own package in the install command, carries the shared alpha
          banner verbatim, and uses absolute links only - nuget.org does not resolve relative links.
 

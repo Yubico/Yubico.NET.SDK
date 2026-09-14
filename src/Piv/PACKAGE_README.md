@@ -1,21 +1,13 @@
 # Yubico.YubiKit.Piv
 
-PIV (Personal Identity Verification) support for YubiKey devices. This package turns a
-YubiKey into a smart card holding private keys and X.509 certificates in numbered slots, with PIN, PUK,
-and management-key authentication, key and certificate management, signing, decryption, ECDH key
-agreement, and attestation.
+PIV (Personal Identity Verification) support for YubiKey devices: PIN, PUK, and management-key
+authentication, key and certificate management, signing, decryption, key agreement, and attestation.
 
 > ## ALPHA - NOT FOR PRODUCTION
 >
 > This is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
 > security audit**. No security guarantees are made until that audit is complete. Packages are
 > unsigned, and package names and namespaces may change. Provided for evaluation only.
-
-## Requirements
-
-- .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
-- A YubiKey 4 or 5 series device with PIV enabled.
-- SmartCard transport only (USB CCID or NFC).
 
 ## Installation
 
@@ -26,26 +18,7 @@ dotnet add package Yubico.YubiKit.Piv --prerelease
 
 `Yubico.YubiKit.Core` is installed transitively.
 
-## Getting started
-
-```csharp
-using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Piv;
-
-var devices = await YubiKeyManager.FindAllAsync();
-IYubiKey device = devices[0];
-await using var session = await device.CreatePivSessionAsync();
-
-int pinAttempts = await session.GetPinAttemptsAsync();
-Console.WriteLine($"PIN attempts remaining: {pinAttempts}");
-```
-
-Reading the PIN attempt counter needs no PIN, touch, or management key.
-
 ## Documentation
 
-- [PIV module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Piv/README.md) covers
-  authentication, key and certificate operations, touch policy, constraints, and secret handling.
-- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit) covers the other modules, building
-  from source, and release notes.
+- [PIV module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Piv/README.md): requirements, getting started, common operations, constraints, and security notes.
+- [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit): all modules, building from source, and release notes.

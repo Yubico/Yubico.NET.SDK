@@ -1,7 +1,8 @@
-# Yubico .NET SDK v2
+# Yubico.YubiKit.YubiHsm
 
-Fallback package readme. Every shipping module has its own `src/<Module>/PACKAGE_README.md`, packed as
-`README.md`; this file is used only by a packable project that does not have one yet.
+YubiHSM Auth applet support for YubiKey devices. This is **not** a YubiHSM 2 client: the applet stores the
+credentials used to authenticate to a YubiHSM 2 and derives the session keys your own code then uses.
+This package never contacts the HSM itself.
 
 > ## Alpha - not for production
 >
@@ -13,9 +14,12 @@ Fallback package readme. Every shipping module has its own `src/<Module>/PACKAGE
 
 ```bash
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
-dotnet add package Yubico.YubiKit.Core --prerelease
+dotnet add package Yubico.YubiKit.YubiHsm --prerelease
 ```
+
+`Yubico.YubiKit.Core` is installed transitively.
 
 ## Documentation
 
+- [YubiHSM Auth module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/YubiHsm/README.md): requirements, getting started, common operations, constraints, and security notes.
 - [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit): all modules, building from source, and release notes.

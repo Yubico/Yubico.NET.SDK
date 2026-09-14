@@ -27,6 +27,21 @@ gh stack rebase && gh stack push && gh stack submit
 - Use additional `.editorconfig` files or folder-scoped sections when tests or legacy code paths require a different configuration. Roslyn will pick the closest match automatically.
 - Do not rely on IDE-specific settings to express shared conventions. If Rider or Visual Studio disagrees, the build wins.
 
+## Building and testing
+
+```bash
+dotnet toolchain.cs build
+dotnet toolchain.cs test
+dotnet toolchain.cs pack
+```
+
+Always go through `toolchain.cs`; it handles the xUnit v2/v3 runner differences and per-module scoping.
+See [TOOLCHAIN.md](../TOOLCHAIN.md) for the full target list.
+
+Unit test projects use xUnit v3 on the Microsoft Testing Platform, which the VS Code C# extensions do not
+yet discover; run them from the CLI. Integration test projects remain on xUnit v2 and appear in Test
+Explorer.
+
 ## IDE Configuration Notes
 
 - Rider: enable **Editor → Code Style → General → Read settings from .editorconfig**. Use the shared `.DotSettings` file only for features that `.editorconfig` cannot express (e.g., custom cleanup profiles that invoke "Apply .editorconfig rules").

@@ -1,7 +1,8 @@
-# Yubico .NET SDK v2
+# Yubico.YubiKit.SecurityDomain
 
-Fallback package readme. Every shipping module has its own `src/<Module>/PACKAGE_README.md`, packed as
-`README.md`; this file is used only by a packable project that does not have one yet.
+Security Domain support for YubiKey devices: inspect, generate, import, rotate, and delete the Secure
+Channel Protocol (SCP) keys other applet sessions use, manage SCP11 certificates and allow lists, and
+factory-reset the application.
 
 > ## Alpha - not for production
 >
@@ -13,9 +14,12 @@ Fallback package readme. Every shipping module has its own `src/<Module>/PACKAGE
 
 ```bash
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
-dotnet add package Yubico.YubiKit.Core --prerelease
+dotnet add package Yubico.YubiKit.SecurityDomain --prerelease
 ```
+
+`Yubico.YubiKit.Core` is installed transitively.
 
 ## Documentation
 
+- [Security Domain module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/SecurityDomain/README.md): requirements, getting started, common operations, constraints, and security notes.
 - [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit): all modules, building from source, and release notes.

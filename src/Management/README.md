@@ -1,411 +1,167 @@
 # Yubico.YubiKit.Management
 
-> **Note:** This documentation is subject to change as the module evolves. Please check for updates regularly.
+The Management application is the device-level control surface of a YubiKey. This package reads device
+information - serial number, firmware, form factor, supported and enabled capabilities - and writes device
+configuration: enabled applications per transport, timeouts, device flags, NFC restriction, and the
+configuration lock code. Other modules talk to one application; this one decides which applications exist.
 
-This module provides access to the YubiKey Management application, enabling device configuration, capability management, and device information retrieval.
-
-## Overview
-
-The Management application is the primary interface for configuring and managing YubiKey devices. It provides:
-
-- **Device Information**: Query serial number, firmware version, form factor, capabilities
-- **Capability Management**: Enable/disable applications over USB and NFC transports
-- **Device Configuration**: Configure timeouts, device flags, NFC restrictions
-- **Configuration Locking**: Protect device settings with a lock code
-- **Device Reset**: Factory reset the device (firmware 5.6+)
+> The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+> constraints.
 
 ## Requirements
 
-- **Minimum Firmware**: YubiKey 4.1.0 for basic management
-- **Advanced Features**: YubiKey 5.0+ for full configuration options
-- **Device Reset**: YubiKey 5.6+ required
+- .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
+- Any YubiKey with firmware 4.1.0 or later; writing configuration needs 5.0.0 or later.
+- Transports: SmartCard (CCID, USB or NFC), HID FIDO, or HID OTP - the only module that runs over all three.
 
-## Usage Example
+| Feature | Minimum firmware |
+|---------|------------------|
+| Read device information | 4.1.0 |
+| Write device configuration | 5.0.0 |
+| Factory reset (`ResetDeviceAsync`) | 5.6.0 |
 
-```csharp
-using Yubico.YubiKit.Management;
-using Yubico.YubiKit.Core.Devices;
+## Installation
 
-IYubiKey yubiKey = ...;
-await using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
-DeviceInfo info = await mgmtSession.GetDeviceInfoAsync();
-Console.WriteLine($"Serial: {info.SerialNumber}, Firmware: {info.FirmwareVersion}");
+```bash
+dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
+dotnet add package Yubico.YubiKit.Management --prerelease
 ```
 
-## Logging
+`Yubico.YubiKit.Core` is installed transitively.
 
-This SDK uses `Microsoft.Extensions.Logging`. To enable logs, set the global logger factory once at startup:
+## Getting started
 
 ```csharp
-using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
-
-YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
-{
-    builder.AddConsole();
-    builder.SetMinimumLevel(LogLevel.Information);
-});
-```
-
-
-## Key Concepts
-
-### Device Capabilities
-
-YubiKeys support multiple applications that can be enabled/disabled independently:
-
-- **Otp** (0x01): YubiOTP application
-- **U2f** (0x02): FIDO U2F (CTAP1)
-- **OpenPgp** (0x08): OpenPGP Card protocol
-- **Piv** (0x10): PIV smart card
-- **Oath** (0x20): OATH (TOTP/HOTP)
-- **HsmAuth** (0x100): YubiHSM Auth
-- **Fido2** (0x200): FIDO2 (CTAP2)
-
-### Transports
-
-Capabilities can be configured separately for each transport:
-
-- **USB**: Over USB connection (all YubiKeys)
-- **NFC**: Over NFC connection (NFC-enabled YubiKeys only)
-
-### Session transport selection (smart default + override)
-
-A physical YubiKey may expose several connections (SmartCard, HID FIDO, HID OTP). Each application's
-`Create…SessionAsync` extension picks a transport using an app-specific **smart default**; modules that
-can use more than one transport also accept an optional explicit **override** via a
-`preferredConnection` parameter. Passing `null` (the default) uses the documented order below; passing a
-concrete `ConnectionType` forces that transport (throwing `ArgumentException` if it is not a valid
-transport for that application, or `NotSupportedException` if the device does not expose it).
-
-| Application | Default transport order | Override parameter |
-|-------------|-------------------------|--------------------|
-| Management | SmartCard → HID FIDO → HID OTP | yes |
-| YubiOTP | SmartCard → HID OTP | yes |
-| FIDO2 / WebAuthn | HID FIDO → SmartCard | yes |
-| PIV, OATH, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no (SmartCard-only) |
-
-```csharp
-// Default (SmartCard preferred for Management):
-await using var mgmt = await yubiKey.CreateManagementSessionAsync();
-
-// Force a specific transport:
-await using var mgmtOverOtp = await yubiKey.CreateManagementSessionAsync(
-    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
-```
-
-Management selects exactly one transport: the explicit override, or the first supported transport in
-`SmartCard -> HidFido -> HidOtp`. A grouped physical YubiKey admits one live connection across all known
-interfaces. Connection and initialization failures propagate without trying another interface.
-
-### Form Factors
-
-YubiKeys come in different physical form factors:
-
-- `UsbAKeychain`: USB-A keychain form factor (YubiKey 5)
-- `UsbANano`: USB-A nano form factor (YubiKey 5 Nano)
-- `UsbCKeychain`: USB-C keychain form factor (YubiKey 5C)
-- `UsbCNano`: USB-C nano form factor (YubiKey 5C Nano)
-- `UsbCLightning`: USB-C + Lightning (YubiKey 5Ci)
-- `UsbABiometricKeychain`: USB-A with fingerprint sensor (YubiKey Bio)
-- `UsbCBiometricKeychain`: USB-C with fingerprint sensor (YubiKey Bio C)
-
-### Device Flags
-
-- `FlagEject` (0x80): Auto-eject in CCID-only mode
-- `FlagRemoteWakeup` (0x40): Allow device to wake suspended host
-
-### Configuration Locking
-
-Configuration can be protected with a 16-byte lock code. Once locked:
-- Configuration changes require the lock code
-- Unlocking requires the current lock code
-- The lock code can be changed with the current code
-
-## Core API
-
-### IYubiKey Extension Methods
-
-The module provides convenience extension methods on `IYubiKey` for common operations:
-
-```csharp
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Management;
 
-// Quick device info (creates session automatically)
-var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken: cancellationToken);
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+await using var session = await device.CreateManagementSessionAsync();
 
-// Quick configuration change (creates session automatically)
-await yubiKey.SetDeviceConfigAsync(
-    config,
-    new SetDeviceConfigOptions { Reboot = true },
-    cancellationToken: cancellationToken);
-
-// Manual session management (for multiple operations)
-await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
-    cancellationToken: cancellationToken);
+var info = await session.GetDeviceInfoAsync();
+Console.WriteLine($"Serial {info.SerialNumber}, firmware {info.FirmwareVersion}, {info.FormFactor}");
+Console.WriteLine($"USB enabled: {info.UsbEnabled}");
 ```
 
-**When to use:**
-- **Extension methods**: Single operations (query device info, apply one config)
-- **Manual session**: Multiple operations, batch queries, custom lifecycle control
+Later snippets assume these directives and a `device` obtained the same way. For a single operation, the
+one-shot extensions `device.GetDeviceInfoAsync()` and `device.SetDeviceConfigAsync(...)` open a connection, act,
+and dispose both.
 
-### Creating a Session
+## Common operations
+
+### Query capabilities
 
 ```csharp
-using Yubico.YubiKit.Management;
-
-// Using IYubiKey extension (recommended for single operations)
-await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
-    cancellationToken: cancellationToken);
-
-// Or manually over SmartCard (CCID/NFC)
-await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
-await using var mgmtSession = await ManagementSession.CreateAsync(
-    connection,
-    cancellationToken: cancellationToken);
-
-// Or manually over HID (FIDO interface)
-await using var connection = await yubiKey.ConnectAsync<IFidoHidConnection>();
-await using var mgmtSession = await ManagementSession.CreateAsync(
-    connection,
-    cancellationToken: cancellationToken);
-
-// With SCP03 authentication (SmartCard only)
-await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>();
-await using var mgmtSession = await ManagementSession.CreateAsync(
-    connection,
-    new SessionCreationOptions { ScpKeyParameters = Scp03KeyParameters.Default },
-    cancellationToken: cancellationToken);
+var info = await device.GetDeviceInfoAsync();
+bool pivOverUsb = (info.UsbSupported & DeviceCapabilities.Piv) != 0;
+bool oathEnabledOverNfc = (info.NfcEnabled & DeviceCapabilities.Oath) != 0;
+Console.WriteLine($"Configuration locked: {info.IsLocked}");
 ```
 
-### Connection and session ownership
+`UsbSupported` and `NfcSupported` describe the hardware; `UsbEnabled` and `NfcEnabled` describe what is on now.
 
-Whoever creates a connection disposes it. `ManagementSession.CreateAsync(connection)` borrows the
-caller's connection and does **not** dispose it, so keep both lifetimes explicit with `await using`.
-The `yubiKey.CreateManagementSessionAsync()` convenience API is different: it opens a connection the
-caller never sees, and the returned session owns that hidden connection.
-
-Only one live application session may use a connection. Dispose the first session before creating a
-second over the same caller-owned connection; sequential reuse is supported without reconnecting.
-Failing to dispose a caller-created connection can retain the physical-device lease for the
-connection/process lifetime and block later opens. There is no finalizer backstop.
-
-### Getting Device Information
+### Enable or disable applications
 
 ```csharp
-var deviceInfo = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+var config = DeviceConfig.CreateBuilder()
+    .WithCapabilities(Transport.Usb, (int)(DeviceCapabilities.Piv | DeviceCapabilities.Oath))
+    .Build();
 
-Console.WriteLine($"Serial: {deviceInfo.SerialNumber}");
-Console.WriteLine($"Firmware: {deviceInfo.FirmwareVersion}");
-Console.WriteLine($"Form Factor: {deviceInfo.FormFactor}");
-Console.WriteLine($"USB Enabled: {deviceInfo.UsbEnabled}");
-Console.WriteLine($"NFC Enabled: {deviceInfo.NfcEnabled}");
-Console.WriteLine($"FIPS: {deviceInfo.IsFips}");
-Console.WriteLine($"Locked: {deviceInfo.IsLocked}");
-```
-
-### Managing Capabilities
-
-```csharp
-// Get current device info
-var deviceInfo = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
-
-// Enable PIV and OATH over USB, disable others
-var usbCapabilities = DeviceCapabilities.Piv | DeviceCapabilities.Oath;
-var config = new DeviceConfig
+await using (var session = await device.CreateManagementSessionAsync())
 {
-    EnabledCapabilities = new Dictionary<Transport, int>
-    {
-        { Transport.Usb, (int)usbCapabilities }
-    }
-};
+    await session.SetDeviceConfigAsync(config, new SetDeviceConfigOptions { Reboot = true });
+}
 
-await mgmtSession.SetDeviceConfigAsync(
-    config,
-    new SetDeviceConfigOptions { Reboot = true }, // Device will reboot to apply changes
-    cancellationToken: cancellationToken);
-
-// After reboot, need to re-enumerate device
-await Task.Delay(3000); // Wait for reboot
-var devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken);
-var updatedYubiKey = devices.SingleOrDefault(device => device.SerialNumber == deviceInfo.SerialNumber);
+// The key disconnects and re-enumerates. The session above is disposed; rescan before using the device again.
+await Task.Delay(TimeSpan.FromSeconds(3));
+var rebooted = await YubiKeyManager.FindAllAsync(forceRescan: true);
 ```
 
-### Configuration Locking
+The builder also carries `WithAutoEjectTimeout`, `WithChallengeResponseTimeout`, `WithNfcRestricted`, and
+`WithDeviceFlags`, which takes a byte such as `(byte)DeviceFlags.TouchEject`. At least one USB capability must
+remain enabled; `Build()` rejects zero.
+
+### Lock the configuration
 
 ```csharp
-// Lock configuration with a new lock code
-byte[] lockCode = new byte[16];
-RandomNumberGenerator.Fill(lockCode);
-
-var config = new DeviceConfig
+await using var session = await device.CreateManagementSessionAsync();
+byte[] lockCode = RandomNumberGenerator.GetBytes(16);
+try
 {
-    EnabledCapabilities = new Dictionary<Transport, int>() // No changes
-};
-
-await mgmtSession.SetDeviceConfigAsync(
-    config,
-    new SetDeviceConfigOptions { NewLockCode = lockCode },
-    cancellationToken: cancellationToken);
-
-// Later, modify configuration with lock code
-var newConfig = new DeviceConfig
+    // Persist lockCode in your secret store first. It cannot be recovered.
+    await session.SetDeviceConfigAsync(
+        DeviceConfig.CreateBuilder().Build(),
+        new SetDeviceConfigOptions { NewLockCode = lockCode });
+}
+finally
 {
-    EnabledCapabilities = new Dictionary<Transport, int>
-    {
-        { Transport.Usb, (int)(DeviceCapabilities.Piv | DeviceCapabilities.Oath) }
-    }
-};
-
-await mgmtSession.SetDeviceConfigAsync(
-    newConfig,
-    new SetDeviceConfigOptions { Reboot = true, CurrentLockCode = lockCode },
-    cancellationToken: cancellationToken);
-```
-
-### Device Reset (Firmware 5.6+)
-
-```csharp
-// Factory reset the device
-await mgmtSession.ResetDeviceAsync(cancellationToken);
-// WARNING: This permanently deletes all data on the device
-```
-
-## Project Structure
-
-```
-Yubico.YubiKit.Management/
-├── src/
-│   ├── ManagementSession.cs           # Main session class
-│   ├── DeviceConfig.cs                # Configuration model
-│   ├── IYubiKeyExtensions.cs          # Convenience extensions
-│   └── Yubico.YubiKit.Management.csproj
-└── tests/
-    ├── Yubico.YubiKit.Management.IntegrationTests/
-    │   ├── ManagementIntegrationTests.cs
-    │   ├── AdvancedManagementTests.cs
-    │   └── ManagementTests.cs
-    └── Yubico.YubiKit.Management.UnitTests/
-        ├── FirmwareVersionTests.cs
-        └── ManagementSessionTests.cs
-```
-
-Read-only device metadata types returned by `GetDeviceInfoAsync` live in `Yubico.YubiKit.Core.Devices` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, and `VersionQualifier`). Management owns device configuration and reset operations, but not those metadata model definitions.
-
-## Common Use Cases
-
-### 1. Query Device Capabilities
-
-```csharp
-var deviceInfo = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
-
-// Check what's available
-bool hasPiv = (deviceInfo.UsbSupported & DeviceCapabilities.Piv) != 0;
-bool hasOath = (deviceInfo.NfcSupported & DeviceCapabilities.Oath) != 0;
-
-// Check what's enabled
-bool pivEnabled = (deviceInfo.UsbEnabled & DeviceCapabilities.Piv) != 0;
-bool oathEnabled = (deviceInfo.NfcEnabled & DeviceCapabilities.Oath) != 0;
-```
-
-### 2. Disable NFC for Security
-
-```csharp
-var deviceInfo = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
-
-// Disable all NFC capabilities
-var config = new DeviceConfig
-{
-    EnabledCapabilities = new Dictionary<Transport, int>
-    {
-        { Transport.Nfc, (int)DeviceCapabilities.None }
-    }
-};
-
-await mgmtSession.SetDeviceConfigAsync(
-    config,
-    new SetDeviceConfigOptions { Reboot = true },
-    cancellationToken);
-```
-
-### 3. Configure Auto-Eject Timeout
-
-```csharp
-// Set 30-second auto-eject timeout for CCID-only mode
-var config = new DeviceConfig
-{
-    EnabledCapabilities = new Dictionary<Transport, int>(),
-    AutoEjectTimeout = 30,
-    DeviceFlags = DeviceConfig.FlagEject
-};
-
-await mgmtSession.SetDeviceConfigAsync(
-    config,
-    new SetDeviceConfigOptions { Reboot = true },
-    cancellationToken);
-```
-
-### 4. Restrict NFC (Firmware 5.7+)
-
-```csharp
-// Disable NFC temporarily (can be re-enabled)
-var config = new DeviceConfig
-{
-    EnabledCapabilities = new Dictionary<Transport, int>(),
-    NfcRestricted = true
-};
-
-await mgmtSession.SetDeviceConfigAsync(config, cancellationToken: cancellationToken);
-```
-
-### 5. Check FIPS Status
-
-```csharp
-var deviceInfo = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
-
-if (deviceInfo.IsFips)
-{
-    Console.WriteLine("FIPS Series YubiKey");
-    Console.WriteLine($"FIPS Capable: {deviceInfo.FipsCapabilities}");
-    Console.WriteLine($"FIPS Approved: {deviceInfo.FipsApproved}");
+    CryptographicOperations.ZeroMemory(lockCode);
 }
 ```
 
-## Important Notes
+While locked, every later `SetDeviceConfigAsync` must supply `CurrentLockCode`. Passing `NewLockCode` again
+replaces the code; there is no unlock without the current one.
 
-### Device Reboot
+## User interaction
 
-Configuration changes that enable/disable capabilities require a device reboot:
-- YubiKey will disconnect and reconnect
-- Application needs to re-enumerate the device after ~3 seconds
-- All active sessions are terminated during reboot
+Management operations need no touch, no PIN, and no management key. `SessionCreationOptions.UserPresencePrompt`
+is accepted by the options object but never invoked by this module. The only secret it handles is the 16-byte
+configuration lock code. Cancel a pending operation with the `cancellationToken` you pass to the call.
 
-### Capability Restrictions
+Configuration can change how the device behaves afterwards. `DeviceFlags.TouchEject` makes the CCID smart card
+absent until the user touches the key, affecting every SmartCard session that follows, but it only takes effect
+once every capability that does not depend on CCID - `DeviceCapabilities.Otp`, `U2f`, and `Fido2` - is disabled.
 
-- At least one USB capability must be enabled
-- Cannot disable Management application itself
-- Some capabilities are not available on all YubiKey models
-- FIPS-approved mode limits some configuration options
+## Constraints
 
-### Transport Differences
+Each application picks one transport: the first exposed entry of its default order, or an explicit
+`SessionCreationOptions.PreferredConnectionType`. An unusable override throws `ArgumentException`, one the
+device does not expose throws `NotSupportedException`.
 
-- USB: All capabilities typically available
-- NFC: Not all YubiKey models have NFC
-- Some applications work better over specific transports
+| Application | Default transport order | Override accepted |
+|-------------|-------------------------|-------------------|
+| Management | SmartCard, HID FIDO, HID OTP | yes |
+| YubiOTP | SmartCard, HID OTP | yes |
+| FIDO2 and WebAuthn | HID FIDO, SmartCard | yes |
+| PIV, OATH, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no |
 
-### Lock Code Security
+- Supplying `ScpKeyParameters` without an explicit preference selects SmartCard, because SCP does not run over
+  HID.
+- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection.
+  A second session throws `ConnectionInUseException` until the first is disposed; connection failures propagate
+  rather than falling back to another interface.
+- Sessions from `device.CreateManagementSessionAsync()` own the connection they opened and close it on
+  disposal. `ManagementSession.CreateAsync(connection, ...)` borrows a connection you opened, and you dispose
+  it yourself. Use `await using` for both; there is no finalizer backstop.
+- `SetDeviceConfigAsync` with `Reboot = true` terminates every session on the device, and capability changes
+  can disable applications other code depends on. `ResetDeviceAsync` resets the whole device and cannot be undone.
+- Firmware-gated operations throw `NotSupportedException` when the connected key is too old.
 
-- Lock codes must be exactly 16 bytes
-- Store lock codes securely (cannot be recovered if lost)
-- Locked configuration can only be changed/unlocked with the correct code
-- No factory reset option for locked configuration on firmware <5.6
+## Security notes
 
-## Testing Guidance
+- The lock codes in `SetDeviceConfigOptions` are borrowed `ReadOnlyMemory<byte>` of exactly 16 bytes. The
+  options object is not retained; zero your buffer with `CryptographicOperations.ZeroMemory` in a `finally`.
+- The session zeroes the encoded configuration buffer, lock-code copies included, after transmitting it.
+- A lost lock code cannot be recovered, and firmware below 5.6.0 has no device reset to fall back on.
+- Never log lock codes.
 
-See [CLAUDE.md](CLAUDE.md) for detailed test infrastructure information, including the powerful `[WithYubiKey]` attribute system for declarative device filtering.
+## Example
 
-## References
+The interactive ManagementTool sample lives at src/Management/examples/ManagementTool/.
 
-- **YubiKey Manager**: https://developers.yubico.com/yubikey-manager/
-- **YubiKey Management Commands**: https://developers.yubico.com/yubikey-manager/Config_Reference.html
-- **YubiKey Capabilities**: https://developers.yubico.com/Software_Projects/YubiKey_Personalization_Manager/
+```bash
+dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj
+```
+
+## Related
+
+- [../Core/README.md](../Core/README.md) - device discovery, connections, and the `Core.Devices` metadata types.
+- [../Piv/README.md](../Piv/README.md), [../Oath/README.md](../Oath/README.md), [../Fido2/README.md](../Fido2/README.md) - applications this module toggles.
+- [user-interaction.md](../../docs/usage/user-interaction.md) and
+  [device-discovery.md](../../docs/usage/device-discovery.md).
+- [YubiKey configuration reference](https://developers.yubico.com/yubikey-manager/Config_Reference.html).
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

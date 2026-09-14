@@ -1,377 +1,183 @@
 # Yubico.YubiKit.Fido2
 
-FIDO2/WebAuthn implementation for YubiKey authenticators, supporting passkey creation, authentication, and advanced CTAP 2.1/2.3 features.
+The FIDO2 application on a YubiKey is a CTAP 2.1/2.3 authenticator. This package speaks CTAP directly: read
+capabilities, create and assert credentials, manage the PIN, and drive the credential, biometric, large-blob,
+and config sub-systems. `Yubico.YubiKit.WebAuthn` builds the WebAuthn client API on top of it.
 
-## Overview
-
-This module implements the CTAP 2.1/2.3 (Client to Authenticator Protocol) for YubiKey FIDO2 authenticators. It provides a complete implementation of FIDO2/WebAuthn functionality including:
-
-- 🔐 **Passkey Management** - Create and use passkeys for passwordless authentication
-- 🔑 **WebAuthn Operations** - MakeCredential and GetAssertion for web authentication
-- 👤 **Resident Keys** - Discoverable credentials stored on the authenticator
-- 🔒 **User Verification** - PIN and biometric authentication support
-- 📱 **Credential Management** - Enumerate, update, and delete credentials
-- 🧬 **Biometric Enrollment** - Fingerprint enrollment (YubiKey Bio series)
-- 📦 **Large Blob Storage** - Per-credential blob storage
-- ⚙️ **Authenticator Config** - Device configuration (firmware 5.4+)
+> The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+> constraints.
 
 ## Requirements
 
-- **YubiKey Models**: YubiKey 5 series, Security Key series, YubiKey Bio series
-- **Firmware**: 5.0+ (some features require 5.2+, 5.4+, 5.7+)
-- **Transports**:
-  - USB: HID FIDO interface (primary)
-  - SmartCard/CCID: NFC and USB FIDO2 APDU paths when the connected authenticator exposes the FIDO2 AID
+- .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
+- YubiKey 5 series, Security Key series, or YubiKey Bio series with firmware 5.0.0 or later.
+- Transports: HID FIDO over USB, or SmartCard (CCID) where the FIDO2 AID is exposed - NFC always, USB on 5.8.0+.
 
-⚠️ **Important**: Prefer HID FIDO for ordinary USB FIDO2 coverage. SmartCard FIDO2 over USB requires firmware 5.8.0+ and a FIDO2 AID exposed over CCID; older USB-connected YubiKeys must use HID FIDO.
+| Feature | Minimum firmware |
+|---------|------------------|
+| FIDO2 (CTAP2) | 5.0.0 |
+| Credential management, fingerprint bio enrollment | 5.2.0 |
+| Authenticator config, hmac-secret-mc extension | 5.4.0 |
+| credBlob extension | 5.5.0 |
+| FIDO2 over USB SmartCard | 5.8.0 |
 
 ## Installation
 
 ```bash
-dotnet add package Yubico.YubiKit.Fido2
+dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
+dotnet add package Yubico.YubiKit.Fido2 --prerelease
 ```
 
-## Quick Start
+`Yubico.YubiKit.Core` is installed transitively.
 
-### Create a FIDO2 Session
+## Getting started
 
 ```csharp
+using System.Security.Cryptography;
+using System.Text;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Fido2;
-
-// Create session from IYubiKey (recommended)
-await using var fidoSession = await yubiKey.CreateFidoSessionAsync();
-
-// Get authenticator information
-var info = await fidoSession.GetInfoAsync();
-Console.WriteLine($"FIDO2 Version: {info.CtapVersion}");
-Console.WriteLine($"Supports Resident Keys: {info.SupportsResidentKeys}");
-```
-
-### Make Credential (Registration)
-
-```csharp
 using Yubico.YubiKit.Fido2.Credentials;
-
-// Define relying party and user
-var rpEntity = new PublicKeyCredentialRpEntity
-{
-    Id = "example.com",
-    Name = "Example Corporation"
-};
-
-var userEntity = new PublicKeyCredentialUserEntity
-{
-    Id = userId,
-    Name = "user@example.com",
-    DisplayName = "User Name"
-};
-
-// Create credential
-var credOptions = new MakeCredentialOptions
-{
-    Rp = rpEntity,
-    User = userEntity,
-    PubKeyCredParams = new[]
-    {
-        new PubKeyCredParam { Type = "public-key", Alg = -7 }  // ES256
-    },
-    Options = new AuthenticatorOptions
-    {
-        Rk = true,  // Resident key (discoverable)
-        Uv = true   // User verification required
-    }
-};
-
-var response = await fidoSession.MakeCredentialAsync(credOptions);
-
-Console.WriteLine($"Credential ID: {Convert.ToHexString(response.CredentialId)}");
-Console.WriteLine($"Public Key (COSE): {Convert.ToHexString(response.AuthData.AttestedCredentialData.CredentialPublicKey)}");
-```
-
-### Get Assertion (Authentication)
-
-```csharp
-// Authenticate with specific credential
-var assertionOptions = new GetAssertionOptions
-{
-    RpId = "example.com",
-    AllowList = new[]
-    {
-        new PublicKeyCredentialDescriptor
-        {
-            Type = "public-key",
-            Id = credentialId
-        }
-    },
-    Options = new AuthenticatorOptions
-    {
-        Up = true,  // User presence (touch)
-        Uv = true   // User verification (PIN)
-    }
-};
-
-var assertion = await fidoSession.GetAssertionAsync(assertionOptions);
-
-Console.WriteLine($"User Handle: {Convert.ToHexString(assertion.UserHandle)}");
-Console.WriteLine($"Signature: {Convert.ToHexString(assertion.Signature)}");
-```
-
-### Discoverable Credentials (Resident Keys)
-
-```csharp
-// Authenticate without credential ID (using resident keys)
-var options = new GetAssertionOptions
-{
-    RpId = "example.com",
-    // No AllowList - authenticator returns available credentials
-    Options = new AuthenticatorOptions { Uv = true }
-};
-
-var assertion = await fidoSession.GetAssertionAsync(options);
-
-// If multiple credentials, get next one
-if (assertion.NumberOfCredentials > 1)
-{
-    var nextAssertion = await fidoSession.GetNextAssertionAsync();
-}
-```
-
-## Advanced Features
-
-### Credential Management
-
-```csharp
-using Yubico.YubiKit.Fido2.CredentialManagement;
-
-// Get all credentials
-var creds = await fidoSession.EnumerateCredentialsAsync();
-foreach (var cred in creds)
-{
-    Console.WriteLine($"RP: {cred.RpId}");
-    Console.WriteLine($"User: {cred.User.Name}");
-    Console.WriteLine($"Credential ID: {Convert.ToHexString(cred.CredentialId)}");
-}
-
-// Delete a credential
-await fidoSession.DeleteCredentialAsync(credentialDescriptor);
-
-// Update user information
-await fidoSession.UpdateUserInformationAsync(
-    credentialDescriptor,
-    newUserEntity);
-```
-
-### Biometric Enrollment (YubiKey Bio)
-
-```csharp
-using Yubico.YubiKit.Fido2.BioEnrollment;
-
-// Get fingerprint sensor info
-var bioInfo = await fidoSession.GetBioModalityAsync();
-Console.WriteLine($"Max samples: {bioInfo.MaxCaptureSamplesRequiredForEnroll}");
-
-// Enroll a new fingerprint
-var enrollment = await fidoSession.EnrollBiometricAsync(
-    onCaptureCallback: (remaining, status) =>
-    {
-        Console.WriteLine($"Touch sensor ({remaining} samples remaining)");
-    });
-
-Console.WriteLine($"Fingerprint enrolled: {enrollment.TemplateId}");
-
-// Enumerate enrolled fingerprints
-var fingerprints = await fidoSession.EnumerateBiometricEnrollmentsAsync();
-```
-
-### WebAuthn Extensions
-
-```csharp
 using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.Fido2.Pin;
 
-// Use credProtect extension
-var credOptions = new MakeCredentialOptions
-{
-    // ... rp, user, etc.
-    Extensions = new ExtensionBuilder()
-        .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
-        .Build()
-};
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+await using var session = await device.CreateFidoSessionAsync();
 
-// Use hmac-secret extension
-var assertionOptions = new GetAssertionOptions
-{
-    // ... rpId, etc.
-    Extensions = new ExtensionBuilder()
-        .WithHmacSecret(hmacSecretInput)
-        .Build()
-};
-
-var assertion = await fidoSession.GetAssertionAsync(assertionOptions);
-var hmacOutput = assertion.Extensions.HmacSecret;
+var info = await session.GetInfoAsync();
+Console.WriteLine($"CTAP versions: {string.Join(", ", info.Versions)}");
 ```
 
-### Large Blob Storage
+Later snippets assume these directives and a `device` obtained the same way. `GetInfoAsync` needs no touch and no PIN;
+`info.Options`, `info.Extensions`, and `info.Aaguid` describe the rest. For a single read, the one-shot `device.GetFidoInfoAsync()` opens and closes a session for you.
+
+## Common operations
+
+### Create a credential
+
+This asks for a touch and nothing else; `UserVerification` and credProtect need a PIN token, so they appear in the PIN flow below.
 
 ```csharp
-using Yubico.YubiKit.Fido2.LargeBlobs;
+byte[] clientDataHash = SHA256.HashData(Encoding.UTF8.GetBytes("""{"challenge":"replace-me"}"""));
+var rp = new PublicKeyCredentialRpEntity("example.com", "Example Corp");
+var user = new PublicKeyCredentialUserEntity(
+    RandomNumberGenerator.GetBytes(32), "user@example.com", "Example User");
 
-// Store data associated with a credential
-var blobData = Encoding.UTF8.GetBytes("Secret application data");
-await fidoSession.WriteLargeBlobAsync(credentialId, blobData);
-
-// Retrieve blob
-var retrievedBlob = await fidoSession.ReadLargeBlobAsync(credentialId);
-Console.WriteLine($"Retrieved: {Encoding.UTF8.GetString(retrievedBlob)}");
+var response = await session.MakeCredentialAsync(
+    clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()],
+    new MakeCredentialOptions { ResidentKey = true });
+ReadOnlyMemory<byte> credentialId = response.AuthenticatorData.AttestedCredentialData!.CredentialId;
 ```
 
-### Authenticator Configuration
+### Get an assertion
 
 ```csharp
-using Yubico.YubiKit.Fido2.Config;
-
-// Enable Enterprise Attestation (firmware 5.4+)
-await fidoSession.EnableEnterpriseAttestationAsync();
-
-// Toggle Always-Require-UV
-await fidoSession.SetAlwaysRequireUvAsync(enabled: true);
-
-// Set minimum PIN length (firmware 5.4+)
-await fidoSession.SetMinPinLengthAsync(minPinLength: 8);
+var assertion = await session.GetAssertionAsync("example.com", clientDataHash, new GetAssertionOptions());
+Console.WriteLine($"Signature: {Convert.ToHexString(assertion.Signature.Span)}");
 ```
 
-## PIN Management
+Leave `AllowList` unset to search discoverable credentials; if `NumberOfCredentials` exceeds one, call `GetNextAssertionAsync`.
+
+### Verify the user with a PIN
+
+A verified ceremony carries a PIN token: acquire one for the permission you need, authenticate the same
+`clientDataHash` you send, and set both `PinUvAuthParam` and `PinUvAuthProtocol`. Setting `UserVerification` alone is rejected. `ClientPin` also has `SetPinAsync`, `ChangePinAsync`, and `GetPinRetriesAsync`.
 
 ```csharp
-// Set initial PIN
-await fidoSession.SetPinAsync(newPin);
-
-// Change PIN
-await fidoSession.ChangePinAsync(currentPin, newPin);
-
-// Get PIN retries
-var retries = await fidoSession.GetPinRetriesAsync();
-Console.WriteLine($"PIN attempts remaining: {retries.RetriesRemaining}");
-
-// Get UV retries (biometric)
-var uvRetries = await fidoSession.GetUvRetriesAsync();
-```
-
-## Key Classes
-
-| Class | Purpose |
-|-------|---------|
-| `FidoSession` | Main session for FIDO2 operations |
-| `AuthenticatorInfo` | Device capabilities and version information |
-| `MakeCredentialOptions` / `MakeCredentialResponse` | Credential registration |
-| `GetAssertionOptions` / `GetAssertionResponse` | Authentication |
-| `CredentialManagement` | Manage discoverable credentials |
-| `FingerprintBioEnrollment` | Biometric enrollment (YubiKey Bio) |
-| `LargeBlobStorage` | Per-credential blob storage |
-| `AuthenticatorConfig` | Device configuration |
-| `ClientPin` | PIN/UV protocol operations |
-| `ExtensionBuilder` | Build WebAuthn extension inputs |
-
-## Firmware Version Features
-
-Different features require specific firmware versions:
-
-- **5.0+**: CTAP 2.0, MakeCredential, GetAssertion, PIN
-- **5.2+**: Biometric enrollment (YubiKey Bio only), credBlob extension
-- **5.3+**: Large blob storage
-- **5.4+**: Authenticator config, Enterprise Attestation, minimum PIN length
-- **5.7+**: Always-Require-UV
-- **5.8+**: PRF extension (HMAC-secret v2)
-
-## Security Considerations
-
-- **PIN Security**: Always prompt users securely; never log PINs
-- **User Verification**: Enforce UV for high-value operations
-- **Attestation**: Validate attestation statements in production
-- **Timeout Handling**: FIDO2 operations can timeout waiting for user interaction
-- **Resident Key Limits**: YubiKeys have limited resident key storage (~25-32 credentials)
-
-## Transport Differences
-
-| Transport | Connection Type | Use Case |
-|-----------|----------------|----------|
-| USB HID | `IFidoHidConnection` | Primary FIDO2 interface |
-| SmartCard | `ISmartCardConnection` | FIDO2 APDU path when the FIDO2 AID is exposed; NFC is allowed when the current PC/SC connection reports `Transport.Nfc`, while USB SmartCard requires firmware 5.8.0+; prefer HID for ordinary USB FIDO2 coverage |
-
-A grouped physical YubiKey admits one live SDK connection across all known interfaces. A second
-session throws `ConnectionInUseException` until the current session is disposed.
-
-### Transport selection (smart default + override)
-
-On a physical YubiKey that exposes more than one FIDO2-capable transport, `CreateFidoSessionAsync`
-(and `CreateWebAuthnClientAsync`) selects a transport by an app-specific **smart default**, with an
-optional explicit **override** via the `preferredConnection` parameter:
-
-- Default selection: **HID FIDO** when exposed, otherwise **SmartCard FIDO2**. Once selected, a connection
-  failure propagates rather than switching transports and creating a second session on the same key.
-- `SessionCreationOptions.PreferredConnectionType` set to `ConnectionType.SmartCard` (or `HidFido`) forces a transport. It must be a
-  transport FIDO2 can use and that the device exposes; otherwise it throws `ArgumentException`
-  (not a valid FIDO2 transport, e.g. `HidOtp`) or `NotSupportedException` (valid but not on this device).
-- SCP applies only to SmartCard. Supplying `scpKeyParams` without an override selects SmartCard
-  automatically. Explicitly selecting HID FIDO with SCP parameters throws `NotSupportedException`
-  during session initialization ("SCP is only supported on SmartCard protocols").
-
-```csharp
-// Force SmartCard FIDO2 with SCP on a dual-transport key
-using var scp = Scp03KeyParameters.Default;
-await using var session = await yubiKey.CreateFidoSessionAsync(
-    new SessionCreationOptions
-    {
-        ScpKeyParameters = scp,
-        PreferredConnectionType = ConnectionType.SmartCard
-    });
-```
-
-## Common Patterns
-
-### Check Feature Support
-
-```csharp
-var info = await fidoSession.GetInfoAsync();
-
-if (info.SupportsResidentKeys)
-{
-    // Can use rk=true
-}
-
-if (info.Extensions.Contains("credProtect"))
-{
-    // Can use credProtect extension
-}
-
-if (info.CtapVersion >= new Version(2, 1))
-{
-    // Can use CTAP 2.1+ features
-}
-```
-
-### Handle User Interaction
-
-```csharp
+byte[] pin = Encoding.UTF8.GetBytes("123456");
+byte[]? pinToken = null;
 try
 {
-    var response = await fidoSession.MakeCredentialAsync(options);
+    using var protocol = new PinUvAuthProtocolV2();
+    using var clientPin = new ClientPin(session, protocol);
+    pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+        pin, PinUvAuthTokenPermissions.MakeCredential, "example.com");
+    var options = new MakeCredentialOptions
+    {
+        ResidentKey = true,
+        Extensions = new ExtensionBuilder().WithCredProtect(CredProtectPolicy.UserVerificationRequired).Build()
+    };
+    options.WithPinUvAuth(protocol.Authenticate(pinToken, clientDataHash), protocol.Version);
+    options.WithUserVerification(true);
+    await session.MakeCredentialAsync(
+        clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options);
 }
-catch (CtapException ex) when (ex.StatusCode == CtapStatus.UserActionTimeout)
+finally
 {
-    Console.WriteLine("User didn't touch the YubiKey in time");
-}
-catch (CtapException ex) when (ex.StatusCode == CtapStatus.PinInvalid)
-{
-    Console.WriteLine("Incorrect PIN");
+    CryptographicOperations.ZeroMemory(pin);
+    CryptographicOperations.ZeroMemory(pinToken);
 }
 ```
 
-## Developer Documentation
+The assertion side is the same shape with a `GetAssertion` token:
 
-For implementation details, CBOR encoding, and test patterns, see [CLAUDE.md](CLAUDE.md).
+```csharp
+// Inside the same try block: a token is bound to its permission, so acquire a fresh one.
+CryptographicOperations.ZeroMemory(pinToken);
+pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+    pin, PinUvAuthTokenPermissions.GetAssertion, "example.com");
+var assertionOptions = new GetAssertionOptions();
+assertionOptions.WithPinUvAuth(protocol.Authenticate(pinToken, clientDataHash), protocol.Version);
+assertionOptions.WithUserVerification(true);
+var verified = await session.GetAssertionAsync("example.com", clientDataHash, assertionOptions);
+```
 
-## References
+`CredentialManagement`, `FingerprintBioEnrollment`, `LargeBlobStorage`, and `AuthenticatorConfig` are built the same way: session, protocol, and a token with the matching permission.
 
-- **WebAuthn Specification**: https://www.w3.org/TR/webauthn/
-- **CTAP 2.1 Specification**: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-20210615.html
-- **YubiKey FIDO2**: https://developers.yubico.com/FIDO2/
+## User interaction
+
+`MakeCredentialAsync`, `GetAssertionAsync`, `SelectionAsync`, and `ResetAsync` require a touch; `GetInfoAsync`
+and the `ClientPin` commands are silent. Cancel a pending operation with its `cancellationToken`.
+
+```csharp
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
+}
+```
+
+```csharp
+await using var promptingSession = await device.CreateFidoSessionAsync(
+    new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
+```
+
+The prompt shows the indication and returns without waiting. Over HID the request carries `UserPresenceBasis.DeviceWaiting` on the first keep-alive; SmartCard has no in-flight signal, so MakeCredential and GetAssertion report `PolicyRequires` before the command.
+
+## Constraints
+
+- The default transport is HID FIDO, falling back to SmartCard; `SessionCreationOptions.PreferredConnectionType`
+  forces one. `ConnectionType.HidOtp` throws `ArgumentException`, an unexposed one `NotSupportedException`.
+- SCP runs only over SmartCard. `ScpKeyParameters` without an explicit preference selects SmartCard; pairing
+  them with `ConnectionType.HidFido` throws `NotSupportedException` during initialization.
+- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection;
+  a second session throws `ConnectionInUseException` until the first is disposed.
+- Sessions from `device.CreateFidoSessionAsync()` own the connection they opened; `FidoSession.CreateAsync`
+  borrows yours and you dispose it. Use `await using` for both; there is no finalizer backstop.
+- `ResetAsync` erases every credential and the PIN, irreversibly, and is refused unless it arrives within five
+  seconds of insertion. Firmware gates throw `NotSupportedException`.
+
+## Security notes
+
+- PINs and PIN tokens are borrowed buffers; zero yours with `CryptographicOperations.ZeroMemory` in a `finally`.
+- `ClientPin` zeroes what it derives internally and `PinUvAuthProtocolV2` zeroes the raw ECDH output.
+- Never log PINs, PIN tokens, or secret-derived extension outputs such as hmac-secret and PRF results.
+
+## Example
+
+The interactive FidoTool sample lives at src/Fido2/examples/FidoTool/.
+
+```bash
+dotnet run --project src/Fido2/examples/FidoTool/FidoTool.csproj
+```
+
+## Related
+
+- [../Core/README.md](../Core/README.md) - device discovery, connections, and session creation.
+- [../WebAuthn/README.md](../WebAuthn/README.md) - the higher-level WebAuthn client built on this module.
+- [user-interaction.md](../../docs/usage/user-interaction.md) and [device-discovery.md](../../docs/usage/device-discovery.md).
+- The [CTAP 2.1](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html) and [WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/) specifications.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

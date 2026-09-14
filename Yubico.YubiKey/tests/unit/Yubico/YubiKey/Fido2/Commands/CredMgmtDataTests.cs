@@ -448,6 +448,73 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Throws<Ctap2DataException>(() => CredentialUserInfo.FromCredentialManagementData(map));
         }
 
+        [Fact]
+        public void CredMgm_Decode_UnsupportedPublicKey_PreservesRawKey()
+        {
+            byte[] publicKey = CredMgmtTestData.BuildUnsupportedCoseKey();
+            byte[] encodedData = CredMgmtTestData.BuildCredentialUserInfo(publicKey);
+
+            var mgmtData = new CredentialManagementData(encodedData);
+
+            var unsupported = Assert.IsType<CoseUnsupportedPublicKey>(mgmtData.CredentialPublicKey);
+            Assert.Equal(publicKey, unsupported.EncodedKey.ToArray());
+            Assert.NotNull(mgmtData.CredentialId);
+            Assert.NotNull(mgmtData.User);
+        }
+
+        [Fact]
+        public void CredentialUserInfo_FromCredentialManagementData_UnsupportedPublicKey_PreservesRawKey()
+        {
+            byte[] publicKey = CredMgmtTestData.BuildUnsupportedCoseKey();
+            byte[] encodedData = CredMgmtTestData.BuildCredentialUserInfo(publicKey);
+            var map = new CborMap<int>(encodedData);
+
+            var userInfo = CredentialUserInfo.FromCredentialManagementData(map);
+
+            var unsupported = Assert.IsType<CoseUnsupportedPublicKey>(userInfo.CredentialPublicKey);
+            Assert.Equal(publicKey, unsupported.EncodedKey.ToArray());
+        }
+
+        [Fact]
+        public void CredentialUserInfo_FromCredentialManagementData_UnsupportedPublicKey_StillDecodesOtherFields()
+        {
+            byte[] encodedData = CredMgmtTestData.BuildCredentialUserInfo(
+                CredMgmtTestData.BuildUnsupportedCoseKey());
+            var map = new CborMap<int>(encodedData);
+
+            var userInfo = CredentialUserInfo.FromCredentialManagementData(map);
+
+            Assert.Equal(CredMgmtTestData.CredentialIdBytes, userInfo.CredentialId.Id.ToArray());
+            Assert.Equal(CredMgmtTestData.UserIdBytes, userInfo.User.Id.ToArray());
+            Assert.Equal(CredMgmtTestData.UserName, userInfo.User.Name);
+            Assert.Equal(CredProtectPolicy.UserVerificationOptional, userInfo.CredProtectPolicy);
+        }
+
+        [Fact]
+        public void CredentialUserInfo_FromCredentialManagementData_SupportedPublicKey_ReturnsModeledKey()
+        {
+            byte[] encodedData = CredMgmtTestData.BuildCredentialUserInfo(
+                CredMgmtTestData.BuildEs256CoseKey());
+            var map = new CborMap<int>(encodedData);
+
+            var userInfo = CredentialUserInfo.FromCredentialManagementData(map);
+
+            var ecKey = Assert.IsType<CoseEcPublicKey>(userInfo.CredentialPublicKey);
+            Assert.Equal(CoseAlgorithmIdentifier.ES256, ecKey.Algorithm);
+        }
+
+        [Fact]
+        public void CredentialUserInfo_FromCredentialManagementData_MismatchedPublicKey_ThrowsCtap2DataException()
+        {
+            // A modeled algorithm paired with the wrong key type is corrupt data
+            // and must still fail rather than degrade to an unsupported key.
+            byte[] encodedData = CredMgmtTestData.BuildCredentialUserInfo(
+                CredMgmtTestData.BuildMismatchedEs256OkpCoseKey());
+            var map = new CborMap<int>(encodedData);
+
+            _ = Assert.Throws<Ctap2DataException>(() => CredentialUserInfo.FromCredentialManagementData(map));
+        }
+
         private CredentialManagementData GetFullCredMgmtData(out Dictionary<int, object> expectedValues)
         {
             expectedValues = new Dictionary<int, object>(20);

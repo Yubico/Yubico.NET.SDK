@@ -40,8 +40,15 @@
         <Copyright>Copyright © Yubico $([System.DateTime]::Now.Year)</Copyright>
         <!-- The repository default branch is v1. Point the nuget.org project link at the v2 branch
              so a package page does not send people to the wrong SDK. RepositoryUrl stays bare: it is
-             source-control metadata, and Source Link pairs it with the exact commit. -->
-        <PackageProjectUrl>https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit</PackageProjectUrl>
+             source-control metadata, and Source Link pairs it with the exact commit.
+
+             YubiKitDocsBranch is the single source of truth for that branch name. The package
+             readmes hardcode it in their links - they are packed verbatim, so they cannot expand an
+             MSBuild property - and `docs-qa` reads this property to fail any readme link that names
+             a different branch. When v2 becomes the default branch: change it here, run docs-qa, and
+             fix the lines it reports. -->
+        <YubiKitDocsBranch>yubikit</YubiKitDocsBranch>
+        <PackageProjectUrl>https://github.com/Yubico/Yubico.NET.SDK/tree/$(YubiKitDocsBranch)</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Yubico/Yubico.NET.SDK</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -75,10 +82,14 @@
          constraints live in src/<Module>/README.md, which it links to, so the two never drift. The
          package page answers "is this the right package"; the module README answers "how do I use it". `docs-qa` enforces that
          each one exists, names its own package in the install command, carries the shared alpha
-         banner verbatim, and uses absolute links only - nuget.org does not resolve relative links.
+         banner verbatim, uses absolute links only - nuget.org does not resolve relative links - and
+         names $(YubiKitDocsBranch) above in every repository link.
 
-         The file is packed at the package root as README.md. A packable project without one falls
-         back to the shared root PACKAGE_README.md so pack never fails with NU5039. -->
+         The file is packed at the package root as README.md, byte for byte: it is a plain markdown
+         file, so MSBuild properties in it would ship as literal text. That is why the branch name is
+         written out in each link and checked by docs-qa rather than substituted. A packable project
+         without its own readme falls back to the shared root PACKAGE_README.md so pack never fails
+         with NU5039; that file is branch-checked too. -->
     <PropertyGroup Condition="'$(IsTestProject)' != 'true'">
         <ModulePackageReadme>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../PACKAGE_README.md'))</ModulePackageReadme>
         <HasModulePackageReadme>false</HasModulePackageReadme>

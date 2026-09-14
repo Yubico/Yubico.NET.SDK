@@ -1537,6 +1537,7 @@ List<string> ValidatePackageReadmes(string[] packableProjectPaths)
         """;
 
     var failures = new List<string>();
+    var docsBranch = ReadDocsBranch();
 
     foreach (var projectPath in packableProjectPaths)
     {
@@ -1561,47 +1562,84 @@ List<string> ValidatePackageReadmes(string[] packableProjectPaths)
         if (!text.Contains(alphaBanner, StringComparison.Ordinal))
             failures.Add($"{relativePath}: alpha banner is missing or altered; it must match ValidatePackageReadmes in toolchain.cs verbatim");
 
-        var lines = text.Split('\n');
-        var inFence = false;
-        for (var i = 0; i < lines.Length; i++)
-        {
-            // Code fences are not prose; `handlers[i](arg)` is not a broken link.
-            if (IsCodeFenceLine(lines[i]))
-            {
-                inFence = !inFence;
-                continue;
-            }
+        ValidatePackageReadmeLinks(relativePath, text, docsBranch, failures);
+    }
 
-            if (inFence)
-                continue;
-
-            // Inline links, reference definitions, and autolinks all reach the package page.
-            var targets = Regex.Matches(lines[i], @"\]\(([^)\s]+)")
-                .Concat(Regex.Matches(lines[i], @"^\s*\[[^\]]+\]:\s*(\S+)"))
-                .Concat(Regex.Matches(lines[i], @"<((?:https?|ftp)://[^>\s]+)>"))
-                .Select(match => match.Groups[1].Value);
-
-            foreach (var target in targets)
-            {
-                if (!target.StartsWith("https://", StringComparison.Ordinal))
-                {
-                    failures.Add($"{relativePath}:{i + 1}: package readme links must be absolute https, because nuget.org does not resolve '{target}'");
-                    continue;
-                }
-
-                // The repository default branch is v1. An unqualified repository link silently lands
-                // a v2 package-page reader on the wrong SDK, which is worse than a broken link.
-                if (Regex.IsMatch(target, @"^https://github\.com/Yubico/Yubico\.NET\.SDK(/|$)") &&
-                    !target.Contains("/tree/", StringComparison.Ordinal) &&
-                    !target.Contains("/blob/", StringComparison.Ordinal))
-                {
-                    failures.Add($"{relativePath}:{i + 1}: repository link '{target}' must name the v2 branch (/tree/<branch> or /blob/<branch>/...); the default branch is v1");
-                }
-            }
-        }
+    // The root readme is packed by any packable project that has no module readme of its own
+    // (see the per-package readme block in Directory.Build.props), so its links reach nuget.org too.
+    var rootReadmePath = Path.Combine(repoRoot, "PACKAGE_README.md");
+    if (File.Exists(rootReadmePath))
+    {
+        var rootText = File.ReadAllText(rootReadmePath).Replace("\r\n", "\n", StringComparison.Ordinal);
+        ValidatePackageReadmeLinks("PACKAGE_README.md", rootText, docsBranch, failures);
     }
 
     return failures;
+}
+
+// The v2 branch name, read from the single place that owns it. PackageProjectUrl is derived from
+// this property in MSBuild; the package readmes cannot be, because they are packed verbatim.
+string ReadDocsBranch()
+{
+    var propsPath = Path.Combine(repoRoot, "Directory.Build.props");
+    var match = Regex.Match(File.ReadAllText(propsPath), @"<YubiKitDocsBranch>([^<]+)</YubiKitDocsBranch>");
+    if (!match.Success)
+        throw new InvalidOperationException($"{propsPath}: no <YubiKitDocsBranch> property; package readme links cannot be checked against it");
+
+    return match.Groups[1].Value.Trim();
+}
+
+static void ValidatePackageReadmeLinks(string relativePath, string text, string docsBranch, List<string> failures)
+{
+    var lines = text.Split('\n');
+    var inFence = false;
+    for (var i = 0; i < lines.Length; i++)
+    {
+        // Code fences are not prose; `handlers[i](arg)` is not a broken link.
+        if (IsCodeFenceLine(lines[i]))
+        {
+            inFence = !inFence;
+            continue;
+        }
+
+        if (inFence)
+            continue;
+
+        // Inline links, reference definitions, and autolinks all reach the package page.
+        var targets = Regex.Matches(lines[i], @"\]\(([^)\s]+)")
+            .Concat(Regex.Matches(lines[i], @"^\s*\[[^\]]+\]:\s*(\S+)"))
+            .Concat(Regex.Matches(lines[i], @"<((?:https?|ftp)://[^>\s]+)>"))
+            .Select(match => match.Groups[1].Value);
+
+        foreach (var target in targets)
+        {
+            if (!target.StartsWith("https://", StringComparison.Ordinal))
+            {
+                failures.Add($"{relativePath}:{i + 1}: package readme links must be absolute https, because nuget.org does not resolve '{target}'");
+                continue;
+            }
+
+            if (!Regex.IsMatch(target, @"^https://github\.com/Yubico/Yubico\.NET\.SDK(/|$)"))
+                continue;
+
+            // The repository default branch is v1. An unqualified repository link silently lands
+            // a v2 package-page reader on the wrong SDK, which is worse than a broken link.
+            var branchMatch = Regex.Match(target, @"^https://github\.com/Yubico/Yubico\.NET\.SDK/(?:tree|blob)/([^/#?]+)");
+            if (!branchMatch.Success)
+            {
+                failures.Add($"{relativePath}:{i + 1}: repository link '{target}' must name the v2 branch (/tree/<branch> or /blob/<branch>/...); the default branch is v1");
+                continue;
+            }
+
+            // Every readme link must name the same branch as $(YubiKitDocsBranch), so flipping the
+            // branch is one property edit plus whatever this check reports.
+            var linkBranch = branchMatch.Groups[1].Value;
+            if (!string.Equals(linkBranch, docsBranch, StringComparison.Ordinal))
+            {
+                failures.Add($"{relativePath}:{i + 1}: repository link '{target}' names branch '{linkBranch}', expected '{docsBranch}' (YubiKitDocsBranch in Directory.Build.props)");
+            }
+        }
+    }
 }
 
 static void ValidateCodeFences(string relativePath, string[] lines, List<string> failures)

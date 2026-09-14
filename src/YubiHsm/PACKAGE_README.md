@@ -3,8 +3,8 @@
 This package is for the **YubiHSM Auth application on a YubiKey**, not for a YubiHSM 2 device itself. The
 applet stores the credentials used to authenticate to a YubiHSM 2 hardware security module, so the
 long-lived HSM authentication keys live on a YubiKey instead of on the host. It manages those credentials
-and derives the S-ENC, S-MAC, and S-RMAC session keys; your own code then uses those keys to talk to the
-HSM through a connector. This package never contacts the HSM.
+and derives the session keys your own code then uses to talk to the HSM. This package never contacts the
+HSM itself.
 
 > ## ALPHA - NOT FOR PRODUCTION
 >
@@ -16,10 +16,7 @@ HSM through a connector. This package never contacts the HSM.
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
 - A YubiKey with firmware 5.4.3 or later and the YubiHSM Auth application enabled.
-- SmartCard transport only (USB CCID or NFC). There is no HID or OTP path.
-
-Some operations need newer firmware: asymmetric credentials and challenge retrieval need 5.6.0, challenge
-retrieval with a credential password needs 5.7.1, and credential password changes need 5.8.0.
+- SmartCard transport only (USB CCID or NFC).
 
 ## Installation
 

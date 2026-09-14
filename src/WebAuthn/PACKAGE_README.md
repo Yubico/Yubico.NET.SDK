@@ -1,10 +1,8 @@
 # Yubico.YubiKit.WebAuthn
 
 This package is a W3C Web Authentication client over `Yubico.YubiKit.Fido2`. It reduces registration and
-authentication to two calls, handling client data JSON, relying-party ID validation, and PIN/UV token
-acquisition on the way to CTAP2. It requires a WebAuthn origin and a public-suffix checker backed by Public
-Suffix List data, because relying-party ID validation is what stops one site claiming another site's
-credentials.
+authentication to two calls, handling client data, relying-party ID validation, and PIN/UV token acquisition
+for you. It requires a WebAuthn origin and a public-suffix checker backed by Public Suffix List data.
 
 > ## ALPHA - NOT FOR PRODUCTION
 >
@@ -16,7 +14,7 @@ credentials.
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
 - A YubiKey 5 series, Security Key series, or YubiKey Bio series device with firmware 5.0.0 or later.
-- HID FIDO over USB by default, or SmartCard where the FIDO2 AID is exposed: NFC always, USB on 5.8.0+.
+- HID FIDO or SmartCard transport (USB or NFC).
 - An origin that is a secure context: `https`, or `http` on `localhost`.
 
 ## Installation

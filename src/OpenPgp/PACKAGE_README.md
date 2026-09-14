@@ -1,6 +1,6 @@
 # Yubico.YubiKit.OpenPgp
 
-This package implements the OpenPGP card application (specification 3.4) on a YubiKey. It manages the
+This package implements the OpenPGP card application on a YubiKey. It manages the
 signature, decryption, and authentication key slots and their certificates, signs, decrypts, and
 authenticates on the device, and administers the PINs, reset code, and touch policy. It is a smart-card
 applet beside PIV; the two share no credentials.
@@ -15,10 +15,7 @@ applet beside PIV; the two share no credentials.
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
 - A YubiKey with the OpenPGP application enabled.
-- SmartCard transport only (USB CCID or NFC). OpenPGP is never available over HID.
-
-Some operations need newer firmware: factory reset needs 1.0.6, the touch policy (UIF) needs 4.2.0, and
-elliptic-curve keys, certificates, and attestation need 5.2.0.
+- SmartCard transport only (USB CCID or NFC).
 
 ## Installation
 

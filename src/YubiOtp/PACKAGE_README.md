@@ -15,10 +15,7 @@ application: use `Yubico.YubiKit.Oath` for those.
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
 - A YubiKey with the OTP application enabled.
-- SmartCard or HID OTP transport, selected in that order unless you override it.
-
-Feature floors are per operation: serial read and challenge-response need firmware 2.2.0, slot update and
-swap need 2.3.0, and NDEF configuration needs 3.0.0.
+- SmartCard or HID OTP transport.
 
 ## Installation
 
@@ -44,8 +41,7 @@ ConfigState state = session.GetConfigState();
 Console.WriteLine($"OTP applet firmware {state.FirmwareVersion}");
 ```
 
-Reading the cached slot state needs no access code and no touch. Note that `state.IsConfigured(Slot.One)`
-throws below firmware 2.1.0.
+Reading the cached slot state needs no access code and no touch.
 
 ## Documentation
 

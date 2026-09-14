@@ -1,10 +1,9 @@
 # Yubico.YubiKit.SecurityDomain
 
-The Security Domain is the GlobalPlatform root security application on a YubiKey. It owns the Secure Channel
-Protocol (SCP) keys that every other applet session can use to encrypt and authenticate its APDU traffic.
-This package inspects, generates, imports, rotates, and deletes those keys, manages SCP11 certificates and
-allow lists, and factory-resets the application. Other modules then consume the keys through
-`SessionCreationOptions.ScpKeyParameters`.
+The Security Domain is the root security application on a YubiKey. It owns the Secure Channel Protocol
+(SCP) keys that other applet sessions use to encrypt and authenticate their traffic. This package inspects,
+generates, imports, rotates, and deletes those keys, manages SCP11 certificates and allow lists, and
+factory-resets the application.
 
 > ## ALPHA - NOT FOR PRODUCTION
 >
@@ -15,12 +14,8 @@ allow lists, and factory-resets the application. Other modules then consume the 
 ## Requirements
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
-- A YubiKey with firmware 5.3.0 or later for SCP03. Key attestation and allow lists need 5.7.0, and
-  SCP11a, SCP11b, and SCP11c need 5.7.2.
+- A YubiKey with firmware 5.3.0 or later.
 - SmartCard transport only (USB CCID or NFC).
-
-The application cannot report its own firmware version, so the session assumes 5.3.0 and skips firmware
-gating unless you set `SessionCreationOptions.FirmwareVersionOverride`.
 
 ## Installation
 

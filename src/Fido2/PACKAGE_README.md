@@ -1,6 +1,6 @@
 # Yubico.YubiKit.Fido2
 
-The FIDO2 application on a YubiKey is a CTAP (Client to Authenticator Protocol) 2.1/2.3 authenticator. This
+The FIDO2 application on a YubiKey is a CTAP (Client to Authenticator Protocol) authenticator. This
 package speaks CTAP directly: read authenticator capabilities, create and assert credentials, manage the
 PIN, and drive the credential-management, biometric-enrollment, large-blob, and authenticator-config
 sub-systems. For the higher-level W3C ceremony API, use `Yubico.YubiKit.WebAuthn` instead.
@@ -15,10 +15,7 @@ sub-systems. For the higher-level W3C ceremony API, use `Yubico.YubiKit.WebAuthn
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
 - A YubiKey 5 series, Security Key series, or YubiKey Bio series device with firmware 5.0.0 or later.
-- HID FIDO over USB by default, or SmartCard where the FIDO2 AID is exposed: NFC always, USB on 5.8.0+.
-
-Some features need newer firmware: credential management and biometric enrollment need 5.2.0, authenticator
-config needs 5.4.0, and credBlob needs 5.5.0.
+- HID FIDO or SmartCard transport (USB or NFC).
 
 ## Installation
 

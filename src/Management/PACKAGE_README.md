@@ -4,7 +4,7 @@ The Management application is the device-level control surface of a YubiKey. Thi
 information (serial number, firmware, form factor, supported and enabled capabilities) and writes device
 configuration: which applications are enabled per transport, timeouts, device flags, NFC restriction, and
 the configuration lock code. Other modules talk to one application; this one decides which applications
-exist.
+are enabled.
 
 > ## ALPHA - NOT FOR PRODUCTION
 >
@@ -15,8 +15,8 @@ exist.
 ## Requirements
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
-- A YubiKey 4.1.0 or later. Writing configuration needs 5.0.0, and device reset needs 5.6.0.
-- SmartCard, HID FIDO, or HID OTP transport, selected in that order unless you override it.
+- A YubiKey with firmware 4.1.0 or later.
+- SmartCard, HID FIDO, or HID OTP transport.
 
 ## Installation
 

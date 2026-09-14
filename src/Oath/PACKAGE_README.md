@@ -1,10 +1,9 @@
 # Yubico.YubiKit.Oath
 
-The OATH application stores TOTP (RFC 6238) and HOTP (RFC 4226) credentials on a YubiKey and calculates
-their codes on the device. The device retains each provisioned secret, so code generation never needs it
-on the host again. This package adds, renames, lists,
-deletes, and calculates those credentials and manages the optional password protecting them. The two
-programmable OTP slots are a different application: use `Yubico.YubiKit.YubiOtp` for those.
+The OATH application stores TOTP and HOTP credentials on a YubiKey and calculates their codes on the
+device. This package adds, renames, lists, deletes, and calculates those credentials and manages the
+optional password protecting them. The two programmable OTP slots are a different application: use
+`Yubico.YubiKit.YubiOtp` for those.
 
 > ## ALPHA - NOT FOR PRODUCTION
 >
@@ -16,9 +15,7 @@ programmable OTP slots are a different application: use `Yubico.YubiKit.YubiOtp`
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
 - A YubiKey 5 series device or later with OATH enabled.
-- SmartCard transport only (USB CCID or NFC). OATH is never available over HID.
-
-Renaming a credential needs firmware 5.3.1, and using SCP with OATH needs 5.6.3.
+- SmartCard transport only (USB CCID or NFC).
 
 ## Installation
 

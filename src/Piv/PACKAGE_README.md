@@ -1,6 +1,6 @@
 # Yubico.YubiKit.Piv
 
-PIV (Personal Identity Verification, NIST SP 800-73) support for YubiKey devices. This package turns a
+PIV (Personal Identity Verification) support for YubiKey devices. This package turns a
 YubiKey into a smart card holding private keys and X.509 certificates in numbered slots, with PIN, PUK,
 and management-key authentication, key and certificate management, signing, decryption, ECDH key
 agreement, and attestation.
@@ -15,10 +15,7 @@ agreement, and attestation.
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
 - A YubiKey 4 or 5 series device with PIV enabled.
-- SmartCard transport only (USB CCID or NFC). PIV is never available over HID.
-
-Some operations need newer firmware: metadata reads need 5.3.0, an AES management key needs 5.4.0, and
-move/delete key, Curve25519, and RSA 3072/4096 need 5.7.0.
+- SmartCard transport only (USB CCID or NFC).
 
 ## Installation
 

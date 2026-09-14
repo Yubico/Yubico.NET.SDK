@@ -1,9 +1,8 @@
 # Yubico.YubiKit.Core
 
-Core is the foundation of the Yubico .NET SDK. It discovers YubiKeys, opens and owns connections over
-SmartCard (PC/SC) and HID, runs the ISO 7816-4 APDU pipeline with command chaining, implements Secure
-Channel Protocol (SCP03 and SCP11), and supplies the shared device metadata, cryptography, and TLV types
-every application module builds on.
+Core is the foundation of the Yubico .NET SDK. It discovers YubiKeys, manages connections over SmartCard
+and HID, implements the APDU and Secure Channel Protocol layers, and supplies the shared types every
+application module builds on.
 
 > ## ALPHA - NOT FOR PRODUCTION
 >
@@ -15,7 +14,7 @@ every application module builds on.
 
 - .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules.
 - A YubiKey 4 series, YubiKey 5 series, or Security Key series device.
-- SmartCard (USB CCID and NFC), HID FIDO, and HID OTP transports.
+- SmartCard (USB CCID or NFC), HID FIDO, and HID OTP transports.
 
 ## Installation
 
@@ -40,8 +39,7 @@ foreach (var device in devices)
 }
 ```
 
-One `IYubiKey` represents one physical YubiKey, even when it exposes several interfaces at once.
-Discovery needs no PIN, touch, or open session.
+One `IYubiKey` represents one physical YubiKey. Discovery needs no PIN, touch, or open session.
 
 ## Documentation
 

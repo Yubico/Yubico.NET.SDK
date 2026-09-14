@@ -8,7 +8,7 @@ The OATH module implements TOTP (RFC 6238) and HOTP (RFC 4226) one-time password
 
 **Key characteristics:**
 - **SmartCard-only** — no FIDO/OTP backend abstraction needed (like SecurityDomain)
-- **Firmware 5.0.0+** — SDK 2.0 targets modern devices only, no NEO workarounds
+- **No session-open firmware floor** — matches canonical Python/Rust/Android yubikit. Only rename (5.3.1) and SCP03 (5.6.3) are gated; the SDK carries no NEO (firmware < 3.0.0) workarounds such as the post-`set_key` re-select
 - **Sealed session** — `OathSession` is sealed, extended via `IOathSession` interface
 - **Two-phase init** — private constructor + static `CreateAsync` (matches Management/SecurityDomain)
 - **Credential policy ownership** — `CredentialData.RequireTouch` travels with creation policy

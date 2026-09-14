@@ -10,7 +10,8 @@ password protecting them. The programmable OTP slots belong to [Yubico.YubiKit.Y
 ## Requirements
 
 - .NET 10. On Linux, install PC/SC and the udev rules described in [docs/linux-setup.md](../../docs/linux-setup.md).
-- YubiKey 5 or later, firmware 5.0 and up; no NEO or YubiKey 4 workarounds. Two operations need newer firmware:
+- A YubiKey 4 or 5 series device with OATH enabled. The SDK implements no YubiKey NEO workarounds. Two
+  operations need newer firmware:
 
   | Feature | Minimum firmware |
   |---------|------------------|

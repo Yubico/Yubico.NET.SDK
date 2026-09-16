@@ -5,7 +5,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.WebAuthn;
@@ -25,11 +27,14 @@ IYubiKey yubiKey = await YubiKeyManager.FindFirstOrDefaultAsync(
         device => device.SupportsConnection(ConnectionType.HidFido))
     ?? throw new InvalidOperationException("Connect a previewSign-capable YubiKey over USB.");
 
+// Touch notification comes from the FIDO2 session underneath, so it is configured in
+// sessionOptions -- not in WebAuthnClientOptions, which configures the client.
 await using WebAuthnClient client = await yubiKey.CreateWebAuthnClientAsync(
     origin ?? throw new InvalidOperationException("The demo origin is invalid."),
-    new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" or "org" or "net" });
+    new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" or "org" or "net" },
+    sessionOptions: new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
 
-Console.WriteLine("Touch the YubiKey to create a credential and an ARKG signing key.");
+Console.WriteLine("Registering a credential and an ARKG signing key...");
 
 RegistrationResponse registration = await client.MakeCredentialAsync(new RegistrationOptions
 {
@@ -77,7 +82,7 @@ var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningPa
         additionalArgs),
 };
 
-Console.WriteLine("Touch the YubiKey again to sign the message with previewSign.");
+Console.WriteLine("Signing the message with previewSign...");
 
 IReadOnlyList<MatchedCredential> matches = await client.GetAssertionAsync(new AuthenticationOptions
 {
@@ -95,3 +100,30 @@ ReadOnlyMemory<byte> signature = assertion.ClientExtensionResults?.PreviewSign?.
 
 Console.WriteLine($"Message:   {Encoding.UTF8.GetString(message)}");
 Console.WriteLine($"Signature: {Convert.ToHexString(signature.Span)}");
+
+// The SDK tells you touch is needed rather than making you guess before the call.
+// Over FIDO HID this arrives as UserPresenceBasis.DeviceWaiting, which is an observed
+// keepalive from the authenticator (CTAP UPNEEDED), not a prediction from policy.
+//
+// Return promptly: the request callback announces the wait, it does not wait. Resolution
+// fires exactly once afterwards and reports how the operation ended -- it never claims the
+// user actually touched the key.
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(
+        UserPresenceContext context,
+        CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"  [{context.Basis}] Touch your YubiKey for {context.Application}.");
+        return default;
+    }
+
+    public ValueTask OnUserPresenceResolvedAsync(
+        UserPresenceContext context,
+        UserPresenceOutcome outcome,
+        CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"  [{outcome}]");
+        return default;
+    }
+}

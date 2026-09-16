@@ -646,3 +646,17 @@ appear in any slide, so no slide changed for them.
 > first commit (`git log -S 'assets/deck-zoom.js' -- docs/demo/build.sh`). The text
 > always rendered, it just sat below the visible page area, so every committed `deck.pdf`
 > before this one carries it invisibly.
+
+## The demo now demonstrates what the deck teaches
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| N16 | `webauthn-demo.cs` previously printed `"Touch the YubiKey..."` with `Console.WriteLine` before each ceremony — the speculative prompt slide 32 contrasts against the real signal. It now supplies an `IUserPresencePrompt` and lets the SDK say when touch is actually needed | code | `webauthn-demo.cs` — `TouchPrompt` at end of file, wired through `sessionOptions` |
+| N17 | The prompt is configured in `sessionOptions`, not `clientOptions`, because WebAuthn touch notification comes from the FIDO2 session underneath | code | `webauthn-demo.cs`; `src/WebAuthn/CLAUDE.md:399-400`; `src/WebAuthn/README.md` "User interaction" |
+| N18 | Because the demo runs over FIDO HID, its notifications can carry `UserPresenceBasis.DeviceWaiting` — an observed CTAP `UPNEEDED` keepalive rather than a policy prediction. This is one of only two transports that can | code | device filter `SupportsConnection(ConnectionType.HidFido)` in `webauthn-demo.cs`; `src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs:284-288`; see UP6 |
+| N19 | The demo deliberately does **not** wire an `ICredentialPrompt`. Both ceremonies set `UserVerification = Discouraged`, so no PIN is ever requested; adding a prompt that never fires would be misleading | code | `webauthn-demo.cs` — `UserVerification = UserVerificationPreference.Discouraged` on both `RegistrationOptions` and `AuthenticationOptions` |
+| N20 | The demo still compiles after the change: `dotnet build webauthn-demo.cs`, exit 0, zero warnings | measured | run on this branch at `2f1d912a` |
+
+> **Still not hardware-verified.** N20 covers compilation only. Whether `DeviceWaiting`
+> actually arrives, and how the two callbacks interleave with the previewSign ceremony on a
+> real key, has not been observed. That needs a previewSign-capable YubiKey and a human.

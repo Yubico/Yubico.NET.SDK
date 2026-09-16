@@ -7,9 +7,8 @@
 ## The pipeline in code
 
 ```csharp
-// 1. HOST APP asks the SDK for devices
-var keys = await YubiKeyManager.FindAllAsync();
-IYubiKey key = keys[0];
+// 1. HOST APP asks the SDK for a device
+IYubiKey key = await YubiKeyManager.FindFirstAsync();
 
 // 2. SESSION — convenience: the session owns a hidden connection
 await using var piv = await key.CreatePivSessionAsync();
@@ -46,9 +45,9 @@ await using var mgmt = await ManagementSession.CreateAsync(conn);   // after piv
 **C** when several applets share one connection — sequentially; one connection admits
 one live session.
 
-<!-- Anchors: FindAllAsync src/Core/src/PublicAPI.Unshipped.txt:985;
+<!-- Anchors: FindFirstAsync src/Core/src/Devices/YubiKeyManager.cs:355;
      CreatePivSessionAsync src/Piv/src/IYubiKeyExtensions.cs:38;
-     GetCertificateAsync src/Piv/src/PublicAPI.Unshipped.txt:191;
+     GetCertificateAsync src/Piv/src/PivSession.cs:596;
      PivSession.CreateAsync src/Piv/src/PivSession.cs:130;
      ConnectAsync<T> src/Core/src/Abstractions/IYubiKey.cs:164;
      SessionCreationOptions fields docs/architecture/applet-public-api.md:10-13;

@@ -11,13 +11,13 @@ await using var s = await key.CreateXSessionAsync(options, cancellationToken);
 - Always `await using`
 
 > **WebAuthn is the deliberate exception.** It is not an applet session. It returns a
-> `WebAuthnClient`, takes a required origin and public-suffix checker, and has its own
-> factory test. The test file says so in as many words:
+> `WebAuthnClient`, takes a required origin and required client options carrying the
+> public-suffix checker, and has its own factory test. The test file says so in as many words:
 > *"WebAuthn is not an applet session and has its own factory test."*
 
 <!-- Anchors: grammar docs/architecture/applet-public-api.md:3-9;
      eight sessions src/PublicApi/tests/.../AppletSessionShapeTests.cs:16-26;
-     exclusion FactoryShapeTests.cs:56, WebAuthn factory shape :94-127 -->
+     exclusion FactoryShapeTests.cs:57, WebAuthn factory shape :96-127 -->
 
 ---
 

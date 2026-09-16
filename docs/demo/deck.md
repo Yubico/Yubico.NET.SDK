@@ -55,9 +55,8 @@ Branch `yubikit` @ `d04d59aa` · 2026-09-07
 ## The pipeline in code
 
 ```csharp
-// 1. HOST APP asks the SDK for devices
-var keys = await YubiKeyManager.FindAllAsync();
-IYubiKey key = keys[0];
+// 1. HOST APP asks the SDK for a device
+IYubiKey key = await YubiKeyManager.FindFirstAsync();
 
 // 2. SESSION — convenience: the session owns a hidden connection
 await using var piv = await key.CreatePivSessionAsync();
@@ -94,9 +93,9 @@ await using var mgmt = await ManagementSession.CreateAsync(conn);   // after piv
 **C** when several applets share one connection — sequentially; one connection admits
 one live session.
 
-<!-- Anchors: FindAllAsync src/Core/src/PublicAPI.Unshipped.txt:985;
+<!-- Anchors: FindFirstAsync src/Core/src/Devices/YubiKeyManager.cs:355;
      CreatePivSessionAsync src/Piv/src/IYubiKeyExtensions.cs:38;
-     GetCertificateAsync src/Piv/src/PublicAPI.Unshipped.txt:191;
+     GetCertificateAsync src/Piv/src/PivSession.cs:596;
      PivSession.CreateAsync src/Piv/src/PivSession.cs:130;
      ConnectAsync<T> src/Core/src/Abstractions/IYubiKey.cs:164;
      SessionCreationOptions fields docs/architecture/applet-public-api.md:10-13;
@@ -175,6 +174,9 @@ await using var mgmt = await key.CreateManagementSessionAsync(
 var keys = await YubiKeyManager.FindAllAsync();
 await using var piv = await keys[0].CreatePivSessionAsync();
 // ... do the work, then exit
+
+// Or skip the list: FindFirstAsync throws, FindFirstOrDefaultAsync returns null
+IYubiKey key = await YubiKeyManager.FindFirstAsync();
 ```
 
 **B — Long-lived.** Start monitoring, react to arrivals for the process lifetime.
@@ -190,6 +192,8 @@ await foreach (var e in YubiKeyManager.WatchAsync(ct))
 ```
 
 Same `IYubiKey`, same sessions. The models differ only in **who keeps the cache fresh.**
+The first-device helpers are model A only — one shot over the same cache, they do **not**
+wait for insertion, and first is not a stable ordering. To wait for a key, you need B.
 
 ---
 
@@ -232,9 +236,11 @@ arrive late here and not there.
 Both models inherit this. Neither model can promise a key that arrives *during* a scan
 appears in that scan's result.
 
-<!-- Anchors: FindAllAsync src/Core/src/PublicAPI.Unshipped.txt:984-985;
-     caching + "monitoring keeps cache fresh" src/Core/src/Devices/YubiKeyManager.cs:286-300;
-     monitoring surface PublicAPI.Unshipped.txt:986-992;
+<!-- Anchors: FindAllAsync src/Core/src/Devices/YubiKeyManager.cs:279,336;
+     FindFirstAsync/FindFirstOrDefaultAsync :355,373 (one-shot, no wait,
+     ordering not stable — remarks on both); caching + "monitoring keeps cache fresh"
+     src/Core/src/Devices/YubiKeyManager.cs:286-300;
+     monitoring surface :102,117,206,257;
      race conditions docs/usage/device-discovery.md:202-209;
      publish-first docs/architecture/device-identity.md:93-96 -->
 
@@ -350,7 +356,9 @@ The monitoring **control** surface is five members: `StartMonitoring()`,
 `StartMonitoring(TimeSpan)`, `StopMonitoring()`, `WatchAsync(ct)`, `IsMonitoring`.
 `Shutdown()` / `ShutdownAsync()` also stop monitoring as part of tearing the manager down.
 
-<!-- Anchors: src/Core/src/PublicAPI.Unshipped.txt:986-992 (incl. Shutdown :987, ShutdownAsync :988);
+<!-- Anchors: monitoring surface src/Core/src/Devices/YubiKeyManager.cs:102,117,131,143,206
+     (StartMonitoring x2, StopMonitoring, IsMonitoring, WatchAsync);
+     Shutdown :257, ShutdownAsync :230;
      ShutdownAsync stops monitoring src/Core/src/Devices/YubiKeyManager.cs:216;
      src/Core/src/DeviceEvent.cs:19-30; docs/usage/device-discovery.md:126 -->
 
@@ -385,7 +393,7 @@ OS notification.
 
 ```csharp
 // Silent — the default
-var keys = await YubiKeyManager.FindAllAsync();
+IYubiKey key = await YubiKeyManager.FindFirstAsync();
 
 // One line, before you touch the SDK
 YubiKitLogging.Configure(loggerFactory);
@@ -474,8 +482,9 @@ one-connection-per-key and one-session-per-connection.
 <!-- Anchors: docs/architecture/raw-access-tiers.md:6-16 (T0), :19-33 (T1),
      :136-145 (T2), :30-33 (safety still applies);
      src/Core/src/Devices/YubiKeyConnectionExtensions.cs:37,90,108;
-     Tier 2 signature takes ReadOnlyMemory<byte> src/Core/src/PublicAPI.Unshipped.txt:655
-     (Tier 1 takes ApduCommand, :535) -->
+     Tier 2 signature takes ReadOnlyMemory<byte>
+     src/Core/src/Transports/SmartCard/ISmartCardConnection.cs:30
+     (Tier 1 takes ApduCommand, src/Core/src/Sessions/RawSmartCardSession.cs:141) -->
 
 
 ---
@@ -493,13 +502,13 @@ await using var s = await key.CreateXSessionAsync(options, cancellationToken);
 - Always `await using`
 
 > **WebAuthn is the deliberate exception.** It is not an applet session. It returns a
-> `WebAuthnClient`, takes a required origin and public-suffix checker, and has its own
-> factory test. The test file says so in as many words:
+> `WebAuthnClient`, takes a required origin and required client options carrying the
+> public-suffix checker, and has its own factory test. The test file says so in as many words:
 > *"WebAuthn is not an applet session and has its own factory test."*
 
 <!-- Anchors: grammar docs/architecture/applet-public-api.md:3-9;
      eight sessions src/PublicApi/tests/.../AppletSessionShapeTests.cs:16-26;
-     exclusion FactoryShapeTests.cs:56, WebAuthn factory shape :94-127 -->
+     exclusion FactoryShapeTests.cs:57, WebAuthn factory shape :96-127 -->
 
 ---
 
@@ -604,7 +613,7 @@ X509Certificate cert = piv.getCertificate(Slot.AUTHENTICATION);
 **nullability**: an empty slot returns `null` rather than throwing.
 
 <!-- Anchors: .NET src/Piv/src/IYubiKeyExtensions.cs:38,
-     PublicAPI.Unshipped.txt:191 (X509Certificate2?);
+     src/Piv/src/PivSession.cs:596 (X509Certificate2?);
      python yubikit/piv.py:1258; android PivSession.java:882 -->
 
 ---
@@ -708,8 +717,9 @@ let info = try await s.getInfo()
 keeps construction cheap and the round-trip explicit and cancellable. Note FIDO2 is
 dual-transport: `HidFido` first, then SmartCard — NFC, or USB-CCID on **firmware 5.8.0+**.
 
-<!-- Anchors: .NET src/Fido2/src/IYubiKeyExtensions.cs:124,
-     PublicAPI.Unshipped.txt:609, transports :189-190, FW5.8 :95;
+<!-- Anchors: .NET src/Fido2/src/IYubiKeyExtensions.cs:124, transport order
+     src/Fido2/src/IYubiKeyExtensions.cs:190, FW5.8 note same file :95;
+     GetInfoAsync src/Fido2/src/PublicAPI.Unshipped.txt:609;
      python-fido2 fido2/ctap2/base.py:246-262 (get_info at :252), :304-309;
      swift@1.4.0 CTAPSession+Creation.swift:25, CTAPSession.swift:49 -->
 
@@ -721,8 +731,8 @@ Origin checks, client data, attestation, extensions, PIN/UV orchestration.
 
 ```csharp
 _ = WebAuthnOrigin.TryParse("https://example.com", out var origin);
-await using var client = await key.CreateWebAuthnClientAsync(
-    origin!, isPublicSuffix: d => d is "com" or "org" or "net");
+await using var client = await key.CreateWebAuthnClientAsync(origin!,
+    new WebAuthnClientOptions { PublicSuffixChecker = d => d is "com" or "org" or "net" });
 var reg = await client.MakeCredentialAsync(options, pinBytes);
 ```
 
@@ -743,12 +753,14 @@ let r = try await client.makeCredential(options, authorization: .pin("1234")).va
 </div>
 
 **Delta:** both .NET and Swift demand an **origin and a public-suffix checker up front** —
-you cannot accidentally skip origin validation. `python-fido2` also ships the
-relying-party half (`Fido2Server`); v2 is client-side only.
+you cannot accidentally skip origin validation. In .NET the checker is a `required` member of
+`WebAuthnClientOptions`, guarded before a device connection is ever opened.
+`python-fido2` also ships the relying-party half (`Fido2Server`); v2 is client-side only.
 
-<!-- Anchors: .NET src/WebAuthn/src/IYubiKeyExtensions.cs:57-62,
-     PublicAPI.Unshipped.txt:111-112, real call site
-     src/WebAuthn/tests/.../WebAuthnClientFactoryTests.cs:42-45;
+<!-- Anchors: .NET factory src/WebAuthn/src/IYubiKeyExtensions.cs:57-66,
+     required checker src/WebAuthn/src/Client/WebAuthnClientOptions.cs:39-58,
+     ctor src/WebAuthn/src/Client/WebAuthnClient.cs:55-64, real call site
+     src/WebAuthn/tests/.../WebAuthnClientFactoryTests.cs;
      python-fido2 fido2/client/__init__.py:1066-1179, fido2/server.py:158;
      swift@1.4.0 FIDO/WebAuthn/Client/Client.swift:34-41 (doc), :95 (init) -->
 
@@ -859,8 +871,8 @@ same slot enum, same argument order. The .NET difference is that its session is
 **dual-transport and prefers SmartCard** (`SmartCard → HidOtp`), so on a CCID-enabled
 key this runs over APDU, not HID. `yubikit-swift` has no YubiOTP session at all.
 
-<!-- Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102,
-     transport order :144-145, CalculateHmacSha1Async PublicAPI.Unshipped.txt:72;
+<!-- Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102, transport order
+     same file :144-145; CalculateHmacSha1Async src/YubiOtp/src/PublicAPI.Unshipped.txt:72;
      python yubikit/yubiotp.py:708, calculate_hmac_sha1 :901;
      android YubiOtpSession.java:253,447;
      rust crates/yubikit/src/yubiotp.rs:1165 (calculate_hmac_sha1);

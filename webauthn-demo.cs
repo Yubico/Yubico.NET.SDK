@@ -21,13 +21,13 @@ using Fido2Extensions = Yubico.YubiKit.Fido2.Extensions;
 const string relyingPartyId = "example.com";
 _ = WebAuthnOrigin.TryParse("https://example.com", out WebAuthnOrigin? origin);
 
-IYubiKey yubiKey = (await YubiKeyManager.FindAllAsync(ConnectionType.HidFido))
-    .FirstOrDefault()
+IYubiKey yubiKey = await YubiKeyManager.FindFirstOrDefaultAsync(
+        device => device.SupportsConnection(ConnectionType.HidFido))
     ?? throw new InvalidOperationException("Connect a previewSign-capable YubiKey over USB.");
 
 await using WebAuthnClient client = await yubiKey.CreateWebAuthnClientAsync(
     origin ?? throw new InvalidOperationException("The demo origin is invalid."),
-    isPublicSuffix: domain => domain is "com" or "org" or "net");
+    new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" or "org" or "net" });
 
 Console.WriteLine("Touch the YubiKey to create a credential and an ARKG signing key.");
 

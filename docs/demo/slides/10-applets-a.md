@@ -63,7 +63,7 @@ X509Certificate cert = piv.getCertificate(Slot.AUTHENTICATION);
 **nullability**: an empty slot returns `null` rather than throwing.
 
 <!-- Anchors: .NET src/Piv/src/IYubiKeyExtensions.cs:38,
-     PublicAPI.Unshipped.txt:191 (X509Certificate2?);
+     src/Piv/src/PivSession.cs:596 (X509Certificate2?);
      python yubikit/piv.py:1258; android PivSession.java:882 -->
 
 ---

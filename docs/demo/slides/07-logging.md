@@ -4,7 +4,7 @@
 
 ```csharp
 // Silent — the default
-var keys = await YubiKeyManager.FindAllAsync();
+IYubiKey key = await YubiKeyManager.FindFirstAsync();
 
 // One line, before you touch the SDK
 YubiKitLogging.Configure(loggerFactory);

@@ -61,8 +61,9 @@ let info = try await s.getInfo()
 keeps construction cheap and the round-trip explicit and cancellable. Note FIDO2 is
 dual-transport: `HidFido` first, then SmartCard — NFC, or USB-CCID on **firmware 5.8.0+**.
 
-<!-- Anchors: .NET src/Fido2/src/IYubiKeyExtensions.cs:124,
-     PublicAPI.Unshipped.txt:609, transports :189-190, FW5.8 :95;
+<!-- Anchors: .NET src/Fido2/src/IYubiKeyExtensions.cs:124, transport order
+     src/Fido2/src/IYubiKeyExtensions.cs:190, FW5.8 note same file :95;
+     GetInfoAsync src/Fido2/src/PublicAPI.Unshipped.txt:609;
      python-fido2 fido2/ctap2/base.py:246-262 (get_info at :252), :304-309;
      swift@1.4.0 CTAPSession+Creation.swift:25, CTAPSession.swift:49 -->
 
@@ -74,8 +75,8 @@ Origin checks, client data, attestation, extensions, PIN/UV orchestration.
 
 ```csharp
 _ = WebAuthnOrigin.TryParse("https://example.com", out var origin);
-await using var client = await key.CreateWebAuthnClientAsync(
-    origin!, isPublicSuffix: d => d is "com" or "org" or "net");
+await using var client = await key.CreateWebAuthnClientAsync(origin!,
+    new WebAuthnClientOptions { PublicSuffixChecker = d => d is "com" or "org" or "net" });
 var reg = await client.MakeCredentialAsync(options, pinBytes);
 ```
 
@@ -96,11 +97,13 @@ let r = try await client.makeCredential(options, authorization: .pin("1234")).va
 </div>
 
 **Delta:** both .NET and Swift demand an **origin and a public-suffix checker up front** —
-you cannot accidentally skip origin validation. `python-fido2` also ships the
-relying-party half (`Fido2Server`); v2 is client-side only.
+you cannot accidentally skip origin validation. In .NET the checker is a `required` member of
+`WebAuthnClientOptions`, guarded before a device connection is ever opened.
+`python-fido2` also ships the relying-party half (`Fido2Server`); v2 is client-side only.
 
-<!-- Anchors: .NET src/WebAuthn/src/IYubiKeyExtensions.cs:57-62,
-     PublicAPI.Unshipped.txt:111-112, real call site
-     src/WebAuthn/tests/.../WebAuthnClientFactoryTests.cs:42-45;
+<!-- Anchors: .NET factory src/WebAuthn/src/IYubiKeyExtensions.cs:57-66,
+     required checker src/WebAuthn/src/Client/WebAuthnClientOptions.cs:39-58,
+     ctor src/WebAuthn/src/Client/WebAuthnClient.cs:55-64, real call site
+     src/WebAuthn/tests/.../WebAuthnClientFactoryTests.cs;
      python-fido2 fido2/client/__init__.py:1066-1179, fido2/server.py:158;
      swift@1.4.0 FIDO/WebAuthn/Client/Client.swift:34-41 (doc), :95 (init) -->

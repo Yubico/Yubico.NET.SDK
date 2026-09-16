@@ -2,9 +2,16 @@
 
 Every factual claim in the deck, mapped to the source that grounds it.
 
-**Repository:** `Yubico.YubiKit.NET.SDK`, branch `yubikit`, `d628ce5f1c999ab79d0f63180b56799237c7ecdb`
-(was `d04d59aae63981588f6dc047eb0d788b681a8b8d` through Round-7; PR #656 landed the unified
-user-presence API and moved the Round-7 touch anchors — see Round-8.)
+**Repository:** `Yubico.YubiKit.NET.SDK`, branch `yubikit`, `ee5cc317`
+(was `d628ce5f` through Round-8, `d04d59aa` through Round-7. PR #656 landed the unified
+user-presence API — see Round-8. PRs #661 and #664 landed first-device discovery and a
+breaking WebAuthn factory change — see Round-9.)
+
+> **Anchor policy, from Round-9 on:** claims point at real source files, not at
+> `PublicAPI.Unshipped.txt`. That file is the Roslyn public-API analyzer's sorted,
+> append-only ledger; it grows on nearly every PR, so line numbers into it rot silently.
+> Several Round-1 anchors had already drifted by up to 30 lines before anyone noticed.
+> Per-applet `PublicAPI` anchors that still resolve correctly are left in place.
 
 **V1 predecessor:** `Yubico.NET.SDK`, branch `origin/develop`, `f57aa2d6b8c88c3ff53bafcc73496b07f5a00428`
 
@@ -28,7 +35,7 @@ run, see slide 14 provenance. `quoted` = taken from a pull request, not re-measu
 
 | # | Claim | Kind | Anchor |
 |---|---|---|---|
-| ~~1.1~~ | ~~Async all the way down; no sync-over-async~~ | **WITHDRAWN** | **False against `src/`.** `YubiKeyManager.Shutdown()` is `GetAwaiter().GetResult()` (`src/Core/src/Devices/YubiKeyManager.cs:257`, public at `PublicAPI.Unshipped.txt:987`); `ISmartCardConnection.BeginTransaction` is sync and blocks (`:653`, `UsbSmartCardConnection.cs:102`). Superseded by R11. |
+| ~~1.1~~ | ~~Async all the way down; no sync-over-async~~ | **WITHDRAWN** | **False against `src/`.** `YubiKeyManager.Shutdown()` is `GetAwaiter().GetResult()` (`src/Core/src/Devices/YubiKeyManager.cs:257`); `ISmartCardConnection.BeginTransaction` is sync and blocks (`src/Core/src/Transports/SmartCard/ISmartCardConnection.cs:38`, `UsbSmartCardConnection.cs:102`). Superseded by R11. |
 | 1.2 | Install only what you use; ten packages | doc | `docs/v2-highlights.md:48` |
 | 1.3 | Native AOT, all ten libraries analyzer-checked and link-verified | doc | `docs/v2-highlights.md:65`; PR #578 body |
 | 1.4 | v1 used a 500 ms polling timer | doc | `docs/architecture/event-driven-device-discovery.md` "BEFORE" |
@@ -38,7 +45,7 @@ run, see slide 14 provenance. `quoted` = taken from a pull request, not re-measu
 
 | # | Claim | Kind | Anchor |
 |---|---|---|---|
-| 2.1 | `YubiKeyManager.FindAllAsync()` returns `IReadOnlyList<IYubiKey>` | code | `src/Core/src/PublicAPI.Unshipped.txt:984-985` |
+| 2.1 | `YubiKeyManager.FindAllAsync()` returns `IReadOnlyList<IYubiKey>` | code | `src/Core/src/Devices/YubiKeyManager.cs:279,336` |
 | 2.2 | `key.CreatePivSessionAsync()` exists and is an extension member | code | `src/Piv/src/IYubiKeyExtensions.cs:38` |
 | 2.3 | `piv.GetCertificateAsync(PivSlot)` returns `Task<X509Certificate2?>` | code | `src/Piv/src/PublicAPI.Unshipped.txt:191` |
 | 2.4 | `L2-layered-stack.svg` depicts the layer stack | doc | `docs/architecture/images/L2-layered-stack.svg` |
@@ -57,7 +64,7 @@ run, see slide 14 provenance. `quoted` = taken from a pull request, not re-measu
 
 | # | Claim | Kind | Anchor |
 |---|---|---|---|
-| 4.1 | `FindAllAsync(ConnectionType, bool forceRescan, CancellationToken)` | code | `src/Core/src/PublicAPI.Unshipped.txt:985` |
+| 4.1 | `FindAllAsync(ConnectionType, bool forceRescan, CancellationToken)` | code | `src/Core/src/Devices/YubiKeyManager.cs:336` |
 | 4.2 | Discovery is publish-first and degraded-state tolerant | doc | `docs/architecture/device-identity.md:93-96` |
 | 4.3 | Canonical Rust withholds publication until metadata is read | doc | `docs/architecture/device-identity.md:93-96` |
 
@@ -81,9 +88,9 @@ run, see slide 14 provenance. `quoted` = taken from a pull request, not re-measu
 
 | # | Claim | Kind | Anchor |
 |---|---|---|---|
-| 6.1 | Monitoring **control** surface is five members: `StartMonitoring()`, `StartMonitoring(TimeSpan)`, `StopMonitoring()`, `WatchAsync(ct)`, `IsMonitoring`. `Shutdown`/`ShutdownAsync` additionally stop monitoring during teardown. | code | `src/Core/src/PublicAPI.Unshipped.txt:986-992`; teardown remark `src/Core/src/Devices/YubiKeyManager.cs:216` |
-| 6.2 | `WatchAsync` returns `IAsyncEnumerable<DeviceEvent>` | code | `src/Core/src/PublicAPI.Unshipped.txt:992` |
-| 6.3 | `DeviceAction` has exactly `Added` and `Removed` | code | `src/Core/src/DeviceEvent.cs:19-23`; `PublicAPI.Unshipped.txt:203-204` |
+| 6.1 | Monitoring **control** surface is five members: `StartMonitoring()`, `StartMonitoring(TimeSpan)`, `StopMonitoring()`, `WatchAsync(ct)`, `IsMonitoring`. `Shutdown`/`ShutdownAsync` additionally stop monitoring during teardown. | code | `src/Core/src/Devices/YubiKeyManager.cs:102,117,131,143,206`; `Shutdown` `:257`, `ShutdownAsync` `:230`; teardown remark `:216` |
+| 6.2 | `WatchAsync` returns `IAsyncEnumerable<DeviceEvent>` | code | `src/Core/src/Devices/YubiKeyManager.cs:206` |
+| 6.3 | `DeviceAction` has exactly `Added` and `Removed` | code | `src/Core/src/DeviceEvent.cs:19-23` |
 | 6.4 | `DeviceEvent` carries `Device`, `Action`, `Timestamp` | code | `src/Core/src/DeviceEvent.cs:25-30` |
 | 6.5 | **No `IObservable`, no Rx dependency** | code | `rg DeviceChanges src/` returns zero hits; no `IObservable` in `PublicAPI.Unshipped.txt` |
 | 6.6 | Events do not flow until `StartMonitoring()` | doc | `docs/usage/device-discovery.md:71-72` |
@@ -162,11 +169,11 @@ Representative operations, verified against the public API baselines:
 | # | Claim | Kind | Anchor |
 |---|---|---|---|
 | 10.1 | `GetDeviceInfoAsync` on `IYubiKey` and on the session | code | `src/Management/src/PublicAPI.Unshipped.txt:33,36` |
-| 10.2 | `GetCertificateAsync(PivSlot)` returns `X509Certificate2?` | code | `src/Piv/src/PublicAPI.Unshipped.txt:191` |
+| 10.2 | `GetCertificateAsync(PivSlot)` returns `X509Certificate2?` | code | `src/Piv/src/PivSession.cs:596` |
 | 10.3 | `CalculateAllAsync` returns `IReadOnlyDictionary<Credential, Code?>` | code | `src/Oath/src/PublicAPI.Unshipped.txt:50,87` |
 | 10.4 | `GetApplicationRelatedDataAsync` | code | `src/OpenPgp/src/PublicAPI.Unshipped.txt:181` |
 | 10.5 | `FidoSession.GetInfoAsync` returns `AuthenticatorInfo` | code | `src/Fido2/src/PublicAPI.Unshipped.txt:609` |
-| 10.6 | `WebAuthnClient.MakeCredentialAsync(options, pinBytes, ct)` | code | `src/WebAuthn/src/PublicAPI.Unshipped.txt:112` |
+| 10.6 | `WebAuthnClient.MakeCredentialAsync(options, pinBytes, ct)` | code | `src/WebAuthn/src/PublicAPI.Unshipped.txt:112`; factory now requires client options, see W1 |
 | 10.7 | `GetAssertionAsync` returns `IReadOnlyList<MatchedCredential>` | code | `src/WebAuthn/src/PublicAPI.Unshipped.txt:111` |
 | 10.8 | `GetCertificatesAsync(KeyReference)` on SecurityDomain | code | `src/SecurityDomain/src/PublicAPI.Unshipped.txt:22` |
 | 10.9 | `HsmAuthSession.ListCredentialsAsync` | code | `src/YubiHsm/src/PublicAPI.Unshipped.txt:36` |
@@ -297,7 +304,7 @@ inverted.
 |---|---|---|---|
 | D1 | ykman returns `x509.Certificate` from `get_certificate` | peer | `yubikey-manager@4ca60f7:yubikit/piv.py:1258` |
 | D2 | Android returns `java.security.cert.X509Certificate` | peer | `yubikit-android@f462685:piv/.../PivSession.java:882` |
-| D3 | .NET returns `X509Certificate2?` — nullable for an empty slot | code | `src/Piv/src/PublicAPI.Unshipped.txt:191` |
+| D3 | .NET returns `X509Certificate2?` — nullable for an empty slot | code | `src/Piv/src/PivSession.cs:596` |
 | D4 | Android OATH is `Map<Credential, @Nullable Code>` | peer | `yubikit-android@f462685:oath/.../OathSession.java:391` |
 | D5 | Android `Slot.AUTHENTICATION` exists | peer | `yubikit-android@f462685:piv/.../Slot.java:23` |
 | D6 | Swift WebAuthn usage is `makeCredential(options, authorization: .pin(...)).value` | peer | `swift@1.4.0 FIDO/WebAuthn/Client/Client.swift:34-41` |
@@ -350,7 +357,7 @@ OATH delta.
 | R3 | `release/1.4.0` is **58 commits ahead** of `origin/main` and dated 2026-09-07 | peer | `git rev-list --count origin/main..origin/release/1.4.0` = 58 |
 | R4 | Swift anchors are branch-sensitive — `CTAPSession.getInfo` is `:42` on `origin/main`, `:49` on `release/1.4.0` | peer | both refs read directly |
 | R5 | Non-CPU wall time is 508 ms (AOT) and 458 ms (framework-dependent), ~11 % apart | measured | 528−20 and 628−170 from the measured table |
-| R6 | Tier 2 `ISmartCardConnection.TransmitAndReceiveAsync` takes `ReadOnlyMemory<byte>` | code | `src/Core/src/PublicAPI.Unshipped.txt:655`; Tier 1 `RawSmartCardSession` takes `ApduCommand` at `:535` |
+| R6 | Tier 2 `ISmartCardConnection.TransmitAndReceiveAsync` takes `ReadOnlyMemory<byte>` | code | `src/Core/src/Transports/SmartCard/ISmartCardConnection.cs:30`; Tier 1 `RawSmartCardSession` takes `ApduCommand` at `src/Core/src/Sessions/RawSmartCardSession.cs:141` |
 | R7 | `DeviceInterfaceDescriptor` includes `TopologyKey` (Windows Container ID, `null` elsewhere) and `IdentityReadBudgetConsumed` | code | `src/Core/src/Devices/CompositeDeviceMerger.cs:40-48`, doc `:31-35` |
 | R8 | ykman declares a hard dependency on `python-fido2` | peer | `yubikey-manager@4ca60f7:pyproject.toml:21` — `"fido2 (>=2.0, <3)"` |
 | R9 | `python-fido2` supplies `Fido2Client` as well as `Ctap2` | peer | `python-fido2@5bc9d3a:fido2/client/__init__.py:1066` |
@@ -370,7 +377,7 @@ OATH delta.
 
 | # | Claim | Kind | Anchor |
 |---|---|---|---|
-| R11 | v2 is async **on the golden path**, but sync members exist by design | code | `YubiKeyManager.Shutdown()` = `ShutdownAsync().GetAwaiter().GetResult()` (`src/Core/src/Devices/YubiKeyManager.cs:257`, public `PublicAPI.Unshipped.txt:987`); `ISmartCardConnection.BeginTransaction(ct)` is synchronous (`:653`) and blocks on a `Task` (`src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs:102`) |
+| R11 | v2 is async **on the golden path**, but sync members exist by design | code | `YubiKeyManager.Shutdown()` = `ShutdownAsync().GetAwaiter().GetResult()` (`src/Core/src/Devices/YubiKeyManager.cs:257`); `ISmartCardConnection.BeginTransaction(ct)` is synchronous (`src/Core/src/Transports/SmartCard/ISmartCardConnection.cs:38`) and blocks on a `Task` (`src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs:102`) |
 | R12 | `ShutdownAsync` stops monitoring as part of teardown, so it is monitoring lifecycle | doc | `src/Core/src/Devices/YubiKeyManager.cs:216` — "stops monitoring if active"; `<seealso cref="StopMonitoring"/>` at `:229` |
 | R13 | `Fido2Server` class is at `server.py:125` | peer | `python-fido2@5bc9d3a1:fido2/server.py:125` |
 | R14 | `DeviceInterfaceDescriptor` has **eight** members, first is `Device` | code | `src/Core/src/Devices/CompositeDeviceMerger.cs:40-48` |
@@ -540,10 +547,49 @@ Grounded on `d628ce5f` — PR #656, `feat(applets)!: unify user-presence notific
 | UP8 | `UserPresenceContext` compares by reference and its `ToString()` omits `Scope`, so concurrent equal-valued requests cannot be conflated and display context stays out of logs | code | `src/Core/src/Credentials/UserPresenceContext.cs:27-48` |
 | UP9 | Resolution always receives `CancellationToken.None` so cleanup runs after cancellation, and a resolution exception never displaces an in-flight operation exception | code | `src/Core/src/Credentials/UserPresenceNotification.cs:123-144`; `IUserPresencePrompt.cs:50-58` |
 | UP10 | `ConsoleUserPresencePrompt` is the reference terminal implementation: it writes `Touch your YubiKey.` immediately for certain requests and debounces uncertain ones for ~300 ms | code | `src/Cli.Shared/src/Output/ConsoleUserPresencePrompt.cs:20-23,33,52,79,106` |
-| UP11 | WebAuthn still has no progress stream; touch notification comes from the FIDO2 session and `WebAuthnClientOptions` does not duplicate it | doc | `src/WebAuthn/CLAUDE.md:215-218,390-391` |
+| UP11 | WebAuthn still has no progress stream; touch notification comes from the FIDO2 session and `WebAuthnClientOptions` does not duplicate it | doc | `src/WebAuthn/CLAUDE.md:221-224,399-400` (Round-8 cited `:215-218,390-391`; #664 shifted the file) |
 | UP12 | Peer SDKs surface touch only on the FIDO path — PIV exposes touch as policy, never as a notification, in Android, Rust and Swift, and ykman has no PIV touch callback | peer | `yubikit-android@f462685:PivSession.java:84-90,169,185`; `rust@90940e9:crates/yubikit/src/piv.rs:597-612`; `swift@c76ae973:YubiKit/YubiKit/PIV/PIVDataTypes.swift:22-32` (`TouchPolicy` enum) and `PIV/PIVSession.swift:246-267,541-559` (`touchPolicy:` parameter, `requiresTouch: Bool`); `yubikey-manager:yubikit/piv.py` (no touch callback) |
 | UP13 | Swift's interaction signal is structurally FIDO-only: every file containing `StatusStream` at `c76ae973` lives under `YubiKit/YubiKit/FIDO/`, so `.waitingForUser` cannot reach a PIV, OATH or SecurityDomain session | peer | `git grep -l StatusStream c76ae973 -- YubiKit/YubiKit` returns only `FIDO/**` paths plus `BackwardsCompatibility.swift`; stream definition `YubiKit/YubiKit/FIDO/StatusStream.swift`, states `FIDO/WebAuthn/WebAuthn.swift:37-61` |
 
 > **Swift pin:** every claim above was re-read against `release/1.4.0` @ `c76ae973`, the ref
 > this ledger declares. Nothing in Round-8 rests on `release/1.3.0`.
 
+---
+
+# Round-9: first-device discovery and the WebAuthn factory (2026-09-16)
+
+Grounded on `ee5cc317`. Two substantive PRs since Round-8: #661 `feat(core): add first-key
+discovery helpers` and #664 `refactor(webauthn)!: move suffix checker into required client
+options`. #663 and #665 are documentation only.
+
+## WebAuthn factory — breaking
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| W1 | `PublicSuffixChecker` moved out of the factory parameter list and became a `required` member of `WebAuthnClientOptions`; `clientOptions` itself went from optional to required | code | `src/WebAuthn/src/Client/WebAuthnClientOptions.cs:39-58`; `src/WebAuthn/src/IYubiKeyExtensions.cs:57-66` |
+| W2 | The same collapse applies to the public `WebAuthnClient` constructor, which lost its `isPublicSuffix` parameter and its optional `options` default | code | `src/WebAuthn/src/Client/WebAuthnClient.cs:55-64`; `src/WebAuthn/src/PublicAPI.Unshipped.txt:113` |
+| W3 | The checker is guarded twice: `ArgumentNullException` on `init`, and `InvalidOperationException` on `get` when never configured | code | `src/WebAuthn/src/Client/WebAuthnClientOptions.cs:49-57` |
+| W4 | The factory forces that guard **before** session creation can open a device connection, so a misconfigured client cannot leave a connection dangling | code | `src/WebAuthn/src/IYubiKeyExtensions.cs:64-66` — `_ = clientOptions.PublicSuffixChecker;` with the comment stating the intent |
+| W5 | `CredentialPrompt` semantics are unchanged by #664; only the call shape moved. It remains optional on the same options record | code | `src/WebAuthn/src/Client/WebAuthnClientOptions.cs`; `src/WebAuthn/CLAUDE.md:149-151` |
+| W6 | Touch notification for WebAuthn still comes from the FIDO2 session through `sessionOptions`, not from `WebAuthnClientOptions` | doc | `src/WebAuthn/README.md` "User interaction"; `src/WebAuthn/CLAUDE.md:399-400` |
+
+## First-device discovery
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| F1 | `YubiKeyManager.FindFirstAsync(predicate?, ct)` returns the first match and throws `InvalidOperationException` when none matches | code | `src/Core/src/Devices/YubiKeyManager.cs:355`; implementation `src/Core/src/Devices/YubiKeyDeviceManager.cs:147-151` |
+| F2 | `FindFirstOrDefaultAsync(predicate?, ct)` returns `null` instead of throwing | code | `src/Core/src/Devices/YubiKeyManager.cs:373`; implementation `YubiKeyDeviceManager.cs:154-162` |
+| F3 | Both are one-shot queries over the same cached `FindAllAsync` discovery: they do **not** wait for insertion, and discovery ordering is **not stable** | doc | `src/Core/src/Devices/YubiKeyManager.cs:346-352,365-371` (remarks on both); `docs/usage/device-discovery.md`; `src/Core/README.md` |
+| F4 | They inherit `FindAllAsync` cancellation behavior — the token reaches discovery, but a cached result may complete without observing cancellation | doc | same remarks blocks as F3 |
+| F5 | The SDK's own READMEs now bind the first device with `FindFirstAsync`, which is why the deck's pipeline and logging slides do too | doc | PR #663 `docs: bind the first device with FindFirstAsync in every README`; `src/WebAuthn/README.md:48` |
+
+## Deck consequences
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| X1 | The deck's WebAuthn sample did not compile against `ee5cc317` before this round, and neither did the linked `webauthn-demo.cs` | code | both used the removed `isPublicSuffix:` parameter; fixed in this commit |
+| X2 | `webauthn-demo.cs` compiles clean against `ee5cc317` — `dotnet build webauthn-demo.cs`, zero warnings, zero errors | measured | run on this branch after the fix. **Not** hardware-verified; running it needs a previewSign-capable key and a human touch. |
+
+> **Honest limit on X2:** compiling is not running. The previewSign and ARKG path in that
+> demo has not been exercised against hardware in this round, so treat "it builds" as
+> exactly that.

@@ -26,5 +26,6 @@ one-connection-per-key and one-session-per-connection.
 <!-- Anchors: docs/architecture/raw-access-tiers.md:6-16 (T0), :19-33 (T1),
      :136-145 (T2), :30-33 (safety still applies);
      src/Core/src/Devices/YubiKeyConnectionExtensions.cs:37,90,108;
-     Tier 2 signature takes ReadOnlyMemory<byte> src/Core/src/PublicAPI.Unshipped.txt:655
-     (Tier 1 takes ApduCommand, :535) -->
+     Tier 2 signature takes ReadOnlyMemory<byte>
+     src/Core/src/Transports/SmartCard/ISmartCardConnection.cs:30
+     (Tier 1 takes ApduCommand, src/Core/src/Sessions/RawSmartCardSession.cs:141) -->

@@ -102,8 +102,8 @@ same slot enum, same argument order. The .NET difference is that its session is
 **dual-transport and prefers SmartCard** (`SmartCard → HidOtp`), so on a CCID-enabled
 key this runs over APDU, not HID. `yubikit-swift` has no YubiOTP session at all.
 
-<!-- Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102,
-     transport order :144-145, CalculateHmacSha1Async PublicAPI.Unshipped.txt:72;
+<!-- Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102, transport order
+     same file :144-145; CalculateHmacSha1Async src/YubiOtp/src/PublicAPI.Unshipped.txt:72;
      python yubikit/yubiotp.py:708, calculate_hmac_sha1 :901;
      android YubiOtpSession.java:253,447;
      rust crates/yubikit/src/yubiotp.rs:1165 (calculate_hmac_sha1);

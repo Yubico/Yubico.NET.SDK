@@ -12,6 +12,9 @@
 var keys = await YubiKeyManager.FindAllAsync();
 await using var piv = await keys[0].CreatePivSessionAsync();
 // ... do the work, then exit
+
+// Or skip the list: FindFirstAsync throws, FindFirstOrDefaultAsync returns null
+IYubiKey key = await YubiKeyManager.FindFirstAsync();
 ```
 
 **B — Long-lived.** Start monitoring, react to arrivals for the process lifetime.
@@ -27,6 +30,8 @@ await foreach (var e in YubiKeyManager.WatchAsync(ct))
 ```
 
 Same `IYubiKey`, same sessions. The models differ only in **who keeps the cache fresh.**
+The first-device helpers are model A only — one shot over the same cache, they do **not**
+wait for insertion, and first is not a stable ordering. To wait for a key, you need B.
 
 ---
 
@@ -69,8 +74,10 @@ arrive late here and not there.
 Both models inherit this. Neither model can promise a key that arrives *during* a scan
 appears in that scan's result.
 
-<!-- Anchors: FindAllAsync src/Core/src/PublicAPI.Unshipped.txt:984-985;
-     caching + "monitoring keeps cache fresh" src/Core/src/Devices/YubiKeyManager.cs:286-300;
-     monitoring surface PublicAPI.Unshipped.txt:986-992;
+<!-- Anchors: FindAllAsync src/Core/src/Devices/YubiKeyManager.cs:279,336;
+     FindFirstAsync/FindFirstOrDefaultAsync :355,373 (one-shot, no wait,
+     ordering not stable — remarks on both); caching + "monitoring keeps cache fresh"
+     src/Core/src/Devices/YubiKeyManager.cs:286-300;
+     monitoring surface :102,117,206,257;
      race conditions docs/usage/device-discovery.md:202-209;
      publish-first docs/architecture/device-identity.md:93-96 -->

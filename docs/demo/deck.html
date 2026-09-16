@@ -116,9 +116,8 @@ img { display: block; margin: 0 auto; }
 section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 ;" data-marpit-pagination-total="40" data-size="16:9">
 <h2 id="the-pipeline-in-code">The pipeline in code</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-comment">// 1. HOST APP asks the SDK for devices</span>
-<span class="hljs-keyword">var</span> keys = <span class="hljs-keyword">await</span> YubiKeyManager.FindAllAsync();
-IYubiKey key = keys[<span class="hljs-number">0</span>];
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-comment">// 1. HOST APP asks the SDK for a device</span>
+IYubiKey key = <span class="hljs-keyword">await</span> YubiKeyManager.FindFirstAsync();
 
 <span class="hljs-comment">// 2. SESSION — convenience: the session owns a hidden connection</span>
 <span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> piv = <span class="hljs-keyword">await</span> key.CreatePivSessionAsync();
@@ -413,6 +412,9 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-keyword">var</span> keys = <span class="hljs-keyword">await</span> YubiKeyManager.FindAllAsync();
 <span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> piv = <span class="hljs-keyword">await</span> keys[<span class="hljs-number">0</span>].CreatePivSessionAsync();
 <span class="hljs-comment">// ... do the work, then exit</span>
+
+<span class="hljs-comment">// Or skip the list: FindFirstAsync throws, FindFirstOrDefaultAsync returns null</span>
+IYubiKey key = <span class="hljs-keyword">await</span> YubiKeyManager.FindFirstAsync();
 </code></pre>
 <p><strong>B — Long-lived.</strong> Start monitoring, react to arrivals for the process lifetime.</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp">YubiKeyManager.StartMonitoring();
@@ -423,7 +425,9 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
         <span class="hljs-keyword">await</span> OnKeyInserted(e.Device);
 }
 </code></pre>
-<p>Same <code>IYubiKey</code>, same sessions. The models differ only in <strong>who keeps the cache fresh.</strong></p>
+<p>Same <code>IYubiKey</code>, same sessions. The models differ only in <strong>who keeps the cache fresh.</strong><br />
+The first-device helpers are model A only — one shot over the same cache, they do <strong>not</strong><br />
+wait for insertion, and first is not a stable ordering. To wait for a key, you need B.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -876,7 +880,7 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 <h2 id="observability-logging">Observability: logging</h2>
 <p><strong>Off by default.</strong> No output, no logger, no overhead until you opt in.</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp"><span class="hljs-comment">// Silent — the default</span>
-<span class="hljs-keyword">var</span> keys = <span class="hljs-keyword">await</span> YubiKeyManager.FindAllAsync();
+IYubiKey key = <span class="hljs-keyword">await</span> YubiKeyManager.FindFirstAsync();
 
 <span class="hljs-comment">// One line, before you touch the SDK</span>
 YubiKitLogging.Configure(loggerFactory);
@@ -1120,8 +1124,8 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 </ul>
 <blockquote>
 <p><strong>WebAuthn is the deliberate exception.</strong> It is not an applet session. It returns a<br />
-<code>WebAuthnClient</code>, takes a required origin and public-suffix checker, and has its own<br />
-factory test. The test file says so in as many words:<br />
+<code>WebAuthnClient</code>, takes a required origin and required client options carrying the<br />
+public-suffix checker, and has its own factory test. The test file says so in as many words:<br />
 <em>&quot;WebAuthn is not an applet session and has its own factory test.&quot;</em></p>
 </blockquote>
 </section>
@@ -1466,8 +1470,8 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 <h2 id="webauthn--the-layer-above-ctap2">WebAuthn — the layer above CTAP2</h2>
 <p>Origin checks, client data, attestation, extensions, PIN/UV orchestration.</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-csharp">_ = WebAuthnOrigin.TryParse(<span class="hljs-string">&quot;https://example.com&quot;</span>, <span class="hljs-keyword">out</span> <span class="hljs-keyword">var</span> origin);
-<span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> client = <span class="hljs-keyword">await</span> key.CreateWebAuthnClientAsync(
-    origin!, isPublicSuffix: d =&gt; d <span class="hljs-keyword">is</span> <span class="hljs-string">&quot;com&quot;</span> <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;org&quot;</span> <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;net&quot;</span>);
+<span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> client = <span class="hljs-keyword">await</span> key.CreateWebAuthnClientAsync(origin!,
+    <span class="hljs-keyword">new</span> WebAuthnClientOptions { PublicSuffixChecker = d =&gt; d <span class="hljs-keyword">is</span> <span class="hljs-string">&quot;com&quot;</span> <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;org&quot;</span> <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;net&quot;</span> });
 <span class="hljs-keyword">var</span> reg = <span class="hljs-keyword">await</span> client.MakeCredentialAsync(options, pinBytes);
 </code></pre>
 <div class="cols">
@@ -1481,8 +1485,9 @@ section:has(&gt; p &gt; img) h2 { margin-bottom: 8px; }
 </code></pre>
 </div>
 <p><strong>Delta:</strong> both .NET and Swift demand an <strong>origin and a public-suffix checker up front</strong> —<br />
-you cannot accidentally skip origin validation. <code>python-fido2</code> also ships the<br />
-relying-party half (<code>Fido2Server</code>); v2 is client-side only.</p>
+you cannot accidentally skip origin validation. In .NET the checker is a <code>required</code> member of<br />
+<code>WebAuthnClientOptions</code>, guarded before a device connection is ever opened.<br />
+<code>python-fido2</code> also ships the relying-party half (<code>Fido2Server</code>); v2 is client-side only.</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="29" data-paginate="true" data-theme="default" data-style="section { font-size: 21px; padding: 44px 56px; }
 h2 { color: #1a4d7a; border-bottom: 2px solid #d8e2ea; padding-bottom: 6px; margin-bottom: 14px; }
@@ -2362,9 +2367,9 @@ changes are still cheap. Now is the time to complain.</p>
 <script src="assets/deck-zoom.js"></script>
 </section>
 <script>!function(){"use strict";const t={h1:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"1"},style:"display: block; font-size: 2em; margin-block-start: 0.67em; margin-block-end: 0.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h2:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"2"},style:"display: block; font-size: 1.5em; margin-block-start: 0.83em; margin-block-end: 0.83em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h3:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"3"},style:"display: block; font-size: 1.17em; margin-block-start: 1em; margin-block-end: 1em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h4:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"4"},style:"display: block; margin-block-start: 1.33em; margin-block-end: 1.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h5:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"5"},style:"display: block; font-size: 0.83em; margin-block-start: 1.67em; margin-block-end: 1.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h6:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"6"},style:"display: block; font-size: 0.67em; margin-block-start: 2.33em; margin-block-end: 2.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},span:{proto:()=>HTMLSpanElement},pre:{proto:()=>HTMLElement,style:"display: block; font-family: monospace; white-space: pre; margin: 1em 0; --marp-auto-scaling-white-space: pre;"}},e="data-marp-auto-scaling-wrapper",i="data-marp-auto-scaling-svg",n="data-marp-auto-scaling-container";class s extends HTMLElement{container;containerSize;containerObserver;svg;svgComputedStyle;svgPreserveAspectRatio="xMinYMid meet";wrapper;wrapperSize;wrapperObserver;constructor(){super();const t=t=>([e])=>{const{width:i,height:n}=e.contentRect;this[t]={width:i,height:n},this.updateSVGRect()};this.attachShadow({mode:"open"}),this.containerObserver=new ResizeObserver(t("containerSize")),this.wrapperObserver=new ResizeObserver((...e)=>{t("wrapperSize")(...e),this.flushSvgDisplay()})}static get observedAttributes(){return["data-downscale-only"]}connectedCallback(){this.shadowRoot.innerHTML=`\n<style>\n  svg[${i}] { display: block; width: 100%; height: auto; vertical-align: top; }\n  span[${n}] { display: table; white-space: var(--marp-auto-scaling-white-space, nowrap); width: max-content; }\n</style>\n<div ${e}>\n  <svg part="svg" ${i}>\n    <foreignObject><span ${n}><slot></slot></span></foreignObject>\n  </svg>\n</div>\n    `.split(/\n\s*/).join(""),this.wrapper=this.shadowRoot.querySelector(`div[${e}]`)??void 0;const t=this.svg;this.svg=this.wrapper?.querySelector(`svg[${i}]`)??void 0,this.svg!==t&&(this.svgComputedStyle=this.svg?window.getComputedStyle(this.svg):void 0),this.container=this.svg?.querySelector(`span[${n}]`)??void 0,this.observe()}disconnectedCallback(){this.svg=void 0,this.svgComputedStyle=void 0,this.wrapper=void 0,this.container=void 0,this.observe()}attributeChangedCallback(){this.observe()}flushSvgDisplay(){const{svg:t}=this;t&&(t.style.display="inline",requestAnimationFrame(()=>{t.style.display=""}))}observe(){this.containerObserver.disconnect(),this.wrapperObserver.disconnect(),this.wrapper&&this.wrapperObserver.observe(this.wrapper),this.container&&this.containerObserver.observe(this.container),this.svgComputedStyle&&this.observeSVGStyle(this.svgComputedStyle)}observeSVGStyle(t){const e=()=>{const i=(()=>{const e=t.getPropertyValue("--preserve-aspect-ratio");if(e)return e.trim();return`x${(({textAlign:t,direction:e})=>{if(t.endsWith("left"))return"Min";if(t.endsWith("right"))return"Max";if("start"===t||"end"===t){let i="rtl"===e;return"end"===t&&(i=!i),i?"Max":"Min"}return"Mid"})(t)}YMid meet`})();i!==this.svgPreserveAspectRatio&&(this.svgPreserveAspectRatio=i,this.updateSVGRect()),t===this.svgComputedStyle&&requestAnimationFrame(e)};e()}updateSVGRect(){let t=Math.ceil(this.containerSize?.width??0);const e=Math.ceil(this.containerSize?.height??0);void 0!==this.dataset.downscaleOnly&&(t=Math.max(t,this.wrapperSize?.width??0));const i=this.svg?.querySelector(":scope > foreignObject");if(i?.setAttribute("width",`${t}`),i?.setAttribute("height",`${e}`),this.svg&&(this.svg.setAttribute("viewBox",`0 0 ${t} ${e}`),this.svg.setAttribute("preserveAspectRatio",this.svgPreserveAspectRatio),this.svg.style.height=t<=0||e<=0?"0":""),this.container){const t=this.svgPreserveAspectRatio.toLowerCase();this.container.style.marginLeft=t.startsWith("xmid")||t.startsWith("xmax")?"auto":"0",this.container.style.marginRight=t.startsWith("xmi")?"auto":"0"}}}const r=(t,{attrs:e={},style:i})=>class extends t{constructor(...t){super(...t);for(const[t,i]of Object.entries(e))this.hasAttribute(t)||this.setAttribute(t,i);this._shadow()}static get observedAttributes(){return["data-auto-scaling"]}connectedCallback(){this._update()}attributeChangedCallback(){this._update()}_shadow(){if(!this.shadowRoot)try{this.attachShadow({mode:"open"})}catch(t){if(!(t instanceof Error&&"NotSupportedError"===t.name))throw t}return this.shadowRoot}_update(){const t=this._shadow();if(t){const e=i?`<style>:host { ${i} }</style>`:"";let n="<slot></slot>";const{autoScaling:s}=this.dataset;if(void 0!==s){n=`<marp-auto-scaling exportparts="svg:auto-scaling" ${"downscale-only"===s?"data-downscale-only":""}>${n}</marp-auto-scaling>`}t.innerHTML=e+n}}};let o;const a=()=>o??(o=!!document.createElement("div",{is:"marp-auto-scaling"}).outerHTML.startsWith("<div is"),o),l=Symbol();let c;const d="marpitSVGPolyfill:setZoomFactor,",h=Symbol(),g=Symbol();const p=()=>{const t="Apple Computer, Inc."===navigator.vendor,e=t?[v]:[],i={then:e=>(t?(async()=>{if(void 0===c){const t=document.createElement("canvas");t.width=10,t.height=10;const e=t.getContext("2d"),i=new Image(10,10),n=new Promise(t=>{i.addEventListener("load",()=>t())});i.crossOrigin="anonymous",i.src="data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%201%201%22%3E%3CforeignObject%20width%3D%221%22%20height%3D%221%22%20requiredExtensions%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Cdiv%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%20style%3D%22width%3A%201px%3B%20height%3A%201px%3B%20background%3A%20red%3B%20position%3A%20relative%22%3E%3C%2Fdiv%3E%3C%2FforeignObject%3E%3C%2Fsvg%3E",await n,e.drawImage(i,0,0),c=e.getImageData(5,5,1,1).data[3]<128}return c})().then(t=>{null==e||e(t?[v]:[])}):null==e||e([]),i)};return Object.assign(e,i)};let m,u;function v(t){const e="object"==typeof t&&t.target||document,i="object"==typeof t?t.zoom:t;window[g]||(Object.defineProperty(window,g,{configurable:!0,value:!0}),document.body.style.zoom=1.0001,document.body.offsetHeight,document.body.style.zoom=1,window.addEventListener("message",({data:t,origin:e})=>{if(e===window.origin)try{if(t&&"string"==typeof t&&t.startsWith(d)){const[,e]=t.split(","),i=Number.parseFloat(e);Number.isNaN(i)||(u=i)}}catch(t){console.error(t)}}));let n=!1;Array.from(e.querySelectorAll("svg[data-marpit-svg]"),t=>{var e,s,r,o;t.style.transform||(t.style.transform="translateZ(0)");const a=i||u||t.currentScale||1;m!==a&&(m=a,n=a);const l=t.getBoundingClientRect(),{length:c}=t.children;for(let i=0;i<c;i+=1){const n=t.children[i];if(n.getScreenCTM){const t=n.getScreenCTM();if(t){const i=null!==(s=null===(e=n.x)||void 0===e?void 0:e.baseVal.value)&&void 0!==s?s:0,c=null!==(o=null===(r=n.y)||void 0===r?void 0:r.baseVal.value)&&void 0!==o?o:0,d=n.children.length;for(let e=0;e<d;e+=1){const s=n.children[e];if("SECTION"===s.tagName){const{style:e}=s;e.transformOrigin||(e.transformOrigin=`${-i}px ${-c}px`),e.transform=`scale(${a}) matrix(${t.a}, ${t.b}, ${t.c}, ${t.d}, ${t.e-l.left}, ${t.f-l.top}) translateZ(0.0001px)`;break}}}}}}),!1!==n&&Array.from(e.querySelectorAll("iframe"),({contentWindow:t})=>{null==t||t.postMessage(`${d}${n}`,"null"===window.origin?"*":window.origin)})}function w({once:t=!1,target:e=document}={}){const i=function(t=document){if(t[h])return t[h];let e=!0;const i=()=>{e=!1,delete t[h]};Object.defineProperty(t,h,{configurable:!0,value:i});let n=[],s=!1;(async()=>{try{n=await p()}finally{s=!0}})();const r=()=>{for(const e of n)e({target:t});s&&0===n.length||e&&window.requestAnimationFrame(r)};return r(),i}(e);return t?(i(),()=>{}):i}m=1,u=void 0;const b=Symbol(),y=(e=document)=>{if("undefined"==typeof window)throw new Error("Marp Core's browser script is valid only in browser context.");if(((e=document)=>{const i=window[l];i||customElements.define("marp-auto-scaling",s);for(const n of Object.keys(t)){const s=`marp-${n}`,o=t[n].proto();a()&&o!==HTMLElement?i||customElements.define(s,r(o,{style:t[n].style}),{extends:n}):(i||customElements.define(s,r(HTMLElement,t[n])),e.querySelectorAll(`${n}[is="${s}"]`).forEach(t=>{t.outerHTML=t.outerHTML.replace(new RegExp(`^<${n}`,"i"),`<${s}`).replace(new RegExp(`</${n}>$`,"i"),`</${s}>`)}))}window[l]=!0})(e),e[b])return e[b];const i=w({target:e}),n=()=>{i(),delete e[b]},o=Object.assign(n,{cleanup:n,update:()=>y(e)});return Object.defineProperty(e,b,{configurable:!0,value:o}),o},f=document.currentScript;y(f?f.getRootNode():document)}();
-</script></foreignObject></svg></div><div class="bespoke-marp-note" data-index="3" tabindex="0"><p>Anchors: FindAllAsync src/Core/src/PublicAPI.Unshipped.txt:985;
+</script></foreignObject></svg></div><div class="bespoke-marp-note" data-index="3" tabindex="0"><p>Anchors: FindFirstAsync src/Core/src/Devices/YubiKeyManager.cs:355;
      CreatePivSessionAsync src/Piv/src/IYubiKeyExtensions.cs:38;
-     GetCertificateAsync src/Piv/src/PublicAPI.Unshipped.txt:191;
+     GetCertificateAsync src/Piv/src/PivSession.cs:596;
      PivSession.CreateAsync src/Piv/src/PivSession.cs:130;
      ConnectAsync&lt;T&gt; src/Core/src/Abstractions/IYubiKey.cs:164;
      SessionCreationOptions fields docs/architecture/applet-public-api.md:10-13;
@@ -2375,9 +2380,11 @@ changes are still cheap. Now is the time to complain.</p>
      YubiOtp src/YubiOtp/src/IYubiKeyExtensions.cs:144-145;
      SCP-forces-SmartCard Management:109, Fido2:132, YubiOtp:110;
      single-transport Piv:46 Oath:47 OpenPgp:45 SecurityDomain:53 YubiHsm:49;
-     ConnectionType src/Core/src/Devices/ConnectionType.cs:19-25</p></div><div class="bespoke-marp-note" data-index="11" tabindex="0"><p>Anchors: FindAllAsync src/Core/src/PublicAPI.Unshipped.txt:984-985;
-     caching + &quot;monitoring keeps cache fresh&quot; src/Core/src/Devices/YubiKeyManager.cs:286-300;
-     monitoring surface PublicAPI.Unshipped.txt:986-992;
+     ConnectionType src/Core/src/Devices/ConnectionType.cs:19-25</p></div><div class="bespoke-marp-note" data-index="11" tabindex="0"><p>Anchors: FindAllAsync src/Core/src/Devices/YubiKeyManager.cs:279,336;
+     FindFirstAsync/FindFirstOrDefaultAsync :355,373 (one-shot, no wait,
+     ordering not stable — remarks on both); caching + &quot;monitoring keeps cache fresh&quot;
+     src/Core/src/Devices/YubiKeyManager.cs:286-300;
+     monitoring surface :102,117,206,257;
      race conditions docs/usage/device-discovery.md:202-209;
      publish-first docs/architecture/device-identity.md:93-96</p></div><div class="bespoke-marp-note" data-index="12" tabindex="0"><p>Anchors: src/Core/src/Devices/CompositeDeviceMerger.cs:19-30 (doc), :40-48 (descriptor);
      NFC/unknown-kind never merge :24-27, :119-124;
@@ -2386,7 +2393,9 @@ changes are still cheap. Now is the time to complain.</p>
      src/Core/src/Devices/FindYubiKeys.cs:191;
      transport-shaped DeviceId docs/architecture/device-identity.md:179 (D7)</p></div><div class="bespoke-marp-note" data-index="14" tabindex="0"><p>Anchors: device-identity.md D1 :61-65, D2 :67-98 (latch :76-77, null-forever :73-75,
      late arrival :80-81, republication :82-84), D6 :161, D7 :179-184;
-     &quot;not as the current interface-set string&quot; :188-190</p></div><div class="bespoke-marp-note" data-index="15" tabindex="0"><p>Anchors: src/Core/src/PublicAPI.Unshipped.txt:986-992 (incl. Shutdown :987, ShutdownAsync :988);
+     &quot;not as the current interface-set string&quot; :188-190</p></div><div class="bespoke-marp-note" data-index="15" tabindex="0"><p>Anchors: monitoring surface src/Core/src/Devices/YubiKeyManager.cs:102,117,131,143,206
+     (StartMonitoring x2, StopMonitoring, IsMonitoring, WatchAsync);
+     Shutdown :257, ShutdownAsync :230;
      ShutdownAsync stops monitoring src/Core/src/Devices/YubiKeyManager.cs:216;
      src/Core/src/DeviceEvent.cs:19-30; docs/usage/device-discovery.md:126</p></div><div class="bespoke-marp-note" data-index="16" tabindex="0"><p>Anchors: ykman ykman/device.py:108; rust monitor.rs:1113, examples/monitor_yubikeys.rs:87;
      android YubiKitManager.java:82-84, UsbYubiKeyDevice.java:154;
@@ -2400,10 +2409,11 @@ changes are still cheap. Now is the time to complain.</p>
      swift@1.4.0 YubiKit/YubiKit/Utilities/Logger+Extensions.swift:17-39 (HasLogger, OSLog)</p></div><div class="bespoke-marp-note" data-index="19" tabindex="0"><p>Anchors: docs/architecture/raw-access-tiers.md:6-16 (T0), :19-33 (T1),
      :136-145 (T2), :30-33 (safety still applies);
      src/Core/src/Devices/YubiKeyConnectionExtensions.cs:37,90,108;
-     Tier 2 signature takes ReadOnlyMemory&lt;byte&gt; src/Core/src/PublicAPI.Unshipped.txt:655
-     (Tier 1 takes ApduCommand, :535)</p></div><div class="bespoke-marp-note" data-index="20" tabindex="0"><p>Anchors: grammar docs/architecture/applet-public-api.md:3-9;
+     Tier 2 signature takes ReadOnlyMemory&lt;byte&gt;
+     src/Core/src/Transports/SmartCard/ISmartCardConnection.cs:30
+     (Tier 1 takes ApduCommand, src/Core/src/Sessions/RawSmartCardSession.cs:141)</p></div><div class="bespoke-marp-note" data-index="20" tabindex="0"><p>Anchors: grammar docs/architecture/applet-public-api.md:3-9;
      eight sessions src/PublicApi/tests/.../AppletSessionShapeTests.cs:16-26;
-     exclusion FactoryShapeTests.cs:56, WebAuthn factory shape :94-127</p></div><div class="bespoke-marp-note" data-index="21" tabindex="0"><p>Anchors: real call site src/Management/tests/.../ManagementSessionSimpleTests.cs:40-43;
+     exclusion FactoryShapeTests.cs:57, WebAuthn factory shape :96-127</p></div><div class="bespoke-marp-note" data-index="21" tabindex="0"><p>Anchors: real call site src/Management/tests/.../ManagementSessionSimpleTests.cs:40-43;
      OwnConnection src/Piv/src/IYubiKeyExtensions.cs:59;
      rules docs/architecture/raw-access-tiers.md:149-152,158-159;
      enforcement src/Core/src/Sessions/ConnectionSessionGuard.cs:44-52;
@@ -2412,17 +2422,19 @@ changes are still cheap. Now is the time to complain.</p>
      transports src/Management/src/IYubiKeyExtensions.cs:143-144;
      python yubikit/support.py:83, yubikit/management.py:598;
      swift@1.4.0 ManagementSession.swift:142 (SmartCard), :159 (FIDO), :72</p></div><div class="bespoke-marp-note" data-index="23" tabindex="0"><p>Anchors: .NET src/Piv/src/IYubiKeyExtensions.cs:38,
-     PublicAPI.Unshipped.txt:191 (X509Certificate2?);
+     src/Piv/src/PivSession.cs:596 (X509Certificate2?);
      python yubikit/piv.py:1258; android PivSession.java:882</p></div><div class="bespoke-marp-note" data-index="24" tabindex="0"><p>Anchors: .NET src/Oath/src/IYubiKeyExtensions.cs:39,
      PublicAPI.Unshipped.txt:50,87; python yubikit/oath.py:265,447;
      android OathSession.java:391</p></div><div class="bespoke-marp-note" data-index="25" tabindex="0"><p>Anchors: .NET src/OpenPgp/src/IYubiKeyExtensions.cs:37,
      PublicAPI.Unshipped.txt:181; python yubikit/openpgp.py:987,1088;
-     android OpenPgpSession.java:154,266; swift@1.4.0 absent, Capability.swift:24</p></div><div class="bespoke-marp-note" data-index="26" tabindex="0"><p>Anchors: .NET src/Fido2/src/IYubiKeyExtensions.cs:124,
-     PublicAPI.Unshipped.txt:609, transports :189-190, FW5.8 :95;
+     android OpenPgpSession.java:154,266; swift@1.4.0 absent, Capability.swift:24</p></div><div class="bespoke-marp-note" data-index="26" tabindex="0"><p>Anchors: .NET src/Fido2/src/IYubiKeyExtensions.cs:124, transport order
+     src/Fido2/src/IYubiKeyExtensions.cs:190, FW5.8 note same file :95;
+     GetInfoAsync src/Fido2/src/PublicAPI.Unshipped.txt:609;
      python-fido2 fido2/ctap2/base.py:246-262 (get_info at :252), :304-309;
-     swift@1.4.0 CTAPSession+Creation.swift:25, CTAPSession.swift:49</p></div><div class="bespoke-marp-note" data-index="27" tabindex="0"><p>Anchors: .NET src/WebAuthn/src/IYubiKeyExtensions.cs:57-62,
-     PublicAPI.Unshipped.txt:111-112, real call site
-     src/WebAuthn/tests/.../WebAuthnClientFactoryTests.cs:42-45;
+     swift@1.4.0 CTAPSession+Creation.swift:25, CTAPSession.swift:49</p></div><div class="bespoke-marp-note" data-index="27" tabindex="0"><p>Anchors: .NET factory src/WebAuthn/src/IYubiKeyExtensions.cs:57-66,
+     required checker src/WebAuthn/src/Client/WebAuthnClientOptions.cs:39-58,
+     ctor src/WebAuthn/src/Client/WebAuthnClient.cs:55-64, real call site
+     src/WebAuthn/tests/.../WebAuthnClientFactoryTests.cs;
      python-fido2 fido2/client/__init__.py:1066-1179, fido2/server.py:158;
      swift@1.4.0 FIDO/WebAuthn/Client/Client.swift:34-41 (doc), :95 (init)</p></div><div class="bespoke-marp-note" data-index="28" tabindex="0"><p>Anchors: .NET src/SecurityDomain/src/IYubiKeyExtensions.cs:45,
      GetKeyInfoAsync PublicAPI.Unshipped.txt:24;
@@ -2432,8 +2444,8 @@ changes are still cheap. Now is the time to complain.</p>
      swift@1.4.0 SecurityDomainSession.swift:55,124</p></div><div class="bespoke-marp-note" data-index="29" tabindex="0"><p>Anchors: .NET src/YubiHsm/src/IYubiKeyExtensions.cs:41,
      PublicAPI.Unshipped.txt:36; python yubikit/hsmauth.py:223,250;
      rust crates/yubikit/src/hsmauth.rs:32,383;
-     android absent settings.gradle.kts:35-39; swift@1.4.0 absent Capability.swift:30</p></div><div class="bespoke-marp-note" data-index="30" tabindex="0"><p>Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102,
-     transport order :144-145, CalculateHmacSha1Async PublicAPI.Unshipped.txt:72;
+     android absent settings.gradle.kts:35-39; swift@1.4.0 absent Capability.swift:30</p></div><div class="bespoke-marp-note" data-index="30" tabindex="0"><p>Anchors: .NET src/YubiOtp/src/IYubiKeyExtensions.cs:102, transport order
+     same file :144-145; CalculateHmacSha1Async src/YubiOtp/src/PublicAPI.Unshipped.txt:72;
      python yubikit/yubiotp.py:708, calculate_hmac_sha1 :901;
      android YubiOtpSession.java:253,447;
      rust crates/yubikit/src/yubiotp.rs:1165 (calculate_hmac_sha1);

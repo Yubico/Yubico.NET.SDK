@@ -18,7 +18,9 @@ The monitoring **control** surface is five members: `StartMonitoring()`,
 `StartMonitoring(TimeSpan)`, `StopMonitoring()`, `WatchAsync(ct)`, `IsMonitoring`.
 `Shutdown()` / `ShutdownAsync()` also stop monitoring as part of tearing the manager down.
 
-<!-- Anchors: src/Core/src/PublicAPI.Unshipped.txt:986-992 (incl. Shutdown :987, ShutdownAsync :988);
+<!-- Anchors: monitoring surface src/Core/src/Devices/YubiKeyManager.cs:102,117,131,143,206
+     (StartMonitoring x2, StopMonitoring, IsMonitoring, WatchAsync);
+     Shutdown :257, ShutdownAsync :230;
      ShutdownAsync stops monitoring src/Core/src/Devices/YubiKeyManager.cs:216;
      src/Core/src/DeviceEvent.cs:19-30; docs/usage/device-discovery.md:126 -->
 

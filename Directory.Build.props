@@ -38,7 +38,17 @@
         <Authors>Yubico</Authors>
         <Company>Yubico</Company>
         <Copyright>Copyright © Yubico $([System.DateTime]::Now.Year)</Copyright>
-        <PackageProjectUrl>https://github.com/Yubico/Yubico.NET.SDK</PackageProjectUrl>
+        <!-- The repository default branch is v1. Point the nuget.org project link at the v2 branch
+             so a package page does not send people to the wrong SDK. RepositoryUrl stays bare: it is
+             source-control metadata, and Source Link pairs it with the exact commit.
+
+             YubiKitDocsBranch is the single source of truth for that branch name. The package
+             readmes hardcode it in their links - they are packed verbatim, so they cannot expand an
+             MSBuild property - and `docs-qa` reads this property to fail any readme link that names
+             a different branch. When v2 becomes the default branch: change it here, run docs-qa, and
+             fix the lines it reports. -->
+        <YubiKitDocsBranch>yubikit</YubiKitDocsBranch>
+        <PackageProjectUrl>https://github.com/Yubico/Yubico.NET.SDK/tree/$(YubiKitDocsBranch)</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Yubico/Yubico.NET.SDK</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -58,17 +68,41 @@
         <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-        <!-- Alpha disclaimer surfaced in package metadata via PackageReadmeFile
-             (package page) and PackageReleaseNotes (plain-text fallback). The
-             canonical long-form text lives in PACKAGE_README.md; keep these aligned.
+        <!-- Alpha disclaimer surfaced in package metadata via PackageReleaseNotes (plain-text
+             fallback) and, for packages without their own readme, via the shared
+             PACKAGE_README.md. Every module ships its own package readme; see below.
              Remove when the SDK exits alpha and completes the formal security audit. -->
-        <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>
         <PackageReleaseNotes>ALPHA - NOT FOR PRODUCTION. Pre-release, unsigned, subject to change, and not yet security-audited by Yubico. No security guarantees. Package names/namespaces may change. Evaluation / hackathon use only.</PackageReleaseNotes>
     </PropertyGroup>
 
-    <!-- Ship the shared alpha PACKAGE_README.md in every packable package's root. -->
+    <!-- Per-package readme.
+
+         Each packable module ships src/<Module>/PACKAGE_README.md, a short package-page document:
+         what it is, the alpha banner, install, and links. Nothing else - requirements, snippets, and
+         constraints live in src/<Module>/README.md, which it links to, so the two never drift. The
+         package page answers "is this the right package"; the module README answers "how do I use it". `docs-qa` enforces that
+         each one exists, names its own package in the install command, carries the shared alpha
+         banner verbatim, uses absolute links only - nuget.org does not resolve relative links - and
+         names $(YubiKitDocsBranch) above in every repository link.
+
+         The file is packed at the package root as README.md, byte for byte: it is a plain markdown
+         file, so MSBuild properties in it would ship as literal text. That is why the branch name is
+         written out in each link and checked by docs-qa rather than substituted. A packable project
+         without its own readme falls back to the shared root PACKAGE_README.md so pack never fails
+         with NU5039; that file is branch-checked too. -->
+    <PropertyGroup Condition="'$(IsTestProject)' != 'true'">
+        <ModulePackageReadme>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../PACKAGE_README.md'))</ModulePackageReadme>
+        <HasModulePackageReadme>false</HasModulePackageReadme>
+        <HasModulePackageReadme Condition="Exists('$(ModulePackageReadme)')">true</HasModulePackageReadme>
+        <PackageReadmeFile Condition="'$(HasModulePackageReadme)' == 'true'">README.md</PackageReadmeFile>
+        <PackageReadmeFile Condition="'$(HasModulePackageReadme)' != 'true'">PACKAGE_README.md</PackageReadmeFile>
+    </PropertyGroup>
+
     <ItemGroup Condition="'$(IsTestProject)' != 'true'">
-        <None Include="$(MSBuildThisFileDirectory)PACKAGE_README.md" Pack="true" PackagePath="\" Visible="false"/>
+        <None Condition="'$(HasModulePackageReadme)' == 'true'"
+              Include="$(ModulePackageReadme)" Pack="true" PackagePath="\README.md" Visible="false"/>
+        <None Condition="'$(HasModulePackageReadme)' != 'true'"
+              Include="$(MSBuildThisFileDirectory)PACKAGE_README.md" Pack="true" PackagePath="\" Visible="false"/>
     </ItemGroup>
 
     <!-- Source Link ships in the .NET SDK (8+) and is enabled by default for GitHub-hosted

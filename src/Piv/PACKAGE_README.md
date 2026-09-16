@@ -1,7 +1,7 @@
-# Yubico .NET SDK v2
+# Yubico.YubiKit.Piv
 
-Fallback package readme. Every shipping module has its own `src/<Module>/PACKAGE_README.md`, packed as
-`README.md`; this file is used only by a packable project that does not have one yet.
+PIV (Personal Identity Verification) support for YubiKey devices: PIN, PUK, and management-key
+authentication, key and certificate management, signing, decryption, key agreement, and attestation.
 
 > ## Alpha - not for production
 >
@@ -13,9 +13,12 @@ Fallback package readme. Every shipping module has its own `src/<Module>/PACKAGE
 
 ```bash
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
-dotnet add package Yubico.YubiKit.Core --prerelease
+dotnet add package Yubico.YubiKit.Piv --prerelease
 ```
+
+`Yubico.YubiKit.Core` is installed transitively.
 
 ## Documentation
 
+- [PIV module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Piv/README.md): requirements, getting started, common operations, constraints, and security notes.
 - [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit): all modules, building from source, and release notes.

@@ -1,213 +1,164 @@
 # Yubico.YubiKit.SecurityDomain
 
-> **Note:** This documentation is subject to change as the module evolves. Please check for updates regularly.
+The Security Domain is the GlobalPlatform root security application on a YubiKey. It owns the Secure Channel
+Protocol (SCP) keys that every other applet session can use to encrypt and authenticate its APDU traffic. This
+package inspects, generates, imports, rotates, and deletes those keys, manages SCP11 certificates and allow
+lists, and factory-resets it. Other modules consume the keys through `SessionCreationOptions.ScpKeyParameters`.
 
-This module provides access to the YubiKey Security Domain application, enabling secure channel establishment and key management using Secure Channel Protocol (SCP).
-
-## Overview
-
-The Security Domain is the root security application on YubiKey firmware 5.3.0 and newer. It manages:
-- **SCP Key Lifecycle**: Generate, import, delete, and manage SCP keys
-- **Secure Channel Establishment**: Create authenticated, encrypted channels using SCP03, SCP11a, SCP11b, and SCP11c
-- **Certificate Management**: Store and retrieve certificates for SCP11 protocols
-- **Allowlist Management**: Control which Off-Card Entities (OCEs) can authenticate
+> The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+> constraints.
 
 ## Requirements
 
-- **Minimum Firmware**: YubiKey 5.3.0
-- **SCP03**: Available on YubiKey 5.3.0+
-- **SCP11**: Available on YubiKey 5.7.2+
+- .NET 10 on Windows, macOS, or Linux; Linux also needs PC/SC and udev rules ([Linux setup](../../docs/linux-setup.md)).
+- SmartCard transport only, over USB CCID or NFC.
 
-## Usage Example
+| Feature | Minimum firmware |
+| --- | --- |
+| Security Domain application, SCP03 | 5.3.0 |
+| Key attestation, allow list | 5.7.0 |
+| SCP11a, SCP11b, SCP11c | 5.7.2 |
+
+Keys are addressed by a `KeyReference(byte Kid, byte Kvn)`. The KID (key identifier) selects the protocol —
+`ScpKid.SCP03` (0x01), `ScpKid.SCP11a` (0x11), `ScpKid.SCP11b` (0x13), `ScpKid.SCP11c` (0x15) — and the KVN
+(key version number) distinguishes multiple versions of the same protocol. `KeyReference.Default` is the
+factory SCP03 reference, KID 0x01 and KVN 0xFF.
+
+SCP03 is a symmetric channel built on a `StaticKeys` triple (ENC, MAC, DEK). SCP11 is asymmetric and uses
+EC P-256 keys: SCP11b needs only the device public key you read out after generation, while SCP11a and SCP11c
+additionally require an Off-Card Entity key pair and certificate chain, and can be restricted with a
+certificate serial-number allow list.
+
+## Installation
+
+```bash
+dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
+dotnet add package Yubico.YubiKit.SecurityDomain --prerelease
+```
+
+`Yubico.YubiKit.Core` is installed transitively.
+
+## Getting started
 
 ```csharp
-using Yubico.YubiKit.SecurityDomain;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
-
-IYubiKey yubiKey = ...;
-await using var sdSession = await yubiKey.CreateSecurityDomainSessionAsync();
-// Use sdSession for SCP key management, etc.
-```
-
-## Logging
-
-This SDK uses `Microsoft.Extensions.Logging`. To enable logs, set the global logger factory once at startup:
-
-```csharp
-using Microsoft.Extensions.Logging;
-using Yubico.YubiKit.Core;
-
-YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
-{
-    builder.AddConsole();
-    builder.SetMinimumLevel(LogLevel.Information);
-});
-```
-
-
-## Key Concepts
-
-### SCP Protocols
-
-- **SCP03**: Symmetric key-based secure channel using AES-128
-  - Uses static keys (ENC, MAC, DEK)
-  - Default key reference: KID=0x01, KVN=0xFF
-  
-- **SCP11a/c**: Asymmetric authentication using EC keys
-  - YubiKey generates/imports EC key pair (P-256)
-  - Requires OCE (Off-Card Entity) with certificate chain
-  - Supports serial number allowlists for access control
-  
-- **SCP11b**: Simplified SCP11 without certificate chain requirement
-  - Uses pre-shared public key knowledge
-  - Faster authentication than SCP11a/c
-
-### Key References
-
-Keys are identified by:
-- **KID** (Key ID): Identifies the key type/purpose (e.g., 0x01 for SCP03, 0x10 for SCP11a, 0x13 for SCP11b)
-- **KVN** (Key Version Number): Allows multiple versions of the same key type
-
-## Core API
-
-### Creating a Session
-
-```csharp
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.SecurityDomain;
 
-// Without secure channel
-await using var session = await SecurityDomainSession.CreateAsync(
-    connection,
-    cancellationToken: cancellationToken);
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+await using var session = await device.CreateSecurityDomainSessionAsync();
 
-// Security Domain cannot detect firmware. FirmwareVersionOverride is its only exact
-// version source and controls feature gates; without it, the session assumes 5.3.0.
-// The property is retained on the public API for this reason.
-
-// With SCP03 authentication
-using var scpParams = Scp03KeyParameters.Default;
-await using var session = await SecurityDomainSession.CreateAsync(
-    connection,
-    new SessionCreationOptions { ScpKeyParameters = scpParams },
-    cancellationToken: cancellationToken);
+foreach (var keyInfo in await session.GetKeyInfoAsync())
+{
+    Console.WriteLine(keyInfo.KeyReference);
+}
 ```
 
-### Key Operations
+Reading key information needs no secure channel, so this works on an untouched device. For a single read,
+`device.GetSecurityDomainKeyInfoAsync()` opens and disposes the session for you. Later snippets assume these
+directives and a `device` obtained the same way.
+
+## Common operations
+
+### Authenticate with the default SCP03 keys
 
 ```csharp
-// Get key information
-var keyInfo = await session.GetKeyInfoAsync(cancellationToken);
+using var scpKeyParameters = Scp03KeyParameters.Default;
+await using var session = await device.CreateSecurityDomainSessionAsync(
+    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });
 
-// The one-shot convenience method accepts the same creation options.
-var oneShotKeyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync(
-    new SessionCreationOptions { ScpKeyParameters = scpParams },
-    cancellationToken);
-
-// Generate EC key for SCP11b
-var keyRef = new KeyReference(ScpKid.SCP11b, kvn: 0x01);
-var publicKey = await session.GenerateKeyAsync(keyRef, 0, cancellationToken);
-
-// Import SCP03 static keys
-var staticKeys = new StaticKeys(encKey, macKey, dekKey);
-var keyRef = new KeyReference(0x01, 0x02);
-await session.PutKeyAsync(keyRef, staticKeys, replaceKvn: 0, cancellationToken);
-
-// Delete a key
-await session.DeleteKeyAsync(keyRef, deleteLast: false, cancellationToken);
+IReadOnlyList<KeyInfo> keys = await session.GetKeyInfoAsync();
 ```
 
-### Certificate and Allowlist Management
+`Scp03KeyParameters.Default` wraps the publicly documented factory key set. Every operation that writes key
+material requires an authenticated channel, so the next two snippets continue on this `session`.
+
+### Rotate the SCP03 keys
 
 ```csharp
-// Store CA issuer for SCP11
-await session.StoreCaIssuerAsync(oceKeyRef, subjectKeyIdentifier, cancellationToken);
-
-// Store serial number allowlist
-string[] allowedSerials = ["7F4971B0AD51F84C9DA9928B2D5FEF5E16B2920A"];
-await session.StoreAllowListAsync(oceKeyRef, allowedSerials);
+byte[] keyMaterial = RandomNumberGenerator.GetBytes(48);
+try
+{
+    // Escrow keyMaterial before you send it: the device will not give it back.
+    using var newKeys = new StaticKeys(keyMaterial.AsSpan(0, 16), keyMaterial.AsSpan(16, 16), keyMaterial.AsSpan(32, 16));
+    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, replaceKvn: 0);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(keyMaterial);
+}
 ```
 
-### Factory Reset
+Pass the KVN you are replacing as `replaceKvn` to overwrite an existing version, or `0` to add a new one. Once
+the new version is in place, delete the old one with `DeleteKeyAsync(oldKeyReference, deleteLast: false)` and
+authenticate future sessions with a `Scp03KeyParameters` built from the new reference and keys.
+
+### Set up SCP11b
 
 ```csharp
-// Block all registered keys and reinitialize
-await session.ResetAsync(cancellationToken);
+var keyReference = new KeyReference(ScpKid.SCP11b, Kvn: 0x01);
+ECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, replaceKvn: 0);
 ```
 
-## Project Structure
+Persist `devicePublicKey`. Later sessions authenticate by passing `new Scp11KeyParameters(keyReference,
+devicePublicKey)` as `ScpKeyParameters`, exactly as in the SCP03 flow above. SCP11a and SCP11c also need the
+Off-Card Entity side configured: `StoreCertificatesAsync` loads the certificate bundle (leaf last),
+`StoreCaIssuerAsync` records the CA subject key identifier, and `StoreAllowListAsync` restricts serial numbers.
 
-```
-Yubico.YubiKit.SecurityDomain/
-├── src/
-│   ├── SecurityDomainSession.cs     # Public facade and visible APDU flows
-│   ├── SecurityDomainKeyMaterial.cs # Pure SCP key/KCV helpers
-│   ├── SecurityDomainTlvEncoding.cs # Pure TLV payload helpers
-│   └── Yubico.YubiKit.SecurityDomain.csproj
-└── tests/
-    ├── Yubico.YubiKit.SecurityDomain.IntegrationTests/
-    │   ├── SecurityDomainSessionTests.cs
-    │   ├── Scp11TestData.cs
-    │   ├── ScpCertificates.cs
-    │   └── TestExtensions/
-    │       └── SecurityDomainTestStateExtensions.cs
-    └── Yubico.YubiKit.SecurityDomain.UnitTests/
-```
-
-## Common Use Cases
-
-### 1. Rotating SCP03 Keys
+### Factory reset
 
 ```csharp
-// Authenticate with current keys
-using var currentParams = new Scp03KeyParameters(currentKeyRef, currentKeys);
-await using var session = await SecurityDomainSession.CreateAsync(
-    connection,
-    new SessionCreationOptions { ScpKeyParameters = currentParams },
-    cancellationToken: cancellationToken);
-
-// Import new keys
-var newKeyRef = new KeyReference(0x01, 0x02);
-await session.PutKeyAsync(newKeyRef, newStaticKeys, replaceKvn: 0, cancellationToken);
-
-// Future sessions use new keys
+await using var session = await device.CreateSecurityDomainSessionAsync();
+await session.ResetAsync();
 ```
 
-### 2. Setting Up SCP11b
+## User interaction
 
-```csharp
-// Step 1: Generate key on YubiKey
-var keyRef = new KeyReference(ScpKid.SCP11b, 0x01);
-var publicKey = await session.GenerateKeyAsync(keyRef, 0, cancellationToken);
+The Security Domain needs no PIN and no physical touch. The only credential is the SCP key material you
+supply through `SessionCreationOptions.ScpKeyParameters`, so this module does not use
+`SessionCreationOptions.UserPresencePrompt`. Pass a `CancellationToken` to any session call to abandon it;
+`ResetAsync` in particular sends up to 65 failed authentication attempts per key and takes noticeably longer
+than other operations.
 
-// Step 2: Store public key in your application
-// (publicKey contains the P-256 public point)
+## Constraints
 
-// Step 3: Authenticate with SCP11b in future sessions
-var scp11Params = new Scp11KeyParameters(keyRef, publicKey);
-await using var session = await SecurityDomainSession.CreateAsync(
-    connection,
-    new SessionCreationOptions { ScpKeyParameters = scp11Params },
-    cancellationToken: cancellationToken);
-```
+- SmartCard transport only. Requesting another transport through
+  `SessionCreationOptions { PreferredConnectionType = ... }` throws.
+- One live connection per physical YubiKey, and one session per connection. Whoever creates a connection
+  disposes it with `await using`; a session from `CreateSecurityDomainSessionAsync` owns the one it opened.
+- The Security Domain cannot detect firmware. `SessionCreationOptions.FirmwareVersionOverride` is its only
+  exact version source; without it the session assumes 5.3.0 for protocol configuration. Supply the version
+  from a Management session so the SCP11 gate can be evaluated.
+- `GenerateKeyAsync` throws `NotSupportedException` below 5.7.2 only when you supplied
+  `FirmwareVersionOverride`; without it an unsupported device fails as an `ApduException` instead.
+- `ResetAsync`, `PutKeyAsync`, `DeleteKeyAsync`, `StoreAllowListAsync`, and `ClearAllowListAsync` change
+  persistent state. `ResetAsync` blocks every registered key by exhausting its retry counter; there is no undo,
+  and any key you loaded yourself is gone.
+- Establishing a secure channel that fails throws `SecureChannelException` with the underlying failure as
+  `InnerException`.
 
-### 3. Factory Reset to Default State
+## Security notes
 
-```csharp
-// Create session without authentication
-await using var session = await SecurityDomainSession.CreateAsync(
-    connection,
-    cancellationToken: cancellationToken);
+- `StaticKeys` holds the ENC, MAC, and DEK values and implements `IDisposable`. Wrap it in `using` so the key
+  bytes are zeroed; `Scp03KeyParameters` and `Scp11KeyParameters` do the same for what they own.
+- Session creation borrows the key parameters you pass. You keep ownership and remain responsible for
+  disposing them after the session is gone.
+- Zero any caller-owned key buffer with `CryptographicOperations.ZeroMemory` in a `finally`. The SDK does not
+  zero buffers it did not allocate.
+- The factory SCP03 key set is a public value. Treat a device that still has it as unprotected, and rotate
+  before relying on the channel.
+- Never log key bytes, key check values, or challenge and response payloads. Log key references only.
 
-// Block all keys and restore defaults
-await session.ResetAsync(cancellationToken);
-```
+## Related
 
-## Testing Guidance
-
-See [CLAUDE.md](CLAUDE.md) for detailed test infrastructure information.
-
-## References
-
-- **GlobalPlatform Specification**: Card Specification v2.3.1
-- **SCP Documentation**: GlobalPlatform Secure Channel Protocol specifications
-- **YubiKey Documentation**: https://developers.yubico.com/
+- [Core](../Core/README.md) - SCP key parameter types, SmartCard protocol, TLV, and logging configuration.
+- [Management](../Management/README.md) - the firmware version to pass as `FirmwareVersionOverride`.
+- [PIV](../Piv/README.md) - an applet session that can run over a channel established with these keys.
+- [Device discovery](../../docs/usage/device-discovery.md) - finding and monitoring YubiKeys.
+- [GlobalPlatform Card Specification](https://globalplatform.org/specs-library/card-specification-v2-3-1/) -
+  the SCP03 and SCP11 source specifications.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

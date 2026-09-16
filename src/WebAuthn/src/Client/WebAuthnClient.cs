@@ -47,24 +47,21 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
     /// </summary>
     /// <param name="fidoSession">The FIDO2 session that performs CTAP2 operations (ownership transferred).</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
-    /// <param name="isPublicSuffix">Checker used to reject public-suffix RP IDs.</param>
     /// <param name="options">
-    /// Optional client configuration. When omitted, <see cref="WebAuthnClientOptions"/> defaults
-    /// apply: no enterprise RP IDs, no credential prompt, and
+    /// Required client configuration, including the public suffix checker. Defaults remain no
+    /// enterprise RP IDs, no credential prompt, and
     /// <see cref="WebAuthnClientOptions.DefaultMaxPromptAttempts"/> prompt attempts.
     /// </param>
     public WebAuthnClient(
         IFidoSession fidoSession,
         WebAuthnOrigin origin,
-        PublicSuffixChecker isPublicSuffix,
-        WebAuthnClientOptions? options = null)
+        WebAuthnClientOptions options)
     {
         ArgumentNullException.ThrowIfNull(fidoSession);
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
-        ArgumentNullException.ThrowIfNull(isPublicSuffix);
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _isPublicSuffix = options.PublicSuffixChecker.Invoke;
         _backend = new WebAuthnBackend(fidoSession);
-        _isPublicSuffix = domain => isPublicSuffix(domain);
-        _options = options ?? new WebAuthnClientOptions();
     }
 
     /// <summary>
@@ -72,18 +69,16 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
     /// </summary>
     /// <param name="backend">The backend that performs CTAP2 operations (ownership transferred).</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
-    /// <param name="isPublicSuffix">Predicate to determine if a domain is a public suffix.</param>
-    /// <param name="options">Optional client configuration.</param>
+    /// <param name="options">Required client configuration, including the public suffix checker.</param>
     internal WebAuthnClient(
         IWebAuthnBackend backend,
         WebAuthnOrigin origin,
-        Func<string, bool> isPublicSuffix,
-        WebAuthnClientOptions? options = null)
+        WebAuthnClientOptions options)
     {
         _backend = backend ?? throw new ArgumentNullException(nameof(backend));
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
-        _isPublicSuffix = isPublicSuffix ?? throw new ArgumentNullException(nameof(isPublicSuffix));
-        _options = options ?? new WebAuthnClientOptions();
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _isPublicSuffix = options.PublicSuffixChecker.Invoke;
     }
 
     /// <inheritdoc/>

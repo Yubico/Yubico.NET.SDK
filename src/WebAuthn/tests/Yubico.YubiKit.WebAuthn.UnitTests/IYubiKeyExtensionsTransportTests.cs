@@ -41,6 +41,31 @@ public class IYubiKeyExtensionsTransportTests
     }
 
     private static bool NeverPublicSuffix(string domain) => false;
+    private static WebAuthnClientOptions ClientOptions => new() { PublicSuffixChecker = NeverPublicSuffix };
+
+    [Fact]
+    public async Task CreateWebAuthnClientAsync_NullClientOptions_ThrowsBeforeConnection()
+    {
+        var device = new SelectionProbeYubiKey(ConnectionType.HidFido);
+
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            () => device.CreateWebAuthnClientAsync(Origin, clientOptions: null!, cancellationToken: Ct));
+
+        Assert.Null(device.RequestedConnection);
+    }
+
+    [Fact]
+    public async Task CreateWebAuthnClientAsync_UnconfiguredPublicSuffixChecker_ThrowsBeforeConnection()
+    {
+        var device = new SelectionProbeYubiKey(ConnectionType.HidFido);
+        WebAuthnClientOptions clientOptions = Activator.CreateInstance<WebAuthnClientOptions>();
+
+        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => device.CreateWebAuthnClientAsync(Origin, clientOptions, cancellationToken: Ct));
+
+        Assert.Contains("PublicSuffixChecker must be configured", exception.Message, StringComparison.Ordinal);
+        Assert.Null(device.RequestedConnection);
+    }
 
     // Default both transports -> HID FIDO (the FIDO2 default), proving WebAuthn adds no transport logic.
     [Fact]
@@ -49,7 +74,7 @@ public class IYubiKeyExtensionsTransportTests
         var device = new SelectionProbeYubiKey(ConnectionType.HidFido | ConnectionType.SmartCard);
 
         await Assert.ThrowsAsync<ConnectProbeException>(
-            () => device.CreateWebAuthnClientAsync(Origin, NeverPublicSuffix, cancellationToken: Ct));
+            () => device.CreateWebAuthnClientAsync(Origin, ClientOptions, cancellationToken: Ct));
 
         Assert.Equal(typeof(IFidoHidConnection), device.RequestedConnection);
     }
@@ -61,7 +86,7 @@ public class IYubiKeyExtensionsTransportTests
         var device = new SelectionProbeYubiKey(ConnectionType.SmartCard);
 
         await Assert.ThrowsAsync<ConnectProbeException>(
-            () => device.CreateWebAuthnClientAsync(Origin, NeverPublicSuffix, cancellationToken: Ct));
+            () => device.CreateWebAuthnClientAsync(Origin, ClientOptions, cancellationToken: Ct));
 
         Assert.Equal(typeof(ISmartCardConnection), device.RequestedConnection);
     }
@@ -75,7 +100,7 @@ public class IYubiKeyExtensionsTransportTests
         await Assert.ThrowsAsync<ConnectProbeException>(
             () => device.CreateWebAuthnClientAsync(
                 Origin,
-                NeverPublicSuffix,
+                ClientOptions,
                 sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },
                 cancellationToken: Ct));
 
@@ -91,7 +116,7 @@ public class IYubiKeyExtensionsTransportTests
         await Assert.ThrowsAsync<NotSupportedException>(
             () => device.CreateWebAuthnClientAsync(
                 Origin,
-                NeverPublicSuffix,
+                ClientOptions,
                 sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },
                 cancellationToken: Ct));
 
@@ -108,7 +133,7 @@ public class IYubiKeyExtensionsTransportTests
         await Assert.ThrowsAsync<ConnectProbeException>(
             () => device.CreateWebAuthnClientAsync(
                 Origin,
-                NeverPublicSuffix,
+                ClientOptions,
                 sessionOptions: new SessionCreationOptions { ScpKeyParameters = scp },
                 cancellationToken: Ct));
 
@@ -128,7 +153,7 @@ public class IYubiKeyExtensionsTransportTests
         await Assert.ThrowsAsync<ArgumentException>(
             () => device.CreateWebAuthnClientAsync(
                 Origin,
-                NeverPublicSuffix,
+                ClientOptions,
                 sessionOptions: new SessionCreationOptions { PreferredConnectionType = invalid },
                 cancellationToken: Ct));
 
@@ -144,7 +169,7 @@ public class IYubiKeyExtensionsTransportTests
         await Assert.ThrowsAsync<ArgumentException>(
             () => device.CreateWebAuthnClientAsync(
                 Origin,
-                NeverPublicSuffix,
+                ClientOptions,
                 sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp },
                 cancellationToken: Ct));
 
@@ -160,7 +185,7 @@ public class IYubiKeyExtensionsTransportTests
         var device = new SelectionProbeYubiKey(available);
 
         await Assert.ThrowsAsync<NotSupportedException>(
-            () => device.CreateWebAuthnClientAsync(Origin, NeverPublicSuffix, cancellationToken: Ct));
+            () => device.CreateWebAuthnClientAsync(Origin, ClientOptions, cancellationToken: Ct));
 
         Assert.Null(device.RequestedConnection);
     }

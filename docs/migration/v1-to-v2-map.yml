@@ -503,7 +503,7 @@ mappings:
     confidence: medium
     migration_kind: behavior
     v1: Fido2Session.KeyCollector-driven interactive PIN collection and retry (v1 had no WebAuthn package)
-    v2: WebAuthnClient(fidoSession, new WebAuthnClientOptions { CredentialPrompt = ... }) with an SDK-owned bounded retry loop
+    v2: WebAuthnClient(fidoSession, origin, new WebAuthnClientOptions { PublicSuffixChecker = ..., CredentialPrompt = ... }) with an SDK-owned bounded retry loop
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.Pin.cs
       - develop:Yubico.YubiKey/examples/Fido2SampleCode/KeyCollector/Fido2SampleKeyCollector.cs
@@ -512,7 +512,7 @@ mappings:
       - yubikit:src/WebAuthn/src/Client/WebAuthnClientOptions.cs
       - yubikit:src/WebAuthn/CLAUDE.md
     notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Fido2 (IFidoSession); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt (set via WebAuthnClientOptions.CredentialPrompt - see `webauthn-client-construction-and-streams` for the options-record construction change), an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (WebAuthnClientOptions.MaxPromptAttempts, default 3, now caller-configurable); returning null from the prompt means the user declined, not a retry request. This replaces the credential-collection part of KeyCollector only for WebAuthn; the lower-level Yubico.YubiKit.Fido2.IFidoSession still takes PIN bytes explicitly. Touch is separate and no longer a gap; supply IUserPresencePrompt through the FIDO SessionCreationOptions, and FIDO HID reports DeviceWaiting from the authenticator's live user-presence-needed keep-alive. Review the credential prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
-    last_reviewed_commit: 2918ae0774e182a58cbc98c03c27defc5d18bc43
+    last_reviewed_commit: a05f96552f504a031823fd8c315df4e37656abff
   - id: yubihsm-credential-password-bytes
     status: assisted
     confidence: high
@@ -542,14 +542,14 @@ mappings:
     confidence: medium
     migration_kind: construction
     v1: No v1 equivalent (v1 had no WebAuthn package)
-    v2: WebAuthnClient(IFidoSession, WebAuthnClientOptions? options = null) / IYubiKeyExtensions.CreateWebAuthnClientAsync(origin, isPublicSuffix, WebAuthnClientOptions? clientOptions = null, SessionCreationOptions? sessionOptions = null, cancellationToken); WebAuthnClientOptions { MaxPromptAttempts, CredentialPrompt, EnterpriseRpIds }
+    v2: WebAuthnClient(IFidoSession, origin, WebAuthnClientOptions options) / IYubiKeyExtensions.CreateWebAuthnClientAsync(origin, WebAuthnClientOptions clientOptions, SessionCreationOptions? sessionOptions = null, cancellationToken); WebAuthnClientOptions { required PublicSuffixChecker, MaxPromptAttempts, CredentialPrompt, EnterpriseRpIds }
     evidence:
       - yubikit:src/WebAuthn/src/Client/WebAuthnClient.cs
       - yubikit:src/WebAuthn/src/Client/WebAuthnClientOptions.cs
       - yubikit:src/WebAuthn/src/IYubiKeyExtensions.cs
       - yubikit:src/WebAuthn/CLAUDE.md
-    notes: V2-internal evolution of the alpha-only Yubico.YubiKit.WebAuthn surface, recorded because it changes shapes documented earlier in this guide. `refactor(webauthn)!: internalize the backend seam and rename it WebAuthnBackend` (a4091ebf) and `feat(webauthn)!: add WebAuthnClientOptions and forward it from the factory` (9920b301) replaced the constructors' positional `enterpriseRpIds`/`prompt` parameters with a single `WebAuthnClientOptions` record; `MaxPromptAttempts` (default 3) is now caller-configurable instead of fixed. The `IWebAuthnBackend`-accepting constructor overload became internal along with `IWebAuthnBackend` itself. Separately, `refactor(webauthn)!: remove the ceremony status streams` (485330e0) removed `WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync` and the public `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed` types outright, with no shim; only the plain async `MakeCredentialAsync`/`GetAssertionAsync` remain. Anyone who adopted the streaming ceremony-status API from an earlier v2 alpha must switch to the plain async methods; there is no v1 comparison point for either change because the package itself postdates v1. `refactor(webauthn)!: name the factory's two options clientOptions and sessionOptions` (95b83655) later renamed `IYubiKeyExtensions.CreateWebAuthnClientAsync`'s `WebAuthnClientOptions` parameter from `options` to `clientOptions`, so the name would not collide with the `SessionCreationOptions` convention (`options`) used elsewhere; the `WebAuthnClient` constructor's own `options` parameter is unchanged. Breaking for named-argument call sites only.
-    last_reviewed_commit: 761643765ec63e619df029a1d7ef686b77bbde63
+    notes: V2-internal evolution of the alpha-only Yubico.YubiKit.WebAuthn surface, recorded because it changes shapes documented earlier in this guide. `refactor(webauthn)!: internalize the backend seam and rename it WebAuthnBackend` (a4091ebf) and `feat(webauthn)!: add WebAuthnClientOptions and forward it from the factory` (9920b301) replaced the constructors' positional `enterpriseRpIds`/`prompt` parameters with a single `WebAuthnClientOptions` record; `MaxPromptAttempts` (default 3) is now caller-configurable instead of fixed. The checker subsequently moved from a standalone constructor/factory parameter to required, non-null `WebAuthnClientOptions.PublicSuffixChecker`; the options argument is now mandatory, while `CredentialPrompt` remains nullable and optional. The `IWebAuthnBackend`-accepting constructor overload became internal along with `IWebAuthnBackend` itself. Separately, `refactor(webauthn)!: remove the ceremony status streams` (485330e0) removed `WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync` and the public `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed` types outright, with no shim; only the plain async `MakeCredentialAsync`/`GetAssertionAsync` remain. Anyone who adopted the streaming ceremony-status API from an earlier v2 alpha must switch to the plain async methods; there is no v1 comparison point for either change because the package itself postdates v1. `refactor(webauthn)!: name the factory's two options clientOptions and sessionOptions` (95b83655) renamed `IYubiKeyExtensions.CreateWebAuthnClientAsync`'s `WebAuthnClientOptions` parameter from `options` to `clientOptions`, so the name would not collide with the `SessionCreationOptions` convention (`options`) used elsewhere; the `WebAuthnClient` constructor's own `options` parameter is unchanged.
+    last_reviewed_commit: a05f96552f504a031823fd8c315df4e37656abff
   - id: fido2-forward-compat-raw-data
     status: assisted
     confidence: high
@@ -563,6 +563,19 @@ mappings:
       - yubikit:src/Fido2/CLAUDE.md
     notes: Implements the SDK's forward-compatibility doctrine (see the root CLAUDE.md and the new "Forward compatibility and escape hatches" section in src/Fido2/CLAUDE.md) - typed properties still model only known fields, but callers who need a field this SDK version does not yet expose can parse RawData themselves instead of being blocked. Populated only by the Decode(ReadOnlyMemory<byte>) path; empty on caller-constructed instances. Not a v1-to-v2 API mapping (v1 had no raw-response escape hatch here at all), but relevant to anyone porting v1 code that reached into ad hoc CBOR parsing to read fields the typed model omitted. Related, lower-confidence behavior note: the same range's COSE key decoding refactor (`48d49523`, `01eff955`) made CoseKey.Decode tolerant of unexpected CBOR value types for unmodeled parameters/labels (previously an InvalidOperationException) instead of throwing; code that relied on that exception to detect malformed-shaped keys will no longer see it.
     last_reviewed_commit: 277920d9de48d4aedad7ecc5d00201a015b5a297
+  - id: core-find-first-discovery-helpers
+    status: assisted
+    confidence: high
+    migration_kind: member
+    v1: YubiKeyDevice.FindAll().First() / YubiKeyDevice.FindByTransport(...).First()
+    v2: YubiKeyManager.FindFirstAsync(predicate, cancellationToken) / YubiKeyManager.FindFirstOrDefaultAsync(predicate, cancellationToken)
+    evidence:
+      - yubikit:src/Core/src/Devices/YubiKeyManager.cs
+      - yubikit:src/Core/src/Devices/YubiKeyDeviceManager.cs
+      - yubikit:src/Core/tests/Yubico.YubiKit.Core.UnitTests/Devices/YubiKeyDeviceManagerTests.cs
+      - yubikit:docs/usage/device-discovery.md
+    notes: "`feat(core): add first-key discovery helpers` (`6cb3875f`) adds a one-shot convenience over `FindAllAsync` for the common single-device case. `FindFirstAsync(predicate, cancellationToken)` returns the first matching `IYubiKey` or throws `InvalidOperationException` when none match; `FindFirstOrDefaultAsync(predicate, cancellationToken)` returns `null` instead of throwing. Both are one-shot queries over `FindAllAsync`: they do not wait for insertion, discovery ordering is not stable, and they inherit `FindAllAsync`'s caching (a cached result can complete without observing cancellation) and exception-propagation behavior. This supersedes the `devices.First()` / `FindAllAsync(...).First()` idiom shown in `recipe-device-discovery-find-by-transport` and the Common Migration Recipes' Device Discovery and Device Info examples for the common single-device case; `FindAllAsync` remains the entry point for enumerating every connected key or applying explicit `ConnectionType`/`forceRescan` control."
+    last_reviewed_commit: 0501f516e7877188e6d8977cc799f04a837cffed
 manual_review:
   - device discovery call sites
   - low-level HID listener DeviceEvent callback signatures

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.WebAuthn;
@@ -31,8 +32,8 @@ public sealed class FactoryShapeTests
     /// The WebAuthn factory carries two independent options objects, and they must stay separate.
     /// </summary>
     /// <remarks>
-    /// <see cref="WebAuthnClientOptions"/> configures the client that is returned (enterprise RP IDs,
-    /// credential prompt, prompt-attempt cap) and is equally meaningful on the public
+    /// <see cref="WebAuthnClientOptions"/> configures the client that is returned (public-suffix checker,
+    /// enterprise RP IDs, credential prompt, prompt-attempt cap) and is equally meaningful on the public
     /// <c>WebAuthnClient</c> constructor, where the caller supplies their own session.
     /// <see cref="SessionCreationOptions"/> configures the session this factory creates on the
     /// caller's behalf, so it is meaningful only here. Folding the latter into the former would put a
@@ -97,18 +98,18 @@ public sealed class FactoryShapeTests
         MethodInfo method = typeof(IYubiKeyExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
             .Single(method => method.Name == "CreateWebAuthnClientAsync");
         ParameterInfo[] parameters = method.GetParameters();
+        var nullability = new NullabilityInfoContext();
 
         Assert.Collection(
             parameters,
             receiver => Assert.Equal(typeof(IYubiKey), receiver.ParameterType),
             origin => Assert.Equal("origin", origin.Name),
-            suffixChecker => Assert.Equal("isPublicSuffix", suffixChecker.Name),
             clientOptions =>
             {
                 Assert.Equal("clientOptions", clientOptions.Name);
                 Assert.Equal(typeof(WebAuthnClientOptions), clientOptions.ParameterType);
-                Assert.True(clientOptions.IsOptional);
-                Assert.Null(clientOptions.RawDefaultValue);
+                Assert.Equal(NullabilityState.NotNull, nullability.Create(clientOptions).ReadState);
+                Assert.False(clientOptions.IsOptional);
             },
             sessionOptions =>
             {
@@ -124,6 +125,17 @@ public sealed class FactoryShapeTests
                 Assert.True(cancellationToken.IsOptional);
                 Assert.Null(cancellationToken.RawDefaultValue);
             });
+    }
+
+    [Fact]
+    public void WebAuthnClientOptions_PublicSuffixChecker_IsRequiredAndNonNullable()
+    {
+        PropertyInfo checker = typeof(WebAuthnClientOptions).GetProperty(nameof(WebAuthnClientOptions.PublicSuffixChecker))
+            ?? throw new InvalidOperationException("WebAuthnClientOptions.PublicSuffixChecker is missing.");
+        var nullability = new NullabilityInfoContext();
+
+        Assert.NotNull(checker.GetCustomAttribute<RequiredMemberAttribute>());
+        Assert.Equal(NullabilityState.NotNull, nullability.Create(checker).ReadState);
     }
 
     private static void ValidateFactory(

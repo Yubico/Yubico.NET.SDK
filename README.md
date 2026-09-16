@@ -1,146 +1,87 @@
-# Yubico.NET.SDK
+# Yubico .NET SDK v2
 
-> ## ⚠️ v2 ALPHA — NOT FOR PRODUCTION
+A .NET SDK for YubiKey hardware security devices, for applications that need to talk to a YubiKey
+directly: enterprise tooling, provisioning, custom authenticators, and services that verify or manage
+keys. One package per YubiKey application, all on a shared core.
+
+This is v2, developed on the `yubikit` branch. v1 lives on `develop`; see the
+[migration guide](docs/migration/v1-to-v2.md) if you are coming from it.
+
+> ## Alpha - not for production
 >
-> The v2 SDK (`yubikit` branch) is a **pre-release alpha**. It is
-> **subject to change** and has **not yet completed Yubico's formal security audit**.
->
-> - **No security guarantees** are made until that audit is complete.
-> - Packages are **unsigned**.
-> - **Package names and namespaces may change** before the stable release.
-> - Provided for **evaluation only**.
-
-A .NET SDK for YubiKey hardware security devices. It provides APIs for YubiKey
-applications including PIV, FIDO2, WebAuthn, OATH, YubiOTP, OpenPGP, Security
-Domain (SCP03/SCP11), YubiHSM Auth, and device management.
-
-See [Project Structure](#project-structure) for the per-module breakdown.
+> The v2 SDK is a pre-release alpha. It is subject to change and has **not yet completed Yubico's formal
+> security audit**. No security guarantees are made until that audit is complete. Packages are unsigned,
+> and package names and namespaces may change. Provided for evaluation only.
 
 ## Requirements
 
-- **.NET 10.0** or later
-- **Supported Platforms:** Windows, macOS, Linux
-- **YubiKey** hardware device (YubiKey 4, YubiKey 5, Security Key series, or YubiHSM 2)
+- .NET 10 on Windows, macOS, or Linux. Linux also needs PC/SC and udev rules ([Linux setup](docs/linux-setup.md)).
+- A YubiKey 4 series, YubiKey 5 series, or Security Key series device. Firmware floors and transports vary
+  by application; each package lists its own.
 
 ## Installation
 
-> **Alpha:** the prerelease packages are distributed from a public, anonymous
-> feed (not nuget.org). Add the feed first, then install with `--prerelease` to
-> get the latest alpha. Keep nuget.org enabled so transitive dependencies (e.g.
-> `Yubico.NativeShims`) resolve. See the [feed website](https://yubico.github.io/Yubico.NET.SDK/)
-> for the current package list, or the [release notes](scripts/alpha/RELEASE_NOTES.md)
-> for full details.
+Alpha packages come from a public, anonymous feed rather than nuget.org. Add the feed once, then install
+the package for the YubiKey application you need. `Yubico.YubiKit.Core` and the native shims resolve
+transitively, so keep nuget.org enabled.
 
 ```bash
-# 1. Add the anonymous alpha feed (one time)
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
-
-# 2. Core library (required)
-dotnet add package Yubico.YubiKit.Core --prerelease
-
-# 3. Application modules (install as needed)
 dotnet add package Yubico.YubiKit.Piv --prerelease
-dotnet add package Yubico.YubiKit.Fido2 --prerelease
-dotnet add package Yubico.YubiKit.WebAuthn --prerelease
-dotnet add package Yubico.YubiKit.Oath --prerelease
-dotnet add package Yubico.YubiKit.YubiOtp --prerelease
-dotnet add package Yubico.YubiKit.OpenPgp --prerelease
-dotnet add package Yubico.YubiKit.SecurityDomain --prerelease
-dotnet add package Yubico.YubiKit.Management --prerelease
 ```
 
-## Quick Start
+Substitute the package from the table below. The [feed website](https://yubico.github.io/Yubico.NET.SDK/)
+lists what is currently published, and the [release notes](scripts/alpha/RELEASE_NOTES.md) track changes between
+alpha builds.
 
-### Basic Device Detection
+## Getting started
+
+Every application follows one shape: discover a device, create a session for the application, call it, and
+let `await using` dispose it. Discovery alone needs only Core:
 
 ```csharp
-using Yubico.YubiKit.Core;
-using Yubico.YubiKit.Management;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
 
-// Discover connected YubiKeys
-var devices = await YubiKeyManager.FindAllAsync();
-
-foreach (var device in devices)
-{
-    await using var session = await device.CreateManagementSessionAsync();
-    var deviceInfo = await session.GetDeviceInfoAsync();
-    
-    Console.WriteLine($"YubiKey {deviceInfo.FirmwareVersion}");
-    Console.WriteLine($"Serial: {deviceInfo.SerialNumber}");
-}
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+Console.WriteLine($"Serial {device.SerialNumber}: {device.AvailableConnections}");
 ```
 
-### PIV Digital Signature
+One `IYubiKey` is one physical key, whichever interfaces it exposes. `FindFirstAsync` throws when no key is
+present; `FindAllAsync` returns every connected key, and `FindFirstOrDefaultAsync` takes a predicate. From here, an application package adds
+`device.Create<Application>SessionAsync()`; each package README opens with that step and a first read-only
+call, then covers the common operations. For applet specifics and features, see that documentation.
 
-```csharp
-using Yubico.YubiKit.Piv;
+## Packages
 
-await using var pivSession = await device.CreatePivSessionAsync();
+| Package | YubiKey application |
+|---|---|
+| [Yubico.YubiKit.Piv](src/Piv/README.md) | PIV smart card: keys, certificates, signing, decryption |
+| [Yubico.YubiKit.Fido2](src/Fido2/README.md) | FIDO2 CTAP authenticator operations |
+| [Yubico.YubiKit.WebAuthn](src/WebAuthn/README.md) | WebAuthn client API over FIDO2 |
+| [Yubico.YubiKit.Oath](src/Oath/README.md) | TOTP and HOTP credentials |
+| [Yubico.YubiKit.YubiOtp](src/YubiOtp/README.md) | OTP slot configuration and challenge-response |
+| [Yubico.YubiKit.OpenPgp](src/OpenPgp/README.md) | OpenPGP card keys, PINs, signing, decryption |
+| [Yubico.YubiKit.SecurityDomain](src/SecurityDomain/README.md) | Secure channel (SCP03/SCP11) key management |
+| [Yubico.YubiKit.YubiHsm](src/YubiHsm/README.md) | YubiHSM Auth applet on a YubiKey |
+| [Yubico.YubiKit.Management](src/Management/README.md) | Device information and configuration |
 
-// Sign data with PIV slot
-byte[] dataToSign = Encoding.UTF8.GetBytes("Hello, YubiKey!");
-byte[] signature = await pivSession.SignOrDecryptAsync(PivSlot.Authentication, dataToSign);
-```
-
-### FIDO2 Registration
-
-```csharp
-using Yubico.YubiKit.Fido2;
-
-await using var fidoSession = await device.CreateFidoSessionAsync();
-
-// Query authenticator capabilities without requiring user presence
-var info = await fidoSession.GetInfoAsync();
-Console.WriteLine(string.Join(", ", info.Versions));
-```
-
-## Project Structure
-
-- **Yubico.YubiKit.Core** - Device discovery, connection management, APDU protocol handling
-- **Yubico.YubiKit.Management** - Device information and capability queries
-- **Yubico.YubiKit.Piv** - PIV smart card operations
-- **Yubico.YubiKit.Fido2** - FIDO2/WebAuthn authentication
-- **Yubico.YubiKit.WebAuthn** - WebAuthn API over FIDO2
-- **Yubico.YubiKit.Oath** - TOTP/HOTP one-time passwords
-- **Yubico.YubiKit.YubiOtp** - Yubico OTP configuration
-- **Yubico.YubiKit.OpenPgp** - OpenPGP card implementation
-- **Yubico.YubiKit.SecurityDomain** - Secure channel (SCP03/SCP11) and key management
-- **Yubico.YubiKit.YubiHsm** - YubiHSM Auth applet operations on YubiKey
-
-## Native AOT
-
-All SDK library packages (`Core`, `Management`, `Piv`, `Fido2`, `WebAuthn`, `Oath`, `OpenPgp`,
-`SecurityDomain`, `YubiOtp`, `YubiHsm`) publish Native AOT compatibility metadata and participate in
-the repository's analyzer and link-verification gates. Runtime evidence varies by platform and
-module; see [`docs/NATIVE-AOT.md`](docs/NATIVE-AOT.md) for the evidence matrix and deployment
-guidance. CLI tools and test projects are outside the support surface.
+[Yubico.YubiKit.Core](src/Core/README.md) underlies all of them: discovery, connections, sessions, and
+secure channel. Interactive sample tools live under `src/<Module>/examples/`.
 
 ## Documentation
 
-- **[Developer Guide](docs/)** - Detailed documentation for each module
-- **[Physical Device Model](docs/architecture/physical-device-model.md)** - Discovery, transport selection, and session/connection ownership
-- **[Device Discovery Guarantees](docs/architecture/device-discovery-guarantees.md)** - Exact grouping guarantees, conservative splits, and platform bounds
-- **[Native AOT Support](docs/NATIVE-AOT.md)** - Native AOT support contract, platform matrix, and deployment guidance
-- **[API Reference](https://docs.yubico.com/yesdk/)** - Complete API documentation
-- Module examples live under `src/<Module>/examples/`
+- [Physical device model](docs/architecture/physical-device-model.md): one `IYubiKey` per key, transport selection, connection and session ownership.
+- [User interaction](docs/usage/user-interaction.md): touch notification and credential prompting across applications.
+- [Migrating from v1](docs/migration/v1-to-v2.md) and [what changed in v2](docs/v2-highlights.md).
+- [Native AOT](docs/NATIVE-AOT.md): every library package publishes AOT compatibility metadata.
+- [API reference](https://docs.yubico.com/yesdk/).
 
-## Building from Source
+## Contributing
 
-```bash
-# Build the solution
-dotnet toolchain.cs build
+Build, test, and packaging instructions are in the [developer guide](docs/DEV-GUIDE.md) and
+[TOOLCHAIN.md](TOOLCHAIN.md).
 
-# Run tests
-dotnet toolchain.cs test
+## License
 
-# Create NuGet packages
-dotnet toolchain.cs pack
-```
-
-See [TOOLCHAIN.md](TOOLCHAIN.md) for detailed build instructions.
-
-## Test Runner Support in IDEs
-
-- Unit test projects use xUnit v3 with the Microsoft Testing Platform (`<UseMicrosoftTestingPlatformRunner>true`). Run them via `dotnet run --project ... --no-build` or use the build script (`dotnet toolchain.cs test`).
-- Integration test projects remain on xUnit v2 with `Microsoft.NET.Test.Sdk`, so they will appear in VS Code’s Test Explorer.
-- VS Code’s C# extensions do **not** yet discover xUnit v3 / Testing Platform projects. Until Microsoft ships support, the unit tests are invisible in the Testing tab even though they run fine from the CLI.
+Apache License 2.0. See [LICENSE.txt](LICENSE.txt).

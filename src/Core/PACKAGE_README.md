@@ -1,7 +1,8 @@
-# Yubico .NET SDK v2
+# Yubico.YubiKit.Core
 
-Fallback package readme. Every shipping module has its own `src/<Module>/PACKAGE_README.md`, packed as
-`README.md`; this file is used only by a packable project that does not have one yet.
+Core is the foundation of the Yubico .NET SDK: device discovery, connections over SmartCard and HID, the
+APDU and Secure Channel Protocol layers, and the shared types every application module builds on.
+Most applications install an application package instead and get Core with it.
 
 > ## Alpha - not for production
 >
@@ -18,4 +19,5 @@ dotnet add package Yubico.YubiKit.Core --prerelease
 
 ## Documentation
 
+- [Core module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Core/README.md): device discovery, connections and sessions, access tiers, SCP, and security considerations.
 - [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit): all modules, building from source, and release notes.

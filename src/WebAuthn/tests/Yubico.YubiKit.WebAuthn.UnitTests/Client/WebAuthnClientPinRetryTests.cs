@@ -52,8 +52,7 @@ public sealed class WebAuthnClientPinRetryTests
         _client = new WebAuthnClient(
             _mockBackend,
             _origin,
-            isPublicSuffix: domain => domain == "com",
-            new WebAuthnClientOptions());
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
     }
 
     [Fact(Timeout = 5000)]

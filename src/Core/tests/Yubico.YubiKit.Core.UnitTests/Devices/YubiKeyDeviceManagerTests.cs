@@ -25,6 +25,104 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// </summary>
 public class YubiKeyDeviceManagerTests
 {
+    [Fact]
+    public async Task FindFirstMethods_WithoutPredicate_ReturnFirstCachedDeviceWithoutRescanning()
+    {
+        var (manager, findYubiKeys, _) = CreateManager();
+        await using var managerLifetime = manager.ConfigureAwait(false);
+        findYubiKeys.SetDevices([
+            new FakeYubiKey("device-1", ConnectionType.SmartCard),
+            new FakeYubiKey("device-2", ConnectionType.HidFido)
+        ]);
+        var cachedDevices = await manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var expected = cachedDevices[0];
+
+        var nullableResult = await manager.FindFirstOrDefaultAsync(
+            cancellationToken: TestContext.Current.CancellationToken);
+        var throwingResult = await manager.FindFirstAsync(
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Same(expected, nullableResult);
+        Assert.Same(expected, throwingResult);
+        Assert.Equal(1, findYubiKeys.ScanCount);
+    }
+
+    [Fact]
+    public async Task FindFirstOrDefaultAsync_ReturnsFirstMatchingDevice_AndStopsEvaluating()
+    {
+        var (manager, findYubiKeys, _) = CreateManager();
+        await using var managerLifetime = manager.ConfigureAwait(false);
+        var predicateCalls = 0;
+        findYubiKeys.SetDevices([
+            new FakeYubiKey("device-1", ConnectionType.SmartCard),
+            new FakeYubiKey("device-2", ConnectionType.HidFido),
+            new FakeYubiKey("device-3", ConnectionType.HidFido)
+        ]);
+        var devices = await manager.FindAllAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var expected = devices[1];
+
+        var actual = await manager.FindFirstOrDefaultAsync(
+            device =>
+            {
+                predicateCalls++;
+                return ReferenceEquals(device, expected);
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.Same(expected, actual);
+        Assert.Equal(2, predicateCalls);
+    }
+
+    [Fact]
+    public async Task FindFirstOrDefaultAsync_NoMatch_ReturnsNull()
+    {
+        var (manager, findYubiKeys, _) = CreateManager();
+        await using var managerLifetime = manager.ConfigureAwait(false);
+        findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
+
+        var actual = await manager.FindFirstOrDefaultAsync(
+            device => device.SupportsConnection(ConnectionType.HidFido),
+            TestContext.Current.CancellationToken);
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public async Task FindFirstAsync_NoMatch_ThrowsInvalidOperationException()
+    {
+        var (manager, _, _) = CreateManager();
+        await using var managerLifetime = manager.ConfigureAwait(false);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            manager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task FindFirstOrDefaultAsync_PredicateThrows_PreservesException()
+    {
+        var (manager, findYubiKeys, _) = CreateManager();
+        await using var managerLifetime = manager.ConfigureAwait(false);
+        findYubiKeys.SetDevices([new FakeYubiKey("device-1", ConnectionType.SmartCard)]);
+        var expected = new PredicateException();
+
+        var actual = await Assert.ThrowsAsync<PredicateException>(() =>
+            manager.FindFirstOrDefaultAsync(_ => throw expected, TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task FindFirstOrDefaultAsync_CanceledBeforeScan_ThrowsOperationCanceledException()
+    {
+        var (manager, findYubiKeys, _) = CreateManager();
+        await using var managerLifetime = manager.ConfigureAwait(false);
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            manager.FindFirstOrDefaultAsync(cancellationToken: cts.Token));
+        Assert.Equal(0, findYubiKeys.ScanCount);
+    }
 
     [Fact]
     public async Task FindAllAsync_FirstCall_PerformsScan()
@@ -595,4 +693,5 @@ public class YubiKeyDeviceManagerTests
         public void Dispose() => DeviceEvent = null;
     }
 
+    private sealed class PredicateException : Exception;
 }

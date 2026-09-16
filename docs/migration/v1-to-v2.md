@@ -101,8 +101,8 @@ below before diagnosing behavior changes.
 | Any of the eight `XSession.CreateAsync(connection, configuration, scpKeyParams[, firmwareVersion], cancellationToken)` factories | `XSession.CreateAsync(connection, SessionCreationOptions?, cancellationToken)`. The eight applets are Management, PIV, FIDO2, OATH, OpenPGP, Security Domain, YubiOTP, and YubiHSM Auth. |
 | Security Domain's fourth positional `firmwareVersion` factory argument | Set `SessionCreationOptions.FirmwareVersionOverride`. Security Domain cannot detect firmware, so this remains its only exact version source. |
 | FIDO2 Phase-38 compatibility factory overload | Use the single normalized `CreateAsync(connection, options, cancellationToken)` factory. |
-| `CreateWebAuthnClientAsync(origin, isPublicSuffix, enterpriseRpIds, scpKeyParams, configuration, preferredConnection, cancellationToken)` | Keep `origin`, `isPublicSuffix`, and `enterpriseRpIds` in place; pass cross-cutting settings through `SessionCreationOptions? options`. |
-| WebAuthn Phase-38 compatibility overload ending in `scpKeyParams, configuration, cancellationToken` | Removed. Call the single normalized `CreateWebAuthnClientAsync(origin, isPublicSuffix, enterpriseRpIds, options, cancellationToken)` signature. |
+| `CreateWebAuthnClientAsync(origin, isPublicSuffix, enterpriseRpIds, scpKeyParams, configuration, preferredConnection, cancellationToken)` | Pass `new WebAuthnClientOptions { PublicSuffixChecker = isPublicSuffix, EnterpriseRpIds = enterpriseRpIds }` after `origin`; pass cross-cutting settings through optional `SessionCreationOptions? sessionOptions`. |
+| WebAuthn Phase-38 compatibility overload ending in `scpKeyParams, configuration, cancellationToken` | Removed. Call the single normalized `CreateWebAuthnClientAsync(origin, clientOptions, sessionOptions, cancellationToken)` signature. |
 | `CalculateAllAsync` / `CalculateAllOathCodesAsync` returning `Dictionary<Credential, Code?>` | Consume `IReadOnlyDictionary<Credential, Code?>`. |
 | One-shot `SetDeviceConfigAsync` / `PutConfigurationAsync` returning `ValueTask` | Await the returned `Task`. This is binary-breaking even though normal `await` source often remains unchanged. |
 | `GetSecurityDomainKeyInfoAsync(scpKeyParams, cancellationToken)` / `ListHsmAuthCredentialsAsync(scpKeyParams, cancellationToken)` | Pass `new SessionCreationOptions { ScpKeyParameters = scpKeyParams }` as the optional second-level creation policy. |
@@ -135,7 +135,7 @@ behavior changes.
 | `SetDeviceConfigAsync(DeviceConfig config, SetDeviceConfigOptions? options = null, CancellationToken cancellationToken = default)` | `SetDeviceConfigAsync(DeviceConfig config, SetDeviceConfigOptions? options = null, SessionCreationOptions? sessionOptions = null, CancellationToken cancellationToken = default)`. `options` controls the configuration operation (`Reboot`, `CurrentLockCode`, and `NewLockCode`); `sessionOptions` controls creation of the temporary Management session. |
 | `ApplicationIds` was a record with public static `byte[]` fields. | `ApplicationIds` is a static class whose members are `ReadOnlyMemory<byte>` properties. Most APIs consuming application identifiers already accept `ReadOnlyMemory<byte>`, so most call sites need no change; use `.ToArray()` only when an array is required. |
 | A type derived from `SlotConfiguration` could write the protected `_fixed`, `_uid`, `_key`, and `_fixedSize` fields or call protected static `ProcessHmacKey(ReadOnlySpan<byte> hmacKey, Span<byte> key, Span<byte> uid)`. | The fields are private and derived classes use the protected copy-in methods `SetFixed`, `SetUid`, and `SetKey`. `ProcessHmacKey` is replaced by protected `SetHmacKey(ReadOnlySpan<byte> hmacKey, ushort initialMovingFactor)`. This affects only consumers deriving from `SlotConfiguration` outside the SDK. |
-| `CreateWebAuthnClientAsync(origin, isPublicSuffix, WebAuthnClientOptions? options = null, SessionCreationOptions? sessionOptions = null, cancellationToken)` | The third parameter is renamed `clientOptions` (type unchanged). Only named-argument call sites using `options:` for the `WebAuthnClientOptions` argument break; positional call sites are unaffected. `WebAuthnClient`'s own constructor keeps its `options` parameter name. |
+| `CreateWebAuthnClientAsync(origin, isPublicSuffix, WebAuthnClientOptions? options = null, SessionCreationOptions? sessionOptions = null, cancellationToken)` | Move the checker to required `WebAuthnClientOptions.PublicSuffixChecker`, pass the non-null options as `clientOptions`, and keep optional `sessionOptions` and `cancellationToken`. The standalone checker parameter and nullable/default options were removed. |
 
 For example, a positional cancellation token passed to a one-shot convenience must become named:
 
@@ -202,6 +202,7 @@ Migration notes:
 - Replace synchronous enumeration assumptions with async flow and cancellation support.
 - V2 models one physical YubiKey with one or more available connections. Avoid assuming that the discovered object is a single transport handle.
 - If v1 code filtered by `Transport.HidFido`, `Transport.UsbSmartCard`, or NFC-specific behavior, review the v2 `ConnectionType` choice rather than applying a mechanical enum rename.
+- For the common "just get one matching device" case, prefer `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` (throws `InvalidOperationException` when none match) or `FindFirstOrDefaultAsync(...)` (returns `null`) over `FindAllAsync(...).First()`. See `core-find-first-discovery-helpers` in `v1-to-v2-map.yml` and `docs/usage/device-discovery.md`.
 
 ### Device Info
 
@@ -221,10 +222,7 @@ V2 exposes detailed device information through the Management package:
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Management;
 
-var device = (await YubiKeyManager.FindAllAsync(
-    ConnectionType.All,
-    forceRescan: false,
-    cancellationToken: cancellationToken)).First();
+var device = await YubiKeyManager.FindFirstAsync(cancellationToken: cancellationToken);
 await using var session = await device.CreateManagementSessionAsync(
     cancellationToken: cancellationToken);
 
@@ -239,6 +237,7 @@ Migration notes:
 - Some v1 metadata properties moved into richer v2 fields. For example, v1 `FirmwareVersion` often corresponds to `DeviceInfo.FirmwareVersion` for comparisons and `DeviceInfo.VersionName` for display.
 - Reuse one session for multiple Management operations instead of creating repeated one-shot sessions.
 - Configuration changes are persistent and may reboot the device; keep read-only device-info migrations separate from configuration migrations.
+- The snippet uses `YubiKeyManager.FindFirstAsync(...)`, the one-shot single-device discovery helper; see `core-find-first-discovery-helpers` in `v1-to-v2-map.yml`.
 
 ### Applet Session Creation
 
@@ -566,7 +565,7 @@ Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new
 WebAuthn touch notification is the separate `IUserPresencePrompt` supplied in the FIDO session's
 `SessionCreationOptions`; over FIDO HID it receives the authenticator's live wait signal.
 
-The prompt and retry-attempt count now configure through a single `WebAuthnClientOptions` record (`MaxPromptAttempts`, `CredentialPrompt`, `EnterpriseRpIds`) passed to `WebAuthnClient`'s constructor or `IYubiKeyExtensions.CreateWebAuthnClientAsync`, replacing earlier positional `enterpriseRpIds`/`prompt` parameters. Earlier v2 alphas also exposed a streaming ceremony-status API (`WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync`, returning `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed`); it was removed outright with no shim, leaving the plain async `MakeCredentialAsync`/`GetAssertionAsync` as the only ceremony entry points. See `webauthn-client-construction-and-streams` in `v1-to-v2-map.yml`.
+The public-suffix checker, prompt, and retry-attempt count now configure through a required `WebAuthnClientOptions` record (`PublicSuffixChecker`, `MaxPromptAttempts`, `CredentialPrompt`, `EnterpriseRpIds`) passed to `WebAuthnClient`'s constructor or `IYubiKeyExtensions.CreateWebAuthnClientAsync`, replacing the standalone checker and earlier positional `enterpriseRpIds`/`prompt` parameters. `CredentialPrompt` remains nullable and optional. Earlier v2 alphas also exposed a streaming ceremony-status API (`WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync`, returning `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed`); it was removed outright with no shim, leaving the plain async `MakeCredentialAsync`/`GetAssertionAsync` as the only ceremony entry points. See `webauthn-client-construction-and-streams` in `v1-to-v2-map.yml`.
 
 ### OATH
 

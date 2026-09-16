@@ -144,7 +144,7 @@ var scp11Params = new Scp11KeyParameters(keyRef, sdPublicKey, ocePrivateKey, oce
 ### TLV Processing
 
 The canonical usage examples for `DecodeList`, `TryFindValue`, `Tlv`, `EncodeList`, nested encoding, and
-`EncodeAndDisposeList` are in the [Core README](README.md#tlv-processing). Keep the full examples there rather
+`EncodeAndDisposeList` are in [docs/usage/tlv-processing.md](../../docs/usage/tlv-processing.md). Keep the full examples there rather
 than duplicating them in this contributor guide.
 
 Contributor rules:
@@ -211,6 +211,11 @@ fresh known serial evidence does not contradict it. A different known serial on 
 substitution and emits `Removed` for the predecessor followed by `Added` for a new successor object. Unknown
 serials never trigger identity-based republication. If no listener event invalidates discovery caches and no scan
 observes absence, same-interface substitution remains unknowable from cached evidence.
+
+Use `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` when absence is exceptional and
+`FindFirstOrDefaultAsync(predicate, cancellationToken)` when it is not. They are thin, one-shot selections over
+cached `FindAllAsync`; they do not wait for insertion, and callers must not treat discovery order as stable. The
+token is passed to discovery, but a cached result may complete without observing cancellation.
 
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
 handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by production discovery.

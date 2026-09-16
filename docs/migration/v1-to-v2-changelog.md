@@ -162,3 +162,18 @@
 - Incidental bug fix: OTP HID restarts its response timeout after a completed touch wait, so time spent waiting
   for touch no longer consumes the post-touch response budget. This timing behavior remains deferred for live
   hardware verification; no deterministic clock seam was added solely for this polling detail.
+
+## 2026-09-14 - WebAuthn required client options
+
+- Reviewed the WebAuthn construction records against base commit
+  `a05f96552f504a031823fd8c315df4e37656abff` and updated them for the v2 development change moving the public-suffix checker
+  into required `WebAuthnClientOptions`; no merged commit is claimed for the working-tree refactor.
+
+## 2026-09-14 - Post-merge update through commit 0501f516 (FindFirstAsync discovery helpers)
+
+- Analyzed range `761643765ec63e619df029a1d7ef686b77bbde63..0501f516e7877188e6d8977cc799f04a837cffed` (154 changed files). `diff.patch` truncated at 250000 of 830154 bytes for this range.
+- Confirmed the range's two other migration-relevant merges already carried their own migration-documentation updates in the same commit, so no further changes were needed for them: `feat(applets)!: unify user-presence notifications` (`d628ce5f`, PR #656) fully backs the `user-presence-prompt` map entry and the 2026-09-12 changelog entry above; `refactor(webauthn)!: move suffix checker into required client options` (`2176675b`, PR #664) fully backs the `webauthn-client-construction-and-streams`/`webauthn-credential-prompt` map entries and the 2026-09-14 entry immediately above, now confirmed merged rather than working-tree-only. `docs(migration): correct the stale Utf8 secret-parameter guidance` (`8382be40`, PR #655) was also a self-contained migration-guide correction within this range.
+- Added `core-find-first-discovery-helpers`: `feat(core): add first-key discovery helpers` (`6cb3875f`, merged via PR #661/#663) adds `YubiKeyManager.FindFirstAsync(predicate, cancellationToken)` (throws `InvalidOperationException` when no device matches) and `FindFirstOrDefaultAsync(predicate, cancellationToken)` (returns `null`) as one-shot convenience queries over `FindAllAsync`. The same commit had already updated the Common Migration Recipes' Device Info snippet to use `FindFirstAsync`, but left that change without a backing map entry; this update adds the entry and cross-references it from both the Device Discovery and Device Info recipes in `v1-to-v2.md`.
+- No-impact items confirmed in this range that need no guide or map changes: ~25 commits reshaping module `README.md`/`PACKAGE_README.md` files to a shared structure, adding package-page readmes, fixing repository links, and slimming the root `README.md` and `docs/DEV-GUIDE.md` (docs-only, outside this guide's v1-to-v2 API mapping scope); `build: read YubiKitDocsBranch from MSBuild evaluation, not the props file` (`5a32475a`) and `build: single source of truth for the v2 documentation branch` (`3c323d1d`) are build/tooling-only; `docs(oath): state the firmware floor the code actually enforces` (`19603b95`) and `docs: correct stale API claims in contributor docs and a doc comment` (`91d8c943`) touch contributor-facing docs, not this guide.
+- `package-changes.txt` was empty for this range; `namespace-changes.txt` showed only test-project and example-tool using-directive churn already covered by the user-presence and find-first changes above.
+- Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `0501f516e7877188e6d8977cc799f04a837cffed`.

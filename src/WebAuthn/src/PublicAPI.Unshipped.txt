@@ -46,7 +46,6 @@ Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse.User.get ->
 Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse.User.init -> void
 Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential
 Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential.Id.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential.RequiresSelection.get -> bool
 Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential.SelectAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.Authentication.AuthenticationResponse!>!
 Yubico.YubiKit.WebAuthn.Client.Authentication.MatchedCredential.User.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity?
 Yubico.YubiKit.WebAuthn.Client.PublicSuffixChecker
@@ -154,10 +153,9 @@ Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Prf.get -> Yubi
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Prf.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs!
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.AuthenticationExtensionOutputs(Yubico.YubiKit.Fido2.Extensions.CredBlobAssertionOutput? CredBlob = null, Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput? LargeBlob = null, Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfAuthenticationOutput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? PreviewSign = null) -> void
+Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.AuthenticationExtensionOutputs() -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.CredBlob.get -> Yubico.YubiKit.Fido2.Extensions.CredBlobAssertionOutput?
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.CredBlob.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.Deconstruct(out Yubico.YubiKit.Fido2.Extensions.CredBlobAssertionOutput? CredBlob, out Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput? LargeBlob, out Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfAuthenticationOutput? Prf, out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? PreviewSign) -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.Equals(Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs? other) -> bool
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.LargeBlob.get -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput?
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.LargeBlob.init -> void
@@ -306,7 +304,6 @@ Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.CredProps.get ->
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.CredProps.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.CredProtect.get -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredProtectOutput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.CredProtect.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.Deconstruct(out Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredProtectOutput? CredProtect, out Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput? CredBlob, out Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput? MinPinLength, out Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobRegistrationOutput? LargeBlob, out Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput? Prf, out Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredPropsOutput? CredProps, out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? PreviewSign) -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.Equals(Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs? other) -> bool
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.LargeBlob.get -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobRegistrationOutput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.LargeBlob.init -> void
@@ -316,7 +313,7 @@ Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.PreviewSign.get 
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.PreviewSign.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.Prf.get -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.Prf.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.RegistrationExtensionOutputs(Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredProtectOutput? CredProtect = null, Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput? CredBlob = null, Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput? MinPinLength = null, Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobRegistrationOutput? LargeBlob = null, Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredPropsOutput? CredProps = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? PreviewSign = null) -> void
+Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.RegistrationExtensionOutputs() -> void
 Yubico.YubiKit.WebAuthn.IYubiKeyExtensions
 Yubico.YubiKit.WebAuthn.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!)
 Yubico.YubiKit.WebAuthn.IYubiKeyExtensions.extension(Yubico.YubiKit.Core.Abstractions.IYubiKey!).CreateWebAuthnClientAsync(Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions! clientOptions, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? sessionOptions = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.WebAuthnClient!>!

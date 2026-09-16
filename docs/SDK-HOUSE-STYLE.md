@@ -30,7 +30,7 @@ Session method
 This is preferred:
 
 ```csharp
-public async Task<KeyInfo[]> GetKeyInfoAsync(CancellationToken cancellationToken = default)
+public async Task<KeyInfo[]> ListKeyInformationAsync(CancellationToken cancellationToken = default)
 {
     ThrowIfDisposed();
 

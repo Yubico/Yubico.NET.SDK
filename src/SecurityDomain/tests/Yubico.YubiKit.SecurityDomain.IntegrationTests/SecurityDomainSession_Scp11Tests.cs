@@ -71,7 +71,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
         await state.WithSecurityDomainSessionAsync(false,
             async session =>
             {
-                var keyInfo = await session.GetKeyInfoAsync(CancellationTokenSource.Token);
+                var keyInfo = await session.ListKeyInformationAsync(CancellationTokenSource.Token);
 
                 // Verify the key we just generated is now registered
                 Assert.Contains(keyInfo, keyEntry =>

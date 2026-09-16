@@ -124,7 +124,7 @@ public class SecureChannelExceptionTests
     // --- ISC-43: post-handshake, per-operation failures are unaffected ---
 
     [Fact]
-    public async Task GetKeyInfoAsync_MalformedResponse_DoesNotWrapAsSecureChannelException()
+    public async Task ListKeyInformationAsync_MalformedResponse_DoesNotWrapAsSecureChannelException()
     {
         // No scpKeyParams: the session establishes without a secure channel, so a subsequent
         // per-operation failure must surface as the original exception type, not
@@ -137,7 +137,7 @@ public class SecureChannelExceptionTests
             cancellationToken: TestContext.Current.CancellationToken);
 
         var ex = await Assert.ThrowsAsync<BadResponseException>(() =>
-            session.GetKeyInfoAsync(TestContext.Current.CancellationToken));
+            session.ListKeyInformationAsync(TestContext.Current.CancellationToken));
 
         Assert.IsNotType<SecureChannelException>(ex);
     }

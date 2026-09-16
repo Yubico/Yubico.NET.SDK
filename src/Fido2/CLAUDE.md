@@ -53,8 +53,11 @@ Yubico.YubiKit.Fido2/
 │   │   └── AuthenticatorConfig.cs
 │   ├── CredentialManagement/       # Credential enumeration/management
 │   │   ├── CredManagementSubCommand.cs
+│   │   ├── CredentialEnumerationResult.cs
 │   │   ├── CredentialManagement.cs
-│   │   └── CredentialManagementModels.cs
+│   │   ├── CredentialManagementModels.cs
+│   │   ├── RelyingPartyEnumerationResult.cs
+│   │   └── StoredCredentialInfo.cs
 │   ├── Credentials/                # MakeCredential/GetAssertion types
 │   │   ├── AuthenticatorData.cs
 │   │   ├── AttestedCredentialData.cs
@@ -238,15 +241,25 @@ var credMgmt = new CredentialManagement(session, protocol, pinToken);
 // Get credential metadata
 var metadata = await credMgmt.GetCredentialsMetadataAsync();
 
-// Enumerate RPs
-var rps = await credMgmt.EnumerateRelyingPartiesAsync();
+// Enumerate RPs. ReportedTotal is copied from the first response and can be null.
+var rpResult = await credMgmt.EnumerateRelyingPartiesAsync();
+var rps = rpResult.RelyingParties;
 
 // Enumerate credentials for an RP
-var creds = await credMgmt.EnumerateCredentialsAsync(rpIdHash);
+using var credentialResult = await credMgmt.EnumerateCredentialsAsync(rpIdHash);
+var creds = credentialResult.Credentials;
 
 // Delete credential
 await credMgmt.DeleteCredentialAsync(credentialId);
 ```
+
+Credential-management enumeration results own read-only collection storage. A
+`CredentialEnumerationResult` also owns its `StoredCredentialInfo` entries and must be disposed after their
+raw or secret-bearing views are no longer needed. `StoredCredentialInfo.Decode` borrows its input and returns
+an independently disposable owner for direct decoder callers. The reported total is not recomputed from the
+collection count. `ClientPin.GetPinRetriesAsync` and `GetUvRetriesAsync` return the property-based
+`PinRetryStatus` and `UserVerificationRetryStatus` models; their response parsers retain the existing protocol
+behavior.
 
 ### User-presence notifications
 
@@ -291,14 +304,18 @@ Key rules:
 
 Valid authenticator response data that is not yet modeled must remain usable without relaxing malformed or security-critical data checks. The FIDO2 and WebAuthn response escape hatches are:
 
-- `RawData` on non-secret response owners such as `AuthenticatorInfo`, credential metadata, relying-party information, `FingerprintSensorInfo`, and `EnrollmentSampleResult` preserves the complete response envelope.
+- `RawData` on response owners such as `AuthenticatorInfo`, credential metadata, relying-party information, `StoredCredentialInfo`, `FingerprintSensorInfo`, and `EnrollmentSampleResult` preserves the complete response envelope. Dispose `StoredCredentialInfo` directly, or its owning `CredentialEnumerationResult`, because its envelope can contain secret fields.
 - `AttestedCredentialData.CredentialPublicKey`, with `CoseOtherKey.RawCbor` when an unmodeled key type is not claimed by a modeled algorithm. COSE keys must still report an algorithm.
 - `ExtensionOutput.TryGetRawExtension` and `WebAuthnAuthenticatorData.ParsedExtensions` for extension outputs.
 - `IFidoSession.SendCborRequestAsync` for explicitly constructed raw CTAP CBOR requests and responses.
 
 PIN/UV key agreement is a separate security-critical boundary: forward-compatible response handling must not relax its required P-256 key type, curve, coordinates, or protocol structure. Raw response access is not a bypass, and unknown response fields must not be blindly copied into requests.
 
-Add `RawData` to models that own a complete, non-secret authenticator response. Do not duplicate the same buffer on nested entities or add another retained copy of envelopes containing material the SDK should zero.
+Add `RawData` to models that own a complete, non-secret authenticator response. A response that can contain
+secret material instead needs explicit disposable ownership. `StoredCredentialInfo` owns one private complete
+response clone; `LargeBlobKey` is a view into it, and disposal clears that clone, including unknown fields.
+The public decoder never clears its borrowed input, and the session's read-only response contract is unchanged,
+so this is not an end-to-end cleanup guarantee. Do not duplicate the same buffer on nested entities.
 Use `RawCbor` only for an encoded nested CBOR structure, such as an attestation statement or unsupported COSE key; it may be a slice of its parent buffer rather than a separately owned copy.
 
 ## Security Requirements

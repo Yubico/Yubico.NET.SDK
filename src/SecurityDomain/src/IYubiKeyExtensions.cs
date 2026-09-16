@@ -76,7 +76,7 @@ public static class IYubiKeyExtensions
         /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A list of key information from the Security Domain.</returns>
-        public async Task<IReadOnlyList<KeyInfo>> GetSecurityDomainKeyInfoAsync(
+        public async Task<IReadOnlyList<KeyInfo>> ListKeyInformationAsync(
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
@@ -85,7 +85,7 @@ public static class IYubiKeyExtensions
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-            return await session.GetKeyInfoAsync(cancellationToken).ConfigureAwait(false);
+            return await session.ListKeyInformationAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

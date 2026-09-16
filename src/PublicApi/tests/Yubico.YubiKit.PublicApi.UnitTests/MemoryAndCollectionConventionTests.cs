@@ -1,54 +1,58 @@
-using System.Collections;
 using System.Reflection;
 
 namespace Yubico.YubiKit.PublicApi.UnitTests;
 
 public sealed class MemoryAndCollectionConventionTests
 {
-    private static readonly HashSet<string> MutableCollectionReturnAllowlist =
-    [
-        "OathSession.DeriveKey",
-        "IOathSession.DeriveKey"
-    ];
+    private static readonly IReadOnlyDictionary<string, string> ReviewedSecretArrayReturns = new Dictionary<string, string>
+    {
+        ["Yubico.YubiKit.Oath.OathSession.DeriveKey(System.ReadOnlyMemory<System.Byte>): System.Byte[]"] =
+            "Existing password-derived secret contract transfers an owned array that callers must clear.",
+        ["Yubico.YubiKit.Oath.IOathSession.DeriveKey(System.ReadOnlyMemory<System.Byte>): System.Byte[]"] =
+            "Existing password-derived secret contract transfers an owned array that callers must clear."
+    };
 
     [Fact]
-    public void PublicSessionOperations_DoNotBorrowRawArraysOrReturnMutableCollections()
+    public void PublicSessionOperations_DoNotBorrowRawArraysOrAddUnreviewedSecretArrayReturns()
     {
         var violations = new List<string>();
+        var observedSecretArrayReturns = new HashSet<string>();
 
-        foreach (var (session, _, _) in AppletSessionShapeTests.Sessions)
+        foreach (var (session, contract, _) in AppletSessionShapeTests.Sessions)
         {
             foreach (var method in session.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-                ValidateMemoryAndCollectionShape(method, session.Name, violations);
+                ValidateMemoryShape(method, violations, observedSecretArrayReturns);
+
+            foreach (var method in contract.GetMethods())
+                ValidateMemoryShape(method, violations, observedSecretArrayReturns);
 
             foreach (var method in AppletSessionShapeTests.GetDeviceExtensionMethods(session))
-                ValidateMemoryAndCollectionShape(method, method.DeclaringType?.Name ?? session.Name, violations);
+                ValidateMemoryShape(method, violations, observedSecretArrayReturns);
         }
+
+        violations.AddRange(ReviewedSecretArrayReturns.Keys
+            .Except(observedSecretArrayReturns)
+            .Select(static signature => $"{signature} has a stale secret-array exception"));
 
         Assert.Empty(violations);
     }
 
-    private static void ValidateMemoryAndCollectionShape(
+    private static void ValidateMemoryShape(
         MethodInfo method,
-        string typeName,
-        ICollection<string> violations)
+        ICollection<string> violations,
+        ISet<string> observedSecretArrayReturns)
     {
         if (method.GetParameters().Any(static p => p.ParameterType == typeof(byte[])))
-            violations.Add($"{typeName}.{method.Name} borrows byte[]");
+            violations.Add($"{PublicReturnContractScanner.FormatSignature(method)} borrows byte[]");
 
-        Type resultType = method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>)
-            ? method.ReturnType.GetGenericArguments()[0]
-            : method.ReturnType;
+        Type resultType = PublicReturnContractScanner.UnwrapAsync(method.ReturnType);
 
-        string member = $"{typeName}.{method.Name}";
-        if (!MutableCollectionReturnAllowlist.Contains(member) && IsMutableCollectionContract(resultType))
-            violations.Add($"{typeName}.{method.Name} returns mutable {resultType.Name}");
+        if (resultType != typeof(byte[]))
+            return;
+
+        string signature = PublicReturnContractScanner.FormatSignature(method);
+        observedSecretArrayReturns.Add(signature);
+        if (!ReviewedSecretArrayReturns.ContainsKey(signature))
+            violations.Add($"{signature} returns an unreviewed secret byte array");
     }
-
-    private static bool IsMutableCollectionContract(Type type) =>
-        type.IsArray ||
-        (type.IsGenericType && type.GetGenericTypeDefinition() is { } definition &&
-            (definition == typeof(List<>) || definition == typeof(Dictionary<,>) || definition == typeof(IList<>) ||
-             definition == typeof(IDictionary<,>) || definition == typeof(ICollection<>))) ||
-        type == typeof(IList) || type == typeof(IDictionary) || type == typeof(ICollection);
 }

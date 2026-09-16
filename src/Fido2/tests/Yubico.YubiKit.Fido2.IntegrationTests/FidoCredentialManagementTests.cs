@@ -92,13 +92,13 @@ public class FidoCredentialManagementTests
 
                 using (clientPinForCredMan)
                 {
-                    var credMan = new CredentialManagementClass(session, protocol, pinToken);
+                    using var credMan = new CredentialManagementClass(session, protocol, pinToken);
 
                     var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(FidoTestData.RpId));
-                    var credentials = await credMan.EnumerateCredentialsAsync(rpIdHash);
+                    using var result = await credMan.EnumerateCredentialsAsync(rpIdHash);
 
-                    Assert.NotEmpty(credentials);
-                    Assert.Contains(credentials, c =>
+                    Assert.NotEmpty(result.Credentials);
+                    Assert.Contains(result.Credentials, c =>
                         c.CredentialId.Id.Span.SequenceEqual(credentialId));
                 }
 
@@ -134,13 +134,13 @@ public class FidoCredentialManagementTests
 
             using (clientPinForCredMan)
             {
-                var credMan = new CredentialManagementClass(session, protocol, pinToken);
+                using var credMan = new CredentialManagementClass(session, protocol, pinToken);
                 var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(uniqueRpId));
 
                 try
                 {
-                    var credentials = await credMan.EnumerateCredentialsAsync(rpIdHash);
-                    Assert.Empty(credentials);
+                    using var result = await credMan.EnumerateCredentialsAsync(rpIdHash);
+                    Assert.Empty(result.Credentials);
                 }
                 catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
                 {

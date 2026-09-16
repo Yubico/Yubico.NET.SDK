@@ -65,7 +65,7 @@ The reset session is scoped to its own disposal declaration deliberately. A conn
 
 The `ResetAsync()` method (in `SecurityDomainSession.cs:685`):
 
-1. **Enumerates keys** via `GetKeyInfoAsync()`
+1. **Enumerates keys** via `ListKeyInformationAsync()`
 2. **For each key type**, sends bogus authentication attempts:
    - SCP03 (KID=0x01): `INITIALIZE UPDATE` with bad payload
    - SCP11a/c (KID=0x10/0x15): `EXTERNAL AUTHENTICATE`

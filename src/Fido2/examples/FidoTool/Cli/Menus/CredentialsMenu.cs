@@ -148,7 +148,7 @@ public static class CredentialsMenu
             OutputHelpers.WriteHex("    RP ID Hash", rp.RpIdHash);
 
             // Enumerate credentials for this RP
-            var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
+            using var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
                 device, pinOwner.Memory, rp.RpIdHash, cancellationToken);
 
             if (!credResult.Success)

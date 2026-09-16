@@ -131,16 +131,16 @@ public static class FidoTestHelpers
 
             using (clientPin)
             {
-                var credMan = new CredentialManagementClass(session, protocol, pinToken);
+                using var credMan = new CredentialManagementClass(session, protocol, pinToken);
 
                 // Get RP ID hash
                 var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(rpId));
 
                 // Enumerate and delete credentials
-                var credentials = await credMan.EnumerateCredentialsAsync(rpIdHash, cancellationToken)
+                using var result = await credMan.EnumerateCredentialsAsync(rpIdHash, cancellationToken)
                     .ConfigureAwait(false);
 
-                foreach (var cred in credentials)
+                foreach (var cred in result.Credentials)
                 {
                     await credMan.DeleteCredentialAsync(cred.CredentialId, cancellationToken)
                         .ConfigureAwait(false);

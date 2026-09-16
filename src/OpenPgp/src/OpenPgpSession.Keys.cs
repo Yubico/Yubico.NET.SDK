@@ -176,7 +176,7 @@ public sealed partial class OpenPgpSession
     }
 
     /// <inheritdoc />
-    public async Task<KeyInformation> GetKeyInformationAsync(
+    public async Task<KeyInformation> ListKeyInformationAsync(
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -184,18 +184,18 @@ public sealed partial class OpenPgpSession
         // Key information is in the discretionary data objects
         var appData = await GetApplicationRelatedDataAsync(cancellationToken)
             .ConfigureAwait(false);
-        return appData.Discretionary.KeyInfo;
+        return appData.Discretionary.KeyInformation;
     }
 
     /// <inheritdoc />
-    public async Task<Fingerprints> GetFingerprintsAsync(
+    public async Task<KeyFingerprints> GetKeyFingerprintsAsync(
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
         var appData = await GetApplicationRelatedDataAsync(cancellationToken)
             .ConfigureAwait(false);
-        return appData.Discretionary.Fingerprints;
+        return appData.Discretionary.KeyFingerprints;
     }
 
     /// <inheritdoc />
@@ -210,7 +210,7 @@ public sealed partial class OpenPgpSession
     }
 
     /// <inheritdoc />
-    public async Task SetFingerprintAsync(
+    public async Task SetKeyFingerprintAsync(
         KeyRef keyRef,
         ReadOnlyMemory<byte> fingerprint,
         CancellationToken cancellationToken = default)
@@ -223,7 +223,7 @@ public sealed partial class OpenPgpSession
         }
 
         _logger.LogDebug("Setting fingerprint for {Slot}", keyRef);
-        await PutDataAsync(keyRef.FingerprintDo(), fingerprint, cancellationToken)
+        await PutDataAsync(keyRef.KeyFingerprintDo(), fingerprint, cancellationToken)
             .ConfigureAwait(false);
     }
 

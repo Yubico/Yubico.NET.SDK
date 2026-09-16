@@ -384,7 +384,7 @@ static async Task<int> RunCredentialsVerbAsync(string[] args, CancellationToken 
                     AnsiConsole.MarkupLine($"  [green bold]{Markup.Escape(rp.RelyingParty.Id)}[/]");
                     OutputHelpers.WriteHex("    RP ID Hash", rp.RpIdHash);
 
-                    var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
+                    using var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
                         selection.Device, pinOwner.Memory, rp.RpIdHash, cancellationToken);
 
                     if (credResult.Success)

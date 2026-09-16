@@ -93,7 +93,7 @@ public class FidoCredentialManagementExtendedTests
 
                 using (clientPinForCredMan)
                 {
-                    var credMan = new CredentialManagementClass(session, protocol, pinToken);
+                    using var credMan = new CredentialManagementClass(session, protocol, pinToken);
 
                     var updatedUser = new PublicKeyCredentialUserEntity(
                         userId,
@@ -105,9 +105,9 @@ public class FidoCredentialManagementExtendedTests
 
                     // Verify the update by enumerating credentials
                     var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(FidoTestData.RpId));
-                    var credentials = await credMan.EnumerateCredentialsAsync(rpIdHash);
+                    using var result = await credMan.EnumerateCredentialsAsync(rpIdHash);
 
-                    var updated = credentials.FirstOrDefault(c =>
+                    var updated = result.Credentials.FirstOrDefault(c =>
                         c.CredentialId.Id.Span.SequenceEqual(credentialId));
 
                     Assert.NotNull(updated);
@@ -194,18 +194,18 @@ public class FidoCredentialManagementExtendedTests
 
                 using (clientPinForCredMan)
                 {
-                    var credMan = new CredentialManagementClass(session, protocol, pinToken);
+                    using var credMan = new CredentialManagementClass(session, protocol, pinToken);
 
                     var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(FidoTestData.RpId));
-                    var credentials = await credMan.EnumerateCredentialsAsync(rpIdHash);
+                    using var result = await credMan.EnumerateCredentialsAsync(rpIdHash);
 
-                    Assert.True(credentials.Count >= 2,
-                        $"Expected at least 2 credentials for the RP, found {credentials.Count}");
+                    Assert.True(result.Credentials.Count >= 2,
+                        $"Expected at least 2 credentials for the RP, found {result.Credentials.Count}");
 
                     // Verify both our credential IDs are in the enumeration
                     foreach (var credId in credentialIds)
                     {
-                        Assert.Contains(credentials, c =>
+                        Assert.Contains(result.Credentials, c =>
                             c.CredentialId.Id.Span.SequenceEqual(credId));
                     }
                 }

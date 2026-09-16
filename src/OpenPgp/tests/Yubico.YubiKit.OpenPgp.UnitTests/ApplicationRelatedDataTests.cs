@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.OpenPgp.UnitTests;
@@ -147,5 +148,98 @@ public class ApplicationRelatedDataTests
         var parsed = ApplicationRelatedData.Parse(data);
 
         Assert.Null(parsed.ExtendedLengthInfo);
+    }
+
+    [Fact]
+    public void DiscretionaryParse_KeyCollections_PreserveLookupEnumerationAndEnumValues()
+    {
+        byte[] fingerprint = Enumerable.Range(1, 20).Select(static value => (byte)value).ToArray();
+        byte[] caFingerprint = Enumerable.Range(21, 20).Select(static value => (byte)value).ToArray();
+        byte[] encoded = BuildDiscretionaryData(
+            fingerprints: fingerprint,
+            caFingerprints: caFingerprint,
+            generationTimes: [0x01, 0x02, 0x03, 0x04],
+            keyInformation: [(byte)KeyRef.Sig, 0xFE, 0x7F, (byte)KeyStatus.Generated]);
+
+        DiscretionaryDataObjects parsed = DiscretionaryDataObjects.Parse(encoded);
+
+        Assert.Equal(fingerprint, parsed.KeyFingerprints[KeyRef.Sig].ToArray());
+        Assert.Equal(caFingerprint, parsed.CaKeyFingerprints[KeyRef.Sig].ToArray());
+        Assert.Equal(0x01020304, parsed.GenerationTimes[KeyRef.Sig]);
+        Assert.Equal((KeyStatus)0xFE, parsed.KeyInformation[KeyRef.Sig]);
+        Assert.Equal([KeyRef.Sig], parsed.KeyInformation.Select(static entry => entry.Key));
+        Assert.False(parsed.KeyInformation.ContainsKey((KeyRef)0x7F));
+        Assert.Throws<KeyNotFoundException>(() => parsed.KeyInformation[KeyRef.Dec]);
+    }
+
+    [Fact]
+    public void DiscretionaryParse_MissingCollectionObjects_ReturnsEmptyCollections()
+    {
+        byte[] encoded = BuildDiscretionaryData();
+
+        DiscretionaryDataObjects parsed = DiscretionaryDataObjects.Parse(encoded);
+
+        Assert.Empty(parsed.KeyFingerprints);
+        Assert.Empty(parsed.CaKeyFingerprints);
+        Assert.Empty(parsed.GenerationTimes);
+        Assert.Empty(parsed.KeyInformation);
+        Assert.False(parsed.KeyFingerprints.TryGetValue(KeyRef.Sig, out _));
+    }
+
+    [Fact]
+    public void DiscretionaryParse_RepeatedParsingOwnsFingerprintStorageIndependently()
+    {
+        byte[] fingerprint = Enumerable.Range(1, 20).Select(static value => (byte)value).ToArray();
+        byte[] encoded = BuildDiscretionaryData(fingerprints: fingerprint);
+
+        DiscretionaryDataObjects first = DiscretionaryDataObjects.Parse(encoded);
+        DiscretionaryDataObjects second = DiscretionaryDataObjects.Parse(encoded);
+        encoded.AsSpan().Fill(0xFF);
+
+        Assert.Equal(fingerprint, first.KeyFingerprints[KeyRef.Sig].ToArray());
+        Assert.Equal(fingerprint, second.KeyFingerprints[KeyRef.Sig].ToArray());
+        Assert.True(MemoryMarshal.TryGetArray(first.KeyFingerprints[KeyRef.Sig], out ArraySegment<byte> firstStorage));
+        Assert.True(MemoryMarshal.TryGetArray(second.KeyFingerprints[KeyRef.Sig], out ArraySegment<byte> secondStorage));
+        Assert.NotSame(firstStorage.Array, secondStorage.Array);
+    }
+
+    private static byte[] BuildDiscretionaryData(
+        byte[]? fingerprints = null,
+        byte[]? caFingerprints = null,
+        byte[]? generationTimes = null,
+        byte[]? keyInformation = null)
+    {
+        byte[] rsaAttributes = [0x01, 0x08, 0x00, 0x00, 0x11, 0x00];
+        var tlvs = new List<Tlv>(capacity: 9);
+
+        try
+        {
+            tlvs.Add(new Tlv(0xC0, new byte[] { 0x75, 0x00, 0x00, 0xFF, 0x04, 0x80, 0x00, 0xFF, 0x00, 0x00 }));
+            tlvs.Add(new Tlv(0xC1, rsaAttributes));
+            tlvs.Add(new Tlv(0xC2, rsaAttributes));
+            tlvs.Add(new Tlv(0xC3, rsaAttributes));
+            tlvs.Add(new Tlv(0xC4, new byte[] { 0x00, 0x7F, 0x7F, 0x7F, 0x03, 0x00, 0x03 }));
+            AddOptionalTlv(tlvs, 0xC5, fingerprints);
+            AddOptionalTlv(tlvs, 0xC6, caFingerprints);
+            AddOptionalTlv(tlvs, 0xCD, generationTimes);
+            AddOptionalTlv(tlvs, 0xDE, keyInformation);
+
+            return TlvHelper.EncodeList(tlvs.ToArray()).ToArray();
+        }
+        finally
+        {
+            foreach (Tlv tlv in tlvs)
+            {
+                tlv.Dispose();
+            }
+        }
+    }
+
+    private static void AddOptionalTlv(List<Tlv> tlvs, int tag, byte[]? value)
+    {
+        if (value is not null)
+        {
+            tlvs.Add(new Tlv(tag, value));
+        }
     }
 }

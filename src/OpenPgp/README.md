@@ -20,7 +20,7 @@ administers the PINs, reset code, and touch policy. It is a smart-card applet be
 | Elliptic-curve keys | 5.2.0 |
 | Per-slot certificates | 5.2.0 |
 | Key attestation | 5.2.0 |
-| Algorithm information query | 5.2.0 |
+| Supported-algorithm query | 5.2.0 |
 | PIN unverify | 5.6.0 |
 
 ## Installation
@@ -31,6 +31,10 @@ dotnet add package Yubico.YubiKit.OpenPgp --prerelease
 ```
 
 `Yubico.YubiKit.Core` is installed transitively.
+
+`GetSupportedAlgorithmsAsync` returns an ordered `IReadOnlyList<SupportedAlgorithm>`. Read each entry's
+`KeyRef` and `Attributes`; do not collapse the list into a dictionary because one slot can report multiple
+supported algorithms.
 
 ## Getting started
 
@@ -58,6 +62,22 @@ PIN and no touch. There is no one-shot extension: every operation runs on a sess
 ## Common operations
 
 PINs cross the API as UTF-8 `ReadOnlyMemory<byte>`. The factory defaults are `123456` and `12345678`; change both before the key is used for anything real.
+
+### Inspect key metadata
+
+```csharp
+KeyInformation keyInformation = await session.ListKeyInformationAsync();
+KeyFingerprints keyFingerprints = await session.GetKeyFingerprintsAsync();
+
+if (keyFingerprints.TryGetValue(KeyRef.Sig, out ReadOnlyMemory<byte> fingerprint))
+{
+    Console.WriteLine(Convert.ToHexString(fingerprint.Span));
+}
+```
+
+`KeyInformation`, `KeyFingerprints`, and `GenerationTimes` are named read-only dictionaries: callers can index,
+look up, and enumerate entries but cannot mutate collection storage. `ApplicationRelatedData.Discretionary` exposes
+the same values through `KeyInformation`, `KeyFingerprints`, and `CaKeyFingerprints`.
 
 ### Verify the user PIN
 

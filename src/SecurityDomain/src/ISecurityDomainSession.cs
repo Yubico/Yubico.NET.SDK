@@ -38,7 +38,7 @@ public interface ISecurityDomainSession : IApplicationSession
     ///     Retrieves key metadata exposed by the Security Domain via the key information data object.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    Task<IReadOnlyList<KeyInfo>> GetKeyInfoAsync(
+    Task<IReadOnlyList<KeyInfo>> ListKeyInformationAsync(
         CancellationToken cancellationToken = default);
 
     /// <summary>

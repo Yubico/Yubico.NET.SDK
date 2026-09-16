@@ -45,14 +45,6 @@ public sealed class MatchedCredential
     /// </remarks>
     public PublicKeyCredentialUserEntity? User { get; }
 
-    /// <summary>
-    /// Gets whether this credential requires explicit user selection.
-    /// </summary>
-    /// <remarks>
-    /// True when multiple credentials matched the authentication request.
-    /// </remarks>
-    public bool RequiresSelection { get; }
-
     private readonly Lazy<Task<AuthenticationResponse>> _responseFactory;
 
     /// <summary>
@@ -60,18 +52,14 @@ public sealed class MatchedCredential
     /// </summary>
     /// <param name="id">The credential identifier.</param>
     /// <param name="user">The user information, if available.</param>
-    /// <param name="requiresSelection">Whether this credential requires explicit selection.</param>
     /// <param name="responseFactory">Factory that produces the authentication response.</param>
     internal MatchedCredential(
         ReadOnlyMemory<byte> id,
         PublicKeyCredentialUserEntity? user,
-        bool requiresSelection,
         Func<CancellationToken, Task<AuthenticationResponse>> responseFactory)
     {
         Id = id;
         User = user;
-        RequiresSelection = requiresSelection;
-
         // Lazy ensures the factory runs at most once, even if SelectAsync is called multiple times
         _responseFactory = new Lazy<Task<AuthenticationResponse>>(
             () => responseFactory(CancellationToken.None));

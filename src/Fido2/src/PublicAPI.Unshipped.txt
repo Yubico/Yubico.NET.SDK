@@ -185,18 +185,25 @@ Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Exponent.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Exponent.init -> void
 Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Modulus.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Fido2.Cose.CoseRsaKey.Modulus.init -> void
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialEnumerationResult
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialEnumerationResult.Credentials.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo!>!
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialEnumerationResult.Dispose() -> void
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialEnumerationResult.ReportedTotal.get -> int?
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.CredentialManagement(Yubico.YubiKit.Fido2.FidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlyMemory<byte> pinUvAuthToken) -> void
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.DeleteCredentialAsync(Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor! credentialId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.Dispose() -> void
-Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.EnumerateCredentialsAsync(System.ReadOnlyMemory<byte> rpIdHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo!>!>!
-Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.EnumerateRelyingPartiesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo!>!>!
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.EnumerateCredentialsAsync(System.ReadOnlyMemory<byte> rpIdHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.CredentialManagement.CredentialEnumerationResult!>!
+Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.EnumerateRelyingPartiesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyEnumerationResult!>!
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.GetCredentialsMetadataAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata!>!
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement.UpdateUserInformationAsync(Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor! credentialId, Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity! user, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata.ExistingResidentCredentialsCount.get -> int
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata.MaxPossibleRemainingResidentCredentialsCount.get -> int
 Yubico.YubiKit.Fido2.CredentialManagement.CredentialMetadata.RawData.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyEnumerationResult
+Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyEnumerationResult.RelyingParties.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo!>!
+Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyEnumerationResult.ReportedTotal.get -> int?
 Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo
 Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo.RawData.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo.RelyingParty.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialRpEntity!
@@ -205,8 +212,10 @@ Yubico.YubiKit.Fido2.CredentialManagement.RelyingPartyInfo.TotalRpCount.get -> i
 Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo
 Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.CredProtectPolicy.get -> int?
 Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.CredentialId.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialDescriptor!
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.Dispose() -> void
 Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.LargeBlobKey.get -> System.ReadOnlyMemory<byte>?
 Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.PublicKey.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.RawData.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.ThirdPartyPayment.get -> bool?
 Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.TotalCredentials.get -> int?
 Yubico.YubiKit.Fido2.CredentialManagement.StoredCredentialInfo.User.get -> Yubico.YubiKit.Fido2.Credentials.PublicKeyCredentialUserEntity!
@@ -649,11 +658,11 @@ Yubico.YubiKit.Fido2.Pin.ClientPin
 Yubico.YubiKit.Fido2.Pin.ClientPin.ChangePinAsync(System.ReadOnlyMemory<byte> currentPin, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Fido2.Pin.ClientPin.ClientPin(Yubico.YubiKit.Fido2.IFidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol) -> void
 Yubico.YubiKit.Fido2.Pin.ClientPin.Dispose() -> void
-Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(int PinRetries, bool PowerCycleRequired)>!
+Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Pin.PinRetryStatus!>!
 Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinTokenAsync(System.ReadOnlyMemory<byte> pin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
 Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinUvAuthTokenUsingPinAsync(System.ReadOnlyMemory<byte> pin, Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions permissions, string? rpId = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
 Yubico.YubiKit.Fido2.Pin.ClientPin.GetPinUvAuthTokenUsingUvAsync(Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions permissions, string? rpId = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
-Yubico.YubiKit.Fido2.Pin.ClientPin.GetUvRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(int UvRetries, bool PowerCycleRequired)>!
+Yubico.YubiKit.Fido2.Pin.ClientPin.GetUvRetriesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Pin.UserVerificationRetryStatus!>!
 Yubico.YubiKit.Fido2.Pin.ClientPin.Protocol.get -> Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol!
 Yubico.YubiKit.Fido2.Pin.ClientPin.SetPinAsync(System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand
@@ -666,6 +675,9 @@ Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Encrypt(System.ReadOnlySpan<byte> ke
 Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Kdf(System.ReadOnlySpan<byte> z) -> byte[]!
 Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Verify(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message, System.ReadOnlySpan<byte> signature) -> bool
 Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol.Version.get -> int
+Yubico.YubiKit.Fido2.Pin.PinRetryStatus
+Yubico.YubiKit.Fido2.Pin.PinRetryStatus.PowerCycleRequired.get -> bool
+Yubico.YubiKit.Fido2.Pin.PinRetryStatus.RetriesRemaining.get -> int
 Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1
 Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.Authenticate(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message) -> byte[]!
 Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV1.AuthenticationTagLength.get -> int
@@ -697,6 +709,9 @@ Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.GetAssertion = 2 -> Yubico.Yu
 Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.LargeBlobWrite = 16 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
 Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.MakeCredential = 1 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
 Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.None = 0 -> Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions
+Yubico.YubiKit.Fido2.Pin.UserVerificationRetryStatus
+Yubico.YubiKit.Fido2.Pin.UserVerificationRetryStatus.PowerCycleRequired.get -> bool
+Yubico.YubiKit.Fido2.Pin.UserVerificationRetryStatus.RetriesRemaining.get -> int
 Yubico.YubiKit.Fido2.PublicKeyCredentialParameters
 Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.Algorithm.get -> Yubico.YubiKit.Core.Cryptography.Cose.CoseAlgorithmIdentifier
 Yubico.YubiKit.Fido2.PublicKeyCredentialParameters.Algorithm.init -> void

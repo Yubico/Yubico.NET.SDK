@@ -72,6 +72,12 @@ if [ "${1:-all}" = "md" ]; then
 fi
 
 npx --yes @marp-team/marp-cli@latest "$OUT" --html --allow-local-files -o deck.html
-npx --yes @marp-team/marp-cli@latest "$OUT" --pdf  --allow-local-files -o deck.pdf
+
+# The PDF build does not pass --html, so Marp escapes the zoom <script> tags and
+# renders them as literal text on the last slide. Strip them for the PDF only.
+# Keep the temp file beside deck.md so relative asset paths still resolve.
+grep -v '^<script src="assets/' "$OUT" > "$OUT.pdfsrc"
+npx --yes @marp-team/marp-cli@latest "$OUT.pdfsrc" --pdf --allow-local-files -o deck.pdf
+rm -f "$OUT.pdfsrc"
 
 echo "wrote deck.html and deck.pdf"

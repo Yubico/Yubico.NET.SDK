@@ -2,10 +2,11 @@
 
 Every factual claim in the deck, mapped to the source that grounds it.
 
-**Repository:** `Yubico.YubiKit.NET.SDK`, branch `yubikit`, `ee5cc317`
-(was `d628ce5f` through Round-8, `d04d59aa` through Round-7. PR #656 landed the unified
-user-presence API — see Round-8. PRs #661 and #664 landed first-device discovery and a
-breaking WebAuthn factory change — see Round-9.)
+**Repository:** `Yubico.YubiKit.NET.SDK`, branch `yubikit`, `2f1d912a`
+(was `ee5cc317` through Round-9, `d628ce5f` through Round-8, `d04d59aa` through Round-7.
+PR #656 landed the unified user-presence API — Round-8. PRs #661 and #664 landed
+first-device discovery and a breaking WebAuthn factory change — Round-9. PR #667 landed
+public return contracts — Round-10.)
 
 > **Anchor policy, from Round-9 on:** claims point at real source files, not at
 > `PublicAPI.Unshipped.txt`. That file is the Roslyn public-API analyzer's sorted,
@@ -429,7 +430,7 @@ audience; its logging content was kept and expanded into its own topic.
 | Q3 | An NFC-presented key is published standalone with a transport-shaped `DeviceId` | doc | `docs/architecture/device-identity.md:179-184` (D7) |
 | Q4 | `DeviceId` prefix encodes the evidence tier: `pcsc:*`/`hid:*` alone, `ykphysical:*` only once grouping proved a physical key | doc | `docs/architecture/device-identity.md:179-184` |
 | Q5 | The rejected-for-public-API surface is the interface-set string, not `DeviceId` | doc | `docs/architecture/device-identity.md:61-65` (D1), `:188-190` |
-| Q6 | `ISecurityDomainSession.GetKeyInfoAsync` exists | code | `src/SecurityDomain/src/PublicAPI.Unshipped.txt:24` |
+| ~~Q6~~ | ~~`ISecurityDomainSession.GetKeyInfoAsync` exists~~ | **WITHDRAWN** | **Renamed by PR #667.** The member is now `ListKeyInformationAsync`; `GetKeyInfoAsync` no longer exists anywhere in `src/`. Superseded by N1. |
 | Q7 | `IYubiOtpSession.CalculateHmacSha1Async(Slot, ReadOnlyMemory<byte>, ct)` exists | code | `src/YubiOtp/src/PublicAPI.Unshipped.txt:72` |
 | Q8 | All four peers expose `calculate_hmac_sha1`-shaped OTP challenge-response | peer | python `yubikit/yubiotp.py:901`; rust `crates/yubikit/src/yubiotp.rs:1165`; android `YubiOtpSession.java:447` |
 
@@ -593,3 +594,55 @@ options`. #663 and #665 are documentation only.
 > **Honest limit on X2:** compiling is not running. The previewSign and ARKG path in that
 > demo has not been exercised against hardware in this round, so treat "it builds" as
 > exactly that.
+---
+
+# Round-10: public return contracts (2026-09-16)
+
+Grounded on `2f1d912a`. One substantive PR since Round-9: #667
+`refactor(applets)!: clarify public return contracts`. Breaking.
+
+## The rename that closed a deck delta
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| N1 | `GetKeyInfoAsync` is gone from SecurityDomain, replaced by `ListKeyInformationAsync` on the session, the interface and the device extension | code | `src/SecurityDomain/src/ISecurityDomainSession.cs:41`; `src/SecurityDomain/src/SecurityDomainSession.cs:262`; `src/SecurityDomain/src/IYubiKeyExtensions.cs:79`. `rg GetKeyInfoAsync src/` returns nothing. |
+| N2 | The slide-29 delta ("`.NET abbreviates where Python and Swift write *Information*") is therefore **no longer true** and has been rewritten as a closed gap, not deleted | code / peer | v2 `ListKeyInformationAsync`; `yubikey-manager:yubikit/securitydomain.py:122` `get_key_information()`; `swift@c76ae973:SCP/SecurityDomainSession.swift:124` `getKeyInformation()` |
+| N3 | The device extension is deliberately unqualified — `device.ListKeyInformationAsync(...)`, not `GetSecurityDomainKeyInfoAsync` — so callers may need to qualify the namespace if another extension becomes equally applicable | doc | `docs/migration/v1-to-v2.md`, "Current public return-contract migration" |
+
+## Return-shape enforcement
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| N4 | A reflection scan fails the build when any public member of a shipping assembly returns a mutable collection or a tuple | code | `src/PublicApi/tests/.../PublicReturnContractTests.cs:50-72`; scanner `PublicReturnContractScanner.cs:185-209` |
+| N5 | "Mutable collection" means `ICollection<>`, `IList<>`, `IDictionary<,>`, their non-generic forms, or an array; "tuple" means `System.ValueTuple\`n` or `System.Tuple\`n` | code | `PublicReturnContractScanner.cs:30-56,185-209,238` |
+| N6 | Exactly 19 members are allow-listed, each with a written justification, and the test also fails if an allow-list entry goes stale | code | `PublicReturnContractTests.cs:7-47` (19 entries); stale check `:56-60` |
+| N7 | The scan covers only assemblies marked as shipping through assembly metadata, so test and example assemblies are out of scope | code | `PublicReturnContractScanner.cs:100-108` |
+
+## Collateral renames the deck does not show
+
+Recorded so a teammate reading the deck is not surprised by the source. None of these
+appear in any slide, so no slide changed for them.
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| N8 | OpenPGP `KeyInformation`, `KeyFingerprints` and `GenerationTimes` are now sealed `IReadOnlyDictionary` implementations with no public constructors or mutators | code | `src/OpenPgp/src/KeyInformation.cs:22`; `KeyFingerprints.cs:22`; `GenerationTimes.cs:22` |
+| N9 | FIDO2 credential enumeration returns `CredentialEnumerationResult` (which is `IDisposable`, because entries hold raw response clones that can carry secret fields) and `RelyingPartyEnumerationResult`, replacing bare lists | code | `src/Fido2/src/CredentialManagement/CredentialEnumerationResult.cs:21`; `RelyingPartyEnumerationResult.cs:20` |
+| N10 | `GetPinRetriesAsync` and `GetUvRetriesAsync` return named `PinRetryStatus` / `UserVerificationRetryStatus` instead of tuples | code | `src/Fido2/src/Pin/PinRetryStatus.cs:20`; `UserVerificationRetryStatus.cs:20` |
+| N11 | OpenPGP `GetAlgorithmInformationAsync` became `GetSupportedAlgorithmsAsync` returning `SupportedAlgorithm` entries; a key slot can appear more than once | code / doc | `src/OpenPgp/src/SupportedAlgorithm.cs:20`; ordering caveat in `docs/migration/v1-to-v2.md` |
+| N12 | `MatchedCredential.RequiresSelection` was removed; callers inspect `IReadOnlyList<MatchedCredential>.Count` instead | code | `src/WebAuthn/src/Client/Authentication/MatchedCredential.cs` (12 lines deleted in #667); rationale `src/WebAuthn/CLAUDE.md:147`; `docs/migration/v1-to-v2.md` result-contract table |
+| N13 | `GetApplicationRelatedDataAsync` — the only OpenPGP member the deck shows — was **not** renamed and still returns `ApplicationRelatedData` | code | `src/OpenPgp/src/PublicAPI.Unshipped.txt:184,286` |
+
+> **Scope check:** of the 20 SDK members the deck's code samples call, `GetKeyInfoAsync` was
+> the only one #667 removed. The other 19 were re-verified present against `2f1d912a`.
+
+## Build fix found while rendering
+
+| # | Claim | Kind | Anchor |
+|---|---|---|---|
+| N14 | `build.sh` passed `--html` to the HTML build but not the PDF build, so Marp escaped the appended click-to-zoom `<script>` tags and rendered them as literal text on the final slide | code | `docs/demo/build.sh`; visible in the PDF once slide 40 shrank by one line and the text rose above the page edge |
+| N15 | Fixed by stripping the script lines for the PDF input only. `deck.html` still contains both script tags, so click-to-zoom is unaffected | code | `docs/demo/build.sh`; `rg -c 'panzoom\|deck-zoom' deck.html` = 2; rendered page 40 shows no script text |
+
+> **How long this was broken:** since the zoom scripts were added in `7a1bfe5d`, the deck's
+> first commit (`git log -S 'assets/deck-zoom.js' -- docs/demo/build.sh`). The text
+> always rendered, it just sat below the visible page area, so every committed `deck.pdf`
+> before this one carries it invisibly.

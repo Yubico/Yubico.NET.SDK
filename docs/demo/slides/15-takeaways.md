@@ -5,6 +5,9 @@
 **One shape, eight applet sessions** — test-enforced, not conventional.
 WebAuthn is the deliberate exception: it returns a client, not a session.
 
+**Return shapes are enforced too.** A reflection scan fails the build on any public member
+returning a mutable collection or a tuple. The 19 exceptions are allow-listed, with reasons.
+
 **Ownership is explicit.** Convenience owns the connection, the direct factory borrows it.
 One connection, one live session, enforced at runtime.
 
@@ -24,4 +27,6 @@ Status **2.0.0-alpha.2** — public API still in `PublicAPI.Unshipped.txt`, so b
 changes are still cheap. Now is the time to complain.
 
 <!-- Anchors: eight sessions AppletSessionShapeTests.cs:16-26;
+     return contracts src/PublicApi/tests/.../PublicReturnContractTests.cs:50-72
+     (19 reviewed exceptions :7-47), scanner PublicReturnContractScanner.cs:30-56,185-209;
      version Directory.Packages.props:6; all other claims anchored on their own slides -->

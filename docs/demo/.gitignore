@@ -7,3 +7,4 @@ node_modules/
 
 # marp --watch output; carries a livereload client, never commit it
 deck.dev.html
+deck.md.pdfsrc

@@ -773,7 +773,7 @@ GlobalPlatform key management — SCP03 and SCP11, certificates, CA identifiers.
 
 ```csharp
 await using var sd = await key.CreateSecurityDomainSessionAsync();
-var keyInfo = await sd.GetKeyInfoAsync();
+var keyInfo = await sd.ListKeyInformationAsync();
 ```
 
 <div class="cols">
@@ -792,16 +792,19 @@ let keyInfo = try await s.getKeyInformation()
 
 </div>
 
-**Delta:** same operation, three spellings — .NET abbreviates to `GetKeyInfoAsync`
-where Python and Swift both write *Information*. Bigger point: in .NET, SCP is *also*
-a creation option on every other applet — pass `ScpKeyParameters` in
-`SessionCreationOptions` and any session runs over a secure channel.
+**Delta:** this one *closed*. .NET used to abbreviate to `GetKeyInfoAsync` where Python and
+Swift both write *Information*; it is now `ListKeyInformationAsync`, where `List` marks a
+collection return. Bigger point: in .NET, SCP is *also* a creation option on every other
+applet — pass `ScpKeyParameters` in `SessionCreationOptions` and any session runs over a
+secure channel.
 
-<!-- Anchors: .NET src/SecurityDomain/src/IYubiKeyExtensions.cs:45,
-     GetKeyInfoAsync PublicAPI.Unshipped.txt:24;
+<!-- Anchors: .NET src/SecurityDomain/src/IYubiKeyExtensions.cs:79,
+     ListKeyInformationAsync src/SecurityDomain/src/ISecurityDomainSession.cs:41,
+     impl SecurityDomainSession.cs:262; rename PR #667, docs/migration/v1-to-v2.md
+     "Current public return-contract migration";
      SCP-as-option src/Management/tests/.../ManagementSessionSimpleTests.cs:215-217,
      SCP-forces-SmartCard src/Management/src/IYubiKeyExtensions.cs:109;
-     python yubikit/securitydomain.py:100,122;
+     python yubikit/securitydomain.py:122;
      swift@1.4.0 SecurityDomainSession.swift:55,124 -->
 
 ---
@@ -1135,6 +1138,9 @@ Single machine, single run set: **ballpark**.
 **One shape, eight applet sessions** — test-enforced, not conventional.
 WebAuthn is the deliberate exception: it returns a client, not a session.
 
+**Return shapes are enforced too.** A reflection scan fails the build on any public member
+returning a mutable collection or a tuple. The 19 exceptions are allow-listed, with reasons.
+
 **Ownership is explicit.** Convenience owns the connection, the direct factory borrows it.
 One connection, one live session, enforced at runtime.
 
@@ -1154,6 +1160,8 @@ Status **2.0.0-alpha.2** — public API still in `PublicAPI.Unshipped.txt`, so b
 changes are still cheap. Now is the time to complain.
 
 <!-- Anchors: eight sessions AppletSessionShapeTests.cs:16-26;
+     return contracts src/PublicApi/tests/.../PublicReturnContractTests.cs:50-72
+     (19 reviewed exceptions :7-47), scanner PublicReturnContractScanner.cs:30-56,185-209;
      version Directory.Packages.props:6; all other claims anchored on their own slides -->
 
 <script src="assets/vendor/panzoom.min.js"></script>

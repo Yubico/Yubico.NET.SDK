@@ -96,7 +96,7 @@ extension(YubiKeyTestState state)
 
 Located in [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs), the reset process:
 
-1. **Enumerates keys** via `GetKeyInfoAsync()`
+1. **Enumerates keys** via `ListKeyInformationAsync()`
 2. **For each key type**, determines the appropriate blocking instruction:
    - SCP03 (KID=0x01): `INITIALIZE UPDATE`
    - SCP11a/c (KID=0x11/0x15): `EXTERNAL AUTHENTICATE`
@@ -117,8 +117,8 @@ public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state) =>
         async session =>
         {
             // Test runs with default keys (0xFF) after reset
-            var keyInfo = await session.GetKeyInfoAsync(cancellationToken);
-            Assert.Contains(keyInfo.Keys, k => k.Kvn == 0xFF);
+            var keyInfo = await session.ListKeyInformationAsync(cancellationToken);
+            Assert.Contains(keyInfo, entry => entry.KeyReference.Kvn == 0xFF);
         },
         resetBeforeUse: true,  // Explicitly documented
         cancellationToken: CancellationTokenSource.Token);
@@ -151,8 +151,8 @@ await state.WithSecurityDomainSessionAsync(
 await state.WithSecurityDomainSessionAsync(
     async session =>
     {
-        var keyInfo = await session.GetKeyInfoAsync(cancellationToken);
-        Assert.Contains(keyInfo.Keys, k => k.Kid == keyRef.Kid);
+        var keyInfo = await session.ListKeyInformationAsync(cancellationToken);
+        Assert.Contains(keyInfo, entry => entry.KeyReference.Kid == keyRef.Kid);
     },
     resetBeforeUse: false,  // Don't destroy what we just created!
     cancellationToken: cancellationToken);
@@ -299,10 +299,13 @@ using var session = await SecurityDomainSession.CreateAsync(
 ### Key Information Inspection
 
 ```csharp
-var keyInfo = await session.GetKeyInfoAsync(cancellationToken);
-foreach (var key in keyInfo.Keys)
+var keyInfo = await session.ListKeyInformationAsync(cancellationToken);
+foreach (var entry in keyInfo)
 {
-    _logger.LogDebug("Key: KID={Kid:X2}, KVN={Kvn:X2}", key.Kid, key.Kvn);
+    _logger.LogDebug(
+        "Key: KID={Kid:X2}, KVN={Kvn:X2}",
+        entry.KeyReference.Kid,
+        entry.KeyReference.Kvn);
 }
 ```
 

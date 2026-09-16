@@ -65,7 +65,7 @@ public class SecurityDomainSession_Scp11cTests : SecurityDomainStateRestoringTes
                 Assert.True(session.IsAuthenticated);
 
                 // Verify we can perform an authenticated operation
-                var keyInfo = await session.GetKeyInfoAsync(ct);
+                var keyInfo = await session.ListKeyInformationAsync(ct);
                 Assert.True(keyInfo.Count > 0);
             }, scpKeyParams: keyParams, cancellationToken: ct);
     }

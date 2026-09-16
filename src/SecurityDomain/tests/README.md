@@ -55,7 +55,7 @@ public async Task MyTest(YubiKeyTestState state) =>
         resetBeforeUse: true,
         async session =>
         {
-            var keyInfo = await session.GetKeyInfoAsync(ct);
+            var keyInfo = await session.ListKeyInformationAsync(ct);
             Assert.NotEmpty(keyInfo);
         },
         scpKeyParams: Scp03KeyParameters.Default,

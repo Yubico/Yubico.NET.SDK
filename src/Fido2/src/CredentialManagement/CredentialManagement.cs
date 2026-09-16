@@ -86,8 +86,8 @@ public sealed class CredentialManagement : IDisposable
     /// Enumerates all relying parties with stored discoverable credentials.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A list of all RPs with credentials.</returns>
-    public async Task<IReadOnlyList<RelyingPartyInfo>> EnumerateRelyingPartiesAsync(
+    /// <returns>The relying parties and the total reported by the authenticator.</returns>
+    public async Task<RelyingPartyEnumerationResult> EnumerateRelyingPartiesAsync(
         CancellationToken cancellationToken = default)
     {
         var results = new List<RelyingPartyInfo>();
@@ -103,8 +103,8 @@ public sealed class CredentialManagement : IDisposable
         }
         catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
         {
-            // No credentials stored - return empty list
-            return results;
+            // No credentials stored - return an empty result
+            return new RelyingPartyEnumerationResult(results, null);
         }
 
         var firstRp = RelyingPartyInfo.Decode(response);
@@ -123,7 +123,7 @@ public sealed class CredentialManagement : IDisposable
             }
         }
 
-        return results;
+        return new RelyingPartyEnumerationResult(results, firstRp.TotalRpCount);
     }
 
     /// <summary>
@@ -131,8 +131,11 @@ public sealed class CredentialManagement : IDisposable
     /// </summary>
     /// <param name="rpIdHash">The SHA-256 hash of the RP ID.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A list of all credentials for the RP.</returns>
-    public async Task<IReadOnlyList<StoredCredentialInfo>> EnumerateCredentialsAsync(
+    /// <returns>
+    /// The credentials and the total reported by the authenticator. The caller must dispose the
+    /// result after using its credential entries.
+    /// </returns>
+    public async Task<CredentialEnumerationResult> EnumerateCredentialsAsync(
         ReadOnlyMemory<byte> rpIdHash,
         CancellationToken cancellationToken = default)
     {
@@ -150,26 +153,38 @@ public sealed class CredentialManagement : IDisposable
         catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
         {
             // No credentials for this RP
-            return results;
+            return new CredentialEnumerationResult(results, null);
         }
 
-        var firstCred = StoredCredentialInfo.Decode(response);
-        results.Add(firstCred);
-
-        // Get remaining credentials if any
-        if (firstCred.TotalCredentials.HasValue && firstCred.TotalCredentials.Value > 1)
+        try
         {
-            var nextPayload = BuildCommandPayload(CredManagementSubCommand.EnumerateCredentialsGetNextCredential);
+            var firstCred = StoredCredentialInfo.Decode(response);
+            results.Add(firstCred);
 
-            for (var i = 1; i < firstCred.TotalCredentials.Value; i++)
+            // Get remaining credentials if any
+            if (firstCred.TotalCredentials.HasValue && firstCred.TotalCredentials.Value > 1)
             {
-                response = await SendCredentialManagementCommandAsync(nextPayload, cancellationToken)
-                    .ConfigureAwait(false);
-                results.Add(StoredCredentialInfo.Decode(response));
-            }
-        }
+                var nextPayload = BuildCommandPayload(CredManagementSubCommand.EnumerateCredentialsGetNextCredential);
 
-        return results;
+                for (var i = 1; i < firstCred.TotalCredentials.Value; i++)
+                {
+                    response = await SendCredentialManagementCommandAsync(nextPayload, cancellationToken)
+                        .ConfigureAwait(false);
+                    results.Add(StoredCredentialInfo.Decode(response));
+                }
+            }
+
+            return new CredentialEnumerationResult(results, firstCred.TotalCredentials);
+        }
+        catch
+        {
+            foreach (StoredCredentialInfo credential in results)
+            {
+                credential.Dispose();
+            }
+
+            throw;
+        }
     }
 
     /// <summary>

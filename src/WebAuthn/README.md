@@ -101,7 +101,12 @@ var matches = await client.GetAssertionAsync(authenticationOptions, pinBytes: nu
 var assertion = await matches[0].SelectAsync();
 ```
 
-`GetAssertionAsync` returns every credential that matched without finishing the ceremony, so show a picker when more than one did; `SelectAsync` needs no further touch. An empty list means nothing matched, which is not an exception.
+`GetAssertionAsync` returns every credential that matched without finishing the ceremony, so inspect `Count`
+and show a picker when more than one did; `SelectAsync` needs no further touch. An empty list means nothing
+matched, which is not an exception. `MatchedCredential` does not repeat that list-level decision as a property.
+
+`RegistrationExtensionOutputs` and `AuthenticationExtensionOutputs` are non-positional records. Their init
+properties are optional and default to null; construct them with named object initializers.
 
 ### Let the client ask for the PIN
 

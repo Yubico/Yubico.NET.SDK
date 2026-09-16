@@ -61,9 +61,20 @@ public sealed class FactoryShapeTests
                     method.Name != factoryName));
         }
 
-        Assert.True(
-            oneShotMethods.Count == 10,
-            $"Expected 10 one-shot extensions, found: {string.Join(", ", oneShotMethods.Select(static method => method.Name))}");
+        string[] expectedNames =
+        [
+            "CalculateAllOathCodesAsync",
+            "CalculateHmacSha1Async",
+            "GetConfigStateAsync",
+            "GetDeviceInfoAsync",
+            "GetFidoInfoAsync",
+            "ListHsmAuthCredentialsAsync",
+            "ListKeyInformationAsync",
+            "ListOathCredentialsAsync",
+            "PutConfigurationAsync",
+            "SetDeviceConfigAsync"
+        ];
+        Assert.Equal(expectedNames, oneShotMethods.Select(static method => method.Name).Order(StringComparer.Ordinal));
 
         foreach (MethodInfo method in oneShotMethods)
         {

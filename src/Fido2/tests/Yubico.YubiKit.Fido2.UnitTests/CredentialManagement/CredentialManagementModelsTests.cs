@@ -235,7 +235,7 @@ public class CredentialManagementModelsTests
 
         writer.WriteEndMap();
 
-        var credInfo = StoredCredentialInfo.Decode(writer.Encode());
+        using var credInfo = StoredCredentialInfo.Decode(writer.Encode());
 
         Assert.Equal("john@example.com", credInfo.User.Name);
         Assert.Equal("John Doe", credInfo.User.DisplayName);
@@ -285,7 +285,7 @@ public class CredentialManagementModelsTests
 
         writer.WriteEndMap();
 
-        var credInfo = StoredCredentialInfo.Decode(writer.Encode());
+        using var credInfo = StoredCredentialInfo.Decode(writer.Encode());
 
         Assert.Equal(2, credInfo.CredProtectPolicy);
     }
@@ -331,7 +331,7 @@ public class CredentialManagementModelsTests
 
         writer.WriteEndMap();
 
-        var credInfo = StoredCredentialInfo.Decode(writer.Encode());
+        using var credInfo = StoredCredentialInfo.Decode(writer.Encode());
 
         Assert.NotNull(credInfo.LargeBlobKey);
         Assert.Equal(largeBlobKey, credInfo.LargeBlobKey.Value.ToArray());
@@ -405,7 +405,7 @@ public class CredentialManagementModelsTests
 
         writer.WriteEndMap();
 
-        var credInfo = StoredCredentialInfo.Decode(writer.Encode());
+        using var credInfo = StoredCredentialInfo.Decode(writer.Encode());
 
         Assert.True(credInfo.ThirdPartyPayment);
     }
@@ -446,12 +446,92 @@ public class CredentialManagementModelsTests
 
         writer.WriteEndMap();
 
-        var credInfo = StoredCredentialInfo.Decode(writer.Encode());
+        using var credInfo = StoredCredentialInfo.Decode(writer.Encode());
 
         Assert.Null(credInfo.TotalCredentials);
         Assert.Null(credInfo.CredProtectPolicy);
         Assert.Null(credInfo.LargeBlobKey);
         Assert.Null(credInfo.ThirdPartyPayment);
+    }
+
+    [Fact]
+    public void StoredCredentialInfo_Decode_PreservesCompleteRawDataInIndependentStorage()
+    {
+        byte[] source = CreateStoredCredentialResponse([0xAA, 0xBB, 0xCC, 0xDD], includeUnknownField: true);
+        byte[] expected = source.ToArray();
+
+        using var credInfo = StoredCredentialInfo.Decode(source);
+        source.AsSpan().Fill(0xEE);
+
+        Assert.Equal(expected, credInfo.RawData.ToArray());
+    }
+
+    [Fact]
+    public void StoredCredentialInfo_Dispose_ZeroesOwnedViewsAndKeepsPublicFieldsUsable()
+    {
+        byte[] source = CreateStoredCredentialResponse([0xAA, 0xBB, 0xCC, 0xDD], includeUnknownField: true);
+        byte[] expectedSource = source.ToArray();
+        var credInfo = StoredCredentialInfo.Decode(source);
+        ReadOnlyMemory<byte> rawData = credInfo.RawData;
+        ReadOnlyMemory<byte> largeBlobKey = Assert.IsType<ReadOnlyMemory<byte>>(credInfo.LargeBlobKey);
+        credInfo.Dispose();
+        credInfo.Dispose();
+
+        Assert.All(rawData.ToArray(), value => Assert.Equal(0, value));
+        Assert.All(largeBlobKey.ToArray(), value => Assert.Equal(0, value));
+        Assert.Throws<ObjectDisposedException>(() => _ = credInfo.RawData);
+        Assert.Throws<ObjectDisposedException>(() => _ = credInfo.LargeBlobKey);
+        Assert.Equal([0x10], credInfo.User.Id.ToArray());
+        Assert.Equal([0x01], credInfo.CredentialId.Id.ToArray());
+        Assert.Equal([0xA0], credInfo.PublicKey.ToArray());
+        Assert.Equal(expectedSource, source);
+    }
+
+    [Fact]
+    public void StoredCredentialInfo_DecodeFailure_DoesNotModifyBorrowedSource()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(1);
+        writer.WriteInt32(99);
+        writer.WriteByteString([0xDE, 0xAD, 0xBE, 0xEF]);
+        writer.WriteEndMap();
+        byte[] source = writer.Encode();
+        byte[] expected = source.ToArray();
+
+        Assert.Throws<InvalidOperationException>(() => StoredCredentialInfo.Decode(source));
+
+        Assert.Equal(expected, source);
+    }
+
+    private static byte[] CreateStoredCredentialResponse(
+        ReadOnlySpan<byte> largeBlobKey,
+        bool includeUnknownField)
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(includeUnknownField ? 5 : 4);
+        writer.WriteInt32(6);
+        writer.WriteStartMap(1);
+        writer.WriteTextString("id");
+        writer.WriteByteString([0x10]);
+        writer.WriteEndMap();
+        writer.WriteInt32(7);
+        writer.WriteStartMap(2);
+        writer.WriteTextString("id");
+        writer.WriteByteString([0x01]);
+        writer.WriteTextString("type");
+        writer.WriteTextString("public-key");
+        writer.WriteEndMap();
+        writer.WriteInt32(8);
+        writer.WriteEncodedValue([0xA0]);
+        writer.WriteInt32(11);
+        writer.WriteByteString(largeBlobKey);
+        if (includeUnknownField)
+        {
+            writer.WriteInt32(99);
+            writer.WriteByteString([0xDE, 0xAD, 0xBE, 0xEF]);
+        }
+        writer.WriteEndMap();
+        return writer.Encode();
     }
 
 }

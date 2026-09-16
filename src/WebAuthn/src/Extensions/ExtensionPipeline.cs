@@ -262,14 +262,16 @@ internal sealed class ExtensionPipeline
             }
         }
 
-        return new RegistrationExtensionOutputs(
-            CredProtect: credProtect,
-            CredBlob: credBlob,
-            MinPinLength: minPinLength,
-            LargeBlob: largeBlob,
-            Prf: prf,
-            CredProps: credProps,
-            PreviewSign: previewSign);
+        return new RegistrationExtensionOutputs
+        {
+            CredProtect = credProtect,
+            CredBlob = credBlob,
+            MinPinLength = minPinLength,
+            LargeBlob = largeBlob,
+            Prf = prf,
+            CredProps = credProps,
+            PreviewSign = previewSign
+        };
     }
 
     /// <summary>
@@ -345,10 +347,12 @@ internal sealed class ExtensionPipeline
             }
         }
 
-        return new AuthenticationExtensionOutputs(
-            CredBlob: credBlob,
-            LargeBlob: largeBlob,
-            Prf: prf,
-            PreviewSign: previewSign);
+        return new AuthenticationExtensionOutputs
+        {
+            CredBlob = credBlob,
+            LargeBlob = largeBlob,
+            Prf = prf,
+            PreviewSign = previewSign
+        };
     }
 }

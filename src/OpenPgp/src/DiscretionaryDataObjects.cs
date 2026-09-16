@@ -17,27 +17,6 @@ using Yubico.YubiKit.Core.Utilities;
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     Key information mapping key slots to their status (none, generated, imported).
-/// </summary>
-public sealed class KeyInformation : Dictionary<KeyRef, KeyStatus>
-{
-}
-
-/// <summary>
-///     Fingerprint data for each key slot (20 bytes per slot).
-/// </summary>
-public sealed class Fingerprints : Dictionary<KeyRef, ReadOnlyMemory<byte>>
-{
-}
-
-/// <summary>
-///     Generation timestamps for each key slot (Unix epoch seconds).
-/// </summary>
-public sealed class GenerationTimes : Dictionary<KeyRef, int>
-{
-}
-
-/// <summary>
 ///     Parsed discretionary data objects (tag 0x73) from the application related data.
 ///     Contains algorithm attributes, PIN status, fingerprints, key information, and UIF values.
 /// </summary>
@@ -76,22 +55,22 @@ public sealed class DiscretionaryDataObjects
     /// <summary>
     ///     Fingerprints for each key slot (20 bytes each).
     /// </summary>
-    public Fingerprints Fingerprints { get; init; } = [];
+    public KeyFingerprints KeyFingerprints { get; init; } = new([]);
 
     /// <summary>
     ///     CA fingerprints for each key slot (20 bytes each).
     /// </summary>
-    public Fingerprints CaFingerprints { get; init; } = [];
+    public KeyFingerprints CaKeyFingerprints { get; init; } = new([]);
 
     /// <summary>
     ///     Key generation timestamps for each key slot (Unix epoch seconds).
     /// </summary>
-    public GenerationTimes GenerationTimes { get; init; } = [];
+    public GenerationTimes GenerationTimes { get; init; } = new([]);
 
     /// <summary>
     ///     Key status information (none, generated, imported) for each slot.
     /// </summary>
-    public KeyInformation KeyInfo { get; init; } = [];
+    public KeyInformation KeyInformation { get; init; } = new([]);
 
     /// <summary>
     ///     User Interaction Flag for the Signature key. Null if not supported.
@@ -135,16 +114,16 @@ public sealed class DiscretionaryDataObjects
                 ? AlgorithmAttributes.Parse(attData.Span)
                 : null,
             PwStatus = PwStatus.Parse(data[(int)DataObject.PwStatusBytes].Span),
-            Fingerprints = ParseFingerprints(data.TryGetValue((int)DataObject.Fingerprints, out var fp)
+            KeyFingerprints = ParseKeyFingerprints(data.TryGetValue((int)DataObject.Fingerprints, out var fp)
                 ? fp.Span
                 : ReadOnlySpan<byte>.Empty),
-            CaFingerprints = ParseFingerprints(data.TryGetValue((int)DataObject.CaFingerprints, out var caFp)
+            CaKeyFingerprints = ParseKeyFingerprints(data.TryGetValue((int)DataObject.CaFingerprints, out var caFp)
                 ? caFp.Span
                 : ReadOnlySpan<byte>.Empty),
             GenerationTimes = ParseGenerationTimes(data.TryGetValue((int)DataObject.GenerationTimes, out var gt)
                 ? gt.Span
                 : ReadOnlySpan<byte>.Empty),
-            KeyInfo = ParseKeyInformation(data.TryGetValue((int)DataObject.KeyInformation, out var ki)
+            KeyInformation = ParseKeyInformation(data.TryGetValue((int)DataObject.KeyInformation, out var ki)
                 ? ki.Span
                 : ReadOnlySpan<byte>.Empty),
             UifSig = data.TryGetValue((int)DataObject.UifSig, out var uifSig) ? UifExtensions.ParseUif(uifSig.Span) : null,
@@ -156,20 +135,20 @@ public sealed class DiscretionaryDataObjects
 
     private static readonly KeyRef[] KeySlots = [KeyRef.Sig, KeyRef.Dec, KeyRef.Aut, KeyRef.Att];
 
-    private static Fingerprints ParseFingerprints(ReadOnlySpan<byte> encoded)
+    private static KeyFingerprints ParseKeyFingerprints(ReadOnlySpan<byte> encoded)
     {
-        var result = new Fingerprints();
+        var entries = new Dictionary<KeyRef, ReadOnlyMemory<byte>>();
         for (var i = 0; i < KeySlots.Length && (i + 1) * 20 <= encoded.Length; i++)
         {
-            result[KeySlots[i]] = encoded.Slice(i * 20, 20).ToArray();
+            entries[KeySlots[i]] = encoded.Slice(i * 20, 20).ToArray();
         }
 
-        return result;
+        return new KeyFingerprints(entries);
     }
 
     private static GenerationTimes ParseGenerationTimes(ReadOnlySpan<byte> encoded)
     {
-        var result = new GenerationTimes();
+        var entries = new Dictionary<KeyRef, int>();
         for (var i = 0; i < KeySlots.Length && (i + 1) * 4 <= encoded.Length; i++)
         {
             var offset = i * 4;
@@ -177,23 +156,23 @@ public sealed class DiscretionaryDataObjects
                             | (encoded[offset + 1] << 16)
                             | (encoded[offset + 2] << 8)
                             | encoded[offset + 3];
-            result[KeySlots[i]] = timestamp;
+            entries[KeySlots[i]] = timestamp;
         }
 
-        return result;
+        return new GenerationTimes(entries);
     }
 
     private static KeyInformation ParseKeyInformation(ReadOnlySpan<byte> encoded)
     {
-        var result = new KeyInformation();
+        var entries = new Dictionary<KeyRef, KeyStatus>();
         for (var i = 0; i + 1 < encoded.Length; i += 2)
         {
             if (Enum.IsDefined((KeyRef)encoded[i]))
             {
-                result[(KeyRef)encoded[i]] = (KeyStatus)encoded[i + 1];
+                entries[(KeyRef)encoded[i]] = (KeyStatus)encoded[i + 1];
             }
         }
 
-        return result;
+        return new KeyInformation(entries);
     }
 }

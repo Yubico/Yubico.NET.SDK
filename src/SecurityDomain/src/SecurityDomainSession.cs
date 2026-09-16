@@ -259,7 +259,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     Retrieves key metadata exposed by the Security Domain via the key information data object.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public async Task<IReadOnlyList<KeyInfo>> GetKeyInfoAsync(
+    public async Task<IReadOnlyList<KeyInfo>> ListKeyInformationAsync(
         CancellationToken cancellationToken = default)
     {
         var response = await GetDataAsync(TagKeyInformationTemplate, cancellationToken: cancellationToken)
@@ -868,7 +868,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     {
         await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        var keyInfo = await GetKeyInfoAsync(cancellationToken).ConfigureAwait(false);
+        var keyInfo = await ListKeyInformationAsync(cancellationToken).ConfigureAwait(false);
         if (keyInfo.Count == 0)
         {
             _logger.LogInformation("Security Domain reset skipped: no keys reported");

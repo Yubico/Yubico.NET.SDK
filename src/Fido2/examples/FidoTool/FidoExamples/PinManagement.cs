@@ -198,9 +198,9 @@ public static class PinManagement
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync(cancellationToken);
+            var status = await clientPin.GetPinRetriesAsync(cancellationToken);
 
-            return PinRetriesResult.Succeeded(retries, powerCycleRequired);
+            return PinRetriesResult.Succeeded(status.RetriesRemaining, status.PowerCycleRequired);
         }
         catch (CtapException ex)
         {
@@ -230,9 +230,9 @@ public static class PinManagement
             using var protocol = new PinUvAuthProtocolV2();
             using var clientPin = new ClientPin(session, protocol);
 
-            var (retries, powerCycleRequired) = await clientPin.GetUvRetriesAsync(cancellationToken);
+            var status = await clientPin.GetUvRetriesAsync(cancellationToken);
 
-            return PinRetriesResult.Succeeded(retries, powerCycleRequired);
+            return PinRetriesResult.Succeeded(status.RetriesRemaining, status.PowerCycleRequired);
         }
         catch (CtapException ex)
         {

@@ -63,7 +63,7 @@ public class OpenPgpMultiCurveTests
                 Assert.True(pubKey.Length > 0);
 
                 // Verify key information shows generated status
-                var keyInfo = await session.GetKeyInformationAsync();
+                var keyInfo = await session.ListKeyInformationAsync();
                 Assert.Equal(KeyStatus.Generated, keyInfo[KeyRef.Sig]);
             });
 

@@ -1,5 +1,5 @@
-using System.Reflection;
 using NSubstitute;
+using System.Reflection;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
@@ -168,7 +168,7 @@ public class SecurityDomainSessionTests
     }
 
     [Fact]
-    public async Task GetKeyInfoAsync_AfterDisposal_ThrowsObjectDisposedException()
+    public async Task ListKeyInformationAsync_AfterDisposal_ThrowsObjectDisposedException()
     {
         var connection = CreateMockConnection();
         var session = await SecurityDomainSession.CreateAsync(
@@ -178,7 +178,7 @@ public class SecurityDomainSessionTests
         int transmissionsBeforeCall = connection.ReceivedCalls().Count();
 
         var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
-            () => session.GetKeyInfoAsync(TestContext.Current.CancellationToken));
+            () => session.ListKeyInformationAsync(TestContext.Current.CancellationToken));
 
         Assert.Equal(typeof(SecurityDomainSession).FullName, exception.ObjectName);
         Assert.Equal(transmissionsBeforeCall, connection.ReceivedCalls().Count());
@@ -393,14 +393,14 @@ public class SecurityDomainSessionTests
     }
 
     [Fact]
-    public async Task IYubiKeyExtensions_GetSecurityDomainKeyInfoAsync_WithDefaultParameters_Succeeds()
+    public async Task IYubiKeyExtensions_ListKeyInformationAsync_WithDefaultParameters_Succeeds()
     {
         // Arrange
         var yubiKey = CreateMockYubiKey(out var connection);
         SetupGetKeyInfoMock(connection);
 
         // Act
-        var keyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var keyInfo = await yubiKey.ListKeyInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(keyInfo);
@@ -408,7 +408,7 @@ public class SecurityDomainSessionTests
     }
 
     [Fact]
-    public async Task IYubiKeyExtensions_GetSecurityDomainKeyInfoAsync_WithCancellationToken_Succeeds()
+    public async Task IYubiKeyExtensions_ListKeyInformationAsync_WithCancellationToken_Succeeds()
     {
         // Arrange
         var yubiKey = CreateMockYubiKey(out var connection);
@@ -416,21 +416,21 @@ public class SecurityDomainSessionTests
         using var cts = new CancellationTokenSource();
 
         // Act
-        var keyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync(cancellationToken: cts.Token);
+        var keyInfo = await yubiKey.ListKeyInformationAsync(cancellationToken: cts.Token);
 
         // Assert
         Assert.NotNull(keyInfo);
     }
 
     [Fact]
-    public async Task IYubiKeyExtensions_GetSecurityDomainKeyInfoAsync_DisposesSession()
+    public async Task IYubiKeyExtensions_ListKeyInformationAsync_DisposesSession()
     {
         // Arrange
         var yubiKey = CreateMockYubiKey(out var connection);
         SetupGetKeyInfoMock(connection);
 
         // Act
-        var keyInfo = await yubiKey.GetSecurityDomainKeyInfoAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var keyInfo = await yubiKey.ListKeyInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(keyInfo);
@@ -453,7 +453,7 @@ public class SecurityDomainSessionTests
     }
 
     [Fact]
-    public async Task GetKeyInfoAsync_TransmitsGetDataAndParsesKeyInformation()
+    public async Task ListKeyInformationAsync_TransmitsGetDataAndParsesKeyInformation()
     {
         var connection = new RecordingSmartCardConnection(
             OkResponse(),
@@ -462,7 +462,7 @@ public class SecurityDomainSessionTests
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        var keyInfo = await session.GetKeyInfoAsync(TestContext.Current.CancellationToken);
+        var keyInfo = await session.ListKeyInformationAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(GetDataCommand(0xE0), connection.TransmittedCommands[1]);
         var entry = Assert.Single(keyInfo);

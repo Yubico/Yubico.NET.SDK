@@ -404,7 +404,7 @@ public class OpenPgpSessionTests
                 await session.VerifyAdminAsync(DefaultAdminPin);
                 await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
 
-                var keyInfo = await session.GetKeyInformationAsync();
+                var keyInfo = await session.ListKeyInformationAsync();
                 Assert.True(keyInfo.ContainsKey(KeyRef.Sig));
                 Assert.Equal(KeyStatus.Generated, keyInfo[KeyRef.Sig]);
             });
@@ -418,7 +418,7 @@ public class OpenPgpSessionTests
             resetBeforeUse: true,
             action: async session =>
             {
-                var fingerprints = await session.GetFingerprintsAsync();
+                var fingerprints = await session.GetKeyFingerprintsAsync();
                 Assert.NotNull(fingerprints);
 
                 // Verify all four key slots are present with 20-byte fingerprints
@@ -463,20 +463,20 @@ public class OpenPgpSessionTests
                 Assert.Equal(0, counter);
             });
 
-    // ── Algorithm Information ────────────────────────────────────────
+    // ── Supported Algorithms ─────────────────────────────────────────
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
-    public async Task GetAlgorithmInformation_ReturnsSupportedAlgorithms(YubiKeyTestState state) =>
+    public async Task GetSupportedAlgorithms_ReturnsSupportedAlgorithms(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
             action: async session =>
             {
-                var algoInfo = await session.GetAlgorithmInformationAsync();
-                Assert.NotEmpty(algoInfo);
+                var algorithms = await session.GetSupportedAlgorithmsAsync();
+                Assert.NotEmpty(algorithms);
 
                 // Should contain entries for at least SIG, DEC, AUT
-                var keyRefs = algoInfo.Select(x => x.KeyRef).Distinct().ToList();
+                var keyRefs = algorithms.Select(x => x.KeyRef).Distinct().ToList();
                 Assert.Contains(KeyRef.Sig, keyRefs);
                 Assert.Contains(KeyRef.Dec, keyRefs);
                 Assert.Contains(KeyRef.Aut, keyRefs);
@@ -495,14 +495,14 @@ public class OpenPgpSessionTests
                 await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
 
                 // Key should exist
-                var keyInfo = await session.GetKeyInformationAsync();
+                var keyInfo = await session.ListKeyInformationAsync();
                 Assert.Equal(KeyStatus.Generated, keyInfo[KeyRef.Sig]);
 
                 // Delete key
                 await session.DeleteKeyAsync(KeyRef.Sig);
 
                 // Key should be gone
-                keyInfo = await session.GetKeyInformationAsync();
+                keyInfo = await session.ListKeyInformationAsync();
                 Assert.Equal(KeyStatus.None, keyInfo[KeyRef.Sig]);
             });
 

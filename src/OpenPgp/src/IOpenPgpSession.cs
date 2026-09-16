@@ -256,13 +256,13 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Gets key status information (none/generated/imported) for all slots.
     /// </summary>
-    Task<KeyInformation> GetKeyInformationAsync(
+    Task<KeyInformation> ListKeyInformationAsync(
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets the fingerprints for all key slots.
     /// </summary>
-    Task<Fingerprints> GetFingerprintsAsync(
+    Task<KeyFingerprints> GetKeyFingerprintsAsync(
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -274,7 +274,7 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Sets the fingerprint for the specified key slot.
     /// </summary>
-    Task SetFingerprintAsync(
+    Task SetKeyFingerprintAsync(
         KeyRef keyRef,
         ReadOnlyMemory<byte> fingerprint,
         CancellationToken cancellationToken = default);
@@ -354,7 +354,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Gets the list of supported algorithm attributes per key slot.
     ///     Requires firmware 5.2.0+.
     /// </summary>
-    Task<IReadOnlyList<(KeyRef KeyRef, AlgorithmAttributes Attributes)>> GetAlgorithmInformationAsync(
+    Task<IReadOnlyList<SupportedAlgorithm>> GetSupportedAlgorithmsAsync(
         CancellationToken cancellationToken = default);
 
     /// <summary>

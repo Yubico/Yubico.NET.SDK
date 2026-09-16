@@ -446,10 +446,11 @@ public sealed class FidoCredentialsListCommand : YkCommandBase<FidoCredentialsLi
             pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
                 pin.Memory, PinUvAuthTokenPermissions.CredentialManagement);
 
-            var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
+            using var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
                 session, protocol, pinToken);
 
-            var rps = await credMgmt.EnumerateRelyingPartiesAsync();
+            var rpResult = await credMgmt.EnumerateRelyingPartiesAsync();
+            var rps = rpResult.RelyingParties;
 
             if (rps.Count == 0)
             {
@@ -472,12 +473,12 @@ public sealed class FidoCredentialsListCommand : YkCommandBase<FidoCredentialsLi
                     credToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
                         pin.Memory, PinUvAuthTokenPermissions.CredentialManagement);
 
-                    var innerCredMgmt = new Fido2.CredentialManagement.CredentialManagement(
+                    using var innerCredMgmt = new Fido2.CredentialManagement.CredentialManagement(
                         session, protocol, credToken);
 
-                    var creds = await innerCredMgmt.EnumerateCredentialsAsync(rp.RpIdHash);
+                    using var credentialResult = await innerCredMgmt.EnumerateCredentialsAsync(rp.RpIdHash);
 
-                    foreach (var cred in creds)
+                    foreach (var cred in credentialResult.Credentials)
                     {
                         FidoHelpers.DisplayStoredCredential(cred);
                     }

@@ -554,7 +554,6 @@ public class WebAuthnClientGetAssertionTests
         var match = new MatchedCredential(
             credentialId,
             user: null,
-            requiresSelection: false,
             responseFactory: _ => tcs.Task);
 
         // Act - Call with already-cancelled token (factory hasn't completed yet)

@@ -193,7 +193,7 @@ extension(YubiKeyTestState state)
 ### Reset Mechanism (line 685)
 
 The `ResetAsync()` method:
-1. Enumerates keys via `GetKeyInfoAsync()`
+1. Enumerates keys via `ListKeyInformationAsync()`
 2. For each key, sends 65 failed auth attempts
 3. Waits for `0x6983` (blocked) status
 4. Reinitializes session

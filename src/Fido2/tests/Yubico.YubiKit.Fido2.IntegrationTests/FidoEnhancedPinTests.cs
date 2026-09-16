@@ -108,9 +108,9 @@ public class FidoEnhancedPinTests
                 ? new PinUvAuthProtocolV2()
                 : new PinUvAuthProtocolV1();
             var clientPin = new ClientPin(session, protocol);
-            var (retries, powerCycleState) = await clientPin.GetPinRetriesAsync();
+            var status = await clientPin.GetPinRetriesAsync();
 
-            Assert.True(retries >= 0, "PIN retries should be non-negative");
-            Assert.True(retries <= 8, "PIN retries should not exceed 8");
+            Assert.True(status.RetriesRemaining >= 0, "PIN retries should be non-negative");
+            Assert.True(status.RetriesRemaining <= 8, "PIN retries should not exceed 8");
         });
 }

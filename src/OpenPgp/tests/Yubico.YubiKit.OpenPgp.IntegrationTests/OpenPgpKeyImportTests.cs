@@ -46,7 +46,7 @@ public class OpenPgpKeyImportTests
                 await session.PutKeyAsync(KeyRef.Sig, template, attributes);
 
                 // Verify key was imported
-                var keyInfo = await session.GetKeyInformationAsync();
+                var keyInfo = await session.ListKeyInformationAsync();
                 Assert.Equal(KeyStatus.Imported, keyInfo[KeyRef.Sig]);
 
                 // Sign with the imported key
@@ -85,7 +85,7 @@ public class OpenPgpKeyImportTests
                 await session.PutKeyAsync(KeyRef.Sig, template, attributes);
 
                 // Verify key was imported
-                var keyInfo = await session.GetKeyInformationAsync();
+                var keyInfo = await session.ListKeyInformationAsync();
                 Assert.Equal(KeyStatus.Imported, keyInfo[KeyRef.Sig]);
 
                 // Sign with the imported key
@@ -120,7 +120,7 @@ public class OpenPgpKeyImportTests
                 var attributes = EcAttributes.Create(KeyRef.Sig, CurveOid.Secp384R1);
                 await session.PutKeyAsync(KeyRef.Sig, template, attributes);
 
-                var keyInfo = await session.GetKeyInformationAsync();
+                var keyInfo = await session.ListKeyInformationAsync();
                 Assert.Equal(KeyStatus.Imported, keyInfo[KeyRef.Sig]);
 
                 var message = "Import EC P384 test"u8.ToArray();
@@ -151,7 +151,7 @@ public class OpenPgpKeyImportTests
                     var attributes = EcAttributes.Create(KeyRef.Sig, CurveOid.Ed25519);
                     await session.PutKeyAsync(KeyRef.Sig, template, attributes);
 
-                    var keyInfo = await session.GetKeyInformationAsync();
+                    var keyInfo = await session.ListKeyInformationAsync();
                     Assert.Equal(KeyStatus.Imported, keyInfo[KeyRef.Sig]);
 
                     var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Sig);
@@ -184,7 +184,7 @@ public class OpenPgpKeyImportTests
                     var attributes = EcAttributes.Create(KeyRef.Dec, CurveOid.X25519);
                     await session.PutKeyAsync(KeyRef.Dec, template, attributes);
 
-                    var keyInfo = await session.GetKeyInformationAsync();
+                    var keyInfo = await session.ListKeyInformationAsync();
                     Assert.Equal(KeyStatus.Imported, keyInfo[KeyRef.Dec]);
 
                     var attrs = await session.GetAlgorithmAttributesAsync(KeyRef.Dec);
@@ -221,7 +221,7 @@ public class OpenPgpKeyImportTests
                 var attributes = EcAttributes.Create(KeyRef.Aut, CurveOid.Secp256R1);
                 await session.PutKeyAsync(KeyRef.Aut, template, attributes);
 
-                var keyInfo = await session.GetKeyInformationAsync();
+                var keyInfo = await session.ListKeyInformationAsync();
                 Assert.Equal(KeyStatus.Imported, keyInfo[KeyRef.Aut]);
 
                 // Authenticate with the imported key

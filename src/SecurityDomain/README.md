@@ -52,15 +52,17 @@ using Yubico.YubiKit.SecurityDomain;
 IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreateSecurityDomainSessionAsync();
 
-foreach (var keyInfo in await session.GetKeyInfoAsync())
+foreach (var keyInfo in await session.ListKeyInformationAsync())
 {
     Console.WriteLine(keyInfo.KeyReference);
 }
 ```
 
 Reading key information needs no secure channel, so this works on an untouched device. For a single read,
-`device.GetSecurityDomainKeyInfoAsync()` opens and disposes the session for you. Later snippets assume these
-directives and a `device` obtained the same way.
+`device.ListKeyInformationAsync()` opens and disposes the session for you. If another imported module later
+defines an equally applicable extension, qualify this static call with
+`Yubico.YubiKit.SecurityDomain.IYubiKeyExtensions` or create an explicit Security Domain session. Later snippets
+assume these directives and a `device` obtained the same way.
 
 ## Common operations
 
@@ -71,7 +73,7 @@ using var scpKeyParameters = Scp03KeyParameters.Default;
 await using var session = await device.CreateSecurityDomainSessionAsync(
     new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });
 
-IReadOnlyList<KeyInfo> keys = await session.GetKeyInfoAsync();
+IReadOnlyList<KeyInfo> keys = await session.ListKeyInformationAsync();
 ```
 
 `Scp03KeyParameters.Default` wraps the publicly documented factory key set. Every operation that writes key

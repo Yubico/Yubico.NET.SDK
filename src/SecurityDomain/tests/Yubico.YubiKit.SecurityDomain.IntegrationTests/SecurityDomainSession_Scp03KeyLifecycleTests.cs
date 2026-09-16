@@ -99,7 +99,7 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
             await state.WithSecurityDomainSessionAsync(false,
                 async session =>
                 {
-                    var keyInfo = await session.GetKeyInfoAsync(ct);
+                    var keyInfo = await session.ListKeyInformationAsync(ct);
                     Assert.DoesNotContain(keyInfo,
                         entry => entry.KeyReference.Kvn == keyRef1.Kvn);
                     Assert.Contains(keyInfo,

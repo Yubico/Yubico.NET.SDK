@@ -86,6 +86,14 @@ Supports SHA256 (0x08) and SHA512 (0x0A).
 - `PwStatus` — PIN attempt counters and length limits
 - `Kdf` (abstract) → `KdfNone`, `KdfIterSaltedS2k`
 - `PrivateKeyTemplate` (abstract) → `RsaKeyTemplate`, `RsaCrtKeyTemplate`, `EcKeyTemplate`
+- `KeyInformation`, `KeyFingerprints`, `GenerationTimes` — sealed read-only dictionary domain types with
+  private collection storage; parsers transfer exclusively owned dictionaries into them
+
+Public key metadata uses semantic names: `ListKeyInformationAsync`, `GetKeyFingerprintsAsync`, and
+`SetKeyFingerprintAsync`, with discretionary properties `KeyInformation`, `KeyFingerprints`, and
+`CaKeyFingerprints`. Protocol `DataObject` tag names retain the OpenPGP specification terminology.
+`GetSupportedAlgorithmsAsync` returns ordered `SupportedAlgorithm` entries; repeated `KeyRef` values are
+valid and preserve the card's per-slot algorithm multiplicity.
 
 ## Firmware Compatibility
 

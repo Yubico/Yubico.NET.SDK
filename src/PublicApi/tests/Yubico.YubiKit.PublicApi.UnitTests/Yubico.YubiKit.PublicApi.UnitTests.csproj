@@ -27,4 +27,18 @@
     <ProjectReference Include="..\..\..\YubiOtp\src\Yubico.YubiKit.YubiOtp.csproj" />
     <ProjectReference Include="..\..\..\YubiHsm\src\Yubico.YubiKit.YubiHsm.csproj" />
   </ItemGroup>
+
+  <Target Name="MarkShippingAssemblyReferences" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <_ShippingAssemblyReference Include="@(ProjectReference)">
+        <SourceLine>[assembly: System.Reflection.AssemblyMetadataAttribute(&quot;PublicApiShippingAssembly&quot;, &quot;%(Filename)&quot;)]</SourceLine>
+      </_ShippingAssemblyReference>
+      <Compile Include="$(IntermediateOutputPath)PublicApiShippingAssemblies.g.cs" />
+    </ItemGroup>
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)PublicApiShippingAssemblies.g.cs"
+      Lines="@(_ShippingAssemblyReference->'%(SourceLine)')"
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
+  </Target>
 </Project>

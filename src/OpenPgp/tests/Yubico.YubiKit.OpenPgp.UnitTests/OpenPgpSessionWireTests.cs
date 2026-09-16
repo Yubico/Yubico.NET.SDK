@@ -87,6 +87,30 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
+    public async Task GetSupportedAlgorithmsAsync_PreservesRepeatedSlotsAndOrder()
+    {
+        var connection = CreateInitializedConnection([
+            0xFA, 0x10,
+            0xC1, 0x06, 0x01, 0x08, 0x00, 0x00, 0x11, 0x00,
+            0xC1, 0x06, 0x01, 0x0C, 0x00, 0x00, 0x11, 0x00,
+            0x90, 0x00
+        ]);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var algorithms = await session.GetSupportedAlgorithmsAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, algorithms.Count);
+        Assert.All(algorithms, algorithm => Assert.Equal(KeyRef.Sig, algorithm.KeyRef));
+        Assert.Equal(2048, Assert.IsType<RsaAttributes>(algorithms[0].Attributes).NLen);
+        Assert.Equal(3072, Assert.IsType<RsaAttributes>(algorithms[1].Attributes).NLen);
+        var mutableView = Assert.IsAssignableFrom<IList<SupportedAlgorithm>>(algorithms);
+        Assert.True(mutableView.IsReadOnly);
+        Assert.Throws<NotSupportedException>(() => mutableView.Add(algorithms[0]));
+    }
+
+    [Fact]
     public async Task SetSignaturePinPolicyAsync_TransmitsPutDataForPwStatusBytes()
     {
         var connection = CreateInitializedConnection(OkResponse());
@@ -658,7 +682,7 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
-    public async Task SetFingerprintAsync_AfterDisposal_InvalidLengthThrowsObjectDisposedBeforeValidation()
+    public async Task SetKeyFingerprintAsync_AfterDisposal_InvalidLengthThrowsObjectDisposedBeforeValidation()
     {
         var connection = CreateInitializedConnection();
         var session = await OpenPgpSession.CreateAsync(
@@ -668,7 +692,7 @@ public sealed class OpenPgpSessionWireTests
         int transmissionsBeforeCall = connection.TransmittedCommands.Count;
 
         var exception = await Assert.ThrowsAsync<ObjectDisposedException>(
-            () => session.SetFingerprintAsync(
+            () => session.SetKeyFingerprintAsync(
                 KeyRef.Sig,
                 ReadOnlyMemory<byte>.Empty,
                 TestContext.Current.CancellationToken));

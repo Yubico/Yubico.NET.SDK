@@ -158,14 +158,12 @@ public sealed partial class WebAuthnClient
 
             // Wrap each match into a MatchedCredential with deferred SelectAsync
             var results = new List<MatchedCredential>();
-            bool requiresSelection = matches.Count > 1;
 
             foreach (var (credId, user, response) in matches)
             {
                 var matchedCred = new MatchedCredential(
                     id: credId,
                     user: user,
-                    requiresSelection: requiresSelection,
                     responseFactory: _ => Task.FromResult(BuildAuthenticationResponse(response, clientData, options)));
 
                 results.Add(matchedCred);

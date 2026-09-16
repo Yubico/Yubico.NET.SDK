@@ -71,10 +71,10 @@ public sealed class ClientPinTests : IDisposable
         var responseData = CreatePinRetriesResponse(5, false);
         SetupMockResponse(responseData);
 
-        var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
+        var status = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(5, retries);
-        Assert.False(powerCycleRequired);
+        Assert.Equal(5, status.RetriesRemaining);
+        Assert.False(status.PowerCycleRequired);
     }
 
     [Fact]
@@ -85,10 +85,10 @@ public sealed class ClientPinTests : IDisposable
         var responseData = CreatePinRetriesResponse(0, true);
         SetupMockResponse(responseData);
 
-        var (retries, powerCycleRequired) = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
+        var status = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(0, retries);
-        Assert.True(powerCycleRequired);
+        Assert.Equal(0, status.RetriesRemaining);
+        Assert.True(status.PowerCycleRequired);
     }
 
     [Fact]
@@ -99,10 +99,10 @@ public sealed class ClientPinTests : IDisposable
         var responseData = CreateUvRetriesResponse(3, false);
         SetupMockResponse(responseData);
 
-        var (retries, powerCycleRequired) = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
+        var status = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(3, retries);
-        Assert.False(powerCycleRequired);
+        Assert.Equal(3, status.RetriesRemaining);
+        Assert.False(status.PowerCycleRequired);
     }
 
     // ─── PIN length validation and ParamName accuracy ──────────────────────────

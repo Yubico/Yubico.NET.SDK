@@ -79,7 +79,7 @@ public static class KeyRefExtensions
     /// <summary>
     ///     Gets the <see cref="DataObject" /> tag for this key slot's fingerprint.
     /// </summary>
-    public static DataObject FingerprintDo(this KeyRef keyRef) =>
+    public static DataObject KeyFingerprintDo(this KeyRef keyRef) =>
         GetKeyRefData(keyRef).Fingerprint;
 
     /// <summary>

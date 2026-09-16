@@ -35,11 +35,11 @@ public class SecurityDomainSession_Scp03Tests
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
-    public async Task GetKeyInfoAsync_ReturnsDefaultScpKey(YubiKeyTestState state) =>
+    public async Task ListKeyInformationAsync_ReturnsDefaultScpKey(YubiKeyTestState state) =>
         await state.WithSecurityDomainSessionAsync(true,
             async session =>
             {
-                var keyInfo = await session.GetKeyInfoAsync(CancellationTokenSource.Token);
+                var keyInfo = await session.ListKeyInformationAsync(CancellationTokenSource.Token);
 
                 Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInfo.Count);
                 Assert.Equal(0xFF, keyInfo.First().KeyReference.Kvn);
@@ -53,7 +53,7 @@ public class SecurityDomainSession_Scp03Tests
             {
                 await session.ResetAsync(CancellationTokenSource.Token);
 
-                var keyInfo = await session.GetKeyInfoAsync(CancellationTokenSource.Token);
+                var keyInfo = await session.ListKeyInformationAsync(CancellationTokenSource.Token);
 
                 Assert.Equal(state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3, keyInfo.Count);
                 Assert.Contains(keyInfo, keyEntry => keyEntry.KeyReference.Kvn == 0xFF);

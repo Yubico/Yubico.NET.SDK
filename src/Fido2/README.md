@@ -81,10 +81,34 @@ Console.WriteLine($"Signature: {Convert.ToHexString(assertion.Signature.Span)}")
 
 Leave `AllowList` unset to search discoverable credentials; if `NumberOfCredentials` exceeds one, call `GetNextAssertionAsync`.
 
+Credential-management enumeration returns `RelyingPartyEnumerationResult` or `CredentialEnumerationResult`.
+Read the owned, read-only `RelyingParties` or `Credentials` collection and use `ReportedTotal` when the
+authenticator supplied a total in its first response; an empty credential result has a null total.
+Dispose credential results after use because each `StoredCredentialInfo` owns a complete response clone that
+can contain a large-blob key:
+
+```csharp
+using var credentialResult = await credentialManagement.EnumerateCredentialsAsync(rpIdHash);
+foreach (StoredCredentialInfo credential in credentialResult.Credentials)
+{
+    Console.WriteLine(Convert.ToHexString(credential.CredentialId.Id.Span));
+}
+```
+
+`StoredCredentialInfo.RawData` preserves the byte-exact response, including unknown fields, while
+`LargeBlobKey` is a view into that owned clone. Both properties reject access after disposal, and previously
+captured views observe the clone being cleared. Ordinary decoded fields remain usable because they are
+independent copies. Direct `StoredCredentialInfo.Decode` callers must dispose the returned value too. The
+decoder borrows and never clears its input, and the transport response contract is unchanged; disposal only
+clears the model's private clone and is not an end-to-end response cleanup guarantee.
+
 ### Verify the user with a PIN
 
 A verified ceremony carries a PIN token: acquire one for the permission you need, authenticate the same
 `clientDataHash` you send, and set both `PinUvAuthParam` and `PinUvAuthProtocol`. Setting `UserVerification` alone is rejected. `ClientPin` also has `SetPinAsync`, `ChangePinAsync`, and `GetPinRetriesAsync`.
+
+`GetPinRetriesAsync` and `GetUvRetriesAsync` return `PinRetryStatus` and
+`UserVerificationRetryStatus`; read `RetriesRemaining` and `PowerCycleRequired` from those results.
 
 ```csharp
 byte[] pin = Encoding.UTF8.GetBytes("123456");

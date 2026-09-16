@@ -153,8 +153,8 @@ public async Task Scp11_ModernDevice_ReturnsKeyInfo(YubiKeyTestState state)
         resetBeforeUse: true,
         async session =>
         {
-            var keyInfo = await session.GetKeyInfoAsync();
-            Assert.NotEmpty(keyInfo.Keys);
+            var keyInfo = await session.ListKeyInformationAsync();
+            Assert.NotEmpty(keyInfo);
         },
         scpKeyParams: Scp03KeyParameters.Default);
 }

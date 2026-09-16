@@ -121,7 +121,7 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
         // 0: SELECT (initial CreateAsync)
         // 1: INITIALIZE UPDATE (initial handshake)
         // 2: EXTERNAL AUTHENTICATE (initial handshake)
-        // 3: GET DATA, encrypted (ResetAsync's GetKeyInfoAsync)
+        // 3: GET DATA, encrypted (ResetAsync's ListKeyInformationAsync)
         // 4: raw (non-SCP) key-blocking attempt
         // 5: SELECT (post-reset reinit)
         // 6: INITIALIZE UPDATE (reinit) -- deliberately rejected

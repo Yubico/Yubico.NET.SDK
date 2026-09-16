@@ -62,17 +62,41 @@ public static class CredentialManagementExample
     /// <summary>
     /// Result of enumerating credentials for a relying party.
     /// </summary>
-    public sealed record EnumerateCredentialsResult
+    public sealed class EnumerateCredentialsResult : IDisposable
     {
-        public bool Success { get; init; }
-        public string? ErrorMessage { get; init; }
-        public IReadOnlyList<StoredCredentialInfo> Credentials { get; init; } = [];
+        private bool _disposed;
 
-        public static EnumerateCredentialsResult Succeeded(IReadOnlyList<StoredCredentialInfo> creds) =>
-            new() { Success = true, Credentials = creds };
+        public bool Success { get; }
+        public string? ErrorMessage { get; }
+        public CredentialEnumerationResult? Result { get; }
+        public IReadOnlyList<StoredCredentialInfo> Credentials => Result?.Credentials ?? [];
+
+        private EnumerateCredentialsResult(
+            bool success,
+            string? errorMessage = null,
+            CredentialEnumerationResult? result = null)
+        {
+            Success = success;
+            ErrorMessage = errorMessage;
+            Result = result;
+        }
+
+        public static EnumerateCredentialsResult Succeeded(CredentialEnumerationResult result) =>
+            new(true, result: result);
 
         public static EnumerateCredentialsResult Failed(string error) =>
-            new() { Success = false, ErrorMessage = error };
+            new(false, error);
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            Result?.Dispose();
+            _disposed = true;
+        }
     }
 
     /// <summary>
@@ -158,9 +182,9 @@ public static class CredentialManagementExample
             var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
                 session, protocol, pinToken);
 
-            var rps = await credMgmt.EnumerateRelyingPartiesAsync(cancellationToken);
+            var result = await credMgmt.EnumerateRelyingPartiesAsync(cancellationToken);
 
-            return EnumerateRpsResult.Succeeded(rps);
+            return EnumerateRpsResult.Succeeded(result.RelyingParties);
         }
         catch (CtapException ex)
         {
@@ -189,25 +213,30 @@ public static class CredentialManagementExample
         CancellationToken cancellationToken = default)
     {
         byte[]? pinToken = null;
+        CredentialEnumerationResult? result = null;
         try
         {
-            await using var session = await yubiKey.CreateFidoSessionAsync(
-                cancellationToken: cancellationToken);
+            {
+                await using var session = await yubiKey.CreateFidoSessionAsync(
+                    cancellationToken: cancellationToken);
 
-            using var protocol = new PinUvAuthProtocolV2();
-            using var clientPin = new ClientPin(session, protocol);
+                using var protocol = new PinUvAuthProtocolV2();
+                using var clientPin = new ClientPin(session, protocol);
 
-            pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                pin,
-                PinUvAuthTokenPermissions.CredentialManagement,
-                cancellationToken: cancellationToken);
+                pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                    pin,
+                    PinUvAuthTokenPermissions.CredentialManagement,
+                    cancellationToken: cancellationToken);
 
-            var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
-                session, protocol, pinToken);
+                using var credMgmt = new Fido2.CredentialManagement.CredentialManagement(
+                    session, protocol, pinToken);
 
-            var creds = await credMgmt.EnumerateCredentialsAsync(rpIdHash, cancellationToken);
+                result = await credMgmt.EnumerateCredentialsAsync(rpIdHash, cancellationToken);
+            }
 
-            return EnumerateCredentialsResult.Succeeded(creds);
+            EnumerateCredentialsResult success = EnumerateCredentialsResult.Succeeded(result);
+            result = null;
+            return success;
         }
         catch (CtapException ex)
         {
@@ -219,6 +248,7 @@ public static class CredentialManagementExample
         }
         finally
         {
+            result?.Dispose();
             if (pinToken is not null)
             {
                 CryptographicOperations.ZeroMemory(pinToken);

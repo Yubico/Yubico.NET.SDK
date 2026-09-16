@@ -100,8 +100,8 @@ public sealed partial class OpenPgpSession
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<(KeyRef KeyRef, AlgorithmAttributes Attributes)>>
-        GetAlgorithmInformationAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<SupportedAlgorithm>>
+        GetSupportedAlgorithmsAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
@@ -139,7 +139,7 @@ public sealed partial class OpenPgpSession
             ? outerTlv.Value.Span[..^2]
             : outerTlv.Value.Span;
 
-        var result = new List<(KeyRef, AlgorithmAttributes)>();
+        var result = new List<SupportedAlgorithm>();
         var offset = 0;
 
         while (offset < innerSpan.Length)
@@ -157,7 +157,7 @@ public sealed partial class OpenPgpSession
             try
             {
                 var attrs = AlgorithmAttributes.Parse(tlv.Value.Span);
-                result.Add((keyRef, attrs));
+                result.Add(new SupportedAlgorithm(keyRef, attrs));
             }
             catch (ArgumentException)
             {
@@ -171,7 +171,7 @@ public sealed partial class OpenPgpSession
             result = FixCurve25519AlgorithmInfo(result);
         }
 
-        return result;
+        return result.AsReadOnly();
     }
 
     /// <inheritdoc />
@@ -210,16 +210,18 @@ public sealed partial class OpenPgpSession
     ///     The fix removes invalid entries and ensures correct Curve25519 assignments:
     ///     Ed25519/EdDSA for SIG/AUT, X25519/ECDH for DEC.
     /// </summary>
-    private static List<(KeyRef, AlgorithmAttributes)> FixCurve25519AlgorithmInfo(
-        List<(KeyRef KeyRef, AlgorithmAttributes Attributes)> entries)
+    private static List<SupportedAlgorithm> FixCurve25519AlgorithmInfo(
+        List<SupportedAlgorithm> entries)
     {
-        var result = new List<(KeyRef, AlgorithmAttributes)>();
+        var result = new List<SupportedAlgorithm>();
 
-        foreach (var (keyRef, attrs) in entries)
+        foreach (var entry in entries)
         {
+            var keyRef = entry.KeyRef;
+            var attrs = entry.Attributes;
             if (attrs is not EcAttributes ec)
             {
-                result.Add((keyRef, attrs));
+                result.Add(entry);
                 continue;
             }
 
@@ -229,7 +231,7 @@ public sealed partial class OpenPgpSession
                 // Replace: DEC gets X25519/ECDH, others skip
                 if (keyRef == KeyRef.Dec)
                 {
-                    result.Add((keyRef, EcAttributes.Create(KeyRef.Dec, CurveOid.X25519)));
+                    result.Add(new SupportedAlgorithm(keyRef, EcAttributes.Create(KeyRef.Dec, CurveOid.X25519)));
                 }
 
                 continue;
@@ -241,7 +243,7 @@ public sealed partial class OpenPgpSession
                 continue;
             }
 
-            result.Add((keyRef, attrs));
+            result.Add(entry);
         }
 
         return result;

@@ -170,6 +170,39 @@ public sealed class CustomSlotConfiguration : SlotConfiguration
 }
 ```
 
+### Current public return-contract migration
+
+The current v2 source makes key listings explicit and prevents callers from mutating parsed OpenPGP collection
+storage. These changes are not assigned to a later alpha release label.
+
+| Before | Current replacement |
+|---|---|
+| `SecurityDomainSession.GetKeyInfoAsync(cancellationToken)` / `ISecurityDomainSession.GetKeyInfoAsync(cancellationToken)` | `ListKeyInformationAsync(cancellationToken)` on the session or interface. The returned element type remains `KeyInfo`. |
+| `device.GetSecurityDomainKeyInfoAsync(options, cancellationToken)` | `device.ListKeyInformationAsync(options, cancellationToken)`. This deliberately has no applet qualifier; qualify `Yubico.YubiKit.SecurityDomain.IYubiKeyExtensions.ListKeyInformationAsync(...)` or use an explicit session if another imported extension becomes equally applicable. |
+| `OpenPgpSession.GetKeyInformationAsync(cancellationToken)` / `IOpenPgpSession.GetKeyInformationAsync(cancellationToken)` | `ListKeyInformationAsync(cancellationToken)`. |
+| `OpenPgpSession.GetFingerprintsAsync(cancellationToken)` / `IOpenPgpSession.GetFingerprintsAsync(cancellationToken)` | `GetKeyFingerprintsAsync(cancellationToken)`. |
+| `OpenPgpSession.SetFingerprintAsync(keyRef, fingerprint, cancellationToken)` / `IOpenPgpSession.SetFingerprintAsync(keyRef, fingerprint, cancellationToken)` | `SetKeyFingerprintAsync(keyRef, fingerprint, cancellationToken)`. |
+| `Fingerprints` | `KeyFingerprints`. |
+| `DiscretionaryDataObjects.Fingerprints` | `DiscretionaryDataObjects.KeyFingerprints`. |
+| `DiscretionaryDataObjects.CaFingerprints` | `DiscretionaryDataObjects.CaKeyFingerprints`. |
+| `DiscretionaryDataObjects.KeyInfo` | `DiscretionaryDataObjects.KeyInformation`. |
+| `KeyRefExtensions.FingerprintDo(keyRef)` / `keyRef.FingerprintDo()` | `KeyRefExtensions.KeyFingerprintDo(keyRef)` / `keyRef.KeyFingerprintDo()`. Protocol tag identifiers such as `DataObject.Fingerprints`, `DataObject.CaFingerprints`, and the individual `DataObject.Fingerprint*` values retain their specification names. |
+| Public parameterless construction, dictionary collection initializers, and inherited mutators on `KeyInformation`, `Fingerprints`, and `GenerationTimes` | `KeyInformation`, `KeyFingerprints`, and `GenerationTimes` are sealed `IReadOnlyDictionary` implementations with no public constructors or mutators. Values come from parsed session results; indexing, `ContainsKey`, `TryGetValue`, keys, values, count, enumeration, and missing-key behavior remain available. |
+
+#### Result-contract migration
+
+Several current v2 return shapes changed before release. Migrate callers as follows:
+
+| Before | Current replacement |
+|---|---|
+| `IReadOnlyList<RelyingPartyInfo> rps = await credentialManagement.EnumerateRelyingPartiesAsync()` | `RelyingPartyEnumerationResult result = ...`; read `result.RelyingParties` and the first response's optional total from `result.ReportedTotal`. |
+| `IReadOnlyList<StoredCredentialInfo> credentials = await credentialManagement.EnumerateCredentialsAsync(rpIdHash)` | `using CredentialEnumerationResult result = await ...`; read `result.Credentials` and `result.ReportedTotal` within that lifetime. No credentials produces an empty collection and a null total. The result disposes its entries, whose complete raw response clones can contain secret fields. Direct `StoredCredentialInfo.Decode` callers must dispose the returned entry. |
+| `(pinRetries, powerCycleRequired) = await clientPin.GetPinRetriesAsync()` | Store the returned `PinRetryStatus`, then read `RetriesRemaining` and `PowerCycleRequired`. |
+| `(uvRetries, powerCycleRequired) = await clientPin.GetUvRetriesAsync()` | Store the returned `UserVerificationRetryStatus`, then read `RetriesRemaining` and `PowerCycleRequired`. |
+| `GetAlgorithmInformationAsync()` returning `(KeyRef, AlgorithmAttributes)` tuples | `GetSupportedAlgorithmsAsync()` returning `SupportedAlgorithm` entries with `KeyRef` and `Attributes`. Treat it as an ordered list: a key slot can occur more than once. |
+| Positional construction of `RegistrationExtensionOutputs` or `AuthenticationExtensionOutputs` | Use parameterless construction with named object-initializer properties. All members remain optional and default to null. |
+| `MatchedCredential.RequiresSelection` | Removed. Inspect the `IReadOnlyList<MatchedCredential>.Count`; call `SelectAsync` on the chosen item. |
+
 ## Common Migration Recipes
 
 These examples show the shape of common v1 code and the closest v2 pattern. They are intentionally small and source-backed. Treat examples that write applet state, credential material, keys, PINs, PUKs, access codes, or slot configuration as human-reviewed migrations even when the session or member mapping is clear.

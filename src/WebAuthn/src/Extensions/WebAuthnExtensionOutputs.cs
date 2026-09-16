@@ -19,31 +19,35 @@ namespace Yubico.YubiKit.WebAuthn.Extensions;
 /// <summary>
 /// Extension outputs from WebAuthn registration (MakeCredential).
 /// </summary>
-/// <param name="CredProtect">Credential protection policy output.</param>
-/// <param name="CredBlob">Credential blob storage result.</param>
-/// <param name="MinPinLength">Minimum PIN length output.</param>
-/// <param name="LargeBlob">Large blob support result.</param>
-/// <param name="Prf">PRF support result.</param>
-/// <param name="CredProps">Credential properties output.</param>
-/// <param name="PreviewSign">Generated signing key details (CTAP v4 draft).</param>
-public sealed record class RegistrationExtensionOutputs(
-    Outputs.CredProtectOutput? CredProtect = null,
-    CredBlobMakeCredentialOutput? CredBlob = null,
-    MinPinLengthOutput? MinPinLength = null,
-    Outputs.LargeBlobRegistrationOutput? LargeBlob = null,
-    Outputs.PrfRegistrationOutput? Prf = null,
-    Outputs.CredPropsOutput? CredProps = null,
-    PreviewSign.PreviewSignRegistrationOutput? PreviewSign = null);
+public sealed record class RegistrationExtensionOutputs
+{
+    /// <summary>Gets the credential protection policy output.</summary>
+    public Outputs.CredProtectOutput? CredProtect { get; init; }
+    /// <summary>Gets the credential blob storage result.</summary>
+    public CredBlobMakeCredentialOutput? CredBlob { get; init; }
+    /// <summary>Gets the minimum PIN length output.</summary>
+    public MinPinLengthOutput? MinPinLength { get; init; }
+    /// <summary>Gets the large blob support result.</summary>
+    public Outputs.LargeBlobRegistrationOutput? LargeBlob { get; init; }
+    /// <summary>Gets the PRF support result.</summary>
+    public Outputs.PrfRegistrationOutput? Prf { get; init; }
+    /// <summary>Gets the credential properties output.</summary>
+    public Outputs.CredPropsOutput? CredProps { get; init; }
+    /// <summary>Gets the generated signing key details.</summary>
+    public PreviewSign.PreviewSignRegistrationOutput? PreviewSign { get; init; }
+}
 
 /// <summary>
 /// Extension outputs from WebAuthn authentication (GetAssertion).
 /// </summary>
-/// <param name="CredBlob">Retrieved credential blob data.</param>
-/// <param name="LargeBlob">Large blob operation result.</param>
-/// <param name="Prf">PRF evaluation results.</param>
-/// <param name="PreviewSign">Signature over to-be-signed data (CTAP v4 draft).</param>
-public sealed record class AuthenticationExtensionOutputs(
-    CredBlobAssertionOutput? CredBlob = null,
-    Outputs.LargeBlobAuthenticationOutput? LargeBlob = null,
-    Outputs.PrfAuthenticationOutput? Prf = null,
-    PreviewSign.PreviewSignAuthenticationOutput? PreviewSign = null);
+public sealed record class AuthenticationExtensionOutputs
+{
+    /// <summary>Gets the retrieved credential blob data.</summary>
+    public CredBlobAssertionOutput? CredBlob { get; init; }
+    /// <summary>Gets the large blob operation result.</summary>
+    public Outputs.LargeBlobAuthenticationOutput? LargeBlob { get; init; }
+    /// <summary>Gets the PRF evaluation results.</summary>
+    public Outputs.PrfAuthenticationOutput? Prf { get; init; }
+    /// <summary>Gets the signature over the to-be-signed data.</summary>
+    public PreviewSign.PreviewSignAuthenticationOutput? PreviewSign { get; init; }
+}

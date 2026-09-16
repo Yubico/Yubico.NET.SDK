@@ -147,7 +147,7 @@ public sealed class InfoCommand : OpenPgpCommand<InfoCommand.Settings>
 
     private static ReadOnlyMemory<byte> GetFingerprint(
         DiscretionaryDataObjects disc, KeyRef slot) =>
-        disc.Fingerprints.TryGetValue(slot, out var fp) ? fp : ReadOnlyMemory<byte>.Empty;
+        disc.KeyFingerprints.TryGetValue(slot, out var fp) ? fp : ReadOnlyMemory<byte>.Empty;
 
     private static string FormatAlgorithm(AlgorithmAttributes? attrs) =>
         attrs switch

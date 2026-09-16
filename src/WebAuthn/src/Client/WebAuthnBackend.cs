@@ -63,8 +63,8 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         EnsureProtocolInitialized();
         var clientPin = new ClientPin(_session, _protocol!);
 
-        var (pinRetries, _) = await clientPin.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
-        return pinRetries;
+        var status = await clientPin.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
+        return status.RetriesRemaining;
     }
 
     /// <inheritdoc/>

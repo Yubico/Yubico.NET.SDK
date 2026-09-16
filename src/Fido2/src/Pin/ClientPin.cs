@@ -75,14 +75,8 @@ public sealed class ClientPin : IDisposable
     /// Gets the number of PIN retries remaining before the authenticator locks.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>
-    /// A tuple containing:
-    /// <list type="bullet">
-    ///   <item><description>PinRetries: Number of PIN attempts remaining.</description></item>
-    ///   <item><description>PowerCycleRequired: If true, device requires power cycle before next PIN attempt.</description></item>
-    /// </list>
-    /// </returns>
-    public async Task<(int PinRetries, bool PowerCycleRequired)> GetPinRetriesAsync(
+    /// <returns>The authenticator's current PIN retry status.</returns>
+    public async Task<PinRetryStatus> GetPinRetriesAsync(
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
@@ -95,21 +89,16 @@ public sealed class ClientPin : IDisposable
         var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
-        return ParsePinRetriesResponse(response);
+        var (retriesRemaining, powerCycleRequired) = ParsePinRetriesResponse(response);
+        return new PinRetryStatus(retriesRemaining, powerCycleRequired);
     }
 
     /// <summary>
     /// Gets the number of UV retries remaining (CTAP 2.1).
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>
-    /// A tuple containing:
-    /// <list type="bullet">
-    ///   <item><description>UvRetries: Number of UV attempts remaining.</description></item>
-    ///   <item><description>PowerCycleRequired: If true, device requires power cycle before next UV attempt.</description></item>
-    /// </list>
-    /// </returns>
-    public async Task<(int UvRetries, bool PowerCycleRequired)> GetUvRetriesAsync(
+    /// <returns>The authenticator's current user-verification retry status.</returns>
+    public async Task<UserVerificationRetryStatus> GetUvRetriesAsync(
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
@@ -122,7 +111,8 @@ public sealed class ClientPin : IDisposable
         var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
-        return ParseUvRetriesResponse(response);
+        var (retriesRemaining, powerCycleRequired) = ParseUvRetriesResponse(response);
+        return new UserVerificationRetryStatus(retriesRemaining, powerCycleRequired);
     }
 
     /// <summary>

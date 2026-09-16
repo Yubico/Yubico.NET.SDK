@@ -143,6 +143,11 @@ var matches = await client.GetAssertionAsync(requestOptions, pinBytes: null);
 var assertion = await matches[0].SelectAsync();
 ```
 
+Use `matches.Count` to distinguish zero, one, and multiple matches. `MatchedCredential` deliberately has no
+`RequiresSelection` property; selection is a property of the returned list. `SelectAsync` remains lazy,
+idempotent, cancellation-aware while waiting, and caches both success and failure. Registration and
+authentication extension outputs are non-positional records with optional init properties that default to null.
+
 The device factory takes two independent configuration carriers, and mixing them up is the easy mistake:
 required `clientOptions` (`WebAuthnClientOptions`) is forwarded to the created `WebAuthnClient`, while optional
 `sessionOptions` (`SessionCreationOptions`) is forwarded unchanged to `CreateFidoSessionAsync`.

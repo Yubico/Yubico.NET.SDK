@@ -576,6 +576,50 @@ mappings:
       - yubikit:docs/usage/device-discovery.md
     notes: "`feat(core): add first-key discovery helpers` (`6cb3875f`) adds a one-shot convenience over `FindAllAsync` for the common single-device case. `FindFirstAsync(predicate, cancellationToken)` returns the first matching `IYubiKey` or throws `InvalidOperationException` when none match; `FindFirstOrDefaultAsync(predicate, cancellationToken)` returns `null` instead of throwing. Both are one-shot queries over `FindAllAsync`: they do not wait for insertion, discovery ordering is not stable, and they inherit `FindAllAsync`'s caching (a cached result can complete without observing cancellation) and exception-propagation behavior. This supersedes the `devices.First()` / `FindAllAsync(...).First()` idiom shown in `recipe-device-discovery-find-by-transport` and the Common Migration Recipes' Device Discovery and Device Info examples for the common single-device case; `FindAllAsync` remains the entry point for enumerating every connected key or applying explicit `ConnectionType`/`forceRescan` control."
     last_reviewed_commit: 0501f516e7877188e6d8977cc799f04a837cffed
+  - id: security-domain-openpgp-key-info-rename
+    status: automatic
+    confidence: high
+    migration_kind: member
+    v1: SecurityDomainSession.GetKeyInformation() (synchronous, returning IReadOnlyDictionary<KeyReference, Dictionary<byte, byte>>); OpenPgpSession key-status, fingerprint, and generation-time accessors
+    v2: ISecurityDomainSession/SecurityDomainSession.ListKeyInformationAsync(cancellationToken) and IYubiKeyExtensions.ListKeyInformationAsync(options, cancellationToken) (still Task<IReadOnlyList<KeyInfo>>); IOpenPgpSession/OpenPgpSession.ListKeyInformationAsync(...), GetKeyFingerprintsAsync(...), SetKeyFingerprintAsync(keyRef, fingerprint, ...); DiscretionaryDataObjects.KeyFingerprints / CaKeyFingerprints / KeyInformation; KeyRefExtensions.KeyFingerprintDo(keyRef)
+    evidence:
+      - yubikit:src/SecurityDomain/src/ISecurityDomainSession.cs
+      - yubikit:src/SecurityDomain/src/SecurityDomainSession.cs
+      - yubikit:src/SecurityDomain/src/IYubiKeyExtensions.cs
+      - yubikit:src/OpenPgp/src/IOpenPgpSession.cs
+      - yubikit:src/OpenPgp/src/OpenPgpSession.Keys.cs
+      - yubikit:src/OpenPgp/src/DiscretionaryDataObjects.cs
+      - yubikit:src/OpenPgp/src/KeyInformation.cs
+      - yubikit:src/OpenPgp/src/KeyFingerprints.cs
+      - yubikit:src/OpenPgp/src/GenerationTimes.cs
+      - yubikit:src/OpenPgp/src/KeyRef.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Scp/SecurityDomainSession.cs
+      - yubikit:docs/plans/2026-09-14-public-return-contracts.md
+    notes: "`refactor(applets)!: clarify public return contracts` (`84889b92`, PR #667) renamed `ISecurityDomainSession`/`SecurityDomainSession.GetKeyInfoAsync` and the device extension `GetSecurityDomainKeyInfoAsync` to `ListKeyInformationAsync`; the `Task<IReadOnlyList<KeyInfo>>` return shape is unchanged, so only the member name moves. (V1's synchronous `SecurityDomainSession.GetKeyInformation()` returned a raw nested `IReadOnlyDictionary<KeyReference, Dictionary<byte, byte>>` instead; that shape difference predates this range and is unaffected by it.) The same commit stopped OpenPGP's `KeyInformation`, `Fingerprints`, and `GenerationTimes` from publicly inheriting mutable `Dictionary<TKey, TValue>` -- no public constructor, collection initializer, or inherited mutator remains -- moving each to its own file as a sealed `IReadOnlyDictionary` implementation with an internal constructor, and renamed `Fingerprints` to `KeyFingerprints` to disambiguate it from biometric fingerprint operations. `DiscretionaryDataObjects.Fingerprints`/`CaFingerprints`/`KeyInfo` became `KeyFingerprints`/`CaKeyFingerprints`/`KeyInformation`; `IOpenPgpSession.GetKeyInformationAsync`/`GetFingerprintsAsync`/`SetFingerprintAsync` became `ListKeyInformationAsync`/`GetKeyFingerprintsAsync`/`SetKeyFingerprintAsync`; `KeyRefExtensions.FingerprintDo` became `KeyFingerprintDo`. Protocol tag identifiers such as `DataObject.Fingerprints`/`CaFingerprints` keep their specification names. Indexing, `ContainsKey`, `TryGetValue`, `Keys`, `Values`, `Count`, and enumeration remain available on all three renamed types. The same commit already added the `docs/migration/v1-to-v2.md` 'Current public return-contract migration' table documenting these renames; this entry supplies the map record the guide's own convention requires to back it."
+    last_reviewed_commit: 2f1d912a1c8d4779c7e6a9ca9b7753417287f99c
+  - id: fido2-openpgp-webauthn-typed-result-contracts
+    status: automatic
+    confidence: high
+    migration_kind: member
+    v1: GetPinRetriesResponse/GetUvRetriesResponse implementing IYubiKeyResponseWithData<(int retries, bool? powerCycleRequired)>; IOpenPgpSession.GetAlgorithmInformationAsync returning (KeyRef, AlgorithmAttributes) tuples; Fido2 credential-management enumeration exposing only a flat credential/RP list with the reported total discoverable solely on the first entry; positional WebAuthn extension-output records; MatchedCredential.RequiresSelection
+    v2: ClientPin.GetPinRetriesAsync()/GetUvRetriesAsync() returning PinRetryStatus/UserVerificationRetryStatus (RetriesRemaining, PowerCycleRequired); IOpenPgpSession.GetSupportedAlgorithmsAsync() returning IReadOnlyList<SupportedAlgorithm> (KeyRef, Attributes); CredentialManagement.EnumerateRelyingPartiesAsync()/EnumerateCredentialsAsync() returning RelyingPartyEnumerationResult / disposable CredentialEnumerationResult (RelyingParties/Credentials plus ReportedTotal); WebAuthn RegistrationExtensionOutputs/AuthenticationExtensionOutputs as non-positional records with optional init properties; MatchedCredential.RequiresSelection removed outright (use IReadOnlyList<MatchedCredential>.Count)
+    evidence:
+      - yubikit:src/Fido2/src/Pin/ClientPin.cs
+      - yubikit:src/Fido2/src/Pin/PinRetryStatus.cs
+      - yubikit:src/Fido2/src/Pin/UserVerificationRetryStatus.cs
+      - yubikit:src/OpenPgp/src/IOpenPgpSession.cs
+      - yubikit:src/OpenPgp/src/OpenPgpSession.Config.cs
+      - yubikit:src/OpenPgp/src/SupportedAlgorithm.cs
+      - yubikit:src/Fido2/src/CredentialManagement/CredentialManagement.cs
+      - yubikit:src/Fido2/src/CredentialManagement/CredentialEnumerationResult.cs
+      - yubikit:src/Fido2/src/CredentialManagement/RelyingPartyEnumerationResult.cs
+      - yubikit:src/Fido2/src/CredentialManagement/StoredCredentialInfo.cs
+      - yubikit:src/WebAuthn/src/Extensions/WebAuthnExtensionOutputs.cs
+      - yubikit:src/WebAuthn/src/Client/Authentication/MatchedCredential.cs
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Commands/GetPinRetriesResponse.cs
+      - yubikit:docs/plans/2026-09-14-public-return-contracts.md
+    notes: "`refactor(applets)!: clarify public return contracts` (`84889b92`, PR #667) replaced several tuple- or bare-collection-shaped return values with named result types across Fido2, OpenPGP, and WebAuthn. `ClientPin.GetPinRetriesAsync`/`GetUvRetriesAsync` now return `PinRetryStatus`/`UserVerificationRetryStatus` (internal construction, additive-only properties) instead of `(int, bool)` tuples; v1's `GetPinRetriesResponse` already carried the same `(retriesRemaining, powerCycleRequired)` tuple shape being replaced. `IOpenPgpSession.GetAlgorithmInformationAsync` (tuple list) became `GetSupportedAlgorithmsAsync` returning `IReadOnlyList<SupportedAlgorithm>`; repeated `KeyRef` entries remain possible (one slot can support more than one algorithm), so this is not a dictionary. `CredentialManagement.EnumerateRelyingPartiesAsync`/`EnumerateCredentialsAsync` now return `RelyingPartyEnumerationResult`/`CredentialEnumerationResult` instead of a bare `IReadOnlyList<T>`, adding `ReportedTotal` (the authenticator's first-response total, independent of the returned count) alongside the entries; `CredentialEnumerationResult` is `IDisposable` and owns its `StoredCredentialInfo` entries (`using var result = await EnumerateCredentialsAsync(...)`), and on a mid-enumeration failure the already-decoded entries are disposed before the exception propagates. The same commit also added `StoredCredentialInfo.RawData` (a disposable, secret-capable complete-response view, unlike the non-disposable `RawData` properties covered by `fido2-forward-compat-raw-data`) and made `StoredCredentialInfo` itself `IDisposable`; direct `StoredCredentialInfo.Decode` callers must dispose the returned instance. Separately, WebAuthn's `RegistrationExtensionOutputs`/`AuthenticationExtensionOutputs` moved from positional records to non-positional records with optional `init` properties (construction syntax changes; all members remain optional and default to null), and `MatchedCredential.RequiresSelection` was removed outright with no replacement -- inspect `IReadOnlyList<MatchedCredential>.Count` instead. WebAuthn has no v1 comparison point for the last two changes because the package postdates v1. The same commit already added the `docs/migration/v1-to-v2.md` 'Result-contract migration' table documenting all of these; this entry supplies the map record the guide's own convention requires to back it."
+    last_reviewed_commit: 2f1d912a1c8d4779c7e6a9ca9b7753417287f99c
 manual_review:
   - device discovery call sites
   - low-level HID listener DeviceEvent callback signatures

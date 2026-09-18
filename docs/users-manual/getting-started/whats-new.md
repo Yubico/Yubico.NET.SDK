@@ -16,6 +16,26 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.18.x Releases
+
+### 1.18.0
+
+Release date: September 18th, 2026
+
+Features:
+
+- Yubico.NativeShims now includes static libraries for Native AOT applications on supported Windows, macOS, and Linux architectures. ([#586](https://github.com/Yubico/Yubico.NET.SDK/pull/586))
+
+Bug Fixes:
+
+- Fixed an issue where enumerating FIDO2 credentials containing unsupported COSE public key types could fail. Unsupported keys are now preserved for forward compatibility. ([#585](https://github.com/Yubico/Yubico.NET.SDK/pull/585))
+
+Dependencies:
+
+- Several dependencies across the Yubico.Core project, GitHub Actions workflows, and Docker-based documentation image have been updated to newer versions. ([#588](https://github.com/Yubico/Yubico.NET.SDK/pull/588), [#648](https://github.com/Yubico/Yubico.NET.SDK/pull/648), [#666](https://github.com/Yubico/Yubico.NET.SDK/pull/666), [#669](https://github.com/Yubico/Yubico.NET.SDK/pull/669))
+
+_________
+
 ## 1.17.x Releases
 
 ### 1.17.3

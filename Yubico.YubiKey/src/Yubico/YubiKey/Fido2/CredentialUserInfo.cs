@@ -55,6 +55,12 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The public key for a credential returned.
         /// </summary>
+        /// <remarks>
+        /// If the credential's public key uses a COSE algorithm this SDK does
+        /// not model, this is a <see cref="CoseUnsupportedPublicKey"/> carrying
+        /// the original encoding. Enumeration does not fail in that case, so
+        /// callers can still read the other properties of every credential.
+        /// </remarks>
         public CoseKey CredentialPublicKey { get; private set; }
 
         /// <summary>
@@ -191,7 +197,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 var user = new UserEntity(credentialManagementData.ReadEncodedValue(KeyUser), out int _);
                 var credentialId = new CredentialId(credentialManagementData.ReadEncodedValue(KeyCredentialId), out int _);
-                var credentialPublicKey = CoseKey.Create(credentialManagementData.ReadEncodedValue(KeyPublicKey), out int _);
+                var credentialPublicKey = CoseKey.CreateOrUnsupported(credentialManagementData.ReadEncodedValue(KeyPublicKey));
                 int credProtectPolicy = credentialManagementData.ReadInt32(KeyCredProtectPolicy);
                 ReadOnlyMemory<byte>? largeBlobKey = credentialManagementData.Contains(KeyLargeBlobKey)
                     ? credentialManagementData.ReadByteString(KeyLargeBlobKey)

@@ -223,9 +223,17 @@ function Expand-PackagesFromZip {
 
     $zipPath = Join-Path $Directories.WorkingDir $ZipFile
     $extractPath = Join-Path $Directories.Unsigned ([System.IO.Path]::GetFileNameWithoutExtension($ZipFile))
-    Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
+    if (Test-Path -LiteralPath $extractPath) {
+        Remove-Item -LiteralPath $extractPath -Recurse -Force -ErrorAction Stop
+    }
+    Expand-Archive -LiteralPath $zipPath -DestinationPath $extractPath -Force
 
-    $packages = Get-ChildItem -Path $extractPath -Recurse -Include *.nupkg, *.snupkg
+    $packages = @(Get-ChildItem -Path $extractPath -Recurse -Include *.nupkg, *.snupkg -File)
+    if ($packages.Count -eq 0) {
+        throw "No .nupkg/.snupkg found in build artifact: $ZipFile"
+    }
+
+    $stagedPackages = @()
     foreach ($package in $packages) {
         Write-Host "      Package: $($package.Name)"
 
@@ -234,9 +242,13 @@ function Expand-PackagesFromZip {
             throw "Attestation verification failed for: $($package.Name)"
         }
 
-        Copy-Item -Path $package.FullName -Destination $Directories.Unsigned -Force
+        $stagedPath = Join-Path $Directories.Unsigned $package.Name
+        Copy-Item -LiteralPath $package.FullName -Destination $stagedPath -Force
+        $stagedPackages += Get-Item -LiteralPath $stagedPath
     }
     Write-Host "    OK Staged $($packages.Count) package(s)"
+
+    return $stagedPackages
 }
 
 function Invoke-SignCliOnPackage {
@@ -299,6 +311,8 @@ function Invoke-SignCliOnPackage {
     if ($LASTEXITCODE -ne 0) {
         throw "Sign CLI failed (exit $LASTEXITCODE) for: $PackagePath"
     }
+
+    return (Get-Item -LiteralPath $outputFile -ErrorAction Stop)
 }
 
 <#
@@ -464,41 +478,49 @@ function Invoke-NuGetPackageSigningV2 {
         $hasNativeShims = -not [string]::IsNullOrWhiteSpace($NativeShimsZip)
 
         # Extract + attest all packages (nupkg and snupkg) into the unsigned dir.
+        $staged = @()
         if ($hasCorePackages) {
             Write-Host "`nProcessing Core Packages..." -ForegroundColor Yellow
-            Expand-PackagesFromZip -ZipFile $NuGetPackagesZip -Directories $directories -RepoName $RepoName
-            Expand-PackagesFromZip -ZipFile $SymbolsPackagesZip -Directories $directories -RepoName $RepoName
+            $staged += @(Expand-PackagesFromZip -ZipFile $NuGetPackagesZip -Directories $directories -RepoName $RepoName)
+            $staged += @(Expand-PackagesFromZip -ZipFile $SymbolsPackagesZip -Directories $directories -RepoName $RepoName)
         }
         if ($hasNativeShims) {
             Write-Host "`nProcessing Native Shims Package..." -ForegroundColor Yellow
-            Expand-PackagesFromZip -ZipFile $NativeShimsZip -Directories $directories -RepoName $RepoName
+            $staged += @(Expand-PackagesFromZip -ZipFile $NativeShimsZip -Directories $directories -RepoName $RepoName)
+        }
+
+        $duplicatePackageNames = @($staged | Group-Object Name | Where-Object Count -gt 1)
+        if ($duplicatePackageNames.Count -ne 0) {
+            throw "Duplicate package names across build artifacts: $($duplicatePackageNames.Name -join ', ')"
         }
 
         # Sign every staged package in place (assemblies + container) into signed\packages.
         Write-Host "`nSigning packages with the Sign CLI..." -ForegroundColor Cyan
-        $staged = Get-ChildItem -Path $directories.Unsigned -Include *.nupkg, *.snupkg -File
-        if (-not $staged -or $staged.Count -eq 0) {
+        if ($staged.Count -eq 0) {
             throw "No .nupkg/.snupkg found to sign in $($directories.Unsigned)"
         }
-        foreach ($package in $staged) {
-            Invoke-SignCliOnPackage -PackagePath $package.FullName `
+        $signed = @($staged | ForEach-Object {
+            Invoke-SignCliOnPackage -PackagePath $_.FullName `
                 -OutputDirectory $directories.Packages `
                 -SignCliPath $SignCliPath `
                 -Fingerprint $Fingerprint `
                 -TimestampServer $TimestampServer `
                 -FileList $FileList `
                 -Interactive:(-not $NonInteractive)
+        })
+        if ($signed.Count -ne $staged.Count) {
+            throw "Expected $($staged.Count) signed package(s), found $($signed.Count)."
         }
 
         # Summary of signed packages.
         Write-Host "`nSigned Packages Summary:" -ForegroundColor Yellow
         Write-Host "  NuGet Packages:" -ForegroundColor White
-        Get-ChildItem -Path $directories.Packages -Filter "*.nupkg" | ForEach-Object {
+        $signed | Where-Object Extension -eq ".nupkg" | ForEach-Object {
             $size = "{0:N2}" -f ($_.Length / 1KB)
             Write-Host "    $($_.Name) [$size KB]" -ForegroundColor Gray
         }
         Write-Host "  Symbol Packages:" -ForegroundColor White
-        Get-ChildItem -Path $directories.Packages -Filter "*.snupkg" | ForEach-Object {
+        $signed | Where-Object Extension -eq ".snupkg" | ForEach-Object {
             $size = "{0:N2}" -f ($_.Length / 1KB)
             Write-Host "    $($_.Name) [$size KB]" -ForegroundColor Gray
         }
@@ -506,12 +528,10 @@ function Invoke-NuGetPackageSigningV2 {
         Write-Host "`nPackage signing completed." -ForegroundColor Green
         Write-Host "Signed packages: $($directories.Packages)" -ForegroundColor Yellow
 
-        $examplePackage = Get-ChildItem -Path $directories.Packages -Filter "*.nupkg" | Select-Object -First 1
         Write-Host "`nTo push (manual step - never run automatically):" -ForegroundColor Cyan
-        if ($examplePackage) {
-            Write-Host "  Invoke-NuGetPackagePush -PackagePath `"$($examplePackage.FullName)`"" -ForegroundColor Gray
+        foreach ($package in $signed) {
+            Write-Host "  Invoke-NuGetPackagePush -PackagePath `"$($package.FullName)`"" -ForegroundColor Gray
         }
-        Write-Host "  Invoke-NuGetPackagePush -PackagePath `"$($directories.Packages)`" -SkipDuplicate" -ForegroundColor Gray
         Write-Host ""
 
         return

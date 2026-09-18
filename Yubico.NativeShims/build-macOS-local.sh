@@ -33,8 +33,10 @@ rm -rf build-local-arm64
 cmake -S . -B build-local-arm64 \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
+  -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
   -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3 \
-  -DOPENSSL_USE_STATIC_LIBS=FALSE
+  -DOPENSSL_USE_STATIC_LIBS=FALSE \
+  -DYUBICO_BUILD_STATIC=OFF
 cmake --build build-local-arm64 -j
 
 DYLIB="$NS_DIR/build-local-arm64/libYubico.NativeShims.dylib"

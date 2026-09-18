@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('win-'))">winscard.lib</ExpectedLinkerArgs>
+        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('linux-'))">-lpcsclite|-Wl,--exclude-libs,$([System.IO.Path]::GetFileName('$(ExpectedArchive)'))</ExpectedLinkerArgs>
+        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('osx-'))">-framework|PCSC</ExpectedLinkerArgs>
+    </PropertyGroup>
+
+    <Import Project="$(TargetsPath)" />
+    <Import Project="$(TransitiveTargetsPath)" />
+
+    <Target Name="SetupOSSpecificProps" />
+
+    <Target Name="ResolvePackageAssets">
+        <ItemGroup>
+            <NativeCopyLocalItems Include="$(FakeSidecar)" NuGetPackageId="Yubico.NativeShims" />
+            <NativeCopyLocalItems Include="$(FakeSameNameOtherAsset)" NuGetPackageId="Other.Package" />
+            <NativeCopyLocalItems Include="$(FakeOtherAsset)" NuGetPackageId="Other.Package" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="ResolveLockFileCopyLocalFiles" DependsOnTargets="ResolvePackageAssets" />
+
+    <Target Name="ComputeResolvedFilesToPublishList">
+        <ItemGroup>
+            <ResolvedFileToPublish Include="$(FakeSidecar)" NuGetPackageId="Yubico.NativeShims" AssetType="native" />
+            <ResolvedFileToPublish Include="$(FakeSameNameOtherAsset)" NuGetPackageId="Other.Package" AssetType="native" />
+            <ResolvedFileToPublish Include="$(FakeOtherAsset)" NuGetPackageId="Other.Package" AssetType="native" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="Validate" DependsOnTargets="SetupOSSpecificProps">
+        <Error Condition="'@(DirectPInvoke)' != 'Yubico.NativeShims'"
+               Text="Expected one DirectPInvoke item for Yubico.NativeShims, got '@(DirectPInvoke)'." />
+        <Error Condition="'@(NativeLibrary)' != '$(ExpectedArchive)'"
+               Text="Expected NativeLibrary '$(ExpectedArchive)', got '@(NativeLibrary)'." />
+        <Error Condition="'@(LinkerArg, '|')' != '$(ExpectedLinkerArgs)'"
+               Text="Expected LinkerArgs '$(ExpectedLinkerArgs)', got '@(LinkerArg, '|')'." />
+    </Target>
+
+    <Target Name="ValidateNonAot" DependsOnTargets="SetupOSSpecificProps">
+        <Error Condition="'@(DirectPInvoke)' != '' OR '@(NativeLibrary)' != '' OR '@(LinkerArg)' != ''"
+               Text="Native AOT items must not be added when PublishAot is false." />
+    </Target>
+
+    <Target Name="ValidateAotBuildAssets" DependsOnTargets="ResolveLockFileCopyLocalFiles">
+        <Error Condition="'@(NativeCopyLocalItems)' != '$(FakeSidecar);$(FakeSameNameOtherAsset);$(FakeOtherAsset)'"
+               Text="AOT-configured builds must retain all native package assets, got '@(NativeCopyLocalItems)'." />
+    </Target>
+
+    <Target Name="ValidatePublishAssets" DependsOnTargets="ComputeResolvedFilesToPublishList">
+        <Error Condition="'@(ResolvedFileToPublish)' != '$(FakeSameNameOtherAsset);$(FakeOtherAsset)'"
+               Text="Expected only assets owned by other packages to remain, got '@(ResolvedFileToPublish)'." />
+    </Target>
+
+    <Target Name="ValidateNonAotPublishAssets" DependsOnTargets="ComputeResolvedFilesToPublishList">
+        <Error Condition="'@(ResolvedFileToPublish)' != '$(FakeSidecar);$(FakeSameNameOtherAsset);$(FakeOtherAsset)'"
+               Text="Non-AOT publishes must retain all native package assets, got '@(ResolvedFileToPublish)'." />
+    </Target>
+</Project>

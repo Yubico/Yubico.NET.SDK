@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Validate that a built Yubico.NativeShims shared library exports exactly the
-# canonical set of symbols defined in expected_symbols.txt.
+# Validate that a built Yubico.NativeShims shared library or static archive
+# contains exactly the canonical Native_* symbol set.
 #
-# Usage:  check_exports.sh <path-to-libYubico.NativeShims.{so,dylib}>
+# Usage:  check_exports.sh <path-to-libYubico.NativeShims.{so,dylib,a}>
 #
 # Catches: symbols dropped from exports.gnu / exports.llvm, accidental static
 # qualifier on a Native_* function, regressions where the export-file list
@@ -14,7 +14,7 @@
 set -euo pipefail
 
 if [ "$#" -ne 1 ]; then
-    echo "usage: $0 <path-to-shared-library>" >&2
+    echo "usage: $0 <path-to-native-library>" >&2
     exit 2
 fi
 
@@ -23,7 +23,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXPECTED_FILE="$SCRIPT_DIR/expected_symbols.txt"
 
 if [ ! -f "$LIB" ]; then
-    echo "ERROR: shared library not found: $LIB" >&2
+    echo "ERROR: native library not found: $LIB" >&2
     exit 2
 fi
 if [ ! -f "$EXPECTED_FILE" ]; then
@@ -34,16 +34,19 @@ fi
 # Strip comments + blank lines from expected list
 EXPECTED=$(grep -v '^[[:space:]]*#' "$EXPECTED_FILE" | grep -v '^[[:space:]]*$' | sort -u)
 
-# Extract Native_* symbols from the binary.
-#   macOS: nm -gU lists external defined; symbols carry leading underscore.
-#   Linux: nm -D --defined-only lists dynamic-section defined symbols.
+# Extract Native_* symbols from the binary. Static archives use the ordinary
+# global symbol table; Linux shared libraries use the dynamic symbol table.
 UNAME="$(uname -s)"
 case "$UNAME" in
     Darwin)
-        ACTUAL=$(nm -gU "$LIB" | awk '{print $NF}' | sed 's/^_//' | grep '^Native_' | sort -u)
+        ACTUAL=$(nm -gU "$LIB" | awk '{print $NF}' | sed 's/^_//' | grep '^Native_' | sort -u || true)
         ;;
     Linux)
-        ACTUAL=$(nm -D --defined-only "$LIB" | awk '{print $NF}' | grep '^Native_' | sort -u)
+        if [[ "$LIB" == *.a ]]; then
+            ACTUAL=$(nm -g --defined-only "$LIB" | awk '{print $NF}' | grep '^Native_' | sort -u || true)
+        else
+            ACTUAL=$(nm -D --defined-only "$LIB" | awk '{print $NF}' | grep '^Native_' | sort -u || true)
+        fi
         ;;
     *)
         echo "ERROR: unsupported host OS '$UNAME' (expected Darwin or Linux)" >&2
@@ -76,6 +79,6 @@ if [ -n "$EXTRA" ]; then
 fi
 
 if [ $STATUS -eq 0 ]; then
-    echo "PASS: export table matches expected symbol list"
+    echo "PASS: native symbol table matches expected symbol list"
 fi
 exit $STATUS

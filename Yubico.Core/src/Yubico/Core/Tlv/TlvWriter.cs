@@ -673,11 +673,8 @@ namespace Yubico.Core.Tlv
             // End process, no call to Dispose(bool) or GC.
             public void Dispose()
             {
-                if (!(_writer is null))
-                {
-                    _writer.EndNestedTlv();
-                    _writer = null;
-                }
+                _writer?.EndNestedTlv();
+                _writer = null;
             }
         }
 #pragma warning restore CA1034, CA1815

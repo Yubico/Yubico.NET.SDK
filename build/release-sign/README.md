@@ -6,7 +6,7 @@
 
 - Go 1.27.1.
 - GitHub CLI (`gh`) authenticated for `Yubico/Yubico.NET.SDK` attestations. Run `gh auth setup-git` so Go can authenticate to the private signing dependency without changing repository configuration.
-- A PIV signing key and its leaf-first PEM certificate chain, or a Google Cloud KMS key location.
+- A PIV signing key and its leaf-first PEM certificate chain.
 - Signer and timestamp-authority PEM trust roots. Every certificate in either trust-anchor file must be a certificate authority with valid basic constraints, be self-issued with byte-identical encoded subject and issuer names, and have a valid self-signature. The signer certificate-chain file remains leaf-first and contains only the leaf and any intermediates.
 - An independent package verifier implementing the command shown below.
 - Linux builds need PC/SC development headers (for example, `libpcsclite-dev`).
@@ -80,5 +80,9 @@ is rejected.
 Publishing remains a separate release operation after review of `signed/report.json`. Retain the existing fallback signing scripts for one release, but do not mix their output into a `release-sign` run.
 
 This module does not have a GitHub Actions test workflow because `github.com/Yubico/nuget-sign` is private and the repository workflow token is not known to have read access. Adding a workflow without an explicit credential would create a predictably broken required check. Run the verification commands locally or add continuous integration only after a suitable read-only credential is provisioned.
+
+Cloud KMS support is intentionally deferred. Enabling the provider currently
+pulls a gRPC version covered by `GHSA-2v4p-qf9q-27wj`; add it later after the
+upstream dependency is patched and dependency review passes.
 
 PEM means Privacy-Enhanced Mail certificate encoding. PIV means Personal Identity Verification. PIN means Personal Identification Number. PC/SC means Personal Computer/Smart Card. KMS means Key Management Service. CLI means command-line interface. DLL means Dynamic-Link Library. RFC 3161 is the Internet standard for trusted timestamps.

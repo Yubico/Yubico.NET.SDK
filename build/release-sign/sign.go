@@ -20,7 +20,6 @@ import (
 
 	"github.com/Yubico/nuget-sign/pkg/assembly"
 	"github.com/Yubico/nuget-sign/pkg/keys"
-	_ "github.com/Yubico/nuget-sign/pkg/keys/gcpkms"
 	_ "github.com/Yubico/nuget-sign/pkg/keys/piv"
 	"github.com/Yubico/nuget-sign/pkg/nuget"
 	"golang.org/x/term"

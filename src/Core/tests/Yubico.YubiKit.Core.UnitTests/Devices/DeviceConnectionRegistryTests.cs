@@ -185,7 +185,7 @@ public class DeviceConnectionRegistryTests
     }
 
     [Fact]
-    public async Task RegisteredSmartCardConnection_Dispose_ReleasesRegistration_EvenWhenInnerThrows()
+    public async Task RegisteredSmartCardConnection_Dispose_RetainsRegistrationWhenInnerReleaseIsUnproven()
     {
         var id = NewId();
         var throwingInner = new FakeSmartCardConnection { ThrowOnDispose = true };
@@ -194,7 +194,9 @@ public class DeviceConnectionRegistryTests
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
 
         Assert.Throws<InvalidOperationException>(wrapped.Dispose);
-        Assert.False(DeviceConnectionRegistry.IsInUse(id));
+        Assert.True(DeviceConnectionRegistry.IsInUse(id));
+        _ = await Assert.ThrowsAsync<UnrecoveredConnectionException>(async () =>
+            await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken));
 
         var asyncId = NewId();
         var inner = new FakeSmartCardConnection();
@@ -206,6 +208,31 @@ public class DeviceConnectionRegistryTests
         await asyncWrapped.DisposeAsync();
         Assert.False(DeviceConnectionRegistry.IsInUse(asyncId));
         Assert.True(inner.Disposed);
+    }
+
+    [Fact]
+    public async Task UnrecoveredRegistration_NewAndWaitingAcquisitionsReceiveFreshTypedFailuresWithStoredCause()
+    {
+        var id = NewId();
+        var cause = new InvalidOperationException("native release was not proven");
+        var discovery = DeviceConnectionRegistry.TryAcquireDiscovery(id);
+        Assert.NotNull(discovery);
+        var waiting = DeviceConnectionRegistry.AcquireConnectionAsync(
+            [id], TestContext.Current.CancellationToken).AsTask();
+
+        DeviceConnectionRegistry.MarkUnrecovered(discovery, cause);
+
+        var waitingFailure = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => waiting);
+        var firstNewFailure = Assert.Throws<UnrecoveredConnectionException>(
+            () => DeviceConnectionRegistry.TryAcquireDiscovery(id));
+        var secondNewFailure = await Assert.ThrowsAsync<UnrecoveredConnectionException>(async () =>
+            await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken));
+
+        Assert.NotSame(waitingFailure, firstNewFailure);
+        Assert.NotSame(firstNewFailure, secondNewFailure);
+        Assert.Same(cause, waitingFailure.InnerException);
+        Assert.Same(cause, firstNewFailure.InnerException);
+        Assert.Same(cause, secondNewFailure.InnerException);
     }
 
     // Blocking waits below are deliberate: "a losing caller must not return early" can only be observed by
@@ -221,7 +248,7 @@ public class DeviceConnectionRegistryTests
     //   I3  the lease is never released before inner teardown completes;
     //   I4  a losing caller (sync or async) does not return before the winner's teardown finishes;
     //   I5  a synchronous loser blocking on an asynchronous winner does not deadlock;
-    //   I6  teardown failure releases the lease anyway, and every caller observes the same exception.
+    //   I6  unproven SmartCard teardown retains the lease, and every caller observes the same exception.
     // ---------------------------------------------------------------------------------------------------
 
     /// <summary>I1, I2, I3, I4 — SmartCard wrapper.</summary>
@@ -356,9 +383,9 @@ public class DeviceConnectionRegistryTests
         Assert.Equal(1, lease.ReleaseCount);
     }
 
-    /// <summary>I6 — teardown failure still releases the lease, and every caller sees the same exception.</summary>
+    /// <summary>I6 — unproven SmartCard teardown retains the lease, and every caller sees the same exception.</summary>
     [Fact]
-    public async Task RegisteredSmartCardConnection_InnerDisposeThrows_ReleasesLeaseAndSharesException()
+    public async Task RegisteredSmartCardConnection_InnerDisposeThrows_RetainsLeaseAndSharesException()
     {
         var inner = new FakeSmartCardConnection { ThrowOnDispose = true };
         var lease = new CountingLease();
@@ -372,7 +399,7 @@ public class DeviceConnectionRegistryTests
         Assert.Same(winner, syncLoser);
         Assert.Same(winner, asyncLoser);
         Assert.Equal(1, inner.DisposeCount);
-        Assert.Equal(1, lease.ReleaseCount);
+        Assert.Equal(0, lease.ReleaseCount);
     }
 
 #pragma warning restore xUnit1031

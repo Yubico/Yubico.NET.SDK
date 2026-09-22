@@ -15,16 +15,18 @@
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-///     One-shot disposal with shared completion. The first caller wins and runs teardown, then releases the
-///     optional <paramref name="lease" /> in a <c>finally</c>. Every concurrent or later caller observes that
-///     same completion: async callers await it, sync callers block on it. Any disposal call returning therefore
-///     implies teardown actually finished, and all callers see the same outcome.
+///     One-shot disposal with shared completion. The first caller wins and runs teardown. Every concurrent or
+///     later caller observes that same completion: async callers await it, sync callers block on it. Any disposal
+///     call returning therefore implies teardown actually finished, and all callers see the same outcome.
 /// </summary>
 /// <remarks>
-///     When supplied, the lease is never released before inner teardown completes, even when inner teardown
-///     fails, so a caller cannot reopen an interface whose physical handle is still being torn down.
+///     When supplied, the lease is never released before inner teardown completes. The caller selects whether a
+///     failed teardown supplies enough release evidence to release the lease or must retain it as unrecovered.
 /// </remarks>
-internal sealed class DisposalGate(IDisposable? lease = null)
+internal sealed class DisposalGate(
+    IDisposable? lease = null,
+    bool releaseLeaseOnFailure = true,
+    Action<Exception>? onFailure = null)
 {
     private Task? _completion;
 
@@ -52,15 +54,23 @@ internal sealed class DisposalGate(IDisposable? lease = null)
 
     private async Task TearDownAsync(TaskCompletionSource claim, Func<ValueTask> teardown)
     {
+        Exception? failure = null;
         try
         {
             try
             {
                 await teardown().ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                failure = ex;
+                onFailure?.Invoke(ex);
+                throw;
+            }
             finally
             {
-                lease?.Dispose();
+                if (failure is null || releaseLeaseOnFailure)
+                    lease?.Dispose();
             }
 
             claim.SetResult();

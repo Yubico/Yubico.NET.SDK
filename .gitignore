@@ -564,3 +564,8 @@ worktrees/
 .humanlayer/
 .playwright-mcp/
 Plans/
+
+# Version the async-boundaries approval documents, including on case-insensitive filesystems.
+!/docs/plans/
+/docs/plans/*
+!/docs/plans/yubikit-async-boundaries/

@@ -137,11 +137,17 @@ device with `Yubico.YubiKit.SecurityDomain`.
   guard is process-local.
 - One live session per connection. Dispose it before creating another over the same connection.
 - Whoever creates a connection disposes it; use `await using`. A session from a `device.Create...` factory
-  owns the hidden connection it opened. There is no finalizer backstop, and a leaked connection can hold
-  the device lease for the life of the process.
+  owns the hidden connection it opened. Built-in SmartCard connections request safe shutdown from their
+  finalizer, but finalization is nondeterministic and is not a substitute for disposal.
 - Sessions refuse overlapping operations. An exchange already in flight runs to completion.
-- Raw `IConnection` I/O bypasses every guard. Never interleave it with a live session, and dispose and
-  reopen after an interrupted exchange.
+- Raw `IConnection` I/O bypasses session and exchange guards. The built-in SmartCard connection additionally
+  refuses overlapping raw native operations instead of queuing them. Never interleave raw I/O with a live
+  session, and dispose and reopen after an interrupted exchange.
+- Built-in SmartCard cancellation prevents dispatch when observed first. Once a native PC/SC call starts, its
+  task remains pending until the call returns so caller-owned input remains borrowed safely. Async disposal
+  waits for accepted work, transaction end, disconnect, and context release without blocking the caller.
+- If native release cannot be proven, the physical-interface claim remains quarantined and a later open throws
+  `UnrecoveredConnectionException` rather than treating the key as ordinarily busy.
 - `ProtocolFactory` and the `IProtocol` family are internal. Use `Raw*Session.CreateAsync(connection)`.
 
 ## Security notes

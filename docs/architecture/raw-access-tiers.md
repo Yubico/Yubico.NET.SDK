@@ -144,6 +144,14 @@ keep-alive handling, sequencing, concurrency exclusion, and recovery from partia
 Never drive a raw connection concurrently with a live session or another raw operation. If traffic is interrupted,
 interleaved, or otherwise leaves device state uncertain, dispose the connection and open a new one before continuing.
 
+The built-in PC/SC connection enforces the caller-exclusion rule at native admission: a second raw operation is
+refused immediately rather than queued. Open, transmit, transaction begin/end, disconnect, and context release use
+one connection-lifetime background worker. Cancellation observed before dispatch submits no native call. After
+dispatch, the task remains pending until PC/SC returns; only then may the caller reuse or clear command memory.
+`DisposeAsync` closes admission promptly and completes after accepted work and checked native cleanup. If cleanup
+cannot prove both card disconnect and context release, the physical-interface claim remains quarantined and later
+managed opens fail with `UnrecoveredConnectionException`.
+
 ## Ownership And Sequencing
 
 - A grouped physical YubiKey admits one live connection across its known interfaces.
@@ -152,6 +160,7 @@ interleaved, or otherwise leaves device state uncertain, dispose the connection 
 - `Raw*Session.CreateAsync(connection)` borrows the connection; the caller disposes both.
 - `IYubiKey.CreateRaw*SessionAsync(...)` owns its hidden connection and disposes it with the returned session.
 - Overlapping operations on one raw session throw `InvalidOperationException` immediately.
+- Overlapping raw calls on a built-in SmartCard connection also throw `InvalidOperationException` immediately.
 - Once admitted, a stateful exchange runs to completion so cancellation cannot strand protocol state.
 - Disposal atomically closes admission, waits for an admitted exchange, and only then disposes protocol/SCP state
   and any convenience-owned connection. New operations are refused as soon as disposal begins.

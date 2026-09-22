@@ -315,8 +315,8 @@ public class DiscoverySingleFlightTests
             ProtocolDeviceInfo.NotifyTransportActivity();
 
             // A read from the new generation cannot join the in-flight read from the superseded generation.
-            // Its independent attempt observes the still-held discovery lease and skips.
-            var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
+            // Its independent attempt observes the quarantined lease and reports unresolved ownership.
+            _ = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() =>
                 ProtocolDeviceInfo.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
@@ -324,7 +324,6 @@ public class DiscoverySingleFlightTests
                     NullLogger.Instance,
                     CancellationToken.None));
 
-            Assert.Equal(DiscoveryReadSkipCause.InterfaceLeaseHeld, exception.Cause);
             Assert.Equal(1, device.ConnectCalls);
         }
         finally
@@ -356,7 +355,7 @@ public class DiscoverySingleFlightTests
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => firstRead);
             Assert.Equal(1, device.ConnectCalls);
 
-            var exception = await Assert.ThrowsAsync<DiscoveryReadSkippedException>(() =>
+            _ = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() =>
                 ProtocolDeviceInfo.ReadBoundedAsync(
                     device,
                     ConnectionType.SmartCard,
@@ -365,7 +364,6 @@ public class DiscoverySingleFlightTests
                     CancellationToken.None,
                     scope: replacementManagerScope));
 
-            Assert.Equal(DiscoveryReadSkipCause.InterfaceLeaseHeld, exception.Cause);
             Assert.Equal(1, device.ConnectCalls);
         }
         finally

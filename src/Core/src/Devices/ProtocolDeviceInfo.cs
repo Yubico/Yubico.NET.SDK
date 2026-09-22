@@ -226,12 +226,14 @@ internal static class ProtocolDeviceInfo
         }
         catch (TimeoutException)
         {
-            sharedRead.RecordAbandonment();
+            if (!sharedRead.Task.IsCompleted)
+                sharedRead.RecordAbandonment();
             throw;
         }
         catch (OperationCanceledException)
         {
-            sharedRead.RecordAbandonment();
+            if (!sharedRead.Task.IsCompleted)
+                sharedRead.RecordAbandonment();
             throw;
         }
     }
@@ -246,6 +248,7 @@ internal static class ProtocolDeviceInfo
         private readonly ConnectionType _connection;
         private readonly ILogger _logger;
         private readonly Lazy<Task<DeviceInfo>> _task;
+        private readonly DiscoveryReadLeaseTracker _leaseTracker = new();
         private int _abandonedWaiterCount;
 
         public SharedRead(
@@ -270,14 +273,24 @@ internal static class ProtocolDeviceInfo
 
         public Task<DeviceInfo> Task => _task.Value;
 
-        public void RecordAbandonment() => Interlocked.Increment(ref _abandonedWaiterCount);
+        public void RecordAbandonment()
+        {
+            Interlocked.Increment(ref _abandonedWaiterCount);
+            _leaseTracker.MarkAbandoned(_key.InterfaceId);
+        }
 
         private Task<DeviceInfo> StartAndObserve(
             TransportEpoch epoch,
             IDiscoveryConnectionProvider? provider,
             bool waitForWorkerSlot)
         {
-            var task = StartSharedRead(_scope, _key, epoch, provider, waitForWorkerSlot);
+            var task = StartSharedRead(
+                _scope,
+                _key,
+                epoch,
+                provider,
+                waitForWorkerSlot,
+                _leaseTracker);
             _ = task.ContinueWith(
                 Complete,
                 CancellationToken.None,
@@ -311,7 +324,8 @@ internal static class ProtocolDeviceInfo
         ReadKey key,
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
-        bool waitForWorkerSlot)
+        bool waitForWorkerSlot,
+        DiscoveryReadLeaseTracker leaseTracker)
     {
         if (waitForWorkerSlot)
         {
@@ -322,7 +336,7 @@ internal static class ProtocolDeviceInfo
             // bounds the wait, and the admission bound itself is preserved: at most
             // MaximumConcurrentWorkers native reads run concurrently, so a hung native call still cannot
             // multiply workers.
-            return StartQueuedSharedRead(scope, key, epoch, provider);
+            return StartQueuedSharedRead(scope, key, epoch, provider, leaseTracker);
         }
 
         if (!DiscoveryWorkerAdmission.TryAcquire(out var admission))
@@ -337,7 +351,7 @@ internal static class ProtocolDeviceInfo
             // WaitAsync. Saturation skips instead of queuing or allocating another worker (best-effort
             // metadata path). Supersession is validated inside the worker, immediately before the
             // hardware open (see ConnectAndReadAsync).
-            return StartWorker(scope, key, epoch, provider, admission);
+            return StartWorker(scope, key, epoch, provider, admission, leaseTracker);
         }
         catch
         {
@@ -350,7 +364,8 @@ internal static class ProtocolDeviceInfo
         ReadScope scope,
         ReadKey key,
         TransportEpoch epoch,
-        IDiscoveryConnectionProvider? provider)
+        IDiscoveryConnectionProvider? provider,
+        DiscoveryReadLeaseTracker leaseTracker)
     {
         // The queued wait is cancelled by transport activity so superseded reads cannot accumulate behind
         // hung workers: each hotplug event would otherwise enqueue another uncancellable waiter (its
@@ -370,7 +385,7 @@ internal static class ProtocolDeviceInfo
 
         try
         {
-            return await StartWorker(scope, key, epoch, provider, admission).ConfigureAwait(false);
+            return await StartWorker(scope, key, epoch, provider, admission, leaseTracker).ConfigureAwait(false);
         }
         catch
         {
@@ -395,13 +410,20 @@ internal static class ProtocolDeviceInfo
         ReadKey key,
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
-        IDisposable admission) =>
+        IDisposable admission,
+        DiscoveryReadLeaseTracker leaseTracker) =>
         Task.Factory.StartNew(
                 async () =>
                 {
                     using (admission)
                     {
-                        return await ConnectAndReadAsync(scope, key, epoch, provider, CancellationToken.None)
+                        return await ConnectAndReadAsync(
+                                scope,
+                                key,
+                                epoch,
+                                provider,
+                                leaseTracker,
+                                CancellationToken.None)
                             .ConfigureAwait(false);
                     }
                 },
@@ -415,30 +437,90 @@ internal static class ProtocolDeviceInfo
         ReadKey key,
         TransportEpoch epoch,
         IDiscoveryConnectionProvider? provider,
+        DiscoveryReadLeaseTracker leaseTracker,
         CancellationToken cancellationToken)
     {
         var interfaceId = key.InterfaceId;
         if (provider is null)
             throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.NoDiscoveryProvider);
 
-        using var discoveryLease = DeviceConnectionRegistry.TryAcquireDiscovery(interfaceId);
+        var discoveryLease = DeviceConnectionRegistry.TryAcquireDiscovery(interfaceId);
         if (discoveryLease is null)
             throw new DiscoveryReadSkippedException(interfaceId, DiscoveryReadSkipCause.InterfaceLeaseHeld);
+        leaseTracker.Register(discoveryLease);
+        var registrationTransferred = false;
+        try
+        {
+            // Final supersession check, as close to the hardware open as possible: a superseded read must not
+            // START a new open against hardware its evidence no longer names.
+            ThrowIfSuperseded(scope, key, epoch);
 
-        // Final supersession check, as close to the hardware open as possible: a superseded read must not
-        // START a new open against hardware its evidence no longer names. An epoch flip landing after this
-        // check is inherently racy with the open itself and is accepted as residual: the delivered
-        // invariants are (a) a read holding an old epoch can never wait forever un-cancelled, and (b) it
-        // cannot begin a hardware open once supersession is observable. A finder also stores cache writes in
-        // the same captured EvidenceEpoch as this scope, so results completing after retirement cannot reach
-        // the replacement epoch's caches.
-        ThrowIfSuperseded(scope, key, epoch);
+            // Discovery creates this connection, so discovery disposes it. A PC/SC slot takes the discovery
+            // registration before native open. Resolve the selected member when the provider is the published
+            // composite device so metadata reads follow the same route as direct slot reads.
+            var pcscSlot = ResolvePcscSlot(provider, key.Connection);
+            registrationTransferred = pcscSlot is not null;
+            var conn = pcscSlot is not null
+                ? await pcscSlot.OpenRegisteredConnectionAsync(discoveryLease, cancellationToken).ConfigureAwait(false)
+                : await provider.ConnectForDiscoveryAsync(key.Connection, cancellationToken).ConfigureAwait(false);
+            await using (conn.ConfigureAwait(false))
+                return await ReadAsync(conn, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            if (!registrationTransferred)
+                discoveryLease.Dispose();
+        }
+    }
 
-        // Discovery creates this connection, so discovery disposes it. Protocols are pure users of the
-        // connection they are handed, so the protocol disposal inside ReadAsync does not release the handle.
-        var conn = await provider.ConnectForDiscoveryAsync(key.Connection, cancellationToken).ConfigureAwait(false);
-        await using (conn.ConfigureAwait(false))
-            return await ReadAsync(conn, cancellationToken).ConfigureAwait(false);
+    private static PcscConnectionSlot? ResolvePcscSlot(
+        IDiscoveryConnectionProvider provider,
+        ConnectionType connection)
+    {
+        if (connection != ConnectionType.SmartCard)
+            return null;
+        if (provider is PcscConnectionSlot pcscSlot)
+            return pcscSlot;
+        return provider is YubiKeyDevice published &&
+               published.TryResolveSlot(connection, out var slot) &&
+               slot is PcscConnectionSlot selectedPcscSlot
+            ? selectedPcscSlot
+            : null;
+    }
+
+    private sealed class DiscoveryReadLeaseTracker
+    {
+        private readonly Lock _sync = new();
+        private IDisposable? _lease;
+        private Exception? _abandonment;
+
+        public void Register(IDisposable lease)
+        {
+            Exception? abandonment;
+            lock (_sync)
+            {
+                _lease = lease;
+                abandonment = _abandonment;
+            }
+
+            if (abandonment is not null)
+                DeviceConnectionRegistry.TryMarkUnrecovered(lease, abandonment);
+        }
+
+        public void MarkAbandoned(string interfaceId)
+        {
+            IDisposable? lease;
+            var failure = new InvalidOperationException(
+                $"A bounded discovery read for interface '{interfaceId}' was abandoned while native ownership remained active.");
+            lock (_sync)
+            {
+                _abandonment ??= failure;
+                lease = _lease;
+            }
+
+            if (lease is not null)
+                DeviceConnectionRegistry.TryMarkUnrecovered(lease, failure);
+        }
     }
 
     public static async Task<DeviceInfo> ReadAsync(IConnection connection, CancellationToken cancellationToken)

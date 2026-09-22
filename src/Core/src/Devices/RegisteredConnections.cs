@@ -29,7 +29,10 @@ internal sealed class RegisteredSmartCardConnection(
     ISmartCardConnection inner,
     IDisposable registration) : ISmartCardConnection
 {
-    private readonly DisposalGate _disposal = new(registration);
+    private readonly DisposalGate _disposal = new(
+        registration,
+        releaseLeaseOnFailure: false,
+        failure => DeviceConnectionRegistry.TryMarkUnrecovered(registration, failure));
 
     public ConnectionType Type => inner.Type;
 

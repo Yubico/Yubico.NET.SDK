@@ -242,6 +242,8 @@ Yubico.YubiKit.Core.Devices.ConnectionInUseException
 Yubico.YubiKit.Core.Devices.ConnectionInUseException.ConnectionInUseException() -> void
 Yubico.YubiKit.Core.Devices.ConnectionInUseException.ConnectionInUseException(string! message) -> void
 Yubico.YubiKit.Core.Devices.ConnectionInUseException.ConnectionInUseException(string! message, System.Exception! innerException) -> void
+Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException
+Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException.UnrecoveredConnectionException(string! message, System.Exception! innerException) -> void
 Yubico.YubiKit.Core.Devices.ConnectionType
 Yubico.YubiKit.Core.Devices.ConnectionType.All = Yubico.YubiKit.Core.Devices.ConnectionType.Hid | Yubico.YubiKit.Core.Devices.ConnectionType.HidFido | Yubico.YubiKit.Core.Devices.ConnectionType.HidOtp | Yubico.YubiKit.Core.Devices.ConnectionType.SmartCard -> Yubico.YubiKit.Core.Devices.ConnectionType
 Yubico.YubiKit.Core.Devices.ConnectionType.Hid = 1 -> Yubico.YubiKit.Core.Devices.ConnectionType
@@ -707,7 +709,7 @@ Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind.Unknown = 1 -> Yubic
 Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind.Usb = 2 -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
 Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory
 Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice! smartCardDevice, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection!>!
-Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.SmartCardConnectionFactory(Microsoft.Extensions.Logging.ILoggerFactory! loggerFactory) -> void
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.SmartCardConnectionFactory() -> void
 Yubico.YubiKit.Core.Utilities.BerLength
 Yubico.YubiKit.Core.Utilities.ByteUtils
 Yubico.YubiKit.Core.Utilities.Crc13239
@@ -1086,7 +1088,7 @@ static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.GetReportType(Y
 static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.IsSupported(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo! descriptorInfo) -> bool
 static Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetInstance(Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout layout) -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator!
 static Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices.Create(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices!>? logger = null) -> Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices!
-static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.CreateDefault(Microsoft.Extensions.Logging.ILoggerFactory? loggerFactory = null) -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory!
+static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.CreateDefault() -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory!
 static Yubico.YubiKit.Core.Utilities.BerLength.EncodingSize(int length) -> int
 static Yubico.YubiKit.Core.Utilities.BerLength.Write(System.Span<byte> destination, int length) -> int
 static Yubico.YubiKit.Core.Utilities.ByteUtils.ValidateByte(int byteInt, string! name) -> byte

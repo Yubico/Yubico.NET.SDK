@@ -145,13 +145,20 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
         var ownership = await DeviceConnectionRegistry
             .AcquireConnectionAsync(InterfaceIds, cancellationToken)
             .ConfigureAwait(false);
+        var ownershipTransferred = requested == ConnectionType.SmartCard && slot is PcscConnectionSlot;
         try
         {
-            var raw = await slot.OpenRawConnectionAsync(requested, cancellationToken).ConfigureAwait(false);
+            var raw = ownershipTransferred
+                ? await ((PcscConnectionSlot)slot)
+                    .OpenRegisteredConnectionAsync(ownership, cancellationToken)
+                    .ConfigureAwait(false)
+                : await slot.OpenRawConnectionAsync(requested, cancellationToken).ConfigureAwait(false);
             try
             {
                 IConnection registered = requested switch
                 {
+                    ConnectionType.SmartCard when ownershipTransferred && raw is ISmartCardConnection smartCard =>
+                        smartCard,
                     ConnectionType.SmartCard when raw is ISmartCardConnection smartCard =>
                         new RegisteredSmartCardConnection(smartCard, ownership),
                     ConnectionType.HidFido when raw is IFidoHidConnection fido =>
@@ -170,9 +177,15 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
                 throw;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            ownership.Dispose();
+            if (!ownershipTransferred)
+            {
+                if (ex is UnrecoveredConnectionException)
+                    DeviceConnectionRegistry.MarkUnrecovered(ownership, ex);
+                else
+                    ownership.Dispose();
+            }
             throw;
         }
     }

@@ -1,17 +1,17 @@
 ---
 name: Release
-description: Drives the Yubico .NET SDK release end-to-end — version gating, release branch, NativeShims ordering, CI dispatch, tagging, Windows-wizard sign+publish, GitHub release, post-release merge-back, and Slack #ask-tla announcement. USE WHEN release, drop release, ship release, cut release, publish release, release SDK, dotnet release, NuGet release, /Release, /Release resume.
+description: Drives the Yubico .NET SDK release end-to-end — version gating, release branch, NativeShims ordering, CI dispatch, tagging, cross-platform sign+publish, GitHub release, post-release merge-back, and Slack #ask-tla announcement. USE WHEN release, drop release, ship release, cut release, publish release, release SDK, dotnet release, NuGet release, /Release, /Release resume.
 ---
 
 # Release
 
-Project-local skill for shipping a Yubico .NET SDK release. The operator invokes the skill, answers gating questions, and (on Windows) plugs in the code-sign YubiKey. Every other step (branch creation, CI dispatch, artifact download, signing, publishing, tagging, GitHub release, Slack draft) is automated or surfaces an explicit decision gate.
+Project-local skill for shipping a Yubico .NET SDK release. The operator invokes the skill, answers gating questions, and plugs in the code-sign YubiKey only during phase 5 on macOS, Windows, or Linux. Every other step (branch creation, CI dispatch, artifact download, signing, publishing, tagging, GitHub release, Slack draft) is automated or surfaces an explicit decision gate.
 
 The skill works in two modes:
 - **`/Release`** — full flow from phase 1 (pre-flight) onward
-- **`/Release resume <version>`** — picks up at the current phase using cached state from `~/Releases/<version>/.state.json`. Most commonly used to resume at phase 5 (sign+publish) when phases 1–4 ran on macOS/Linux and the operator switches to Windows for signing, but works at any phase boundary.
+- **`/Release resume <version>`** — picks up at the current phase using cached state from `~/Releases/<version>/.state.json`; it works at any phase boundary and on any supported platform.
 
-The Windows-only constraint (`build/sign-v2.ps1` + smart-card YubiKey + the .NET Sign CLI, whose Authenticode signing is Windows-only) is enforced at phase 5 — the skill detects platform and either runs the full wizard (Windows) or stops with a handoff (macOS/Linux).
+Phase 5 builds the signer and independent verifier from their nested Go modules once, then uses those binaries on macOS, Windows, or Linux. Each signing run is bound to the exact workflow `headSha`. The old `build/sign-v2.ps1` flow is a Windows-only fallback that requires explicit operator choice and is allowed for exactly one transition release; `build/sign.ps1` is legacy and is not the primary flow.
 
 ## Workflow Routing
 
@@ -21,7 +21,7 @@ The Windows-only constraint (`build/sign-v2.ps1` + smart-card YubiKey + the .NET
 
 ## Examples
 
-**Example 1: Full release on Windows**
+**Example 1: Full release**
 ```
 User: "/Release"
 → Skill loads Workflows/DropRelease.md
@@ -29,21 +29,21 @@ User: "/Release"
 → Phase 2: detects no Yubico.NativeShims/ changes, skips NativeShims rebuild
 → Phase 3: creates release/1.16.1 from develop, drafts whats-new.md, opens PR to main
 → Phase 4: after PR merged, dispatches build.yml with version=1.16.1, polls until green, tags 1.16.1
-→ Phase 5 (Windows): downloads artifacts to ~/Releases/1.16.1/, runs sign-v2.ps1 (Sign CLI), publishes to NuGet.org
+→ Phase 5: builds the cross-platform signer and verifier once, downloads artifacts to ~/Releases/1.16.1/, signs against each workflow's exact source digest, verifies report versions, publishes to NuGet.org
 → Phase 6: creates draft GitHub release with signed assets, triggers deploy-docs.yml
 → Phase 7: merges main back to develop, prints Slack #ask-tla announcement ready to copy
 ```
 
-**Example 2: Cross-machine release (start macOS, finish Windows)**
+**Example 2: Resume after an interruption**
 ```
 Operator (on macOS): "/Release"
 → Phases 1-4 complete (release branch, PR, merge, tag)
-→ Phase 5 detects darwin → STOPS, prints handoff with build.yml run ID and instruction to run `/Release resume 1.16.1` on Windows
+→ Operator stops before signing; state retains the build run ID and tag status
 → State cached to ~/Releases/1.16.1/.state.json (run IDs, version, NativeShims flag)
 
-Operator (on Windows): "/Release resume 1.16.1"
+Operator (on any supported platform): "/Release resume 1.16.1"
 → Loads cached state, skips phases 1-4
-→ Phase 5: downloads artifacts (NativeShims first if rebuilt), runs sign-v2.ps1, publishes
+→ Phase 5: downloads artifacts (NativeShims first if rebuilt), runs release-sign, publishes
 → Phases 6-7 complete normally
 ```
 
@@ -72,8 +72,12 @@ User: "/Release"
 
 ## Hard Constraints
 
-- **Code-signing YubiKey must be unplugged during phases 1–4**: The operator's code-signing YubiKey must NOT be connected to the machine while any build or CI step runs. Integration tests that enumerate YubiKeys can accidentally run PIV/PGP resets against any connected key. The skill gates this: Phase 1 asks the operator to confirm the YubiKey is unplugged. Phase 5 is the ONLY phase where it should be plugged in — the Sign CLI reads the PIV certificate safely but cannot coexist with stray test runs. The skill must NEVER run integration tests itself.
-- **Windows-only sign step**: phase 5 refuses to run on non-Windows
+- **Code-signing YubiKey must be unplugged during phases 1–4**: The operator's code-signing YubiKey must NOT be connected to the machine while any build or CI step runs. Integration tests that enumerate YubiKeys can accidentally run PIV/PGP resets against any connected key. The skill gates this: Phase 1 asks the operator to confirm the YubiKey is unplugged. Phase 5 is the ONLY phase where it should be plugged in. Unplug it immediately after each signing half before returning to phase 4 or entering phase 6 if tests or other workflows may run. The skill must NEVER run integration tests itself.
+- **Cross-platform primary sign step**: phase 5 accepts macOS, Windows, and Linux and uses `build/release-sign`; Windows `build/sign-v2.ps1` is an explicit, one-transition-release fallback only
+- **Build-provenance binding**: each NativeShims or main signing invocation receives the `headSha` from its own workflow run as `--source-digest`; never reuse one component's digest for the other
+- **Deferred NativeShims binding**: when NativeShims is built from `main`, its workflow `headSha` must equal `state.releaseCommit`; a build from `develop` remains bound to its own recorded workflow digest
+- **Release commit binding**: after the release PR merges, record its exact merge commit as `state.releaseCommit`; the main build, release tag, signing report, and source digest must all resolve to that commit
+- **No silent publish retries**: normal NuGet publishing does not use `--skip-duplicate`; an existing version is a hard stop unless a state-recorded partial retry proves remote package equivalence
 - **NativeShims ordering**: when rebuilt (from either develop or main), NativeShims signs + publishes to NuGet.org *before* main `build.yml` dispatches. The operator chooses whether to build from develop (immediate) or main (deferred to after PR merge).
 - **Tag only after green CI**: `git tag` runs only after `build.yml` reports success — failed builds mean broken artifacts and a poisoned tag
 - **No Versions.props edits**: version is passed as `build.yml` workflow_dispatch input; `<CommonVersion>0.0.0-dev</CommonVersion>` stays unchanged

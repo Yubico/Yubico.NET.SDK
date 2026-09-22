@@ -20,7 +20,6 @@ type extractedPackage struct {
 	Path         string
 	Name         string
 	ArtifactPath string
-	Attested     bool
 }
 
 type commandRunner interface {
@@ -145,7 +144,7 @@ func extractEntryExclusive(entry *zip.File, output string) error {
 	return nil
 }
 
-func attestPackages(ctx context.Context, runner commandRunner, repo, workflow, sourceDigest string, packages []extractedPackage, after func() error) error {
+func attestPackages(ctx context.Context, runner commandRunner, repo, workflow, sourceDigest string, packages []extractedPackage) error {
 	for i := range packages {
 		output, err := runner.Run(ctx, "gh", "attestation", "verify", packages[i].Path,
 			"--repo", repo,
@@ -160,9 +159,8 @@ func attestPackages(ctx context.Context, runner commandRunner, repo, workflow, s
 		if !attestationMatches(output, packages[i].Path) {
 			return fmt.Errorf("verify attestation for %s: gh returned invalid or empty JSON", packages[i].Name)
 		}
-		packages[i].Attested = true
 	}
-	return after()
+	return nil
 }
 
 func attestationMatches(output []byte, filename string) bool {

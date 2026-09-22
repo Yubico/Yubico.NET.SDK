@@ -10,28 +10,29 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
 
 type runConfig struct {
-	Component           string
-	WorkingDirectory    string
-	Artifacts           []string
-	ManifestPath        string
-	KeyLocation         string
-	CertificatePath     string
-	RootPath            string
-	TimestampRootPath   string
-	IndependentVerifier string
-	SourceDigest        string
-	Timestamper         string
-	Clean               bool
+	Component         string
+	WorkingDirectory  string
+	Artifacts         []string
+	ManifestPath      string
+	KeyLocation       string
+	CertificatePath   string
+	RootPath          string
+	TimestampRootPath string
+	Osslsigncode      string
+	SourceDigest      string
+	Timestamper       string
+	Clean             bool
 }
 
 func run(ctx context.Context, cfg runConfig, runner commandRunner, acquire signerAcquirer) error {
 	started := time.Now().UTC()
-	m, manifestHash, certificates, roots, timestampRoots, err := validateRun(&cfg)
+	m, manifestHash, certificates, roots, timestampRoots, err := validateRun(ctx, &cfg, runner)
 	if err != nil {
 		return err
 	}
@@ -40,11 +41,8 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner, acquire signe
 	if err != nil {
 		return err
 	}
-	if err := attestPackages(ctx, runner, m.AttestationRepo, m.SignerWorkflow, cfg.SourceDigest, extracted, func() error { return nil }); err != nil {
+	if err := attestPackages(ctx, runner, m.AttestationRepo, m.SignerWorkflow, cfg.SourceDigest, extracted); err != nil {
 		return err
-	}
-	for i := range extracted {
-		extracted[i].Attested = true
 	}
 	packages := make([]packageInfo, 0, len(extracted))
 	for _, item := range extracted {
@@ -107,7 +105,7 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner, acquire signe
 			err = verifySignedPackage(packageCtx, info, output, selected, expected, roots, timestampRoots, signer.Leaf)
 		}
 		if err == nil && info.Kind == "nupkg" {
-			err = runIndependentVerifier(packageCtx, runner, cfg, output, selected, signer.Leaf)
+			err = verifyAssembliesWithOsslsigncode(packageCtx, runner, cfg, output, selected, signer.Leaf)
 		}
 		cancel()
 		if err != nil {
@@ -126,7 +124,7 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner, acquire signe
 			assemblies = append(assemblies, name)
 		}
 		sort.Strings(assemblies)
-		result.Packages = append(result.Packages, reportPackage{ID: info.ID, Version: info.Version, Kind: info.Kind, Filename: info.Name, InputSHA256: inputHash, OutputSHA256: outputHash, SelectedAssemblies: assemblies, AttestationVerified: info.Attested})
+		result.Packages = append(result.Packages, reportPackage{ID: info.ID, Version: info.Version, Kind: info.Kind, Filename: info.Name, InputSHA256: inputHash, OutputSHA256: outputHash, SelectedAssemblies: assemblies})
 		outputNames = append(outputNames, info.Name)
 	}
 	result.CompletedUTC = time.Now().UTC()
@@ -137,8 +135,8 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner, acquire signe
 	return commitOutputs(filepath.Join(cfg.WorkingDirectory, "signed"), staging, outputNames, reportContents, cfg.Clean)
 }
 
-func validateRun(cfg *runConfig) (manifest, string, []*x509.Certificate, *x509.CertPool, *x509.CertPool, error) {
-	if cfg.Component == "" || cfg.WorkingDirectory == "" || len(cfg.Artifacts) == 0 || cfg.ManifestPath == "" || cfg.KeyLocation == "" || cfg.CertificatePath == "" || cfg.RootPath == "" || cfg.TimestampRootPath == "" || cfg.IndependentVerifier == "" || cfg.SourceDigest == "" {
+func validateRun(ctx context.Context, cfg *runConfig, runner commandRunner) (manifest, string, []*x509.Certificate, *x509.CertPool, *x509.CertPool, error) {
+	if cfg.Component == "" || cfg.WorkingDirectory == "" || len(cfg.Artifacts) == 0 || cfg.ManifestPath == "" || cfg.KeyLocation == "" || cfg.CertificatePath == "" || cfg.RootPath == "" || cfg.TimestampRootPath == "" || cfg.Osslsigncode == "" || cfg.SourceDigest == "" {
 		return manifest{}, "", nil, nil, nil, errors.New("all required run flags must be provided")
 	}
 	if len(cfg.SourceDigest) != 40 {
@@ -156,15 +154,22 @@ func validateRun(cfg *runConfig) (manifest, string, []*x509.Certificate, *x509.C
 	if _, err := exec.LookPath("gh"); err != nil {
 		return manifest{}, "", nil, nil, nil, errors.New("gh executable is unavailable")
 	}
-	verifier, err := exec.LookPath(cfg.IndependentVerifier)
+	osslsigncode, err := exec.LookPath(cfg.Osslsigncode)
 	if err != nil {
-		return manifest{}, "", nil, nil, nil, fmt.Errorf("independent verifier is unavailable: %w", err)
+		return manifest{}, "", nil, nil, nil, fmt.Errorf("osslsigncode is unavailable: %w", err)
 	}
-	verifier, err = filepath.Abs(verifier)
+	osslsigncode, err = filepath.Abs(osslsigncode)
 	if err != nil {
 		return manifest{}, "", nil, nil, nil, err
 	}
-	cfg.IndependentVerifier = verifier
+	cfg.Osslsigncode = osslsigncode
+	versionOutput, err := runner.Run(ctx, cfg.Osslsigncode, "--version")
+	if err != nil {
+		return manifest{}, "", nil, nil, nil, fmt.Errorf("check osslsigncode version: %w", err)
+	}
+	if err := validateOsslsigncodeVersion(versionOutput); err != nil {
+		return manifest{}, "", nil, nil, nil, err
+	}
 	signedDirectory := filepath.Join(cfg.WorkingDirectory, "signed")
 	if _, err := os.Lstat(signedDirectory); err == nil && !cfg.Clean {
 		return manifest{}, "", nil, nil, nil, errors.New("refusing to replace existing signed directory without --clean")
@@ -196,38 +201,92 @@ func validateRun(cfg *runConfig) (manifest, string, []*x509.Certificate, *x509.C
 	return m, hash, certificates, roots, timestampRoots, nil
 }
 
-func runIndependentVerifier(ctx context.Context, runner commandRunner, cfg runConfig, output string, selected map[string]struct{}, signer *x509.Certificate) error {
-	args := []string{"--package", output, "--root", cfg.RootPath, "--timestamp-root", cfg.TimestampRootPath, "--signer-fingerprint", certificateFingerprint(signer)}
+func validateOsslsigncodeVersion(output []byte) error {
+	firstLine := strings.TrimSuffix(strings.SplitN(string(output), "\n", 2)[0], "\r")
+	const prefix = "osslsigncode "
+	if !strings.HasPrefix(firstLine, prefix) {
+		return fmt.Errorf("unrecognized osslsigncode version output: %q", firstLine)
+	}
+	version := strings.Fields(strings.TrimPrefix(firstLine, prefix))
+	if len(version) == 0 {
+		return fmt.Errorf("unrecognized osslsigncode version output: %q", firstLine)
+	}
+	versionNumber := strings.TrimSuffix(version[0], ",")
+	parts := strings.Split(versionNumber, ".")
+	if len(parts) < 2 || len(parts) > 3 {
+		return fmt.Errorf("unrecognized osslsigncode version output: %q", firstLine)
+	}
+	values := make([]int, len(parts))
+	for i, part := range parts {
+		value, err := strconv.Atoi(part)
+		if err != nil || value < 0 {
+			return fmt.Errorf("unrecognized osslsigncode version output: %q", firstLine)
+		}
+		values[i] = value
+	}
+	if values[0] < 2 || (values[0] == 2 && values[1] < 13) {
+		return fmt.Errorf("osslsigncode 2.13 or newer is required, found %s", versionNumber)
+	}
+	return nil
+}
+
+func verifyAssembliesWithOsslsigncode(ctx context.Context, runner commandRunner, cfg runConfig, output string, selected map[string]struct{}, signer *x509.Certificate) error {
 	names := make([]string, 0, len(selected))
 	for name := range selected {
 		names = append(names, name)
 	}
 	sort.Strings(names)
-	for _, name := range names {
-		args = append(args, "--assembly", name)
+	if len(names) == 0 {
+		return nil
 	}
-	verifierOutput, err := runner.Run(ctx, cfg.IndependentVerifier, args...)
+	directory, err := os.MkdirTemp(filepath.Dir(output), ".release-sign-osslsigncode-")
 	if err != nil {
-		return fmt.Errorf("independent verifier: %w", err)
+		return err
 	}
-	expectedFingerprint := certificateFingerprint(signer)
-	seen := make(map[string]bool, len(names))
-	for _, line := range strings.Split(strings.TrimSpace(string(verifierOutput)), "\n") {
-		fields := strings.Fields(line)
-		if len(fields) < 4 || fields[0] != "PASS" {
-			return fmt.Errorf("independent verifier returned an unexpected line: %q", line)
+	defer os.RemoveAll(directory)
+	for index, name := range names {
+		contents, err := zipEntry(output, name)
+		if err != nil {
+			return fmt.Errorf("extract assembly for osslsigncode %s: %w", name, err)
 		}
-		name := fields[1]
-		if _, ok := selected[name]; !ok || seen[name] {
-			return fmt.Errorf("independent verifier returned an unexpected or duplicate assembly: %s", name)
+		assemblyPath := filepath.Join(directory, fmt.Sprintf("assembly-%04d.dll", index))
+		if err := os.WriteFile(assemblyPath, contents, 0o600); err != nil {
+			return fmt.Errorf("extract assembly for osslsigncode %s: %w", name, err)
 		}
-		if !strings.Contains(line, " image=SHA-256 ") || !strings.Contains(line, " signer="+expectedFingerprint+" ") {
-			return fmt.Errorf("independent verifier did not confirm SHA-256 and the expected signer for %s", name)
+		verificationOutput, err := runner.Run(ctx, cfg.Osslsigncode,
+			"verify", "-in", assemblyPath,
+			"-CAfile", cfg.RootPath,
+			"-TSA-CAfile", cfg.TimestampRootPath,
+			"-require-leaf-hash", "sha256:"+certificateFingerprint(signer),
+			"-ignore-cdp", "-ignore-crl")
+		if err != nil {
+			return fmt.Errorf("osslsigncode verify %s: %w", name, err)
 		}
-		seen[name] = true
+		if err := validateOsslsigncodeEvidence(verificationOutput); err != nil {
+			return fmt.Errorf("osslsigncode verify %s: %w", name, err)
+		}
 	}
-	if len(seen) != len(selected) {
-		return fmt.Errorf("independent verifier confirmed %d of %d assemblies", len(seen), len(selected))
+	return nil
+}
+
+func validateOsslsigncodeEvidence(output []byte) error {
+	required := map[string]int{
+		"Message digest algorithm : SHA256":           0,
+		"Leaf hash match: ok":                         0,
+		"Timestamp Server Signature verification: ok": 0,
+		"Signature verification: ok":                  0,
+		"Number of verified signatures: 1":            0,
+	}
+	for _, line := range strings.Split(string(output), "\n") {
+		normalized := strings.Join(strings.Fields(line), " ")
+		if _, ok := required[normalized]; ok {
+			required[normalized]++
+		}
+	}
+	for evidence, count := range required {
+		if count != 1 {
+			return fmt.Errorf("expected exactly one %q evidence line, got %d", evidence, count)
+		}
 	}
 	return nil
 }

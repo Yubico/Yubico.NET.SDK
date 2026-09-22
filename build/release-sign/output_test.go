@@ -62,6 +62,9 @@ func TestReportSortedAndContainsNoKeySecret(t *testing.T) {
 	if strings.Contains(string(b), "NUGET_SIGN_PIN") || strings.Contains(string(b), "123456") {
 		t.Fatal("report leaked a secret")
 	}
+	if strings.Contains(string(b), "attestationVerified") {
+		t.Fatal("report contains redundant per-package attestation state")
+	}
 	var got report
 	if err := json.Unmarshal(b, &got); err != nil {
 		t.Fatal(err)

@@ -17,31 +17,66 @@ import (
 	"time"
 )
 
-func TestValidateRunValidatesSourceDigestAndRetainsResolvedVerifier(t *testing.T) {
-	cfg, _ := validRunConfig(t)
+func TestValidateRunValidatesSourceDigestAndRetainsResolvedOsslsigncode(t *testing.T) {
+	cfg, runner := validRunConfig(t)
 	cfg.SourceDigest = "not-a-commit"
-	if _, _, _, _, _, err := validateRun(&cfg); err == nil || !strings.Contains(err.Error(), "source-digest") {
+	if _, _, _, _, _, err := validateRun(context.Background(), &cfg, runner); err == nil || !strings.Contains(err.Error(), "source-digest") {
 		t.Fatalf("expected source digest error, got %v", err)
 	}
 	cfg.SourceDigest = strings.Repeat("A", 40)
-	if _, _, _, _, _, err := validateRun(&cfg); err != nil {
+	if _, _, _, _, _, err := validateRun(context.Background(), &cfg, runner); err != nil {
 		t.Fatal(err)
 	}
-	if !filepath.IsAbs(cfg.IndependentVerifier) {
-		t.Fatalf("verifier path was not resolved: %q", cfg.IndependentVerifier)
+	if !filepath.IsAbs(cfg.Osslsigncode) {
+		t.Fatalf("osslsigncode path was not resolved: %q", cfg.Osslsigncode)
+	}
+	if got := runner.calls[len(runner.calls)-1]; !reflect.DeepEqual(got, []string{cfg.Osslsigncode, "--version"}) {
+		t.Fatalf("version command %v", got)
+	}
+}
+
+func TestOsslsigncodeMinimumVersion(t *testing.T) {
+	for _, test := range []struct {
+		version string
+		valid   bool
+	}{
+		{"osslsigncode 2.12\n", false},
+		{"osslsigncode 2.13\n", true},
+		{"osslsigncode 2.14.0\nOpenSSL details\n", true},
+		{"osslsigncode 2.14, using:\n\tOpenSSL 3.6.3\n", true},
+		{"osslsigncode two.thirteen\n", false},
+		{"other 2.14\n", false},
+	} {
+		t.Run(strings.TrimSpace(test.version), func(t *testing.T) {
+			err := validateOsslsigncodeVersion([]byte(test.version))
+			if (err == nil) != test.valid {
+				t.Fatalf("valid=%v, error=%v", test.valid, err)
+			}
+		})
+	}
+}
+
+func TestDefaultOsslsigncodeUsesEnvironmentOrPathName(t *testing.T) {
+	t.Setenv("RELEASE_SIGN_OSSLSIGNCODE", "")
+	if got := defaultOsslsigncode(); got != "osslsigncode" {
+		t.Fatalf("default %q", got)
+	}
+	t.Setenv("RELEASE_SIGN_OSSLSIGNCODE", "/tools/osslsigncode")
+	if got := defaultOsslsigncode(); got != "/tools/osslsigncode" {
+		t.Fatalf("environment value %q", got)
 	}
 }
 
 func TestValidateRunRejectsAnyExistingSignedDirectoryWithoutClean(t *testing.T) {
-	cfg, _ := validRunConfig(t)
+	cfg, runner := validRunConfig(t)
 	if err := os.Mkdir(filepath.Join(cfg.WorkingDirectory, "signed"), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, _, _, _, err := validateRun(&cfg); err == nil || !strings.Contains(err.Error(), "--clean") {
+	if _, _, _, _, _, err := validateRun(context.Background(), &cfg, runner); err == nil || !strings.Contains(err.Error(), "--clean") {
 		t.Fatalf("expected existing signed directory error, got %v", err)
 	}
 	cfg.Clean = true
-	if _, _, _, _, _, err := validateRun(&cfg); err != nil {
+	if _, _, _, _, _, err := validateRun(context.Background(), &cfg, runner); err != nil {
 		t.Fatalf("--clean should permit existing signed directory: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(cfg.WorkingDirectory, "signed")); err != nil {
@@ -89,35 +124,80 @@ func TestRunAttestationDigestFailurePrecedesSignerAcquisition(t *testing.T) {
 	}
 }
 
-func TestIndependentVerifierGetsResolvedPathAndSignerFingerprint(t *testing.T) {
-	_, certificate := testIdentity(t)
-	runner := &fakeRunner{output: []byte("PASS lib/a.dll image=SHA-256 timestamp=2026-09-22T00:00:00Z signer=" + certificateFingerprint(certificate) + " tsa=ABC subject=CN=test\n")}
-	cfg := runConfig{IndependentVerifier: "/absolute/verifier", RootPath: "root.pem", TimestampRootPath: "timestamp.pem"}
-	err := runIndependentVerifier(context.Background(), runner, cfg, "signed.nupkg", map[string]struct{}{"lib/a.dll": {}}, certificate)
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := []string{"/absolute/verifier", "--package", "signed.nupkg", "--root", "root.pem", "--timestamp-root", "timestamp.pem", "--signer-fingerprint", certificateFingerprint(certificate), "--assembly", "lib/a.dll"}
-	if !reflect.DeepEqual(runner.calls[0], want) {
-		t.Fatalf("command %v, want %v", runner.calls[0], want)
+func TestRunRejectsOldOsslsigncodeBeforeSignerAcquisition(t *testing.T) {
+	cfg, runner := validRunConfig(t)
+	runner.versionOutput = []byte("osslsigncode 2.12\n")
+	called := false
+	err := run(context.Background(), cfg, runner, func(context.Context, string, []*x509.Certificate, *x509.CertPool) (*signerHandle, error) {
+		called = true
+		return nil, errors.New("must not be reached")
+	})
+	if err == nil || !strings.Contains(err.Error(), "2.13") || called {
+		t.Fatalf("run err=%v signer called=%v", err, called)
 	}
 }
 
-func TestIndependentVerifierMustConfirmEveryAssembly(t *testing.T) {
+func TestOsslsigncodeVerifiesSortedSelectedAssemblyBytesWithExactArguments(t *testing.T) {
 	_, certificate := testIdentity(t)
-	cfg := runConfig{IndependentVerifier: "/absolute/verifier", RootPath: "root.pem", TimestampRootPath: "timestamp.pem"}
-	selected := map[string]struct{}{"lib/a.dll": {}, "lib/b.dll": {}}
+	packagePath := writeZip(t, t.TempDir(), "signed package.nupkg", []zipItem{{"lib/b.dll", []byte("second assembly")}, {"lib/a.dll", []byte("first assembly")}})
+	var extracted [][]byte
+	runner := &fakeRunner{run: func(call []string) ([]byte, error) {
+		body, err := os.ReadFile(call[3])
+		extracted = append(extracted, body)
+		return []byte(validOsslsigncodeEvidence), err
+	}}
+	cfg := runConfig{Osslsigncode: "/absolute/osslsigncode", RootPath: "root with spaces.pem", TimestampRootPath: "timestamp root.pem"}
+	err := verifyAssembliesWithOsslsigncode(context.Background(), runner, cfg, packagePath, map[string]struct{}{"lib/b.dll": {}, "lib/a.dll": {}}, certificate)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(runner.calls) != 2 {
+		t.Fatalf("commands %v, want exactly two", runner.calls)
+	}
+	for i, body := range [][]byte{[]byte("first assembly"), []byte("second assembly")} {
+		call := runner.calls[i]
+		want := []string{"/absolute/osslsigncode", "verify", "-in", call[3], "-CAfile", "root with spaces.pem", "-TSA-CAfile", "timestamp root.pem", "-require-leaf-hash", "sha256:" + certificateFingerprint(certificate), "-ignore-cdp", "-ignore-crl"}
+		if !reflect.DeepEqual(call, want) {
+			t.Fatalf("command %v, want %v", call, want)
+		}
+		if string(extracted[i]) != string(body) {
+			t.Fatalf("extracted %q, want %q", extracted[i], body)
+		}
+		if _, err := os.Stat(call[3]); !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("temporary assembly remains: %v", err)
+		}
+		if filepath.Dir(filepath.Dir(call[3])) != filepath.Dir(packagePath) {
+			t.Fatalf("temporary directory %q is not beside staged package %q", filepath.Dir(call[3]), packagePath)
+		}
+	}
+}
 
-	for name, output := range map[string]string{
-		"empty":        "",
-		"missing":      "PASS lib/a.dll image=SHA-256 signer=" + certificateFingerprint(certificate) + " tsa=ABC\n",
-		"wrong signer": "PASS lib/a.dll image=SHA-256 signer=" + strings.Repeat("A", 64) + " tsa=ABC\nPASS lib/b.dll image=SHA-256 signer=" + certificateFingerprint(certificate) + " tsa=ABC\n",
-		"unexpected":   "PASS lib/c.dll image=SHA-256 signer=" + certificateFingerprint(certificate) + " tsa=ABC\n",
+func TestOsslsigncodeRequiresSuccessfulCompleteEvidence(t *testing.T) {
+	_, certificate := testIdentity(t)
+	packagePath := writeZip(t, t.TempDir(), "signed.nupkg", []zipItem{{"lib/a.dll", []byte("assembly")}})
+	cfg := runConfig{Osslsigncode: "/absolute/osslsigncode", RootPath: "root.pem", TimestampRootPath: "timestamp.pem"}
+	selected := map[string]struct{}{"lib/a.dll": {}}
+
+	for name, test := range map[string]struct {
+		output string
+		err    error
+	}{
+		"empty":             {},
+		"missing digest":    {output: strings.Replace(validOsslsigncodeEvidence, "Message digest algorithm  : SHA256\n", "", 1)},
+		"missing leaf":      {output: strings.Replace(validOsslsigncodeEvidence, "Leaf hash match: ok\n", "", 1)},
+		"missing timestamp": {output: strings.Replace(validOsslsigncodeEvidence, "Timestamp Server Signature verification: ok\n", "", 1)},
+		"missing signature": {output: strings.Replace(validOsslsigncodeEvidence, "Signature verification: ok\n", "", 1)},
+		"missing count":     {output: strings.Replace(validOsslsigncodeEvidence, "Number of verified signatures: 1\n", "", 1)},
+		"duplicate evidence": {output: validOsslsigncodeEvidence +
+			"Signature verification: ok\n"},
+		"duplicate count": {output: validOsslsigncodeEvidence +
+			"Number of verified signatures: 1\n"},
+		"nonzero": {output: validOsslsigncodeEvidence, err: errors.New("exit status 1")},
 	} {
 		t.Run(name, func(t *testing.T) {
-			runner := &fakeRunner{output: []byte(output)}
-			if err := runIndependentVerifier(context.Background(), runner, cfg, "signed.nupkg", selected, certificate); err == nil {
-				t.Fatal("accepted incomplete independent-verifier evidence")
+			runner := &fakeRunner{output: []byte(test.output), err: test.err}
+			if err := verifyAssembliesWithOsslsigncode(context.Background(), runner, cfg, packagePath, selected, certificate); err == nil {
+				t.Fatal("accepted failed or incomplete osslsigncode verification")
 			}
 		})
 	}
@@ -129,11 +209,9 @@ func TestTransientStagingCleanupAfterVerifierFailure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(stage, "signed.nupkg"), []byte("signed"), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	packagePath := writeZip(t, stage, "signed.nupkg", []zipItem{{"lib/a.dll", []byte("assembly")}})
 	runner := &fakeRunner{err: errors.New("verification failed")}
-	if err := runIndependentVerifier(context.Background(), runner, runConfig{IndependentVerifier: "/verifier"}, filepath.Join(stage, "signed.nupkg"), nil, &x509.Certificate{}); err == nil {
+	if err := verifyAssembliesWithOsslsigncode(context.Background(), runner, runConfig{Osslsigncode: "/osslsigncode"}, packagePath, map[string]struct{}{"lib/a.dll": {}}, &x509.Certificate{}); err == nil {
 		t.Fatal("expected verifier failure")
 	}
 	cleanup()
@@ -160,7 +238,7 @@ func validRunConfig(t *testing.T) (runConfig, *fakeRunner) {
 	t.Helper()
 	work := t.TempDir()
 	bin := t.TempDir()
-	for _, name := range []string{"gh", "verifier"} {
+	for _, name := range []string{"gh", "osslsigncode"} {
 		if err := os.WriteFile(filepath.Join(bin, name), []byte("#!/bin/sh\nexit 0\n"), 0o700); err != nil {
 			t.Fatal(err)
 		}
@@ -174,14 +252,16 @@ func validRunConfig(t *testing.T) (runConfig, *fakeRunner) {
 	}
 	rootPath := writeCertificateFileAt(t, filepath.Join(work, "root.pem"), root)
 	manifestPath := filepath.Join(work, "manifest.json")
-	manifestBody := `{"schema":1,"attestationRepo":"Yubico/Yubico.NET.SDK","signerWorkflow":"Yubico/Yubico.NET.SDK/.github/workflows/build-nativeshims.yml","packages":{"Yubico.NativeShims":{"symbols":"absent","authenticode":{"include":["runtimes/win-x64/native/Yubico.NativeShims.dll"],"firstParty":["Yubico.NativeShims.dll"],"alreadySigned":"reject"}}}}`
+	manifestBody := `{"schema":1,"attestationRepo":"Yubico/Yubico.NET.SDK","signerWorkflow":"Yubico/Yubico.NET.SDK/.github/workflows/build-nativeshims.yml","packages":{"Yubico.NativeShims":{"symbols":"absent","authenticode":{"include":["runtimes/win-x64/native/Yubico.NativeShims.dll"],"firstParty":["Yubico.NativeShims.dll"]}}}}`
 	if err := os.WriteFile(manifestPath, []byte(manifestBody), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	artifact := writeZip(t, work, "artifact.zip", []zipItem{{"a.nupkg", []byte("package")}})
-	cfg := runConfig{Component: "nativeshims", WorkingDirectory: work, Artifacts: []string{artifact}, ManifestPath: manifestPath, KeyLocation: "test://key", CertificatePath: certificatePath, RootPath: rootPath, TimestampRootPath: rootPath, IndependentVerifier: "verifier", Timestamper: defaultTimestamper, SourceDigest: strings.Repeat("a", 40)}
-	return cfg, &fakeRunner{}
+	cfg := runConfig{Component: "nativeshims", WorkingDirectory: work, Artifacts: []string{artifact}, ManifestPath: manifestPath, KeyLocation: "test://key", CertificatePath: certificatePath, RootPath: rootPath, TimestampRootPath: rootPath, Osslsigncode: "osslsigncode", Timestamper: defaultTimestamper, SourceDigest: strings.Repeat("a", 40)}
+	return cfg, &fakeRunner{versionOutput: []byte("osslsigncode 2.14\n")}
 }
+
+const validOsslsigncodeEvidence = "Message digest algorithm  : SHA256\nLeaf hash match: ok\nTimestamp Server Signature verification: ok\nSignature verification: ok\nNumber of verified signatures: 1\n"
 
 func testTrustAnchor(t *testing.T) *x509.Certificate {
 	t.Helper()

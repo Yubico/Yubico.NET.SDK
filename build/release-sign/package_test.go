@@ -22,7 +22,7 @@ import (
 func TestAssemblySignDigestChecksumAndPackageRawPreservation(t *testing.T) {
 	key, cert := testIdentity(t)
 	original := minimalPE()
-	signed, err := signPE(context.Background(), original, assembly.SignOptions{Certificates: []*x509.Certificate{cert}, Key: key, Hash: crypto.SHA256}, "reject")
+	signed, err := signPE(context.Background(), original, assembly.SignOptions{Certificates: []*x509.Certificate{cert}, Key: key, Hash: crypto.SHA256})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func TestAssemblySignDigestChecksumAndPackageRawPreservation(t *testing.T) {
 	if binary.LittleEndian.Uint32(signed[pe+88:]) == 0 {
 		t.Fatal("PE checksum was not set")
 	}
-	if _, err := signPE(context.Background(), signed, assembly.SignOptions{Certificates: []*x509.Certificate{cert}, Key: key}, "reject"); err == nil {
+	if _, err := signPE(context.Background(), signed, assembly.SignOptions{Certificates: []*x509.Certificate{cert}, Key: key}); err == nil {
 		t.Fatal("accepted signed input")
 	}
 
@@ -52,7 +52,7 @@ func TestAssemblySignDigestChecksumAndPackageRawPreservation(t *testing.T) {
 func TestAuthenticodeMutationGuardRejectsExecutableChange(t *testing.T) {
 	key, cert := testIdentity(t)
 	original := minimalPE()
-	signed, err := signPE(context.Background(), original, assembly.SignOptions{Certificates: []*x509.Certificate{cert}, Key: key}, "reject")
+	signed, err := signPE(context.Background(), original, assembly.SignOptions{Certificates: []*x509.Certificate{cert}, Key: key})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func TestComparePreservationForNupkgAndSnupkg(t *testing.T) {
 }
 
 func TestSelectEntriesIsPolicyChokepoint(t *testing.T) {
-	policy := authenticodePolicy{Include: []string{"lib/Yubico.Core.dll"}, FirstParty: []string{"Yubico.*.dll"}, AlreadySigned: "reject"}
+	policy := authenticodePolicy{Include: []string{"lib/Yubico.Core.dll"}, FirstParty: []string{"Yubico.*.dll"}}
 	tests := []struct {
 		name    string
 		entries []zipItem

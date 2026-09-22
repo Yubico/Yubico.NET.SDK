@@ -13,8 +13,7 @@
         ],
         "firstParty": [
           "Yubico.NativeShims.dll"
-        ],
-        "alreadySigned": "reject"
+        ]
       }
     }
   }

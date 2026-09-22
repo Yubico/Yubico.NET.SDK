@@ -13,8 +13,7 @@
         ],
         "firstParty": [
           "Yubico.*.dll"
-        ],
-        "alreadySigned": "reject"
+        ]
       }
     },
     "Yubico.YubiKey": {
@@ -27,8 +26,7 @@
         ],
         "firstParty": [
           "Yubico.*.dll"
-        ],
-        "alreadySigned": "reject"
+        ]
       }
     }
   }

@@ -39,14 +39,13 @@ type reportManifest struct {
 }
 
 type reportPackage struct {
-	ID                  string   `json:"id"`
-	Version             string   `json:"version"`
-	Kind                string   `json:"kind"`
-	Filename            string   `json:"filename"`
-	InputSHA256         string   `json:"inputSha256"`
-	OutputSHA256        string   `json:"outputSha256"`
-	SelectedAssemblies  []string `json:"selectedAssemblies"`
-	AttestationVerified bool     `json:"attestationVerified"`
+	ID                 string   `json:"id"`
+	Version            string   `json:"version"`
+	Kind               string   `json:"kind"`
+	Filename           string   `json:"filename"`
+	InputSHA256        string   `json:"inputSha256"`
+	OutputSHA256       string   `json:"outputSha256"`
+	SelectedAssemblies []string `json:"selectedAssemblies"`
 }
 
 func marshalReport(value report) ([]byte, error) {

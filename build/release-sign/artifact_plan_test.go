@@ -38,7 +38,7 @@ func TestExtractArtifactsRejectsUnsafeCollisionAndDuplicatePackage(t *testing.T)
 	}
 }
 
-func TestAttestationFailurePrecedesSignerAcquisition(t *testing.T) {
+func TestAttestPackagesRequiresMatchingSuccessfulGitHubEvidence(t *testing.T) {
 	dir := t.TempDir()
 	pkg := filepath.Join(dir, "a.nupkg")
 	if err := os.WriteFile(pkg, []byte("package"), 0o600); err != nil {
@@ -49,34 +49,29 @@ func TestAttestationFailurePrecedesSignerAcquisition(t *testing.T) {
 		t.Fatal(err)
 	}
 	runner := &fakeRunner{output: []byte(`not-json`)}
-	called := false
-	err = attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}}, func() error { called = true; return nil })
-	if err == nil || called {
-		t.Fatalf("attestation err=%v signer called=%v", err, called)
+	err = attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}})
+	if err == nil {
+		t.Fatalf("attestation err=%v", err)
 	}
 	runner.err = errors.New("verification failed")
-	if err := attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}}, func() error { called = true; return nil }); err == nil {
+	if err := attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}}); err == nil {
 		t.Fatal("accepted failed gh command")
 	}
 	runner.err = nil
 	runner.output = []byte(fmt.Sprintf(`[{"verificationResult":{"statement":{"subject":[{"name":"a.nupkg","digest":{"sha256":%q}}]}}}]`, digest))
-	if err := attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}}, func() error { called = true; return nil }); err != nil {
+	if err := attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}}); err != nil {
 		t.Fatal(err)
-	}
-	if !called {
-		t.Fatal("signer callback not called")
 	}
 	want := []string{"gh", "attestation", "verify", pkg, "--repo", "Yubico/Yubico.NET.SDK", "--signer-workflow", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", "--predicate-type", "https://slsa.dev/provenance/v1", "--deny-self-hosted-runners", "--source-digest", strings.Repeat("a", 40), "--format", "json"}
 	if got := runner.calls[len(runner.calls)-1]; !reflect.DeepEqual(got, want) {
 		t.Fatalf("command %v, want %v", got, want)
 	}
 	runner.output = []byte(`[{"verificationResult":{"statement":{"subject":[{"digest":{"sha256":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}}]}}}]`)
-	called = false
-	if err := attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}}, func() error { called = true; return nil }); err == nil || called {
-		t.Fatalf("mismatched artifact digest err=%v signer called=%v", err, called)
+	if err := attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}}); err == nil {
+		t.Fatalf("mismatched artifact digest err=%v", err)
 	}
 	runner.output = []byte(fmt.Sprintf(`[{"verificationResult":{"statement":{"subject":[{"digest":{"sha256":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}}],"predicate":{"verificationResult":{"statement":{"subject":[{"digest":{"sha256":%q}}]}}}}}}]`, digest))
-	if err := attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}}, func() error { called = true; return nil }); err == nil {
+	if err := attestPackages(context.Background(), runner, "Yubico/Yubico.NET.SDK", "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", strings.Repeat("a", 40), []extractedPackage{{Path: pkg}}); err == nil {
 		t.Fatal("accepted digest found only in an arbitrary nested predicate")
 	}
 }
@@ -116,13 +111,22 @@ func TestInspectPackageReadsNamespacedNuspec(t *testing.T) {
 }
 
 type fakeRunner struct {
-	output []byte
-	err    error
-	calls  [][]string
+	output        []byte
+	versionOutput []byte
+	err           error
+	calls         [][]string
+	run           func([]string) ([]byte, error)
 }
 
 func (f *fakeRunner) Run(_ context.Context, name string, args ...string) ([]byte, error) {
-	f.calls = append(f.calls, append([]string{name}, args...))
+	call := append([]string{name}, args...)
+	f.calls = append(f.calls, call)
+	if f.run != nil {
+		return f.run(call)
+	}
+	if len(args) == 1 && args[0] == "--version" && f.versionOutput != nil {
+		return f.versionOutput, f.err
+	}
 	return f.output, f.err
 }
 
@@ -158,5 +162,5 @@ func writeZip(t *testing.T, dir, name string, entries []zipItem) string {
 }
 
 func testCoreManifest() manifest {
-	return manifest{Schema: 1, AttestationRepo: "Yubico/Yubico.NET.SDK", SignerWorkflow: "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", Packages: map[string]packagePolicy{"Yubico.Core": {Symbols: "required", Authenticode: &authenticodePolicy{Include: []string{"lib/a.dll"}, FirstParty: []string{"Yubico.*.dll"}, AlreadySigned: "reject"}}, "Yubico.YubiKey": {Symbols: "required", Authenticode: &authenticodePolicy{Include: []string{"lib/b.dll"}, FirstParty: []string{"Yubico.*.dll"}, AlreadySigned: "reject"}}}}
+	return manifest{Schema: 1, AttestationRepo: "Yubico/Yubico.NET.SDK", SignerWorkflow: "Yubico/Yubico.NET.SDK/.github/workflows/build.yml", Packages: map[string]packagePolicy{"Yubico.Core": {Symbols: "required", Authenticode: &authenticodePolicy{Include: []string{"lib/a.dll"}, FirstParty: []string{"Yubico.*.dll"}}}, "Yubico.YubiKey": {Symbols: "required", Authenticode: &authenticodePolicy{Include: []string{"lib/b.dll"}, FirstParty: []string{"Yubico.*.dll"}}}}}
 }

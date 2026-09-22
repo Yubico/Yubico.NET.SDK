@@ -24,7 +24,6 @@ type packageInfo struct {
 	Path         string
 	Name         string
 	ArtifactPath string
-	Attested     bool
 	Policy       packagePolicy
 }
 
@@ -70,7 +69,7 @@ func inspectPackage(extracted extractedPackage) (packageInfo, error) {
 		return packageInfo{}, fmt.Errorf("nuspec in %s must contain id and version", extracted.Name)
 	}
 	kind := strings.TrimPrefix(strings.ToLower(path.Ext(extracted.Name)), ".")
-	return packageInfo{ID: id, Version: version, Kind: kind, Path: extracted.Path, Name: extracted.Name, ArtifactPath: extracted.ArtifactPath, Attested: extracted.Attested}, nil
+	return packageInfo{ID: id, Version: version, Kind: kind, Path: extracted.Path, Name: extracted.Name, ArtifactPath: extracted.ArtifactPath}, nil
 }
 
 func parseNuspecIdentity(contents []byte) (string, string, error) {

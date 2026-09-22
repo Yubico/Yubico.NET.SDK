@@ -10,6 +10,13 @@ import (
 
 const defaultTimestamper = "http://timestamp.digicert.com"
 
+func defaultOsslsigncode() string {
+	if configured := os.Getenv("RELEASE_SIGN_OSSLSIGNCODE"); configured != "" {
+		return configured
+	}
+	return "osslsigncode"
+}
+
 func main() {
 	if err := execute(context.Background(), os.Args[1:], osRunner{}); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
@@ -19,7 +26,7 @@ func main() {
 
 func execute(ctx context.Context, args []string, runner commandRunner) error {
 	if len(args) == 0 || args[0] != "run" {
-		return errors.New("usage: release-sign run --component core|nativeshims --working-directory DIR --artifact ZIP [--artifact ZIP...] --manifest FILE --source-digest COMMIT --key LOCATION --certificate PEM --root PEM --timestamp-root PEM --independent-verifier PATH [--timestamper URL] [--clean]")
+		return errors.New("usage: release-sign run --component core|nativeshims --working-directory DIR --artifact ZIP [--artifact ZIP...] --manifest FILE --source-digest COMMIT --key LOCATION --certificate PEM --root PEM --timestamp-root PEM [--osslsigncode PATH] [--timestamper URL] [--clean]")
 	}
 	fs := flag.NewFlagSet("run", flag.ContinueOnError)
 	var artifacts stringList
@@ -32,7 +39,7 @@ func execute(ctx context.Context, args []string, runner commandRunner) error {
 	fs.StringVar(&cfg.CertificatePath, "certificate", os.Getenv("RELEASE_SIGN_CERTIFICATE"), "signer certificate chain")
 	fs.StringVar(&cfg.RootPath, "root", os.Getenv("RELEASE_SIGN_ROOT"), "signer trust root")
 	fs.StringVar(&cfg.TimestampRootPath, "timestamp-root", os.Getenv("RELEASE_SIGN_TIMESTAMP_ROOT"), "timestamp trust root")
-	fs.StringVar(&cfg.IndependentVerifier, "independent-verifier", os.Getenv("RELEASE_SIGN_INDEPENDENT_VERIFIER"), "independent verifier executable")
+	fs.StringVar(&cfg.Osslsigncode, "osslsigncode", defaultOsslsigncode(), "osslsigncode executable")
 	fs.StringVar(&cfg.SourceDigest, "source-digest", os.Getenv("RELEASE_SIGN_SOURCE_DIGEST"), "40-character Git commit digest")
 	fs.StringVar(&cfg.Timestamper, "timestamper", defaultTimestamper, "RFC 3161 timestamp authority")
 	fs.BoolVar(&cfg.Clean, "clean", false, "replace existing signed output")

@@ -1,28 +1,31 @@
 # Cross-platform release signer
 
-`release-sign` verifies build provenance, Authenticode-signs selected Windows assemblies, author-signs NuGet packages, verifies the results twice, and emits the layout consumed by the Release skill. Publishing is deliberately separate and is not performed by this tool.
+`release-sign` verifies build provenance, Authenticode-signs the assemblies explicitly selected by a manifest, author-signs NuGet packages, verifies package and assembly signatures internally, and verifies each selected assembly independently with `osslsigncode`. Publishing is a separate operation.
 
-## Prerequisites
+## Build and prerequisites
+
+Prerequisites:
 
 - Go 1.27.1.
-- GitHub CLI (`gh`) authenticated for `Yubico/Yubico.NET.SDK` attestations. Run `gh auth setup-git` so Go can authenticate to the private signing dependency without changing repository configuration.
+- GitHub CLI (`gh`), authenticated for `Yubico/Yubico.NET.SDK` attestations.
+- `osslsigncode` 2.13 or newer, available through Homebrew (`brew install osslsigncode`), apt (`apt install osslsigncode`), or Chocolatey (`choco install osslsigncode`). This integration was developed with 2.14; older versions are rejected because of verify-path security defects and missing required flags.
 - A PIV signing key and its leaf-first PEM certificate chain.
-- Signer and timestamp-authority PEM trust roots. Every certificate in either trust-anchor file must be a certificate authority with valid basic constraints, be self-issued with byte-identical encoded subject and issuer names, and have a valid self-signature. The signer certificate-chain file remains leaf-first and contains only the leaf and any intermediates.
-- An independent package verifier implementing the command shown below.
-- Linux builds need PC/SC development headers (for example, `libpcsclite-dev`).
+- PEM trust roots for the signer and timestamp authority. Every trust-anchor certificate must be a certificate authority with valid basic constraints, be self-issued with byte-identical encoded subject and issuer names, and have a valid self-signature. The signer chain contains only the leaf followed by any intermediates.
+- Linux builds need PC/SC development headers, such as `libpcsclite-dev`.
 
-From the repository root, build without writing a binary into the repository:
+Build outside the repository:
 
 ```sh
 export GOPRIVATE=github.com/Yubico/nuget-sign
 gh auth setup-git
 go -C build/release-sign build -o /tmp/release-sign .
-go -C build/release-sign/relic-verify build -o /tmp/release-sign-relic-verify ./cmd/release-sign-relic-verify
 ```
 
-The signer uses neither `signtool`, `nuget.exe`, nor `dotnet nuget` for signing.
+The signer does not use `signtool`, `nuget.exe`, or `dotnet nuget` for signing. `osslsigncode` is a GPL-licensed tool executed as a separate process; it is not linked into the signer or included as a Go dependency.
 
-## Core release
+This pull request lands the signing tool first and does not wire the Release skill. The existing release signer remains in use until a follow-up changes the release workflow.
+
+## Run
 
 ```sh
 /tmp/release-sign run \
@@ -35,54 +38,37 @@ The signer uses neither `signtool`, `nuget.exe`, nor `dotnet nuget` for signing.
   --key 'yubikey://9c?serial=12345678' \
   --certificate /secure/certs/code-signing-chain.pem \
   --root /secure/certs/code-signing-root.pem \
-  --timestamp-root /secure/certs/digicert-timestamp-root.pem \
-  --independent-verifier /secure/bin/relic-verify
+  --timestamp-root /secure/certs/digicert-timestamp-root.pem
 ```
 
-## NativeShims release
+For NativeShims, use `--component nativeshims`, its build artifact, and `manifests/nativeshims.json`. Manifests remain explicit so the package and assembly scope can be audited independently of the executable location.
+
+`--osslsigncode` defaults to `osslsigncode` on `PATH`. It can also be set with `RELEASE_SIGN_OSSLSIGNCODE`. The source digest, key, certificate, signer root, and timestamp root can come from `RELEASE_SIGN_SOURCE_DIGEST`, `RELEASE_SIGN_KEY`, `RELEASE_SIGN_CERTIFICATE`, `RELEASE_SIGN_ROOT`, and `RELEASE_SIGN_TIMESTAMP_ROOT`. `--timestamper` defaults to `http://timestamp.digicert.com`. For unattended PIV use, set `NUGET_SIGN_PIN`; never place a PIN in the key URI or command line.
+
+Use `--clean` to replace an existing `signed` directory. Existing output remains untouched until all replacement packages pass verification.
+
+## Verification and output
+
+Before key acquisition, the signer validates inputs, resolves the exact `gh` and `osslsigncode` executable paths, requires `osslsigncode` 2.13 or newer, extracts packages, verifies GitHub attestations, and plans the complete package set.
+
+After signing, the signer verifies NuGet package signatures and selected assembly signatures internally. It then extracts the exact bytes of each selected assembly from the signed package into a temporary file and runs:
 
 ```sh
-/tmp/release-sign run \
-  --component nativeshims \
-  --working-directory /secure/release-work \
-  --artifact nativeshims-build.zip \
-  --manifest ./build/release-sign/manifests/nativeshims.json \
-  --source-digest 0123456789abcdef0123456789abcdef01234567 \
-  --key 'yubikey://9c?serial=12345678' \
-  --certificate /secure/certs/code-signing-chain.pem \
-  --root /secure/certs/code-signing-root.pem \
-  --timestamp-root /secure/certs/digicert-timestamp-root.pem \
-  --independent-verifier /secure/bin/relic-verify
+osslsigncode verify -in TEMP -CAfile ROOT -TSA-CAfile TIMESTAMP_ROOT -require-leaf-hash sha256:FINGERPRINT -ignore-cdp -ignore-crl
 ```
 
-`--timestamper` defaults to `http://timestamp.digicert.com`. Use `--clean` whenever intentionally replacing an existing `signed` directory. Existing output is preserved until every replacement package passes verification.
+Each selected assembly gets exactly one call in sorted entry-name order. Temporary assembly files stay beside the staged package and are removed after verification. A zero exit status is insufficient: output must confirm a SHA-256 message digest, the required leaf hash, the timestamp-server signature, the assembly signature, and exactly one verified signature. Symbol packages are not passed to `osslsigncode`.
 
-The flags `--source-digest`, `--key`, `--certificate`, `--root`, `--timestamp-root`, and `--independent-verifier` may instead come from `RELEASE_SIGN_SOURCE_DIGEST`, `RELEASE_SIGN_KEY`, `RELEASE_SIGN_CERTIFICATE`, `RELEASE_SIGN_ROOT`, `RELEASE_SIGN_TIMESTAMP_ROOT`, and `RELEASE_SIGN_INDEPENDENT_VERIFIER`. The source digest is the exact 40-character hexadecimal Git commit attested by the build workflow. For unattended PIV use, set `NUGET_SIGN_PIN`; never place a PIN in the key URI or command line.
+For an optional live check of an extracted signed assembly, run the same command with real file and certificate paths:
 
-## Output and safety
-
-The working directory owns `scratch/unsigned/`, transient scratch directories, `signed/packages/`, and `signed/report.json`. Packages and the report appear only after every package passes internal and independent verification. Failed runs leave no partial package in `signed/packages`.
-
-Stages 1–4 validate inputs, extract packages, verify GitHub attestations, and plan the complete package set before opening a signing-key session. Keep the YubiKey unplugged while preparing and validating release inputs; for an interactive run, connect it only when the process reaches key access. Unattended runs must have the device connected but still do not open it before stages 1–4 complete.
-
-The external verifier is mandatory and is called once for each signed `.nupkg`:
-
-```text
-VERIFIER --package OUTPUT --root ROOT --timestamp-root TIMESTAMP_ROOT --signer-fingerprint SHA256HEX --assembly ENTRY [--assembly ENTRY...]
+```sh
+osslsigncode verify -in ./Yubico.Core.dll -CAfile ./code-signing-root.pem -TSA-CAfile ./timestamp-root.pem -require-leaf-hash sha256:HEX_FINGERPRINT -ignore-cdp -ignore-crl
 ```
 
-It is not called for `.snupkg` files. This independent check is intentionally required because verification by the signing implementation alone cannot detect every implementation-specific defect.
-The bundled implementation is built from `relic-verify/cmd/release-sign-relic-verify`.
-The parent requires one `PASS` record per selected assembly, including SHA-256
-and the expected signer fingerprint; a zero exit status without that evidence
-is rejected.
+The working directory owns `scratch/unsigned/`, transient scratch directories, `signed/packages/`, and `signed/report.json`. Packages and the report are published there only after every package passes provenance, internal, and `osslsigncode` verification. Failed runs leave no partial package in `signed/packages`.
 
-Publishing remains a separate release operation after review of `signed/report.json`. Retain the existing fallback signing scripts for one release, but do not mix their output into a `release-sign` run.
+This module has no GitHub Actions test workflow because `github.com/Yubico/nuget-sign` is private and the repository workflow token is not known to have read access. Run its checks locally until a suitable read-only credential is provisioned.
 
-This module does not have a GitHub Actions test workflow because `github.com/Yubico/nuget-sign` is private and the repository workflow token is not known to have read access. Adding a workflow without an explicit credential would create a predictably broken required check. Run the verification commands locally or add continuous integration only after a suitable read-only credential is provisioned.
+Cloud KMS support remains deferred because its provider dependency currently pulls a gRPC version covered by `GHSA-2v4p-qf9q-27wj`. Reconsider it after the upstream dependency is patched and dependency review passes.
 
-Cloud KMS support is intentionally deferred. Enabling the provider currently
-pulls a gRPC version covered by `GHSA-2v4p-qf9q-27wj`; add it later after the
-upstream dependency is patched and dependency review passes.
-
-PEM means Privacy-Enhanced Mail certificate encoding. PIV means Personal Identity Verification. PIN means Personal Identification Number. PC/SC means Personal Computer/Smart Card. KMS means Key Management Service. CLI means command-line interface. DLL means Dynamic-Link Library. RFC 3161 is the Internet standard for trusted timestamps.
+PIV means Personal Identity Verification. PEM means Privacy-Enhanced Mail certificate encoding. PC/SC means Personal Computer/Smart Card. PIN means Personal Identification Number. GPL means GNU General Public License. SHA-256 means Secure Hash Algorithm 256-bit. URI means Uniform Resource Identifier. CLI means command-line interface. CI means continuous integration. KMS means Key Management Service. gRPC means Google Remote Procedure Call. apt means Advanced Package Tool.

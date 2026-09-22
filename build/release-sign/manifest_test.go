@@ -9,12 +9,13 @@ import (
 )
 
 func TestManifestStrictJSONAndComponentScope(t *testing.T) {
-	valid := `{"schema":1,"attestationRepo":"Yubico/Yubico.NET.SDK","signerWorkflow":"Yubico/Yubico.NET.SDK/.github/workflows/build.yml","packages":{"Yubico.Core":{"symbols":"required","authenticode":{"include":["lib/net472/Yubico.Core.dll"],"firstParty":["Yubico.*.dll"],"alreadySigned":"reject"}},"Yubico.YubiKey":{"symbols":"required","authenticode":{"include":["lib/net472/Yubico.YubiKey.dll"],"firstParty":["Yubico.*.dll"],"alreadySigned":"reject"}}}}`
+	valid := `{"schema":1,"attestationRepo":"Yubico/Yubico.NET.SDK","signerWorkflow":"Yubico/Yubico.NET.SDK/.github/workflows/build.yml","packages":{"Yubico.Core":{"symbols":"required","authenticode":{"include":["lib/net472/Yubico.Core.dll"],"firstParty":["Yubico.*.dll"]}},"Yubico.YubiKey":{"symbols":"required","authenticode":{"include":["lib/net472/Yubico.YubiKey.dll"],"firstParty":["Yubico.*.dll"]}}}}`
 	tests := []struct {
 		name, body, component, want string
 	}{
 		{"valid", valid, "core", ""},
 		{"unknown field", strings.Replace(valid, `"schema":1`, `"schema":1,"extra":true`, 1), "core", "unknown field"},
+		{"removed alreadySigned field", strings.Replace(valid, `"firstParty":["Yubico.*.dll"]`, `"firstParty":["Yubico.*.dll"],"alreadySigned":"reject"`, 1), "core", "unknown field"},
 		{"wrong schema", strings.Replace(valid, `"schema":1`, `"schema":2`, 1), "core", "schema must be 1"},
 		{"missing workflow", strings.Replace(valid, `,"signerWorkflow":"Yubico/Yubico.NET.SDK/.github/workflows/build.yml"`, ``, 1), "core", "signerWorkflow"},
 		{"wrong workflow", strings.Replace(valid, `build.yml`, `other.yml`, 1), "core", "signerWorkflow"},

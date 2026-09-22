@@ -23,9 +23,8 @@ type packagePolicy struct {
 }
 
 type authenticodePolicy struct {
-	Include       []string `json:"include"`
-	FirstParty    []string `json:"firstParty"`
-	AlreadySigned string   `json:"alreadySigned"`
+	Include    []string `json:"include"`
+	FirstParty []string `json:"firstParty"`
 }
 
 var componentPackages = map[string][]string{
@@ -119,9 +118,6 @@ func knownPackage(id string) (string, bool) {
 func validateAuthenticode(p authenticodePolicy) error {
 	if len(p.Include) == 0 || len(p.FirstParty) == 0 {
 		return errors.New("authenticode include and firstParty must not be empty")
-	}
-	if p.AlreadySigned != "reject" && p.AlreadySigned != "replace" {
-		return errors.New(`authenticode alreadySigned must be "reject" or "replace"`)
 	}
 	seen := map[string]bool{}
 	for _, name := range p.Include {

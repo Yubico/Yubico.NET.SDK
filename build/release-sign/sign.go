@@ -187,12 +187,12 @@ func packageSigned(filename string) (bool, error) {
 	return pkg.Signed(), nil
 }
 
-func signPE(ctx context.Context, contents []byte, options assembly.SignOptions, existingPolicy string) ([]byte, error) {
+func signPE(ctx context.Context, contents []byte, options assembly.SignOptions) ([]byte, error) {
 	file, err := assembly.Open(contents)
 	if err != nil {
 		return nil, err
 	}
-	if file.Signed() && existingPolicy == "reject" {
+	if file.Signed() {
 		return nil, errors.New("selected DLL already has a PE certificate table")
 	}
 	options.Hash = crypto.SHA256
@@ -277,10 +277,10 @@ func verifyAuthenticodeOnlyMutation(before, after []byte) error {
 	if want.checksum != got.checksum || want.security != got.security {
 		return errors.New("PE header layout changed")
 	}
-	payloadEnd := len(before)
 	if want.certificateLen != 0 {
-		payloadEnd = want.certificateAt
+		return errors.New("input already has a certificate table")
 	}
+	payloadEnd := len(before)
 	if got.certificateLen == 0 || got.certificateAt < payloadEnd || got.certificateAt+got.certificateLen != len(after) {
 		return errors.New("output certificate table is not appended after the executable image")
 	}
@@ -316,7 +316,7 @@ func signPackage(ctx context.Context, info packageInfo, output, timestamper stri
 	expected := make(map[string][]byte, len(selected))
 	assemblyOptions := assembly.SignOptions{Certificates: signer.Certificates, Key: signer.Signer, Hash: crypto.SHA256, TimestampURL: timestamper}
 	if err := rewritePackage(info.Path, rebuilt, selected, func(name string, contents []byte) ([]byte, error) {
-		signedAssembly, err := signPE(ctx, contents, assemblyOptions, info.Policy.Authenticode.AlreadySigned)
+		signedAssembly, err := signPE(ctx, contents, assemblyOptions)
 		if err != nil {
 			return nil, err
 		}

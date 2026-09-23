@@ -187,3 +187,8 @@
 - No-impact items confirmed in this range: the `docs/plans/2026-09-14-public-return-contracts.md` implementation plan added by the same commit is planning material, not itself a migration-relevant API surface, and is only cited as supporting evidence above; module `CLAUDE.md`/`README.md` touch-ups in Fido2/OpenPgp/SecurityDomain/WebAuthn describing these same renames are contributor-facing documentation already covered by the two map entries above.
 - `package-changes.txt` was empty for this range; `namespace-changes.txt` showed only new-file `namespace` declarations for the added OpenPGP collection types and Fido2/PublicApi test files, already covered by the entries above.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `2f1d912a1c8d4779c7e6a9ca9b7753417287f99c`.
+
+## 2026-09-21 - No migration impact
+
+- Analyzed range `2f1d912a1c8d4779c7e6a9ca9b7753417287f99c..HEAD`; no migration-relevant source, package, namespace, or project-shape changes were found.
+- Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`.

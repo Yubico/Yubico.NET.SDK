@@ -46,7 +46,7 @@ The state file is the single source of truth for resume. Update it before any op
 4. `AskUserQuestion`: "Confirm release version" — default option is `+1 patch` of `previousTag` (e.g., `1.16.0` → `1.16.1`); also offer `+1 minor`, `+1 major`, custom
 5. `AskUserQuestion`: "Release date" — default today (in `Month Dth, YYYY` format matching whats-new.md style)
 6. **Hardware test reminder** — print: "Before continuing, confirm you've tested PIV + SCP on real YubiKey hardware. The skill cannot do this for you." Gate with `AskUserQuestion`: "Hardware tests pass?" / "Skip (not recommended)"
-7. **Code-signing YubiKey safety gate** — `AskUserQuestion`: "⚠️ IMPORTANT: Your code-signing YubiKey must be UNPLUGGED from this machine during phases 1–4. Integration tests that enumerate YubiKeys can run PIV/PGP resets against any connected key. Only plug it back in when Phase 5 (sign+publish) explicitly asks for it — the .NET Sign CLI reads the PIV certificate safely, but no other YubiKey operation should touch the key. Is the code-signing YubiKey unplugged?" Options: "Yes, it's unplugged" / "Let me unplug it now". If the operator needs to unplug, wait for confirmation before proceeding.
+7. **Code-signing YubiKey safety gate** — `AskUserQuestion`: "⚠️ IMPORTANT: Your code-signing YubiKey must be UNPLUGGED from this machine during phases 1–4. Integration tests that enumerate YubiKeys can run PIV/PGP resets against any connected key. Only plug it back in when Phase 5 (sign+publish) explicitly asks for it. Is the code-signing YubiKey unplugged?" Options: "Yes, it's unplugged" / "Let me unplug it now". If the operator needs to unplug, wait for confirmation before proceeding.
 8. Create `~/Releases/<version>/` and write initial `.state.json`
 
 ## Phase 2 — NativeShims gate (cross-platform, conditional)
@@ -154,7 +154,7 @@ git diff <previousTag>..origin/develop -- Yubico.NativeShims/ --stat
          sleep 120
        done
        ```
-     - On failure: STOP. On success: jump to Phase 5 NativeShims half (Windows-only); sign+publish, verify NuGet 200, then return here for step 4.
+      - On failure: STOP. On success: jump to Phase 5 NativeShims half; sign+publish, verify NuGet 200, then return here for step 4.
    - **If `nativeShimsBuildRef == "develop"` (already built in Phase 2)**:
      - Check if NativeShims signed+published: poll `https://www.nuget.org/packages/Yubico.NativeShims/<nsVersion>` — must return 200
      - If NOT published: jump to Phase 5 NativeShims half, then return here
@@ -182,162 +182,91 @@ git diff <previousTag>..origin/develop -- Yubico.NativeShims/ --stat
      - `git push origin <version>`
      - Update state: `tagPushed: true`
 
-## Phase 5 — Sign + publish (Windows wizard, or hard-stop)
+## Phase 5 — Sign + publish (cross-platform)
 
-**Platform detection**:
-```bash
-# In bash:
-case "$(uname -s)" in
-  MINGW*|MSYS*|CYGWIN*) PLATFORM=windows ;;
-  *) PLATFORM=$(uname -s | tr '[:upper:]' '[:lower:]') ;;
-esac
+Follow `build/release-sign/README.md`. Hard gates before signing:
+
+- `gh auth status` succeeds.
+- `nuget-sign`, Go, and `dotnet` are available.
+- `RELEASE_SIGN_KEY`, `RELEASE_SIGN_CERTIFICATE`, `RELEASE_SIGN_ROOT`, and
+  `RELEASE_SIGN_TIMESTAMP_ROOT` identify the production key and certificate files.
+- The code-signing YubiKey stays disconnected until the signing commands below;
+  build the wrapper and download artifacts first.
+- `NUGET_API_KEY` is set for this session and is never printed or persisted.
+
+Build the wrapper once:
+
+```sh
+go -C build/release-sign build -o "$HOME/Releases/<version>/release-sign" .
 ```
 
-### If PLATFORM != windows
+Download the exact artifact ZIPs for each recorded workflow run and obtain that
+run's `headSha` with `gh run view <run-id> --json headSha --jq .headSha`.
+Connect the code-signing YubiKey only after these preparation steps.
 
-STOP. Phase 5 can be reached via two entry paths — render the handoff text from actual state, not assumptions:
+The Go signer prompts for the PIV PIN once per invocation after checking
+attestations and package identities; it reuses the PIN only for its signing child
+processes. Invoke the signer directly when the agent has an attached terminal.
+If the agent shell has no terminal input on macOS, invoke each command below as:
 
-- **Entry path A — NativeShims-only** (from Phase 4 step 3 ordering check; `state.buildRunId == null` and `state.tagPushed == false`): main `build.yml` has NOT been dispatched yet. The operator must sign+publish NativeShims first, then resume returns flow to Phase 4 step 4.
-- **Entry path B — full release** (`state.buildRunId != null` and `state.tagPushed == true`): main build is green and tag is pushed; only sign+publish + GitHub release remain.
-
-Pseudocode for the handoff message (skill builds the strings from state):
-
-```
-═══ HANDOFF TO WINDOWS ═══
-Release <version> needs sign+publish on Windows with your code-sign YubiKey.
-
-Current state (from ~/Releases/<version>/.state.json):
-- Entry path: <"NativeShims-only" if buildRunId == null else "full release">
-- NativeShims rebuild: <nativeShimsRebuild>
-- NativeShims run: <nativeShimsRunId or "n/a">
-- NativeShims published: <nativeShimsPublished>
-- Main build run: <buildRunId or "not yet dispatched">
-- Tag pushed: <tagPushed>
-
-What's left after sign+publish:
-<if buildRunId == null:
-   - Resume returns to Phase 4 step 4 (dispatch build.yml against main)
-   - Then re-enter Phase 5 entry path B for the main packages
- else:
-   - Phase 6 (GitHub release with signed assets)
-   - Phase 7 (merge main back to develop, Slack draft)>
-
-On your Windows machine:
-1. Plug in your code-sign YubiKey
-2. cd <this repo>
-3. Invoke: /Release resume <version>
-
-Do not proceed past this point on macOS/Linux.
-═══
-```
-Exit cleanly. Do NOT mark phase 5 complete.
-
-### If PLATFORM == windows
-
-**5a. Pre-flight asserts** (each is a hard gate; on failure print fix instructions and stop):
-- `gh auth status` — authenticated with `repo` + `workflow` scope
-- Sign CLI resolvable — `Get-Command sign` (the dotnet tool, `dotnet tool install --global sign --prerelease`). NOTE: the repo's `build/sign.ps1` shim can shadow it on PATH; if so, pass the tool executable via `-SignCliPath` to `Invoke-NuGetPackageSigningV2`.
-- `Get-Command nuget.exe` — resolvable (still used by the publish step)
-- `$env:YUBICO_SIGNING_SHA256_FINGERPRINT` — set (the **SHA-256** cert fingerprint, 64 hex, NOT the SHA-1 thumbprint); if not, AskUserQuestion to provide and persist for session. Derive from the cert: `[BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash((Get-ChildItem Cert:\CurrentUser\My | Where-Object Subject -match 'Yubico').RawData)).Replace('-','')`
-- YubiKey presence — best-effort: `Get-PnpDevice -Class SmartCard | Where-Object Status -eq 'OK'`. If empty, prompt: "No smart card detected — is YubiKey plugged in?"
-
-**5b. Staging**:
-```powershell
-$staging = "$HOME\Releases\<version>"
-New-Item -ItemType Directory -Force -Path "$staging\nativeshims","$staging\core"
+```sh
+zsh build/release-sign/launch-macos.zsh \
+  "$HOME/Releases/<version>/<component>/signing.status" \
+  "$HOME/Releases/<version>/release-sign" run <the same flags as below>
 ```
 
-**5c. Status board** — initialize and print after each step:
+Ensure the component working directory exists and the status file does not
+before launching. The helper opens Terminal; the operator enters the PIN there,
+never in chat or an argument. Poll for `signing.status`, require its exit code
+to be `0`, then inspect `signed/report.json`. If the status file is missing or
+nonzero, stop instead of publishing. On Windows or Linux without an attached
+agent terminal, have the operator run the exact signer command in a local
+interactive terminal and verify its report before continuing. If NativeShims
+was not rebuilt, only the main Core invocation is needed: one PIN prompt for
+both managed packages and their symbols. When NativeShims is rebuilt, its
+earlier signing run has a separate prompt; never retain the PIN across the
+intervening build.
+
+For NativeShims, when rebuilt:
+
+```sh
+"$HOME/Releases/<version>/release-sign" run \
+  --component nativeshims \
+  --working-directory "$HOME/Releases/<version>/nativeshims" \
+  --artifact NativeShims-Package.zip \
+  --manifest build/release-sign/manifests/nativeshims.json \
+  --source-digest <native-workflow-headSha> \
+  --key "$RELEASE_SIGN_KEY" \
+  --certificate "$RELEASE_SIGN_CERTIFICATE" \
+  --root "$RELEASE_SIGN_ROOT" \
+  --timestamp-root "$RELEASE_SIGN_TIMESTAMP_ROOT"
 ```
-Release <version> — Sign & Publish
 
-[ ] NativeShims build.yml         (run <id>)
-[ ] NativeShims download
-[ ] NativeShims signed
-[ ] NativeShims published to NuGet
-[ ] Main build.yml                (run <id>)
-[ ] Main download
-[ ] Main signed
-[ ] Main published to NuGet
+Publish its signed `.nupkg`, wait for NuGet indexing, set
+`state.nativeShimsPublished: true`, then return to Phase 4 step 4 if the main
+build has not run yet.
+
+For the main packages:
+
+```sh
+"$HOME/Releases/<version>/release-sign" run \
+  --component core \
+  --working-directory "$HOME/Releases/<version>/core" \
+  --artifact Nuget-Packages.zip \
+  --artifact Symbols-Packages.zip \
+  --manifest build/release-sign/manifests/core.json \
+  --source-digest <main-workflow-headSha> \
+  --key "$RELEASE_SIGN_KEY" \
+  --certificate "$RELEASE_SIGN_CERTIFICATE" \
+  --root "$RELEASE_SIGN_ROOT" \
+  --timestamp-root "$RELEASE_SIGN_TIMESTAMP_ROOT"
 ```
-(Skip NativeShims rows if `nativeShimsRebuild: false`.)
 
-**Pre-flight for publish (one-time per session)**: `Invoke-NuGetPackagePush` resolves the API key from `-ApiKey` parameter or falls back to `$env:NUGET_API_KEY`. Before phase 5d/5e push steps, assert:
-```powershell
-if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) {
-  # AskUserQuestion: paste API key (will be set in $env:NUGET_API_KEY for this session only)
-}
-```
-Never echo the API key. Never persist it to the state file.
-
-**5d. NativeShims half** (only if `nativeShimsRebuild: true`):
-1. **Download artifact as zip** — use the GitHub API to download the NativeShims nupkg directly as a zip file (no extraction + re-zip):
-   ```powershell
-   $artifacts = gh api "repos/Yubico/Yubico.NET.SDK/actions/runs/$($state.nativeShimsRunId)/artifacts" | ConvertFrom-Json
-   $nsArtifact = $artifacts.artifacts | Where-Object { $_.name -match 'NativeShims' } | Select-Object -First 1
-   $outFile = "$staging\nativeshims\NativeShims-Package.zip"
-   gh api "repos/Yubico/Yubico.NET.SDK/actions/artifacts/$($nsArtifact.id)/zip" > $outFile
-   ```
-   **WARNING**: NEVER name a zip `*.nupkg.zip` — `GetFileNameWithoutExtension` produces a name ending in `.nupkg` which collides with `Get-ChildItem -Filter "*.nupkg"` inside sign-v2.ps1.
-2. Verify zip exists and is non-empty: `(Get-Item $outFile).Length -gt 0`
-3. Sign:
-   ```powershell
-   . ./build/sign-v2.ps1
-   Invoke-NuGetPackageSigningV2 `
-     -Fingerprint $env:YUBICO_SIGNING_SHA256_FINGERPRINT `
-     -WorkingDirectory "$staging\nativeshims" `
-     -NativeShimsZip "NativeShims-Package.zip"
-   ```
-   YubiKey PIN prompt will surface once; tell the operator to enter it.
-4. Verify: `Get-ChildItem "$staging\nativeshims\signed\packages\*.nupkg"` non-empty.
-5. Publish:
-   ```powershell
-   Get-ChildItem "$staging\nativeshims\signed\packages\*.nupkg" | ForEach-Object {
-     Invoke-NuGetPackagePush -PackagePath $_.FullName -SkipDuplicate
-   }
-   ```
-6. **Verify live**: poll `https://www.nuget.org/packages/Yubico.NativeShims/<nsVersion>` via `WebFetch` until HTTP 200 (NuGet indexing latency: 1–5 min). Update status board. Set `state.nativeShimsPublished: true`.
-7. **Loop back to Phase 4 step 4** to dispatch `build.yml` if not yet done.
-
-**5e. Main half**:
-1. **Download artifacts as zips** — use the GitHub API to download directly as zip files:
-   ```powershell
-   $artifacts = gh api "repos/Yubico/Yubico.NET.SDK/actions/runs/$($state.buildRunId)/artifacts" | ConvertFrom-Json
-   foreach ($a in $artifacts.artifacts) {
-     switch -Regex ($a.name) {
-       'Nuget Packages'   { $outName = "Nuget-Packages.zip" }
-       'Symbols Packages' { $outName = "Symbols-Packages.zip" }
-       default { continue }
-     }
-     gh api "repos/Yubico/Yubico.NET.SDK/actions/artifacts/$($a.id)/zip" > "$staging\core\$outName"
-   }
-   ```
-   Verify both zips exist and are non-empty.
-2. Sign:
-   ```powershell
-   . ./build/sign-v2.ps1
-   Invoke-NuGetPackageSigningV2 `
-     -Fingerprint $env:YUBICO_SIGNING_SHA256_FINGERPRINT `
-     -WorkingDirectory "$staging\core" `
-     -NuGetPackagesZip "Nuget-Packages.zip" `
-     -SymbolsPackagesZip "Symbols-Packages.zip"
-   ```
-3. Verify: `Get-ChildItem "$staging\core\signed\packages\*.nupkg","$staging\core\signed\packages\*.snupkg"` non-empty.
-4. **Publish nupkgs first** (snupkgs must wait for NuGet indexing):
-   ```powershell
-   Get-ChildItem "$staging\core\signed\packages\*.nupkg" | ForEach-Object {
-     Invoke-NuGetPackagePush -PackagePath $_.FullName -SkipDuplicate
-   }
-   ```
-5. **Verify nupkgs live**: poll `https://www.nuget.org/packages/Yubico.YubiKey/<version>` AND `https://www.nuget.org/packages/Yubico.Core/<version>` via `WebFetch` until both return HTTP 200 (indexing latency: 1–10 min).
-6. **Publish snupkgs** (only after nupkgs are indexed):
-   ```powershell
-   Get-ChildItem "$staging\core\signed\packages\*.snupkg" | ForEach-Object {
-     Invoke-NuGetPackagePush -PackagePath $_.FullName -SkipDuplicate
-   }
-   ```
-7. **Verify snupkgs live**: `WebFetch` the NuGet package pages for Yubico.YubiKey and Yubico.Core, confirm "Download symbols" link appears (snupkg indexing can take up to 10 min).
-8. Update final status board rows.
+Require `signed/report.json` and the expected package count before publication.
+Publish `.nupkg` files first with `dotnet nuget push`, stop on any failure, wait
+until both ordinary packages are indexed, and only then publish `.snupkg` files.
+Never use `--skip-duplicate` during the normal release path. Verify the live
+NuGet pages before marking phase 5 complete.
 
 ## Phase 6 — GitHub release (cross-platform; can run on Windows continuation or back on dev machine)
 

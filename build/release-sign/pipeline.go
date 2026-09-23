@@ -119,7 +119,7 @@ func signAndVerifyPackage(ctx context.Context, runner commandRunner, cfg runConf
 	selected := map[string]struct{}{}
 	if info.Kind == "nupkg" {
 		var err error
-		selected, err = selectEntries(info.Path, *info.Policy.Authenticode)
+		selected, err = selectEntries(info.entries, *info.Policy.Authenticode)
 		if err != nil {
 			return nil, err
 		}
@@ -151,9 +151,6 @@ func validateRun(ctx context.Context, cfg *runConfig, runner commandRunner) (man
 	}
 	if err := os.MkdirAll(cfg.WorkingDirectory, 0o700); err != nil {
 		return empty(err)
-	}
-	if _, err := exec.LookPath("gh"); err != nil {
-		return empty(errors.New("gh executable is unavailable"))
 	}
 	nugetTool, err := inspectNugetSign(ctx, runner, cfg.NugetSign)
 	if err != nil {

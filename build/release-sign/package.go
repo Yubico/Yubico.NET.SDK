@@ -25,6 +25,7 @@ type packageInfo struct {
 	Name         string
 	ArtifactPath string
 	Policy       packagePolicy
+	entries      []string
 }
 
 func inspectPackage(extracted extractedPackage) (packageInfo, error) {
@@ -34,6 +35,7 @@ func inspectPackage(extracted extractedPackage) (packageInfo, error) {
 	}
 	defer archive.Close()
 	seen := map[string]string{}
+	entries := make([]string, 0, len(archive.File))
 	var nuspec *zip.File
 	for _, entry := range archive.File {
 		if err := validateEntryName(entry.Name); err != nil {
@@ -44,6 +46,7 @@ func inspectPackage(extracted extractedPackage) (packageInfo, error) {
 			return packageInfo{}, fmt.Errorf("package %s has duplicate ZIP name (case-insensitive): %s and %s", extracted.Name, previous, entry.Name)
 		}
 		seen[folded] = entry.Name
+		entries = append(entries, entry.Name)
 		if strings.EqualFold(path.Ext(entry.Name), ".nuspec") {
 			if path.Base(entry.Name) != entry.Name {
 				return packageInfo{}, fmt.Errorf("package %s nuspec must be root-level: %s", extracted.Name, entry.Name)
@@ -69,7 +72,7 @@ func inspectPackage(extracted extractedPackage) (packageInfo, error) {
 		return packageInfo{}, fmt.Errorf("nuspec in %s must contain id and version", extracted.Name)
 	}
 	kind := strings.TrimPrefix(strings.ToLower(path.Ext(extracted.Name)), ".")
-	return packageInfo{ID: id, Version: version, Kind: kind, Path: extracted.Path, Name: extracted.Name, ArtifactPath: extracted.ArtifactPath}, nil
+	return packageInfo{ID: id, Version: version, Kind: kind, Path: extracted.Path, Name: extracted.Name, ArtifactPath: extracted.ArtifactPath, entries: entries}, nil
 }
 
 func parseNuspecIdentity(contents []byte) (string, string, error) {
@@ -156,36 +159,22 @@ func planPackages(m manifest, packages []packageInfo) ([]packageInfo, error) {
 	return packages, nil
 }
 
-func selectEntries(filename string, policy authenticodePolicy) (map[string]struct{}, error) {
-	archive, err := zip.OpenReader(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer archive.Close()
+func selectEntries(entries []string, policy authenticodePolicy) (map[string]struct{}, error) {
 	wanted := map[string]bool{}
 	for _, name := range policy.Include {
 		wanted[name] = true
 	}
 	selected := map[string]struct{}{}
-	seen := map[string]string{}
 	var problems []string
-	for _, entry := range archive.File {
-		if err := validateEntryName(entry.Name); err != nil {
-			problems = append(problems, fmt.Sprintf("unsafe ZIP entry %q: %v", entry.Name, err))
-		}
-		folded := strings.ToLower(entry.Name)
-		if previous, ok := seen[folded]; ok {
-			problems = append(problems, fmt.Sprintf("duplicate ZIP name (case-insensitive): %s and %s", previous, entry.Name))
-		}
-		seen[folded] = entry.Name
-		if wanted[entry.Name] {
-			selected[entry.Name] = struct{}{}
+	for _, name := range entries {
+		if wanted[name] {
+			selected[name] = struct{}{}
 		}
 		for _, pattern := range policy.FirstParty {
-			match, _ := path.Match(strings.ToLower(pattern), strings.ToLower(path.Base(entry.Name)))
+			match, _ := path.Match(strings.ToLower(pattern), strings.ToLower(path.Base(name)))
 			if match {
-				if !wanted[entry.Name] {
-					problems = append(problems, "first-party DLL is not selected: "+entry.Name)
+				if !wanted[name] {
+					problems = append(problems, "first-party DLL is not selected: "+name)
 				}
 				break
 			}
@@ -242,7 +231,7 @@ func rewritePackage(input, output string, selected map[string]struct{}, transfor
 	})
 }
 
-func verifyPreservation(input, output string, selected map[string]struct{}, symbolPackage bool) error {
+func verifyPreservation(input, output string, selected map[string]struct{}) error {
 	want, err := archiveContents(input)
 	if err != nil {
 		return err
@@ -259,12 +248,6 @@ func verifyPreservation(input, output string, selected map[string]struct{}, symb
 		after, ok := got[name]
 		if !ok {
 			return fmt.Errorf("signed package is missing %s", name)
-		}
-		if symbolPackage {
-			if !bytes.Equal(before, after) {
-				return fmt.Errorf("symbol package entry changed: %s", name)
-			}
-			continue
 		}
 		if _, chosen := selected[name]; !chosen && !bytes.Equal(before, after) {
 			return fmt.Errorf("unselected package entry changed: %s", name)

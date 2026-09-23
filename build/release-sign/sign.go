@@ -194,9 +194,6 @@ func signPackage(ctx context.Context, runner commandRunner, cfg runConfig, info 
 	originals := make(map[string][]byte, len(names))
 	paths := make([]string, 0, len(names))
 	for _, name := range names {
-		if err := validateEntryName(name); err != nil {
-			return fmt.Errorf("unsafe selected assembly %q: %w", name, err)
-		}
 		contents, err := zipEntry(info.Path, name)
 		if err != nil {
 			return err

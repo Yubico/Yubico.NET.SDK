@@ -46,17 +46,16 @@ func TestPolicyIsStrictAndFailClosed(t *testing.T) {
 
 	policy := authenticodePolicy{Include: []string{"lib/Yubico.Core.dll"}, FirstParty: []string{"Yubico.*.dll"}}
 	for _, test := range []struct {
-		name string
-		zip  []zipItem
-		want string
+		name    string
+		entries []string
+		want    string
 	}{
-		{"missing", []zipItem{{"data.txt", []byte("x")}}, "unmatched include"},
-		{"case mismatch", []zipItem{{"lib/yubico.core.dll", minimalPE()}}, "unmatched include"},
-		{"collision", []zipItem{{"lib/Yubico.Core.dll", minimalPE()}, {"LIB/YUBICO.CORE.DLL", minimalPE()}}, "case-insensitive"},
-		{"unselected first party", []zipItem{{"lib/Yubico.Core.dll", minimalPE()}, {"lib/Yubico.Other.dll", minimalPE()}}, "not selected"},
+		{"missing", []string{"data.txt"}, "unmatched include"},
+		{"case mismatch", []string{"lib/yubico.core.dll"}, "unmatched include"},
+		{"unselected first party", []string{"lib/Yubico.Core.dll", "lib/Yubico.Other.dll"}, "not selected"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := selectEntries(writeZip(t, t.TempDir(), "test.nupkg", test.zip), policy)
+			_, err := selectEntries(test.entries, policy)
 			if err == nil || !strings.Contains(err.Error(), test.want) {
 				t.Fatalf("want %q, got %v", test.want, err)
 			}
@@ -92,6 +91,22 @@ func TestArtifactSafetyPackagePlanNamespacedNuspecAndAttestation(t *testing.T) {
 	info, err := inspectPackage(extractedPackage{Path: pkg, Name: filepath.Base(pkg)})
 	if err != nil || info.ID != "Yubico.Core" || info.Version != "1.2.3" {
 		t.Fatalf("info=%#v err=%v", info, err)
+	}
+	for _, test := range []struct {
+		name, entry, want string
+	}{
+		{"collision", "yubico.core.NUSPEC", "duplicate ZIP name"},
+		{"traversal", "../extra.txt", "unsafe ZIP entry"},
+	} {
+		t.Run("package "+test.name, func(t *testing.T) {
+			path := writeZip(t, t.TempDir(), "test.nupkg", []zipItem{
+				{"Yubico.Core.nuspec", []byte(`<package><metadata><id>Yubico.Core</id><version>1.2.3</version></metadata></package>`)},
+				{test.entry, []byte("x")},
+			})
+			if _, err := inspectPackage(extractedPackage{Path: path, Name: filepath.Base(path)}); err == nil || !strings.Contains(err.Error(), test.want) {
+				t.Fatalf("want %q, got %v", test.want, err)
+			}
+		})
 	}
 	m := testCoreManifest()
 	for _, test := range []struct {
@@ -186,12 +201,16 @@ func TestRewritePreservationAndPEMutationGuard(t *testing.T) {
 		t.Fatal(err)
 	}
 	signed := addSignature(t, rebuilt, filepath.Join(dir, "signed.nupkg"))
-	if err := verifyPreservation(nupkg, signed, map[string]struct{}{"lib/a.dll": {}}, false); err != nil {
+	if err := verifyPreservation(nupkg, signed, map[string]struct{}{"lib/a.dll": {}}); err != nil {
 		t.Fatal(err)
 	}
 	snupkg := writeZip(t, dir, "in.snupkg", []zipItem{{"x.nuspec", []byte("same")}, {"symbols.pdb", []byte("symbols")}})
-	if err := verifyPreservation(snupkg, addSignature(t, snupkg, filepath.Join(dir, "signed.snupkg")), nil, true); err != nil {
+	if err := verifyPreservation(snupkg, addSignature(t, snupkg, filepath.Join(dir, "signed.snupkg")), nil); err != nil {
 		t.Fatal(err)
+	}
+	modifiedSymbols := writeZip(t, dir, "modified.snupkg", []zipItem{{"x.nuspec", []byte("same")}, {"symbols.pdb", []byte("changed")}})
+	if err := verifyPreservation(snupkg, addSignature(t, modifiedSymbols, filepath.Join(dir, "signed-modified.snupkg")), nil); err == nil {
+		t.Fatal("accepted changed symbol package entry")
 	}
 }
 

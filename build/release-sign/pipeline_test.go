@@ -95,7 +95,7 @@ func TestExactNugetSignAndVerifyCommands(t *testing.T) {
 	}
 	fingerprint := strings.Repeat("A", 64)
 	runner.run = func(call []string) ([]byte, error) {
-		return []byte("valid author signature\nfingerprint: " + fingerprint + "\nassemblies: valid\nlib/a.dll\nlib/b.dll\n"), nil
+		return []byte("lib/a.dll  SHA-256, signer, digest matches\nlib/b.dll  SHA-256, signer, digest matches\n"), nil
 	}
 	if err := verifySignedPackage(context.Background(), runner, cfg, info, output, selected, fingerprint); err != nil {
 		t.Fatal(err)
@@ -110,7 +110,7 @@ func TestExactNugetSignAndVerifyCommands(t *testing.T) {
 	symbolInput := writeZip(t, dir, "input.snupkg", []zipItem{{"a.nuspec", []byte("same")}, {"a.pdb", []byte("symbols")}})
 	symbolOutput := addSignature(t, symbolInput, filepath.Join(dir, "output.snupkg"))
 	runner.calls = nil
-	runner.output = []byte("valid author signature\nfingerprint: " + fingerprint + "\n")
+	runner.output = nil
 	runner.run = nil
 	if err := verifySignedPackage(context.Background(), runner, cfg, packageInfo{Path: symbolInput, Kind: "snupkg"}, symbolOutput, nil, fingerprint); err != nil {
 		t.Fatal(err)
@@ -121,20 +121,22 @@ func TestExactNugetSignAndVerifyCommands(t *testing.T) {
 	}
 }
 
-func TestZeroExitIncompleteVerificationEvidenceIsRejected(t *testing.T) {
-	fingerprint := strings.Repeat("A", 64)
-	validNuget := "valid author signature\n" + fingerprint + "\nassemblies: valid\nlib/a.dll\n"
+func TestSelectedAssembliesRequireSuccessfulVerification(t *testing.T) {
 	for _, test := range []struct {
 		name, output string
+		valid        bool
 	}{
-		{"author", strings.Replace(validNuget, "valid author signature", "", 1)},
-		{"fingerprint", strings.Replace(validNuget, fingerprint, "", 1)},
-		{"assemblies summary", strings.Replace(validNuget, "assemblies: valid", "", 1)},
-		{"assembly", strings.Replace(validNuget, "lib/a.dll", "", 1)},
+		{"verified", "    lib/a.dll  SHA-256, signer, digest matches\n", true},
+		{"missing", "assemblies  1, 1 verified\n", false},
+		{"unsigned", "    lib/a.dll  unsigned\n", false},
+		{"misleading summary", "assemblies  1, 1 verified\n    lib/a.dll  unsigned\n", false},
+		{"modified", "    lib/a.dll  DIGEST DIFFERS\n", false},
+		{"different name", "    lib/a.dll-other  SHA-256, signer, digest matches\n", false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if err := validateNugetSignEvidence([]byte(test.output), fingerprint, []string{"lib/a.dll"}); err == nil {
-				t.Fatal("accepted incomplete evidence")
+			err := requireVerifiedAssemblies([]byte(test.output), []string{"lib/a.dll"})
+			if (err == nil) != test.valid {
+				t.Fatalf("valid=%v err=%v", test.valid, err)
 			}
 		})
 	}

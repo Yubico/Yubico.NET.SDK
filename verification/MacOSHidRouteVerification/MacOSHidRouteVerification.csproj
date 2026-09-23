@@ -13,5 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Core/src/Yubico.YubiKit.Core.csproj" />
     <ProjectReference Include="../../src/Fido2/src/Yubico.YubiKit.Fido2.csproj" />
+    <ProjectReference Include="../../src/Management/src/Yubico.YubiKit.Management.csproj" />
   </ItemGroup>
 </Project>

@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Globalization;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Fido2;
 
 // The verification executable itself contains the integration assertions. No fake bridge, HID
@@ -21,13 +21,20 @@ if (args is ["--child", "--list"])
 if (args is ["--child", "--probe", "--serial", var childSerial]
     && int.TryParse(childSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedSerial))
     return await DiscoverAsync(selectedSerial);
+if (args is ["--child", "--otp-get", "--serial", var childOtpSerial]
+    && int.TryParse(childOtpSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedOtpSerial))
+    return await ProbeOtpAsync(selectedOtpSerial);
+if (args is ["--child", "--active-cancel" or "--otp-info" or "--touch" or "--removal", "--serial", var scenarioSerial]
+    && int.TryParse(scenarioSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedScenarioSerial)
+    && selectedScenarioSerial > 0)
+    return await AcceptanceScenarios.RunAsync(args[1], selectedScenarioSerial);
 
-if (args is not ["--list"] and not ["--probe", "--serial", _])
+if (args is not ["--list"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal", "--serial", _])
 {
-    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | --probe --serial SERIAL");
+    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal) --serial SERIAL");
     return 2;
 }
-if (args is ["--probe", "--serial", var serial]
+if (args is [_, "--serial", var serial]
     && (!int.TryParse(serial, NumberStyles.None, CultureInfo.InvariantCulture, out int parsed) || parsed <= 0))
 {
     Console.Error.WriteLine("BLOCKED: specify one positive decimal serial explicitly");
@@ -49,7 +56,7 @@ Task output = CopyAsync(child.StandardOutput, Console.Out);
 Task error = CopyAsync(child.StandardError, Console.Error);
 try
 {
-    await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(20));
+    await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(args[0] == "--removal" ? 180 : args[0] == "--touch" ? 60 : 20));
     await Task.WhenAll(output, error);
     Console.WriteLine($"child exit={child.ExitCode}");
     return child.ExitCode;
@@ -59,7 +66,7 @@ catch (TimeoutException)
     child.Kill(entireProcessTree: true);
     await child.WaitForExitAsync();
     await Task.WhenAll(output, error);
-    Console.Error.WriteLine("FAIL watchdog exceeded 20s; process kill is OS cleanup, NOT SDK native drain proof");
+    Console.Error.WriteLine("FAIL child watchdog expired; process kill is OS cleanup, NOT SDK native drain proof");
     return 3;
 }
 
@@ -68,6 +75,73 @@ static async Task CopyAsync(StreamReader source, TextWriter target)
     string? line;
     while ((line = await source.ReadLineAsync()) is not null)
         await target.WriteLineAsync(line);
+}
+
+static async Task<int> ProbeOtpAsync(int serial)
+{
+    try
+    {
+        IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
+        IYubiKey[] matches = devices.Where(d => d.SerialNumber == serial &&
+            d.SupportsConnection(ConnectionType.HidOtp)).ToArray();
+        if (matches.Length != 1)
+        {
+            Console.Error.WriteLine($"BLOCKED: serial={serial} matched {matches.Length} OTP HID devices");
+            return 2;
+        }
+
+        for (int cycle = 1; cycle <= 3; cycle++)
+        {
+            var timer = Stopwatch.StartNew();
+            Task<IOtpHidConnection> opening;
+            try
+            {
+                opening = matches[0].ConnectAsync<IOtpHidConnection>();
+                Console.WriteLine($"otp cycle={cycle} open invocationMs={timer.Elapsed.TotalMilliseconds:F3} pending={!opening.IsCompleted}");
+                await opening;
+            }
+            catch (UnrecoveredConnectionException) when (cycle == 1)
+            {
+                // Observe whether an abandoned discovery read eventually releases its claim.
+                // A retry is diagnostic, not permission to release an unproven native owner.
+                var recovery = Stopwatch.StartNew();
+                while (true)
+                {
+                    if (recovery.Elapsed > TimeSpan.FromSeconds(8))
+                        throw new TimeoutException("OTP discovery claim remained unrecovered for 8 seconds");
+                    await Task.Delay(250);
+                    try
+                    {
+                        opening = matches[0].ConnectAsync<IOtpHidConnection>();
+                        await opening;
+                        Console.WriteLine($"otp discovery claim released after {recovery.Elapsed.TotalMilliseconds:F0}ms");
+                        break;
+                    }
+                    catch (UnrecoveredConnectionException) { }
+                }
+            }
+            Console.WriteLine($"otp cycle={cycle} open completedMs={timer.Elapsed.TotalMilliseconds:F3} (includes any discovery recovery wait)");
+            await using IOtpHidConnection connection = await opening;
+            if (connection.GetType().Name != "MacOSOtpHidConnection")
+                throw new InvalidOperationException("OTP did not use the connection-owned macOS feature worker");
+            ReadOnlyMemory<byte> report = await connection.ReceiveAsync();
+            if (report.Length != connection.FeatureReportSize)
+                throw new InvalidOperationException($"Unexpected feature report length: {report.Length}");
+            Console.WriteLine($"otp cycle={cycle} read-only GET length={report.Length}; close on dispose");
+        }
+
+        Console.WriteLine($"PASS OTP read-only feature GET/open/dispose/reopen; serial={serial}, cycles=3");
+        return 0;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"FAIL OTP serial={serial}: {ex}");
+        return 1;
+    }
+    finally
+    {
+        await YubiKeyManager.ShutdownAsync();
+    }
 }
 
 static async Task<int> DiscoverAsync(int? serial)

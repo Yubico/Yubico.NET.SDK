@@ -3,8 +3,13 @@
 Status: first slice implemented and verified on 2026-09-22; its original independent
 review finished PASS WITH NOTES, and the subsequent structural refactor has separately
 recorded managed verification. This is smart-card slice evidence, not completion of the epic.
-Only the first smart-card slice was committed at `db7a1bf6`; the later async transaction,
-macOS FIDO/OTP and dependency work remains uncommitted in this worktree.
+The commit/worktree and route evidence in the sections below are historical snapshots;
+the [current status](00-status.md) supersedes their package and hardware-gap claims.
+The first smart-card slice was committed at `db7a1bf6`. The subsequent native fix
+is committed locally at `71a23cd0` (not pushed); the unsigned, unpublished `.7`
+package was built before that commit from the same-behavior working source, with
+producer metadata still at `f8c974` plus dirty changes. Do not describe `71a23cd0`
+as a post-commit package producer.
 The user approved the single-key product and architecture and replaced whole-effort
 upfront specification with incremental implementation on 2026-09-22. For subsequent
 slices, walk through bounded pseudocode, then implement, test and review; resolve
@@ -13,6 +18,35 @@ non-blocking details live rather than requiring a complete epic program design o
 The [master plan](../../../2026-09-21-yubikit-async-boundaries-ISA.md) remains the
 acceptance record. The [earlier detailed program design](addenda/earlier-multi-key-program-design.md)
 is preserved as research/reference, not a prerequisite or an implementation instruction.
+
+## Subsequent bounded portable checkpoint — 2026-09-24
+
+This is not a replacement for the historical first-slice pseudocode below. The
+selected macOS normal-use FIDO path passed on one key, including `.3` touch/cancel,
+`.6` unplug/replug after earlier close failures and `.7` normal native-AOT execution;
+`.7` did not receive a new unplug run. The failed-reset OTP path now latches the
+current protocol unusable while retaining the original cancellation or timeout;
+28 focused tests and one scripted real-protocol abort/reuse test passed. A new session
+borrowing the same raw connection can bypass that per-protocol latch, and physical
+mid-frame failure remains unverified. The unplug/dispose edge stays quarantined.
+Correctness review finished PASS WITH NOTES: this bounded implementation increment
+stops without claiming universal route or platform acceptance.
+
+The Core-only semantic scanner records 198 exact source sites, all
+documented/outstanding, and 13 passing targeted tests, including the cross-file
+source-order regression. Its unknown-native fixture and exact
+gate establish only ISC-5; ISC-6 is not established by flagging an interface call.
+Source scanning covers Core and the current .NET 10 preprocessor configuration only,
+not native exports or every applet/helper path. Two-pass collection fixed source-order
+dependence; callback forwarder/nontransitive helper-native-graph coverage remains a
+deferred review note. The final full Core run passed 1,400 tests with 3 skipped,
+including the thirteenth inventory test. The same-host `.3`
+ten-before/ten-after measurements are descriptive with
+unmeasured native duration, allocation and idle activity and worse after-tail;
+the comparison runner's six self-tests are pinned to `.3`, not the current `.7`
+checkout. ISC-62 remains open. ISC-5/49/52 are the only master checkmarks (3/72).
+The [current status](00-status.md) records evidence limits, outstanding rows and
+future package promotion; neither a push nor a private release is part of this checkpoint.
 
 ## First slice
 
@@ -206,7 +240,7 @@ and macOS arm64 Native AOT publish. The published host was not executed and no d
 used. Native OpenSSL execution covers local cryptography, not PC/SC or HID hardware. The
 master records package identity, signatures, artifact/export comparison and limitations.
 
-## Current macOS FIDO route: persistent input
+## Historical macOS FIDO `.2` route checkpoint: persistent input
 
 **D30 production code implemented, selected normal and pending-read shutdown paths verified, route acceptance pending:** the built-in macOS FIDO
 open/init/send/receive/cancel-recovery/concurrency/shutdown/reopen route is available for
@@ -450,10 +484,11 @@ and a temporary local feed in the explicit `RestoreConfigFile` NuGet configurati
 restore/build/publish. Neither a configuration path alone nor this unsigned local build
 is release proof.
 
-## Subsequent bounded increments — current evidence
+## Subsequent bounded increments — historical `.3` evidence
 
-These increments do not change the first-slice finish line or the master 2/72 count.
-They remain uncommitted here; parent verification and any requested commit follow separately.
+These historical `.3` increments do not change the first-slice finish line or the
+master 2/72 count. The [current status](00-status.md) supersedes the old hardware and
+package gaps; parent verification and any requested commit follow separately.
 
 | Milestone | Implemented and tested | Blocker and next evidence |
 |---|---|---|

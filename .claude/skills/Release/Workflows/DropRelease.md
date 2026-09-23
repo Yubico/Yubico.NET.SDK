@@ -46,7 +46,7 @@ The state file is the single source of truth for resume. Update it before any op
 4. `AskUserQuestion`: "Confirm release version" — default option is `+1 patch` of `previousTag` (e.g., `1.16.0` → `1.16.1`); also offer `+1 minor`, `+1 major`, custom
 5. `AskUserQuestion`: "Release date" — default today (in `Month Dth, YYYY` format matching whats-new.md style)
 6. **Hardware test reminder** — print: "Before continuing, confirm you've tested PIV + SCP on real YubiKey hardware. The skill cannot do this for you." Gate with `AskUserQuestion`: "Hardware tests pass?" / "Skip (not recommended)"
-7. **Code-signing YubiKey safety gate** — `AskUserQuestion`: "⚠️ IMPORTANT: Your code-signing YubiKey must be UNPLUGGED from this machine during phases 1–4. Integration tests that enumerate YubiKeys can run PIV/PGP resets against any connected key. Only plug it back in when Phase 5 (sign+publish) explicitly asks for it — the .NET Sign CLI reads the PIV certificate safely, but no other YubiKey operation should touch the key. Is the code-signing YubiKey unplugged?" Options: "Yes, it's unplugged" / "Let me unplug it now". If the operator needs to unplug, wait for confirmation before proceeding.
+7. **Code-signing YubiKey safety gate** — `AskUserQuestion`: "⚠️ IMPORTANT: Your code-signing YubiKey must be UNPLUGGED from this machine during phases 1–4. Integration tests that enumerate YubiKeys can run PIV/PGP resets against any connected key. Only plug it back in when Phase 5 (sign+publish) explicitly asks for it. Is the code-signing YubiKey unplugged?" Options: "Yes, it's unplugged" / "Let me unplug it now". If the operator needs to unplug, wait for confirmation before proceeding.
 8. Create `~/Releases/<version>/` and write initial `.state.json`
 
 ## Phase 2 — NativeShims gate (cross-platform, conditional)
@@ -154,7 +154,7 @@ git diff <previousTag>..origin/develop -- Yubico.NativeShims/ --stat
          sleep 120
        done
        ```
-     - On failure: STOP. On success: jump to Phase 5 NativeShims half (Windows-only); sign+publish, verify NuGet 200, then return here for step 4.
+      - On failure: STOP. On success: jump to Phase 5 NativeShims half; sign+publish, verify NuGet 200, then return here for step 4.
    - **If `nativeShimsBuildRef == "develop"` (already built in Phase 2)**:
      - Check if NativeShims signed+published: poll `https://www.nuget.org/packages/Yubico.NativeShims/<nsVersion>` — must return 200
      - If NOT published: jump to Phase 5 NativeShims half, then return here
@@ -190,7 +190,8 @@ Follow `build/release-sign/README.md`. Hard gates before signing:
 - `nuget-sign`, Go, and `dotnet` are available.
 - `RELEASE_SIGN_KEY`, `RELEASE_SIGN_CERTIFICATE`, `RELEASE_SIGN_ROOT`, and
   `RELEASE_SIGN_TIMESTAMP_ROOT` identify the production key and certificate files.
-- The code-signing YubiKey is connected only now.
+- The code-signing YubiKey stays disconnected until the signing commands below;
+  build the wrapper and download artifacts first.
 - `NUGET_API_KEY` is set for this session and is never printed or persisted.
 
 Build the wrapper once:
@@ -201,6 +202,30 @@ go -C build/release-sign build -o "$HOME/Releases/<version>/release-sign" .
 
 Download the exact artifact ZIPs for each recorded workflow run and obtain that
 run's `headSha` with `gh run view <run-id> --json headSha --jq .headSha`.
+Connect the code-signing YubiKey only after these preparation steps.
+
+The Go signer prompts for the PIV PIN once per invocation after checking
+attestations and package identities; it reuses the PIN only for its signing child
+processes. Invoke the signer directly when the agent has an attached terminal.
+If the agent shell has no terminal input on macOS, invoke each command below as:
+
+```sh
+zsh build/release-sign/launch-macos.zsh \
+  "$HOME/Releases/<version>/<component>/signing.status" \
+  "$HOME/Releases/<version>/release-sign" run <the same flags as below>
+```
+
+Ensure the component working directory exists and the status file does not
+before launching. The helper opens Terminal; the operator enters the PIN there,
+never in chat or an argument. Poll for `signing.status`, require its exit code
+to be `0`, then inspect `signed/report.json`. If the status file is missing or
+nonzero, stop instead of publishing. On Windows or Linux without an attached
+agent terminal, have the operator run the exact signer command in a local
+interactive terminal and verify its report before continuing. If NativeShims
+was not rebuilt, only the main Core invocation is needed: one PIN prompt for
+both managed packages and their symbols. When NativeShims is rebuilt, its
+earlier signing run has a separate prompt; never retain the PIN across the
+intervening build.
 
 For NativeShims, when rebuilt:
 

@@ -216,7 +216,7 @@ func signPackage(ctx context.Context, runner commandRunner, cfg runConfig, info 
 	}
 	args := []string{"sign-assemblies", "--key", cfg.KeyLocation, "--certificate", cfg.CertificatePath, "--hash-algorithm", "sha256", "--timestamper", cfg.Timestamper}
 	args = append(args, paths...)
-	if err := runner.RunAttached(ctx, cfg.NugetSign, args...); err != nil {
+	if err := runner.RunAttached(ctx, cfg.NugetSign, signingEnvironment(cfg.signingPIN), args...); err != nil {
 		return fmt.Errorf("nuget-sign sign-assemblies: %w", err)
 	}
 	signed := make(map[string][]byte, len(names))
@@ -239,10 +239,17 @@ func signPackage(ctx context.Context, runner commandRunner, cfg runConfig, info 
 
 func runNugetSign(ctx context.Context, runner commandRunner, cfg runConfig, input, output string) error {
 	args := []string{"sign", "--key", cfg.KeyLocation, "--certificate", cfg.CertificatePath, "--hash-algorithm", "sha256", "--timestamper", cfg.Timestamper, "--output", output, input}
-	if err := runner.RunAttached(ctx, cfg.NugetSign, args...); err != nil {
+	if err := runner.RunAttached(ctx, cfg.NugetSign, signingEnvironment(cfg.signingPIN), args...); err != nil {
 		return fmt.Errorf("nuget-sign sign: %w", err)
 	}
 	return nil
+}
+
+func signingEnvironment(pin string) []string {
+	if pin == "" {
+		return nil
+	}
+	return []string{"NUGET_SIGN_PIN=" + pin}
 }
 
 func certificateFingerprint(certificate *x509.Certificate) string {

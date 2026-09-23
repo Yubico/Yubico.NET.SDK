@@ -11,7 +11,7 @@ The skill works in two modes:
 - **`/Release`** — full flow from phase 1 (pre-flight) onward
 - **`/Release resume <version>`** — picks up at the current phase using cached state from `~/Releases/<version>/.state.json`.
 
-Phase 5 uses the cross-platform tool documented in `build/release-sign/README.md`.
+Phase 5 uses the cross-platform tool documented in `build/release-sign/README.md`. It prompts once per signing run in an interactive terminal; a release without a NativeShims rebuild has one Core signing run.
 
 ## Workflow Routing
 

@@ -54,13 +54,75 @@ func TestExecutableResolutionAndMinimumVersions(t *testing.T) {
 	}
 }
 
+func TestSigningPINPrompt(t *testing.T) {
+	t.Setenv("NUGET_SIGN_PIN", "")
+	if err := os.Unsetenv("NUGET_SIGN_PIN"); err != nil {
+		t.Fatal(err)
+	}
+	prompts := 0
+	readPIN := func() (string, error) {
+		prompts++
+		return "test-pin", nil
+	}
+	pin, err := acquireSigningPIN("yubikey://9c?serial=28188992", readPIN)
+	if err != nil || pin != "test-pin" {
+		t.Fatalf("PIN prompt failed: %v", err)
+	}
+	if prompts != 1 {
+		t.Fatalf("prompted %d times, want once", prompts)
+	}
+	if _, set := os.LookupEnv("NUGET_SIGN_PIN"); set {
+		t.Fatal("prompted PIN escaped into the process environment")
+	}
+	if _, err := acquireSigningPIN("yubikey://9c", func() (string, error) { return "", nil }); err == nil {
+		t.Fatal("accepted an empty PIN")
+	}
+	if _, err := acquireSigningPIN("yubikey://9c", func() (string, error) { return "", errors.New("no terminal") }); err == nil {
+		t.Fatal("accepted a failed prompt")
+	}
+	if pin, err := acquireSigningPIN("file:///key.pem", func() (string, error) { t.Fatal("prompted for a file key"); return "", nil }); err != nil || pin != "" {
+		t.Fatalf("unexpected PIN for file key: %v", err)
+	}
+	t.Setenv("NUGET_SIGN_PIN", "provided")
+	if pin, err := acquireSigningPIN("yubikey://9c", func() (string, error) { t.Fatal("prompted with PIN already set"); return "", nil }); err != nil || pin != "" {
+		t.Fatalf("unexpected prompt with PIN already set: %v", err)
+	}
+	t.Setenv("NUGET_SIGN_PIN", "")
+	if _, err := acquireSigningPIN("yubikey://9c", func() (string, error) { t.Fatal("prompted with an empty PIN in the environment"); return "", nil }); err == nil {
+		t.Fatal("accepted an empty PIN from the environment")
+	}
+}
+
+func TestSigningEnvironmentScope(t *testing.T) {
+	if os.Getenv("RELEASE_SIGN_TEST_CHILD") == "1" {
+		if os.Getenv("NUGET_SIGN_PIN") != "test-pin" {
+			t.Fatal("signing child did not receive the PIN")
+		}
+		return
+	}
+	t.Setenv("NUGET_SIGN_PIN", "")
+	if err := os.Unsetenv("NUGET_SIGN_PIN"); err != nil {
+		t.Fatal(err)
+	}
+	program, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := (osRunner{}).RunAttached(context.Background(), program, []string{"RELEASE_SIGN_TEST_CHILD=1", "NUGET_SIGN_PIN=test-pin"}, "-test.run=^TestSigningEnvironmentScope$"); err != nil {
+		t.Fatal(err)
+	}
+	if _, set := os.LookupEnv("NUGET_SIGN_PIN"); set {
+		t.Fatal("signing child PIN leaked into the parent environment")
+	}
+}
+
 func TestExactNugetSignAndVerifyCommands(t *testing.T) {
 	dir := t.TempDir()
 	input := writeZip(t, dir, "input.nupkg", []zipItem{{"a.nuspec", []byte(`<package><metadata><id>A</id><version>1</version></metadata></package>`)}, {"lib/b.dll", minimalPE()}, {"lib/a.dll", minimalPE()}, {"data", []byte("same")}})
 	info := packageInfo{Path: input, Name: "A.1.nupkg", Kind: "nupkg"}
 	selected := map[string]struct{}{"lib/b.dll": {}, "lib/a.dll": {}}
 	output := filepath.Join(dir, "output.nupkg")
-	cfg := runConfig{NugetSign: "/tools/nuget-sign", KeyLocation: "yubikey://9c", CertificatePath: "chain.pem", RootPath: "root.pem", TimestampRootPath: "timestamp.pem", Timestamper: "https://timestamp"}
+	cfg := runConfig{NugetSign: "/tools/nuget-sign", KeyLocation: "yubikey://9c", CertificatePath: "chain.pem", RootPath: "root.pem", TimestampRootPath: "timestamp.pem", Timestamper: "https://timestamp", signingPIN: "test-pin"}
 	runner := &fakeRunner{}
 	runner.attachedRun = func(call []string) error {
 		if call[1] == "sign-assemblies" {
@@ -83,6 +145,14 @@ func TestExactNugetSignAndVerifyCommands(t *testing.T) {
 	}
 	if len(runner.attached) != 2 {
 		t.Fatalf("attached calls %v", runner.attached)
+	}
+	if len(runner.attachedEnv) != 2 {
+		t.Fatalf("received %d signing environments, want two", len(runner.attachedEnv))
+	}
+	for _, environment := range runner.attachedEnv {
+		if !reflect.DeepEqual(environment, []string{"NUGET_SIGN_PIN=test-pin"}) {
+			t.Fatal("signer subprocess did not receive the PIN")
+		}
 	}
 	assemblyCall := runner.attached[0]
 	wantAssemblyPrefix := []string{"/tools/nuget-sign", "sign-assemblies", "--key", "yubikey://9c", "--certificate", "chain.pem", "--hash-algorithm", "sha256", "--timestamper", "https://timestamp"}
@@ -189,6 +259,7 @@ type fakeRunner struct {
 	err         error
 	calls       [][]string
 	attached    [][]string
+	attachedEnv [][]string
 	run         func([]string) ([]byte, error)
 	attachedRun func([]string) error
 }
@@ -201,9 +272,10 @@ func (f *fakeRunner) Run(_ context.Context, name string, args ...string) ([]byte
 	}
 	return f.output, f.err
 }
-func (f *fakeRunner) RunAttached(_ context.Context, name string, args ...string) error {
+func (f *fakeRunner) RunAttached(_ context.Context, name string, environment []string, args ...string) error {
 	call := append([]string{name}, args...)
 	f.attached = append(f.attached, call)
+	f.attachedEnv = append(f.attachedEnv, environment)
 	if f.attachedRun != nil {
 		return f.attachedRun(call)
 	}

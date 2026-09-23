@@ -29,6 +29,7 @@ type runConfig struct {
 	SourceDigest      string
 	Timestamper       string
 	Clean             bool
+	signingPIN        string
 }
 
 func run(ctx context.Context, cfg runConfig, runner commandRunner) error {
@@ -81,6 +82,12 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner) error {
 			return err
 		}
 		result.Artifacts = append(result.Artifacts, reportArtifact{Path: name, SHA256: digest})
+	}
+	cfg.signingPIN, err = acquireSigningPIN(cfg.KeyLocation, func() (string, error) {
+		return promptSigningPIN(cfg.KeyLocation)
+	})
+	if err != nil {
+		return err
 	}
 	var outputNames []string
 	for _, info := range packages {

@@ -48,6 +48,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     // Production keeps the device's 14-second touch window; the internal override makes timeout tests deterministic.
     private readonly TimeSpan _touchTimeout;
     private FirmwareVersion? _firmwareVersion;
+    private Exception? _resetFailure;
     private bool _initialized;
     private bool _disposed;
 
@@ -69,7 +70,11 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     {
         // Initialization touches the wire, so it must hold the guard like any exchange.
         _exchangeGuard.RunAsync(
-                EnsureInitializedUnderGuardAsync,
+                exchangeToken =>
+                {
+                    ThrowIfResetFailed();
+                    return EnsureInitializedUnderGuardAsync(exchangeToken);
+                },
                 CancellationToken.None)
             .GetAwaiter()
             .GetResult();
@@ -109,7 +114,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                         exchangeToken: cancellationToken)
                     .ConfigureAwait(false);
             }
-            catch
+            catch when (_resetFailure is null)
             {
                 // Expected to fail - the scan map command should be rejected
             }
@@ -150,6 +155,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         return await _exchangeGuard.RunAsync(
                 async exchangeToken =>
                 {
+                    ThrowIfResetFailed();
                     await EnsureInitializedUnderGuardAsync(exchangeToken).ConfigureAwait(false);
                     return await SendAndReceiveCoreUnderGuardAsync(
                             slot,
@@ -313,7 +319,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             _logger.LogTrace("Device busy (statusByte=0x{Status:X2}), continuing poll", statusByte);
         }
 
-        await ResetStateAsync(exchangeToken).ConfigureAwait(false);
+        await ResetStateAfterAbandonmentAsync("response polling timeout", exchangeToken)
+            .ConfigureAwait(false);
         throw new TimeoutException($"Timeout waiting for device response after {stopwatch.ElapsedMilliseconds}ms");
     }
 
@@ -446,8 +453,24 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Unable to reset OTP HID state after {Reason}", reason);
+            // The guard remains held: a failed abort leaves framing unknown for this protocol instance.
+            try
+            {
+                _logger.LogWarning(ex, "Unable to reset OTP HID state after {Reason}", reason);
+            }
+            catch (Exception)
+            {
+                // Diagnostics must not replace the caller's cancellation, timeout, or response failure.
+            }
         }
+    }
+
+    private void ThrowIfResetFailed()
+    {
+        if (_resetFailure is { } failure)
+            throw new InvalidOperationException(
+                "OTP HID state could not be recovered after a failed reset; this protocol is unusable. Dispose it and reopen the connection.",
+                failure);
     }
 
     public async Task<ReadOnlyMemory<byte>> ReadStatusAsync(CancellationToken cancellationToken = default)
@@ -457,6 +480,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         var featureReport = await _exchangeGuard.RunAsync(
                 async exchangeToken =>
                 {
+                    ThrowIfResetFailed();
                     await EnsureInitializedUnderGuardAsync(exchangeToken).ConfigureAwait(false);
                     return await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
                 },
@@ -584,7 +608,16 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         try
         {
             buffer[OtpConstants.FeatureReportSize - 1] = OtpConstants.DummyReportWrite;
-            await WriteFeatureReportAsync(buffer, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await WriteFeatureReportAsync(buffer, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Even a complete response leaves framing unknown if its reset fails.
+                _resetFailure ??= ex;
+                throw;
+            }
         }
         finally
         {

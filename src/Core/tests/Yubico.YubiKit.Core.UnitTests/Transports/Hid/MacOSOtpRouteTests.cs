@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Transports.Hid;
@@ -7,6 +8,48 @@ namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid;
 
 public class MacOSOtpRouteTests
 {
+    [Fact]
+    public async Task AbandonedDiscoveryRead_BlocksNewConnectionUntilNativeReleaseThenAllowsRetry()
+    {
+        var native = new Lifetime { HoldGet = true };
+        native.AllowOpen.Set();
+        native.AllowSet.Set();
+        var descriptor = new HidDescriptorInfo
+        {
+            VendorId = 0x1050,
+            ProductId = 0x0407,
+            UsagePage = 1,
+            Usage = 6
+        };
+        var slot = new HidConnectionSlot(new MacOSHidDevice(42, descriptor), otpLifetime: native);
+        var device = new YubiKeyDevice(slot.InterfaceId, smartCard: null, hidFido: null,
+            hidOtp: slot, deviceInfo: null);
+
+        try
+        {
+            await Assert.ThrowsAsync<TimeoutException>(() => ProtocolDeviceInfo.ReadSlotBoundedAsync(
+                slot, ConnectionType.HidOtp, TimeSpan.FromMilliseconds(100), NullLogger.Instance,
+                TestContext.Current.CancellationToken, waitForWorkerSlot: true,
+                scope: ProtocolDeviceInfo.CreateScope()));
+
+            Assert.True(native.InGet.Wait(TimeSpan.FromSeconds(5)));
+            var failure = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() =>
+                device.ConnectAsync<IOtpHidConnection>(TestContext.Current.CancellationToken));
+            Assert.Contains("was abandoned", failure.InnerException!.Message);
+
+            var recovered = DeviceConnectionRegistry.WaitForRecoveryForTest(slot.InterfaceId);
+            native.AllowGet.Set();
+            await recovered.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+            await using var connection = await device.ConnectAsync<IOtpHidConnection>(TestContext.Current.CancellationToken);
+            Assert.Equal(8, (await connection.ReceiveAsync(TestContext.Current.CancellationToken)).Length);
+        }
+        finally
+        {
+            native.AllowGet.Set();
+        }
+    }
+
     [Fact]
     public async Task OpenSendGetAndClose_RunOnOneWorkerAndReleaseClaim()
     {
@@ -216,8 +259,13 @@ public class MacOSOtpRouteTests
     public async Task RegisteredOtpSlotTransfersClaimBeforeOpenAndReleasesAfterClose()
     {
         var native = new Lifetime();
-        var descriptor = new HidDescriptorInfo { VendorId = 0x1050, ProductId = 0x0407,
-            UsagePage = 1, Usage = 6 };
+        var descriptor = new HidDescriptorInfo
+        {
+            VendorId = 0x1050,
+            ProductId = 0x0407,
+            UsagePage = 1,
+            Usage = 6
+        };
         var slot = new HidConnectionSlot(new MacOSHidDevice(42, descriptor), otpLifetime: native);
         var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([slot.InterfaceId]);
         var opening = slot.OpenRegisteredConnectionAsync(claim, CancellationToken.None);

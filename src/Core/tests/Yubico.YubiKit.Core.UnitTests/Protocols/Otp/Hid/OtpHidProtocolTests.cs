@@ -1,6 +1,8 @@
 // Copyright 2025 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Buffers;
 using System.Diagnostics;
 using Yubico.YubiKit.Core.Credentials;
@@ -30,13 +32,16 @@ public class OtpHidProtocolTests
         public void QueueReport(byte[] report) => _reportsToReturn.Enqueue(report);
         public IReadOnlyList<byte[]> SentReports => _reportsSent;
         public int ReportsRemaining => _reportsToReturn.Count;
+        public int ReportsReceived { get; private set; }
         public Action<byte[]>? OnReportDequeued { get; set; }
+        public Exception? ResetFailure { get; set; }
 
         public byte[] GetReport()
         {
             if (_reportsToReturn.Count == 0)
                 throw new InvalidOperationException("No reports queued - test setup incomplete");
             byte[] report = _reportsToReturn.Dequeue();
+            ReportsReceived++;
             OnReportDequeued?.Invoke(report);
             return report;
         }
@@ -44,6 +49,8 @@ public class OtpHidProtocolTests
         public void SetReport(byte[] report)
         {
             _reportsSent.Add(report.ToArray());
+            if (report[OtpConstants.FeatureReportDataSize] == OtpConstants.DummyReportWrite && ResetFailure is not null)
+                throw ResetFailure;
         }
 
         public void Dispose() { }
@@ -180,6 +187,162 @@ public class OtpHidProtocolTests
             ReadOnlyMemory<byte>.Empty,
             TestContext.Current.CancellationToken);
         Assert.Equal(6, response.Length);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FailedAbandonmentReset_PreservesCurrentOutcomeAndRejectsFurtherExchanges(bool timeout)
+    {
+        using var cancellation = new CancellationTokenSource();
+        var mock = new MockHidConnection { ResetFailure = new IOException("Reset failed.") };
+        var protocol = CreateProtocolWithMock(mock, timeout ? TimeSpan.Zero : null);
+        QueueUntilTouchWait(mock);
+        var prompt = new RecordingUserPresencePrompt(timeout ? null : () => cancellation.Cancel());
+
+        if (timeout)
+        {
+            await Assert.ThrowsAsync<OtpHidTouchTimeoutException>(() => protocol.SendAndReceiveAsync(
+                0x30, ReadOnlyMemory<byte>.Empty, CreatePresenceNotification(prompt), cancellation.Token));
+        }
+        else
+        {
+            OperationCanceledException cancelled = await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                protocol.SendAndReceiveAsync(
+                    0x30, ReadOnlyMemory<byte>.Empty, CreatePresenceNotification(prompt), cancellation.Token));
+            Assert.Equal(cancellation.Token, cancelled.CancellationToken);
+        }
+
+        int sent = mock.SentReports.Count;
+        int received = mock.ReportsReceived;
+        Assert.Equal(11, sent);
+        mock.QueueReport(Status(programmingSequence: 2));
+
+        InvalidOperationException sendFailure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+        Assert.Same(mock.ResetFailure, sendFailure.InnerException);
+        Assert.Contains("unusable", sendFailure.Message, StringComparison.Ordinal);
+        InvalidOperationException statusFailure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.ReadStatusAsync(TestContext.Current.CancellationToken));
+        Assert.Same(mock.ResetFailure, statusFailure.InnerException);
+        InvalidOperationException configureFailure = Assert.Throws<InvalidOperationException>(() =>
+            protocol.Configure(new FirmwareVersion(5, 4, 3)));
+        Assert.Same(mock.ResetFailure, configureFailure.InnerException);
+        Assert.Equal(sent, mock.SentReports.Count);
+        Assert.Equal(received, mock.ReportsReceived);
+        Assert.Equal(1, mock.ReportsRemaining);
+
+        var otherMock = new MockHidConnection();
+        var otherProtocol = CreateProtocolWithMock(otherMock);
+        QueueStatusOnlyExchangeAfterInitialization(otherMock);
+        Assert.Equal(6, (await otherProtocol.SendAndReceiveAsync(
+            0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken)).Length);
+        await protocol.DisposeAsync();
+        Assert.Equal(sent, mock.SentReports.Count);
+    }
+
+    [Fact]
+    public async Task FailedAbandonmentReset_WhenWarningLoggerThrows_StillPreservesCancellationAndFaultsProtocol()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var mock = new MockHidConnection { ResetFailure = new IOException("Reset failed.") };
+        mock.QueueReport(Status(versionMajor: 5));
+        var protocol = new OtpHidProtocol(new OtpHidConnection(mock), new ThrowingWarningLogger());
+        QueueUntilTouchWait(mock);
+        var prompt = new RecordingUserPresencePrompt(() => cancellation.Cancel());
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => protocol.SendAndReceiveAsync(
+            0x30, ReadOnlyMemory<byte>.Empty, CreatePresenceNotification(prompt), cancellation.Token));
+
+        int sent = mock.SentReports.Count;
+        InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.ReadStatusAsync(TestContext.Current.CancellationToken));
+        Assert.Same(mock.ResetFailure, failure.InnerException);
+        Assert.Equal(sent, mock.SentReports.Count);
+    }
+
+    [Fact]
+    public async Task FailedResetAfterResponsePollingTimeout_PreservesTimeoutAndRefusesFurtherReports()
+    {
+        var mock = new MockHidConnection { ResetFailure = new IOException("Reset failed.") };
+        var protocol = CreateProtocolWithMock(mock);
+        mock.QueueReport(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            mock.QueueReport(Status(programmingSequence: 1));
+        // The command never completes: after the frame, status stays at the original sequence.
+        mock.OnReportDequeued = _ =>
+        {
+            if (mock.ReportsRemaining == 0)
+                mock.QueueReport(Status(programmingSequence: 1));
+        };
+
+        await Assert.ThrowsAsync<TimeoutException>(() => protocol.SendAndReceiveAsync(
+            0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        int sent = mock.SentReports.Count;
+        int received = mock.ReportsReceived;
+        mock.OnReportDequeued = null;
+        mock.QueueReport(Status(programmingSequence: 2));
+        InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.ReadStatusAsync(TestContext.Current.CancellationToken));
+        Assert.Same(mock.ResetFailure, failure.InnerException);
+        Assert.Equal(sent, mock.SentReports.Count);
+        Assert.Equal(received, mock.ReportsReceived);
+        Assert.True(mock.ReportsRemaining > 0);
+    }
+
+    [Fact]
+    public async Task FailedResetAfterCompleteDataResponse_FaultsProtocolWithoutFurtherReports()
+    {
+        var reports = new MockHidConnection { ResetFailure = new IOException("Reset failed.") };
+        var protocol = CreateProtocolWithMock(reports);
+        reports.QueueReport(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            reports.QueueReport(Status(programmingSequence: 1));
+        reports.QueueReport(DataReport(sequence: 0, startValue: 1));
+        reports.QueueReport(DataReport(sequence: 0, startValue: 0));
+
+        await Assert.ThrowsAsync<IOException>(() => protocol.SendAndReceiveAsync(
+            0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        int sent = reports.SentReports.Count;
+        int received = reports.ReportsReceived;
+        reports.QueueReport(Status(programmingSequence: 2));
+        InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+        Assert.Same(reports.ResetFailure, failure.InnerException);
+        Assert.Equal(sent, reports.SentReports.Count);
+        Assert.Equal(received, reports.ReportsReceived);
+        Assert.Equal(1, reports.ReportsRemaining);
+    }
+
+    [Fact]
+    public async Task FailedResetDuringNeoInitialization_ConfigureRefusesFaultedProtocolAndFurtherReports()
+    {
+        var reports = new MockHidConnection { ResetFailure = new IOException("Reset failed.") };
+        reports.QueueReport(Status(versionMajor: 3));
+        var protocol = new OtpHidProtocol(new OtpHidConnection(reports));
+        reports.QueueReport(Status(programmingSequence: 1));
+        for (int i = 0; i < 10; i++)
+            reports.QueueReport(Status(programmingSequence: 1));
+        reports.QueueReport(DataReport(sequence: 0, startValue: 1));
+        reports.QueueReport(DataReport(sequence: 0, startValue: 0));
+
+        IOException failure = Assert.Throws<IOException>(() => protocol.Configure(new FirmwareVersion(3, 0, 0)));
+        Assert.Same(reports.ResetFailure, failure);
+
+        int sent = reports.SentReports.Count;
+        int received = reports.ReportsReceived;
+        reports.QueueReport(Status(programmingSequence: 2));
+        InvalidOperationException statusFailure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.ReadStatusAsync(TestContext.Current.CancellationToken));
+        Assert.Same(failure, statusFailure.InnerException);
+        InvalidOperationException configureFailure = Assert.Throws<InvalidOperationException>(() =>
+            protocol.Configure(new FirmwareVersion(3, 0, 0)));
+        Assert.Same(failure, configureFailure.InnerException);
+        Assert.Equal(sent, reports.SentReports.Count);
+        Assert.Equal(received, reports.ReportsReceived);
+        Assert.Equal(1, reports.ReportsRemaining);
     }
 
     [Fact]
@@ -618,6 +781,21 @@ public class OtpHidProtocolTests
         public override byte[] Rent(int minimumLength) => new byte[minimumLength];
 
         public override void Return(byte[] array, bool clearArray = false) => ReturnedArray = array;
+    }
+
+    private sealed class ThrowingWarningLogger : ILogger<OtpHidProtocol>
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull =>
+            NullLogger.Instance.BeginScope(state);
+
+        public bool IsEnabled(LogLevel logLevel) => logLevel == LogLevel.Warning;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
+            Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel == LogLevel.Warning)
+                throw new InvalidOperationException("Logger failed.");
+        }
     }
 
     private sealed class RecordingUserPresencePrompt(

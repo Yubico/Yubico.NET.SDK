@@ -609,17 +609,15 @@ Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL
 1. ✅ `git status` — only your files staged
 2. ✅ Build clean: `dotnet toolchain.cs build`
 3. ✅ Tests pass: `dotnet toolchain.cs test`
-4. ✅ Formatted — scope `dotnet format` to your staged files, never the whole solution:
-   ```
-   dotnet format Yubico.YubiKit.sln --include $(git diff --name-only --cached -- '*.cs')
-   ```
-   Note: `--include` silently skips nonexistent/stale paths — re-run `git diff --cached --name-only` if a file seems to be missed.
+4. ✅ Formatted — use `dotnet format` freely to apply style, whitespace, and analyzer fixes. Always scope it with `--include` to only your edited files; never format the whole solution:
+    ```
+    dotnet format Yubico.YubiKit.sln --include $(git diff --name-only HEAD -- '*.cs')
+    ```
+    This example includes staged and unstaged tracked C# edits. Add any new, untracked C# files explicitly. `--include` silently skips nonexistent/stale paths, so check the file list if a file seems to be missed.
 
-   The `whitespace` subcommand (`dotnet format whitespace ... --include <files>`) is fine and often faster, **as long as it is scoped with `--include` to your own files**. The rule being enforced is "never reformat files you did not change", not "never use a particular subcommand". Unscoped formatting of the whole solution is what is forbidden.
+    Caveat: `dotnet format` only visits documents that belong to a project in the solution. Scoping it to a file-based app script such as `toolchain.cs`, or to a Markdown/props file, matches zero documents and exits `0` — that is "skipped", not "verified clean". Do not report it as a passing gate.
 
-   Caveat: `dotnet format` only visits documents that belong to a project in the solution. Scoping it to a file-based app script such as `toolchain.cs`, or to a Markdown/props file, matches zero documents and exits `0` — that is "skipped", not "verified clean". Do not report it as a passing gate.
-
-   Caveat: `--include` takes a **space-separated** list, which is why the command above leaves `$(...)` unquoted and lets the shell word-split it. Passing several paths as one quoted string joined by `;` or `,` matches **zero** documents and exits `0`, indistinguishable from a clean run. If you build the file list yourself, prove the check is live before trusting it: introduce a trailing space in one of your own files, confirm the command reports `error WHITESPACE`, then revert. A gate that cannot fail has not passed.
+    Caveat: `--include` takes a **space-separated** list, which is why the command above leaves `$(...)` unquoted and lets the shell word-split it. Passing several paths as one quoted string joined by `;` or `,` matches **zero** documents and exits `0`, indistinguishable from a clean run. Ensure the paths passed to `--include` are the files you edited.
 5. ✅ No nullable warnings
 6. ✅ Sensitive data zeroed (`ZeroMemory` / `Dispose`)
 7. ✅ No unnecessary allocations in hot paths

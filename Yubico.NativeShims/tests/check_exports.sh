@@ -33,6 +33,13 @@ fi
 
 # Strip comments + blank lines from expected list
 EXPECTED=$(grep -v '^[[:space:]]*#' "$EXPECTED_FILE" | grep -v '^[[:space:]]*$' | sort -u)
+if [ "$(uname -s)" = Darwin ]; then
+    EXPECTED=$(printf '%s\n%s\n' "$EXPECTED" 'Native_HidInputCreate
+Native_HidInputStart
+Native_HidInputCancel
+Native_HidInputWaitShutdown
+Native_HidInputDestroy' | sort -u)
+fi
 
 # Extract Native_* symbols from the binary. Static archives use the ordinary
 # global symbol table; Linux shared libraries use the dynamic symbol table.

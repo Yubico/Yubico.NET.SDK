@@ -34,3 +34,8 @@ _Native_SCardListReaders
 _Native_SCardReconnect
 _Native_SCardReleaseContext
 _Native_SCardTransmit
+_Native_HidInputCreate
+_Native_HidInputStart
+_Native_HidInputCancel
+_Native_HidInputWaitShutdown
+_Native_HidInputDestroy

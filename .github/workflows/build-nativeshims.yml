@@ -283,6 +283,12 @@ jobs:
       - name: Validate static package targets
         working-directory: Yubico.NativeShims
         run: bash tests/check_static_package.sh
+      - name: Verify macOS input-owner lifetime
+        working-directory: Yubico.NativeShims
+        run: |
+          cmake -S hidinput -B hidinput/build-ci -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
+          cmake --build hidinput/build-ci
+          ctest --test-dir hidinput/build-ci --output-on-failure
       - name: Verify export tables match canonical symbol list
         working-directory: Yubico.NativeShims
         run: |

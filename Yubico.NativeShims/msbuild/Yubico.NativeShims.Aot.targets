@@ -44,6 +44,14 @@
                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
             <LinkerArg Include="PCSC"
                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
+            <LinkerArg Include="-framework"
+                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
+            <LinkerArg Include="IOKit"
+                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
+            <LinkerArg Include="-framework"
+                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
+            <LinkerArg Include="CoreFoundation"
+                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
         </ItemGroup>
     </Target>
 

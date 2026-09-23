@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.Core.Native.Linux.Libc;
 
 // This file contains native methods (P/Invoke) for Linux libc functions.
 // Currently we only need open, close, and ioctl.
-internal static class NativeMethods
+internal static partial class NativeMethods
 {
 
     [Flags]
@@ -80,13 +80,13 @@ internal static class NativeMethods
     /// <param name="nfds">Number of items in the fds array.</param>
     /// <param name="timeout">Timeout in milliseconds. -1 means infinite, 0 means return immediately.</param>
     /// <returns>Number of file descriptors with events, 0 on timeout, -1 on error (check errno).</returns>
-    [DllImport(Libraries.LinuxKernelLib, EntryPoint = "poll", SetLastError = true)]
+    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "poll", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int poll([In, Out] PollFd[] fds, int nfds, int timeout);
+    public static partial int poll([In, Out] PollFd[] fds, int nfds, int timeout);
 
-    [DllImport(Libraries.LinuxKernelLib, EntryPoint = "eventfd", SetLastError = true)]
+    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "eventfd", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern LinuxEventFdSafeHandle eventfd(uint initval, int flags);
+    public static partial LinuxEventFdSafeHandle eventfd(uint initval, int flags);
 
 
     public const long HIDIOCGRAWINFO = 0x0000000080084803;
@@ -126,16 +126,16 @@ internal static class NativeMethods
     // settings). It does not currently have any effect on platforms other
     // than Windows, but is included because of the analyzer and in the hope
     // that it will be supported by these platforms in the future.
-    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "open",
+    [LibraryImport(Libraries.LinuxKernelLib, StringMarshalling = StringMarshalling.Utf8, EntryPoint = "open",
         SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern LinuxFileSafeHandle open(string filename, OpenFlags flag);
+    public static partial LinuxFileSafeHandle open(string filename, OpenFlags flag);
 
     // This will be called from within the SafeHandle class, but should be
     // called by no one else.
-    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "close", SetLastError = true)]
+    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "close", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int close(IntPtr handle);
+    public static partial int close(IntPtr handle);
 
     // The SDK uses ioctl for only three requests: info, descriptor size, and
     // descriptor. All three will be called as follows.
@@ -147,41 +147,39 @@ internal static class NativeMethods
     // Parse the bytes after the call to extract the information, using the
     // Offset const values to find the locations of the data in the buffer
     // where the targets are located.
-    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "ioctl", SetLastError = true)]
+    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "ioctl", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int ioctl(LinuxFileSafeHandle handle, long request, IntPtr result);
+    public static partial int ioctl(LinuxFileSafeHandle handle, long request, IntPtr result);
 
     // Read count bytes. Place them into outputBuffer.
-    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "read", SetLastError = true)]
+    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "read", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int read(LinuxFileSafeHandle handle,
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
+    public static partial int read(LinuxFileSafeHandle handle,
         byte[] outputBuffer,
         int count);
 
     // Read count bytes from an event fd. Place them into outputBuffer.
-    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "read", SetLastError = true)]
+    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "read", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int read(LinuxEventFdSafeHandle handle,
-        [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
+    public static partial int read(LinuxEventFdSafeHandle handle,
         byte[] outputBuffer,
         int count);
 
     // Write the count bytes in inputBuffer.
-    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
+    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "write", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int write(LinuxFileSafeHandle handle,
-        [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
+    public static partial int write(LinuxFileSafeHandle handle,
+        byte[] inputBuffer,
         int count);
 
     // Write count bytes to an event fd.
-    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
+    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "write", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int write(LinuxEventFdSafeHandle handle,
-        [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
+    public static partial int write(LinuxEventFdSafeHandle handle,
+        byte[] inputBuffer,
         int count);
 
-    [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "fcntl", SetLastError = true)]
+    [LibraryImport(Libraries.LinuxKernelLib, EntryPoint = "fcntl", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int fcntl(IntPtr fd, int cmd, int flags = 0);
+    public static partial int fcntl(IntPtr fd, int cmd, int flags = 0);
 }

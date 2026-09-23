@@ -69,6 +69,21 @@ If using DI, configure logging explicitly from the DI-provided `ILoggerFactory` 
 
 ## Critical Patterns
 
+### Built-in macOS FIDO lifetime
+
+The built-in macOS FIDO report connection opens asynchronously through
+`MacOSFidoHidConnection` and its internal `IHidInputBridge`. A persistent native IOKit
+input owner copies bounded reports; blocking output and checked shutdown run on the
+connection's worker. Acknowledgment and accepted-report drain precede release; a failed
+close retains the owner and physical claim rather than allowing unsafe reopen. Terminal
+wake and registry/discovery claim transfer belong to this same connection lifetime.
+`FidoHidProtocol.Configure` performs local setup only; `ApplicationSession` awaits FIDO
+channel initialization. Public lower-level `IHidConnection` compatibility remains
+synchronous; neither OTP nor Windows/Linux HID has migrated. See the
+[async-boundaries master](../../2026-09-21-yubikit-async-boundaries-ISA.md) for current
+evidence: managed regressions passed, but the device route is blocked without a YubiKey.
+The current local native preview is not a released NativeShims package.
+
 ### Listener and Native Retry Loops
 
 Background listeners and native/resource-manager retry loops must block, back off, exit, or throttle on every failure path. Do not ignore native return values inside loops unless another call in the same path provides a bounded wait. Persistent failures such as stale PC/SC handles must have no-hardware fault-injection tests that prove call cadence is backoff-bounded.
@@ -178,6 +193,66 @@ var scanner = SdkPlatformInfo.OperatingSystem switch
     _ => throw new PlatformNotSupportedException()
 };
 ```
+
+#### `LibraryImport`, not `DllImport`
+
+**`DllImport` is wrong for new code.** Every native entry point added to `Native/` must be declared
+with `[LibraryImport]` on an `internal static partial` method inside a `partial` class.
+
+```csharp
+// ❌ WRONG — runtime-generated IL stub
+[DllImport(Libraries.NativeShims, CharSet = CharSet.Ansi, EntryPoint = "Native_Foo", SetLastError = true)]
+[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+internal static extern int Foo(string name, bool flag);
+
+// ✅ RIGHT — source-generated, compile-time-visible marshalling
+[LibraryImport(Libraries.NativeShims, EntryPoint = "Native_Foo",
+    StringMarshalling = StringMarshalling.Utf8, SetLastError = true)]
+[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+internal static partial int Foo(string name, [MarshalAs(UnmanagedType.U1)] bool flag);
+```
+
+Why it matters here, beyond style:
+
+- The marshalling stub is **generated C# you can read and step through**, not IL synthesised by the
+  runtime. Native AOT and trimming see real code — `docs/NATIVE-AOT.md` support depends on it.
+- The generator **fails the build on signatures it cannot marshal**. `DllImport` accepts the same
+  signature silently and corrupts memory at runtime instead. Interop bugs in HID/PC/SC paths are the
+  most expensive class of bug in this module; move them to compile time.
+- Marshalling is explicit at the call site, so reviewers can see the ABI rather than infer it from
+  attribute defaults.
+
+Conversion traps, in the order they bite:
+
+| Trap | What to do |
+|---|---|
+| `extern` → `partial` | The method **and** its enclosing class both need `partial`. `NativeMethods` classes in `Native/` are already declared that way where converted. |
+| `CharSet = CharSet.Ansi` | There is no direct equivalent. On Unix it meant UTF-8 → use `StringMarshalling = StringMarshalling.Utf8`. On Windows it meant the ANSI code page → marshal `byte*`/`ReadOnlySpan<byte>` yourself rather than pretending it is UTF-8. `CharSet.Unicode` → `StringMarshalling.Utf16`. |
+| `bool` parameters/returns | Not blittable. Annotate `[MarshalAs(UnmanagedType.U1)]` (or `.I4` — match the C header), or change the signature to the native integer type. |
+| Delegate callbacks | Not marshalled at all by the generator. Use `delegate* unmanaged[Cdecl]<...>` with an `[UnmanagedCallersOnly]` target, as `Native/MacOS/HidInput/HidInput.Interop.cs` does. A function pointer also avoids the per-instance thunk and the "keep the delegate alive" `GCHandle` dance. |
+| `string` return values | Needs an explicit marshaller (`Utf8StringMarshaller`) or return `nint` and convert. Silent ownership bugs live here — say who frees the buffer in a comment. |
+| `SafeHandle` | **Is** supported, including as a return type. Keep the existing `LinuxUdevSafeHandle`-style pattern; do not downgrade to `nint` during conversion. |
+| `SetLastError = true` | Keep it only where a caller actually reads `errno`/`GetLastError`. It is not free. |
+
+Current state: **every** P/Invoke in the repository is `[LibraryImport]`. There is no remaining
+`[DllImport]` or `static extern` anywhere in `src/`, `benchmarks/`, or `verification/`. Treat any
+reappearance as a regression, not as legacy debt:
+
+```bash
+grep -rn "\[DllImport(\|static extern" --include="*.cs" src/ benchmarks/ verification/   # must be empty
+```
+
+Two macOS IOKit callback registrations (`IOHIDManagerRegisterDeviceMatchingCallback`,
+`IOHIDManagerRegisterDeviceRemovalCallback`) take the callback as a bare `IntPtr` rather than a
+function pointer, because their caller `Transports/Hid/MacOS/MacOSHidDeviceListener.cs` keeps
+per-instance delegates alive in fields (`_arrivedCallbackDelegate`, `_removedCallbackDelegate`,
+`_abandonedCallbackDelegates`) and passes `Marshal.GetFunctionPointerForDelegate(...)`. That is
+deliberate: the listener's context pointer is `IntPtr.Zero`, so an `[UnmanagedCallersOnly]` static
+would have nowhere to recover `this` from. The delegate fields are load-bearing — the function
+pointer dies with the delegate. Do not inline them.
+
+The `SYSLIB1054` analyzer that suggests this conversion is informational and is **not** configured as
+an error in `.editorconfig`. A clean build does not mean you used `LibraryImport`.
 
 ### Connection Factory Pattern
 

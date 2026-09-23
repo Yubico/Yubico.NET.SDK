@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.Native.MacOS.CoreFoundation;
 
-internal static class NativeMethods
+internal static partial class NativeMethods
 {
     public const int kCFRunLoopRunFinished = 1;
     public const int kCFRunLoopRunStopped = 2;
@@ -29,9 +29,9 @@ internal static class NativeMethods
     // settings). It does not currently have any effect on platforms other
     // than Windows, but is included because of the analyzer and in the hope
     // that it will be supported by these platforms in the future.
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern ulong CFGetTypeID(IntPtr theObject);
+    internal static partial ulong CFGetTypeID(IntPtr theObject);
 
     /*!
         @function CFSetGetCount
@@ -40,9 +40,9 @@ internal static class NativeMethods
             CFSet, the behavior is undefined.
         @result The number of values in the set.
     */
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern long CFSetGetCount(IntPtr theSet);
+    internal static partial long CFSetGetCount(IntPtr theSet);
 
     /*!
         @function CFSetGetValues
@@ -55,39 +55,41 @@ internal static class NativeMethods
             parameter is not a valid pointer to a C array of at least
             CFSetGetCount() pointers, the behavior is undefined.
     */
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern void CFSetGetValues(IntPtr theSet, IntPtr[] values);
+    internal static partial void CFSetGetValues(IntPtr theSet, IntPtr[] values);
 
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern IntPtr CFStringCreateWithCString(IntPtr allocatorRef, byte[] cStr, int encoding);
+    internal static partial IntPtr CFStringCreateWithCString(IntPtr allocatorRef, byte[] cStr, int encoding);
 
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern ulong CFNumberGetTypeID();
+    internal static partial ulong CFNumberGetTypeID();
 
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern bool CFNumberGetValue(IntPtr numberRef, int theType, byte[] valuePtr);
+    [return: MarshalAs(UnmanagedType.U1)]
+    public static partial bool CFNumberGetValue(IntPtr numberRef, int theType, byte[] valuePtr);
 
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern void CFRelease(IntPtr theObject);
+    public static partial void CFRelease(IntPtr theObject);
 
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern IntPtr CFRetain(IntPtr theObject);
+    public static partial IntPtr CFRetain(IntPtr theObject);
 
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern IntPtr CFRunLoopGetCurrent();
+    public static partial IntPtr CFRunLoopGetCurrent();
 
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern int CFRunLoopRunInMode(IntPtr mode, double seconds, bool returnAfterSourceHandled);
+    public static partial int CFRunLoopRunInMode(IntPtr mode, double seconds,
+        [MarshalAs(UnmanagedType.U1)] bool returnAfterSourceHandled);
 
-    [DllImport(Libraries.CoreFoundation)]
+    [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern void CFRunLoopStop(IntPtr runLoop);
+    public static partial void CFRunLoopStop(IntPtr runLoop);
 }

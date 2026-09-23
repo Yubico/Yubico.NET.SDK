@@ -27,7 +27,7 @@ Guidance for AI agents working in this repository. Yubico.NET.SDK (YubiKit) is a
 | `Tests.Shared/` | Multi-transport test harness |
 | `Tests.TestProject/` | xUnit v3 test project layout |
 
-**Platform interop** lives in `Core/PlatformInterop/{Windows,macOS,Linux}/` with P/Invoke declarations. `UnmanagedDynamicLibrary` + `SafeLibraryHandle` manage native loading; `SdkPlatformInfo` detects runtime platform.
+**Platform interop** lives in `src/Core/src/Native/{Windows,MacOS,Linux,Desktop}/` with the P/Invoke declarations; the managed transport implementations that call them are in `src/Core/src/Transports/`. `UnmanagedDynamicLibrary` + `SafeLibraryHandle` manage native loading; `SdkPlatformInfo` detects runtime platform.
 
 ## Quick Reference — Critical Rules
 
@@ -75,6 +75,17 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 - ❌ NEVER suppress nullable warnings with `!` without justification
 
 > Deep dive: `docs/CSHARP-PATTERNS.md` (load when designing new types, choosing property accessors, writing switch expressions, or using primary constructors / records).
+
+**Native Interop — `LibraryImport`, never `DllImport`:**
+- ✅ ALWAYS declare new native entry points with `[LibraryImport]` on an `internal static partial` method in a `partial` class
+- ✅ ALWAYS pair it with `[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]`
+- ✅ ALWAYS marshal explicitly — `StringMarshalling`/`StringMarshallingCustomType`, `[MarshalAs(UnmanagedType.U1)]` on `bool`, `SetLastError = true` only where the caller actually reads `errno`/`GetLastError`
+- ✅ ALWAYS use `delegate* unmanaged[Cdecl]<...>` + `[UnmanagedCallersOnly]` for native callbacks — the source-generated marshaller does **not** marshal C# delegate types
+- ❌ NEVER write `[DllImport]` / `extern` in new interop. It emits a runtime-generated IL stub: not trim- or AOT-friendly, invisible to the marshalling source generator, and it silently accepts non-blittable signatures that then fail at runtime. **`DllImport` = wrong.**
+- ⚠️ The `SYSLIB1054` analyzer that flags this is a *suggestion*, not an error — it will not stop you. Don't rely on the build to catch it.
+- 🔁 There is no legacy exception left — the repo has **zero** `[DllImport]`/`static extern` sites. `grep -rn "\[DllImport(\|static extern" --include="*.cs" src/ benchmarks/ verification/` must come back empty; a hit is a regression to fix, not debt to defer.
+
+> Deep dive: `src/Core/CLAUDE.md` § Platform Interop Pattern (conversion recipe and the traps: `CharSet.Ansi`, `bool`, `SafeHandle`, string returns), `docs/NATIVE-AOT.md`, and `.claude/skills/domain-pinvoke-porting/SKILL.md`.
 
 **Code Quality:**
 - ✅ ALWAYS follow `.editorconfig` (see Pre-Commit Checklist for the formatting workflow)
@@ -571,6 +582,7 @@ If you answered "no" to any of these, don't write the test.
 - ❌ Public mutable state (`public byte[] Data;`) — use `{ get; init; }` or `ReadOnlyMemory<byte>`
 - ❌ `#region` — split the class instead
 - ❌ `var` when the type isn't obvious from the right-hand side
+- ❌ `[DllImport]` / `extern` for a new native entry point — use `[LibraryImport]` + `static partial`
 
 > Examples for each: `docs/CSHARP-PATTERNS.md` ("What NOT to Do" section).
 

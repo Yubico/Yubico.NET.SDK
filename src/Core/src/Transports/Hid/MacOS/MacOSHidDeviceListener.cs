@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Native.MacOS.CoreFoundation;
 using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;
 using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;
@@ -96,15 +97,16 @@ internal sealed class MacOSHidDeviceListener : HidDeviceListener
                 _arrivedCallbackDelegate = DeviceArrivedCallback;
                 _removedCallbackDelegate = DeviceRemovedCallback;
 
-                // Register callbacks
+                // Register callbacks. The function pointers are only valid while the delegate
+                // fields above are reachable — never inline these delegates.
                 IOKitNativeMethods.IOHIDManagerRegisterDeviceMatchingCallback(
                     _hidManager,
-                    _arrivedCallbackDelegate,
+                    Marshal.GetFunctionPointerForDelegate(_arrivedCallbackDelegate),
                     IntPtr.Zero);
 
                 IOKitNativeMethods.IOHIDManagerRegisterDeviceRemovalCallback(
                     _hidManager,
-                    _removedCallbackDelegate,
+                    Marshal.GetFunctionPointerForDelegate(_removedCallbackDelegate),
                     IntPtr.Zero);
 
                 _shouldStop = false;

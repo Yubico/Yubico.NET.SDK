@@ -33,7 +33,7 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// goes through Yubico.NativeShims (OpenSSL); scalar reduction uses
 /// <see cref="System.Numerics.BigInteger"/>.
 /// </remarks>
-internal sealed class ArkgPrimitivesOpenSsl : IArkgPrimitives
+internal sealed partial class ArkgPrimitivesOpenSsl : IArkgPrimitives
 {
     private const int P256CoordinateLength = 32;
     private const int Sec1UncompressedLength = 1 + (2 * P256CoordinateLength);
@@ -556,33 +556,33 @@ internal sealed class ArkgPrimitivesOpenSsl : IArkgPrimitives
     // P/Invoke declarations and SafeHandle types
     // ---------------------------------------------------------------------
 
-    private static class NativeMethods
+    private static partial class NativeMethods
     {
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_new_by_curve_name", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_new_by_curve_name")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern IntPtr EcGroupNewByCurveNameIntPtr(int curveId);
+        private static partial IntPtr EcGroupNewByCurveNameIntPtr(int curveId);
 
         public static SafeEcGroup EcGroupNewByCurveName(int curveId) =>
             new(EcGroupNewByCurveNameIntPtr(curveId), true);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_free", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_free")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern void EcGroupFree(IntPtr group);
+        public static partial void EcGroupFree(IntPtr group);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_new", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_new")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern IntPtr EcPointNewIntPtr(IntPtr ecGroup);
+        private static partial IntPtr EcPointNewIntPtr(IntPtr ecGroup);
 
         public static SafeEcPoint EcPointNew(SafeEcGroup ecGroup) =>
             new(EcPointNewIntPtr(ecGroup.DangerousGetHandle()), true);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_free", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_free")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern void EcPointFree(IntPtr ecPoint);
+        public static partial void EcPointFree(IntPtr ecPoint);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_set_affine_coordinates", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_set_affine_coordinates")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern int EcPointSetAffineCoordinatesIntPtr(IntPtr group, IntPtr point, IntPtr x, IntPtr y, IntPtr ctx);
+        private static partial int EcPointSetAffineCoordinatesIntPtr(IntPtr group, IntPtr point, IntPtr x, IntPtr y, IntPtr ctx);
 
         public static int EcPointSetAffineCoordinates(
             SafeEcGroup group,
@@ -596,9 +596,9 @@ internal sealed class ArkgPrimitivesOpenSsl : IArkgPrimitives
                 y.DangerousGetHandle(),
                 IntPtr.Zero);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_get_affine_coordinates", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_get_affine_coordinates")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern int EcPointGetAffineCoordinatesIntPtr(IntPtr group, IntPtr point, IntPtr x, IntPtr y, IntPtr ctx);
+        private static partial int EcPointGetAffineCoordinatesIntPtr(IntPtr group, IntPtr point, IntPtr x, IntPtr y, IntPtr ctx);
 
         public static int EcPointGetAffineCoordinates(
             SafeEcGroup group,
@@ -612,9 +612,9 @@ internal sealed class ArkgPrimitivesOpenSsl : IArkgPrimitives
                 y.DangerousGetHandle(),
                 IntPtr.Zero);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_mul", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_mul")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern int EcPointMulIntPtr(IntPtr group, IntPtr r, IntPtr n, IntPtr q, IntPtr m, IntPtr ctx);
+        private static partial int EcPointMulIntPtr(IntPtr group, IntPtr r, IntPtr n, IntPtr q, IntPtr m, IntPtr ctx);
 
         public static int EcPointMul(
             SafeEcGroup group,
@@ -630,16 +630,16 @@ internal sealed class ArkgPrimitivesOpenSsl : IArkgPrimitives
                 m,
                 IntPtr.Zero);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_is_on_curve", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_is_on_curve")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern int EcPointIsOnCurveIntPtr(IntPtr group, IntPtr point, IntPtr ctx);
+        private static partial int EcPointIsOnCurveIntPtr(IntPtr group, IntPtr point, IntPtr ctx);
 
         public static int EcPointIsOnCurve(SafeEcGroup group, SafeEcPoint point) =>
             EcPointIsOnCurveIntPtr(group.DangerousGetHandle(), point.DangerousGetHandle(), IntPtr.Zero);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bin2bn", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_BN_bin2bn")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern IntPtr BnBinaryToBigNumIntPtr(byte[] buffer, int length, IntPtr ret);
+        private static partial IntPtr BnBinaryToBigNumIntPtr(byte[] buffer, int length, IntPtr ret);
 
         public static SafeBigNum BnBinaryToBigNum(ReadOnlySpan<byte> buffer)
         {
@@ -647,19 +647,19 @@ internal sealed class ArkgPrimitivesOpenSsl : IArkgPrimitives
             return new SafeBigNum(BnBinaryToBigNumIntPtr(bufferArray, bufferArray.Length, IntPtr.Zero), true);
         }
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_new", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_BN_new")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern IntPtr BnNewIntPtr();
+        private static partial IntPtr BnNewIntPtr();
 
         public static SafeBigNum BnNew() => new(BnNewIntPtr(), true);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_clear_free", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_BN_clear_free")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern void BnClearFree(IntPtr bignum);
+        public static partial void BnClearFree(IntPtr bignum);
 
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2binpad", ExactSpelling = true)]
+        [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2binpad")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        private static extern int BnBigNumToBinaryWithPaddingIntPtr(IntPtr bignum, byte[] buffer, int bufferSize);
+        private static partial int BnBigNumToBinaryWithPaddingIntPtr(IntPtr bignum, byte[] buffer, int bufferSize);
 
         public static int BnBigNumToBinaryWithPadding(SafeBigNum bigNum, Span<byte> buffer)
         {

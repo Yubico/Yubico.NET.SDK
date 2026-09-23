@@ -55,9 +55,9 @@ internal static partial class NativeMethods
                     @link kIOHIDManagerOptionNone @/link (or 0).
         @result     Returns a new IOHIDManagerRef.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern IntPtr IOHIDManagerCreate(IntPtr allocator, int options); /* OS >= 10.5 */
+    internal static partial IntPtr IOHIDManagerCreate(IntPtr allocator, int options); /* OS >= 10.5 */
 
     /*! @function   IOHIDManagerSetDeviceMatching
         @abstract   Sets matching criteria for device enumeration.
@@ -72,18 +72,18 @@ internal static partial class NativeMethods
         @param      manager Reference to an IOHIDManager.
         @param      matching CFDictionaryRef containing device matching criteria.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern void IOHIDManagerSetDeviceMatching(IntPtr manager, IntPtr matching);
+    internal static partial void IOHIDManagerSetDeviceMatching(IntPtr manager, IntPtr matching);
 
     /*! @function   IOHIDManagerCopyDevices
         @abstract   Obtains currently enumerated devices.
         @param      manager Reference to an IOHIDManager.
         @result     CFSetRef containing IOHIDDeviceRefs.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern IntPtr IOHIDManagerCopyDevices(IntPtr manager); /* OS >= 10.5 */
+    internal static partial IntPtr IOHIDManagerCopyDevices(IntPtr manager); /* OS >= 10.5 */
 
     /*! @function   IOHIDManagerRegisterDeviceMatchingCallback
         @abstract   Registers a callback to be used a device is enumerated.
@@ -97,11 +97,11 @@ internal static partial class NativeMethods
                     IOHIDDeviceCallback.
         @param      context Pointer to data to be passed to the callback.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern void IOHIDManagerRegisterDeviceMatchingCallback(
+    internal static partial void IOHIDManagerRegisterDeviceMatchingCallback(
         IntPtr manager,
-        IOHIDDeviceCallback callback,
+        IntPtr callback, // IOHIDDeviceCallback (void*, IOReturn, void*, IOHIDDeviceRef) -> void
         IntPtr context); /* OS >= 10.5 */
 
     /*! @function   IOHIDManagerRegisterDeviceRemovalCallback
@@ -114,11 +114,11 @@ internal static partial class NativeMethods
                     IOHIDDeviceCallback.
         @param      context Pointer to data to be passed to the callback.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern void IOHIDManagerRegisterDeviceRemovalCallback(
+    internal static partial void IOHIDManagerRegisterDeviceRemovalCallback(
         IntPtr manager,
-        IOHIDDeviceCallback callback,
+        IntPtr callback, // IOHIDDeviceCallback (void*, IOReturn, void*, IOHIDDeviceRef) -> void
         IntPtr context); /* OS >= 10.5 */
 
     /*! @function   IOHIDManagerScheduleWithRunLoop
@@ -133,9 +133,9 @@ internal static partial class NativeMethods
         @param      runLoopMode Run loop mode to be used when scheduling any
                     asynchronous activity.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern void IOHIDManagerScheduleWithRunLoop(
+    internal static partial void IOHIDManagerScheduleWithRunLoop(
         IntPtr manager,
         IntPtr runLoop,
         IntPtr runLoopMode); /* OS >= 10.5 */
@@ -150,9 +150,9 @@ internal static partial class NativeMethods
         @param      runLoopMode Run loop mode to be used when unscheduling any
                     asynchronous activity.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern void IOHIDManagerUnscheduleFromRunLoop(
+    internal static partial void IOHIDManagerUnscheduleFromRunLoop(
         IntPtr manager,
         IntPtr runLoop,
         IntPtr runLoopMode); /* OS >= 10.5 */
@@ -166,9 +166,9 @@ internal static partial class NativeMethods
         @param      service Reference to service object in the kernel.
         @result     Returns a new IOHIDDeviceRef.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern IntPtr IOHIDDeviceCreate(IntPtr allocator, int service); /* OS >= 10.5 */
+    internal static partial IntPtr IOHIDDeviceCreate(IntPtr allocator, int service); /* OS >= 10.5 */
 
     /*!
         @function   IOHIDDeviceOpen
@@ -182,9 +182,9 @@ internal static partial class NativeMethods
         @param      options Option bits to be sent down to the device.
         @result     Returns kIOReturnSuccess if successful.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern int IOHIDDeviceOpen(IntPtr device, int options); /* OS >= 10.5 */
+    internal static partial int IOHIDDeviceOpen(IntPtr device, int options); /* OS >= 10.5 */
 
     /*!
         @function   IOHIDDeviceClose
@@ -195,9 +195,9 @@ internal static partial class NativeMethods
         @param      options Option bits to be sent down to the device.
         @result     Returns kIOReturnSuccess if successful.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern int IOHIDDeviceClose(IntPtr device, int options); /* OS >= 10.5 */
+    internal static partial int IOHIDDeviceClose(IntPtr device, int options); /* OS >= 10.5 */
 
     /*!
         @function   IOHIDDeviceGetProperty
@@ -209,9 +209,9 @@ internal static partial class NativeMethods
                     device.
         @result     Returns CFTypeRef containing the property.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern IntPtr IOHIDDeviceGetProperty(IntPtr device, IntPtr key); /* OS >= 10.5 */
+    internal static partial IntPtr IOHIDDeviceGetProperty(IntPtr device, IntPtr key); /* OS >= 10.5 */
 
     /*! @function   IOHIDDeviceGetReport
         @abstract   Obtains a report from the device.
@@ -231,9 +231,9 @@ internal static partial class NativeMethods
                     report.
         @result     Returns kIOReturnSuccess if successful.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern int IOHIDDeviceGetReport(IntPtr device, int reportType, long reportID, byte[] report,
+    internal static partial int IOHIDDeviceGetReport(IntPtr device, int reportType, long reportID, byte[] report,
         ref long pReportLength); /* OS >= 10.5 */
 
     /*! @function   IOHIDDeviceSetReport
@@ -250,9 +250,9 @@ internal static partial class NativeMethods
         @param      reportLength The length of the report to be sent to the device.
         @result     Returns kIOReturnSuccess if successful.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern int IOHIDDeviceSetReport(IntPtr device, int reportType, long reportID, byte[] report,
+    internal static partial int IOHIDDeviceSetReport(IntPtr device, int reportType, long reportID, byte[] report,
         long reportLength); /* OS >= 10.5 */
 
     /*!
@@ -264,9 +264,9 @@ internal static partial class NativeMethods
         @result     Returns the io_service_t if the IOHIDDevice has one, or
                     MACH_PORT_NULL if it does not.
      */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern int IOHIDDeviceGetService(IntPtr device);
+    internal static partial int IOHIDDeviceGetService(IntPtr device);
 
     /*! @function   IOHIDDeviceRegisterInputReportCallback
         @abstract   Registers a callback to be used when an input report is issued
@@ -282,9 +282,9 @@ internal static partial class NativeMethods
                     IOHIDReportCallback.
         @param      context Pointer to data to be passed to the callback.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern void IOHIDDeviceRegisterInputReportCallback(
+    public static partial void IOHIDDeviceRegisterInputReportCallback(
         IntPtr device, // IOHIDDeviceRef
         byte[] report, // uint8_t*
         long reportLength, // CFIndex (size_t)
@@ -303,9 +303,9 @@ internal static partial class NativeMethods
         @param      runLoopMode Run loop mode to be used when scheduling any
                     asynchronous activity.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern void IOHIDDeviceScheduleWithRunLoop(
+    public static partial void IOHIDDeviceScheduleWithRunLoop(
         IntPtr device, // IOHIDDeviceRef
         IntPtr runLoop, // CFRunLoopRef (struct *)
         IntPtr runLoopMode); // CFStringRef (struct *)
@@ -319,9 +319,9 @@ internal static partial class NativeMethods
         @param      runLoopMode Run loop mode to be used when unscheduling any
                     asynchronous activity.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern void IOHIDDeviceUnscheduleFromRunLoop(
+    public static partial void IOHIDDeviceUnscheduleFromRunLoop(
         IntPtr device,
         IntPtr runLoop,
         IntPtr runLoopMode);
@@ -334,9 +334,9 @@ internal static partial class NativeMethods
         @param      callback Pointer to a callback method of type IOHIDCallback.
         @param      context Pointer to data to be passed to the callback.
     */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern void IOHIDDeviceRegisterRemovalCallback(
+    public static partial void IOHIDDeviceRegisterRemovalCallback(
         IntPtr device, // IOHIDDeviceRef
         IntPtr callback, // IOHIDCallback (void*, IOResult, void*) -> void
         IntPtr context); // void* (optional)

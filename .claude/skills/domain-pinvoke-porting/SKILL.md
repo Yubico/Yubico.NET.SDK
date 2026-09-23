@@ -15,7 +15,7 @@ Specialized skill for porting legacy platform-specific P/Invoke code to modern C
 - Porting HID, NFC, Bluetooth, or device-specific P/Invoke from legacy SDK
 - Adding platform interop for Windows/macOS/Linux
 - Implementing platform-specific device connections (e.g., MacOSHidIOReportConnection)
-- Moving code from `./legacy-develop/Yubico.Core/src/Yubico/PlatformInterop/` to modern SDK
+- Moving code from the legacy SDK's `Yubico.Core/src/Yubico/PlatformInterop/` to the modern SDK
 
 **Don't use when:**
 - Creating non-platform code (use standard refactoring instead)
@@ -24,20 +24,19 @@ Specialized skill for porting legacy platform-specific P/Invoke code to modern C
 
 ## Identify Sources
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  REFERENCE LOCATIONS                                    │
-│                                                         │
-│  Legacy C# SDK:                                         │
-│    ./legacy-develop/Yubico.Core/src/Yubico/Core/...    │
-│    ./legacy-develop/Yubico.Core/src/Yubico/PlatformInterop/...│
-│                                                         │
-│  Java SDK (protocol logic):                             │
-│    ../yubikit-android/                                  │
-│                                                         │
-│  Current SDK P/Invoke:                                  │
-│    Yubico.YubiKit.Core/src/PlatformInterop/{Platform}/ │
-└─────────────────────────────────────────────────────────┘
+Paths inside this repo are repo-relative. The legacy C# SDK and the Java SDK are **separate
+checkouts**, not subdirectories of this repo — locate them rather than assuming a relative path.
+
+| Source | Location |
+|---|---|
+| Current SDK P/Invoke declarations | `src/Core/src/Native/{Windows,MacOS,Linux,Desktop}/` |
+| Current managed transport callers | `src/Core/src/Transports/{Hid,SmartCard}/` |
+| Legacy C# SDK | sibling checkout, e.g. `~/Code/y/Yubico.NET.SDK-Legacy/Yubico.Core/src/Yubico/{Core,PlatformInterop}/` |
+| Java SDK (protocol logic) | sibling checkout, e.g. `~/Code/y/yubikit-android/` |
+
+```bash
+# Confirm the legacy checkout before relying on it
+ls -d ~/Code/y/Yubico.NET.SDK-Legacy/Yubico.Core/src/Yubico/PlatformInterop
 ```
 
 ## Check Existing Infrastructure
@@ -46,13 +45,43 @@ Before creating new P/Invoke, verify what exists:
 
 ```bash
 # Check existing platform interop
-ls Yubico.YubiKit.Core/src/PlatformInterop/{MacOS,Windows,Linux}/
+ls src/Core/src/Native/{MacOS,Windows,Linux,Desktop}/
 
-# Search for existing signatures
-grep -r "DllImport" Yubico.YubiKit.Core/src/PlatformInterop/
+# Search for existing signatures (both attribute forms)
+grep -rn "LibraryImport\|DllImport" --include="*.cs" src/Core/src/Native/
 ```
 
 **DO NOT duplicate existing P/Invoke signatures.**
+
+## Declare With `LibraryImport` — `DllImport` Is Wrong
+
+Every **new** native entry point uses `[LibraryImport]` on an `internal static partial` method in a
+`partial` class. `[DllImport]`/`extern` emits a runtime-generated IL stub: invisible to trimming and
+Native AOT, invisible to the marshalling source generator, and it accepts non-blittable signatures
+silently that then corrupt memory at runtime.
+
+```csharp
+// ❌ WRONG
+[DllImport(Libraries.NativeShims, CharSet = CharSet.Ansi, EntryPoint = "Native_Foo", SetLastError = true)]
+[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+internal static extern int Foo(string name, bool flag);
+
+// ✅ RIGHT
+[LibraryImport(Libraries.NativeShims, EntryPoint = "Native_Foo",
+    StringMarshalling = StringMarshalling.Utf8, SetLastError = true)]
+[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+internal static partial int Foo(string name, [MarshalAs(UnmanagedType.U1)] bool flag);
+```
+
+`[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]` stays — it is required by the
+analyzer settings and is a Windows security control.
+
+`SYSLIB1054` (the analyzer that suggests this conversion) is informational and is **not** escalated
+to an error in `.editorconfig`. A clean build does not prove you used `LibraryImport`.
+
+When porting a legacy file, convert its declarations as part of the port. Do not carry
+`[DllImport]` forward verbatim. Full conversion-trap table (`CharSet.Ansi`, `bool`, `SafeHandle`,
+string returns): `src/Core/CLAUDE.md` § Platform Interop Pattern.
 
 ## Critical Patterns to PRESERVE
 
@@ -78,22 +107,45 @@ public void Dispose()
 }
 ```
 
-### Delegate Field Storage (Prevent GC Collection)
+### Native Callbacks
+
+Every declaration in this repo is `[LibraryImport]`, so the source-generated marshaller applies
+everywhere — and it does not marshal C# delegate types at all. There are two ways through that, and
+they are not interchangeable.
+
+**Default: use a function pointer.** The source-generated marshaller does not
+marshal C# delegate types at all. Declare the parameter as `delegate* unmanaged[Cdecl]<...>` and
+point it at a `static` `[UnmanagedCallersOnly]` method. Per-instance state travels through the
+native `context` pointer, not through a closure. There is no delegate to keep alive, so no `GCHandle`
+for the callback itself.
 
 ```csharp
-// REQUIRED: Store delegate as field to prevent GC collection
-private readonly IOHIDReportCallback _callback;
-
-public MyConnection()
-{
-    // Delegate MUST be stored as field, not inline lambda
-    _callback = new IOHIDReportCallback(OnReport);
-    NativeMethod(_callback); // Safe - delegate won't be collected
-}
-
-// ❌ WRONG - delegate may be collected before native code calls it:
-// NativeMethod(new IOHIDReportCallback(OnReport));
+// See Native/MacOS/HidInput/HidInput.Interop.cs + Transports/Hid/MacOS/MacOSFidoHidConnection.cs
+[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+private static void OnReport(nint context, nint report, nuint length) { /* ... */ }
 ```
+
+**Escape hatch when the callback needs instance state and the native `context` is unusable:**
+declare the parameter as `IntPtr`, keep a delegate in a field, and pass
+`Marshal.GetFunctionPointerForDelegate(_field)`. A static `[UnmanagedCallersOnly]` method can only
+recover `this` through the `context` pointer; where an existing API passes `IntPtr.Zero` there, the
+closure is the only route. The delegate is GC-tracked and the function pointer dies with it, so the
+field is load-bearing — an inline instance is collectable while native code still holds the thunk.
+
+```csharp
+// See Transports/Hid/MacOS/MacOSHidDeviceListener.cs and MacOSHidIOReportConnection.cs
+private IOHIDDeviceCallback? _arrivedCallbackDelegate;
+
+_arrivedCallbackDelegate = DeviceArrivedCallback;                 // field, not inline lambda
+IOHIDManagerRegisterDeviceMatchingCallback(
+    manager, Marshal.GetFunctionPointerForDelegate(_arrivedCallbackDelegate), IntPtr.Zero);
+
+// ❌ WRONG - delegate collected before native code calls it:
+// ...(manager, Marshal.GetFunctionPointerForDelegate(new IOHIDDeviceCallback(OnArrived)), IntPtr.Zero);
+```
+
+Buffer pinning (`GCHandle.Alloc(..., GCHandleType.Pinned)`) is required in **both** cases — that is
+about the data, not the callback.
 
 ### CFRunLoop/Event Loop Patterns
 
@@ -125,6 +177,8 @@ These updates ARE required:
 | `if/else` chains | Switch expressions | Cleaner, more maintainable |
 | Manual null checks | `ArgumentNullException.ThrowIfNull()` | Standard helper |
 | `throw new ObjectDisposedException()` | `ObjectDisposedException.ThrowIf(_disposed, this)` | Standard helper |
+| `[DllImport]` + `static extern` | `[LibraryImport]` + `static partial` | Source-generated marshalling; trim/AOT safe |
+| Delegate callback parameter | `delegate* unmanaged[Cdecl]<...>` + `[UnmanagedCallersOnly]` | `LibraryImport` cannot marshal delegates |
 
 ## Platform Attributes
 
@@ -178,7 +232,7 @@ dotnet toolchain.cs build 2>&1 | grep -i warning
 
 ### Legacy Code
 ```csharp
-// legacy-develop/.../MacOSHidDevice.cs
+// <legacy-checkout>/Yubico.Core/src/Yubico/Core/Devices/Hid/MacOSHidDevice.cs
 namespace Yubico.Core.Devices.Hid
 {
     public class MacOSHidDevice : IHidDevice
@@ -198,10 +252,10 @@ namespace Yubico.Core.Devices.Hid
 
 ### Modern Ported Code
 ```csharp
-// Yubico.YubiKit.Core/src/Hid/MacOSHidDevice.cs
+// src/Core/src/Transports/Hid/MacOS/MacOSHidDevice.cs
 using System.Runtime.Versioning;
 
-namespace Yubico.YubiKit.Core.Hid;
+namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 
 [SupportedOSPlatform("macos")]
 public sealed class MacOSHidDevice : IHidDevice
@@ -220,10 +274,10 @@ public sealed class MacOSHidDevice : IHidDevice
 
 ```bash
 # Platform layer commits
-git add Yubico.YubiKit.Core/src/Hid/MacOSHidDevice.cs
+git add src/Core/src/Transports/Hid/MacOS/MacOSHidDevice.cs
 git commit -m "feat(hid): add MacOSHidDevice ported from legacy SDK"
 
-git add Yubico.YubiKit.Core/src/Hid/MacOSHidIOReportConnection.cs
+git add src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs
 git commit -m "feat(hid): add MacOSHidIOReportConnection for FIDO HID"
 ```
 
@@ -232,8 +286,12 @@ git commit -m "feat(hid): add MacOSHidIOReportConnection for FIDO HID"
 Before completing a platform port:
 
 - [ ] Checked existing P/Invoke (no duplication)
-- [ ] GCHandle pinning preserved for callbacks
-- [ ] Delegate fields stored (not inline)
+- [ ] New declarations use `[LibraryImport]` + `static partial` — **no new `[DllImport]`**
+- [ ] `[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]` present
+- [ ] Marshalling explicit: `StringMarshalling`, `[MarshalAs]` on `bool`, `SafeHandle` kept
+- [ ] Callbacks are `delegate* unmanaged[Cdecl]` + `[UnmanagedCallersOnly]`, or `IntPtr` + a stored delegate field
+- [ ] GCHandle pinning preserved for buffers
+- [ ] Delegate fields stored (not inline) wherever `Marshal.GetFunctionPointerForDelegate` is used
 - [ ] CFRunLoop timeouts preserved
 - [ ] File-scoped namespace
 - [ ] No `#region` blocks

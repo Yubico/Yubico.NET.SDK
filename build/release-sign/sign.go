@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
-	"crypto"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
@@ -13,117 +12,12 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 	"time"
-
-	"github.com/Yubico/nuget-sign/pkg/assembly"
-	"github.com/Yubico/nuget-sign/pkg/keys"
-	_ "github.com/Yubico/nuget-sign/pkg/keys/piv"
-	"github.com/Yubico/nuget-sign/pkg/nuget"
-	"golang.org/x/term"
 )
-
-type signerHandle struct {
-	Signer       crypto.Signer
-	Certificates []*x509.Certificate
-	Leaf         *x509.Certificate
-	Close        func() error
-}
-
-type signerAcquirer func(context.Context, string, []*x509.Certificate, *x509.CertPool) (*signerHandle, error)
-
-func acquireProductionSigner(ctx context.Context, location string, certificates []*x509.Certificate, roots *x509.CertPool) (*signerHandle, error) {
-	var cachedPIN string
-	var havePIN bool
-	session := keys.NewSession(keys.Config{Secret: func(kind keys.SecretKind, _ string) (string, error) {
-		if kind != keys.PIN {
-			return "", fmt.Errorf("unexpected secret request for %s", kind)
-		}
-		if !havePIN {
-			pin, err := readPIN()
-			if err != nil {
-				return "", err
-			}
-			cachedPIN, havePIN = pin, true
-		}
-		return cachedPIN, nil
-	}})
-	pair, err := session.Key(ctx, location)
-	if err != nil {
-		session.Close()
-		return nil, err
-	}
-	leaf, err := signingCertificate(certificates, pair.Signer)
-	if err != nil {
-		session.Close()
-		return nil, err
-	}
-	if err := validateSigningCertificate(leaf, certificates, roots); err != nil {
-		session.Close()
-		return nil, err
-	}
-	emitted := []*x509.Certificate{leaf}
-	for _, certificate := range certificates {
-		if certificate.Equal(leaf) || isSelfSigned(certificate) {
-			continue
-		}
-		emitted = append(emitted, certificate)
-	}
-	return &signerHandle{Signer: pair.Signer, Certificates: emitted, Leaf: leaf, Close: session.Close}, nil
-}
-
-func validateSigningCertificate(leaf *x509.Certificate, certificates []*x509.Certificate, roots *x509.CertPool) error {
-	intermediates := x509.NewCertPool()
-	for _, certificate := range certificates {
-		if !certificate.Equal(leaf) && !isSelfSigned(certificate) {
-			intermediates.AddCert(certificate)
-		}
-	}
-	_, err := leaf.Verify(x509.VerifyOptions{
-		Roots:         roots,
-		Intermediates: intermediates,
-		CurrentTime:   time.Now(),
-		KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning},
-	})
-	if err != nil {
-		return fmt.Errorf("validate signing certificate: %w", err)
-	}
-	return nil
-}
-
-func readPIN() (string, error) {
-	fd := int(os.Stdin.Fd())
-	if term.IsTerminal(fd) {
-		fmt.Fprint(os.Stderr, "Enter PIV PIN: ")
-		pin, err := term.ReadPassword(fd)
-		fmt.Fprintln(os.Stderr)
-		return string(pin), err
-	}
-	if pin := os.Getenv("NUGET_SIGN_PIN"); pin != "" {
-		return pin, nil
-	}
-	return "", errors.New("no terminal available for the PIV PIN; set NUGET_SIGN_PIN for unattended use")
-}
-
-func signingCertificate(certificates []*x509.Certificate, signer crypto.Signer) (*x509.Certificate, error) {
-	public, ok := signer.Public().(*rsa.PublicKey)
-	if !ok {
-		return nil, fmt.Errorf("signing key is %T, but RSA is required", signer.Public())
-	}
-	for _, certificate := range certificates {
-		key, ok := certificate.PublicKey.(*rsa.PublicKey)
-		if ok && key.Equal(public) {
-			return certificate, nil
-		}
-	}
-	return nil, errors.New("no certificate matches the signing key")
-}
-
-func isSelfSigned(certificate *x509.Certificate) bool {
-	return bytes.Equal(certificate.RawSubject, certificate.RawIssuer) && certificate.CheckSignatureFrom(certificate) == nil
-}
 
 func readCertificates(filename string) ([]*x509.Certificate, error) {
 	contents, err := os.ReadFile(filename)
@@ -137,20 +31,42 @@ func readCertificates(filename string) ([]*x509.Certificate, error) {
 			return nil, errors.New("certificate file contains data other than CERTIFICATE PEM blocks")
 		}
 		block, rest := pem.Decode(contents)
-		if block == nil || block.Type != "CERTIFICATE" {
+		if block == nil || block.Type != "CERTIFICATE" || len(block.Headers) != 0 {
 			return nil, errors.New("certificate file contains invalid PEM data")
 		}
-		contents = rest
 		certificate, err := x509.ParseCertificate(block.Bytes)
 		if err != nil {
 			return nil, err
 		}
 		certificates = append(certificates, certificate)
+		contents = rest
 	}
 	if len(certificates) == 0 {
 		return nil, errors.New("certificate file contains no certificates")
 	}
 	return certificates, nil
+}
+
+func validateCertificateChain(certificates []*x509.Certificate, roots *x509.CertPool) (*x509.Certificate, error) {
+	leaf := certificates[0]
+	publicKey, ok := leaf.PublicKey.(*rsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("signing certificate key is %T, but RSA is required", leaf.PublicKey)
+	}
+	if publicKey.N.BitLen() < 2048 {
+		return nil, fmt.Errorf("signing certificate RSA key is %d bits, want at least 2048", publicKey.N.BitLen())
+	}
+	intermediates := x509.NewCertPool()
+	for _, certificate := range certificates[1:] {
+		intermediates.AddCert(certificate)
+	}
+	if _, err := leaf.Verify(x509.VerifyOptions{
+		Roots: roots, Intermediates: intermediates, CurrentTime: time.Now(),
+		KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageCodeSigning},
+	}); err != nil {
+		return nil, fmt.Errorf("validate signing certificate: %w", err)
+	}
+	return leaf, nil
 }
 
 func trustAnchorPool(filename string) (*x509.CertPool, error) {
@@ -172,45 +88,6 @@ func trustAnchorPool(filename string) (*x509.CertPool, error) {
 		pool.AddCert(certificate)
 	}
 	return pool, nil
-}
-
-func packageSigned(filename string) (bool, error) {
-	file, size, err := openFile(filename)
-	if err != nil {
-		return false, err
-	}
-	defer file.Close()
-	pkg, err := nuget.Open(file, size)
-	if err != nil {
-		return false, err
-	}
-	return pkg.Signed(), nil
-}
-
-func signPE(ctx context.Context, contents []byte, options assembly.SignOptions) ([]byte, error) {
-	file, err := assembly.Open(contents)
-	if err != nil {
-		return nil, err
-	}
-	if file.Signed() {
-		return nil, errors.New("selected DLL already has a PE certificate table")
-	}
-	options.Hash = crypto.SHA256
-	signed, err := file.Sign(ctx, options)
-	if err != nil {
-		return nil, err
-	}
-	if err := verifyAuthenticodeOnlyMutation(contents, signed); err != nil {
-		return nil, fmt.Errorf("signing changed bytes outside Authenticode fields: %w", err)
-	}
-	signature, err := assemblySignature(signed)
-	if err != nil {
-		return nil, err
-	}
-	if signature.Hash != crypto.SHA256 || !signature.Matches() {
-		return nil, errors.New("new Authenticode SHA-256 image digest does not match")
-	}
-	return signed, nil
 }
 
 type peSigningLayout struct {
@@ -300,74 +177,75 @@ func verifyAuthenticodeOnlyMutation(before, after []byte) error {
 	return nil
 }
 
-func signPackage(ctx context.Context, info packageInfo, output, timestamper string, signer *signerHandle, selected map[string]struct{}) (map[string][]byte, error) {
-	signed, err := packageSigned(info.Path)
-	if err != nil {
-		return nil, err
-	}
-	if signed {
-		return nil, fmt.Errorf("input package %s is already NuGet-signed", info.Name)
-	}
-	options := nuget.SignOptions{Certificates: signer.Certificates, Key: signer.Signer, Hash: crypto.SHA256, TimestampURL: timestamper}
+func signPackage(ctx context.Context, runner commandRunner, cfg runConfig, info packageInfo, output string, selected map[string]struct{}) error {
 	if info.Kind == "snupkg" {
-		return nil, signNuGetContainer(ctx, info.Path, output, options)
+		return runNugetSign(ctx, runner, cfg, info.Path, output)
 	}
-	rebuilt := output + ".assemblies"
-	expected := make(map[string][]byte, len(selected))
-	assemblyOptions := assembly.SignOptions{Certificates: signer.Certificates, Key: signer.Signer, Hash: crypto.SHA256, TimestampURL: timestamper}
-	if err := rewritePackage(info.Path, rebuilt, selected, func(name string, contents []byte) ([]byte, error) {
-		signedAssembly, err := signPE(ctx, contents, assemblyOptions)
-		if err != nil {
-			return nil, err
-		}
-		signature, err := assemblySignature(signedAssembly)
-		if err != nil {
-			return nil, err
-		}
-		expected[name] = append([]byte(nil), signature.ActualDigest...)
-		return signedAssembly, nil
-	}); err != nil {
-		return nil, err
-	}
-	defer os.Remove(rebuilt)
-	if err := signNuGetContainer(ctx, rebuilt, output, options); err != nil {
-		return nil, err
-	}
-	return expected, nil
-}
-
-func signNuGetContainer(ctx context.Context, input, output string, options nuget.SignOptions) error {
-	file, size, err := openFile(input)
+	directory, err := os.MkdirTemp(filepath.Dir(output), ".release-sign-assemblies-")
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-	pkg, err := nuget.Open(file, size)
-	if err != nil {
+	defer os.RemoveAll(directory)
+	names := make([]string, 0, len(selected))
+	for name := range selected {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	originals := make(map[string][]byte, len(names))
+	paths := make([]string, 0, len(names))
+	for _, name := range names {
+		if err := validateEntryName(name); err != nil {
+			return fmt.Errorf("unsafe selected assembly %q: %w", name, err)
+		}
+		contents, err := zipEntry(info.Path, name)
+		if err != nil {
+			return err
+		}
+		layout, err := parsePESigningLayout(contents)
+		if err != nil {
+			return fmt.Errorf("parse %s: %w", name, err)
+		}
+		if layout.certificateLen != 0 {
+			return fmt.Errorf("selected DLL already has a PE certificate table: %s", name)
+		}
+		filename := filepath.Join(directory, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(filename), 0o700); err != nil {
+			return err
+		}
+		if err := os.WriteFile(filename, contents, 0o600); err != nil {
+			return err
+		}
+		originals[name], paths = contents, append(paths, filename)
+	}
+	args := []string{"sign-assemblies", "--key", cfg.KeyLocation, "--certificate", cfg.CertificatePath, "--hash-algorithm", "sha256", "--timestamper", cfg.Timestamper}
+	args = append(args, paths...)
+	if err := runner.RunAttached(ctx, cfg.NugetSign, args...); err != nil {
+		return fmt.Errorf("nuget-sign sign-assemblies: %w", err)
+	}
+	signed := make(map[string][]byte, len(names))
+	for i, name := range names {
+		contents, err := os.ReadFile(paths[i])
+		if err != nil {
+			return err
+		}
+		if err := verifyAuthenticodeOnlyMutation(originals[name], contents); err != nil {
+			return fmt.Errorf("signing changed bytes outside Authenticode fields for %s: %w", name, err)
+		}
+		signed[name] = contents
+	}
+	rebuilt := filepath.Join(directory, "rebuilt.nupkg")
+	if err := rewritePackage(info.Path, rebuilt, selected, func(name string, _ []byte) ([]byte, error) { return signed[name], nil }); err != nil {
 		return err
 	}
-	return writeNewFile(output, func(writer io.Writer) error { return pkg.Sign(ctx, writer, options) })
+	return runNugetSign(ctx, runner, cfg, rebuilt, output)
 }
 
-func assemblySignature(contents []byte) (*assembly.Signature, error) {
-	file, err := assembly.Open(contents)
-	if err != nil {
-		return nil, err
+func runNugetSign(ctx context.Context, runner commandRunner, cfg runConfig, input, output string) error {
+	args := []string{"sign", "--key", cfg.KeyLocation, "--certificate", cfg.CertificatePath, "--hash-algorithm", "sha256", "--timestamper", cfg.Timestamper, "--output", output, input}
+	if err := runner.RunAttached(ctx, cfg.NugetSign, args...); err != nil {
+		return fmt.Errorf("nuget-sign sign: %w", err)
 	}
-	return file.Signature()
-}
-
-func openFile(filename string) (*os.File, int64, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, 0, err
-	}
-	info, err := file.Stat()
-	if err != nil {
-		file.Close()
-		return nil, 0, err
-	}
-	return file, info.Size(), nil
+	return nil
 }
 
 func certificateFingerprint(certificate *x509.Certificate) string {

@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -24,15 +25,15 @@ type runConfig struct {
 	CertificatePath   string
 	RootPath          string
 	TimestampRootPath string
-	Osslsigncode      string
+	NugetSign         string
 	SourceDigest      string
 	Timestamper       string
 	Clean             bool
 }
 
-func run(ctx context.Context, cfg runConfig, runner commandRunner, acquire signerAcquirer) error {
+func run(ctx context.Context, cfg runConfig, runner commandRunner) error {
 	started := time.Now().UTC()
-	m, manifestHash, certificates, roots, timestampRoots, err := validateRun(ctx, &cfg, runner)
+	m, manifestHash, leaf, tool, err := validateRun(ctx, &cfg, runner)
 	if err != nil {
 		return err
 	}
@@ -56,27 +57,19 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner, acquire signe
 	if err != nil {
 		return err
 	}
-	signer, err := acquire(ctx, cfg.KeyLocation, certificates, roots)
-	if err != nil {
-		return err
-	}
-	defer signer.Close()
 
 	staging, cleanupStaging, err := createRunStaging(cfg.WorkingDirectory)
 	if err != nil {
 		return err
 	}
 	defer cleanupStaging()
+	fingerprint := certificateFingerprint(leaf)
 	result := report{
-		Schema:            1,
-		Component:         cfg.Component,
-		SourceDigest:      cfg.SourceDigest,
-		SignerWorkflow:    m.SignerWorkflow,
-		StartedUTC:        started,
-		Manifest:          reportManifest{Path: cfg.ManifestPath, SHA256: manifestHash},
-		KeyLocation:       safeKeyLocation(cfg.KeyLocation),
-		SignerSubject:     signer.Leaf.Subject.String(),
-		SignerFingerprint: certificateFingerprint(signer.Leaf),
+		Schema: 1, Component: cfg.Component, SourceDigest: cfg.SourceDigest,
+		SignerWorkflow: m.SignerWorkflow, StartedUTC: started,
+		Manifest:    reportManifest{Path: cfg.ManifestPath, SHA256: manifestHash},
+		KeyLocation: safeKeyLocation(cfg.KeyLocation), SignerSubject: leaf.Subject.String(),
+		SignerFingerprint: fingerprint, Tool: tool,
 	}
 	artifactSet := map[string]bool{}
 	for _, item := range extracted {
@@ -97,15 +90,11 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner, acquire signe
 		if info.Kind == "nupkg" {
 			selected, err = selectEntries(info.Path, *info.Policy.Authenticode)
 		}
-		var expected map[string][]byte
 		if err == nil {
-			expected, err = signPackage(packageCtx, info, output, cfg.Timestamper, signer, selected)
+			err = signPackage(packageCtx, runner, cfg, info, output, selected)
 		}
 		if err == nil {
-			err = verifySignedPackage(packageCtx, info, output, selected, expected, roots, timestampRoots, signer.Leaf)
-		}
-		if err == nil && info.Kind == "nupkg" {
-			err = verifyAssembliesWithOsslsigncode(packageCtx, runner, cfg, output, selected, signer.Leaf)
+			err = verifySignedPackage(packageCtx, runner, cfg, info, output, selected, fingerprint)
 		}
 		cancel()
 		if err != nil {
@@ -135,158 +124,109 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner, acquire signe
 	return commitOutputs(filepath.Join(cfg.WorkingDirectory, "signed"), staging, outputNames, reportContents, cfg.Clean)
 }
 
-func validateRun(ctx context.Context, cfg *runConfig, runner commandRunner) (manifest, string, []*x509.Certificate, *x509.CertPool, *x509.CertPool, error) {
-	if cfg.Component == "" || cfg.WorkingDirectory == "" || len(cfg.Artifacts) == 0 || cfg.ManifestPath == "" || cfg.KeyLocation == "" || cfg.CertificatePath == "" || cfg.RootPath == "" || cfg.TimestampRootPath == "" || cfg.Osslsigncode == "" || cfg.SourceDigest == "" {
-		return manifest{}, "", nil, nil, nil, errors.New("all required run flags must be provided")
+func validateRun(ctx context.Context, cfg *runConfig, runner commandRunner) (manifest, string, *x509.Certificate, reportTool, error) {
+	empty := func(err error) (manifest, string, *x509.Certificate, reportTool, error) {
+		return manifest{}, "", nil, reportTool{}, err
+	}
+	if cfg.Component == "" || cfg.WorkingDirectory == "" || len(cfg.Artifacts) == 0 || cfg.ManifestPath == "" || cfg.KeyLocation == "" || cfg.CertificatePath == "" || cfg.RootPath == "" || cfg.TimestampRootPath == "" || cfg.NugetSign == "" || cfg.SourceDigest == "" {
+		return empty(errors.New("all required run flags must be provided"))
 	}
 	if len(cfg.SourceDigest) != 40 {
-		return manifest{}, "", nil, nil, nil, errors.New("--source-digest must be exactly 40 hexadecimal characters")
+		return empty(errors.New("--source-digest must be exactly 40 hexadecimal characters"))
 	}
 	if _, err := hex.DecodeString(cfg.SourceDigest); err != nil {
-		return manifest{}, "", nil, nil, nil, errors.New("--source-digest must be exactly 40 hexadecimal characters")
+		return empty(errors.New("--source-digest must be exactly 40 hexadecimal characters"))
 	}
 	if strings.TrimSpace(cfg.Timestamper) == "" {
-		return manifest{}, "", nil, nil, nil, errors.New("--timestamper must not be empty")
+		return empty(errors.New("--timestamper must not be empty"))
 	}
 	if err := os.MkdirAll(cfg.WorkingDirectory, 0o700); err != nil {
-		return manifest{}, "", nil, nil, nil, err
+		return empty(err)
 	}
 	if _, err := exec.LookPath("gh"); err != nil {
-		return manifest{}, "", nil, nil, nil, errors.New("gh executable is unavailable")
+		return empty(errors.New("gh executable is unavailable"))
 	}
-	osslsigncode, err := exec.LookPath(cfg.Osslsigncode)
+	nugetTool, err := inspectTool(ctx, runner, cfg.NugetSign, validateNugetSignVersion)
 	if err != nil {
-		return manifest{}, "", nil, nil, nil, fmt.Errorf("osslsigncode is unavailable: %w", err)
+		return empty(fmt.Errorf("check nuget-sign: %w", err))
 	}
-	osslsigncode, err = filepath.Abs(osslsigncode)
-	if err != nil {
-		return manifest{}, "", nil, nil, nil, err
-	}
-	cfg.Osslsigncode = osslsigncode
-	versionOutput, err := runner.Run(ctx, cfg.Osslsigncode, "--version")
-	if err != nil {
-		return manifest{}, "", nil, nil, nil, fmt.Errorf("check osslsigncode version: %w", err)
-	}
-	if err := validateOsslsigncodeVersion(versionOutput); err != nil {
-		return manifest{}, "", nil, nil, nil, err
-	}
+	cfg.NugetSign = nugetTool.Path
+
 	signedDirectory := filepath.Join(cfg.WorkingDirectory, "signed")
 	if _, err := os.Lstat(signedDirectory); err == nil && !cfg.Clean {
-		return manifest{}, "", nil, nil, nil, errors.New("refusing to replace existing signed directory without --clean")
+		return empty(errors.New("refusing to replace existing signed directory without --clean"))
 	} else if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return manifest{}, "", nil, nil, nil, err
-	}
-	packagesDir := filepath.Join(cfg.WorkingDirectory, "signed", "packages")
-	if entries, err := os.ReadDir(packagesDir); err == nil && len(entries) != 0 && !cfg.Clean {
-		return manifest{}, "", nil, nil, nil, errors.New("refusing to overwrite nonempty signed/packages without --clean")
-	} else if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return manifest{}, "", nil, nil, nil, err
+		return empty(err)
 	}
 	m, hash, err := loadManifest(cfg.ManifestPath, cfg.Component)
 	if err != nil {
-		return manifest{}, "", nil, nil, nil, err
+		return empty(err)
 	}
 	certificates, err := readCertificates(cfg.CertificatePath)
 	if err != nil {
-		return manifest{}, "", nil, nil, nil, fmt.Errorf("read certificate chain: %w", err)
+		return empty(fmt.Errorf("read certificate chain: %w", err))
 	}
 	roots, err := trustAnchorPool(cfg.RootPath)
 	if err != nil {
-		return manifest{}, "", nil, nil, nil, fmt.Errorf("read root: %w", err)
+		return empty(fmt.Errorf("read root: %w", err))
 	}
-	timestampRoots, err := trustAnchorPool(cfg.TimestampRootPath)
+	leaf, err := validateCertificateChain(certificates, roots)
 	if err != nil {
-		return manifest{}, "", nil, nil, nil, fmt.Errorf("read timestamp root: %w", err)
+		return empty(err)
 	}
-	return m, hash, certificates, roots, timestampRoots, nil
+	if _, err := trustAnchorPool(cfg.TimestampRootPath); err != nil {
+		return empty(fmt.Errorf("read timestamp root: %w", err))
+	}
+	return m, hash, leaf, nugetTool, nil
 }
 
-func validateOsslsigncodeVersion(output []byte) error {
-	firstLine := strings.TrimSuffix(strings.SplitN(string(output), "\n", 2)[0], "\r")
-	const prefix = "osslsigncode "
-	if !strings.HasPrefix(firstLine, prefix) {
-		return fmt.Errorf("unrecognized osslsigncode version output: %q", firstLine)
+type versionValidator func([]byte) error
+
+func inspectTool(ctx context.Context, runner commandRunner, name string, validate versionValidator) (reportTool, error) {
+	resolved, err := exec.LookPath(name)
+	if err != nil {
+		return reportTool{}, fmt.Errorf("%s is unavailable: %w", name, err)
 	}
-	version := strings.Fields(strings.TrimPrefix(firstLine, prefix))
-	if len(version) == 0 {
-		return fmt.Errorf("unrecognized osslsigncode version output: %q", firstLine)
+	resolved, err = filepath.Abs(resolved)
+	if err != nil {
+		return reportTool{}, err
 	}
-	versionNumber := strings.TrimSuffix(version[0], ",")
-	parts := strings.Split(versionNumber, ".")
-	if len(parts) < 2 || len(parts) > 3 {
-		return fmt.Errorf("unrecognized osslsigncode version output: %q", firstLine)
+	output, err := runner.Run(ctx, resolved, "--version")
+	if err != nil {
+		return reportTool{}, err
 	}
-	values := make([]int, len(parts))
-	for i, part := range parts {
+	if err := validate(output); err != nil {
+		return reportTool{}, err
+	}
+	digest, err := sha256File(resolved)
+	if err != nil {
+		return reportTool{}, err
+	}
+	return reportTool{Path: resolved, Version: strings.TrimSpace(string(output)), SHA256: digest}, nil
+}
+
+var nugetSignVersionPattern = regexp.MustCompile(`^nuget-sign version ([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$`)
+
+func validateNugetSignVersion(output []byte) error {
+	line := strings.Join(strings.Fields(strings.SplitN(string(output), "\n", 2)[0]), " ")
+	match := nugetSignVersionPattern.FindStringSubmatch(line)
+	if match == nil {
+		return fmt.Errorf("unrecognized nuget-sign version output: %q", line)
+	}
+	values := make([]int, 3)
+	for i := range values {
+		part := match[i+1]
+		if len(part) > 1 && part[0] == '0' {
+			return fmt.Errorf("unrecognized nuget-sign version output: %q", line)
+		}
 		value, err := strconv.Atoi(part)
-		if err != nil || value < 0 {
-			return fmt.Errorf("unrecognized osslsigncode version output: %q", firstLine)
+		if err != nil {
+			return fmt.Errorf("unrecognized nuget-sign version output: %q", line)
 		}
 		values[i] = value
 	}
-	if values[0] < 2 || (values[0] == 2 && values[1] < 13) {
-		return fmt.Errorf("osslsigncode 2.13 or newer is required, found %s", versionNumber)
-	}
-	return nil
-}
-
-func verifyAssembliesWithOsslsigncode(ctx context.Context, runner commandRunner, cfg runConfig, output string, selected map[string]struct{}, signer *x509.Certificate) error {
-	names := make([]string, 0, len(selected))
-	for name := range selected {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	if len(names) == 0 {
-		return nil
-	}
-	directory, err := os.MkdirTemp(filepath.Dir(output), ".release-sign-osslsigncode-")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(directory)
-	for index, name := range names {
-		contents, err := zipEntry(output, name)
-		if err != nil {
-			return fmt.Errorf("extract assembly for osslsigncode %s: %w", name, err)
-		}
-		assemblyPath := filepath.Join(directory, fmt.Sprintf("assembly-%04d.dll", index))
-		if err := os.WriteFile(assemblyPath, contents, 0o600); err != nil {
-			return fmt.Errorf("extract assembly for osslsigncode %s: %w", name, err)
-		}
-		verificationOutput, err := runner.Run(ctx, cfg.Osslsigncode,
-			"verify", "-in", assemblyPath,
-			"-CAfile", cfg.RootPath,
-			"-TSA-CAfile", cfg.TimestampRootPath,
-			"-require-leaf-hash", "sha256:"+certificateFingerprint(signer),
-			"-ignore-cdp", "-ignore-crl")
-		if err != nil {
-			return fmt.Errorf("osslsigncode verify %s: %w", name, err)
-		}
-		if err := validateOsslsigncodeEvidence(verificationOutput); err != nil {
-			return fmt.Errorf("osslsigncode verify %s: %w", name, err)
-		}
-	}
-	return nil
-}
-
-func validateOsslsigncodeEvidence(output []byte) error {
-	required := map[string]int{
-		"Message digest algorithm : SHA256":           0,
-		"Leaf hash match: ok":                         0,
-		"Timestamp Server Signature verification: ok": 0,
-		"Signature verification: ok":                  0,
-		"Number of verified signatures: 1":            0,
-	}
-	for _, line := range strings.Split(string(output), "\n") {
-		normalized := strings.Join(strings.Fields(line), " ")
-		if _, ok := required[normalized]; ok {
-			required[normalized]++
-		}
-	}
-	for evidence, count := range required {
-		if count != 1 {
-			return fmt.Errorf("expected exactly one %q evidence line, got %d", evidence, count)
-		}
+	if values[0] == 0 && (values[1] < 1 || (values[1] == 1 && values[2] == 0 && match[4] != "")) {
+		return fmt.Errorf("nuget-sign 0.1.0 or newer is required, found %s", strings.TrimPrefix(line, "nuget-sign version "))
 	}
 	return nil
 }

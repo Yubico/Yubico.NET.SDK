@@ -24,8 +24,15 @@ type report struct {
 	KeyLocation       string           `json:"keyLocation"`
 	SignerSubject     string           `json:"signerSubject"`
 	SignerFingerprint string           `json:"signerFingerprintSha256"`
+	Tool              reportTool       `json:"tool"`
 	Artifacts         []reportArtifact `json:"artifacts"`
 	Packages          []reportPackage  `json:"packages"`
+}
+
+type reportTool struct {
+	Path    string `json:"path"`
+	Version string `json:"version"`
+	SHA256  string `json:"sha256"`
 }
 
 type reportArtifact struct {

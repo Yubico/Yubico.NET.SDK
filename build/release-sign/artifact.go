@@ -24,6 +24,15 @@ type extractedPackage struct {
 
 type commandRunner interface {
 	Run(context.Context, string, ...string) ([]byte, error)
+	RunAttached(context.Context, string, ...string) error
+}
+
+func (osRunner) RunAttached(ctx context.Context, name string, args ...string) error {
+	command := exec.CommandContext(ctx, name, args...)
+	command.Stdin = os.Stdin
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+	return command.Run()
 }
 
 type osRunner struct{}

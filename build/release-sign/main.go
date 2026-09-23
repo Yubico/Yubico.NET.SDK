@@ -10,11 +10,11 @@ import (
 
 const defaultTimestamper = "http://timestamp.digicert.com"
 
-func defaultOsslsigncode() string {
-	if configured := os.Getenv("RELEASE_SIGN_OSSLSIGNCODE"); configured != "" {
+func defaultNugetSign() string {
+	if configured := os.Getenv("RELEASE_SIGN_NUGET_SIGN"); configured != "" {
 		return configured
 	}
-	return "osslsigncode"
+	return "nuget-sign"
 }
 
 func main() {
@@ -26,7 +26,7 @@ func main() {
 
 func execute(ctx context.Context, args []string, runner commandRunner) error {
 	if len(args) == 0 || args[0] != "run" {
-		return errors.New("usage: release-sign run --component core|nativeshims --working-directory DIR --artifact ZIP [--artifact ZIP...] --manifest FILE --source-digest COMMIT --key LOCATION --certificate PEM --root PEM --timestamp-root PEM [--osslsigncode PATH] [--timestamper URL] [--clean]")
+		return errors.New("usage: release-sign run --component core|nativeshims --working-directory DIR --artifact ZIP [--artifact ZIP...] --manifest FILE --source-digest COMMIT --key LOCATION --certificate PEM --root PEM --timestamp-root PEM [--nuget-sign PATH] [--timestamper URL] [--clean]")
 	}
 	fs := flag.NewFlagSet("run", flag.ContinueOnError)
 	var artifacts stringList
@@ -39,7 +39,7 @@ func execute(ctx context.Context, args []string, runner commandRunner) error {
 	fs.StringVar(&cfg.CertificatePath, "certificate", os.Getenv("RELEASE_SIGN_CERTIFICATE"), "signer certificate chain")
 	fs.StringVar(&cfg.RootPath, "root", os.Getenv("RELEASE_SIGN_ROOT"), "signer trust root")
 	fs.StringVar(&cfg.TimestampRootPath, "timestamp-root", os.Getenv("RELEASE_SIGN_TIMESTAMP_ROOT"), "timestamp trust root")
-	fs.StringVar(&cfg.Osslsigncode, "osslsigncode", defaultOsslsigncode(), "osslsigncode executable")
+	fs.StringVar(&cfg.NugetSign, "nuget-sign", defaultNugetSign(), "nuget-sign executable")
 	fs.StringVar(&cfg.SourceDigest, "source-digest", os.Getenv("RELEASE_SIGN_SOURCE_DIGEST"), "40-character Git commit digest")
 	fs.StringVar(&cfg.Timestamper, "timestamper", defaultTimestamper, "RFC 3161 timestamp authority")
 	fs.BoolVar(&cfg.Clean, "clean", false, "replace existing signed output")
@@ -50,7 +50,7 @@ func execute(ctx context.Context, args []string, runner commandRunner) error {
 		return fmt.Errorf("unexpected arguments: %v", fs.Args())
 	}
 	cfg.Artifacts = artifacts
-	return run(ctx, cfg, runner, acquireProductionSigner)
+	return run(ctx, cfg, runner)
 }
 
 type stringList []string

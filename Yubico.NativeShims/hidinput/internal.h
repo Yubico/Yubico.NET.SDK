@@ -23,6 +23,7 @@ struct hidinput_owner {
     size_t *lengths;
     size_t max_report, capacity, head, count;
     int started, cancelling, acked, fault, scheduled, delivering, close_failed;
+    int service_terminated; /* Successful IOKit service-termination callback only. */
     int terminal_reason, terminal_sent;
     hidinput_receiver receiver;
     hidinput_terminal_cb terminal;
@@ -38,7 +39,10 @@ void hidinput_incoming(hidinput_owner *owner, const uint8_t *data, size_t length
 void hidinput_removed(hidinput_owner *owner);
 void hidinput_acked(hidinput_owner *owner);
 void hidinput_report_fault(hidinput_owner *owner);
+/* Called by try_release only after the owner has completed cancellation/drain. */
+int hidinput_close_proven(hidinput_owner *owner, IOReturn status);
 /* The IOHID callback and macOS harness both enter through this validation seam. */
 void hidinput_iohid_input(hidinput_owner *owner, IOReturn status, IOHIDReportType type,
                           uint32_t report_id, const uint8_t *report, CFIndex length);
+void hidinput_iohid_removed(hidinput_owner *owner, IOReturn status);
 #endif

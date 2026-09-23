@@ -185,6 +185,13 @@ if(APPLE)
         hidinput/owner.c
         hidinput/backend_iohid.c
         hidinput/native_exports.c)
+    option(HIDINPUT_DIAG_CLOSE "Print failed macOS HID input close status for local probes" OFF)
+    if(HIDINPUT_DIAG_CLOSE)
+        target_compile_definitions(Yubico.NativeShims PRIVATE HIDINPUT_DIAG_CLOSE=1)
+        if(YUBICO_BUILD_STATIC)
+            target_compile_definitions(Yubico.NativeShims.Static PRIVATE HIDINPUT_DIAG_CLOSE=1)
+        endif()
+    endif()
     target_compile_options(Yubico.NativeShims PRIVATE -fblocks)
     if(YUBICO_BUILD_STATIC)
         target_compile_options(Yubico.NativeShims.Static PRIVATE -fblocks)

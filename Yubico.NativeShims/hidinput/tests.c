@@ -266,6 +266,197 @@ static void iohid_metadata(void) {
         finish(&c);
     }
 }
+static void iohid_no_device_input(void) {
+    capture c; init(&c); c.release = 1;
+    hidinput_owner *o = hidinput_test_create_with_terminal(2, 2, receive, terminal, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    hidinput_iohid_input(o, kIOReturnNoDevice, kIOHIDReportTypeInput, 0, NULL, 0);
+    hidinput_test_remove(o);
+    hidinput_test_ack(o);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+    assert(c.count == 0 && c.terminal_count == 1 && c.terminal_reason == 1);
+    assert(hidinput_destroy(o) == HIDINPUT_OK);
+    finish(&c);
+}
+static void close_status_after_removal(void) {
+    capture c; init(&c); c.release = 1;
+    hidinput_owner *o = hidinput_test_create_with_terminal(1, 1, receive, terminal, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    hidinput_test_remove(o);
+    hidinput_test_set_close_status(o, kIOReturnNoDevice);
+    assert(hidinput_destroy(o) == HIDINPUT_BUSY);
+    hidinput_test_ack(o);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+    assert(c.terminal_count == 1 && c.terminal_reason == 1);
+    assert(hidinput_destroy(o) == HIDINPUT_OK);
+    finish(&c);
+}
+static void close_no_device_without_removal_retains(void) {
+    capture c; init(&c); c.release = 1;
+    hidinput_owner *o = hidinput_test_create(1, 1, receive, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    hidinput_test_set_close_status(o, kIOReturnNoDevice);
+    hidinput_cancel(o); hidinput_test_ack(o);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+    assert(hidinput_destroy(o) == HIDINPUT_CLOSE_FAULT);
+    assert(hidinput_test_close_attempts(o) == 1);
+    assert(hidinput_destroy(o) == HIDINPUT_CLOSE_FAULT);
+    finish(&c);
+}
+static void callback_removal_and_unknown_close(void) {
+    for (int unknown = 0; unknown < 2; unknown++) {
+        capture c; init(&c); c.release = 1;
+        hidinput_owner *o = hidinput_test_create_with_terminal(1, 1, receive, terminal, &c);
+        assert(o); c.owner = o;
+        assert(hidinput_start(o) == HIDINPUT_OK);
+        hidinput_iohid_removed(o, kIOReturnNoDevice);
+        hidinput_iohid_removed(o, kIOReturnNoDevice);
+        hidinput_test_set_close_status(o, unknown ? kIOReturnError : kIOReturnNoDevice);
+        hidinput_test_ack(o);
+        assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+        assert(c.terminal_count == 1 && c.terminal_reason == 1);
+        assert(hidinput_destroy(o) == (unknown ? HIDINPUT_CLOSE_FAULT : HIDINPUT_OK));
+        if (unknown) assert(hidinput_test_close_attempts(o) == 1);
+        finish(&c);
+    }
+}
+static void unknown_removal_callback_is_fault(void) {
+    capture c; init(&c); c.release = 1;
+    hidinput_owner *o = hidinput_test_create_with_terminal(1, 1, receive, terminal, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    hidinput_iohid_removed(o, kIOReturnError);
+    hidinput_test_set_close_status(o, kIOReturnNoDevice);
+    hidinput_test_ack(o);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_FAULT);
+    assert(c.terminal_count == 1 && c.terminal_reason == 3);
+    assert(hidinput_destroy(o) == HIDINPUT_CLOSE_FAULT);
+    assert(hidinput_test_close_attempts(o) == 1);
+    finish(&c);
+}
+static void removal_close_waits_for_delivery_drain(void) {
+    capture c; init(&c);
+    hidinput_owner *o = hidinput_test_create_with_terminal(1, 2, receive, terminal, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    uint8_t b = 7;
+    hidinput_test_inject(o, &b, 1);
+    pthread_mutex_lock(&c.mutex);
+    while (!c.entered) pthread_cond_wait(&c.cond, &c.mutex);
+    pthread_mutex_unlock(&c.mutex);
+    hidinput_test_remove(o);
+    hidinput_test_set_close_status(o, kIOReturnNoDevice);
+    hidinput_test_ack(o);
+    assert(hidinput_destroy(o) == HIDINPUT_BUSY);
+    assert(hidinput_test_close_attempts(o) == 0);
+    unblock(&c);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+    assert(c.count == 1 && c.terminal_count == 1 && c.terminal_after_reports == 1);
+    assert(hidinput_destroy(o) == HIDINPUT_OK);
+    finish(&c);
+}
+static void bad_argument_after_service_termination(void) {
+    capture c; init(&c); c.release = 1;
+    hidinput_owner *o = hidinput_test_create_with_terminal(1, 1, receive, terminal, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    hidinput_iohid_removed(o, kIOReturnSuccess);
+    hidinput_test_set_close_status(o, kIOReturnBadArgument);
+    assert(hidinput_destroy(o) == HIDINPUT_BUSY);
+    assert(hidinput_test_close_attempts(o) == 0);
+    hidinput_test_ack(o);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+    assert(c.terminal_count == 1 && c.terminal_reason == 1);
+    assert(hidinput_destroy(o) == HIDINPUT_OK);
+    finish(&c);
+}
+static void bad_argument_without_service_termination_retains(void) {
+    for (int path = 0; path < 3; path++) {
+        capture c; init(&c); c.release = 1;
+        hidinput_owner *o = hidinput_test_create_with_terminal(1, 1, receive, terminal, &c);
+        assert(o); c.owner = o;
+        assert(hidinput_start(o) == HIDINPUT_OK);
+        if (path == 0) hidinput_iohid_input(o, kIOReturnNoDevice, kIOHIDReportTypeInput, 0, NULL, 0);
+        if (path == 1) hidinput_iohid_removed(o, kIOReturnNoDevice);
+        if (path == 2) hidinput_iohid_removed(o, kIOReturnError);
+        hidinput_test_set_close_status(o, kIOReturnBadArgument);
+        hidinput_test_ack(o);
+        assert(hidinput_wait_shutdown(o, 2000) == (path == 2 ? HIDINPUT_FAULT : HIDINPUT_OK));
+        assert(c.terminal_count == 1 && c.terminal_reason == (path == 2 ? 3 : 1));
+        assert(hidinput_destroy(o) == HIDINPUT_CLOSE_FAULT);
+        assert(hidinput_destroy(o) == HIDINPUT_CLOSE_FAULT);
+        assert(hidinput_test_close_attempts(o) == 1);
+        finish(&c);
+    }
+}
+static void bad_argument_after_fault_then_service_termination_retains(void) {
+    capture c; init(&c); c.release = 1;
+    hidinput_owner *o = hidinput_test_create_with_terminal(1, 1, receive, terminal, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    hidinput_iohid_input(o, kIOReturnError, kIOHIDReportTypeInput, 0, NULL, 0);
+    hidinput_iohid_removed(o, kIOReturnSuccess);
+    hidinput_test_set_close_status(o, kIOReturnBadArgument);
+    hidinput_test_ack(o);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_FAULT);
+    assert(c.terminal_count == 1 && c.terminal_reason == 3);
+    assert(hidinput_destroy(o) == HIDINPUT_CLOSE_FAULT);
+    assert(hidinput_destroy(o) == HIDINPUT_CLOSE_FAULT);
+    assert(hidinput_test_close_attempts(o) == 1);
+    finish(&c);
+}
+static void bad_argument_service_termination_waits_for_delivery(void) {
+    capture c; init(&c);
+    hidinput_owner *o = hidinput_test_create_with_terminal(1, 2, receive, terminal, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    uint8_t b = 7;
+    hidinput_test_inject(o, &b, 1);
+    pthread_mutex_lock(&c.mutex);
+    while (!c.entered) pthread_cond_wait(&c.cond, &c.mutex);
+    pthread_mutex_unlock(&c.mutex);
+    hidinput_iohid_removed(o, kIOReturnSuccess);
+    hidinput_test_set_close_status(o, kIOReturnBadArgument);
+    hidinput_test_ack(o);
+    assert(hidinput_destroy(o) == HIDINPUT_BUSY);
+    assert(hidinput_test_close_attempts(o) == 0);
+    unblock(&c);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+    assert(c.count == 1 && c.terminal_count == 1 && c.terminal_after_reports == 1);
+    assert(hidinput_destroy(o) == HIDINPUT_OK);
+    finish(&c);
+}
+static void unrelated_close_after_service_termination_retains(void) {
+    capture c; init(&c); c.release = 1;
+    hidinput_owner *o = hidinput_test_create_with_terminal(1, 1, receive, terminal, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    hidinput_iohid_removed(o, kIOReturnSuccess);
+    hidinput_test_set_close_status(o, kIOReturnNotOpen);
+    hidinput_test_ack(o);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+    assert(hidinput_destroy(o) == HIDINPUT_CLOSE_FAULT);
+    assert(hidinput_destroy(o) == HIDINPUT_CLOSE_FAULT);
+    assert(hidinput_test_close_attempts(o) == 1);
+    finish(&c);
+}
+static void input_no_device_then_service_termination(void) {
+    capture c; init(&c); c.release = 1;
+    hidinput_owner *o = hidinput_test_create_with_terminal(1, 1, receive, terminal, &c);
+    assert(o); c.owner = o;
+    assert(hidinput_start(o) == HIDINPUT_OK);
+    hidinput_iohid_input(o, kIOReturnNoDevice, kIOHIDReportTypeInput, 0, NULL, 0);
+    hidinput_iohid_removed(o, kIOReturnSuccess);
+    hidinput_test_set_close_status(o, kIOReturnBadArgument);
+    hidinput_test_ack(o);
+    assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+    assert(c.terminal_count == 1 && c.terminal_reason == 1);
+    assert(hidinput_destroy(o) == HIDINPUT_OK);
+    finish(&c);
+}
 int main(int argc, char **argv) {
     assert(argc == 2);
     int test = atoi(argv[1]);
@@ -281,6 +472,18 @@ int main(int argc, char **argv) {
         case 9: terminal_removal(); break;
         case 10: terminal_overflow(); break;
         case 11: iohid_metadata(); break;
+        case 12: iohid_no_device_input(); break;
+        case 13: close_status_after_removal(); break;
+        case 14: close_no_device_without_removal_retains(); break;
+        case 15: callback_removal_and_unknown_close(); break;
+        case 16: unknown_removal_callback_is_fault(); break;
+        case 17: removal_close_waits_for_delivery_drain(); break;
+        case 18: bad_argument_after_service_termination(); break;
+        case 19: bad_argument_without_service_termination_retains(); break;
+        case 20: bad_argument_after_fault_then_service_termination_retains(); break;
+        case 21: bad_argument_service_termination_waits_for_delivery(); break;
+        case 22: unrelated_close_after_service_termination_retains(); break;
+        case 23: input_no_device_then_service_termination(); break;
         default: assert(0);
     }
 }

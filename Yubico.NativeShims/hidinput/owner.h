@@ -42,8 +42,11 @@ int Native_HidInputDestroy(hidinput_owner *owner);
    with no run-loop or dispatch queue previously assigned. The caller keeps its
    creation reference until successful destroy and then releases it; the owner
    separately retains its reference until successful destroy. No open is performed;
-   destroy checks IOHIDDeviceClose
-   after cancellation acknowledgment and reports failure as HIDINPUT_CLOSE_FAULT.
+   destroy checks IOHIDDeviceClose after cancellation acknowledgment. A
+   kIOReturnNoDevice close after a native removal terminal and completed drain
+    permits release; BadArgument additionally requires confirmed service
+    termination, a removed terminal and completed drain. Other failures report
+    HIDINPUT_CLOSE_FAULT.
    If never started, the caller remains responsible for closing the device. */
 hidinput_owner *hidinput_iohid_create(void *device, size_t max_report, size_t capacity,
                                       hidinput_receiver receiver, hidinput_terminal_cb terminal,
@@ -59,5 +62,6 @@ void hidinput_test_ack(hidinput_owner *owner);
 void hidinput_test_remove(hidinput_owner *owner);
 int hidinput_test_activated_with_registration(hidinput_owner *owner);
 void hidinput_test_fail_close(hidinput_owner *owner);
+void hidinput_test_set_close_status(hidinput_owner *owner, int status);
 int hidinput_test_close_attempts(hidinput_owner *owner);
 #endif

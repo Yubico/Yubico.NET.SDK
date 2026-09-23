@@ -1,7 +1,7 @@
 #include "internal.h"
 #include <stdlib.h>
 
-typedef struct { int registered, activated, fail_close, close_attempts; } synthetic;
+typedef struct { int registered, activated, fail_close, close_attempts, close_status; } synthetic;
 static void register_all(hidinput_owner *o) {
     synthetic *s = o->backend_data;
     /* Called under owner mutex: registration precedes activation. */
@@ -13,7 +13,7 @@ static hidinput_result try_release(hidinput_owner *o) {
     synthetic *s = o->backend_data;
     if (o->started) {
         s->close_attempts++;
-        if (s->fail_close) return HIDINPUT_CLOSE_FAULT;
+        if (s->fail_close || !hidinput_close_proven(o, s->close_status)) return HIDINPUT_CLOSE_FAULT;
     }
     free(s);
     return HIDINPUT_OK;
@@ -57,6 +57,11 @@ int hidinput_test_activated_with_registration(hidinput_owner *o) {
 void hidinput_test_fail_close(hidinput_owner *o) {
     pthread_mutex_lock(&o->mutex);
     ((synthetic *)o->backend_data)->fail_close = 1;
+    pthread_mutex_unlock(&o->mutex);
+}
+void hidinput_test_set_close_status(hidinput_owner *o, int status) {
+    pthread_mutex_lock(&o->mutex);
+    ((synthetic *)o->backend_data)->close_status = status;
     pthread_mutex_unlock(&o->mutex);
 }
 int hidinput_test_close_attempts(hidinput_owner *o) {

@@ -13,7 +13,7 @@ target_link_libraries(hidinput_experiment PRIVATE "-framework IOKit" "-framework
 add_executable(hidinput_tests tests.c)
 target_link_libraries(hidinput_tests PRIVATE hidinput_experiment)
 enable_testing()
-foreach(n RANGE 1 11)
+foreach(n RANGE 1 23)
     add_test(NAME hidinput_${n} COMMAND hidinput_tests ${n})
     set_tests_properties(hidinput_${n} PROPERTIES TIMEOUT 5)
 endforeach()

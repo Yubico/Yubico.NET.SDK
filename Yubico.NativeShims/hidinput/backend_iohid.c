@@ -2,6 +2,9 @@
 #include <IOKit/hid/IOHIDDevice.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <stdlib.h>
+#ifdef HIDINPUT_DIAG_CLOSE
+#include <stdio.h>
+#endif
 
 typedef struct {
     IOHIDDeviceRef device;
@@ -15,6 +18,10 @@ static void input(void *context, IOReturn status, void *sender, IOHIDReportType 
 }
 void hidinput_iohid_input(hidinput_owner *owner, IOReturn status, IOHIDReportType type,
                           uint32_t report_id, const uint8_t *report, CFIndex length) {
+    if (status == kIOReturnNoDevice) {
+        hidinput_removed(owner);
+        return;
+    }
     if (status != kIOReturnSuccess || !report || length <= 0) {
         hidinput_report_fault(owner);
         return;
@@ -25,9 +32,17 @@ void hidinput_iohid_input(hidinput_owner *owner, IOReturn status, IOHIDReportTyp
     hidinput_incoming(owner, report, (size_t)length);
 }
 static void removed(void *context, IOReturn status, void *sender) {
-    (void)status; (void)sender;
-    if (status == kIOReturnSuccess) hidinput_removed(context);
-    else hidinput_report_fault(context);
+    (void)sender;
+    hidinput_iohid_removed(context, status);
+}
+void hidinput_iohid_removed(hidinput_owner *owner, IOReturn status) {
+    if (status == kIOReturnSuccess) {
+        pthread_mutex_lock(&owner->mutex);
+        owner->service_terminated = 1;
+        pthread_mutex_unlock(&owner->mutex);
+        hidinput_removed(owner);
+    } else if (status == kIOReturnNoDevice) hidinput_removed(owner);
+    else hidinput_report_fault(owner);
 }
 static void acknowledge(void *context) { hidinput_acked(context); }
 static void register_all(hidinput_owner *o) {
@@ -48,8 +63,17 @@ static void cancel_backend(hidinput_owner *o) {
 }
 static hidinput_result try_release(hidinput_owner *o) {
     iohid *b = o->backend_data;
-    if (o->started && IOHIDDeviceClose(b->device, kIOHIDOptionsTypeNone) != kIOReturnSuccess)
-        return HIDINPUT_CLOSE_FAULT;
+    if (o->started) {
+        IOReturn status = IOHIDDeviceClose(b->device, kIOHIDOptionsTypeNone);
+#ifdef HIDINPUT_DIAG_CLOSE
+        if (status != kIOReturnSuccess)
+            fprintf(stderr, "hidinput IOHIDDeviceClose status=0x%08x terminal=%d acked=%d service_terminated=%d\n",
+                    (unsigned int)status, o->terminal_reason, o->acked, o->service_terminated);
+#endif
+        if (!hidinput_close_proven(o, status)) {
+            return HIDINPUT_CLOSE_FAULT;
+        }
+    }
     CFRelease(b->device);
     dispatch_release(b->queue);
     free(b->report);

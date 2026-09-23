@@ -138,6 +138,16 @@ static int complete(hidinput_owner *o) {
     return o->started && o->acked && !o->scheduled && !o->delivering && !o->count &&
         (!o->terminal_reason || o->terminal_sent);
 }
+int hidinput_close_proven(hidinput_owner *o, IOReturn status) {
+    /* Apple IOHIDDeviceClass clears _opened after its close call even on error;
+       its deallocator IOServiceClose releases the remaining connection reference.
+       Only a confirmed service termination with drained callbacks justifies
+       releasing our refs for BadArgument, never an arbitrary close failure. */
+    return status == kIOReturnSuccess ||
+        (status == kIOReturnNoDevice && o->terminal_reason == 1 && complete(o)) ||
+        (status == kIOReturnBadArgument && o->service_terminated &&
+         o->terminal_reason == 1 && complete(o));
+}
 hidinput_result hidinput_wait_shutdown(hidinput_owner *o, uint32_t timeout_ms) {
     if (!o) return HIDINPUT_INVALID;
     if (callback_owner == o) return HIDINPUT_SELF_WAIT;

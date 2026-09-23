@@ -459,10 +459,13 @@ internal static class ProtocolDeviceInfo
             // registration before native open. Resolve the selected member when the provider is the published
             // composite device so metadata reads follow the same route as direct slot reads.
             var pcscSlot = ResolvePcscSlot(provider, key.Connection);
-            registrationTransferred = pcscSlot is not null;
+            var hidSlot = ResolveMacHidSlot(provider, key.Connection);
+            registrationTransferred = pcscSlot is not null || hidSlot is not null;
             var conn = pcscSlot is not null
                 ? await pcscSlot.OpenRegisteredConnectionAsync(discoveryLease, cancellationToken).ConfigureAwait(false)
-                : await provider.ConnectForDiscoveryAsync(key.Connection, cancellationToken).ConfigureAwait(false);
+                : hidSlot is not null
+                    ? await hidSlot.OpenRegisteredConnectionAsync(discoveryLease, cancellationToken).ConfigureAwait(false)
+                    : await provider.ConnectForDiscoveryAsync(key.Connection, cancellationToken).ConfigureAwait(false);
             await using (conn.ConfigureAwait(false))
                 return await ReadAsync(conn, cancellationToken).ConfigureAwait(false);
         }
@@ -471,6 +474,15 @@ internal static class ProtocolDeviceInfo
             if (!registrationTransferred)
                 discoveryLease.Dispose();
         }
+    }
+
+    private static HidConnectionSlot? ResolveMacHidSlot(IDiscoveryConnectionProvider provider, ConnectionType connection)
+    {
+        if (connection is not (ConnectionType.HidFido or ConnectionType.HidOtp)) return null;
+        if (provider is HidConnectionSlot direct && (direct.IsBuiltInMacFido || direct.IsBuiltInMacOtp)) return direct;
+        return provider is YubiKeyDevice published &&
+                published.TryResolveSlot(connection, out var selected) &&
+                selected is HidConnectionSlot hid && (hid.IsBuiltInMacFido || hid.IsBuiltInMacOtp) ? hid : null;
     }
 
     private static PcscConnectionSlot? ResolvePcscSlot(

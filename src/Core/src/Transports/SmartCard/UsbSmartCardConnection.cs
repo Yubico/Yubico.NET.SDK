@@ -111,6 +111,12 @@ internal class UsbSmartCardConnection : ISmartCardConnection
             cancellationToken,
             result => _logger.LogDebug("SCardEndTransaction returned {Error}", result));
 
+    public Task<IDisposable> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
+        _nativeState.BeginTransactionAsync(
+            SCARD_DISPOSITION.LEAVE_CARD,
+            cancellationToken,
+            result => _logger.LogDebug("SCardEndTransaction returned {Error}", result));
+
     public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,
         CancellationToken cancellationToken)

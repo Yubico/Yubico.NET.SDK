@@ -27,6 +27,34 @@ public class PcscLifetimeIntegrationTests(ITestOutputHelper output) : IAsyncLife
 
     [Fact]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
+    public async Task PcscLifetime_AsyncTransactionReadAndReopen_ReadStableSerial()
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        var candidates = AuthorizedDevices.GetByConnectionType(ConnectionType.SmartCard)
+            .Where(device => device.IsUsbTransport && device.SerialNumber is not null)
+            .OrderByDescending(device => device.SerialNumber).ToList();
+        Assert.NotEmpty(candidates);
+        var selected = candidates[0];
+        output.WriteLine($"Selected authorized USB smart-card device: serial={selected.SerialNumber}");
+
+        for (var cycle = 0; cycle < 2; cycle++)
+        {
+            await using var connection = await selected.Device.ConnectAsync<ISmartCardConnection>(timeout.Token);
+            IDisposable scope = await connection.BeginTransactionAsync(timeout.Token);
+            try
+            {
+                var info = await ProtocolDeviceInfo.ReadAsync(connection, timeout.Token);
+                Assert.Equal(selected.SerialNumber, info.SerialNumber);
+            }
+            finally
+            {
+                await ((IAsyncDisposable)scope).DisposeAsync();
+            }
+        }
+    }
+
+    [Fact]
+    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
     public async Task PcscLifetime_SequentialTransactionsAndConnectionReopens_ReadStableDeviceInfo()
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));

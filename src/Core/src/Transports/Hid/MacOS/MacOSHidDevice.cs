@@ -28,6 +28,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 internal sealed class MacOSHidDevice : IHidDevice
 {
     private readonly long _entryId;
+    internal long EntryId => _entryId;
 
     public string ReaderName => _entryId.ToString(CultureInfo.InvariantCulture);
 

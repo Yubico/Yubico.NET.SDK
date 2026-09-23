@@ -46,6 +46,9 @@ internal sealed class RegisteredSmartCardConnection(
     public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
         inner.BeginTransaction(cancellationToken);
 
+    public Task<IDisposable> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
+        inner.BeginTransactionAsync(cancellationToken);
+
     public bool SupportsExtendedApdu() => inner.SupportsExtendedApdu();
 
     public void Dispose() => _disposal.Dispose(inner.Dispose);
@@ -56,9 +59,14 @@ internal sealed class RegisteredSmartCardConnection(
 /// <inheritdoc cref="RegisteredSmartCardConnection" />
 internal sealed class RegisteredFidoHidConnection(
     IFidoHidConnection inner,
-    IDisposable registration) : IFidoHidConnection
+    IDisposable registration) : IFidoHidConnection, ITerminalWakeControl
 {
     private readonly DisposalGate _disposal = new(registration);
+
+    public void RequestTerminalWake()
+    {
+        if (inner is ITerminalWakeControl wake) wake.RequestTerminalWake();
+    }
 
     public ConnectionType Type => inner.Type;
 

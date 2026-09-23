@@ -16,8 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Core/src/Yubico.YubiKit.Core.csproj" />
-    <ProjectReference Include="../../src/Management/src/Yubico.YubiKit.Management.csproj" />
+    <ProjectReference Include="../../src/Core/src/Yubico.YubiKit.Core.csproj" Condition="'$(BoundaryBaselineRoot)' == ''" />
+    <ProjectReference Include="../../src/Management/src/Yubico.YubiKit.Management.csproj" Condition="'$(BoundaryBaselineRoot)' == ''" />
+    <ProjectReference Include="$(BoundaryBaselineRoot)/src/Core/src/Yubico.YubiKit.Core.csproj" Condition="'$(BoundaryBaselineRoot)' != ''" />
+    <ProjectReference Include="$(BoundaryBaselineRoot)/src/Management/src/Yubico.YubiKit.Management.csproj" Condition="'$(BoundaryBaselineRoot)' != ''" />
   </ItemGroup>
 
 </Project>

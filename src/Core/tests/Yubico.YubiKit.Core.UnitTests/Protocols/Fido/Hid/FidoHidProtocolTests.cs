@@ -180,6 +180,26 @@ public class FidoHidProtocolTests
     }
 
     [Fact]
+    public async Task DisposeFromOwnExchangeRefusesSelfDrainAndKeepsExchangeUsable()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        connection.QueueResponsePackets(CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xA5]));
+        var refused = false;
+        connection.OnResponseDequeued = _ =>
+        {
+            Assert.Throws<InvalidOperationException>(protocol.Dispose);
+            refused = true;
+        };
+
+        var response = await protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.True(refused);
+        Assert.Equal((byte)0xA5, response.Span[0]);
+        protocol.Dispose();
+    }
+
+    [Fact]
     public async Task SendVendorCommandAsync_RepeatedUserPresenceKeepAlive_NotifiesOnceAndCompletes()
     {
         var connection = new FakeFidoHidConnection();

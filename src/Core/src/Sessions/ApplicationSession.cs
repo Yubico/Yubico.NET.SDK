@@ -290,6 +290,8 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
             return Protocol ?? protocol;
 
         protocol.Configure(firmwareVersion, configuration);
+        if (protocol is Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidProtocol fidoProtocol)
+            await fidoProtocol.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         IProtocol effectiveProtocol = protocol;
         var isAuthenticated = false;

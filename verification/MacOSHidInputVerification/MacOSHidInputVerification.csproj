@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PublishAot>true</PublishAot>
+    <IsPackable>false</IsPackable>
+    <IsYubiKitSdkLibrary>false</IsYubiKitSdkLibrary>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AnalysisMode>Recommended</AnalysisMode>
+  </PropertyGroup>
+  <!-- Supply the nonshipping artifact with -p:HidInputNativeLibrary=/absolute/path/libhidinput_experiment.dylib. -->
+  <ItemGroup Condition="'$(HidInputNativeLibrary)' != ''">
+    <None Include="$(HidInputNativeLibrary)" Link="libhidinput_experiment.dylib"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always" />
+  </ItemGroup>
+</Project>

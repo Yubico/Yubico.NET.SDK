@@ -175,6 +175,12 @@ public class MacOSHidConnectionLifetimeTests
 
         public void CloseDevice(nint device) => Closed.Add(device);
 
+        public bool CloseDeviceChecked(nint device) { CloseDevice(device); return true; }
+
+        public int GetFeatureReport(nint device, byte[] buffer, ref long length) => throw new NotSupportedException();
+
+        public int SetFeatureReport(nint device, byte[] buffer) => throw new NotSupportedException();
+
         public void ReleaseCFObject(nint cfObject) => Released.Add(cfObject);
 
         public nint CreateRunLoopMode(string name)

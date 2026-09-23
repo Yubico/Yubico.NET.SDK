@@ -14,6 +14,7 @@
 
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Native;
+using Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;
 using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;
 using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;
 
@@ -22,20 +23,21 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 /// <summary>
 ///     The IOKit and CoreFoundation calls that govern the <em>lifetime</em> of a macOS HID connection:
 ///     creating the device, opening and closing it, creating and releasing CoreFoundation objects, and
-///     registering or clearing the IOKit callbacks.
+///     registering or clearing the IOKit callbacks, and OTP feature-report I/O.
 /// </summary>
 /// <remarks>
 ///     <para>
 ///         This is a seam, not an abstraction layer. It exists so the constructor-failure and disposal
-///         paths of <see cref="MacOSHidFeatureReportConnection" /> and
-///         <see cref="MacOSHidIOReportConnection" /> can be tested without macOS hardware — the same
+///         paths of <see cref="MacOSHidFeatureReportConnection" />,
+///         <see cref="MacOSHidIOReportConnection" />, and <see cref="MacOSOtpHidConnection" />
+///         can be tested without macOS hardware — the same
 ///         reason <c>IHidDDevice</c> exists on the Windows side. It deliberately mirrors the native calls
 ///         one-for-one and adds no policy.
 ///     </para>
 ///     <para>
-///         Report I/O (<c>IOHIDDeviceGetReport</c>/<c>IOHIDDeviceSetReport</c>) and run-loop scheduling are
-///         <em>not</em> part of this seam. They never run during construction or disposal, so widening the
-///         seam to cover them would add surface without adding coverage.
+///         OTP feature-report I/O and checked close verify that accepted operations drain before the
+///         physical claim is released. FIDO report I/O uses a separate bridge; this seam also exposes
+///         the existing feature-report and callback calls used by the macOS HID connections.
 ///     </para>
 /// </remarks>
 [SupportedOSPlatform("macos")]
@@ -60,10 +62,25 @@ internal interface IIOKitDeviceLifetime
     /// <exception cref="PlatformApiException">The open failed.</exception>
     void OpenDevice(nint device);
 
+    // OTP needs the return code: exclusive access still establishes an open that must be closed.
+    // Apple IOHIDDeviceClass.m sets _opened for both success and kIOReturnExclusiveAccess.
+    int OpenDeviceResult(nint device)
+    {
+        OpenDevice(device);
+        return 0;
+    }
+
     /// <summary>
     ///     Closes the device. Does not release it; see <see cref="ReleaseCFObject" />.
     /// </summary>
     void CloseDevice(nint device);
+
+    // OTP uses the checked result to decide whether its physical claim can be released.
+    bool CloseDeviceChecked(nint device);
+
+    int GetFeatureReport(nint device, byte[] buffer, ref long length);
+
+    int SetFeatureReport(nint device, byte[] buffer);
 
     /// <summary>
     ///     Releases a CoreFoundation object previously created by <see cref="CreateDevice" /> or
@@ -138,7 +155,7 @@ internal sealed class IOKitDeviceLifetime : IIOKitDeviceLifetime
         // (hid_darwin_set_open_exclusive(0) => kIOHIDOptionsTypeNone), and python-fido2's macOS backend
         // calls IOHIDDeviceOpen(handle, 0). The OTP feature-report path uses 0 as well, so both macOS
         // HID paths stay consistent.
-        var result = IOKitNativeMethods.IOHIDDeviceOpen(device, 0);
+        var result = OpenDeviceResult(device);
 
         if (result != 0)
             throw new PlatformApiException(
@@ -147,7 +164,17 @@ internal sealed class IOKitDeviceLifetime : IIOKitDeviceLifetime
                 "Failed to open HID device.");
     }
 
+    public int OpenDeviceResult(nint device) => IOKitNativeMethods.IOHIDDeviceOpen(device, 0);
+
     public void CloseDevice(nint device) => _ = IOKitNativeMethods.IOHIDDeviceClose(device, 0);
+
+    public bool CloseDeviceChecked(nint device) => IOKitNativeMethods.IOHIDDeviceClose(device, 0) == 0;
+
+    public int GetFeatureReport(nint device, byte[] buffer, ref long length) =>
+        IOKitNativeMethods.IOHIDDeviceGetReport(device, IOKitHidConstants.kIOHidReportTypeFeature, 0, buffer, ref length);
+
+    public int SetFeatureReport(nint device, byte[] buffer) =>
+        IOKitNativeMethods.IOHIDDeviceSetReport(device, IOKitHidConstants.kIOHidReportTypeFeature, 0, buffer, buffer.Length);
 
     public void ReleaseCFObject(nint cfObject) => CFNativeMethods.CFRelease(cfObject);
 

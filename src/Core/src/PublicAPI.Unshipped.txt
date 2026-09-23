@@ -683,6 +683,7 @@ Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice.Atr.get -> Yubico.YubiKit.C
 Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice.Kind.get -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.BeginTransaction(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.IDisposable!
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.BeginTransactionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IDisposable!>!
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.SupportsExtendedApdu() -> bool
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.TransmitAndReceiveAsync(System.ReadOnlyMemory<byte> command, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.Transport.get -> Yubico.YubiKit.Core.Transport

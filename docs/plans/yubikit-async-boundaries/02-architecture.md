@@ -1,8 +1,12 @@
 # Architecture: one key's asynchronous lifecycle
 
 Status: revised single-key Gate 2 approved by the user on 2026-09-22; independent design review passed.
-The revised single-key-first product gate is approved. No implementation is authorized.
-Source base: `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`, matching fetched `origin/yubikit`.
+The first smart-card lifetime slice is committed at `db7a1bf6`; built-in macOS FIDO
+production work is in progress under D30. Its selected-key read-only normal path has
+executed; full route acceptance remains pending.
+Design baseline: `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`, which matched fetched `origin/yubikit`.
+Reconciled 2026-09-23: approved A1/A5 policy remains unchanged; D30 delegates in-scope
+route-local implementation without repeated microapprovals. Public raw invariants remain.
 
 This is the architecture view of the [master plan](../../../2026-09-21-yubikit-async-boundaries-ISA.md).
 The [earlier architecture](addenda/earlier-multi-key-architecture.md) and
@@ -12,8 +16,8 @@ capacity credits and multi-key guarantees are deferred in the
 
 Delivery update: the user subsequently requested incremental implementation after
 reviewing [first-slice pseudocode](03-program-design.md), without whole-effort upfront
-program/slice specifications. Later-gate references below describe responsibilities,
-not a requirement to finish the entire epic's design before the first slice.
+program/slice specifications. Affected-route checkpoints retain the former detailed-gate
+responsibilities without requiring the entire epic's design before each slice.
 
 ## Fit
 
@@ -22,12 +26,16 @@ not a requirement to finish the entire epic's design before the first slice.
 Keep device discovery/identity, applet sessions and their domain contracts, public raw
 sessions, typed raw connection operations, and external connection implementations.
 Equivalent public concepts keep consistent creation, cancellation, ownership and
-disposal conventions. Breaking changes and internalization remain permitted; exact
-signatures and visibility closure are revised Gate 3 decisions.
+disposal conventions. Breaking changes and internalization remain permitted; material
+public-surface scope changes still require user escalation under D30.
 
 The lower-level synchronous report interface becomes an internal asynchronous boundary.
 It is distinct from the retained public typed raw connections. Keep local validation,
 encoding, parsing and bounded cryptographic computation synchronous.
+
+**Current sequence, not renewed architecture approval:** the built-in macOS route uses an
+internal asynchronous seam while leaving the shared public report interface unchanged.
+Wholesale interface migration would be a material scope change for user review.
 
 Reuse the existing ownership roles:
 
@@ -72,7 +80,8 @@ the release merely because the worker is busy. Connection shutdown and scope dis
 share exactly-once end state. At most one active transaction's end intent and one
 connection shutdown intent are retained; this is not a general control-job queue.
 If a cancelled begin later succeeds, return an owned scope or finish its end before
-publishing cancellation/failure. Exact precedence and public scope signatures are Gate 3.
+publishing cancellation/failure. Exact precedence and public scope signatures are settled
+in the affected-route walkthrough.
 
 If a native call never returns, retain its thread/state and unresolved ownership.
 Do not create a replacement thread, free the handle, or report successful disposal.
@@ -93,8 +102,9 @@ A gate over Task.Run would be shorter and could still track operation ownership;
 is not incapable of retaining state. The dedicated worker is preferred here because
 blocking driver waits then occupy an attributable resource outside the shared managed
 pool. That does **not** make all managed teardown continuations pool-independent.
-Gate 3 must trace the disposal wait graph and test context/pool-pressure behavior without
-claiming progress when an application blocks every available execution resource.
+The affected-route checkpoint must trace the disposal wait graph and test context/pool-
+pressure behavior without claiming progress when an application blocks every available
+execution resource.
 
 ### A3 — preserve native completion and the explicit macOS expansion
 
@@ -102,15 +112,23 @@ The worker adapts blocking calls; it does not replace genuine native completion 
 readiness. Platform event delivery is a separate responsibility and must not need the
 blocking worker to become free merely to observe completion or removal.
 
-| Route | Single-key direction retained |
-|---|---|
-| Windows FIDO reports | Owned overlapped ReadFile/WriteFile completion. Immediate-success notification rules must prevent double completion. CancelIoEx requests cancellation; terminal completion controls storage release. |
-| Windows OTP feature reports | Preserve zero-desired-access opening. Keep feature calls on the connection's blocking owner unless GET/SET directions are separately verified for overlapped execution. |
-| macOS input | Persistent IOKit device event delivery and bounded owned reports, replacing per-call caller-run-loop pumping. Prefer IOHIDDeviceSetDispatchQueue, IOHIDDeviceActivate, IOHIDDeviceCancel and IOHIDDeviceSetCancelHandler where the agreed deployment floor permits. |
-| macOS output/feature reports | Evaluate IOHIDDeviceSetReportWithCallback/GetReportWithCallback independently by direction; use the connection's blocking owner for an unverified direction. |
-| Linux input | Nonblocking read plus readiness/wake signaling using poll/eventfd. Readiness ownership is independent from blocking writes/control calls; descriptor generation and deregistration remain required. |
-| Linux output/feature reports | Run potentially blocking writes/ioctls on the connection's blocking owner, never the read-readiness loop. |
-| Smart-card routes | Adapt blocking context/connect/transmit/transaction/end/disconnect/release calls through their connection owner. Keep status monitoring's independent context/lifetime. |
+This six-row table is the authoritative architecture view of the platform/transport
+combinations. HID direction entries are deliberately separate: FIDO input/output are
+not OTP feature GET/SET. Common cancellation, recovery and release rules follow the
+table rather than being repeated in every cell.
+
+| Platform/transport | Classified execution and direction | Implementation/evidence status |
+|---|---|---|
+| Windows HID | FIDO input and output use owned overlapped `ReadFile`/`WriteFile` completion; immediate-success notification rules prevent double completion. `CancelIoEx` requests cancellation, while terminal completion controls storage release. Preserve OTP zero-desired-access opening; classify feature GET and SET independently, using the connection's blocking owner unless that direction is separately verified for overlapped execution. | Approved design only for this effort. Existing HID code/tests remain, but no Windows HID route has migrated and native-runtime/hardware evidence is pending. |
+| macOS HID | FIDO input uses persistent IOKit event delivery and bounded owned reports instead of per-call caller-run-loop pumping. Evaluate FIDO output and OTP feature GET and SET independently with the exact callback API for that direction; an unverified direction uses the connection's blocking owner. | Built-in FIDO route implemented with a selected-key native-AOT read-only open/init/getInfo/dispose/reopen result. Touch/removal, interruption/quiescence, OTP work and broader acceptance remain pending; one normal path does not verify every callback race. |
+| Linux HID | FIDO input uses nonblocking read plus `poll`/`eventfd` readiness and wake signaling. FIDO output uses the connection's blocking owner when it may block. OTP feature GET and SET ioctls are classified independently and never run on the read-readiness loop. | Approved design only for this effort. Existing HID code/tests remain, but no Linux HID route has migrated and native-runtime/hardware evidence is pending. |
+| Windows smart card | Apply the portable smart-card policy: adapt classified blocking context/connect/transmit/transaction/end/disconnect/release calls through the connection owner; keep status monitoring's context/lifetime independent. Platform release and monitor semantics require their own evidence. | Portable owner slice implemented and managed-tested. Windows native-runtime/hardware evidence remains pending. |
+| macOS smart card | Apply the same portable smart-card policy without inferring that one platform's release/monitor result proves another's. | Portable owner slice implemented and managed-tested. The original selected-key run predates the structural refactor; the later read-only integration test passed three connections with two transactions/reads each on the `.2` preview. Other platforms and interrupted native release remain pending. |
+| Linux smart card | Apply the same portable smart-card policy. Interpret release results by established platform evidence without changing the approved cleanup policy. | Portable owner slice implemented and managed-tested. Linux native-runtime/hardware evidence remains pending. |
+
+These rows map to the existing parameterized ISC-4, ISC-8–20, ISC-26–40, ISC-44–46,
+ISC-54 and ISC-57–64 obligations as applicable. They add no criterion, checkmark,
+platform semantic, reservation number or route approval.
 
 Cancellation capability is classified per route, not invented for the single worker:
 Windows overlapped requests have CancelIoEx; Linux readiness waits have explicit wake
@@ -121,15 +139,24 @@ only for its independently owned monitoring/status context. Those calls must dra
 possibly indefinitely, before scope release/connection shutdown can execute. Callback
 report timeout behavior must be verified per direction before it supplies a deadline.
 No caller cancellation or ordinary slowness alone is classified as a permanent fault.
-The current Task.Run(...).GetAwaiter().GetResult() begin blocks its caller; the new
-awaitable improves caller responsiveness without claiming a new device-side abort.
+The baseline used Task.Run(...).GetAwaiter().GetResult() for transaction begin. The
+committed smart-card slice moves that native call to the connection owner but retains
+the synchronous public transaction boundary. A future public awaitable must improve
+caller responsiveness without claiming a new device-side abort.
+
+There is no blanket HID native-cancel promise after caller cancellation. A protocol
+cancellation token can require continued recovery reads, including FIDO's retained
+between-read/keepalive cancellation point, while native shutdown cancellation separately
+stops or quiesces the platform event owner during teardown. Neither action by itself is
+protocol recovery or proof of safe release.
 
 #### macOS expansion and report lifetime
 
 The macOS input change is an explicit expansion of existing IOKit usage, not merely
 moving the old caller-run-loop pump onto an incidental pool thread. An owned native
 run-loop event owner remains a documented fallback if the dispatch lifecycle cannot
-be used. Account for that event owner separately from the blocking worker; there is
+be used for a demonstrated technical reason; it is not a fallback solely for preserving
+an older binary target. Account for that event owner separately from the blocking worker; there is
 no claim that a connection consumes only one operating-system thread in total.
 
 Report completion and event quiescence are separate. For callback report operations,
@@ -141,7 +168,7 @@ fault on overflow; the old 256-report proposal is not automatically selected.
 
 A minimal native bridge may own dispatch blocks/queue lifetime without exposing their
 layout to managed code. Exact exports, timeout conversion, native-source/package
-provenance and direction-specific runtime probes remain Gate 3/prerequisite work.
+provenance and direction-specific runtime probes remain affected-route prerequisites.
 The known report-timeout documentation/source discrepancy remains unresolved.
 Device matching and discovery identity policy are not expanded by this change.
 
@@ -165,6 +192,11 @@ one legal cancel frame; do not require simultaneous raw send/read from external
 implementations. Cancellation while a blocking native call/read is pending may have
 to wait for its permitted completion boundary. No immediate device-side abort is promised.
 
+Managed/public completion, native terminal completion, protocol recovery/reuse
+classification and physical-claim release are four distinct observations. They may become
+known at different times; uncertainty can retain admission, resources or quarantine the
+claim, but never authorizes mutation replay.
+
 The physical lease may release only after the relevant native work and callbacks are
 finished and release is established. A task fault, cancellation, removal notification
 or SafeHandle.Dispose return alone is not proof. Keep unresolved native state rooted
@@ -179,14 +211,14 @@ can clear only its original claim; replug alone cannot authorize cleanup of old 
 Preserve the distinction between successful physical release and a cleanup error:
 platforms such as Linux can report a close error after releasing a descriptor. Report
 the error, apply the platform's release evidence, and never retry close on a reused
-descriptor. Revised Gate 3 must specify that outcome and its tests.
+descriptor. The affected-route checkpoint must specify that outcome and its tests.
 
 Synchronous disposal invoked **from** an owned native worker/event callback must not
 wait for that same worker/event path to make progress. A separate caller thread may
 use the documented blocking facade, potentially indefinitely. Likewise, do not drain
 an exchange from the callback whose return that exchange requires. Keep application callbacks and
 continuations off native callback/worker stacks. Completion sources use asynchronous
-continuations; exact reentrancy checks are Gate 3 work, not a reason to recreate the
+continuations; exact reentrancy checks are affected-route work, not a reason to recreate the
 deferred shared execution-context framework wholesale.
 
 ### A5 — keep discovery integration focused on this key
@@ -196,9 +228,12 @@ than replacing them with global work classes or reservation credits. Their prior
 source findings remain recorded. In particular, an async LongRunning delegate does
 not provide dedicated-thread execution after an await; do not claim it does.
 Retaining those owners does not exempt listener delivery from callback isolation.
-Revised Gate 3 must explicitly settle the visibility or delivery-thread behavior of
-FindHidDevices/IFindHidDevices/IHidDevice and HidDeviceListener/ISmartCardDeviceListener/
-DesktopSmartCardDeviceListener; their current callbacks cannot simply be declared safe.
+The affected-route checkpoint must review its selected route's callback and removal
+delivery behavior even when discovery and public visibility remain unchanged. The proposed
+sequencing default leaves `FindHidDevices`/`IFindHidDevices`/`IHidDevice` visibility
+unchanged. A broader visibility migration requires a separate walkthrough and user
+approval. Current `HidDeviceListener`/`ISmartCardDeviceListener`/
+`DesktopSmartCardDeviceListener` callbacks cannot simply be declared safe.
 Preserve public manager enumeration/events and the retained public raw-access use cases.
 
 Adapt connection opening and release to the new lifetime owner. Preserve current
@@ -222,7 +257,8 @@ Use narrow internal seams below actual production adapters to withhold native wo
 and assert that the entry point returns its task first, including open and DisposeAsync.
 Protocol-only fake connections do not prove that a platform adapter is nonblocking.
 Prove one complete route's open/operation/failure/teardown path before widening changes.
-The exact route and slice order belong to Gate 4.
+The orchestrator proposes route order and presents each bounded route to the user for
+approval before implementation.
 
 Retain the source inventory and evidence distinctions. Implement only the contract
 harness and verification support needed by the selected slices initially; map their
@@ -274,10 +310,32 @@ guarantees remain scoped to paths that acquire those leases.
 ## External
 
 Existing desktop stacks and NativeShims remain the dependencies. No application
-dispatcher or supplied executor is required. The macOS bridge needs a verified native
-base/package and deployment contract before implementation. Do not assume the package's
-observed macOS floor settles product support. Other platform/reader fixtures, exact
-firmware, callback behavior and baseline measurements remain explicit prerequisites.
+dispatcher or supplied executor is required. NativeShims 1.18.0 was the selected signed
+upstream base; current development selects private-published `1.18.1-async.3` with five
+new macOS exports. Earlier selected-key evidence used unsigned local preview `.2`, whose
+dirty-file hash manifest is missing. Original 1.18.0 macOS artifacts
+target minimum 12, while the .NET 10 upstream
+support matrix currently starts at macOS 14 and the approved dispatch APIs are available
+from 10.15. These facts are distinct; D28 selects modern dispatch across the current
+upstream-supported systems and does not require an old-API fallback solely for the binary
+minimum. Other platform/reader fixtures, exact firmware, callback behavior and baseline
+measurements remain explicit prerequisites.
+
+| Earlier signed 1.18.0 package evidence | Architectural meaning |
+|---|---|
+| Restore and managed/local native-crypto tests pass; macOS arm64 Native AOT publish links the static shim and PCSC.framework. | Confirms dependency consumption and local cryptographic execution, not device driver, PC/SC or HID hardware behavior. The published host was not executed. |
+| macOS x64/arm64 retain all 11 `Native_SCard` exports and unchanged PC/SC ABI/dependencies; all packaged native platforms add static runtime archives. | No observed smart-card ABI regression, but Windows/Linux/Intel runtime and hardware remain unverified. |
+| Tag `1.18.0` (`cb5275e…`) is inspected source; package metadata has no producer commit. | Local `.2` preview builds from this tag; the cited dirty-file hash manifest is missing, and the tag does not bind the original signed package to its producer. |
+
+The `.2` preview provides input-owner exports; a later selected-key native-AOT read-only
+public route completed three lifecycle cycles, as recorded in master Verification. This
+does not prove interruption or removal quiescence, nor change blocking PC/SC semantics or
+abort capability. The `.2` actual-key pending-receive dispose/reopen probe later passed;
+it does not prove touch or physical removal. The current `.3` declaration restored from
+the matching workflow artifact, while direct private-feed access returned 403 and no
+`.3` selected-key route has been verified. Managed seam tests on macOS cannot
+prove the proposed Windows FIDO overlapped route on Windows hardware.
+CryptoTokenKit and WinRT remain later exploration work.
 Alternative smart-card backends remain later exploration work.
 
 ## Approval boundary and evidence
@@ -285,16 +343,19 @@ Alternative smart-card backends remain later exploration work.
 This revised Gate 2 selects connection-local execution and lifetime ownership, the
 retained native platform directions, and focused same-key integration/testing. It
 does not approve exact new types, signatures, buffer limits, files or slice order.
-The reduced Gate 3 must reuse proven findings without copying the earlier shared-pool
-program design. A need for cross-key reservations or a global scheduler reopens scope.
+Each affected-route checkpoint must reuse proven findings without copying the earlier
+shared-pool program design. A need for cross-key reservations or a global scheduler
+reopens scope.
 
-Source anchors at the recorded base: `HidConnectionSlot.cs:48-71` performs synchronous
-open inside an async-looking wrapper; `UsbSmartCardConnection.cs:98-102` blocks for
-transaction begin; `DisposalGate.cs:59-64` releases a lease in finally after faulted
-teardown; `MacOSHidIOReportConnection.cs:100-117` pumps the caller's run loop;
-`ProtocolDeviceInfo.cs:399-426` and `:477-480` contain the existing discovery scheduling
-and admission. Full paths and source/native references remain in the earlier documents.
-No new implementation, benchmark, native-runtime or hardware evidence is claimed here.
+Baseline source anchors: the smart-card observations at `a7f2cae8` are superseded by the
+implemented slice. Reinspection at `db7a1bf6` confirms `HidConnectionSlot.cs:48-71` still
+performs synchronous open inside an async-looking wrapper and
+`MacOSHidIOReportConnection.cs:100-117` still pumped the caller's run loop at that commit,
+before the new FIDO route was implemented. Historical
+discovery and smart-card references remain in the earlier documents.
+The smart-card implementation evidence is recorded separately. The later macOS
+selected-key evidence is in the master; this architecture view adds no other-platform
+or interruption evidence.
 
 FIDO — Fast Identity Online; HID — human interface device; OTP — one-time password.
 IOKit is Apple's device-driver framework. These identify the existing transport routes.

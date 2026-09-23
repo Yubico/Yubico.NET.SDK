@@ -19,8 +19,16 @@ using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management;
 
+if (args is ["--async-boundary-self-test"])
+    return await BoundarySelfTest.RunAsync();
+if (args.Length > 0 && args[0] == "--async-boundary-baseline")
+    return await AsyncBoundaryBaseline.RunAsync(args[1..]);
+if (args.Length > 0 && args[0] == "--boundary-child")
+    return await AsyncBoundaryBaseline.ChildAsync(args[1..]);
+
 var config = YubiKitBenchmarkConfig.Create();
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
+return 0;
 
 internal sealed class YubiKitBenchmarkConfig : ManualConfig
 {
@@ -158,7 +166,7 @@ public class SmartCardManagementBenchmarks : YubiKeyHardwareBenchmarkBase
     public async Task<int> GetDeviceInfoOverSmartCard()
     {
         await using var session = await Device.CreateManagementSessionAsync(
-                preferredConnection: ConnectionType.SmartCard)
+                options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard })
             .ConfigureAwait(false);
 
         var info = await session.GetDeviceInfoAsync().ConfigureAwait(false);
@@ -185,7 +193,7 @@ public class FidoHidManagementBenchmarks : YubiKeyHardwareBenchmarkBase
     public async Task<int> CreateManagementSessionOverFidoHid()
     {
         await using var session = await Device.CreateManagementSessionAsync(
-                preferredConnection: ConnectionType.HidFido)
+                options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido })
             .ConfigureAwait(false);
 
         return session.FirmwareVersion.Major;
@@ -195,7 +203,7 @@ public class FidoHidManagementBenchmarks : YubiKeyHardwareBenchmarkBase
     public async Task<int> GetDeviceInfoOverFidoHid()
     {
         await using var session = await Device.CreateManagementSessionAsync(
-                preferredConnection: ConnectionType.HidFido)
+                options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido })
             .ConfigureAwait(false);
 
         var info = await session.GetDeviceInfoAsync().ConfigureAwait(false);
@@ -222,7 +230,7 @@ public class OtpHidManagementBenchmarks : YubiKeyHardwareBenchmarkBase
     public async Task<int> CreateManagementSessionOverOtpHid()
     {
         await using var session = await Device.CreateManagementSessionAsync(
-                preferredConnection: ConnectionType.HidOtp)
+                options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp })
             .ConfigureAwait(false);
 
         return session.FirmwareVersion.Major;
@@ -232,7 +240,7 @@ public class OtpHidManagementBenchmarks : YubiKeyHardwareBenchmarkBase
     public async Task<int> GetDeviceInfoOverOtpHid()
     {
         await using var session = await Device.CreateManagementSessionAsync(
-                preferredConnection: ConnectionType.HidOtp)
+                options: new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp })
             .ConfigureAwait(false);
 
         var info = await session.GetDeviceInfoAsync().ConfigureAwait(false);

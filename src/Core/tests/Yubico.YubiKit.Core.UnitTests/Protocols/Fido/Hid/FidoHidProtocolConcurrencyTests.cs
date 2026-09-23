@@ -36,6 +36,16 @@ public class FidoHidProtocolConcurrencyTests
     private static readonly TimeSpan CompletionBound = TimeSpan.FromSeconds(5);
 
     [Fact]
+    public void Configure_DoesNotStartWireInitialization()
+    {
+        var fake = new FakeCtapHidDevice { Responder = (_, payload) => payload };
+        using var protocol = new FidoHidProtocol(fake);
+        protocol.Configure(new FirmwareVersion(5, 8, 0));
+        Assert.False(protocol.IsChannelInitialized);
+        Assert.Equal(0, fake.InitExchangeCount);
+    }
+
+    [Fact]
     public async Task SendVendorCommandAsync_OverlappingOperation_ThrowsImmediately()
     {
         var ct = TestContext.Current.CancellationToken;
@@ -119,9 +129,8 @@ public class FidoHidProtocolConcurrencyTests
         var operationA = Task.Run(() => protocol.SendVendorCommandAsync(VendorCommandA, payloadA, cancellationToken: ct), ct);
         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
 
-        // Configure() is sync-over-async; pre-fix it initialized the channel outside the gate and
-        // raced a second CTAPHID_INIT onto the wire mid-transaction.
-        Assert.Throws<InvalidOperationException>(() => protocol.Configure(new FirmwareVersion(5, 8, 0)));
+        // Configuration is local; it must neither block on the held send nor start a second INIT.
+        protocol.Configure(new FirmwareVersion(5, 8, 0));
         Assert.False(await fake.WaitForSendsAsync(2, ObservationWindow, ct));
 
         fake.ReleaseSends();

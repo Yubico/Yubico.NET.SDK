@@ -301,6 +301,17 @@ public class DeviceConnectionRegistryTests
         Assert.Equal(1, lease.ReleaseCount);
     }
 
+    [Fact]
+    public void RegisteredFidoHidConnection_ExternalDisposeFailure_KeepsPriorLeaseBehavior()
+    {
+        var inner = new FakeFidoHidConnection { ThrowOnDispose = true };
+        var lease = new CountingLease();
+        var wrapped = new RegisteredFidoHidConnection(inner, lease);
+
+        Assert.Throws<InvalidOperationException>(wrapped.Dispose);
+        Assert.Equal(1, lease.ReleaseCount);
+    }
+
     /// <summary>I1, I2, I3, I4 — OTP HID wrapper.</summary>
     [Fact]
     public async Task RegisteredOtpHidConnection_SyncDisposeRacingAsyncDispose_DisposesInnerOnce()

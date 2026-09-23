@@ -1,12 +1,65 @@
 # Status: YubiKit async boundaries
 
+## Latest verified checkpoint — 2026-09-23
+
+The private-feed `1.18.1-async.3` workflow finished successfully across the configured
+build and native ahead-of-time jobs. An arm64 macOS production-host publish and live run
+on serial 31683481 (firmware 5.7.4) passed five read-only scenarios: three
+open/initialize/getInfo/dispose cycles, pending receive → dispose → reopen, and
+predispatch cancellation → reopen. The macOS FIDO open-failure cleanup now distinguishes
+an unopened device from an exclusive-access open; 18 focused tests passed. This does
+not cover physical removal, touch, or a valid before/after performance comparison.
+
+Smart-card awaitable transaction acquisition is additive and passes eight focused
+managed tests; its selected-key integration test encountered PC/SC sharing contention,
+so native/hardware responsiveness evidence remains pending. macOS OTP feature GET/SET
+has a connection-owned worker and 15 passing focused tests. Its direct device open
+encountered IOKit access failure (`0xE00002E2`), so native OTP recovery is unproven.
+After the last OTP changes: Core 1,378 passed/3 skipped, PublicApi 22, YubiOtp 180,
+resilience 77, and documentation validation passed. No whole-platform acceptance
+criterion was newly checked. Keep the independent platform routes and final closure
+in the schedule below; these three increments are code checkpoints, not epic closure.
+
+## Private package published and selected; route evidence pending
+
+The user authorized restoring `1.18.1-async.2` and building the native additions for the
+private Yubico feed. Local restore succeeded. Native-only commit
+`f8c974f785d96dfc654606b573c6840968bb8220` was pushed on `feature/macos-hid-input-dev`.
+[Workflow run 35888947280](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35888947280)
+published `1.18.1-async.3` successfully; workflow 35888947280 completed SUCCESS with
+macOS/Linux/Windows builds, AOT consumers and private publish.
+`Directory.Packages.props` now selects `.3`; `NuGet.Config` maps NativeShims to the
+private Yubico feed. Direct local restore returned 403 with the available credentials.
+The exact workflow package artifact was instead downloaded and restored via an isolated
+temporary source; all 17 focused macOS lifetime tests passed against that package.
+Its SHA-256 is `b6df35457da06409f5bfd6643dd7dbc9da8b0e7e8404bb5fa99fcdde076f4a3c`.
+Fresh private-feed restores require package-read credentials; this artifact-based check
+does not claim private-feed authentication succeeded. Native tests passed 11/11 and
+static package validation passed before dispatch.
+The managed milestones below are not committed; `db7a1bf6` is the recorded first
+smart-card slice commit only. Earlier `.2` hardware evidence remains version-specific;
+no selected-key `.3` FIDO or OTP device run is verified.
+
 - Gate 1 — Product: APPROVED 2026-09-22 for the revised single-key-first scope.
 - Gate 2 — Architecture: APPROVED 2026-09-22 for the revised single-key design.
 - First smart-card lifetime slice: implemented and verified 2026-09-22; code review PASS WITH NOTES.
-- Next checkpoint: present this slice's evidence and choose the next bounded implementation step.
+- Built-in macOS FIDO production code: selected-key normal and pending-raw-receive dispose/reopen paths passed with the local `.2` preview; touch, physical removal and interrupted shutdown remain unverified, so the route is not accepted.
+- S4 smart-card async transaction: additive public `ISmartCardConnection.BeginTransactionAsync`; built-in awaitable worker and synchronous fallback for external implementations documented. Eight focused managed tests, pre-OTP Core 1,363 and PublicApi 22 passed. Selected PC/SC hardware integration test failed with a sharing violation; no hardware proof or S4 closure.
+- S2 macOS OTP GET/SET: worker feature-report candidate implemented; eight focused unit tests passed, Core 1,371 passed/3 skipped, PublicApi 22, YubiOtp 180 and resilience-fast 77 passed. No selected-key actual OTP hardware or touch probe; not S5 or universal criterion acceptance.
+- Master acceptance: 2/72 verified (ISC-49 and ISC-52); 70 pending.
 - Whole-effort program/slice specification: deferred to implementation effort at the user's request.
 
 ## Authority and approvals
+
+Historical direction (master D31): the user explicitly approved local `Yubico.NativeShims`
+**`1.18.1-async.2`**, since superseded by the published `.3` pin above. Parent restore
+with `.2` passed with a temporary local feed and explicit `RestoreConfigFile`; this unsigned,
+unpublished preview was not a stable release. The earlier 1.18.0 override remains a
+historical attempt: restore and 17 focused managed lifetime tests passed after the
+readability cleanup, but its cached macOS arm64 library had no `Native_HidInput*` exports.
+Those tests prove only the controlled seam at 1.18.0. The selected-key normal and later
+pending-read shutdown probes used `.2`; the latter followed the latest restore.
+Another agent owns the interop migration and root policy files.
 
 The [master acceptance plan](../../../2026-09-21-yubikit-async-boundaries-ISA.md)
 owns the 72 stable acceptance criteria, detailed requirements, evidence, and decisions.
@@ -24,7 +77,130 @@ instead of waterfall specification of the whole effort. Review first-slice pseud
 then implement with tests, independent review and a consistency check. Non-blocking
 details are **deferred to implementation effort** and handled live. Do not impose a
 separate whole-epic Gate 3/Gate 4 approval before that slice. Material public-contract,
-architecture or safety changes still require discussion before implementation.
+architecture or safety changes still require user approval before implementation.
+
+Under D30's newer delegation, the orchestrator owns master evidence and sequencing and
+may direct Engineers through coherent in-scope implementation milestones, including
+internal seams, routine packaging, fixture selection and tests. D14/D25's historical
+micro-walkthrough requirements do not halt this approved macOS direction. Preserve public
+raw-access and safety contracts; escalate material scope change, unresolvable blocker or
+destructive operation. No blanket authorization for credential writes, releases or commits.
+
+### Working agreement
+
+After each meaningful checkpoint, update the master, this status and the affected plan
+while work progresses. Record scope and owner (orchestrator or named Engineer), outcome
+(`planned`, `in progress`, `implemented`, `verified`, `blocked` or `deferred`), concrete
+evidence or command plus its limits, and the next decision. Distinguish document/design
+review, managed implementation verification, native-runtime verification and hardware
+verification. Do not create a separate report artifact or infer completed evidence.
+
+When recommending a next move, use: **document section → relevant rule stated plainly →
+current evidence or gap → recommendation and approval needed**. References alone are not
+enough; spell out the rule that governs the recommendation.
+
+For each implementation slice, apply master D26's finish line before dispatch: agree one
+observable route outcome, bounded files/responsibilities and non-goals, applicable existing
+criterion IDs, finite probes/commands and required evidence grades. Close only when agreed
+behavior passes without correctness/safety/regression blockers, appropriate correctness
+review of the settled shape and targeted fixes are complete, and evidence/limits/next
+action are recorded. Stop at a coherent milestone rather than each tiny helper;
+defer taste-driven redesign and speculative abstractions. Missing required native, hardware,
+platform or performance evidence means **blocked**, not silently managed-only complete.
+
+Current checkpoint — owners: Route/Native Engineers (macOS FIDO/OTP), Smart-card Engineer
+(async transaction), Measurement Engineer (baseline tooling), orchestrator (integration/evidence).
+**Selected normal and pending-read shutdown paths verified on key 31683481 (firmware 5.7.4); route not accepted.**
+Final `.2` preview-package runs: Core 1,355 passed/3 skipped, PublicApi 22, Fido2 471,
+Management 86, resilience-fast 77; after a small report-queue allocation fix, focused
+macOS FIDO route tests passed 17 (full suites precede that final allocation-only edit).
+Native 11 and synthetic AOT 5 passed as supplied. The earlier packaged-host `--list`
+attempt found zero keys; a later explicit-serial native-AOT production-host probe with
+real Core/Fido2 and `.2` passed three read-only open/init/getInfo/dispose/reopen cycles.
+The same fixture passed one `PcscLifetimeIntegrationTests` read-only test (three
+connections, two transactions and reads per connection). Benchmark-tooling artifacts
+record three completed lifecycle samples and one censored no-input sample: invocation
+returned in 79.9447 ms, but the watchdog ended the child before shutdown was requested.
+That is **not** evidence of shutdown failure or completion. No touch/unplug/removal,
+BEFORE dataset, comparison or performance budget exists. Parent correctness review/fixes
+are not an independent review. A later real-Core/Fido2 native-AOT probe with the local
+`.2` preview passed three read-only cycles and pending raw receive → `DisposeAsync` →
+terminal read → completed dispose → reopen/getInfo. This exercised real IOKit callback
+acknowledgment in normal shutdown, not physical removal, touch or every interruption race.
+Seventeen focused post-craftsmanship managed tests passed with the preview. The bounded
+craftsmanship cleanup (named native codes,
+per-owner capacity, format quarantine helper, comment trimming) finished with review
+PASS WITH NOTES and 17 focused managed tests at the historical 1.18.0 pin; these older
+tests remain separate from the later preview result.
+**ISC-49/52 verified; 70 criteria pending**, including
+ISC-31/33/58. Artifact names and evidence limits are in master Verification; exact
+host/integration shell invocations for the earlier user run were not retained. The later
+publish and explicit-serial probe commands are recorded there.
+
+Small deferred list: cross-key scheduling remains deferred by D20 because it is outside
+the single-key iteration; wholesale `IHidConnection` migration remains deferred because it
+needs a separate approved compatibility walkthrough. macOS GET/SET worker code now exists,
+but callback capability and actual per-direction native/hardware evidence remain pending.
+Add an item only with a reason and remove or promote it when its scope is selected.
+
+### Near-term work schedule
+
+This is dependency order, not calendar estimates or approval of production changes.
+The orchestrator owns acceptance and integration; Engineers receive bounded assignments.
+
+N1/D1/B1 preparation and D29 synthetic checks preceded D30's production dispatch. Older
+1.18.0 checks and D29 no-production statements remain historical, not the current state.
+Preserve the staged planning edits; distinguish the executed selected-key normal path
+from synthetic/AOT publish-only evidence and untested interruptions. Record progress
+at milestone checkpoints, not every test ping.
+
+| Assignment | Owner | Outcome and finite exit |
+|---|---|---|
+| N1 — native prerequisite card | Native Engineer | Historical 1.18.0 signed-package checks remain recorded; current `.2` preview uses the tagged 1.18.0 source base plus local edits. Its exact local source hash manifest must be recovered for clean-machine replay; no release or signed-package producer binding is claimed. |
+| macOS FIDO production | Route/Native Engineers | Code implemented; selected-key read-only packaged native-AOT normal path and pending-read shutdown/reopen passed. Touch, physical removal and interrupted callback quiescence pending; no route acceptance. |
+| S2 macOS OTP GET/SET | Route Engineer | Worker feature reports implemented and managed-tested (8 focused; Core 1,371/3 skipped, PublicApi 22, YubiOtp 180, resilience 77). Selected-key OTP device/touch and recovery remain unverified; not S5 closure. |
+| S4 smart-card transaction | Smart-card Engineer | Additive async interface and built-in worker/fallback implemented; 8 focused tests and pre-OTP Core 1,363/PublicApi 22 passed. Selected PC/SC integration failed sharing violation; hardware proof blocked. |
+| B1 — baseline tooling | Measurement Engineer | Implemented; 8 self-tests, dry-run and 12-benchmark listing; later three selected-key lifecycle samples completed and one no-input sample censored before shutdown request. No BEFORE dataset/budgets. |
+| D29 input-owner experiment | Native Engineer + verification Engineer | Completed at synthetic grade (8 C tests in three configurations, 3 executed synthetic AOT probes); real IOKit proof remains part of active production milestone. |
+
+Schedule the actual work as follows:
+
+| Order | Work / epic contribution | Owner | Starts after | Finish line |
+|---|---|---|---|---|
+| 1 — macOS selected paths verified; route pending | Built-in macOS FIDO lifecycle | Route/Native Engineers + orchestrator | Normal and pending-read dispose/reopen probes passed | Touch, physical removal and interrupted callback shutdown; comparable before/after data and producer checks. No full route acceptance yet. |
+| 2 — next production increment, design read-only now | Windows FIDO overlapped read/write, terminal completion and `CancelIoEx` races | Architect/orchestrator for design; route Engineer after scope selection | Independent of macOS hardware | Finite production-route probes and Windows-host runtime/driver/hardware evidence; macOS managed seams cannot prove Windows behavior. |
+| 3 — independent lane | Linux HID nonblocking readiness and explicit wake | Platform Engineer when scoped | Does not need Windows to finish first | Native/hardware proof of read readiness and output isolation on Linux; not inferred from macOS or Windows. |
+| 4 — remaining reports and protocol routes | macOS GET/SET candidate and OTP recovery, including Windows zero-access feature reports | Route/Native Engineers | macOS worker code and managed tests passed | Selected-key GET/SET/touch and per-direction native evidence; Windows and recovery remain pending. |
+| 5 — smart-card continuation | Async transaction acquisition, context isolation and lifecycle proof | Smart-card Engineer | Additive async path and managed tests passed | Resolve selected PC/SC sharing violation, then hardware and cross-platform lifecycle/context proof. |
+| 6 — production closure | Inventory, native/package producer and consumer checks, before/after measurements, platform matrix and consistency | Orchestrator + Engineers | Relevant route evidence, not a strict serial dependency between platform lanes | Close ISC-1–64 only with every required row verified; current count stays 2/72. |
+| 7 — later exploration | WinRT/CryptoTokenKit prototypes and recommendation | Orchestrator + Engineers | Separate from production milestone | ISC-65–72; no default backend promotion without a new scope. |
+
+NativeShims 1.18.0 was the selected signed upstream base; current development selects
+private-published `1.18.1-async.3` for five new macOS exports. The earlier `.2` local preview's tagged
+source base is recorded in the master; the cited dirty-file hash manifest was absent on
+later inspection and must be recovered for a reproducibility claim. No original 1.18.0
+package-producer binding is asserted. The older 1.16.1 binary targeted minimum 14;
+1.18.0 macOS artifacts target minimum 12;
+the project targets .NET 10, whose upstream support matrix currently lists macOS 14, 15
+and 26 on arm64/x64; the relevant dispatch APIs are available from 10.15. These are distinct
+facts, not a floor-compatibility fix, new YubiKit hardware claim or perpetual future-support promise. D28 selects
+modern dispatch APIs without an old-API fallback solely for the binary minimum. Package
+metadata still does not bind the original signed 1.18.0 to a producer commit. D30 permits
+routine native bridge work within this approved direction, not releases or scope expansion.
+The package declaration now reads `1.18.1-async.3`; local restore via the identical workflow
+artifact passed, whereas direct private-feed access returned 403. The `.2` pending-read probe
+followed its earlier local-feed restore. Replaying that historical preview
+requires tagged source plus dirty-file hashes, native macOS package scripts/inputs, a
+temporary local feed listed with normal feeds in a NuGet configuration, and explicit
+`RestoreConfigFile` for restore/build/publish; a temporary path alone cannot reproduce it.
+
+Shared-file boundary: baseline tooling stays in the benchmark project; the Native Engineer
+owns only the approved native worktree/harness; the Route Engineer owns the approved Core
+slice; the orchestrator alone updates master/status. No shared-file editing is parallelized.
+Windows/Linux route evidence requires suitable hosts. Smart-card
+Windows/Linux proof, asynchronous transaction acquisition, remaining protocol boundaries,
+and production/exploration closure remain visible in the master rather than disappearing
+behind this macOS schedule.
 
 ## Product review
 
@@ -77,9 +253,12 @@ Retain public applet/raw access, nonblocking native execution, teardown release 
 and tests beneath production adapters. Re-slice around one key's complete lifecycle
 instead of building the earlier shared-capacity foundation first.
 
-The first slice is implemented with 38 passing boundary tests, Core 1,335 passed/3
-existing skipped, PublicApi 22 passed and resilience 77 passed. Its hardware test passed
-one selected key; macOS arm64 native ahead-of-time publish/discovery smoke passed.
+The first slice is implemented with 38 passing boundary tests and historical resilience
+77 passed. At NativeShims 1.18.0, Core reran with 1,335 passed/3 existing skipped,
+PublicApi reran with 22 passed, focused crypto/PreviewSign tests passed, and macOS arm64
+Native AOT publish passed without execution. The selected-key hardware and earlier native
+discovery smoke predate the structural refactor and dependency upgrade; they are not 1.18.0
+hardware/runtime evidence.
 Independent cross-vendor review finished PASS WITH NOTES after three rounds. The
 broader S0/S0b/S1–S6/X1–X3 graph remains reference; do not dispatch it unchanged or finish
 its detailed specification before starting the approved slice. Subsequent details are
@@ -87,33 +266,39 @@ deferred to implementation effort with evidence mapped to the master as work lan
 Known limits: unproven native close errors retain ownership until process exit; Windows/
 Linux and interruption/touch hardware scenarios remain unverified. The hardware run's
 discovery initialization skipped the non-selected 5.4.3 key on an unresolved HID read;
-recorded for follow-up, not silently treated as multi-key success. Reviewer notes on
-diagnostic detail, the internal thread-start test seam, child-kill diagnostics, and
-centralizing provider/slot resolution are deferred to implementation effort.
+recorded for follow-up, not silently treated as multi-key success. The original review
+finished PASS WITH NOTES; the later structural refactor centralized slot selection and
+registration-owning smart-card opening. Remaining low-priority notes concern diagnostic
+detail, the internal thread-start test seam and child-kill diagnostics.
+The built-in `SmartCardConnectionFactory` is sealed with a parameterless constructor and
+`CreateDefault()`; custom factories use `ISmartCardConnectionFactory`. Smart-card logging
+uses the single static `YubiKitLogging` source rather than a factory-specific logger.
 The S0 intelligence pass has source/artifact findings and existing-test results;
-S0 is not complete and the master still has 0/72 criteria checked.
+S0 is not complete; subsequent atomic ISC-49/52 evidence brings the master to 2/72.
 
 ## Notes for a fresh session
 
 - Worktree: `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-boundaries`.
-- Branch: `yubikit-async-boundaries`; last fetched base on 2026-09-22:
-  `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`, matching `origin/yubikit`.
+- Branch: `yubikit-async-boundaries`; smart-card commit
+  `db7a1bf64b7c5b4915565eca56273ce2bda15e57` plus uncommitted macOS FIDO route,
+  benchmark tooling, async transaction, macOS OTP and `.3` pin; selected-key FIDO evidence
+  consumed `1.18.1-async.2`, not the current `.3` declaration. Its fetched base was
+  `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`, matching `origin/yubikit` at the time.
   Refresh before further work and revalidate affected evidence if the base changes.
 - One architect/orchestrator owns planning, inventory acceptance, measurements,
   integration, and master acceptance. Engineers own implementation; shared-file
   ownership and handoffs are explicit. Final cross-applet/Core consistency is mandatory.
-- The user wants to know before decisions on new code, architecture, or seams.
-  Existing proposals in the master plan are not blanket approval.
+- Follow D30 for in-scope internal execution; escalate material scope changes, unresolvable
+  blockers and destructive actions, not every helper, test or routine package decision.
 - Initial iteration scope is one selected physical key at a time; the prior simultaneous
-  three-key target is deferred. Exact supported system
-  floors, verified firmware, other platform/reader fixtures, frozen numerical budgets,
-  and native package-producing provenance remain open. Preserve evidence grades;
+  three-key target is deferred. D28 selects modern macOS APIs within the current .NET 10
+  upstream-supported matrix; it is not a YubiKit hardware claim or perpetual future-floor
+  promise. Verified firmware, other platform/reader fixtures, frozen numerical budgets,
+  and exact 1.18.0 package-producing provenance remain open. Preserve evidence grades;
   managed test passes and binary inspection do not establish hardware behavior.
-- The first smart-card lifetime iteration is the checkpoint for this implementation
-  and its planning/evidence documents. The user authorized committing it together.
-- Before the next implementation slice, review what this smart-card iteration teaches
-  about HID ownership, cancellation, completion, and teardown; reconcile the master
-  design with those lessons and obtain approval for the next slice.
+- The first smart-card lifetime iteration and its planning/evidence documents were
+  committed together at `db7a1bf6`.
+- The smart-card lifetime lessons are reconciled; its later async transaction increment is managed-tested but the selected PC/SC integration failed sharing violation. The macOS FIDO production milestone has `.2` selected-key normal and pending-read shutdown/reopen results but remains underway. D30's bounded fit pass retained the nested owner; named return codes, per-owner capacity, format quarantine and comment trimming are complete, review PASS WITH NOTES; 17 focused post-cleanup managed tests ran at the historical 1.18.0 pin and 17 later focused tests passed with the preview. Touch/removal and interrupted shutdown remain outstanding. MacOS OTP GET/SET has managed tests only. No shared slot interface or scheduler.
 - Read the current scope/architecture, first-slice pseudocode and master decisions;
   resume the pending slice checkpoint under the user's incremental workflow. Do not
   restart whole-effort gates or repeat settled D15/D16 choices.
@@ -122,3 +307,6 @@ S0 is not complete and the master still has 0/72 criteria checked.
 - Revised Gate 2's independent review passed after clarifying bounded transaction-release
   intent, per-route abort limits, borrowed-buffer ownership and synchronous reentrancy.
   This is proposal review only; no native/hardware or implementation evidence was added.
+- D29's synthetic increment and D30's empty-host attempt are historical; the later
+  selected-key read-only probe passed. Touch/removal, before/after and release evidence
+  remain pending; unrelated platform work need not wait. No whole-epic gate is auto-passed.

@@ -37,6 +37,21 @@ public interface ISmartCardConnection : IConnection
     /// </summary>
     IDisposable BeginTransaction(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    ///     Starts a PC/SC transaction without synchronously waiting for native acquisition.
+    ///     Dispose the returned scope to end the transaction; built-in scopes also implement
+    ///     <see cref="IAsyncDisposable" /> for awaitable end completion.
+    /// </summary>
+    /// <remarks>
+    ///     External implementations use the synchronous <see cref="BeginTransaction" /> fallback
+    ///     unless they override this method; the fallback may block the calling thread.
+    /// </remarks>
+    Task<IDisposable> BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(BeginTransaction(cancellationToken));
+    }
+
     bool SupportsExtendedApdu();
     // byte[] getAtr();
 }

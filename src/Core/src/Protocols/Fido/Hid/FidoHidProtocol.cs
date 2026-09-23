@@ -35,6 +35,7 @@ internal class FidoHidProtocol(
     private readonly IFidoHidConnection _connection = connection ?? throw new ArgumentNullException(nameof(connection));
     private readonly ExchangeGuard _exchangeGuard = new();
     private readonly DisposalGate _disposalGate = new();
+    private readonly AsyncLocal<bool> _insideExchange = new();
     private readonly ILogger<FidoHidProtocol> _logger = logger ?? NullLogger<FidoHidProtocol>.Instance;
     private readonly Func<int, byte[]> _responseBufferFactory = responseBufferFactory ?? (static length => new byte[length]);
     private uint? _channelId;
@@ -47,8 +48,6 @@ internal class FidoHidProtocol(
     /// <inheritdoc cref="IProtocol.Configure" />
     public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null)
     {
-        InitializeAsync().GetAwaiter().GetResult();
-
         _logger.LogDebug("HID protocol configured for firmware version {Version}", version);
     }
 
@@ -60,8 +59,13 @@ internal class FidoHidProtocol(
         await _exchangeGuard.RunAsync(
                 async exchangeToken =>
                 {
-                    await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
-                    return true;
+                    _insideExchange.Value = true;
+                    try
+                    {
+                        await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
+                        return true;
+                    }
+                    finally { _insideExchange.Value = false; }
                 },
                 cancellationToken)
             .ConfigureAwait(false);
@@ -90,15 +94,20 @@ internal class FidoHidProtocol(
         var response = await _exchangeGuard.RunAsync(
                 async exchangeToken =>
                 {
-                    await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
-                    return await TransmitCommand(
-                            _channelId!.Value,
-                            command,
-                            data,
-                            userPresenceNotification,
-                            exchangeToken,
-                            cancellationToken)
-                        .ConfigureAwait(false);
+                    _insideExchange.Value = true;
+                    try
+                    {
+                        await EnsureChannelInitializedAsync(exchangeToken).ConfigureAwait(false);
+                        return await TransmitCommand(
+                                _channelId!.Value,
+                                command,
+                                data,
+                                userPresenceNotification,
+                                exchangeToken,
+                                cancellationToken)
+                            .ConfigureAwait(false);
+                    }
+                    finally { _insideExchange.Value = false; }
                 },
                 cancellationToken)
             .ConfigureAwait(false);
@@ -500,18 +509,27 @@ internal class FidoHidProtocol(
     /// </summary>
     public void Dispose()
     {
+        if (_insideExchange.Value)
+            throw new InvalidOperationException("Cannot synchronously dispose FIDO from its own exchange.");
         _disposalGate.Dispose(() =>
         {
+            if (_connection is ITerminalWakeControl wake) wake.RequestTerminalWake();
             _exchangeGuard.CloseAndDrain();
             _channelId = null;
             _disposed = true;
         });
     }
 
-    public ValueTask DisposeAsync() => _disposalGate.DisposeAsync(async () =>
+    public ValueTask DisposeAsync()
     {
-        await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
-        _channelId = null;
-        _disposed = true;
-    });
+        if (_insideExchange.Value)
+            throw new InvalidOperationException("Cannot dispose FIDO from its own exchange.");
+        return _disposalGate.DisposeAsync(async () =>
+        {
+            if (_connection is ITerminalWakeControl wake) wake.RequestTerminalWake();
+            await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+            _channelId = null;
+            _disposed = true;
+        });
+    }
 }

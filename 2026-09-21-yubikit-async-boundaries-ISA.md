@@ -5,25 +5,25 @@ project: Yubico.YubiKit.NET and Yubico.NativeShims
 effort: E4
 effort_source: auto
 phase: execute
-progress: 0/72
+progress: 2/72
 mode: interactive
 started: 2026-09-21T16:01:47Z
-updated: 2026-09-22T17:06:11Z
+updated: 2026-09-23T17:05:17+02:00
 ---
 
 # YubiKit async boundaries — PRD / ideal state artifact
 
-**Status:** The first single-key smart-card lifetime slice is implemented, passed managed verification and a selected-key macOS hardware smoke, and received independent code review PASS WITH NOTES. Broader native/platform, inventory and performance acceptance remains open; cross-key scheduling stays deferred. All 72 epic criteria remain unchecked because this slice does not satisfy their complete operation/platform registry obligations. Detailed slice evidence follows; non-blocking subsequent choices remain deferred to implementation effort.
+**Status:** The first single-key smart-card lifetime slice is committed at `db7a1bf6`; subsequent S4 async transaction, S2 macOS FIDO/OTP and dependency work is still uncommitted in this worktree. With a selected key attached, the built-in macOS FIDO route completed a read-only native-AOT public-route lifecycle, pending-raw-receive → `DisposeAsync` → terminal read → completed dispose → reopen/getInfo, and predispatch-cancellation → reopen/getInfo using the published `.3` package artifact: five scenarios passed on serial 31683481 (firmware 5.7.4). This is normal-path and pending-read shutdown evidence, **not** touch, physical removal, interrupted callback shutdown, route or production acceptance. The `.3` package workflow completed successfully on macOS, Linux and Windows consumers, native AOT and private publish; local artifact restore worked but direct private-feed access returned 403. S4 async transaction managed tests passed, but its selected PC/SC hardware integration test failed with a sharing violation. S2 macOS OTP GET/SET is managed-tested (15 focused tests), but OTP hardware opening failed with IOKit access error `0xE00002E2`; neither OTP recovery nor touch is proven. Other platform route acceptance and scientifically comparable before/after performance remain pending. ISC-49 and ISC-52 alone are verified; 70 criteria remain unchecked. Cross-key scheduling stays deferred. The earlier empty-host result below remains historical evidence.
 
 **Purpose:** Define the behavior, boundaries, staffing, migration slices, and evidence needed to make cross-platform asynchronous device operations reliable. It also defines later, separate evaluations of Windows WinRT SmartCard and Apple CryptoTokenKit.
 
-**Current implementation base:** worktree `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-boundaries`, branch `yubikit-async-boundaries`, commit `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`, fetched from `origin/yubikit`. The original demo baseline `99e082c46018ecdde63c3c47980c14e313b70192` remains historical context. A scoped comparison found no changes in Core, Core tests, the `src/PublicApi` test project, package version declarations, toolchain, or the two relevant workflows. S0 separately compared all nine applet source roots: the only source/public-baseline delta is `PreviewSignGeneratedKey.FromArkgSeedKey`, present on the demo baseline but absent on this integration base. It is not a native async-boundary change; the exact scope and evidence are recorded below.
+**Current implementation:** worktree `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-boundaries`, branch `yubikit-async-boundaries`, first smart-card source committed at `db7a1bf64b7c5b4915565eca56273ce2bda15e57` plus uncommitted built-in macOS FIDO/OTP, async smart-card transaction and dependency work. Later unrelated commits appear in worktree history; none establishes a commit for these current milestones. Its fetched pre-slice baseline was `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`. The original demo baseline `99e082c46018ecdde63c3c47980c14e313b70192` remains historical context. Pre-slice comparisons below are baseline evidence, not current-tree claims.
 
-**Native dependency baseline:** `Directory.Packages.props:23` references `Yubico.NativeShims` 1.16.1. NativeShims is a code/package lineage in the same upstream repository. The unrelated checkout `/Users/Dennis.Dyall/Code/y/worktrees/nativeshims-static-core` at `411e5a9bd8fda49cccfb5a3423e41bd1ba3062de` remains read-only; its newer static-linking work is not the consumed release. S0 inspected the signed GitHub release package and found all seven declared platform binaries. Build run `25131796239` at `29d38c6fe55dcf0a6810b79b664b1b73a66f38e4` is the strongest producer candidate; the release tag at `9dffc9d5ad752ac9203c1ca47f343294957e8924` is a later consumer repin. Expired build artifacts prevent an exact producer-to-package binding. See the S0 evidence below for package digest, artifact floors, and limitations; ISC-41 remains pending.
+**Current native dependency:** `Directory.Packages.props:23` selects private-feed-published `Yubico.NativeShims` `1.18.1-async.3`, built at `f8c974f785d96dfc654606b573c6840968bb8220` by [run 35888947280](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35888947280), which completed SUCCESS with macOS/Linux/Windows builds, AOT consumers and private publish. The downloaded workflow package has SHA-256 `b6df35457da06409f5bfd6643dd7dbc9da8b0e7e8404bb5fa99fcdde076f4a3c` and five inspected macOS arm64 input exports. The publication job succeeded, but this host's GitHub token lacks `read:packages` (403), so restore here used the identical-hash workflow artifact, **not the private feed**. The earlier local, unsigned, unpublished `.2` (SHA-256 `514f3804201c26447273a48fef89fa31f1153eadf12ab9cbd6ea2c5266c60d1f`) supplied the selected-key hardware evidence; its source starts at tag `1.18.0` (`cb5275ea8c151b7ad0bc9465ff2f9fa24785d3b3`). The missing dirty-file hash manifest for `.2` still blocks its clean-machine reproducibility claim. Neither the preview nor tag binds the original signed 1.18.0 to a producer. The 1.16.1 macOS binary minimum was 14; 1.18.0's was 12, distinct from the .NET 10 support matrix.
 
 **Reading guide:** Requirements and acceptance criteria precede design and delivery details. Features contains contracts, platform direction, the single-orchestrator workflow, the 11-slice graph, ownership, and dispatch/result packet rules. Decisions distinguishes adopted direction from choices that must be settled before affected slices. Verification separates current intake evidence from historical handoff claims. This document is the one master acceptance plan; the generated boundary manifest/coverage report is its executable evidence input, not a competing source of acceptance truth. Do not create parallel agent specification or report systems.
 
-**Current workflow:** [Status](docs/plans/yubikit-async-boundaries/00-status.md) records approved product/architecture and the approved [first-slice pseudocode](docs/plans/yubikit-async-boundaries/03-program-design.md). D23/D24 authorize implementation, verification and review one slice at a time. Non-blocking details are **deferred to implementation effort**; material contract/architecture/safety decisions are still raised before changes. The [earlier architecture](docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-architecture.md), [earlier program design](docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-program-design.md) and [multi-key addendum](docs/plans/yubikit-async-boundaries/addenda/multi-key-capacity.md) retain the broader research. This master retains all epic criteria and evidence.
+**Current workflow:** [Status](docs/plans/yubikit-async-boundaries/00-status.md) records approved product/architecture, the completed [first slice](docs/plans/yubikit-async-boundaries/03-program-design.md), and the next affected-route checkpoint. The user delegates ISA/planning progression to the orchestrator and Engineers: the orchestrator owns this master, evidence interpretation, criteria and proposed route sequence; Engineers implement bounded approved slices. D14 remains binding: material signatures, visibility, seams, native-platform changes, architecture or safety decisions are presented to the user for approval in an affected-route walkthrough before implementation. Delegation grants no self-approval authority. Non-blocking details are **deferred to implementation effort**. The [earlier architecture](docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-architecture.md), [earlier program design](docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-program-design.md) and [multi-key addendum](docs/plans/yubikit-async-boundaries/addenda/multi-key-capacity.md) retain broader historical research and are not the active checklist. This master retains all epic criteria and evidence.
 
 ## Problem
 
@@ -100,7 +100,7 @@ Deliver cross-platform device input/output whose supported asynchronous entry po
 
 ## Criteria
 
-All criteria start unchecked. **Production milestone P is ISC-1 through ISC-64; exploration milestone X is ISC-65 through ISC-72.** P may ship without X, but must never be reported as all 72 criteria complete. Universal criteria are parameterized by the explicit operation/adapter registry; a missing row fails verification. Slices may contribute evidence to the same criterion, but no early slice claims universal acceptance.
+All criteria began unchecked; ISC-49 and ISC-52 are now verified below. **Production milestone P is ISC-1 through ISC-64; exploration milestone X is ISC-65 through ISC-72.** P may ship without X, but must never be reported as all 72 criteria complete. Universal criteria are parameterized by the explicit operation/adapter registry; a missing row fails verification. Slices may contribute evidence to the same criterion, but no early slice claims universal acceptance.
 
 **Iteration 1 is a narrower delivery step, not a redefinition of P or X.** Establish
 the single-key lifecycle first and map its required operation/platform rows in the
@@ -174,10 +174,10 @@ recovery, removal-generation and monitor-context guarantees remain mandatory.
 
 ### API, compatibility, and interaction — P
 
-- [ ] ISC-49: Existing public async-surface convention tests pass for the shipping applet APIs.
+- [x] ISC-49: Existing public async-surface convention tests pass for the shipping applet APIs.
 - [ ] ISC-50: A reviewed `IHidConnection` evolution decision is enforced by its consumer compatibility test.
 - [ ] ISC-51: Transaction acquisition has an async path passing the withheld-native-completion responsiveness probe.
-- [ ] ISC-52: Production FIDO configuration does not synchronously wait for asynchronous channel initialization.
+- [x] ISC-52: Production FIDO configuration does not synchronously wait for asynchronous channel initialization.
 - [ ] ISC-53: Every retained synchronous wait reachable from public API is an explicit boundary with a verified drain contract.
 - [ ] ISC-54: Public operation documentation states the applicable cancellation and borrowed-memory lifetime contract without contradicting implementation evidence.
 - [ ] ISC-55: Existing user-presence pairing/outcome tests pass through migrated transports.
@@ -265,7 +265,7 @@ Every row is proposed work, not an existing passing test. Parameterized profiles
 | ISC-38 | Policy audit/test proves no portable transmit-abort reliance on `SCardCancel`. |
 | ISC-39 | Monitor cancellation leaves independent connection context active. |
 | ISC-40 | Windows OTP hardware exchange succeeds through zero-desired-access opening. |
-| ISC-41 | Release job/package metadata resolves package 1.16.1 to immutable source. |
+| ISC-41 | Release job/package metadata resolves consumed package 1.18.0 to immutable source. |
 | ISC-42 | Declared SDK/shim compatibility combinations pass. |
 | ISC-43 | Native harness covers reject, immediate, pending, and failure schedules and asserts the specified callback-count rule for each. |
 | ISC-44 | Native retained-buffer counters prove pointer lifetime. |
@@ -325,7 +325,11 @@ prerequisite for a first working single-key path.
 - Freeze required scenarios for FIDO HID request/response and touch cancellation; OTP exchange/touch abandonment; PC/SC USB and supported NFC; cross-process contention; removal during input/output; and disposal during an admitted exchange.
 - Record exact systems, architecture, PC/SC/reader drivers, firmware, SDK/native revisions, package, harness revision, and applicability. A missing fixture is pending, not passed.
 - Freeze numeric active/pending/report-buffer limits and discovery/interactive capacity separation before implementation comparisons. Test permanent-block exhaustion. P1 provides separation; S4 proves discovery migration and isolation.
-- The approved architecture additionally requires reserved bounded cleanup/control progress. The supported failure budget must carry one stalled cleanup alongside healthy connections without abandoning the stalled call's slot or spawning unbounded replacements. Gate 3 must specify the reservation topology, supported simultaneous stalls, and caller-visible exhaustion behavior; S0 freezes measured values before production changes.
+- The broader epic additionally requires reserved bounded cleanup/control progress. For the
+  deferred multi-key iteration, its affected capacity checkpoint must specify reservation
+  topology, supported simultaneous stalls and caller-visible exhaustion without abandoning
+  a stalled call's slot or spawning unbounded replacements. Freeze measured values before
+  that production change; this obligation is not a prerequisite for the current single-key slice.
 - Staff one measurement engineer in S0 to implement only the baseline harness/tooling against the untouched baseline runtime. The orchestrator designs scenarios and metrics, interprets results, and freezes numeric budgets before any production change; the orchestrator does not modify runtime code. This measurement subtask is a sequential predecessor to S0b, which may reuse the harness.
 - Freeze performance regression budgets before changes. Baseline measurements happen in S0, not after migration. Keep caller-return, native, recovery, scheduling, allocation, and idle costs separate. Missing required baseline evidence blocks the affected before/after comparison; it is never presumed available.
 - Responsiveness is primarily event ordering, not an arbitrary latency threshold. Record distributions as supporting evidence.
@@ -368,6 +372,25 @@ NativeShims: ABI/platform adaptation and difficult callback-lifetime bridges onl
 ```
 
 Keep `ExchangeGuard`, `DisposalGate`, `ConnectionSessionGuard`, and `DeviceConnectionRegistry` as distinct starting points. Audit their interactions; do not wrap them in a competing state machine. Await remains where `using`, `finally`, exception timing, zeroing, or ownership requires it.
+
+The concern registry is about observable ownership and flow, not merely whether an API
+uses `async`/`await`:
+
+| Concern | Required distinction and owner |
+|---|---|
+| Execution scheduling | The platform transport owner chooses verified native completion/readiness/callback delivery or the classified blocking owner. This says where native work waits, not who owns the protocol. |
+| Control flow and ownership | Existing applet/protocol code and guards continue to sequence the full admitted exchange: framing, chaining, prompts, protocol cancellation/recovery and final disposition. Lifecycle end/shutdown remains with the connection owner; public raw consumers retain their documented framing, exclusion and recovery responsibilities. |
+| Cancellation intent | Cancellation winning before submission prevents that submission. After submission it records intent and uses only the route's permitted cancellation point/capability; it is not native completion or permission to release resources. |
+| Recovery and drain | The protocol owner drains or reaches a terminal disposition before deciding reusable versus faulted. Recovery is not proof that native resources or the physical claim were released, and an uncertain mutation is never replayed. |
+| Concurrency and admission | Competing logical exchanges remain refused, with no ordinary same-key backlog. Independently owned native completion, readiness, callback, monitor and coalesced lifecycle-control progress may overlap only as specified; that does not grant public-operation concurrency. |
+| Resource lifetime | Borrowed input ends at public operation completion only after native last use. Operation resources live through native terminal completion; callback contexts live through quiescence; the physical claim lives through positive release evidence or remains quarantined. |
+
+“Control” is overloaded and does not name one queue or execution class. A lifecycle
+control intent is the coalesced transaction-end or connection-shutdown request; a native
+transport control operation is a feature-report ioctl or equivalent platform call; a wire
+control action is a protocol frame such as `CTAPHID_CANCEL`. Caller cancellation may cause
+a permitted control action without establishing native abort, terminal completion,
+protocol recovery, safe reuse or physical release.
 
 ### Minimal primitives
 
@@ -423,11 +446,18 @@ Required coverage matrix axes:
 
 | Axis | Required enumeration |
 |---|---|
-| Operating system | Windows, Linux, macOS |
-| Transport | PC/SC USB, supported PC/SC NFC, FIDO HID input/output, OTP HID feature reports |
+| Platform × transport | Windows HID, macOS HID, Linux HID, Windows smart card, macOS smart card, Linux smart card |
+| Report/operation direction | HID: FIDO input, FIDO output, OTP feature GET and OTP feature SET as separate rows. Smart card: PC/SC USB and supported PC/SC NFC lifecycle operations where applicable. |
 | Lifecycle | Open/connect, initialize, send/receive/transmit, transaction begin/end where applicable, cancellation/recovery, removal, dispose, monitor start/stop, discovery probe |
 | Entry route | Applet/convenience path, typed raw connection path, retained synchronous expert/lifecycle path |
 | Evidence | Documented, implemented, managed-tested, native-runtime-tested, Native-AOT-runtime-tested, hardware-tested |
+
+The six platform/transport combinations are coverage keys, not claims of identical native
+semantics. The detailed table in Gate 2 A3 is the authoritative architecture view of
+their classified execution and current evidence; it does not create criteria. ISC-4,
+ISC-8–20, ISC-26–40, ISC-44–46, ISC-54 and ISC-57–64 remain the stable mappings, stay
+parameterized by applicable rows, and remain unchecked until their existing obligations
+are satisfied.
 
 S0b freezes the shared foundation only after a withheld native seam has been exercised through an actual available-host production adapter, preserving the red sensitivity fixture. This is managed proof, not native or hardware proof. S0b requires no hardware success and cannot pass universal criteria early.
 
@@ -439,7 +469,7 @@ S0b freezes the shared foundation only after a withheld native seam has been exe
 - `DisposeAsync` returns without unbounded caller-thread waiting; neither sync nor async disposal frees live native storage merely to meet a deadline.
 - Finalizers and cancellation callbacks never impersonate completion. Unresolved native work quarantines ownership.
 - Quarantined operation state, handles, buffers and callback contexts remain strongly reachable with native references retained after callers drop their connection. Late native completion/quiescence permits safe cleanup and lease release; removal/replug alone does not. Nonterminating native work may retain ownership for process lifetime, with an observable unrecovered state distinct from ordinary in-use refusal. `DisposalGate`'s current lease release on fault must not free an interface whose native work remains unresolved.
-- Retained synchronous disposal cannot wait on an owned worker/event thread needed for its completion or run reentrantly inside the exchange it drains. Gate 3 traces/tests the wait graph, shared-pool pressure and absence of application-context dependency; dedicated native workers alone do not establish managed-continuation independence from the shared pool.
+- Retained synchronous disposal cannot wait on an owned worker/event thread needed for its completion or run reentrantly inside the exchange it drains. Each affected-route checkpoint traces/tests its wait graph, relevant execution-resource pressure and absence of application-context dependency; dedicated native workers alone do not establish managed-continuation independence from the shared pool.
 - Native callbacks/reactors/workers invoke no application callback inline and use asynchronous managed continuations.
 - FIDO sends `CTAPHID_CANCEL` only after full request transmission, at most once, while retaining/draining the exchange. Do not cancel the read needed for protocol recovery merely because the caller cancelled.
 - Gate 2 approves retaining the current FIDO between-read/keepalive cancellation point. It does not require concurrent send/read support from public raw-connection implementers. A later pending-read control-send design would need explicit public concurrency semantics, consumer tests, documentation updates, and renewed architecture approval; ISC-16's count/ordering rule is not evidence that such concurrency already exists. Register the no-further-keepalive case: the exchange remains admitted until native read termination/removal supplies a terminal disposition, not merely caller cancellation.
@@ -451,7 +481,7 @@ S0b freezes the shared foundation only after a withheld native seam has been exe
 
 **Windows FIDO:** open report handles with `FILE_FLAG_OVERLAPPED` and retain `GENERIC_READ | GENERIC_WRITE` access. Own overlapped state and preserve report-ID normalization: Windows buffer lengths include the report ID while existing SDK payload lengths do not. Validate full expected packet length; partial or malformed reports are not successful packets. Cover reject/failure/immediate/pending completion and `CancelIoEx` races without double completion. Cancellation requests do not free state before terminal completion.
 
-**macOS HID:** expand the existing IOKit usage explicitly. First inspect the current `IIOKitDeviceLifetime` seam and investigate callback viability separately for input, output, and feature reports before introducing another seam. Input uses a persistent event-delivery owner, preferably `IOHIDDeviceSetDispatchQueue` / `IOHIDDeviceActivate` / `IOHIDDeviceCancel` / `IOHIDDeviceSetCancelHandler` where the verified deployment floor permits them, never caller-run-loop pumping; an owned run-loop thread remains the support-floor fallback. Evaluate the exact `IOHIDDeviceSetReportWithCallback` and `IOHIDDeviceGetReportWithCallback` APIs; these report callbacks are distinct from similarly named value APIs and each direction requires verified contract/implementation evidence. Each unverified direction uses a classified P1 fallback without redesigning the shared contract. Register before activation; copy or transfer reports before callback-buffer reuse under P3, keep returned response memory valid, fault pending readers on removal, and observe both callback quiescence and outstanding report-operation completion before release. The architecture permits a minimal C/Objective-C bridge; its concrete contract and native base still require approval/provenance before the macOS engineer implements it. The unrelated static-linking branch is not the base. Changing native device-matching/discovery shape remains outside this effort.
+**macOS HID:** expand the existing IOKit usage explicitly. First inspect the current `IIOKitDeviceLifetime` seam and investigate callback viability separately for input, output, and feature reports before introducing another seam. Input uses a persistent event-delivery owner through `IOHIDDeviceSetDispatchQueue` / `IOHIDDeviceActivate` / `IOHIDDeviceCancel` / `IOHIDDeviceSetCancelHandler` across the current .NET 10 upstream-supported macOS versions, never caller-run-loop pumping. Do not add an owned-run-loop fallback solely to preserve an older binary target; any technical fallback needs explicit evidence and approval. Evaluate the exact `IOHIDDeviceSetReportWithCallback` and `IOHIDDeviceGetReportWithCallback` APIs; these report callbacks are distinct from similarly named value APIs and each direction requires verified contract/implementation evidence. Each unverified output/feature direction uses a classified P1 blocking fallback without redesigning the shared contract. Register before activation; copy or transfer reports before callback-buffer reuse under P3, keep returned response memory valid, fault pending readers on removal, and observe both callback quiescence and outstanding report-operation completion before release. The architecture permits a minimal C/Objective-C bridge; its concrete contract and native base still require approval/provenance before the macOS engineer implements it. The unrelated static-linking branch is not the base. Changing native device-matching/discovery shape remains outside this effort.
 
 **Linux HID:** use `O_NONBLOCK` reads with `poll`/`eventfd` readiness and explicit cancellation/registration/shutdown wake-up. Handle `EAGAIN`, `EINTR`, errors, removal, deregistration, and descriptor reuse by generation. Preserve existing numbered and unnumbered report framing in both directions. Potentially blocking writes/ioctls use P1 and never the read reactor. Adopt `epoll` only with measured need.
 
@@ -461,7 +491,13 @@ S0b freezes the shared foundation only after a withheld native seam has been exe
 
 ### Native code/package lineage
 
-Before native edits, S0 must validate the 1.16.1 release job, package provenance, artifact contents, build instructions, supported consumers/floors, and a compatible native base. The candidate release reference is not package-producing proof. The unrelated `nativeshims-static-core` branch is read-only for this effort and supplies no accepted static-linking premise.
+NativeShims 1.18.0 was the earlier selected signed upstream dependency; its package identity,
+signatures, artifact contents and historical consumer checks are recorded below. Current
+development instead consumes the explicitly approved local `1.18.1-async.2` preview for
+the macOS input bridge. Exact original signed-package producer binding remains pending.
+Tag `1.18.0` (`cb5275e…`) is the aligned preview source base, not signed-package-producing
+proof or release authority. The unrelated `nativeshims-static-core` branch remains read-only
+and supplies no accepted premise.
 
 NativeShims may normalize platform ABI, bridge Apple block/callback ownership, and expose testable lifetime semantics. It does not own applet admission, CTAP cancellation policy, SCP, prompts, or a second scheduler.
 
@@ -599,6 +635,29 @@ WinRT evaluation proves raw APDU fidelity, limits/chaining, transaction mapping,
 
 ## Decisions
 
+**Published package consumption:** run
+[35888947280](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35888947280)
+completed successfully, including all seven platform consumer checks and private-feed
+publication of `1.18.1-async.3`. The user requested updating the reference on completion;
+`Directory.Packages.props` now selects `.3` and `NuGet.Config` maps NativeShims to
+the private feed. Local private-feed access returned 403; the exact uploaded workflow
+artifact was downloaded, restored from an isolated temporary source, and passed all 17
+focused macOS lifetime tests. Package SHA-256:
+`b6df35457da06409f5bfd6643dd7dbc9da8b0e7e8404bb5fa99fcdde076f4a3c`.
+Private-feed credentials remain a local setup requirement. No new hardware acceptance
+or universal criterion is inferred from these package checks.
+
+**Historical dependency override (D31):** the user explicitly approved moving forward with
+NativeShims **`1.18.1-async.2`**. That earlier pin restored with a temporary local feed
+and explicit `RestoreConfigFile`; it is an unsigned/unpublished preview, not a released
+stable dependency. The current pin is the workflow-built `.3` above. The
+earlier 1.18.0 override and its successful restore and 17 focused controlled-seam tests
+remain historical evidence only: the cached 1.18.0 macOS arm64 library lacked
+`Native_HidInput*` exports and could not run the persistent-input native route. Earlier
+`.2` selected-key hardware proof applies to the preview; a later selected-key pending-read
+probe followed the latest restore, without closing the route. Another agent owns
+DllImport/LibraryImport migration and root policy files; this decision does not alter that work.
+
 ### Adopted direction — 2026-09-21
 
 - **D1:** Keep async public operations and protocol orchestration, synchronous local computation, native async input/output where verified, and bounded blocking adaptation elsewhere.
@@ -638,6 +697,162 @@ WinRT evaluation proves raw APDU fidelity, limits/chaining, transaction mapping,
 
 - **D24 — first implementation slice approved, 2026-09-22:** The user accepted the smart-card lifetime pseudocode and authorized implementation. Use the existing native package to prove the single-key open/operation/cancellation/cleanup model through production-adapter tests, preserving raw/app access and the existing ownership rules. Keep synchronous transaction paths lifetime-safe on the same owner while the new async public transaction surface remains deferred to implementation effort. Run focused regressions, independent code review and a style/consistency check. Identify the selected fixture before device operations; do not count planning approval or managed tests as native/hardware acceptance.
 
+- **D25 — delegated incremental orchestration, 2026-09-23:** The user delegates ISA and planning progression to the orchestrator and implementation of bounded approved slices to Engineers. The orchestrator owns master criteria, evidence interpretation and proposed sequencing. This does not grant self-approval: D14 remains binding, and material signatures, visibility, seams, native-platform changes, architecture or safety decisions must be presented to the user for approval in the affected-route walkthrough before implementation. Whole-epic reapproval is not required, archived multi-key work is not reactivated, and all 72 criteria remain unchecked until their evidence obligations are actually satisfied. The orchestrator must track its own and delegated work as it progresses in this master, status and affected plans. At each meaningful checkpoint record scope/owner, outcome (`planned`, `in progress`, `implemented`, `verified`, `blocked` or `deferred`), concrete evidence/command and limits, and the next decision; distinguish review from managed implementation, native-runtime and hardware verification. Do not create a separate report artifact or invent completed evidence. Each recommendation must state **document section → relevant rule in plain language → current evidence/gap → recommendation and approval needed**, not cite references alone.
+
+- **D26 — bounded definition of done requested, 2026-09-23:** The user requires a finite slice finish line to prevent endless refactoring and overengineering. Before an Engineer starts, agree the observable outcome, selected route, owner, bounded responsibilities/files and non-goals, applicable existing criterion IDs, finite acceptance probes and exact relevant commands, and required evidence grades. Slice closure is not completion of all 72 criteria. The operating defaults below govern orchestration; they add no epic gate or criterion and approve no route.
+
+- **D27 — close documentation review and schedule work, 2026-09-23:** The user waived the pending independent reviewer for the transport/concern documentation clarification and requested scheduling upcoming work. That documentation checkpoint is closed on its recorded document validation and orchestrator consistency check. This waiver does not retroactively claim an independent review ran, change implementation-slice review defaults, or approve an unreviewed production/native design. The orchestrator will schedule bounded prerequisite/design work, reconcile its results into the existing plans, and present the material decisions before dispatching dependent implementation.
+
+- **D28 — NativeShims 1.18.0 and modern macOS direction, 2026-09-23:** The user selected NativeShims 1.18.0 for v2 and rejected paying implementation cost solely to preserve older macOS APIs when doing so would compromise smart-card or HID support. `README.md:16-20`, `src/Core/README.md:12-17` and `Directory.Build.props:35` establish the v2 .NET 10 target; the [upstream .NET 10 support matrix](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md), fetched on this date, lists macOS 14, 15 and 26 on arm64/x64. That upstream matrix is not YubiKit hardware verification and does not promise every future macOS 14+ release indefinitely. Native artifact minimum macOS 12, .NET runtime support from macOS 14, and API availability from macOS 10.15 are distinct facts. The approved macOS HID direction remains persistent modern IOKit dispatch lifecycle across the current upstream-supported systems; do not add an old-API fallback solely to preserve a macOS 12 binary target. This dependency decision does not implement HID migration, make blocking PC/SC asynchronous, add abort semantics, or advance CryptoTokenKit/WinRT beyond later exploration. Native changes still require an approved bridge contract and compatible source base, and must not regress macOS smart-card or HID behavior.
+
+- **D29 — ratchet the bounded prerequisite increment, 2026-09-23:** In response to the concrete next-step proposal, the user said “They wont. Lets ratchet forward.” The orchestrator dispatched only non-production macOS input-owner experiments on a detached 1.18.0-tag worktree and opt-in baseline tooling in the benchmark project, plus a synthetic-backed native AOT verification host. The finite outcome is compiled and executed synthetic ownership/quiescence probes and hardware-free tooling checks, **not** a real-device baseline or the previously proposed full 2b exit. The orchestrator reviewed the architectural native contract and targeted correctness fixes; no independent code reviewer ran (D27 waived a documentation review only). Material public interfaces, shipping native exports/package, Core route migration and hardware operations were not authorized. D14/D26 still govern any next production slice.
+
+- **D30 — coherent production milestone, 2026-09-23:** The user directs the orchestrator to continue within the approved product/platform principles through larger coherent changes rather than stop for each helper, test, fixture choice or routine packaging decision. D14/D25's earlier micro-walkthrough requirements yield to this newer delegation for in-scope internal implementation; retain the public raw-access and safety invariants. Escalate genuine material scope changes, unresolvable blockers and destructive operations, not each implementation detail. This is not blanket permission for credential writes, releases or git commits. The current review point is a **full built-in macOS FIDO** open/initialize/send/receive/cancel-recovery/concurrency/shutdown/reopen production route with evidence; the user may request refactoring at that review point. Continue the rest of the epic afterward; no criterion is waived or checked by this decision. D26's finite evidence/stop rule applies to coherent milestones, without automatically imposing an independent review round the user has not requested.
+- **D31 — preview dependency and epic continuation, 2026-09-23:** After a temporary 1.18.0 override, the user said “set it to 1.18.1-async-2 then whatever it was lets roll forward Epic.” The exact package version is `1.18.1-async.2`; the pin is in `Directory.Packages.props` and requires a local feed because the preview is unsigned and unpublished. Preserve the earlier stable-attempt evidence without attributing its 17 managed seam tests to native exports. Continue the approved epic under D30; the macOS physical-key pending-read dispose/reopen probe has since passed (Verification below), while bounded Windows FIDO production-route design proceeds independently. Windows overlapped implementation is a proposal, not runtime/hardware proof. No new criterion is checked by this decision.
+
+The current dependency schedule is in `docs/plans/yubikit-async-boundaries/00-status.md`
+under “Near-term work schedule”; the route walkthrough and baseline assignment are in
+`03-program-design.md`. N1 and D29's bounded tooling/harness increment are recorded.
+Under D30 the macOS built-in FIDO production milestone is **in progress**, not accepted:
+the selected-key packaged native-AOT public route, read-only lifecycle and pending-raw-receive
+dispose/reopen have executed with the earlier local `.2` preview since the initial empty-host
+check. The current `.3` pin restored locally via a workflow artifact, not the private feed;
+its selected-key route remains unverified. Next test selected-key touch, physical removal and
+interrupted shutdown; collect comparable baseline/after data and producer/package evidence. Bounded
+Windows FIDO overlapped production-route design is proceeding read-only in parallel;
+Linux readiness and remaining macOS report directions can proceed independently when scoped.
+Then complete OTP/macOS report paths, smart-card async transaction/context proof and the
+cross-platform production matrix; WinRT/CryptoTokenKit exploration follows separately.
+Do not treat these selected macOS probes as route closure or Windows/Linux evidence.
+
+Selected aligned source option from N1: local annotated tag `1.18.0` resolves to
+`cb5275ea8c151b7ad0bc9465ff2f9fa24785d3b3`, a descendant of candidate `29d38c6`.
+At that immutable revision, `Yubico.NativeShims/build-macOS.sh:23,35` and the macOS
+triplets set deployment target 12.0; `.github/workflows/build-nativeshims.yml:259–295`
+invokes and checks those inputs. This verifies committed source/build configuration only.
+The consumed 1.18.0 package is verified separately below, but its metadata supplies no
+source commit, so exact source-producing binding remains pending. Use this tag as the
+recommended aligned base for a proposed bridge contract, not blanket approval for native
+edits. The old 1.16.1 producer hunt is historical and no longer blocks the selected
+dependency; do not resume it without new relevance.
+
+**D29 prerequisite evidence (historical non-production increment).** The Native Engineer used a new
+detached worktree `/Users/Dennis.Dyall/Code/y/worktrees/nativeshims-macos-input-harness`
+from the immutable 1.18.0 tag `cb5275ea8c151b7ad0bc9465ff2f9fa24785d3b3`, not the
+unrelated native branch. Only `Yubico.NativeShims/hidinput/{owner.h,owner.c,internal.h,
+backend_synthetic.c,backend_iohid.c,tests.c,CMakeLists.txt,.gitignore}` is new: an
+experimental standalone dylib, with no shipping CMake/export/package changes. The opaque
+create/start/cancel/wait/destroy contract copies into bounded reports, isolates owners,
+refuses self-wait, waits for cancellation acknowledgment **and** accepted-delivery drain,
+and refuses destroy while busy. Checked close runs synchronously on the destroy caller,
+not the event queue; `HIDINPUT_CLOSE_FAULT` retains roots without blind close retry.
+Production close would need a blocking owner. The native cancellation handler posts an
+acknowledgment after its return on the same serial queue. The actual IOKit backend compiled
+and linked, but was not exercised with a device. Synthetic libdispatch execution passed
+eight C tests in Debug, Release and AddressSanitizer configurations; the final Release
+build explicitly used `-DCMAKE_OSX_DEPLOYMENT_TARGET=12.0` and its binary minos was
+inspected as 12 (earlier host-default-15 configuration was corrected). Reproduce the
+final Release result in that detached worktree:
+
+```text
+cmake -S Yubico.NativeShims/hidinput -B Yubico.NativeShims/hidinput/build-release -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
+cmake --build Yubico.NativeShims/hidinput/build-release
+ctest --test-dir Yubico.NativeShims/hidinput/build-release --output-on-failure
+```
+
+One close-failure race first reproduced a red test (release attempted despite failed
+close), then passed after the targeted fix; no independent reviewer ran. The main
+worktree's `verification/MacOSHidInputVerification/{Program.cs,
+MacOSHidInputVerification.csproj}` executes three watchdog-isolated synthetic-backed
+macOS arm64 Native AOT probes (borrow/root/drain, late-owner isolation, overflow) via
+unmanaged Cdecl callbacks and a rooted `GCHandle`. The final minos-12 experiment dylib
+was republished and **executed**, reporting `MacOS native input AOT: 3 passed (synthetic
+backend)`:
+
+```text
+dotnet publish verification/MacOSHidInputVerification/MacOSHidInputVerification.csproj -c Release -r osx-arm64 --self-contained -p:PublishAot=true -p:HidInputNativeLibrary=/Users/Dennis.Dyall/Code/y/worktrees/nativeshims-macos-input-harness/Yubico.NativeShims/hidinput/build-release/libhidinput_experiment.dylib
+verification/MacOSHidInputVerification/bin/Release/net10.0/osx-arm64/publish/MacOSHidInputVerification
+```
+
+These prove synthetic C queue/managed callback lifetimes, not actual IOKit device callback
+quiescence, removal behavior, or HID hardware. The experimental ABI has no managed
+terminal-error/removal read path; production initialization, control and callback terminal
+integration still require the D1 walkthrough. ISC-10/11/26/27/28 gain **partial**
+synthetic evidence only; ISC-31/33/58 remained unchecked at this checkpoint. Later
+ISC-49/52 closure is recorded in the evidence record below.
+
+The Measurement Engineer added opt-in `--async-boundary-self-test` (8 passed),
+`--async-boundary-baseline --dry-run` (no device), and preserved `--list flat` (12 existing
+benchmarks) under `benchmarks/Yubico.YubiKit.PerformanceBenchmarks/`; existing session
+signatures were updated to `SessionCreationOptions` to compile with the current API.
+Only two hardware modes are implemented but **not executed**: read-only lifecycle/getInfo/
+dispose/reopen and raw no-input receive without sending a request. The previously proposed
+keepalive cancel/recovery and held-exchange overlap remain deferred until faithful fixture
+support. Per-sample child watchdogs with flushed progress distinguish blocked synchronous
+prefix, returned pending task, synchronous/task fault and censored unknown cleanup. Dataset
+metadata records source commit plus shipping diff hash, tooling hashes, executing
+NativeShims 1.18.0, package/deployed-native digests and architecture/runtime/fixture
+serial; it compares the cached archive's native **asset** to the deployed binary, not the
+whole package to that binary. A passing comparison does not prove which DLL loaded.
+Firmware is null with “not read” reason; native durations/counts are null when unavailable.
+At that tooling-only checkpoint there was no hardware dataset, numeric budget or regression comparison. For a comparable
+before/after baseline use `db7a1bf6` old transport source with the **same** local preview
+package `1.18.1-async.2` on both sides; record package hash, shipping diff and tooling
+revision. The earlier 1.18.0 baseline proposal is superseded, not measured evidence.
+
+**D30 macOS production review point — historical pre-fixture snapshot.** The Route Engineer has
+implemented internal `MacOSFidoHidConnection`/`IHidInputBridge`, terminal wake,
+slot/registry/discovery claim transfer, and awaitable initialization through
+`ApplicationSession`, retaining existing public raw contracts. The native engineer
+integrated the opaque owner into a local preview package with five new macOS exports,
+at-most-once terminal callback, report type/ID validation and checked close-failure
+retention. Both macOS architectures' shared/static builds expose 41 exports; native
+11 tests and synthetic native AOT 5 probes passed as reported by the engineers. Local
+package `1.18.1-async.2` is reproducible from the tagged 1.18.0 base and the dirty-file
+hash manifest in detached-worktree `docs/local-provenance.json`, not a signed release.
+Main-worktree restore passed using
+`RestoreConfigFile=/var/folders/gn/mh64zz5969j89_f5dffnvnb80000kt/T/opencode/yubikit-async-native.nuget.config dotnet toolchain.cs -- restore --project Core`.
+Final preview-package regression runs reported Core 1,355 passed/3 skipped, PublicApi 22,
+Fido2 471, Management 86 and resilience-fast 77. After a small report-queue change that
+avoids allocating a discarded overflow copy, the focused
+`MacOSHidFidoRouteLifetimeTests` filter passed 17; full suite results precede that
+allocation-only follow-up. The packaged-native AOT `MacOSHidRouteVerification` host
+published with real Core/Fido2 and `.2`, but `--list` discovered zero devices and exited 2;
+system USB enumeration also found no YubiKeys. `--probe --serial 0` rejected an invalid
+fixture. At that time no actual IOKit input/cancel acknowledgment, device lifecycle, firmware or
+performance evidence existed. Parent correctness review/fixes occurred, but no independent
+code review is claimed. Earlier D29 no-shipping statements describe that historical
+increment only. The later selected-key results are recorded below; ISC-49/52 are complete,
+while other mapped native/route criteria remain pending.
+
+### Bounded slice definition of done
+
+Before dispatch, record these five closure conditions:
+
+1. **Bounded outcome:** one observable outcome on one selected route, with owner,
+   allowed responsibilities/files, explicit non-goals and applicable stable criterion IDs.
+2. **Finite evidence:** named acceptance probes, exact relevant regression/build commands
+   and required managed, native-runtime, hardware, platform and performance grades as
+   applicable. Reuse existing passes until meaningful changes or new risks invalidate them.
+3. **Behavioral closure:** every agreed behavioral check passes; no correctness, safety or
+   regression blocker remains; the change fits scope and surrounding conventions without
+   speculative shared abstractions or generalization solely for unimplemented routes.
+4. **Bounded review:** one independent correctness review on the settled shape, followed
+   only by targeted review of fixes. The existing two-pass Craftsman budget remains the
+   upper bound. The ordinary default is one implementation pass plus at most one optional,
+   bounded readability cleanup and no more than two review/fix cycles. If blockers remain,
+   the orchestrator presents them to the user rather than waiving them or declaring success.
+5. **Honest handoff:** update this master, status and affected plan with commands/results,
+   evidence grades and limits, deferred items with reasons, and the next action or decision.
+
+**Stop when all five are met.** Defer unsolicited enhancements and redesign for taste.
+Unavailable required evidence makes the route **blocked**; it is never silently downgraded
+to managed-only acceptance. A pre-agreed limited investigation or managed-only milestone
+may finish on its own stated evidence grade. A newly discovered safety issue may require
+more work, but must be made explicit and re-scoped; materially new scope requires user
+approval. Do not spawn self-perpetuating review rounds or rerun a whole suite without a
+meaningful change or newly identified risk.
+
 ### Choices to settle before affected work
 
 | Decision | Default/proposal | Owner and deadline |
@@ -673,7 +888,7 @@ WinRT evaluation proves raw APDU fidelity, limits/chaining, transaction mapping,
 
 ### First smart-card lifetime slice — 2026-09-22
 
-Implemented in the uncommitted worktree over `a7f2cae8`. No NativeShims source/package
+Implemented and committed at `db7a1bf6` over `a7f2cae8`. No NativeShims source/package
 or applet protocol bytes changed. Key source: `PcscConnectionNativeState.cs` owns native
 execution, partial opening, transaction generations/end intents, rooted native state
 and checked cleanup; `ISCardConnectionApi.cs` supplies the native test seam. Factory,
@@ -727,7 +942,8 @@ it. The new integration test selected that authorized USB-C fixture and asserted
 serial/firmware while performing **three connection/disposal cycles and two sequential
 transaction/device-info reads per connection**. No reset, configuration write, credential
 operation, touch ceremony or unplug was performed. Host: macOS 15.7.7, arm64, .NET 10.0.0;
-existing NativeShims 1.16.1. Serial numbers remain out of this planning record.
+then-existing NativeShims 1.16.1. This hardware result predates the refactor and 1.18.0
+upgrade and is not reusable as 1.18.0 hardware evidence. Serial numbers remain out of this planning record.
 
 During that hardware run, discovery initialization skipped the non-selected 5.4.3
 fixture after an unresolved HID discovery read. The selected smart-card scenario passed;
@@ -737,10 +953,11 @@ keys, but did not identify per-adapter execution or resolve the earlier observat
 
 **Remaining limits / deferred to implementation effort.** Non-success native release
 codes remain conservatively unrecovered until their platform semantics are established;
-process restart can be required. Low review notes concern the internal test starter's
-throw-before-start contract, failed-end diagnostic specificity, a child-process kill
-diagnostic race, and consolidating provider/slot lookup before another provider kind is
-added. Windows/Linux native execution, interruption/touch/removal hardware scenarios,
+process restart can be required. Low notes from the original review concern the internal
+test starter's throw-before-start contract, failed-end diagnostic specificity and a
+child-process kill diagnostic race. The subsequent structural refactor centralized slot
+selection and registration-owning smart-card opening before commit. Windows/Linux native
+execution, interruption/touch/removal hardware scenarios,
 clean packaged consumers, performance budgets and whole-epic inventory remain pending.
 No universal epic criterion is checked from this local slice evidence.
 
@@ -783,22 +1000,54 @@ partial-open cleanup, unrecovered quarantine, late release proof, factory owners
 finalization, and safe reopen through controlled native seams. It does not establish
 all-platform native runtime behavior, complete lifecycle inventory, asynchronous public
 transaction acquisition, cross-key capacity/fairness, removal/touch recovery, package
-provenance, or whole-epic closure. All 72 criteria therefore remain unchecked.
+provenance, or whole-epic closure. All 72 criteria were unchecked at that first-slice
+checkpoint; ISC-49/52 were subsequently verified independently.
 
-### First-iteration checkpoint and next design review
+### Historical first-iteration checkpoint and design review
 
-The user approved committing the first smart-card lifetime iteration before extending
-the implementation to HID. Smart-card logging now uses `YubiKitLogging` exclusively;
+The user approved and committed the first smart-card lifetime iteration at `db7a1bf6`
+before extending implementation to HID. Smart-card logging now uses `YubiKitLogging` exclusively;
 the sealed built-in factory exposes a parameterless constructor and `CreateDefault()`.
 Custom factories continue to implement `ISmartCardConnectionFactory`.
 
-Before implementing the next slice, reassess the HID designs against the lessons from
-this iteration: one explicit native lifetime owner, completion as the borrowed-memory
-release boundary, refusal of overlapping operations, and release of physical ownership
-only after proven cleanup. Reuse those contracts without assuming that every HID route
-needs the smart-card worker: native completion, readiness, and callback ownership remain
-platform-specific choices. Update the relevant architecture and acceptance evidence
-after that review; this checkpoint does not approve a shared executor or a HID design.
+Before implementing the next slice, reassess HID designs against the established lessons:
+create the lifetime owner before native open; keep one lifetime authority distinct from
+its native-resources helper; admit no ordinary backlog; treat public task termination as
+the borrowed-memory release boundary; and release physical ownership only after checked
+cleanup, otherwise quarantine it. Apply those rules by route without pre-extracting a
+generic scheduler: native completion, readiness and callback ownership remain platform-
+specific choices.
+
+At that checkpoint no HID route or exact new interface was approved. `IHidConnection` joins
+`IHidDevice`/`IFindHidDevices`, both FIDO/OTP wrappers and six platform implementations;
+wholesale conversion or internalization is broader than one route. The proposal is a
+route-local internal async seam while leaving the common/public surface unchanged until
+a separate compatible migration walkthrough approves otherwise.
+
+The then-proposed next action was a macOS persistent-input native-owner prerequisite and
+bounded design checkpoint, not production migration. Approved A3 direction still requires
+persistent event delivery, accepted-operation drain, event-quiescence acknowledgment,
+bounded copied reports, overflow faulting and late-callback generation isolation. Moving
+the current per-call run-loop pump to a worker is not sufficient. An owned persistent run
+loop remains a fallback only with explicit rationale. Dispatch cancellation-handler
+ownership requires the planned native block bridge, and the report-buffer bound remains
+pending checkpoint selection. The input harness proposal covers
+register/activate/input/removal/cancel acknowledgment, late callbacks/generation and
+Native AOT execution; GET/SET callback timeout behavior remains a separate per-direction,
+per-version runtime experiment and may use the approved blocking fallback meanwhile.
+
+D28 resolves the product-direction fork: use modern dispatch APIs across the current .NET
+10 upstream-supported macOS versions rather than an old-API fallback solely for a macOS 12
+binary minimum. NativeShims 1.18.0 is selected and consumed; exact producer binding remains
+unknown. Tag `cb5275e…` is the recommended aligned source base for the proposed bridge, but
+the concrete contract/base still required approval at that checkpoint. The dependency
+change alone did not authorize HID implementation, native bridge edit or hardware operation;
+D30 and later evidence supersede that proposed next step.
+
+Applicable stable mappings are ISC-9–15, ISC-20, ISC-26–28, ISC-31–33, ISC-50,
+ISC-52–56 and ISC-60–63, with ISC-41–48/ISC-58 only if affected. A Windows FIDO
+alternative additionally maps ISC-16–17 and ISC-29–30, with ISC-50/ISC-52 retained.
+ISC-40 applies only if a separate Windows OTP scope is authorized. This proposal checks none.
 Scheduling overhead and end-to-end performance remain unmeasured.
 
 ### Initial intake evidence — 2026-09-21
@@ -818,7 +1067,7 @@ Scheduling overhead and end-to-end performance remain unmeasured.
 
 ### S0 intelligence evidence — 2026-09-21
 
-This is an independently searched, manually inspected **starting inventory**, not the semantic scanner or a closed acceptance manifest. The orchestrator owns these classifications; engineers supplied read-only evidence on native provenance and existing tests. No runtime, test, build-script, interface, or seam source was changed. The initial-intake statements above describe the earlier point in time; the tests and package inspection below happened subsequently.
+This is an independently searched, manually inspected **starting inventory at `a7f2cae8`**, not the semantic scanner or a closed acceptance manifest. The orchestrator owns these classifications; engineers supplied read-only evidence on native provenance and existing tests. No runtime, test, build-script, interface, or seam source was changed during that pass. The initial-intake statements above describe the earlier point in time; the tests and package inspection below happened subsequently.
 
 #### Revision, scope, and source census
 
@@ -860,7 +1109,11 @@ rg --count-matches 'Task\.Run\(|Task\.Factory\.StartNew\(|\.GetAwaiter\(\)\.GetR
 
 #### Boundary families and current execution owners
 
-Paths below are relative to `src/Core/src/`; all dispositions are current-source observations, not approved replacement designs.
+Paths below are relative to `src/Core/src/`. Smart-card dispositions are `a7f2cae8`
+baseline observations superseded where the first slice changed them. Reinspection at
+`db7a1bf6` confirms that synchronous HID opening and the macOS per-call run-loop pump
+remain live defects. Other rows remain baseline inventory, not unreviewed current-tree
+claims or approved replacement designs.
 
 | Family / source anchors | Current behavior | Outstanding evidence or classification |
 |---|---|---|
@@ -914,7 +1167,28 @@ Applet routes were traced through each module's `src/IYubiKeyExtensions.cs`; the
 
 `RawSmartCardSession`, `RawFidoHidSession`, `RawOtpHidSession`, and typed raw connections add distinct entry routes. `UsbSmartCardConnection.Transport` maps both USB and NFC (`:290-295`), so the class name must not exclude NFC from coverage. Existing multi-transport selection tests in Management/Fido2/WebAuthn/YubiOtp and applet wire/presence tests are useful regressions, not native boundary evidence. The public compatibility scope also includes `IHidDevice.ConnectToIOReports`/`ConnectToFeatureReports`, not only `IHidConnection`: see `src/Core/src/PublicAPI.Unshipped.txt:632-639,683`.
 
-#### Native package provenance and capability evidence
+#### Earlier signed NativeShims 1.18.0 dependency evidence — 2026-09-23
+
+The Dependency Engineer first changed only `Directory.Packages.props:23` from 1.16.1 to
+1.18.0; no lockfile changed. This evidence predates the local `.2` preview pin:
+
+| Evidence | Result and limitation |
+|---|---|
+| Package identity/signature | SHA-512 `7bf7866ead06877547c4b5056c1ba84358cac1e01ee7ae85acdd65d1105dac54782ef3d3f014c14a920871b1d259efcdbbc5fb16063d00878b71fdc018a8c43d`. Author and NuGet repository signatures verified; NU3028 reported an incomplete certificate-revocation check, so do not overstate revocation evidence. |
+| Restore | `dotnet toolchain.cs restore` passed; generated assets contain 1.18.0 and no 1.16.1. |
+| Managed regressions | `dotnet toolchain.cs -- test --project Core` reported 1,335 passed/3 skipped; `dotnet toolchain.cs -- test --project PublicApi` reported 22 passed. Focused results: Core `CryptographyProviderExtensionTests` 11 and `ArkgP256Tests` 3; Fido2 `PreviewSignGeneratedKeyTests` 3. These prove managed/local native-crypto paths, not device PC/SC or HID behavior. |
+| Native AOT publish | `dotnet publish verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj -c Release -r osx-arm64 --self-contained -p:PublishAot=true` passed. The static shim linked, PCSC.framework remained a dependency, and no shared shim was published. The output was not executed and no hardware was used. |
+| Packaged native shape | macOS x64/arm64 artifacts declare minimum macOS 12 with SDK 14.5. Both retain all 11 `Native_SCard` exports; `pcsc.c`, `native_abi.h`, macOS export lists and PCSC.framework/libSystem dependencies are unchanged from 1.16.1. New static-runtime archives are present across all packaged native platforms. Header/export inspection is not driver/runtime verification. |
+| Deployed artifact check | The deployed arm64 shim's partial digest `96feaab5…` matches the 1.18.0 cache and differs from old `db45ce49…`; these are deliberately recorded as partial identifiers, not fabricated full hashes. |
+| Source binding | Tag `1.18.0` at `cb5275ea8c151b7ad0bc9465ff2f9fa24785d3b3` is inspected aligned source evidence, but package metadata contains no producer commit. Exact package-producing binding remains pending. Any bridge native edit still requires explicit contract/base approval. |
+
+The modern macOS HID path remains direct managed IOKit; NativeShims 1.18.0 adds no HID
+exports or dispatch bridge and does not make blocking PC/SC calls asynchronous or abortable. Windows,
+Linux and Intel macOS runtime behavior, device PC/SC/HID behavior and all hardware scenarios
+remain unverified for 1.18.0. Historical macOS hardware evidence predates both the smart-card
+refactor and this upgrade and is not a 1.18.0 hardware pass.
+
+#### Historical NativeShims 1.16.1 provenance and capability evidence
 
 The inspected artifact was the [GitHub release package](https://github.com/Yubico/Yubico.NET.SDK/releases/download/1.16.1/Yubico.NativeShims.1.16.1.nupkg), retained locally at `/var/folders/gn/mh64zz5969j89_f5dffnvnb80000kt/T/opencode/nativeshims-1.16.1/Yubico.NativeShims.1.16.1.nupkg`; extracted binaries are under its sibling `extracted/runtimes/`. Temporary paths are investigation artifacts, not durable release storage.
 
@@ -949,16 +1223,17 @@ An earlier Core invocation with a `|`-joined list of `FullyQualifiedName` filter
 
 The existing BenchmarkDotNet project (`benchmarks/**/Program.cs:25-49,68-88,94-240`) measures discovery and Management opening/session/device-info operations across transports and configures memory/threading diagnostics. It expects a YubiKey 5.8 fixture. It does not provide caller-return/native/recovery decomposition, bounded pending/active counters, cancellation/removal/transaction scenarios, or idle-work accounting. It was not run. The named test durations above are test-run timing, **not** an ISC-62 performance baseline. No new measurement harness was written, no numeric regression budget was frozen, and no hardware/reader fixture or remote Windows/Linux host was confirmed.
 
-Source-only documentation leads: `docs/migration/v1-to-v2-gaps.md:356` claims the synchronous-wait search is empty, contradicted by `UsbSmartCardConnection.cs:102`; `docs/v2-highlights.md:38-46` contains an “Async all the way down” claim requiring qualification. Current documentation also records older Native AOT evidence; it was not rerun for this revision and cannot fill new boundary-test rows.
+Source-only documentation leads from that pass: `docs/migration/v1-to-v2-gaps.md:356` claims the synchronous-wait search is empty, contradicted by `UsbSmartCardConnection.cs:102`; `docs/v2-highlights.md:38-46` contains an “Async all the way down” claim requiring qualification. The older Native AOT evidence in that pass cannot fill new boundary-test rows; the later 1.18.0 publish-only evidence is recorded separately above.
 
 #### Decisions to bring to the user
 
-Resolved product choices and remaining design questions are distinguished below. S0 exit and implementation remain blocked on the outstanding answers/evidence.
+These were the S0 questions. Later decisions supersede them where stated; unresolved
+route-specific evidence still blocks only the affected work.
 
 1. **Compatibility and raw-access scope answered:** D15 permits consistent breaking v2 changes and internalization; D16 retains both public raw sessions and raw connection operations, including public connection implementations and composition. No legacy-signature compatibility path is mandatory. Exact signatures/internalization closure remain to be presented, and the separate transaction-scope decision is due before S4.
 2. **Baseline measurement scope:** which device scale, platforms, reader/firmware fixtures and application scenarios are required? Agree these before proposing harness code or numeric budgets; current defaults are observations, not selected budgets.
 3. **Test-seam design:** present alternatives for the missing Windows/macOS/Linux report and full PC/SC lifecycle coverage, including whether to extend existing seams or introduce narrower ones. Do not silently extend `ISCardApi` or `IIOKitDeviceLifetime`.
-4. **Support/provenance policy:** confirm intended operating-system floors and whether retained internal release evidence can resolve the producer binding. Do not silently equate artifact floors with policy or mark the candidate producer verified.
+4. **Support/provenance policy resolved in part by D28:** v2 follows modern APIs within the current .NET 10 upstream support matrix rather than preserving an old API solely for a macOS 12 binary target. Exact 1.18.0 package-producer binding remains unknown; bridge edits still require an approved contract and compatible base.
 5. **Scanner and platform implementation:** present the bounded semantic-scanner approach, worker admission/queue policy, and each native completion bridge before engineers write them. The proposed graph does not authorize these detailed decisions.
 
 No acceptance checkbox is changed by this pass: the source census is not semantic enforcement; current managed tests are not migrated native contract tests; package inspection is not producer proof or all-platform runtime loading.
@@ -1011,6 +1286,25 @@ D15's compatibility/visibility policy and D16's retention of both public raw-acc
 
 Append accepted evidence to this master acceptance document under the stable ISC ID, with generated boundary manifest/coverage artifacts linked by stable boundary ID. Include probe identity, exact command/result or artifact, SDK SHA, native SHA/package, system/RID, driver/firmware when relevant, and evidence level. Record failures and unavailable fixtures without checking criteria. Every required pending item blocks closure. Preserve IDs when refining interpretation.
 
+**Accepted atomic evidence — 2026-09-23, uncommitted source over `db7a1bf6`, local
+NativeShims `1.18.1-async.2` (SHA-256 `514f3804201c26447273a48fef89fa31f1153eadf12ab9cbd6ea2c5266c60d1f`):**
+
+| Criterion | Exact executed command / result and source | Grade / limit |
+|---|---|---|
+| ISC-49 | `dotnet toolchain.cs -- test --project PublicApi` — 22 passed. `src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs:20-55` tests every registered shipping applet session/extension operation for Task return, Async suffix and final defaulted cancellation token (documented synchronous allowlist). | Public managed API shape only, not native responsiveness. |
+| ISC-52 | `dotnet toolchain.cs -- test --project Core` — 1,355 passed/3 skipped before the subsequent report-queue allocation fix; `dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~MacOSHidFidoRouteLifetimeTests"` — 17 passed after it. `FidoHidProtocol.cs:49-71` has synchronous local-only `Configure` and separately awaited `InitializeAsync`; `ApplicationSession.cs:292-294` awaits FIDO channel initialization. `FidoHidProtocolConcurrencyTests.Configure_DoesNotStartWireInitialization` and `MacOSHidFidoRouteLifetimeTests` held-init session test cover zero-wire configure and pending native initialization. | Managed production configuration/initialization contract, not actual device INIT completion. |
+
+**Earlier empty-host route attempt — not accepted.** `verification/MacOSHidRouteVerification`
+was Native AOT published with real Core/Fido2 and the `.2` package: the host statically
+links 41 exports with no native shared-shim dependency. Executing its binary with `--list`
+returned `discovered=0`, exit 2; `system_profiler SPUSBDataType` showed zero YubiKeys.
+`--probe --serial 0` rejected an invalid serial; no valid explicit-serial probe ran. Thus
+that invocation performed no physical open/init/send/receive/cancel/removal/reopen, native driver callback or
+cancel acknowledgment, firmware, factory-fallback recovery, manual touch/unplug, hardware
+baseline or before/after performance. Neither publishing nor empty discovery
+checks ISC-31/33/58 or route completion. The subsequent selected-key checkpoint below
+supersedes the empty-host availability assessment, not its historical result.
+
 ```yaml
 isc: ISC-30
 boundary_id: Windows.Fido.ReportRead
@@ -1028,4 +1322,88 @@ result: null
 artifact: null
 ```
 
-The first implementation action is S0 baseline/design under the orchestrator, followed by S0b executable shared foundation from the foundation engineer. No runtime acceptance is implied by this plan.
+**Current selected-key checkpoint — 2026-09-23.** The following host and integration
+PASS results are supplied from the prior user run; their exact shell invocations and
+console logs are not retained here. Do not treat them as newly rerun verification.
+On macOS 15.7.7 arm64 / .NET 10.0.0,
+the attached selected key (serial 31683481, firmware 5.7.4) exercised the production
+`verification/MacOSHidRouteVerification` native-AOT host with real Core/Fido2 and the
+local `.2` shim. The explicit-serial read-only probe returned PASS for three
+open → initialize → getInfo → dispose → reopen cycles. This proves a normal-path
+public-route device execution, not removal, touch, pending-read shutdown or all driver
+callback races. The read-only
+`PcscLifetimeIntegrationTests.PcscLifetime_SequentialTransactionsAndConnectionReopens_ReadStableDeviceInfo`
+integration filter passed **one** test on the same fixture: three connections, each
+with two transactions and device-info reads. This result is separate from the earlier
+smart-card test at 1.16.1; it does not prove Windows/Linux smart-card behavior.
+
+Benchmark-tooling artifacts
+[`lifecycle`](artifacts/measurements/async-boundary-20260923T153527498Z-911932a49f5d4a47a85b420e233e0410.json)
+and [`no-input-return`](artifacts/measurements/async-boundary-20260923T153539866Z-85978c78e9af4e80bf6b11e101a4d184.json)
+record three completed lifecycle samples and one **censored** no-input sample (watchdog
+invocation exit 1; child exit code unrecorded; `phase=invocation_returned`, invocation
+return 79.9447 ms). The no-input
+sample never recorded that shutdown was requested: it says nothing about whether
+dispose would complete, and is not a shutdown bug. The tooling records firmware as
+unread, independently of the fixture firmware identified above; `shippingDiffSha256`
+is unavailable because untracked source files exist. There is **no BEFORE dataset** or
+agreed numeric budget: neither latency improvement nor ISC-62 closure follows. No
+touch/unplug/removal scenario ran at this earlier checkpoint. Native-AOT device execution
+on this one macOS route does not close ISC-31/33/58 across required rows; ISC-49/52 remain
+the only checkmarks.
+
+**Later selected-key pending-read checkpoint — 2026-09-23, supplied result (not rerun here).**
+With local `.2` and the explicit temporary feed, the following publish succeeded:
+`RestoreConfigFile=/var/folders/gn/mh64zz5969j89_f5dffnvnb80000kt/T/opencode/yubikit-async-native.nuget.config dotnet publish verification/MacOSHidRouteVerification/MacOSHidRouteVerification.csproj -c Release -r osx-arm64 --self-contained -p:PublishAot=true`.
+`./verification/MacOSHidRouteVerification/bin/Release/net10.0/osx-arm64/publish/MacOSHidRouteVerification --probe --serial 31683481`
+passed three cycles **and** pending raw receive → `DisposeAsync` → read terminal → dispose
+complete → reopen/getInfo on the selected key (firmware 5.7.4). This exercises the real
+IOKit callback acknowledgment in normal shutdown while a read is pending, not physical
+removal, touch or every interruption race. The separate 17 focused post-craftsmanship
+managed tests passed with the preview; the previous 1.18.0-pin tests remain historical.
+Do not check universal ISC-33 or all-platform ISC-58 from this one path. No comparable
+BEFORE dataset or performance improvement is established. The later `.3` publication
+and artifact-backed managed tests above do not retroactively turn this `.2` hardware
+checkpoint into `.3` hardware evidence or establish local private-feed consumption.
+
+**Current bounded milestones — supplied results, not rerun by this document edit.**
+
+| Lane | Outcome and evidence grade | Still required |
+|---|---|---|
+| S4 smart-card transaction | Additive public `BeginTransactionAsync` on `ISmartCardConnection`; built-in path awaits its owned worker, external implementations retain a synchronous fallback. Eight focused managed tests; pre-OTP Core 1,363 passed and PublicApi 22 passed. The selected PC/SC hardware integration test failed with a sharing violation. Implemented/managed-tested, **not hardware-verified**. | Resolve sharing contention, rerun selected-key transaction probe; prove remaining PC/SC lifecycle/context isolation and required platform rows before S4 acceptance. |
+| S2 macOS OTP feature GET/SET | Worker-owned GET and SET candidate implemented. Eight focused unit tests passed; after this change Core 1,371 passed/3 skipped, PublicApi 22 passed, YubiOtp 180 passed, resilience-fast 77 passed. Implemented/managed-tested, **not selected-key OTP hardware-verified**. | Actual GET/SET, touch and recovery on the selected key, plus native/packaged route evidence; do not promote this partial S2 contribution to S5 or universal ISC-18/32/59/61. |
+| S5 OTP and remaining boundaries | Not complete; macOS GET/SET contributes only one platform's candidate implementation. | Windows zero-access feature reports, cross-platform OTP recovery and remaining raw/factory/monitor/disposal boundaries still need their own evidence. |
+
+The `.3` workflow and artifact-backed restore above establish packaging/build evidence, not a
+fresh private-feed restore or selected-key `.3` route run. No physical removal or touch
+occurred in the cited live probes; no scientifically valid BEFORE/AFTER comparison exists.
+The parent handles verification and any requested commit later; only `db7a1bf6` is the
+recorded first smart-card slice commit. All other milestone results remain uncommitted here.
+
+**Bounded fit pass (D30; not a new architecture gate).** Parent owns evidence and
+doc reconciliation; the separate Code Engineer completed named return codes, per-owner report
+capacity, format quarantine helper and trimmed comments on the macOS FIDO route. The
+bounded review returned PASS WITH NOTES; 17 focused managed tests passed after cleanup
+at the historical 1.18.0 pin. This is not a preview native-runtime or hardware result. Keep
+the connection/native event owner and existing public raw contracts, with no shared
+slot interface or scheduler. Value 2 / cost 1: local clarity of return and capacity;
+value 1 / cost 1: comments/docs that distinguish proven normal flow from pending
+shutdown. Keeping the current shape unchanged would leave ambiguous local names and
+stale claims; introducing shared machinery would enlarge a one-route iteration and
+is deferred. The cross-vendor Fable two-turn consultation retained the overall nested
+owner shape and withdrew the shared slot interface. The later preview/pending-read
+hardware result is recorded above; this fit pass supplies no new criterion checkmark.
+
+For a clean-machine replay, obtain the tagged native source plus the exact dirty-file
+hash manifest (the cited `docs/local-provenance.json` was not present in the detached
+worktree on this inspection; recover and verify it before claiming reproducibility),
+build the local preview with that native checkout's macOS build/package
+scripts and inputs, and expose the resulting `.2` package through a **temporary local
+NuGet feed** listed in a temporary NuGet configuration alongside the normal feeds.
+Use the same configuration explicitly as `RestoreConfigFile` for restore/build/publish;
+record resulting package and deployed asset digests. A temporary configuration path
+by itself is not a portable recipe. The current `.2` declaration has restored with
+that configuration; this does not prove clean-machine replay. Before promoting shipping artifacts, establish actual
+source/package binding, compatible clean restores on required systems, native runtime
+and hardware matrix evidence; this unsigned local build is not promotion authority.
+Continue independent platform work while those gates remain pending.

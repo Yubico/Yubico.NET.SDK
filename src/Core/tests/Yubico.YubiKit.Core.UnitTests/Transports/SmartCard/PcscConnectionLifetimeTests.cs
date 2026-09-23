@@ -28,6 +28,163 @@ public class PcscConnectionLifetimeTests
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     [Fact]
+    public async Task AsyncTransaction_ExternalSyncOnlyImplementation_UsesDefaultFallback()
+    {
+        ISmartCardConnection connection = new SyncOnlyTransactionConnection();
+        using var scope = await connection.BeginTransactionAsync(Ct);
+        Assert.Equal(1, ((SyncOnlyTransactionConnection)connection).BeginCalls);
+    }
+
+    [Fact]
+    public async Task AsyncTransaction_BlockedNativeBegin_ReturnsPendingTaskWithoutBlockingCaller()
+    {
+        var api = new ControlledSCardConnectionApi { HoldBegin = true };
+        await using var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        Task<IDisposable>? begin = null;
+        try
+        {
+            begin = connection.BeginTransactionAsync(Ct);
+            await api.BeginEntered.Task.WaitAsync(Ct);
+            Assert.False(begin.IsCompleted);
+        }
+        finally
+        {
+            api.ReleaseBegin.Set();
+            if (begin is not null)
+            {
+                using var scope = await begin;
+            }
+        }
+        Assert.Equal(1, api.EndTransactionCalls);
+    }
+
+    [Fact]
+    public async Task AsyncTransaction_PreCanceledToken_DoesNotBeginNativeTransaction()
+    {
+        var api = new ControlledSCardConnectionApi();
+        await using var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        _ = await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => connection.BeginTransactionAsync(cancellation.Token));
+        Assert.Equal(0, api.BeginTransactionCalls);
+    }
+
+    [Fact]
+    public async Task AsyncTransaction_ShutdownDuringNativeBegin_EndsLateSuccessBeforeRelease()
+    {
+        var api = new ControlledSCardConnectionApi { HoldBegin = true };
+        var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        try
+        {
+            var begin = connection.BeginTransactionAsync(Ct);
+            await api.BeginEntered.Task.WaitAsync(Ct);
+            var shutdown = connection.DisposeAsync().AsTask();
+            Assert.False(shutdown.IsCompleted);
+            api.ReleaseBegin.Set();
+            var scope = await begin;
+            await shutdown;
+            await ((IAsyncDisposable)scope).DisposeAsync();
+            Assert.Equal(["establish", "connect", "begin-enter", "begin-exit", "end", "disconnect", "release-context"], api.Events);
+        }
+        finally
+        {
+            api.ReleaseBegin.Set();
+            await connection.DisposeAsync();
+        }
+    }
+
+    [Fact]
+    public async Task AsyncTransaction_OverlappingBeginIsRefusedWithoutSecondNativeCall()
+    {
+        var api = new ControlledSCardConnectionApi { HoldBegin = true };
+        await using var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        var begin = connection.BeginTransactionAsync(Ct);
+        try
+        {
+            await api.BeginEntered.Task.WaitAsync(Ct);
+            _ = await Assert.ThrowsAsync<InvalidOperationException>(() => connection.BeginTransactionAsync(Ct));
+            Assert.Equal(1, api.BeginTransactionCalls);
+        }
+        finally
+        {
+            api.ReleaseBegin.Set();
+            using var scope = await begin;
+        }
+    }
+
+    [Fact]
+    public async Task AsyncTransaction_CancellationAfterNativeDispatch_DoesNotAbandonSuccessfulBegin()
+    {
+        var api = new ControlledSCardConnectionApi { HoldBegin = true };
+        await using var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        using var cancellation = new CancellationTokenSource();
+        var begin = connection.BeginTransactionAsync(cancellation.Token);
+        try
+        {
+            await api.BeginEntered.Task.WaitAsync(Ct);
+            cancellation.Cancel();
+            Assert.False(begin.IsCompleted);
+            api.ReleaseBegin.Set();
+            IDisposable scope = await begin;
+            await ((IAsyncDisposable)scope).DisposeAsync();
+            Assert.Equal(1, api.EndTransactionCalls);
+        }
+        finally
+        {
+            api.ReleaseBegin.Set();
+        }
+    }
+
+    [Fact]
+    public async Task AsyncTransaction_AsyncScopeEndAwaitsNativeEndAndSyncBeginStillWorks()
+    {
+        var api = new ControlledSCardConnectionApi();
+        var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        try
+        {
+            IDisposable scope = await connection.BeginTransactionAsync(Ct);
+            var transmit = connection.TransmitAndReceiveAsync(new byte[] { 0x00 }, Ct);
+            await api.FirstTransmitEntered.Task.WaitAsync(Ct);
+            var end = ((IAsyncDisposable)scope).DisposeAsync().AsTask();
+            Assert.False(end.IsCompleted);
+            Assert.Equal(0, api.EndTransactionCalls);
+            api.ReleaseTransmit.Set();
+            _ = await transmit;
+            await end;
+            scope.Dispose();
+            Assert.Equal(1, api.EndTransactionCalls);
+            using (connection.BeginTransaction(Ct)) { }
+            Assert.Equal(2, api.EndTransactionCalls);
+        }
+        finally
+        {
+            api.ReleaseTransmit.Set();
+            await connection.DisposeAsync();
+        }
+    }
+
+    [Fact]
+    public async Task AsyncTransaction_FailedAsyncEnd_RefusesFurtherWorkAndShutdownReportsFailure()
+    {
+        var api = new ControlledSCardConnectionApi
+        {
+            EndTransactionResult = ErrorCode.SCARD_E_NOT_TRANSACTED
+        };
+        var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        IDisposable scope = await connection.BeginTransactionAsync(Ct);
+
+        await ((IAsyncDisposable)scope).DisposeAsync();
+        _ = await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => connection.TransmitAndReceiveAsync(new byte[] { 0x00 }, Ct));
+        _ = await Assert.ThrowsAsync<SCardException>(() => connection.DisposeAsync().AsTask());
+        Assert.Equal(1, api.EndTransactionCalls);
+        Assert.Equal(1, api.DisconnectCalls);
+        Assert.Equal(1, api.ReleaseContextCalls);
+    }
+
+    [Fact]
     public async Task BuiltInPcscConnection_OverlappingRawTransmits_RefusesSecondWithoutNativeSubmission()
     {
         var api = new ControlledSCardConnectionApi();
@@ -454,5 +611,25 @@ public class PcscConnectionLifetimeTests
             api: api,
             released: released.SetResult);
         return new WeakReference(connection);
+    }
+
+    private sealed class SyncOnlyTransactionConnection : ISmartCardConnection
+    {
+        public int BeginCalls { get; private set; }
+        public ConnectionType Type => ConnectionType.SmartCard;
+        public Transport Transport => Transport.Usb;
+        public bool SupportsExtendedApdu() => false;
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default)
+        {
+            BeginCalls++;
+            return new CancellationTokenSource();
+        }
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
+            ReadOnlyMemory<byte> command, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public void Dispose() { }
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }

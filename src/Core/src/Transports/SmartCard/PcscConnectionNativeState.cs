@@ -101,6 +101,14 @@ internal sealed class PcscConnectionNativeState
         if (IsWorkerThread)
             throw new InvalidOperationException("A synchronous transaction cannot begin from the native worker.");
 
+        return BeginTransactionAsync(endDisposition, cancellationToken, reportEndFailure).GetAwaiter().GetResult();
+    }
+
+    public async Task<IDisposable> BeginTransactionAsync(
+        SCARD_DISPOSITION endDisposition,
+        CancellationToken cancellationToken,
+        Action<uint> reportEndFailure)
+    {
         cancellationToken.ThrowIfCancellationRequested();
         var transaction = new TransactionState(endDisposition);
         var work = new NativeWorkItem<uint>(
@@ -119,7 +127,7 @@ internal sealed class PcscConnectionNativeState
         }
 
         SignalWorker();
-        var result = work.Task.GetAwaiter().GetResult();
+        var result = await work.Task.ConfigureAwait(false);
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new SCardException("ExceptionMessages.SCardBeginTransactionFailure", result);
 
@@ -570,7 +578,7 @@ internal sealed class PcscConnectionNativeState
     private sealed class TransactionScope(
         PcscConnectionNativeState owner,
         TransactionState transaction,
-        Action<uint> reportEndFailure) : IDisposable
+        Action<uint> reportEndFailure) : IDisposable, IAsyncDisposable
     {
         public void Dispose()
         {
@@ -579,6 +587,13 @@ internal sealed class PcscConnectionNativeState
 
             var endTask = owner.RequestTransactionEnd(transaction);
             var result = endTask.GetAwaiter().GetResult();
+            if (result != ErrorCode.SCARD_S_SUCCESS)
+                reportEndFailure(result);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            var result = await owner.RequestTransactionEnd(transaction).ConfigureAwait(false);
             if (result != ErrorCode.SCARD_S_SUCCESS)
                 reportEndFailure(result);
         }

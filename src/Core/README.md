@@ -114,6 +114,18 @@ Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
 `RawFidoHidSession` and `RawOtpHidSession` are the HID equivalents, created with
 `device.CreateRawFidoHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
 
+In the development worktree, the built-in macOS FIDO connection uses asynchronous open,
+awaited channel initialization and persistent native input delivery. Blocking output and
+checked shutdown have connection-owned execution; uncertain native close retains the
+physical claim. This does not make the public lower-level `IHidConnection` interface or
+OTP/Windows/Linux HID routes asynchronous. The development worktree's read-only macOS
+FIDO open/init/getInfo/dispose/reopen path has run on one connected 5.7.4 YubiKey, but
+touch, removal and interrupted shutdown are not verified. The current development pin is
+**`Yubico.NativeShims` `1.18.1-async.2`**, an unsigned, unpublished local preview requiring
+a local feed; the prior selected-key result used that preview. An actual-key pending-receive
+dispose/reopen test is still pending, not a claimed pass; see the
+[async-boundaries status](../../docs/plans/yubikit-async-boundaries/00-status.md).
+
 ### Use a secure channel
 
 Core owns the SCP key-parameter types; session factories establish the channel from them.

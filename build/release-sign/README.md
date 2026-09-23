@@ -6,14 +6,13 @@
 
 - Go 1.27.1.
 - GitHub CLI (`gh`), authenticated for `Yubico/Yubico.NET.SDK` attestations.
-- The Yubico `nuget-sign` fork at commit `25ef12b`.
+- `Yubico/nuget-sign` at merged commit `d283a90294edc5aba1dfd211b3d948b71d335f0e`.
 - A Personal Identity Verification (PIV) signing key, a leaf-first Privacy-Enhanced Mail (PEM) certificate chain, and PEM roots for the signer and timestamp authority.
 
 ```sh
-git clone git@github.com:Yubico/nuget-sign-verification-fix.git
-cd nuget-sign-verification-fix
-git switch fix/verify-authenticode-cryptography
-git checkout 25ef12b
+git clone git@github.com:Yubico/nuget-sign.git
+cd nuget-sign
+git checkout d283a90294edc5aba1dfd211b3d948b71d335f0e
 go install -tags nogcpkms .
 cd /path/to/Yubico.NET.SDK
 go -C build/release-sign build -o /tmp/release-sign .

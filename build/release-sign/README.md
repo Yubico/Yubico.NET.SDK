@@ -1,18 +1,18 @@
 # Cross-platform release signer
 
-`nuget-sign` signs NuGet packages and their selected assemblies, then verifies the package signature and focused Authenticode runtime policy. This wrapper enforces manifest policy, build provenance, package preservation, atomic output, and reporting.
+`nuget-sign` owns all signing and signature verification: Authenticode for the selected assemblies, the NuGet author signature, certificate chains, timestamps, and signer pinning. This wrapper owns only what is specific to Yubico.NET.SDK releases: GitHub build provenance, the package and assembly allow-lists in `manifests/`, repacking signed assemblies into the CI-built packages, a check that nothing else changed, atomic output, and the release report.
 
 ## Prerequisites and build
 
 - Go 1.27.1.
 - GitHub CLI (`gh`), authenticated for `Yubico/Yubico.NET.SDK` attestations.
-- `Yubico/nuget-sign` at merged commit `d283a90294edc5aba1dfd211b3d948b71d335f0e`.
+- `Yubico/nuget-sign` at commit `e6c54452834ff9fd6bf034b253d66758ca555556` (Yubico/nuget-sign#2) or later, which makes `verify --assemblies` fail on any unverified assembly and pins assembly signers with `--certificate-fingerprint`.
 - A Personal Identity Verification (PIV) signing key, a leaf-first Privacy-Enhanced Mail (PEM) certificate chain, and PEM roots for the signer and timestamp authority.
 
 ```sh
 git clone git@github.com:Yubico/nuget-sign.git
 cd nuget-sign
-git checkout d283a90294edc5aba1dfd211b3d948b71d335f0e
+git checkout e6c54452834ff9fd6bf034b253d66758ca555556
 go install -tags nogcpkms .
 cd /path/to/Yubico.NET.SDK
 go -C build/release-sign build -o /tmp/release-sign .

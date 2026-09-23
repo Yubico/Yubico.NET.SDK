@@ -9,9 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -38,6 +36,7 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner) error {
 	if err != nil {
 		return err
 	}
+	fmt.Fprintln(os.Stderr, "Checking build provenance and package policy; the PIN prompt follows...")
 	unsignedDirectory := filepath.Join(cfg.WorkingDirectory, "scratch", "unsigned")
 	extracted, err := extractArtifacts(cfg.WorkingDirectory, cfg.Artifacts, unsignedDirectory)
 	if err != nil {
@@ -175,20 +174,9 @@ func validateRun(ctx context.Context, cfg *runConfig, runner commandRunner) (man
 	if err != nil {
 		return empty(err)
 	}
-	certificates, err := readCertificates(cfg.CertificatePath)
+	leaf, err := readLeafCertificate(cfg.CertificatePath)
 	if err != nil {
-		return empty(fmt.Errorf("read certificate chain: %w", err))
-	}
-	roots, err := trustAnchorPool(cfg.RootPath)
-	if err != nil {
-		return empty(fmt.Errorf("read root: %w", err))
-	}
-	leaf, err := validateCertificateChain(certificates, roots)
-	if err != nil {
-		return empty(err)
-	}
-	if _, err := trustAnchorPool(cfg.TimestampRootPath); err != nil {
-		return empty(fmt.Errorf("read timestamp root: %w", err))
+		return empty(fmt.Errorf("read signing certificate: %w", err))
 	}
 	return m, hash, leaf, nugetTool, nil
 }
@@ -206,40 +194,14 @@ func inspectNugetSign(ctx context.Context, runner commandRunner, name string) (r
 	if err != nil {
 		return reportTool{}, err
 	}
-	if err := validateNugetSignVersion(output); err != nil {
-		return reportTool{}, err
+	if !strings.HasPrefix(string(output), "nuget-sign version ") {
+		return reportTool{}, fmt.Errorf("%s is not nuget-sign: %q", resolved, strings.TrimSpace(string(output)))
 	}
 	digest, err := sha256File(resolved)
 	if err != nil {
 		return reportTool{}, err
 	}
 	return reportTool{Path: resolved, Version: strings.TrimSpace(string(output)), SHA256: digest}, nil
-}
-
-var nugetSignVersionPattern = regexp.MustCompile(`^nuget-sign version ([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$`)
-
-func validateNugetSignVersion(output []byte) error {
-	line := strings.Join(strings.Fields(strings.SplitN(string(output), "\n", 2)[0]), " ")
-	match := nugetSignVersionPattern.FindStringSubmatch(line)
-	if match == nil {
-		return fmt.Errorf("unrecognized nuget-sign version output: %q", line)
-	}
-	values := make([]int, 3)
-	for i := range values {
-		part := match[i+1]
-		if len(part) > 1 && part[0] == '0' {
-			return fmt.Errorf("unrecognized nuget-sign version output: %q", line)
-		}
-		value, err := strconv.Atoi(part)
-		if err != nil {
-			return fmt.Errorf("unrecognized nuget-sign version output: %q", line)
-		}
-		values[i] = value
-	}
-	if values[0] == 0 && (values[1] < 1 || (values[1] == 1 && values[2] == 0 && match[4] != "")) {
-		return fmt.Errorf("nuget-sign 0.1.0 or newer is required, found %s", strings.TrimPrefix(line, "nuget-sign version "))
-	}
-	return nil
 }
 
 func createRunStaging(work string) (string, func(), error) {

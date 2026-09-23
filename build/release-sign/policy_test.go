@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
-	"encoding/binary"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -183,18 +182,9 @@ func TestArtifactSafetyPackagePlanNamespacedNuspecAndAttestation(t *testing.T) {
 	}
 }
 
-func TestRewritePreservationAndPEMutationGuard(t *testing.T) {
+func TestRewriteAndPreservation(t *testing.T) {
 	dir := t.TempDir()
-	before := minimalPE()
-	after := fakeSignedPE(t, before)
-	if err := verifyAuthenticodeOnlyMutation(before, after); err != nil {
-		t.Fatal(err)
-	}
-	mutated := append([]byte(nil), after...)
-	mutated[len(before)-1] ^= 1
-	if err := verifyAuthenticodeOnlyMutation(before, mutated); err == nil {
-		t.Fatal("accepted executable mutation")
-	}
+	before, after := []byte("unsigned"), []byte("signed")
 	nupkg := writeZip(t, dir, "in.nupkg", []zipItem{{"lib/a.dll", before}, {"data.bin", bytes.Repeat([]byte("raw"), 20)}})
 	rebuilt := filepath.Join(dir, "rebuilt.nupkg")
 	if err := rewritePackage(nupkg, rebuilt, map[string]struct{}{"lib/a.dll": {}}, func(string, []byte) ([]byte, error) { return after, nil }); err != nil {
@@ -257,31 +247,6 @@ func addSignature(t *testing.T, input, output string) string {
 	}
 	items = append(items, zipItem{".signature.p7s", []byte("signature")})
 	return writeZip(t, filepath.Dir(output), filepath.Base(output), items)
-}
-
-func minimalPE() []byte {
-	b := make([]byte, 512)
-	copy(b, "MZ")
-	binary.LittleEndian.PutUint32(b[0x3c:], 0x80)
-	copy(b[0x80:], "PE\x00\x00")
-	binary.LittleEndian.PutUint16(b[0x84+16:], 224)
-	opt := b[0x98:]
-	binary.LittleEndian.PutUint16(opt, 0x10b)
-	binary.LittleEndian.PutUint32(opt[92:], 16)
-	return b
-}
-
-func fakeSignedPE(t *testing.T, before []byte) []byte {
-	t.Helper()
-	layout, err := parsePESigningLayout(before)
-	if err != nil {
-		t.Fatal(err)
-	}
-	after := append(append([]byte(nil), before...), make([]byte, 8)...)
-	binary.LittleEndian.PutUint32(after[layout.checksum:], 1)
-	binary.LittleEndian.PutUint32(after[layout.security:], uint32(len(before)))
-	binary.LittleEndian.PutUint32(after[layout.security+4:], 8)
-	return after
 }
 
 func testCoreManifest() manifest {

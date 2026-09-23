@@ -1,5 +1,10 @@
 #!/bin/zsh
 # Open an interactive Terminal when the calling agent has no terminal input.
+#
+# Terminal types its command into a shell that may not have started yet, and a
+# terminal line that long is cut at 1024 bytes, spilling the rest into the next
+# read (the PIN prompt). So the command goes into a script and Terminal is only
+# told to run that script.
 set -eu
 
 if [[ $OSTYPE != darwin* || $# -lt 3 ]]; then
@@ -14,11 +19,12 @@ if [[ $status_file != /* || -e $status_file || ! -d ${status_file:h} ]]; then
   exit 1
 fi
 
-command=''
-for argument in "$@"; do
-  command+=" ${(q)argument}"
-done
-command+="; release_sign_status=\$?; print -r -- \$release_sign_status > ${(q)status_file}"
+script=$(mktemp "${status_file:h}/release-sign-launch.XXXXXX")
+{
+  print -r -- "${(j: :)${(q)@}}"
+  print -r -- "print -r -- \$? > ${(q)status_file}"
+  print -r -- "rm -f -- ${(q)script}"
+} > $script
 
 osascript -e 'on run argv' \
   -e 'tell application "Terminal"' \
@@ -26,4 +32,4 @@ osascript -e 'on run argv' \
   -e 'do script (item 1 of argv)' \
   -e 'end tell' \
   -e 'end run' \
-  "$command"
+  "zsh ${(q)script}"

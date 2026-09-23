@@ -18,23 +18,7 @@ import (
 	"time"
 )
 
-func TestExecutableResolutionAndMinimumVersions(t *testing.T) {
-	for _, test := range []struct {
-		output string
-		valid  bool
-	}{
-		{"nuget-sign version 0.0.9\n", false},
-		{"nuget-sign version 0.1.0\n", true},
-		{"nuget-sign version 1.2.3\n", true},
-		{"other version 1.2.3\n", false},
-	} {
-		t.Run(test.output, func(t *testing.T) {
-			err := validateNugetSignVersion([]byte(test.output))
-			if (err == nil) != test.valid {
-				t.Fatalf("valid=%v err=%v", test.valid, err)
-			}
-		})
-	}
+func TestNugetSignExecutableMetadata(t *testing.T) {
 	bin := t.TempDir()
 	if err := os.WriteFile(filepath.Join(bin, "nuget-sign"), []byte("nuget-sign binary"), 0o700); err != nil {
 		t.Fatal(err)
@@ -51,6 +35,10 @@ func TestExecutableResolutionAndMinimumVersions(t *testing.T) {
 	}
 	if call := runner.calls[0]; !reflect.DeepEqual(call, []string{tool, "--version"}) {
 		t.Fatalf("call %v", call)
+	}
+	runner.output = []byte("other version 1.2.3\n")
+	if _, err := inspectNugetSign(context.Background(), runner, "nuget-sign"); err == nil {
+		t.Fatal("accepted an executable that is not nuget-sign")
 	}
 }
 
@@ -118,7 +106,7 @@ func TestSigningEnvironmentScope(t *testing.T) {
 
 func TestExactNugetSignAndVerifyCommands(t *testing.T) {
 	dir := t.TempDir()
-	input := writeZip(t, dir, "input.nupkg", []zipItem{{"a.nuspec", []byte(`<package><metadata><id>A</id><version>1</version></metadata></package>`)}, {"lib/b.dll", minimalPE()}, {"lib/a.dll", minimalPE()}, {"data", []byte("same")}})
+	input := writeZip(t, dir, "input.nupkg", []zipItem{{"a.nuspec", []byte(`<package><metadata><id>A</id><version>1</version></metadata></package>`)}, {"lib/b.dll", []byte("b")}, {"lib/a.dll", []byte("a")}, {"data", []byte("same")}})
 	info := packageInfo{Path: input, Name: "A.1.nupkg", Kind: "nupkg"}
 	selected := map[string]struct{}{"lib/b.dll": {}, "lib/a.dll": {}}
 	output := filepath.Join(dir, "output.nupkg")
@@ -131,11 +119,18 @@ func TestExactNugetSignAndVerifyCommands(t *testing.T) {
 				if err != nil {
 					return err
 				}
-				if err := os.WriteFile(filename, fakeSignedPE(t, body), 0o600); err != nil {
+				if err := os.WriteFile(filename, append(body, "-signed"...), 0o600); err != nil {
 					return err
 				}
 			}
 			return nil
+		}
+		rebuilt, err := archiveContents(call[len(call)-1])
+		if err != nil {
+			return err
+		}
+		if string(rebuilt["lib/a.dll"]) != "a-signed" || string(rebuilt["lib/b.dll"]) != "b-signed" || string(rebuilt["data"]) != "same" {
+			t.Errorf("repacked package does not carry the signed assemblies: %q", rebuilt)
 		}
 		addSignature(t, call[len(call)-1], call[11])
 		return nil
@@ -164,9 +159,6 @@ func TestExactNugetSignAndVerifyCommands(t *testing.T) {
 		t.Fatalf("package command %v, want %v", packageCall, want)
 	}
 	fingerprint := strings.Repeat("A", 64)
-	runner.run = func(call []string) ([]byte, error) {
-		return []byte("lib/a.dll  SHA-256, signer, digest matches\nlib/b.dll  SHA-256, signer, digest matches\n"), nil
-	}
 	if err := verifySignedPackage(context.Background(), runner, cfg, info, output, selected, fingerprint); err != nil {
 		t.Fatal(err)
 	}
@@ -180,35 +172,12 @@ func TestExactNugetSignAndVerifyCommands(t *testing.T) {
 	symbolInput := writeZip(t, dir, "input.snupkg", []zipItem{{"a.nuspec", []byte("same")}, {"a.pdb", []byte("symbols")}})
 	symbolOutput := addSignature(t, symbolInput, filepath.Join(dir, "output.snupkg"))
 	runner.calls = nil
-	runner.output = nil
-	runner.run = nil
 	if err := verifySignedPackage(context.Background(), runner, cfg, packageInfo{Path: symbolInput, Kind: "snupkg"}, symbolOutput, nil, fingerprint); err != nil {
 		t.Fatal(err)
 	}
 	wantSymbolVerify := []string{"/tools/nuget-sign", "verify", "--revocation", "none", "--root", "root.pem", "--timestamp-root", "timestamp.pem", "--certificate-fingerprint", fingerprint, symbolOutput}
 	if !reflect.DeepEqual(runner.calls, [][]string{wantSymbolVerify}) {
 		t.Fatalf("symbol verify commands %v", runner.calls)
-	}
-}
-
-func TestSelectedAssembliesRequireSuccessfulVerification(t *testing.T) {
-	for _, test := range []struct {
-		name, output string
-		valid        bool
-	}{
-		{"verified", "    lib/a.dll  SHA-256, signer, digest matches\n", true},
-		{"missing", "assemblies  1, 1 verified\n", false},
-		{"unsigned", "    lib/a.dll  unsigned\n", false},
-		{"misleading summary", "assemblies  1, 1 verified\n    lib/a.dll  unsigned\n", false},
-		{"modified", "    lib/a.dll  DIGEST DIFFERS\n", false},
-		{"different name", "    lib/a.dll-other  SHA-256, signer, digest matches\n", false},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			err := requireVerifiedAssemblies([]byte(test.output), []string{"lib/a.dll"})
-			if (err == nil) != test.valid {
-				t.Fatalf("valid=%v err=%v", test.valid, err)
-			}
-		})
 	}
 }
 

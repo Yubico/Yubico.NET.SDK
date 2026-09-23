@@ -233,6 +233,23 @@ Conversion traps, in the order they bite:
 | `string` return values | Needs an explicit marshaller (`Utf8StringMarshaller`) or return `nint` and convert. Silent ownership bugs live here — say who frees the buffer in a comment. |
 | `SafeHandle` | **Is** supported, including as a return type. Keep the existing `LinuxUdevSafeHandle`-style pattern; do not downgrade to `nint` during conversion. |
 | `SetLastError = true` | Keep it only where a caller actually reads `errno`/`GetLastError`. It is not free. |
+| Array parameters | Delete `[MarshalAs(UnmanagedType.LPArray, SizeParamIndex = n)]` outright. Do **not** replace it with `[MarshalUsing(CountElementName = ...)]` — leave the parameter as a bare `byte[]`/`IntPtr[]`. See the note below on why that is safe, not merely tidier. |
+
+**Why bare arrays are safe, not just tidier.** A by-value array of a blittable element type is
+*pinned* by the generated stub, not allocated-and-copied:
+
+```csharp
+// from the generated stub, with or without [MarshalUsing]
+fixed (void* __output_native = &ArrayMarshaller<byte, byte>.ManagedToUnmanagedIn.GetPinnableReference(output))
+```
+
+Native writes therefore land in the caller's own buffer, exactly as they did under `[DllImport]`.
+This is load-bearing for native-written output buffers — `CmacEvpMacFinal`'s `output` and
+`BnBigNumToBinaryWithPadding`'s `buffer` are read back by their wrappers after the call. Had the
+generator copied in-only, every CMAC result and every EC coordinate would have come back silently
+zeroed, with a clean build and no warning. Count metadata is only required for arrays marshalled
+back **out** of unmanaged memory, which this repo has none of. Verify with
+`EmitCompilerGeneratedFiles` rather than reasoning about it, as was done here.
 
 Current state: **every** P/Invoke in the repository is `[LibraryImport]`. There is no remaining
 `[DllImport]` or `static extern` anywhere in `src/`, `benchmarks/`, or `verification/`. Treat any

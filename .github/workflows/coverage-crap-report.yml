@@ -16,6 +16,8 @@ on:
     paths:
       - 'src/**/*.cs'
       - 'crap.cs'
+      - 'scripts/code-metrics/**'
+      - 'global.json'
       - 'toolchain.cs'
       - 'coverlet.runsettings.xml'
       - '.config/dotnet-tools.json'
@@ -90,6 +92,8 @@ jobs:
           cp artifacts/crap/head.json "$RUNNER_TEMP/head.json"
           cp crap.cs toolchain.cs coverlet.runsettings.xml "$RUNNER_TEMP/tooling/"
           cp .config/dotnet-tools.json "$RUNNER_TEMP/tooling/dotnet-tools.json"
+          # crap.cs pulls its shared code in with #:include, so it travels with it.
+          cp -r scripts/code-metrics "$RUNNER_TEMP/tooling/code-metrics"
 
       - name: Cache base measurement
         id: base-cache
@@ -112,14 +116,21 @@ jobs:
           cp "$RUNNER_TEMP/tooling/toolchain.cs" toolchain.cs
           cp "$RUNNER_TEMP/tooling/coverlet.runsettings.xml" coverlet.runsettings.xml
           cp "$RUNNER_TEMP/tooling/dotnet-tools.json" .config/dotnet-tools.json
+          rm -rf scripts/code-metrics
+          mkdir -p scripts
+          cp -r "$RUNNER_TEMP/tooling/code-metrics" scripts/code-metrics
 
           rm -rf artifacts/coverage
           dotnet toolchain.cs coverage
           dotnet toolchain.cs -- crap --crap-args "--json artifacts/crap/base.json"
           cp artifacts/crap/base.json "$RUNNER_TEMP/base.json"
 
-          # Discard the tooling overlay so the return checkout has a clean tree.
+          # Discard the tooling overlay so the return checkout has a clean tree. The base may
+          # predate scripts/code-metrics, in which case the overlay is untracked there and
+          # would block the checkout back to head unless removed.
           git checkout -- crap.cs toolchain.cs coverlet.runsettings.xml .config/dotnet-tools.json
+          git checkout -- scripts/code-metrics 2>/dev/null || true
+          git clean -fdq -- scripts/code-metrics
           git checkout --detach "$head_sha"
 
       - name: Render coverage and CRAP report

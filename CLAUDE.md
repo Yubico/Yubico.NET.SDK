@@ -91,6 +91,7 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 - ✅ ALWAYS follow `.editorconfig` (see Pre-Commit Checklist for the formatting workflow)
 - ✅ ALWAYS handle `CancellationToken` in async methods
 - ✅ ALWAYS use `readonly` on fields that don't change
+- ✅ Keep methods simple: cyclomatic complexity ≤ 10 and cognitive complexity ≤ 20, checked by `dotnet toolchain.cs complexity` (see Pre-Commit Checklist). Prefer the repo's existing conventions over clever code.
 - ❌ NEVER use `#region` (split large classes instead)
 - ❌ NEVER use exceptions for control flow
 
@@ -618,8 +619,9 @@ Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL
     Caveat: `dotnet format` only visits documents that belong to a project in the solution. Scoping it to a file-based app script such as `toolchain.cs`, or to a Markdown/props file, matches zero documents and exits `0` — that is "skipped", not "verified clean". Do not report it as a passing gate.
 
     Caveat: `--include` takes a **space-separated** list, which is why the command above leaves `$(...)` unquoted and lets the shell word-split it. Passing several paths as one quoted string joined by `;` or `,` matches **zero** documents and exits `0`, indistinguishable from a clean run. Ensure the paths passed to `--include` are the files you edited.
-5. ✅ No nullable warnings
-6. ✅ Sensitive data zeroed (`ZeroMemory` / `Dispose`)
-7. ✅ No unnecessary allocations in hot paths
-8. ✅ Modern C# (`is null`, switch expressions, file-scoped namespaces)
-9. ✅ EditorConfig followed
+5. ✅ Complexity checked: `dotnet toolchain.cs complexity`. It reports the methods you changed that exceed cyclomatic 10 or cognitive 20, marked new, worse, unchanged, or improved compared with `HEAD`. For each method marked **new** or **worse**, simplify it, or keep it and add the `Complexity-Justification:` line the report prints to your commit message with a real reason. Unchanged and improved methods are existing debt; simplifying them is welcome but optional. Coverage is not part of this check. Details: `TOOLCHAIN.md` § Complexity check.
+6. ✅ No nullable warnings
+7. ✅ Sensitive data zeroed (`ZeroMemory` / `Dispose`)
+8. ✅ No unnecessary allocations in hot paths
+9. ✅ Modern C# (`is null`, switch expressions, file-scoped namespaces)
+10. ✅ EditorConfig followed

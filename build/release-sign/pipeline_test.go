@@ -41,7 +41,7 @@ func TestExecutableResolutionAndMinimumVersions(t *testing.T) {
 	}
 	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
 	runner := &fakeRunner{output: []byte("nuget-sign version 0.1.0\n")}
-	metadata, err := inspectTool(context.Background(), runner, "nuget-sign", validateNugetSignVersion)
+	metadata, err := inspectNugetSign(context.Background(), runner, "nuget-sign")
 	if err != nil {
 		t.Fatal(err)
 	}

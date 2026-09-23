@@ -27,14 +27,18 @@ type authenticodePolicy struct {
 	FirstParty []string `json:"firstParty"`
 }
 
-var componentPackages = map[string][]string{
-	"core":        {"Yubico.Core", "Yubico.YubiKey"},
-	"nativeshims": {"Yubico.NativeShims"},
-}
-
-var componentWorkflows = map[string]string{
-	"core":        "Yubico/Yubico.NET.SDK/.github/workflows/build.yml",
-	"nativeshims": "Yubico/Yubico.NET.SDK/.github/workflows/build-nativeshims.yml",
+var components = map[string]struct {
+	packages []string
+	workflow string
+}{
+	"core": {
+		packages: []string{"Yubico.Core", "Yubico.YubiKey"},
+		workflow: "Yubico/Yubico.NET.SDK/.github/workflows/build.yml",
+	},
+	"nativeshims": {
+		packages: []string{"Yubico.NativeShims"},
+		workflow: "Yubico/Yubico.NET.SDK/.github/workflows/build-nativeshims.yml",
+	},
 }
 
 func loadManifest(filename, component string) (manifest, string, error) {
@@ -62,7 +66,7 @@ func loadManifest(filename, component string) (manifest, string, error) {
 }
 
 func validateManifest(m manifest, component string) error {
-	wanted, ok := componentPackages[component]
+	componentPolicy, ok := components[component]
 	if !ok {
 		return errors.New(`--component must be "core" or "nativeshims"`)
 	}
@@ -72,11 +76,11 @@ func validateManifest(m manifest, component string) error {
 	if strings.TrimSpace(m.AttestationRepo) == "" {
 		return errors.New("manifest attestationRepo is required")
 	}
-	if m.SignerWorkflow != componentWorkflows[component] {
-		return fmt.Errorf("manifest signerWorkflow must be %q", componentWorkflows[component])
+	if m.SignerWorkflow != componentPolicy.workflow {
+		return fmt.Errorf("manifest signerWorkflow must be %q", componentPolicy.workflow)
 	}
-	allowed := make(map[string]bool, len(wanted))
-	for _, id := range wanted {
+	allowed := make(map[string]bool, len(componentPolicy.packages))
+	for _, id := range componentPolicy.packages {
 		allowed[id] = true
 	}
 	for id, policy := range m.Packages {
@@ -96,7 +100,7 @@ func validateManifest(m manifest, component string) error {
 			return fmt.Errorf("package %s: %w", id, err)
 		}
 	}
-	for _, id := range wanted {
+	for _, id := range componentPolicy.packages {
 		if _, ok := m.Packages[id]; !ok {
 			return fmt.Errorf("manifest is missing package %q", id)
 		}
@@ -105,8 +109,8 @@ func validateManifest(m manifest, component string) error {
 }
 
 func knownPackage(id string) (string, bool) {
-	for component, ids := range componentPackages {
-		for _, known := range ids {
+	for component, policy := range components {
+		for _, known := range policy.packages {
 			if id == known {
 				return component, true
 			}

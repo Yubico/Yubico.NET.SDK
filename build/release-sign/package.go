@@ -181,21 +181,19 @@ func selectEntries(filename string, policy authenticodePolicy) (map[string]struc
 		if wanted[entry.Name] {
 			selected[entry.Name] = struct{}{}
 		}
-	}
-	for _, name := range policy.Include {
-		if _, ok := selected[name]; !ok {
-			problems = append(problems, "unmatched include: "+name)
-		}
-	}
-	for _, entry := range archive.File {
 		for _, pattern := range policy.FirstParty {
 			match, _ := path.Match(strings.ToLower(pattern), strings.ToLower(path.Base(entry.Name)))
 			if match {
-				if _, ok := selected[entry.Name]; !ok {
+				if !wanted[entry.Name] {
 					problems = append(problems, "first-party DLL is not selected: "+entry.Name)
 				}
 				break
 			}
+		}
+	}
+	for _, name := range policy.Include {
+		if _, ok := selected[name]; !ok {
+			problems = append(problems, "unmatched include: "+name)
 		}
 	}
 	if len(problems) > 0 {

@@ -86,16 +86,7 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner) error {
 	for _, info := range packages {
 		packageCtx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 		output := filepath.Join(staging, info.Name)
-		selected := map[string]struct{}{}
-		if info.Kind == "nupkg" {
-			selected, err = selectEntries(info.Path, *info.Policy.Authenticode)
-		}
-		if err == nil {
-			err = signPackage(packageCtx, runner, cfg, info, output, selected)
-		}
-		if err == nil {
-			err = verifySignedPackage(packageCtx, runner, cfg, info, output, selected, fingerprint)
-		}
+		selected, err := signAndVerifyPackage(packageCtx, runner, cfg, info, output, fingerprint)
 		cancel()
 		if err != nil {
 			return fmt.Errorf("process %s: %w", info.Name, err)
@@ -124,6 +115,24 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner) error {
 	return commitOutputs(filepath.Join(cfg.WorkingDirectory, "signed"), staging, outputNames, reportContents, cfg.Clean)
 }
 
+func signAndVerifyPackage(ctx context.Context, runner commandRunner, cfg runConfig, info packageInfo, output, fingerprint string) (map[string]struct{}, error) {
+	selected := map[string]struct{}{}
+	if info.Kind == "nupkg" {
+		var err error
+		selected, err = selectEntries(info.Path, *info.Policy.Authenticode)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if err := signPackage(ctx, runner, cfg, info, output, selected); err != nil {
+		return nil, err
+	}
+	if err := verifySignedPackage(ctx, runner, cfg, info, output, selected, fingerprint); err != nil {
+		return nil, err
+	}
+	return selected, nil
+}
+
 func validateRun(ctx context.Context, cfg *runConfig, runner commandRunner) (manifest, string, *x509.Certificate, reportTool, error) {
 	empty := func(err error) (manifest, string, *x509.Certificate, reportTool, error) {
 		return manifest{}, "", nil, reportTool{}, err
@@ -146,7 +155,7 @@ func validateRun(ctx context.Context, cfg *runConfig, runner commandRunner) (man
 	if _, err := exec.LookPath("gh"); err != nil {
 		return empty(errors.New("gh executable is unavailable"))
 	}
-	nugetTool, err := inspectTool(ctx, runner, cfg.NugetSign, validateNugetSignVersion)
+	nugetTool, err := inspectNugetSign(ctx, runner, cfg.NugetSign)
 	if err != nil {
 		return empty(fmt.Errorf("check nuget-sign: %w", err))
 	}
@@ -180,9 +189,7 @@ func validateRun(ctx context.Context, cfg *runConfig, runner commandRunner) (man
 	return m, hash, leaf, nugetTool, nil
 }
 
-type versionValidator func([]byte) error
-
-func inspectTool(ctx context.Context, runner commandRunner, name string, validate versionValidator) (reportTool, error) {
+func inspectNugetSign(ctx context.Context, runner commandRunner, name string) (reportTool, error) {
 	resolved, err := exec.LookPath(name)
 	if err != nil {
 		return reportTool{}, fmt.Errorf("%s is unavailable: %w", name, err)
@@ -195,7 +202,7 @@ func inspectTool(ctx context.Context, runner commandRunner, name string, validat
 	if err != nil {
 		return reportTool{}, err
 	}
-	if err := validate(output); err != nil {
+	if err := validateNugetSignVersion(output); err != nil {
 		return reportTool{}, err
 	}
 	digest, err := sha256File(resolved)

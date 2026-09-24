@@ -4,13 +4,17 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.UnitTests.Devices;
@@ -52,7 +56,7 @@ public class MigrationDiagnosticsTests
         string root = BoundaryScanner.CoreSourceRoot();
         Assert.Equal(new[]
         {
-            "Transmitting APDU: {CommandApdu}",
+            "Transmitting APDU: CLA 0x{Cla:X2} INS 0x{Ins:X2} P1 0x{P1:X2} P2 0x{P2:X2} Le {Le} data length {Length}",
             "Selecting application ID: {ApplicationId}"
         }, LogInvocations(Path.Combine(root, "Protocols/SmartCard/Apdu/PcscProtocol.cs")));
         Assert.Equal(new[]
@@ -170,7 +174,7 @@ public class MigrationDiagnosticsTests
         const string marker = "ISC56-OTP-PIN-key-payload";
         byte[] command = Encoding.ASCII.GetBytes(marker);
         byte[] response = Encoding.ASCII.GetBytes("ISC56-R\0");
-        var connection = new FailingOtpConnection(response);
+        var connection = new FailingOtpConnection(response, $"native reset failed: {marker}");
         using var provider = new RecordingProvider();
         using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
         // OtpHidProtocol accepts a logger directly; do not rely on changing a static logger after initialization.
@@ -178,14 +182,17 @@ public class MigrationDiagnosticsTests
 
         try
         {
-            _ = await Assert.ThrowsAsync<IOException>(() => protocol.SendAndReceiveAsync(0x13, command, Ct));
+            IOException failure = await Assert.ThrowsAsync<IOException>(() => protocol.SendAndReceiveAsync(0x13, command, Ct));
+            Assert.Equal("native response failed", failure.Message);
 
             string[] events = provider.Events;
+            Assert.NotEmpty(events);
             Assert.True(connection.FrameSent);
             Assert.True(connection.ResetAttempted);
             Assert.True(connection.ResponseRead);
             Assert.Contains(events, entry => entry.Contains("Sending OTP slot command", StringComparison.Ordinal));
             Assert.Contains(events, entry => entry.Contains("Unable to reset OTP HID state", StringComparison.Ordinal));
+            Assert.Contains(events, entry => entry == $"ExceptionType={typeof(IOException).FullName}");
             AssertNoPayload(events, command);
             AssertNoPayload(events, response);
         }
@@ -194,6 +201,56 @@ public class MigrationDiagnosticsTests
             CryptographicOperations.ZeroMemory(command);
             CryptographicOperations.ZeroMemory(response);
         }
+    }
+
+    [Fact]
+    public async Task FidoFailedCancel_LogsOperationAndFailureTypeWithoutTransportExceptionPayload()
+    {
+        byte[] secret = Encoding.ASCII.GetBytes("ISC56-FIDO-PIN-key-payload");
+        using var provider = new RecordingProvider();
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        var connection = new FailingFidoConnection($"native cancel failed: {Encoding.ASCII.GetString(secret)}");
+        using var protocol = new FidoHidProtocol(connection, factory.CreateLogger<FidoHidProtocol>());
+        try
+        {
+            InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
+                CtapConstants.CtapVendorFirst, secret, UserPresenceNotification.Create(
+                    new FailingPrompt(), new UserPresenceContext { Basis = UserPresenceBasis.PolicyRequires, Application = "FIDO2", Scope = "example.com" }), Ct));
+            Assert.Equal("prompt failed", failure.Message);
+
+            string[] events = provider.Events;
+            Assert.NotEmpty(events);
+            Assert.True(connection.CancelAttempted);
+            Assert.Contains(events, entry => entry.Contains("Unable to send CTAPHID_CANCEL", StringComparison.Ordinal));
+            Assert.Contains(events, entry => entry == $"ExceptionType={typeof(IOException).FullName}");
+            AssertNoPayload(events, secret);
+        }
+        finally { CryptographicOperations.ZeroMemory(secret); }
+    }
+
+    [Fact]
+    public async Task FidoFailedTerminalValidation_LogsCallbackTypeWithoutCallbackExceptionPayload()
+    {
+        byte[] secret = Encoding.ASCII.GetBytes("ISC56-callback-PIN-key-payload");
+        using var provider = new RecordingProvider();
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        var connection = new FailingFidoConnection(null, invalidTerminal: true);
+        using var protocol = new FidoHidProtocol(connection, factory.CreateLogger<FidoHidProtocol>());
+        try
+        {
+            InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
+                CtapConstants.CtapVendorFirst, secret, UserPresenceNotification.Create(
+                    new FailingPrompt(Encoding.ASCII.GetString(secret)),
+                    new UserPresenceContext { Basis = UserPresenceBasis.PolicyRequires, Application = "FIDO2", Scope = "example.com" }), Ct));
+            Assert.Contains("does not match request command", failure.Message, StringComparison.Ordinal);
+
+            string[] events = provider.Events;
+            Assert.NotEmpty(events);
+            Assert.Contains(events, entry => entry.Contains("terminal response validation also failed", StringComparison.Ordinal));
+            Assert.Contains(events, entry => entry == $"ExceptionType={typeof(InvalidOperationException).FullName}");
+            AssertNoPayload(events, secret);
+        }
+        finally { CryptographicOperations.ZeroMemory(secret); }
     }
 
     [Fact]
@@ -211,14 +268,42 @@ public class MigrationDiagnosticsTests
             using var protocol = new PcscProtocol(connection, logger: factory.CreateLogger<PcscProtocol>());
             _ = await protocol.TransmitAndReceiveAsync(new ApduCommand(0, 0xA4, 0, 0, command), cancellationToken: Ct);
             string[] events = provider.Events;
+            Assert.NotEmpty(events);
             Assert.Contains(events, entry => entry.Contains("Transmitting APDU:", StringComparison.Ordinal));
-            Assert.Contains(events, entry => entry.Contains("CommandApdu=CLA:", StringComparison.Ordinal));
+            Assert.Contains(events, entry => entry.Contains("Cla=0", StringComparison.Ordinal));
+            Assert.Contains(events, entry => entry.Contains($"Length={command.Length}", StringComparison.Ordinal));
             AssertNoPayload(events, command);
             AssertNoPayload(events, response);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(command);
+            CryptographicOperations.ZeroMemory(response);
+        }
+    }
+
+    [Fact]
+    public async Task PcscSelect_LogsApplicationIdentifierWithoutResponsePayload()
+    {
+        ReadOnlyMemory<byte> applicationId = ApplicationIds.Management;
+        byte[] response = Encoding.ASCII.GetBytes("ISC56-select-response-secret");
+        using var provider = new RecordingProvider();
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        try
+        {
+            var connection = new FakeSmartCardConnection();
+            byte[] framedResponse = [.. response, 0x90, 0x00];
+            connection.EnqueueResponse(framedResponse);
+            using var protocol = new PcscProtocol(connection, logger: factory.CreateLogger<PcscProtocol>());
+            _ = await protocol.SelectAsync(applicationId, Ct);
+
+            string[] events = provider.Events;
+            Assert.NotEmpty(events);
+            Assert.Contains(events, entry => entry == $"ApplicationId={Convert.ToHexString(applicationId.Span)}");
+            AssertNoPayload(events, response);
+        }
+        finally
+        {
             CryptographicOperations.ZeroMemory(response);
         }
     }
@@ -236,7 +321,7 @@ public class MigrationDiagnosticsTests
         Assert.DoesNotContain(events, entry => entry.Contains(hex, StringComparison.OrdinalIgnoreCase));
     }
 
-    private sealed class FailingOtpConnection(byte[] response) : IOtpHidConnection
+    private sealed class FailingOtpConnection(byte[] response, string resetError) : IOtpHidConnection
     {
         private int _reads;
         private int _writes;
@@ -251,8 +336,8 @@ public class MigrationDiagnosticsTests
             if (report.Span[7] == OtpConstants.DummyReportWrite)
             {
                 ResetAttempted = true;
-                // The SDK formats the exception via the logger; a native exception's own message is external.
-                throw new IOException("native reset failed");
+                // A native exception's message is external and may contain command data.
+                throw new IOException(resetError);
             }
             if (++_writes == 10)
                 FrameSent = true;
@@ -269,6 +354,62 @@ public class MigrationDiagnosticsTests
             // Initial status and ready-to-write status; report body is opaque to diagnostics.
             ResponseRead = true;
             return Task.FromResult<ReadOnlyMemory<byte>>(response);
+        }
+
+        public void Dispose() { }
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private sealed class FailingPrompt(string? message = null) : IUserPresencePrompt
+    {
+        public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+            ValueTask.FromException(new InvalidOperationException(message ?? "prompt failed"));
+
+        public ValueTask OnUserPresenceResolvedAsync(UserPresenceContext context, UserPresenceOutcome outcome,
+            CancellationToken cancellationToken) => ValueTask.CompletedTask;
+    }
+
+    private sealed class FailingFidoConnection(string? cancelError, bool invalidTerminal = false) : IFidoHidConnection
+    {
+        private byte[]? _nonce;
+        private int _reads;
+        public ConnectionType Type => ConnectionType.HidFido;
+        public int PacketSize => CtapConstants.PacketSize;
+        public bool CancelAttempted { get; private set; }
+
+        public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default)
+        {
+            byte command = (byte)(packet.Span[4] & ~CtapConstants.InitPacketMask);
+            if (command == CtapConstants.CtapHidInit)
+                _nonce = packet.Span.Slice(CtapConstants.InitHeaderSize, CtapConstants.NonceSize).ToArray();
+            if (command == CtapConstants.CtapHidCancel)
+            {
+                CancelAttempted = true;
+                if (cancelError is not null)
+                    throw new IOException(cancelError);
+            }
+            return Task.CompletedTask;
+        }
+
+        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        {
+            byte[] packet = new byte[CtapConstants.PacketSize];
+            BinaryPrimitives.WriteUInt32BigEndian(packet, _reads == 0 ? CtapConstants.BroadcastChannelId : 0x01020304);
+            packet[4] = (byte)((_reads == 0 ? CtapConstants.CtapHidInit :
+                _reads == 1 ? CtapConstants.CtapHidKeepAlive :
+                _reads == 2 && invalidTerminal ? CtapConstants.CtapHidInit : CtapConstants.CtapVendorFirst) |
+                CtapConstants.InitPacketMask);
+            byte[] payload = _reads switch
+            {
+                0 => [.. _nonce ?? [], 0x01, 0x02, 0x03, 0x04, 0x02, 0x05, 0x08, 0x00, 0x00],
+                1 => [CtapConstants.KeepAliveStatusUpNeeded],
+                _ => [0x2D]
+            };
+            packet[5] = (byte)(payload.Length >> 8);
+            packet[6] = (byte)payload.Length;
+            payload.AsSpan().CopyTo(packet.AsSpan(CtapConstants.InitHeaderSize));
+            _reads++;
+            return Task.FromResult<ReadOnlyMemory<byte>>(packet);
         }
 
         public void Dispose() { }

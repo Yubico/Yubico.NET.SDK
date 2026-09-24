@@ -442,7 +442,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             // The guard remains held: a failed abort leaves framing unknown for this protocol instance.
             try
             {
-                _logger.LogWarning(ex, "Unable to reset OTP HID state after {Reason}", reason);
+                _logger.LogWarning("Unable to reset OTP HID state after {Reason}; exception type {ExceptionType}",
+                    reason, ex.GetType().FullName);
             }
             catch (Exception)
             {

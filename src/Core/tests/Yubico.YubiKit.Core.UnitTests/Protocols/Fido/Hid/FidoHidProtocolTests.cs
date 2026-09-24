@@ -618,7 +618,8 @@ public class FidoHidProtocolTests
         var connection = new FakeFidoHidConnection();
         var logger = new RecordingLogger();
         var protocol = new FidoHidProtocol(connection, logger);
-        var promptFailure = new InvalidOperationException("prompt failed");
+        const string marker = "ISC56-callback-credential-sentinel";
+        var promptFailure = new ArgumentException($"prompt failed with {marker}");
         var prompt = new RecordingUserPresencePrompt(promptFailure);
         connection.QueueResponsePackets(
             CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
@@ -632,7 +633,12 @@ public class FidoHidProtocolTests
                 TestContext.Current.CancellationToken));
 
         Assert.Contains("does not match request command", actual.Message, StringComparison.Ordinal);
-        Assert.Contains(promptFailure, logger.Exceptions);
+        Assert.NotEmpty(logger.Events);
+        Assert.Contains(logger.Events, entry => entry.Contains("User-presence callback failed before CTAP HID terminal response validation also failed", StringComparison.Ordinal));
+        Assert.Contains(logger.Events, entry => entry == $"ExceptionType={typeof(ArgumentException).FullName}");
+        Assert.DoesNotContain(logger.Events, entry => entry == $"ExceptionType={typeof(InvalidOperationException).FullName}");
+        Assert.DoesNotContain(logger.Events, entry => entry.Contains(marker, StringComparison.Ordinal));
+        Assert.DoesNotContain(logger.Exceptions, exception => exception is not null);
     }
 
     /// <summary>
@@ -876,6 +882,7 @@ public class FidoHidProtocolTests
     private sealed class RecordingLogger : ILogger<FidoHidProtocol>
     {
         public List<Exception?> Exceptions { get; } = [];
+        public List<string> Events { get; } = [];
 
         public IDisposable? BeginScope<TState>(TState state)
             where TState : notnull => null;
@@ -887,6 +894,17 @@ public class FidoHidProtocolTests
             EventId eventId,
             TState state,
             Exception? exception,
-            Func<TState, Exception?, string> formatter) => Exceptions.Add(exception);
+            Func<TState, Exception?, string> formatter)
+        {
+            Events.Add(formatter(state, exception));
+            if (state is IEnumerable<KeyValuePair<string, object?>> values)
+            {
+                foreach (var value in values)
+                    Events.Add($"{value.Key}={value.Value}");
+            }
+            if (exception is not null)
+                Events.Add(exception.ToString());
+            Exceptions.Add(exception);
+        }
     }
 }

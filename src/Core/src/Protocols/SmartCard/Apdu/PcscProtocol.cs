@@ -118,7 +118,8 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
+        _logger.LogTrace("Transmitting APDU: CLA 0x{Cla:X2} INS 0x{Ins:X2} P1 0x{P1:X2} P2 0x{P2:X2} Le {Le} data length {Length}",
+            command.Cla, command.Ins, command.P1, command.P2, command.Le, command.Data.Length);
 
         var response = await _exchangeGuard.RunAsync(
                 exchangeToken =>
@@ -142,7 +143,6 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-
         _logger.LogTrace("Selecting application ID: {ApplicationId}", Convert.ToHexString(applicationId.Span));
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };

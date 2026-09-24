@@ -3,7 +3,14 @@
 using System.Text;
 
 /// <summary>What a complexity report needs to know about the run that produced it.</summary>
-sealed record ComplexityReportSettings(string RepoRoot, int MaxCyclomatic, int MaxCognitive, int Top);
+/// <param name="RepoRoot">Absolute repo root, for repo-relative paths.</param>
+/// <param name="MaxCyclomatic">Flag when cyclomatic complexity exceeds this.</param>
+/// <param name="MaxCognitive">Flag when cognitive complexity exceeds this.</param>
+/// <param name="Top">Rows shown in a table.</param>
+/// <param name="LinkBase">
+/// Optional URL prefix for source links, e.g. "https://github.com/o/r/blob/&lt;sha&gt;/".
+/// </param>
+sealed record ComplexityReportSettings(string RepoRoot, int MaxCyclomatic, int MaxCognitive, int Top, string? LinkBase = null);
 
 sealed record MethodResult
 {
@@ -38,43 +45,128 @@ static class ComplexityFindings
 /// <summary>
 /// The pull request comment section: the same findings as the console report, as GitHub markdown.
 /// </summary>
+/// <remarks>
+/// Laid out for a reviewer: the verdict is the heading, methods that need action come first,
+/// each score shows where it came from, and the rules of the check sit in a footer.
+/// </remarks>
 static class MarkdownReport
 {
     const string Justify = "<why this complexity is warranted>";
 
-    public static string Render(ComplexityReportSettings options, MetricScope scope, List<MethodResult> results)
+    public static string Render(ComplexityReportSettings settings, MetricScope scope, List<MethodResult> results)
     {
-        var sb = new StringBuilder();
-        sb.AppendLine("### Complexity");
-        sb.AppendLine();
-        sb.AppendLine(Intro(options, scope));
-        sb.AppendLine();
-
         var findings = ComplexityFindings.Ordered(results);
+        var action = findings.Where(f => f.NeedsAction).ToList();
+        var debt = findings.Count - action.Count;
 
-        if (results.Count == 0)
-        {
-            sb.AppendLine(scope.IsChanged ? "No shipping C# methods changed." : "No shipping C# methods in scope.");
-            return sb.ToString().TrimEnd();
-        }
-
-        if (findings.Count == 0)
-        {
-            sb.AppendLine($"No {(scope.IsChanged ? "changed " : "")}method exceeds a threshold ({Count(results.Count)} checked).");
-            return sb.ToString().TrimEnd();
-        }
-
-        AppendTable(sb, options, scope, findings);
+        var sb = new StringBuilder();
+        sb.AppendLine($"### Complexity: {Headline(scope, results.Count, findings.Count, action.Count, debt)}");
         sb.AppendLine();
-        AppendSummary(sb, scope, findings);
+
+        if (findings.Count > 0)
+        {
+            AppendTable(sb, settings, scope, findings);
+            sb.AppendLine();
+        }
+
+        if (scope.IsChanged && action.Count > 0)
+        {
+            sb.AppendLine(action.Count == 1
+                ? "Simplify it, or add this line to the commit message with a real reason:"
+                : "Simplify each one, or add these lines to the commit message with a real reason:");
+            sb.AppendLine();
+            sb.AppendLine("```");
+            foreach (var finding in action)
+                sb.AppendLine($"Complexity-Justification: {finding.ShortName}: {Justify}");
+            sb.AppendLine("```");
+            sb.AppendLine();
+        }
+
+        if (scope.IsChanged && debt > 0)
+        {
+            var debtStatus = findings.First(f => !f.NeedsAction).Status?.ToString().ToLowerInvariant();
+            sb.AppendLine(debt == 1
+                ? $"The {debtStatus} method is existing debt this change touched: simplifying it is welcome but optional."
+                : "The unchanged and improved methods are existing debt this change touched: simplifying them is welcome but optional.");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine($"<sub>{Footer(settings, scope, results.Count)}</sub>");
         return sb.ToString().TrimEnd();
     }
 
-    static string Intro(ComplexityReportSettings options, MetricScope scope)
+    static string Headline(MetricScope scope, int checkedCount, int findingCount, int actionCount, int debt)
     {
-        var what = scope.IsChanged
-            ? $"Methods changed vs `{scope.BaseRef}`"
-            : "Methods";
+        if (checkedCount == 0)
+            return scope.IsChanged ? "no shipping C# methods changed" : "no shipping C# methods in scope";
+
+        if (findingCount == 0)
+            return scope.IsChanged ? "no changed method exceeds a limit" : "no method exceeds a limit";
+
+        if (!scope.IsChanged)
+            return $"{Count(findingCount)} {(findingCount == 1 ? "exceeds" : "exceed")} a limit";
+
+        if (actionCount == 0)
+            return $"no new or worse methods ({debt} existing debt)";
+
+        return $"{Count(actionCount)} {(actionCount == 1 ? "needs" : "need")} action";
+    }
+
+    static void AppendTable(StringBuilder sb, ComplexityReportSettings settings, MetricScope scope, List<MethodResult> findings)
+    {
+        var withStatus = scope.IsChanged;
+        sb.AppendLine(withStatus ? "| Status | Method | Cyclomatic | Cognitive |" : "| Method | Cyclomatic | Cognitive |");
+        sb.AppendLine(withStatus ? "|---|---|---:|---:|" : "|---|---:|---:|");
+
+        foreach (var finding in findings.Take(settings.Top))
+        {
+            var m = finding.Method;
+            var cyclomatic = Score(finding.Base?.Cyclomatic, m.Cyclomatic, settings.MaxCyclomatic);
+            var cognitive = Score(finding.Base?.Cognitive, m.Cognitive, settings.MaxCognitive);
+            var method = MethodCell(settings, finding);
+
+            if (!withStatus)
+            {
+                sb.AppendLine($"| {method} | {cyclomatic} | {cognitive} |");
+                continue;
+            }
+
+            var status = finding.Status?.ToString().ToLowerInvariant() ?? "";
+            sb.AppendLine($"| {(finding.NeedsAction ? $"**{status}**" : status)} | {method} | {cyclomatic} | {cognitive} |");
+        }
+
+        if (findings.Count > settings.Top)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"… and {findings.Count - settings.Top} more.");
+        }
+    }
+
+    /// <summary>"12 → **14**" when the score moved, "**17**" when it did not; bold means over the limit.</summary>
+    static string Score(int? before, int now, int limit)
+    {
+        var current = now > limit ? $"**{now}**" : now.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        return before is { } b && b != now ? $"{b} → {current}" : current;
+    }
+
+    static string MethodCell(ComplexityReportSettings settings, MethodResult finding)
+    {
+        var m = finding.Method;
+        var path = Repo.Relative(settings.RepoRoot, m.FilePath);
+        var name = $"`{finding.ShortName}`";
+
+        if (settings.LinkBase is { } linkBase)
+        {
+            var encoded = string.Join('/', path.Split('/').Select(Uri.EscapeDataString));
+            name = $"[{name}]({linkBase.TrimEnd('/')}/{encoded}#L{m.StartLine}-L{m.EndLine})";
+        }
+
+        return $"{name}<br><sub>{path}:{m.StartLine}-{m.EndLine}</sub>";
+    }
+
+    static string Footer(ComplexityReportSettings settings, MetricScope scope, int checkedCount)
+    {
+        var what = scope.IsChanged ? $"Changed methods vs `{scope.BaseRef}`" : "Methods";
         var where = scope.Modules.Count switch
         {
             0 => scope.IsChanged ? "" : " in the shipping SDK",
@@ -82,71 +174,8 @@ static class MarkdownReport
             _ => $" in modules {string.Join(", ", scope.Modules)}",
         };
 
-        return $"{what}{where} with cyclomatic complexity above {options.MaxCyclomatic} " +
-               $"or cognitive complexity above {options.MaxCognitive}. Source only; coverage plays no part.";
-    }
-
-    static void AppendTable(StringBuilder sb, ComplexityReportSettings options, MetricScope scope, List<MethodResult> findings)
-    {
-        var withStatus = scope.IsChanged;
-        sb.AppendLine(withStatus ? "| cc | cog | status | method | location |" : "| cc | cog | method | location |");
-        sb.AppendLine(withStatus ? "|---:|---:|---|---|---|" : "|---:|---:|---|---|");
-
-        foreach (var finding in findings.Take(options.Top))
-        {
-            var m = finding.Method;
-            var location = $"`{Repo.Relative(options.RepoRoot, m.FilePath)}:{m.StartLine}-{m.EndLine}`";
-            var method = $"`{finding.ShortName}`";
-
-            if (!withStatus)
-            {
-                sb.AppendLine($"| {m.Cyclomatic} | {m.Cognitive} | {method} | {location} |");
-                continue;
-            }
-
-            var status = finding.Status?.ToString().ToLowerInvariant() ?? "";
-            if (finding.Status is ChangeStatus.Worse or ChangeStatus.Improved && finding.Base is { } b)
-                status += $" (was {b.Cyclomatic}/{b.Cognitive})";
-            if (finding.NeedsAction)
-                status = $"**{status}**";
-
-            sb.AppendLine($"| {m.Cyclomatic} | {m.Cognitive} | {status} | {method} | {location} |");
-        }
-
-        if (findings.Count > options.Top)
-        {
-            sb.AppendLine();
-            sb.AppendLine($"… and {findings.Count - options.Top} more.");
-        }
-    }
-
-    static void AppendSummary(StringBuilder sb, MetricScope scope, List<MethodResult> findings)
-    {
-        if (!scope.IsChanged)
-        {
-            sb.AppendLine($"{Count(findings.Count)} {(findings.Count == 1 ? "exceeds" : "exceed")} a threshold.");
-            return;
-        }
-
-        var action = findings.Where(f => f.NeedsAction).ToList();
-        var debt = findings.Count - action.Count;
-
-        if (action.Count == 0)
-        {
-            sb.AppendLine(
-                $"No new or worse methods. {debt} touched {(debt == 1 ? "method is" : "methods are")} existing debt; " +
-                $"simplifying {(debt == 1 ? "it" : "them")} is welcome but optional.");
-            return;
-        }
-
-        sb.Append($"**{Count(action.Count)} {(action.Count == 1 ? "needs" : "need")} action** (new or worse)");
-        sb.AppendLine(debt == 0 ? "." : $"; {debt} {(debt == 1 ? "is" : "are")} existing debt.");
-        sb.AppendLine("For each, simplify it or add to the commit message:");
-        sb.AppendLine();
-        sb.AppendLine("```");
-        foreach (var finding in action)
-            sb.AppendLine($"Complexity-Justification: {finding.ShortName}: {Justify}");
-        sb.AppendLine("```");
+        return $"{what}{where} ({checkedCount} checked) · limits: cyclomatic {settings.MaxCyclomatic}, " +
+               $"cognitive {settings.MaxCognitive} · **bold** is over the limit · source only, no coverage";
     }
 
     static string Count(int n) => n == 1 ? "1 method" : $"{n} methods";

@@ -164,16 +164,47 @@ static class SelfCheck
             newModuleDelta > 0 && newModuleText.Contains("YubiHsm", StringComparison.Ordinal),
             $"expected positive total CRAP delta and 'YubiHsm' listed, got delta={newModuleDelta}, text=\n{newModuleText}");
 
-        // An unchanged module renders "." in both delta columns rather than "+0"/"-0".
+        // Markdown: an unchanged side reads as "no module moved", with no table.
         var unchangedCore = new Dictionary<string, ModuleStats>
         {
             ["Core"] = new() { MethodCount = 100, TotalCrap = 500, CountCrapAtLeast8 = 20, CountCognitiveOver15 = 5, MeanCoveragePercent = 70 },
         };
         var (unchangedText, unchangedDelta) = ModuleReportBuilder.Build(unchangedCore, unchangedCore, markdown: true);
-        const string expectedUnchangedRow = "| **Core** | 100 | 500 | . | 20 | 5 | 70.0% | . |";
-        yield return ("unchanged-module-renders-dot-not-zero",
-            Math.Abs(unchangedDelta) < 0.5 && unchangedText.Contains(expectedUnchangedRow, StringComparison.Ordinal),
-            $"expected row '{expectedUnchangedRow}' and unchanged verdict, got delta={unchangedDelta}, text=\n{unchangedText}");
+        yield return ("markdown-unchanged-has-no-table",
+            Math.Abs(unchangedDelta) < 0.5
+            && unchangedText.Contains("Total CRAP 500, unchanged from the base. No module moved.", StringComparison.Ordinal)
+            && !unchangedText.Contains("| Module |", StringComparison.Ordinal),
+            unchangedText);
+
+        // Markdown: only moved modules are listed, numbers are grouped, and a zero delta is a dash.
+        var head = new Dictionary<string, ModuleStats>
+        {
+            ["Core"] = new() { MethodCount = 1375, TotalCrap = 25375, CountCrapAtLeast8 = 386, CountCognitiveOver15 = 8, MeanCoveragePercent = 70 },
+            ["Piv"] = new() { MethodCount = 183, TotalCrap = 6094, CountCrapAtLeast8 = 76, CountCognitiveOver15 = 3, MeanCoveragePercent = 50 },
+        };
+        var baseline = new Dictionary<string, ModuleStats>
+        {
+            ["Core"] = head["Core"] with { TotalCrap = 24271 },
+            ["Piv"] = head["Piv"],
+        };
+        var (movedText, _) = ModuleReportBuilder.Build(head, baseline, markdown: true);
+        yield return ("markdown-lists-only-moved-modules",
+            movedText.Contains("Total CRAP 31,469, +1,104 from the base. 1 of 2 modules moved:", StringComparison.Ordinal)
+            && movedText.Contains("| Core | 1,375 | 25,375 | +1,104 | 386 | 70.0% | – |", StringComparison.Ordinal)
+            && !movedText.Contains("| Piv |", StringComparison.Ordinal)
+            && movedText.Contains("| **Total** | 1,558 | 31,469 | +1,104 | 462 |  |  |", StringComparison.Ordinal),
+            movedText);
+        yield return ("markdown-is-neutral-background",
+            movedText.StartsWith("<!-- yubikit-crap-report -->\n### Coverage and CRAP (background)", StringComparison.Ordinal)
+            && !movedText.Contains("increased", StringComparison.Ordinal)
+            && !movedText.Contains("cog", StringComparison.OrdinalIgnoreCase),
+            movedText);
+
+        // Console keeps "." for an unchanged delta.
+        var (consoleText, _) = ModuleReportBuilder.Build(unchangedCore, unchangedCore, markdown: false);
+        yield return ("console-unchanged-module-renders-dot-not-zero",
+            consoleText.Contains("Core", StringComparison.Ordinal) && consoleText.Contains("CRAP unchanged.", StringComparison.Ordinal),
+            consoleText);
 
         // Verdict selection is driven by total CRAP delta alone.
         yield return ("verdict-decreased", CrapVerdict.Render(-42) == "**CRAP decreased by 42.**", CrapVerdict.Render(-42));
@@ -366,13 +397,14 @@ static class SelfCheck
 
         var empty = MarkdownReport.Render(settings, changed, []);
         yield return ("markdown-empty-changed-scope",
-            empty.StartsWith("### Complexity", StringComparison.Ordinal) && empty.EndsWith("No shipping C# methods changed.", StringComparison.Ordinal),
+            empty.StartsWith("### Complexity: no shipping C# methods changed", StringComparison.Ordinal)
+            && !empty.Contains("| Status |", StringComparison.Ordinal),
             empty);
 
         var clean = MarkdownReport.Render(settings, changed, [Result(Method("A", 3, 2)), Result(Method("B", 4, 1))]);
-        yield return ("markdown-clean-names-base-and-count",
-            clean.Contains("Methods changed vs `abc1234`", StringComparison.Ordinal)
-            && clean.EndsWith("No changed method exceeds a threshold (2 methods checked).", StringComparison.Ordinal),
+        yield return ("markdown-clean-headline-and-footer",
+            clean.StartsWith("### Complexity: no changed method exceeds a limit", StringComparison.Ordinal)
+            && clean.Contains("<sub>Changed methods vs `abc1234` (2 checked) · limits: cyclomatic 10, cognitive 20", StringComparison.Ordinal),
             clean);
 
         var worse = Method("ValidateAsync", 14, 12);
@@ -383,38 +415,47 @@ static class SelfCheck
             Result(worse, ChangeStatus.Worse, Method("ValidateAsync", 12, 11)),
             Result(Method("Small", 2, 1)),
         ]);
-        yield return ("markdown-status-table-action-first",
-            mixed.Contains("| cc | cog | status | method | location |", StringComparison.Ordinal)
+        yield return ("markdown-verdict-is-the-heading",
+            mixed.StartsWith("### Complexity: 1 method needs action", StringComparison.Ordinal),
+            mixed);
+        yield return ("markdown-action-first-with-before-after-and-bold-limit",
+            mixed.Contains(
+                "| **worse** | `OathSession.ValidateAsync`<br><sub>src/Oath/src/OathSession.cs:10-30</sub> | 12 → **14** | 11 → 12 |",
+                StringComparison.Ordinal)
+            && mixed.Contains("| unchanged | `OathSession.ParseUri`<br><sub>src/Oath/src/OathSession.cs:80-100</sub> | **17** | 12 |", StringComparison.Ordinal)
             && mixed.IndexOf("ValidateAsync", StringComparison.Ordinal) < mixed.IndexOf("ParseUri", StringComparison.Ordinal),
             mixed);
-        yield return ("markdown-worse-is-bold-with-previous-scores",
-            mixed.Contains("| 14 | 12 | **worse (was 12/11)** | `OathSession.ValidateAsync` | `src/Oath/src/OathSession.cs:10-30` |", StringComparison.Ordinal)
-            && mixed.Contains("| 17 | 12 | unchanged | `OathSession.ParseUri` |", StringComparison.Ordinal),
-            mixed);
-        yield return ("markdown-summary-and-justification",
-            mixed.Contains("**1 method needs action** (new or worse); 1 is existing debt.", StringComparison.Ordinal)
-            && mixed.Contains("```\nComplexity-Justification: OathSession.ValidateAsync: <why this complexity is warranted>\n```", StringComparison.Ordinal),
+        yield return ("markdown-justification-and-debt-note",
+            mixed.Contains("```\nComplexity-Justification: OathSession.ValidateAsync: <why this complexity is warranted>\n```", StringComparison.Ordinal)
+            && mixed.Contains("existing debt this change touched: simplifying it is welcome but optional.", StringComparison.Ordinal),
             mixed);
 
         var debtOnly = MarkdownReport.Render(settings, changed, [Result(debt, ChangeStatus.Unchanged, debt)]);
         yield return ("markdown-debt-only-is-optional",
-            debtOnly.EndsWith("No new or worse methods. 1 touched method is existing debt; simplifying it is welcome but optional.", StringComparison.Ordinal)
+            debtOnly.StartsWith("### Complexity: no new or worse methods (1 existing debt)", StringComparison.Ordinal)
             && !debtOnly.Contains("Complexity-Justification", StringComparison.Ordinal),
             debtOnly);
 
         var scan = MarkdownReport.Render(settings, full, [Result(worse), Result(debt)]);
         yield return ("markdown-full-scan-has-no-status",
-            scan.Contains("| cc | cog | method | location |", StringComparison.Ordinal)
-            && !scan.Contains("status", StringComparison.Ordinal)
-            && scan.Contains("Methods in the shipping SDK", StringComparison.Ordinal)
-            && scan.EndsWith("2 methods exceed a threshold.", StringComparison.Ordinal),
+            scan.StartsWith("### Complexity: 2 methods exceed a limit", StringComparison.Ordinal)
+            && scan.Contains("| Method | Cyclomatic | Cognitive |", StringComparison.Ordinal)
+            && !scan.Contains("Status", StringComparison.Ordinal)
+            && scan.Contains("Methods in the shipping SDK (2 checked)", StringComparison.Ordinal),
             scan);
 
         var truncated = MarkdownReport.Render(settings with { Top = 1 }, full, [Result(worse), Result(debt)]);
         yield return ("markdown-top-truncates-table",
             truncated.Contains("… and 1 more.", StringComparison.Ordinal)
-            && truncated.Split('\n').Count(l => l.StartsWith("| 1", StringComparison.Ordinal)) == 1,
+            && truncated.Split('\n').Count(l => l.StartsWith("| `", StringComparison.Ordinal)) == 1,
             truncated);
+
+        var linked = MarkdownReport.Render(
+            settings with { LinkBase = "https://github.com/o/r/blob/abc/" }, changed,
+            [Result(Method("New Thing", 12, 3) with { FilePath = "/r/src/Oath/src/With Space.cs" }, ChangeStatus.New)]);
+        yield return ("markdown-links-encode-path-and-lines",
+            linked.Contains("[`OathSession.New Thing`](https://github.com/o/r/blob/abc/src/Oath/src/With%20Space.cs#L10-L30)", StringComparison.Ordinal),
+            linked);
     }
 
     /// <summary>

@@ -202,8 +202,12 @@ static class Fmt
     public static string WholeNumber(double value) =>
         Math.Round(value, MidpointRounding.AwayFromZero).ToString("0", CultureInfo.InvariantCulture);
 
+    /// <summary>Whole number with thousands separators, e.g. "25,375".</summary>
+    public static string Grouped(double value) =>
+        Math.Round(value, MidpointRounding.AwayFromZero).ToString("#,0", CultureInfo.InvariantCulture);
+
     /// <summary>"." when the absolute change is under half a CRAP point; otherwise a signed whole number.</summary>
-    public static string SignedCrapDelta(double? delta)
+    public static string SignedCrapDelta(double? delta, bool grouped = false)
     {
         if (delta is null)
             return string.Empty;
@@ -212,7 +216,8 @@ static class Fmt
             return ".";
 
         var rounded = Math.Round(delta.Value, MidpointRounding.AwayFromZero);
-        return rounded > 0 ? $"+{WholeNumber(rounded)}" : WholeNumber(rounded);
+        var text = grouped ? Grouped(rounded) : WholeNumber(rounded);
+        return rounded > 0 ? $"+{text}" : text;
     }
 
     /// <summary>"." when the absolute change is under half a percentage point; otherwise signed "pp".</summary>
@@ -320,61 +325,74 @@ static class ModuleReportBuilder
         };
     }
 
+    /// <summary>
+    /// The pull request comment section. CRAP is background here, not a verdict: it rises
+    /// with any new code, so the summary is neutral and only modules that moved are listed.
+    /// </summary>
     static string RenderMarkdown(List<ModuleRow> rows, bool hasBaseline, double totalCrapDelta)
     {
+        var modules = rows.Where(r => !r.IsTotal).ToList();
+        var total = rows.Single(r => r.IsTotal);
+
         var sb = new StringBuilder();
         sb.AppendLine("<!-- yubikit-crap-report -->");
-        sb.AppendLine("### Coverage and CRAP");
+        sb.AppendLine("### Coverage and CRAP (background)");
         sb.AppendLine();
-        sb.AppendLine(hasBaseline
-            ? "| module | methods | CRAP | Δ CRAP | ≥8 | cog>15 | coverage | Δ cov |"
-            : "| module | methods | CRAP | ≥8 | cog>15 | coverage |");
-        sb.AppendLine(hasBaseline
-            ? "|---|---:|---:|---:|---:|---:|---:|---:|"
-            : "|---|---:|---:|---:|---:|---:|");
 
-        foreach (var row in rows)
+        var shown = hasBaseline ? modules.Where(Moved).ToList() : modules;
+        sb.AppendLine(Summary(total, modules.Count, shown.Count, hasBaseline, totalCrapDelta));
+        sb.AppendLine();
+
+        if (shown.Count > 0)
         {
-            var name = row.Bold ? $"**{row.Name}**" : row.Name;
-            var crap = Fmt.WholeNumber(row.Crap);
-            var coverage = row.CoveragePercent is null
-                ? ""
-                : $"{row.CoveragePercent.Value.ToString("F1", CultureInfo.InvariantCulture)}%";
+            sb.AppendLine(hasBaseline
+                ? "| Module | Methods | CRAP | Δ CRAP | CRAP ≥ 8 | Coverage | Δ coverage |"
+                : "| Module | Methods | CRAP | CRAP ≥ 8 | Coverage |");
+            sb.AppendLine(hasBaseline
+                ? "|---|---:|---:|---:|---:|---:|---:|"
+                : "|---|---:|---:|---:|---:|");
 
-            if (hasBaseline)
+            foreach (var row in shown.Append(total))
             {
-                var crapDelta = Fmt.SignedCrapDelta(row.CrapDelta);
-                if (row.IsTotal && crapDelta != ".")
-                    crapDelta = $"**{crapDelta}**";
+                var name = row.IsTotal ? "**Total**" : row.Name;
+                var coverage = row.CoveragePercent is { } c ? $"{c.ToString("F1", CultureInfo.InvariantCulture)}%" : "";
 
-                var coverageDelta = Fmt.SignedCoverageDeltaPp(row.CoverageDeltaPp);
-
-                sb.AppendLine(
-                    $"| {name} | {row.Methods} | {crap} | {crapDelta} | {row.CrapAtLeast8} | {row.CognitiveOver15} | {coverage} | {coverageDelta} |");
+                sb.AppendLine(hasBaseline
+                    ? $"| {name} | {Fmt.Grouped(row.Methods)} | {Fmt.Grouped(row.Crap)} | {Dash(Fmt.SignedCrapDelta(row.CrapDelta, grouped: true))} | {Fmt.Grouped(row.CrapAtLeast8)} | {coverage} | {Dash(Fmt.SignedCoverageDeltaPp(row.CoverageDeltaPp))} |"
+                    : $"| {name} | {Fmt.Grouped(row.Methods)} | {Fmt.Grouped(row.Crap)} | {Fmt.Grouped(row.CrapAtLeast8)} | {coverage} |");
             }
-            else
-            {
-                sb.AppendLine($"| {name} | {row.Methods} | {crap} | {row.CrapAtLeast8} | {row.CognitiveOver15} | {coverage} |");
-            }
-        }
 
-        if (hasBaseline)
-        {
             sb.AppendLine();
-            sb.AppendLine(CrapVerdict.Render(totalCrapDelta));
-
-            var increased = rows.Where(r => !r.IsTotal && r.CrapDelta is > 0.5).ToList();
-            if (increased.Count > 0)
-            {
-                sb.AppendLine();
-                sb.AppendLine("> [!NOTE]");
-                var names = string.Join(", ", increased.Select(r => $"{r.Name} (+{Fmt.WholeNumber(r.CrapDelta!.Value)})"));
-                sb.AppendLine($"> CRAP increased in: {names}.");
-            }
         }
+
+        sb.AppendLine(
+            "<sub>Per method, CRAP = cyclomatic² × (1 − coverage)³ + cyclomatic, summed per module. " +
+            "It rises with any new code, so read it as background on test coverage, not as a target. " +
+            "Coverage is the mean across a module's methods; the total leaves it blank.</sub>");
 
         return sb.ToString().TrimEnd();
     }
+
+    static bool Moved(ModuleRow row) =>
+        row.CrapDelta is { } crap && Math.Abs(crap) >= 0.5
+        || row.CoverageDeltaPp is { } coverage && Math.Abs(coverage) >= 0.5;
+
+    static string Summary(ModuleRow total, int moduleCount, int movedCount, bool hasBaseline, double totalCrapDelta)
+    {
+        var crap = Fmt.Grouped(total.Crap);
+        if (!hasBaseline)
+            return $"Total CRAP {crap} across {moduleCount} {(moduleCount == 1 ? "module" : "modules")}.";
+
+        if (movedCount == 0)
+            return $"Total CRAP {crap}, unchanged from the base. No module moved.";
+
+        var delta = Fmt.SignedCrapDelta(totalCrapDelta, grouped: true);
+        var change = delta == "." ? "unchanged from the base" : $"{delta} from the base";
+        return $"Total CRAP {crap}, {change}. {movedCount} of {moduleCount} modules moved:";
+    }
+
+    /// <summary>"." reads as a typo in a table; an en dash reads as "no change".</summary>
+    static string Dash(string delta) => delta == "." ? "–" : delta;
 
     static string RenderConsole(List<ModuleRow> rows, bool hasBaseline, double totalCrapDelta)
     {

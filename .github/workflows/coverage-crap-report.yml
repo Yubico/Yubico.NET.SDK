@@ -54,9 +54,10 @@ jobs:
       - name: Check out source
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
-          # The checkout is the pull request's merge commit. Its first parent is the base
-          # branch, so depth 2 is all the diff below needs.
-          fetch-depth: 2
+          # The pull request's own head commit rather than the merge commit, so line numbers
+          # and source links match what reviewers see. Full history for the merge base.
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
@@ -75,11 +76,13 @@ jobs:
         run: node .github/scripts/report-comment.test.js
 
       - name: Check changed methods
-        # Diffing the merge commit against its first parent is exactly what the pull
-        # request changes, even if the base branch moved after the event was created.
+        # Head versus merge base is the same diff as the pull request's "Files changed" tab.
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          LINK_BASE: ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha }}/
         run: |
-          base="$(git rev-parse --short HEAD^1)"
-          dotnet complexity.cs --markdown --base "$base" --top 50 > "$RUNNER_TEMP/complexity.md"
+          base="$(git rev-parse --short "$(git merge-base HEAD "$BASE_SHA")")"
+          dotnet complexity.cs --markdown --base "$base" --top 50 --link-base "$LINK_BASE" > "$RUNNER_TEMP/complexity.md"
           cat "$RUNNER_TEMP/complexity.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Update pull request comment

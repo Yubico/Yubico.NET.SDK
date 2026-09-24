@@ -39,6 +39,7 @@
  *   --json <path>           Write every in-scope method as JSON.
  *   --markdown              Print a GitHub markdown section instead of the console
  *                           table (used for the pull request comment).
+ *   --link-base <url>       With --markdown, link each method to <url><path>#L<start>-L<end>.
  *   --fail-on-findings      Exit 3 when a finding needs action (new or worse in a
  *                           changed scope; any finding in a full scan).
  *
@@ -73,8 +74,9 @@ sealed record ComplexityOptions
     public string? JsonPath { get; init; }
     public bool FailOnFindings { get; init; }
     public bool Markdown { get; init; }
+    public string? LinkBase { get; init; }
 
-    public ComplexityReportSettings Settings => new(RepoRoot, MaxCyclomatic, MaxCognitive, Top);
+    public ComplexityReportSettings Settings => new(RepoRoot, MaxCyclomatic, MaxCognitive, Top, LinkBase);
 
     public static ComplexityOptions? Parse(string[] args)
     {
@@ -93,6 +95,7 @@ sealed record ComplexityOptions
         string? json = null;
         var failOnFindings = false;
         var markdown = false;
+        string? linkBase = null;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -125,6 +128,9 @@ sealed record ComplexityOptions
                 case "--markdown":
                     markdown = true;
                     break;
+                case "--link-base" when i + 1 < args.Length:
+                    linkBase = args[++i];
+                    break;
                 case "--help" or "-h":
                     PrintUsage();
                     return null;
@@ -154,6 +160,7 @@ sealed record ComplexityOptions
             JsonPath = json,
             FailOnFindings = failOnFindings,
             Markdown = markdown,
+            LinkBase = linkBase,
         };
     }
 
@@ -179,6 +186,7 @@ sealed record ComplexityOptions
               --json <path>              Write every in-scope method as JSON
               --fail-on-findings         Exit 3 when a finding needs action
               --markdown                 Print a GitHub markdown section instead of the console table
+              --link-base <url>          With --markdown, link methods to <url><path>#L<start>-L<end>
             """ + "\n" + ScopeArgs.Usage);
 }
 

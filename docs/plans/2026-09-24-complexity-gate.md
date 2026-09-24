@@ -204,7 +204,7 @@ Run on 2026-09-24 with SDK 10.0.401 (macOS arm64).
 ### Usage model
 
 - `dotnet complexity.cs --markdown` prints the same findings as a GitHub markdown section instead of the console table. It combines with every scope option, `--top`, `--json` and `--fail-on-findings`. Locally: `dotnet complexity.cs --markdown --base origin/yubikit`.
-- In CI the `complexity` job runs `dotnet complexity.cs --markdown --base <first parent of the merge commit>`, i.e. exactly what the pull request changes.
+- In CI the `complexity` job checks out the pull request's head and runs `dotnet complexity.cs --markdown --base <merge base> --link-base <head blob URL>`: the same diff as the "Files changed" tab, with every method linked to its lines. (First shipped as "first parent of the merge commit"; changed in the visual pass below so links and line numbers match the head.)
 - The comment is one sticky comment with two sections, `complexity` and `crap`, each owned by one job and replaced in place. The `crap` job waits for the `complexity` job (and runs even if it failed), so the two never write the comment at the same time.
 - Forks (read-only token) still get both sections in the job summaries.
 
@@ -225,6 +225,13 @@ Methods changed vs `abc1234` with cyclomatic complexity above 10 or cognitive co
 ```
 
 Clean: `No changed method exceeds a threshold (N checked).` Nothing in scope: `No shipping C# methods changed.` Debt only: a note that simplifying is welcome but optional.
+
+### Visual pass (after the first follow-up commit)
+
+Requested: make both sections easier to read, without collapsing anything.
+
+- Complexity: the verdict is the heading; columns are Status, Method, Cyclomatic, Cognitive; moved scores show `before → after`; bold marks a score over its limit; each method links to its lines with the path underneath; the threshold explanation moves to a `<sub>` footer.
+- CRAP: headed "(background)"; a neutral summary line replaces the bold "CRAP increased by N" verdict and the note listing every module; only modules that moved are listed, plus the total; grouped numbers; `–` for no change; plain column names; the cognitive column is dropped so the comment shows one cognitive limit (the gate's 20). Console and JSON output are unchanged.
 
 ### Definition of done
 

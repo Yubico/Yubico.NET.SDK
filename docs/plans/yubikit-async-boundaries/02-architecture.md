@@ -1,9 +1,18 @@
 # Architecture: one key's asynchronous lifecycle
 
 Status: revised single-key Gate 2 approved by the user on 2026-09-22; independent design review passed.
-The first smart-card lifetime slice is committed at `db7a1bf6`; built-in macOS FIDO
-production work is in progress under D30. Its selected-key read-only normal path has
-executed; full route acceptance remains pending.
+The first smart-card lifetime slice is committed at `db7a1bf6`; macOS typed/direct
+reports and listener teardown have since been verified at bounded grades in the
+[master verification](../../../2026-09-21-yubikit-async-boundaries-ISA.md#verification).
+Full epic acceptance remains pending (18/72 checked, including bounded ISC-19).
+At current source checkpoint `fdedd61c` plus uncommitted continuation and
+registry work, the Core-only inventory classifies 205 outstanding sites:
+134 native imports, 3 native exports, 24 waits, 15 scheduling sites,
+21 pre-task-return gaps, 6 callback registrations, 0 delegate conversions
+and 2 unmanaged callback addresses. The test-link registry now has 23 required
+operation rows/45 profiles (typed Mac FIDO 4, OTP 4, portable PC/SC 5, direct
+input 4, direct feature 4, listener 2). It includes direct raw and listener
+paths but does not prove complete public/platform coverage or check ISC-4.
 Design baseline: `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`, which matched fetched `origin/yubikit`.
 Reconciled 2026-09-23: approved A1/A5 policy remains unchanged; D30 delegates in-scope
 route-local implementation without repeated microapprovals. Public raw invariants remain.
@@ -15,7 +24,8 @@ capacity credits and multi-key guarantees are deferred in the
 [addendum](addenda/multi-key-capacity.md), not prerequisites for this iteration.
 
 Delivery update: the user subsequently requested incremental implementation after
-reviewing [first-slice pseudocode](03-program-design.md), without whole-effort upfront
+reviewing first-slice pseudocode (now condensed in the
+[program design](03-program-design.md)), without whole-effort upfront
 program/slice specifications. Affected-route checkpoints retain the former detailed-gate
 responsibilities without requiring the entire epic's design before each slice.
 
@@ -29,13 +39,14 @@ Equivalent public concepts keep consistent creation, cancellation, ownership and
 disposal conventions. Breaking changes and internalization remain permitted; material
 public-surface scope changes still require user escalation under D30.
 
-The lower-level synchronous report interface becomes an internal asynchronous boundary.
-It is distinct from the retained public typed raw connections. Keep local validation,
-encoding, parsing and bounded cryptographic computation synchronous.
+The lower-level synchronous `IHidConnection` interface remains public and
+unchanged for direct report access. Built-in macOS typed routes use internal
+asynchronous owners, and direct report facades share those owners. Keep local
+validation, encoding, parsing and bounded cryptographic computation synchronous.
 
-**Current sequence, not renewed architecture approval:** the built-in macOS route uses an
-internal asynchronous seam while leaving the shared public report interface unchanged.
-Wholesale interface migration would be a material scope change for user review.
+**Implemented sequence, not renewed architecture approval:** the internal macOS
+asynchronous seam coexists with synchronous public direct report methods.
+Wholesale interface migration remains a separate ISC-50 consumer decision.
 
 Reuse the existing ownership roles:
 
@@ -46,6 +57,21 @@ Reuse the existing ownership roles:
 | DeviceConnectionRegistry | Existing physical-interface leases on managed factory/discovery paths; safe release and same-key quarantine. |
 | DisposalGate | One shared teardown outcome; a fault is not authority to release native ownership. |
 | Platform connection/native operation | Handles, report buffers, callback context, accepted operations, generation and terminal native completion. |
+
+The reviewed uncommitted PC/SC fix marks interrupted plain command/response
+chains recovery-required. After protected state advances, first transport,
+response-MAC or intermediate-fragment failures also latch refusal on the same
+protocol, retaining the original exception without replay. Wrapped plain
+SELECT continuation reports once through the secure hook; authenticated
+terminal application error permits reuse. One independent-card command-MAC
+profile holds a protected continuation through caller cancellation, then
+validates the next protected command (accepted ISC-19 at managed grade).
+Creating a new protocol on the borrowed raw connection bypasses per-protocol
+refusal, so the raw caller must reopen after uncertainty. Latest full Core
+1,492 passed/3 skipped, secure filter 159 passed/2 skipped; the latest
+selected-key smart-card hardware attempts were blocked before open by
+`SCARD_E_SHARING_VIOLATION`. ISC-37 still needs the global monitor/discovery
+and custom-fallback lifecycle matrix; five connection rows are not its closure.
 
 No actor framework, command hierarchy, universal connection-state base class, new
 shipping project, process-global single-key lock, or global reservation framework.
@@ -120,10 +146,10 @@ table rather than being repeated in every cell.
 | Platform/transport | Classified execution and direction | Implementation/evidence status |
 |---|---|---|
 | Windows HID | FIDO input and output use owned overlapped `ReadFile`/`WriteFile` completion; immediate-success notification rules prevent double completion. `CancelIoEx` requests cancellation, while terminal completion controls storage release. Preserve OTP zero-desired-access opening; classify feature GET and SET independently, using the connection's blocking owner unless that direction is separately verified for overlapped execution. | Approved design only for this effort. Existing HID code/tests remain, but no Windows HID route has migrated and native-runtime/hardware evidence is pending. |
-| macOS HID | FIDO input uses persistent IOKit event delivery and bounded owned reports instead of per-call caller-run-loop pumping. Evaluate FIDO output and OTP feature GET and SET independently with the exact callback API for that direction; an unverified direction uses the connection's blocking owner. | Built-in FIDO route implemented with a selected-key native-AOT read-only open/init/getInfo/dispose/reopen result. Touch/removal, interruption/quiescence, OTP work and broader acceptance remain pending; one normal path does not verify every callback race. |
+| macOS HID | FIDO input uses persistent IOKit event delivery and bounded owned reports instead of per-call caller-run-loop pumping. FIDO output and OTP feature GET and SET use connection-owned workers, not unverified callback APIs. | Typed FIDO/OTP and direct IO/feature paths have selected-key `.8` read-only native-AOT evidence. Real listener matching, removal and late-drain probes support bounded ISC-33 teardown acceptance. Public direct calls remain synchronous; other-host permission and universal coverage remain open. |
 | Linux HID | FIDO input uses nonblocking read plus `poll`/`eventfd` readiness and wake signaling. FIDO output uses the connection's blocking owner when it may block. OTP feature GET and SET ioctls are classified independently and never run on the read-readiness loop. | Approved design only for this effort. Existing HID code/tests remain, but no Linux HID route has migrated and native-runtime/hardware evidence is pending. |
 | Windows smart card | Apply the portable smart-card policy: adapt classified blocking context/connect/transmit/transaction/end/disconnect/release calls through the connection owner; keep status monitoring's context/lifetime independent. Platform release and monitor semantics require their own evidence. | Portable owner slice implemented and managed-tested. Windows native-runtime/hardware evidence remains pending. |
-| macOS smart card | Apply the same portable smart-card policy without inferring that one platform's release/monitor result proves another's. | Portable owner slice implemented and managed-tested. The original selected-key run predates the structural refactor; the later read-only integration test passed three connections with two transactions/reads each on the `.2` preview. Other platforms and interrupted native release remain pending. |
+| macOS smart card | Apply the same portable smart-card policy without inferring that one platform's release/monitor result proves another's. | Portable owner and built-in async acquisition passed managed withheld-native probes; selected-key async transaction/read/reopen passed after earlier sharing contention. Other platforms and interrupted native release remain pending. |
 | Linux smart card | Apply the same portable smart-card policy. Interpret release results by established platform evidence without changing the approved cleanup policy. | Portable owner slice implemented and managed-tested. Linux native-runtime/hardware evidence remains pending. |
 
 These rows map to the existing parameterized ISC-4, ISC-8–20, ISC-26–40, ISC-44–46,
@@ -139,10 +165,10 @@ only for its independently owned monitoring/status context. Those calls must dra
 possibly indefinitely, before scope release/connection shutdown can execute. Callback
 report timeout behavior must be verified per direction before it supplies a deadline.
 No caller cancellation or ordinary slowness alone is classified as a permanent fault.
-The baseline used Task.Run(...).GetAwaiter().GetResult() for transaction begin. The
-committed smart-card slice moves that native call to the connection owner but retains
-the synchronous public transaction boundary. A future public awaitable must improve
-caller responsiveness without claiming a new device-side abort.
+The baseline used Task.Run(...).GetAwaiter().GetResult() for transaction begin.
+The built-in connection now provides awaitable `BeginTransactionAsync`, verified
+with native begin withheld; external implementations retain a synchronous
+default fallback. No new device-side abort is claimed.
 
 There is no blanket HID native-cancel promise after caller cancellation. A protocol
 cancellation token can require continued recovery reads, including FIDO's retained
@@ -310,10 +336,13 @@ guarantees remain scoped to paths that acquire those leases.
 ## External
 
 Existing desktop stacks and NativeShims remain the dependencies. No application
-dispatcher or supplied executor is required. NativeShims 1.18.0 was the selected signed
-upstream base; current development selects private-published `1.18.1-async.3` with five
-new macOS exports. Earlier selected-key evidence used unsigned local preview `.2`, whose
-dirty-file hash manifest is missing. Original 1.18.0 macOS artifacts
+dispatcher or supplied executor is required. The current pin is private-published
+`1.18.1-async.8` with five new macOS exports, produced by native `71a23cd0` in
+[workflow 35955737172](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35955737172),
+package SHA-256 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`.
+Fresh private-feed restore and seven packaged consumers passed, not Windows/Linux
+device execution. The earlier `.2` preview lacked its dirty-file hash manifest.
+Original 1.18.0 macOS artifacts
 target minimum 12, while the .NET 10 upstream
 support matrix currently starts at macOS 14 and the approved dispatch APIs are available
 from 10.15. These facts are distinct; D28 selects modern dispatch across the current
@@ -327,15 +356,11 @@ measurements remain explicit prerequisites.
 | macOS x64/arm64 retain all 11 `Native_SCard` exports and unchanged PC/SC ABI/dependencies; all packaged native platforms add static runtime archives. | No observed smart-card ABI regression, but Windows/Linux/Intel runtime and hardware remain unverified. |
 | Tag `1.18.0` (`cb5275e…`) is inspected source; package metadata has no producer commit. | Local `.2` preview builds from this tag; the cited dirty-file hash manifest is missing, and the tag does not bind the original signed package to its producer. |
 
-The `.2` preview provides input-owner exports; a later selected-key native-AOT read-only
-public route completed three lifecycle cycles, as recorded in master Verification. This
-does not prove interruption or removal quiescence, nor change blocking PC/SC semantics or
-abort capability. The `.2` actual-key pending-receive dispose/reopen probe later passed;
-it does not prove touch or physical removal. The current `.3` declaration restored from
-the matching workflow artifact, while direct private-feed access returned 403 and no
-`.3` selected-key route has been verified. Managed seam tests on macOS cannot
-prove the proposed Windows FIDO overlapped route on Windows hardware.
-CryptoTokenKit and WinRT remain later exploration work.
+The `.2` preview's read-only and pending-receive probes are historical. Later
+`.8` selected-key typed/direct reports and listener removal have separate evidence
+grades in master Verification. Earlier `.3` private-feed access failure is not a
+current restore blocker. Managed seams on macOS cannot prove the proposed
+Windows FIDO overlapped route on Windows hardware.
 Alternative smart-card backends remain later exploration work.
 
 ## Approval boundary and evidence
@@ -347,15 +372,10 @@ Each affected-route checkpoint must reuse proven findings without copying the ea
 shared-pool program design. A need for cross-key reservations or a global scheduler
 reopens scope.
 
-Baseline source anchors: the smart-card observations at `a7f2cae8` are superseded by the
-implemented slice. Reinspection at `db7a1bf6` confirms `HidConnectionSlot.cs:48-71` still
-performs synchronous open inside an async-looking wrapper and
-`MacOSHidIOReportConnection.cs:100-117` still pumped the caller's run loop at that commit,
-before the new FIDO route was implemented. Historical
-discovery and smart-card references remain in the earlier documents.
-The smart-card implementation evidence is recorded separately. The later macOS
-selected-key evidence is in the master; this architecture view adds no other-platform
-or interruption evidence.
+At historical `db7a1bf6`, synchronous HID opening and caller-run-loop pumping
+still existed *before* the macOS migration; neither describes the current direct
+report implementation. Historical discovery and smart-card anchors remain in the
+earlier documents. Newer evidence is in the master, not inferred for other platforms.
 
 FIDO — Fast Identity Online; HID — human interface device; OTP — one-time password.
 IOKit is Apple's device-driver framework. These identify the existing transport routes.

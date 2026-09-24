@@ -53,6 +53,12 @@ When `throwOnError` is `false`, inspect `response.Data`, `response.SW1`, and `re
 The `IYubiKey` extension opens exactly the SmartCard transport and transfers ownership of the hidden connection
 to the returned session. Disposing the session therefore disposes that connection.
 
+If a chained command or response continuation fails, the original exception is returned and that protocol
+instance refuses further transmissions, selections, and configuration; it does not replay or drain the
+unfinished exchange. Dispose and reopen the connection before continuing, including when a raw session borrowed
+the connection: replacing only the session over the same connection is not a recovery procedure. The protocol
+cannot guard direct raw calls or a different protocol instance using that connection.
+
 Use the connection-taking factory when the caller needs to reuse one connection sequentially across sessions:
 
 ```csharp
@@ -161,9 +167,9 @@ managed opens fail with `UnrecoveredConnectionException`.
 
 ### Retained synchronous compatibility paths
 
-Prefer applet sessions or typed raw sessions for normal asynchronous exchanges. A1 retains public raw access
-responsibilities and A5 keeps discovery visibility unchanged in the current sequence; neither establishes a drain
-guarantee for the lower synchronous compatibility paths. `FindHidInterfaces.Create().FindAllAsync(token)` runs its platform
+Prefer applet sessions or typed raw sessions for normal asynchronous exchanges. Public raw report access
+and discovery remain available, but neither establishes a drain guarantee for the lower synchronous
+compatibility paths. `FindHidInterfaces.Create().FindAllAsync(token)` runs its platform
 scan via `Task.Run` and can return an `IHidInterface` backed by `MacOSHidInterface`; that discovery task does not make
 the resulting report connection asynchronous or cancel an already-running native scan. Built-in typed macOS FIDO
 and the direct macOS FIDO report connection share the persistent input-owner implementation; OTP uses its
@@ -179,9 +185,8 @@ own migrated route through `HidConnectionSlot`.
 macOS IO report reads wake on disposal; native callback state and the physical owner are retained until
 acknowledged shutdown. Failed native release retains the owner instead of claiming successful disposal.
 The feature-report connection drains an admitted report before release; overlapping raw report calls are
-refused. Direct report opens do not acquire a grouped-key claim. ISC-31 covers the identified macOS
-input waits only; [ISC-53](../../2026-09-21-yubikit-async-boundaries-ISA.md) still requires a
-zero-gap public sync-boundary registry and verified drains across required routes.
+refused. Direct report opens do not acquire a grouped-key claim. The macOS input-owner
+behavior does not establish drain guarantees for all public synchronous entry points.
 
 The Core [source-site inventory](../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md)
 classifies waits and pre-task-return dispatch, but a listed site is not automatically a public boundary
@@ -196,11 +201,12 @@ or a verified drain. The scoped public reachability map below is separate from t
 | `OtpHidProtocol.Configure()` via applet initialization | Synchronous protocol configuration can wait for a feature-report exchange when firmware state is not initialized; raw OTP session creation defers status initialization and exposes no `Configure` method. | This is an internal session initialization boundary, not a public `RawOtpHidSession.Configure` API. Native wait has no proven upper bound. |
 | Raw session `SendAndReceiveAsync`/`SelectAsync` → protocol interface; registered connection `SendAsync`/`ReceiveAsync`/`TransmitAndReceiveAsync` | Forwarding happens before the returned task; built-in macOS and PC/SC adapter lifecycle tests cover their selected paths. | External interfaces and legacy FIDO/OTP wrappers use synchronous `IHidConnection.GetReport`/`SetReport` before task return; task shape is not responsiveness proof. |
 
-This is a macOS-first disposition of identified escapes, not a complete all-platform or
-whole-assembly call-graph certification. The inventory also records worker parking,
-credential-console polling and native imports; those are not additional public synchronous
-report methods. ISC-53 stays outstanding until required platform and custom-boundary contracts
-are independently checked.
+This describes identified macOS paths, not a complete all-platform or whole-assembly
+call-graph certification. The inventory also records worker parking, credential-console
+polling and native imports; those are not additional public synchronous report methods.
+Direct calls on other platforms may block until native operations drain; custom implementations
+own their own dispatch, cancellation and disposal behavior. Do not infer macOS drain behavior
+for either case.
 
 ## Ownership And Sequencing
 

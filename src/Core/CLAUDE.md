@@ -79,10 +79,10 @@ close retains the owner and physical claim rather than allowing unsafe reopen. T
 wake and registry/discovery claim transfer belong to this same connection lifetime.
 `FidoHidProtocol.Configure` performs local setup only; `ApplicationSession` awaits FIDO
 channel initialization. Public lower-level `IHidConnection` compatibility remains
-synchronous; neither OTP nor Windows/Linux HID has migrated. See the
-[async-boundaries master](../../2026-09-21-yubikit-async-boundaries-ISA.md) for current
-evidence: managed regressions passed, but the device route is blocked without a YubiKey.
-The current local native preview is not a released NativeShims package.
+synchronous; the typed macOS OTP path uses a separate worker, and Windows/Linux HID
+behavior must not be inferred from either macOS path. See
+[retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
+for public entry points and known limits.
 
 ### Listener and Native Retry Loops
 

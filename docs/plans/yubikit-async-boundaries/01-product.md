@@ -2,7 +2,21 @@
 
 Status: revised single-key-first Gate 1 approved by the user on 2026-09-22.
 The earlier broader product approval remains historical. Public access and
-compatibility decisions remain settled.
+compatibility decisions remain settled. This is the product target, not a claim
+of release completion: the [master checklist](../../../2026-09-21-yubikit-async-boundaries-ISA.md#criteria)
+is currently 18/72 checked. The [status](00-status.md) separates verified
+macOS typed/direct paths and listener removal, smart-card async acquisition,
+and published `.8` packaging from remaining universal and other-platform work.
+At source `fdedd61c` plus uncommitted continuation/registry changes, the
+Core-only inventory has 205 classified/outstanding sites (134 native imports,
+3 native exports, 24 waits, 15 scheduling, 21 dispatch gaps, 6 callback
+registrations, 0 delegate conversions, 2 unmanaged addresses); the test-link
+registry has 23 required rows and 45 profiles, including macOS direct and
+listener paths. These counts do not change the success metric or check ISC-4.
+The accepted protected-chain result is one managed cancellation/next-command
+profile, not smart-card hardware proof: fresh selected-key smart-card attempts
+were blocked by a pre-open sharing violation. The latest selected-key `.8`
+FIDO/typed OTP checks passed with two keys attached; only one was selected.
 
 ## Problem
 

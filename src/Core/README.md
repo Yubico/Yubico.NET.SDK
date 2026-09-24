@@ -158,17 +158,13 @@ native work; synchronous connection `Dispose()` is not uniformly nonblocking. Fo
 method-by-method execution, ownership and evidence gaps, see
 [retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths).
 
-In the development worktree, the built-in macOS FIDO connection uses asynchronous open,
-awaited channel initialization and persistent native input delivery. Blocking output and
-checked shutdown have connection-owned execution; uncertain native close retains the
-  physical claim. This does not make the public lower-level `IHidConnection` interface or
-OTP/Windows/Linux HID routes asynchronous. The development worktree's read-only macOS
-FIDO open/init/getInfo/dispose/reopen path has run on one connected 5.7.4 YubiKey, but
-touch, removal and interrupted shutdown are not verified. The current development pin is
-**`Yubico.NativeShims` `1.18.1-async.2`**, an unsigned, unpublished local preview requiring
-a local feed; the prior selected-key result used that preview. An actual-key pending-receive
-dispose/reopen test is still pending, not a claimed pass; see the
-[async-boundaries status](../../docs/plans/yubikit-async-boundaries/00-status.md).
+The built-in macOS FIDO connection opens asynchronously, initializes its channel with an
+awaited operation, and receives input through a persistent native owner. Blocking output
+and checked shutdown run on connection-owned execution; an unconfirmed native close retains
+the physical claim. This does not make the public lower-level `IHidConnection` interface
+asynchronous or establish the same execution and drain behavior on Windows or Linux. See
+[retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
+before using direct report access.
 
 ### Use a secure channel
 

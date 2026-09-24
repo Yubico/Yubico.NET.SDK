@@ -10,9 +10,11 @@ using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.UnitTests.Devices;
+using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 using Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
 
 namespace Yubico.YubiKit.Core.UnitTests.BoundaryInventory;
@@ -45,6 +47,28 @@ public class MigrationDiagnosticsTests
     }
 
     [Fact]
+    public void MigratedProtocolAndDiscoveryLogSites_AreClassified()
+    {
+        string root = BoundaryScanner.CoreSourceRoot();
+        Assert.Equal(new[]
+        {
+            "Transmitting APDU: {CommandApdu}",
+            "Selecting application ID: {ApplicationId}"
+        }, LogInvocations(Path.Combine(root, "Protocols/SmartCard/Apdu/PcscProtocol.cs")));
+        Assert.Equal(new[]
+        {
+            "Getting list of HID devices", "Found {Count} Yubico HID devices",
+            "udev native library not available, returning no HID devices: {Message}"
+        }, LogInvocations(Path.Combine(root, "Transports/Hid/FindHidInterfaces.cs")));
+        Assert.Equal(new[]
+        {
+            "Connected to YubiKey in reader {ReaderName}",
+            "Connected to YubiKey in reader {ReaderName}",
+            "Connected to YubiKey in reader {ReaderName}"
+        }, LogInvocations(Path.Combine(root, "Devices/PcscConnectionSlot.cs")));
+    }
+
+    [Fact]
     public void LogSiteInventory_SeesNewPayloadFormattedCalls()
     {
         Assert.Equal(new[] { "raw {Payload}" }, LogInvocationsInSource("class Probe { void Send() { _logger.LogTrace(\"raw {Payload}\", command); } }"));
@@ -60,6 +84,22 @@ public class MigrationDiagnosticsTests
         Assert.Contains(provider.Events, entry => entry.Contains(marker, StringComparison.Ordinal));
         Assert.Contains(provider.Events, entry => entry.Contains("Payload=ISC56-provider-positive-control", StringComparison.Ordinal));
         Assert.Contains(provider.Events, entry => entry.Contains("IOException: ISC56-provider-positive-control", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void PayloadAssertion_RejectsFragmentedStructuredAndExceptionLeaks()
+    {
+        byte[] secret = Encoding.ASCII.GetBytes("ISC56-negative-control");
+        using var provider = new RecordingProvider();
+        provider.CreateLogger("control").LogWarning(new IOException("ISC56 leaked"),
+            "fragment {Payload}", "ISC56");
+        try
+        {
+            Assert.Contains(provider.Events, entry => entry.Contains("Payload=ISC56", StringComparison.Ordinal));
+            Assert.Contains(provider.Events, entry => entry.Contains("IOException: ISC56", StringComparison.Ordinal));
+            Assert.ThrowsAny<Exception>(() => AssertNoPayload(provider.Events, secret));
+        }
+        finally { CryptographicOperations.ZeroMemory(secret); }
     }
 
     private static string[] LogInvocations(string file) => LogInvocationsInSource(File.ReadAllText(file));
@@ -146,6 +186,33 @@ public class MigrationDiagnosticsTests
             Assert.True(connection.ResponseRead);
             Assert.Contains(events, entry => entry.Contains("Sending OTP slot command", StringComparison.Ordinal));
             Assert.Contains(events, entry => entry.Contains("Unable to reset OTP HID state", StringComparison.Ordinal));
+            AssertNoPayload(events, command);
+            AssertNoPayload(events, response);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(command);
+            CryptographicOperations.ZeroMemory(response);
+        }
+    }
+
+    [Fact]
+    public async Task PcscProtocol_RealLoggerEmitsMetadataWithoutCommandOrResponsePayload()
+    {
+        byte[] command = Encoding.ASCII.GetBytes("ISC56-protocol-command-secret");
+        byte[] response = Encoding.ASCII.GetBytes("ISC56-protocol-response-secret");
+        using var provider = new RecordingProvider();
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        try
+        {
+            var connection = new FakeSmartCardConnection();
+            byte[] framedResponse = [.. response, 0x90, 0x00];
+            connection.EnqueueResponse(framedResponse);
+            using var protocol = new PcscProtocol(connection, logger: factory.CreateLogger<PcscProtocol>());
+            _ = await protocol.TransmitAndReceiveAsync(new ApduCommand(0, 0xA4, 0, 0, command), cancellationToken: Ct);
+            string[] events = provider.Events;
+            Assert.Contains(events, entry => entry.Contains("Transmitting APDU:", StringComparison.Ordinal));
+            Assert.Contains(events, entry => entry.Contains("CommandApdu=CLA:", StringComparison.Ordinal));
             AssertNoPayload(events, command);
             AssertNoPayload(events, response);
         }

@@ -59,6 +59,16 @@ internal static partial class NativeMethods
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     internal static partial IntPtr IOHIDManagerCreate(IntPtr allocator, int options); /* OS >= 10.5 */
 
+    // The caller owns the IOHIDManagerCreate reference and must close a successfully
+    // opened manager before unscheduling and releasing it. Both calls return IOReturn.
+    [LibraryImport(Libraries.IOKitFramework)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial int IOHIDManagerOpen(IntPtr manager, int options);
+
+    [LibraryImport(Libraries.IOKitFramework)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial int IOHIDManagerClose(IntPtr manager, int options);
+
     /*! @function   IOHIDManagerSetDeviceMatching
         @abstract   Sets matching criteria for device enumeration.
         @discussion Matching keys are prefixed by kIOHIDDevice and declared in

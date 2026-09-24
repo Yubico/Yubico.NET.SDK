@@ -65,6 +65,14 @@ internal static partial class NativeMethods
 
     [LibraryImport(Libraries.CoreFoundation)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial nint CFNumberCreate(nint allocator, int theType, ref int valuePtr);
+
+    [LibraryImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial nint CFDictionaryCreate(nint allocator, nint[] keys, nint[] values, long count, nint keyCallBacks, nint valueCallBacks);
+
+    [LibraryImport(Libraries.CoreFoundation)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     internal static partial ulong CFNumberGetTypeID();
 
     [LibraryImport(Libraries.CoreFoundation)]

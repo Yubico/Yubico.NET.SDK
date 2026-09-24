@@ -219,9 +219,9 @@ public class BoundaryInventoryTests
     {
         var root = BoundaryScanner.CoreSourceRoot();
         var sites = BoundaryScanner.ScanDirectory(root);
-        Assert.Equal(198, sites.Count);
+        Assert.Equal(205, sites.Count);
         Assert.Equal(sites.Count, sites.Select(site => site.Id).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(130, sites.Count(site => site.Kind == "native-import"));
+        Assert.Equal(134, sites.Count(site => site.Kind == "native-import"));
         Assert.Equal(24, sites.Count(site => site.Kind == "blocking-wait"));
         Assert.Equal(15, sites.Count(site => site.Kind == "scheduling"));
         Assert.Equal(21, sites.Count(site => site.Kind == "dispatch-gap"));
@@ -236,8 +236,8 @@ public class BoundaryInventoryTests
         Assert.Equal(1, manifest.Version);
         Assert.All(manifest.Families, family => Assert.Contains("outstanding", family.Status));
         Assert.All(manifest.Families, family => Assert.DoesNotContain("verified", family.Status));
-        Assert.Equal(sites.Count, manifest.Families.Sum(family => family.Entries.Length));
         Assert.Empty(BoundaryManifest.Validate(sites, manifest));
+        Assert.Equal(sites.Count, manifest.Families.Sum(family => family.Entries.Length));
     }
 
     [Fact]

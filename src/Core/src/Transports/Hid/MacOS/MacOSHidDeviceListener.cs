@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Yubico.YubiKit.Core.Native;
 using CFNativeMethods = Yubico.YubiKit.Core.Native.MacOS.CoreFoundation.NativeMethods;
 using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.NativeMethods;
 
@@ -73,7 +74,7 @@ internal sealed unsafe class MacOSHidDeviceListener : HidDeviceListener
             if (manager == 0) throw new InvalidOperationException("Failed to create IOHIDManager");
             generation = new Generation(this, manager);
             _generation = generation;
-            _native.SetDeviceMatching(manager);
+            _native.SetDeviceMatching(manager, HidConstants.YubicoVendorId);
             foreach (var entryId in _native.GetInitialEntryIds(manager)) generation.KnownEntryIds.Add(entryId);
             generation.RegistrationAttempted = true;
             _native.RegisterMatching(manager, (nint)(delegate* unmanaged[Cdecl]<nint, int, nint, nint, void>)&Arrived, generation.Context);
@@ -136,6 +137,7 @@ internal sealed unsafe class MacOSHidDeviceListener : HidDeviceListener
             if (generation.Mode == 0) throw new InvalidOperationException("Failed to create macOS HID run loop mode");
             _native.Schedule(generation.Manager, generation.RunLoop, generation.Mode);
             generation.Scheduled = true;
+            OpenManager(generation);
             Run(generation);
         }
         catch (Exception ex)
@@ -157,6 +159,16 @@ internal sealed unsafe class MacOSHidDeviceListener : HidDeviceListener
         }
     }
 
+    private void OpenManager(Generation generation)
+    {
+        // A thrown native call may have opened the manager without returning.
+        generation.OpenAttempted = true;
+        int result = _native.Open(generation.Manager);
+        generation.Opened = true;
+        if (result != 0)
+            LogManagerDeviceError("IOHIDManagerOpen", result);
+    }
+
     private void Run(Generation generation)
     {
         while (!generation.StopRequested)
@@ -174,7 +186,15 @@ internal sealed unsafe class MacOSHidDeviceListener : HidDeviceListener
     {
         try
         {
-            // Unschedule only after the run loop has returned from every admitted callback.
+            // An open that did not return has no known quiescence outcome.
+            if (generation.OpenAttempted && !generation.Opened)
+            {
+                if (ReferenceEquals(_generation, generation)) Status = DeviceListenerStatus.Error;
+                return;
+            }
+            // Close only after the run loop has returned from every admitted callback.
+            // A thrown close leaves the manager and callback context rooted: no release proof.
+            CloseManager(generation);
             if (generation.Scheduled) _native.Unschedule(generation.Manager, generation.RunLoop, generation.Mode);
             if (generation.Mode != 0)
             {
@@ -196,6 +216,21 @@ internal sealed unsafe class MacOSHidDeviceListener : HidDeviceListener
             LogWorkerFailure(ex, "macOS HID listener cleanup failed; generation remains quarantined");
             if (ReferenceEquals(_generation, generation)) Status = DeviceListenerStatus.Error;
         }
+    }
+
+    private void CloseManager(Generation generation)
+    {
+        if (!generation.Opened) return;
+        int result = _native.Close(generation.Manager);
+        if (result != 0)
+            LogManagerDeviceError("IOHIDManagerClose", result);
+    }
+
+    private static void LogManagerDeviceError(string operation, int result)
+    {
+        // A logging provider must not turn a completed native close into an unproven cleanup.
+        try { Logger.LogWarning("{Operation} reported per-device error {Result}", operation, result); }
+        catch (Exception) { }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -289,6 +324,8 @@ internal sealed unsafe class MacOSHidDeviceListener : HidDeviceListener
         public nint RunLoop;
         public nint Mode;
         public bool Scheduled;
+        public bool OpenAttempted;
+        public bool Opened;
         public bool RegistrationAttempted;
         public volatile bool StopRequested;
         public bool TimedOut;
@@ -310,7 +347,7 @@ internal sealed unsafe class MacOSHidDeviceListener : HidDeviceListener
 internal interface IMacOSHidListenerNative
 {
     nint CreateManager();
-    void SetDeviceMatching(nint manager);
+    void SetDeviceMatching(nint manager, int vendorId);
     long[] GetInitialEntryIds(nint manager);
     long GetEntryId(nint device);
     void RegisterMatching(nint manager, nint callback, nint context);
@@ -318,6 +355,8 @@ internal interface IMacOSHidListenerNative
     nint RetainCurrentRunLoop();
     nint CreateRunLoopMode();
     void Schedule(nint manager, nint loop, nint mode);
+    int Open(nint manager);
+    int Close(nint manager);
     int Run(nint mode, double seconds);
     void StopRunLoop(nint loop);
     void Unschedule(nint manager, nint loop, nint mode);
@@ -327,13 +366,40 @@ internal interface IMacOSHidListenerNative
 internal sealed class MacOSHidListenerNative : IMacOSHidListenerNative
 {
     public nint CreateManager() => IOKitNativeMethods.IOHIDManagerCreate(0, 0);
-    public void SetDeviceMatching(nint manager) => IOKitNativeMethods.IOHIDManagerSetDeviceMatching(manager, 0);
+    public void SetDeviceMatching(nint manager, int vendorId)
+    {
+        nint key = CoreFoundationString.Create("VendorID");
+        if (key == 0) throw new InvalidOperationException("Failed to create HID vendor matching key");
+        try
+        {
+            nint number = CFNativeMethods.CFNumberCreate(0, 3, ref vendorId); // kCFNumberSInt32Type
+            if (number == 0) throw new InvalidOperationException("Failed to create HID vendor matching number");
+            try
+            {
+                nint library = NativeLibrary.Load(Native.MacOS.Libraries.CoreFoundation);
+                try
+                {
+                    nint keys = NativeLibrary.GetExport(library, "kCFTypeDictionaryKeyCallBacks");
+                    nint values = NativeLibrary.GetExport(library, "kCFTypeDictionaryValueCallBacks");
+                    nint dictionary = CFNativeMethods.CFDictionaryCreate(0, [key], [number], 1, keys, values);
+                    if (dictionary == 0) throw new InvalidOperationException("Failed to create HID vendor matching dictionary");
+                    try { IOKitNativeMethods.IOHIDManagerSetDeviceMatching(manager, dictionary); }
+                    finally { CFNativeMethods.CFRelease(dictionary); }
+                }
+                finally { NativeLibrary.Free(library); }
+            }
+            finally { CFNativeMethods.CFRelease(number); }
+        }
+        finally { CFNativeMethods.CFRelease(key); }
+    }
     public void RegisterMatching(nint manager, nint callback, nint context) => IOKitNativeMethods.IOHIDManagerRegisterDeviceMatchingCallback(manager, callback, context);
     public void RegisterRemoval(nint manager, nint callback, nint context) => IOKitNativeMethods.IOHIDManagerRegisterDeviceRemovalCallback(manager, callback, context);
     public long GetEntryId(nint device) => MacOSHidInterface.GetEntryId(device);
     public nint RetainCurrentRunLoop() => CFNativeMethods.CFRetain(CFNativeMethods.CFRunLoopGetCurrent());
     public nint CreateRunLoopMode() => CoreFoundationString.Create("kCFRunLoopDefaultMode");
     public void Schedule(nint manager, nint loop, nint mode) => IOKitNativeMethods.IOHIDManagerScheduleWithRunLoop(manager, loop, mode);
+    public int Open(nint manager) => IOKitNativeMethods.IOHIDManagerOpen(manager, 0);
+    public int Close(nint manager) => IOKitNativeMethods.IOHIDManagerClose(manager, 0);
     public int Run(nint mode, double seconds) => CFNativeMethods.CFRunLoopRunInMode(mode, seconds, returnAfterSourceHandled: false);
     public void StopRunLoop(nint loop) => CFNativeMethods.CFRunLoopStop(loop);
     public void Unschedule(nint manager, nint loop, nint mode) => IOKitNativeMethods.IOHIDManagerUnscheduleFromRunLoop(manager, loop, mode);

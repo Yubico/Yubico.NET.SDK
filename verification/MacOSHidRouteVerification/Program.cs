@@ -18,6 +18,14 @@ if (!OperatingSystem.IsMacOS())
 
 if (args is ["--child", "--list"])
     return await DiscoverAsync(null);
+if (args is ["--child", "--listener-drain"])
+    return await ListenerDrainScenario.RunAsync();
+if (args is ["--child", "--listener-late-drain"])
+    return ListenerDrainScenario.RunLateDrain();
+if (args is ["--child", "--listener-remove", "--serial", var removalSerial]
+    && int.TryParse(removalSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedRemovalSerial)
+    && selectedRemovalSerial > 0)
+    return await ListenerDrainScenario.RunRemovalAsync(selectedRemovalSerial);
 if (args is ["--child", "--probe", "--serial", var childSerial]
     && int.TryParse(childSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedSerial))
     return await DiscoverAsync(selectedSerial);
@@ -37,9 +45,9 @@ if (args is ["--child", "--expert-feature", "--serial", var featureSerial]
     && selectedFeatureSerial > 0)
     return await ExpertFeatureScenario.RunAsync(selectedFeatureSerial);
 
-if (args is not ["--list"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal" or "--expert-io" or "--expert-feature", "--serial", _])
+if (args is not ["--list"] and not ["--listener-drain"] and not ["--listener-late-drain"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal" or "--expert-io" or "--expert-feature" or "--listener-remove", "--serial", _])
 {
-    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal | --expert-io | --expert-feature) --serial SERIAL");
+    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | --listener-drain | --listener-late-drain | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal | --expert-io | --expert-feature | --listener-remove) --serial SERIAL");
     return 2;
 }
 if (args is [_, "--serial", var serial]
@@ -64,7 +72,7 @@ Task output = CopyAsync(child.StandardOutput, Console.Out);
 Task error = CopyAsync(child.StandardError, Console.Error);
 try
 {
-    await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(args[0] == "--removal" ? 180 : args[0] == "--touch" ? 60 : args[0] == "--expert-io" ? 30 : 20));
+    await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(args[0] == "--listener-remove" ? 200 : args[0] == "--removal" ? 180 : args[0] == "--touch" ? 60 : args[0] == "--expert-io" ? 30 : 20));
     await Task.WhenAll(output, error);
     Console.WriteLine($"child exit={child.ExitCode}");
     return child.ExitCode;

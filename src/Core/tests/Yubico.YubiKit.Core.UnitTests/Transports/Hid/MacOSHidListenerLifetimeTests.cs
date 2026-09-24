@@ -35,6 +35,7 @@ public class MacOSHidListenerLifetimeTests
         Assert.InRange(watch.ElapsedMilliseconds, 80, 2000);
         Assert.Empty(native.Released);
         Assert.Empty(native.Unscheduled);
+        Assert.Equal(0, native.CloseCalls);
 
         watch.Restart();
         listener.Stop();
@@ -42,10 +43,11 @@ public class MacOSHidListenerLifetimeTests
         listener.Start();
         Assert.Equal(1, native.Created);
         Assert.Empty(native.Released);
+        Assert.Equal(0, native.CloseCalls);
 
         native.ContinueCallback.Set();
         Assert.True(native.Cleaned.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-        Assert.Equal(["unschedule", "mode", "loop", "manager"], native.Cleanup);
+        Assert.Equal(["close", "unschedule", "mode", "loop", "manager"], native.Cleanup);
 
         native.HoldCallback = false;
         Assert.True(SpinWait.SpinUntil(() => { listener.Start(); return native.Created == 2; }, TimeSpan.FromSeconds(5)));
@@ -65,7 +67,7 @@ public class MacOSHidListenerLifetimeTests
         native.InvokeCallback = true;
         listener.Start();
         Assert.True(native.Cleaned.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-        Assert.Equal(["unschedule", "mode", "loop", "manager"], native.Cleanup);
+        Assert.Equal(["close", "unschedule", "mode", "loop", "manager"], native.Cleanup);
         Assert.Single(native.Unscheduled);
     }
 
@@ -106,7 +108,7 @@ public class MacOSHidListenerLifetimeTests
         }
 
         await Task.WhenAll(first, second).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        Assert.Equal(["unschedule", "mode", "loop", "manager"], native.Cleanup);
+        Assert.Equal(["close", "unschedule", "mode", "loop", "manager"], native.Cleanup);
     }
 
     [Fact]
@@ -154,14 +156,88 @@ public class MacOSHidListenerLifetimeTests
         Assert.Equal(1, native.Created);
     }
 
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public void Start_RegistersAndSchedulesBeforeOpen_ThenRunsAndClosesBeforeRelease()
+    {
+        var native = new RecordingManager { HoldCallback = false };
+        using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(2));
+        listener.Start();
+        Assert.True(native.Running.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+        listener.Stop();
+        Assert.Equal(["vendor:4176", "enumerate", "matching", "removal", "schedule", "open", "run", "close", "unschedule", "mode", "loop", "manager"], native.Calls);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public void NonzeroOpen_StillRunsAndClosesAfterCallbackDrain()
+    {
+        var native = new RecordingManager { OpenResult = unchecked((int)0xE00002C1), InvokeCallback = true };
+        using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(2));
+        listener.DeviceEvent = _ => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
+        listener.Start();
+        Assert.True(native.InCallback.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+        Assert.Equal(DeviceListenerStatus.Started, listener.Status);
+        try
+        {
+            listener.Stop();
+            Assert.Empty(native.Released);
+            Assert.Equal(0, native.CloseCalls);
+        }
+        finally { native.ContinueCallback.Set(); }
+        Assert.True(native.Cleaned.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+        Assert.Equal(["close", "unschedule", "mode", "loop", "manager"], native.Cleanup);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public void NonzeroClose_ContinuesCheckedCleanupAndCanRestart()
+    {
+        var native = new RecordingManager { HoldCallback = false, CloseResult = unchecked((int)0xE00002C1) };
+        using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(2));
+        listener.Start();
+        Assert.True(native.Running.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+        listener.Stop();
+        Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
+        listener.Start();
+        Assert.Equal(2, native.Created);
+        Assert.Equal(1, native.CloseCalls);
+        Assert.Single(native.Unscheduled);
+        Assert.Equal(["close", "unschedule", "mode", "loop", "manager"], native.Cleanup);
+        listener.Stop();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [Trait("Category", "RuntimeResilience")]
+    public void ThrownOpenOrClose_QuarantinesGeneration(bool throwOnOpen)
+    {
+        var native = new RecordingManager { HoldCallback = false, ThrowOnOpen = throwOnOpen, ThrowOnClose = !throwOnOpen };
+        using var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(2));
+        listener.Start();
+        Assert.True(SpinWait.SpinUntil(() => throwOnOpen ? listener.Status == DeviceListenerStatus.Error : native.Running.IsSet, TimeSpan.FromSeconds(5)));
+        listener.Stop();
+        listener.Start();
+        Assert.Equal(1, native.Created);
+        Assert.Equal(throwOnOpen ? 0 : 1, native.CloseCalls);
+        Assert.Empty(native.Released);
+    }
+
     private sealed class RecordingManager : IMacOSHidListenerNative
     {
         private int _created;
         private nint _callback;
         private nint _context;
         private int _stopCalls;
+        private int _closeCalls;
         public int Created => Volatile.Read(ref _created);
         public int StopCalls => Volatile.Read(ref _stopCalls);
+        public int CloseCalls => Volatile.Read(ref _closeCalls);
+        public int OpenResult { get; set; }
+        public int CloseResult { get; set; }
+        public bool ThrowOnOpen { get; set; }
+        public bool ThrowOnClose { get; set; }
         public bool HoldCallback { get; set; } = true;
         public bool FailUnschedule { get; set; }
         public bool FailManagerRelease { get; set; }
@@ -169,23 +245,28 @@ public class MacOSHidListenerLifetimeTests
         public ManualResetEventSlim InCallback { get; } = new();
         public ManualResetEventSlim ContinueCallback { get; } = new();
         public ManualResetEventSlim Cleaned { get; } = new();
+        public ManualResetEventSlim Running { get; } = new();
         public ManualResetEventSlim StopSignaled { get; } = new();
         public List<nint> StopOnReleasedLoop { get; } = [];
         public List<string> Cleanup { get; } = [];
+        public List<string> Calls { get; } = [];
         public List<nint> Released { get; } = [];
         public List<nint> Unscheduled { get; } = [];
 
         public nint CreateManager() { Interlocked.Increment(ref _created); return 1; }
-        public void SetDeviceMatching(nint manager) { }
-        public long[] GetInitialEntryIds(nint manager) => [];
+        public void SetDeviceMatching(nint manager, int vendorId) { Calls.Add($"vendor:{vendorId}"); }
+        public long[] GetInitialEntryIds(nint manager) { Calls.Add("enumerate"); return []; }
         public long GetEntryId(nint device) => 42;
-        public void RegisterMatching(nint manager, nint callback, nint context) { _callback = callback; _context = context; }
-        public void RegisterRemoval(nint manager, nint callback, nint context) { }
+        public void RegisterMatching(nint manager, nint callback, nint context) { _callback = callback; _context = context; Calls.Add("matching"); }
+        public void RegisterRemoval(nint manager, nint callback, nint context) { Calls.Add("removal"); }
         public nint RetainCurrentRunLoop() => 2;
         public nint CreateRunLoopMode() => 3;
-        public void Schedule(nint manager, nint loop, nint mode) { }
+        public void Schedule(nint manager, nint loop, nint mode) { Calls.Add("schedule"); }
+        public int Open(nint manager) { Calls.Add("open"); if (ThrowOnOpen) throw new InvalidOperationException("open threw"); return OpenResult; }
+        public int Close(nint manager) { Interlocked.Increment(ref _closeCalls); Calls.Add("close"); Cleanup.Add("close"); if (ThrowOnClose) throw new InvalidOperationException("close threw"); return CloseResult; }
         public int Run(nint mode, double seconds)
         {
+            if (!Running.IsSet) { Calls.Add("run"); Running.Set(); }
             if (InvokeCallback)
             {
                 InvokeCallback = false;
@@ -212,12 +293,14 @@ public class MacOSHidListenerLifetimeTests
             if (FailUnschedule) throw new InvalidOperationException("unschedule failed");
             Unscheduled.Add(manager);
             Cleanup.Add("unschedule");
+            Calls.Add("unschedule");
         }
         public void Release(nint handle)
         {
             if (handle == 1 && FailManagerRelease) throw new InvalidOperationException("manager release failed");
             Released.Add(handle);
             Cleanup.Add(handle switch { 3 => "mode", 2 => "loop", _ => "manager" });
+            Calls.Add(handle switch { 3 => "mode", 2 => "loop", _ => "manager" });
             if (handle == 1) Cleaned.Set();
         }
 

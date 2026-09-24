@@ -11,12 +11,19 @@ at their stated evidence grades. Windows/Linux native and hardware
 routes and later backend explorations remain deferred pending user direction;
 no criterion is waived.
 
-Managed checkpoint HEAD `db378ffc` includes the expert-feature slice; the newer
-listener-generation cleanup is uncommitted, not yet attributable to an SDK revision. `4f361504`
-committed the expert IO slice. `efde3ef0`
+Managed checkpoint `69946394` contains the reviewed listener-generation cleanup;
+`db378ffc` contains the expert-feature slice and `4f361504` the expert input slice. `efde3ef0`
 contains ordinary transport-fault recovery and public contract documentation;
 `add0dc73` contains the operation registry and portable boundary controls.
 The independent solution-file edit remains outside these commits.
+
+After the listener commit, the native-AOT host was republished and the selected
+31683481 key again passed all five normal/pending-read/cancellation scenarios and
+three typed OTP info cycles on `.8`. These unattended runs exercise manager startup
+and shutdown during normal discovery, not actual topology-change callbacks. No new
+operator touch or unplug was requested. The remaining Mac-specific evidence includes
+listener callback quiescence, complete diagnostics coverage and the unmeasured fields
+in ISC-62; broader inventory and platform obligations remain open.
 
 `Directory.Packages.props` now pins private-published NativeShims
 `1.18.1-async.8`, attested package SHA-256

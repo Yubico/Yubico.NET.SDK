@@ -11,6 +11,7 @@
   </ItemGroup>
   <PropertyGroup>
     <BoundaryCorePath Condition="'$(BoundaryCorePath)' == ''">$(BoundarySourceRoot)/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll</BoundaryCorePath>
+    <BoundaryNativeVersion Condition="'$(BoundaryNativeVersion)' == ''">1.18.1-async.3</BoundaryNativeVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Yubico.YubiKit.Core">
@@ -18,7 +19,7 @@
     </Reference>
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
-    <PackageReference Include="Yubico.NativeShims" VersionOverride="1.18.1-async.3" />
+    <PackageReference Include="Yubico.NativeShims" VersionOverride="$(BoundaryNativeVersion)" />
   </ItemGroup>
   <Target Name="CopyBoundaryCore" AfterTargets="Publish">
     <Copy SourceFiles="$(BoundaryCorePath)" DestinationFiles="$(PublishDir)Yubico.YubiKit.Core.dll" />

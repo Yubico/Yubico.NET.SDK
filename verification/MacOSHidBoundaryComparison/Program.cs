@@ -27,6 +27,11 @@ internal static class Program
     private static async Task<int> Main(string[] args)
     {
         if (args is ["--self-test"]) return await RunnerSelfTest.RunAsync();
+        if (args is ["--profile-self-test"]) return await CurrentProfile.SelfTestAsync();
+        if (args is ["--profile", "--serial", var serial] && int.TryParse(serial, out var selectedSerial))
+            return await CurrentProfile.RunAsync(selectedSerial);
+        if (args is ["--profile-child", var childMode, var childSerial] && int.TryParse(childSerial, out var parsedSerial))
+            return await CurrentProfile.ChildAsync(childMode, parsedSerial);
         if (args is ["--child", var childScenario]) return await ChildAsync(childScenario);
         if (args is ["--compare", var beforeFile, var afterFile])
         {
@@ -35,7 +40,7 @@ internal static class Program
         }
         if (args is not ["--check"] && (args is not ["--measure", "before"] && args is not ["--measure", "after"]))
         {
-            Console.WriteLine("--self-test | --check | --compare before.json after.json (hardware-free) | --measure before|after (key 31683481, two fresh-child warmup cycles, ten measured lifecycle cycles, one no-input child; 10-second watchdog per child)");
+            Console.WriteLine("--self-test | --check | --compare before.json after.json (hardware-free) | --measure before|after (historical .3) | --profile --serial N (current native dependency; two warmups, ten normal cycles and one 1s idle cycle)");
             return 2;
         }
         if (!OperatingSystem.IsMacOS()) return 2;

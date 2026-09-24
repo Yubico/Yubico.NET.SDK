@@ -6,10 +6,9 @@ recorded managed verification. This is smart-card slice evidence, not completion
 The commit/worktree and route evidence in the sections below are historical snapshots;
 the [current status](00-status.md) supersedes their package and hardware-gap claims.
 The first smart-card slice was committed at `db7a1bf6`. The subsequent native fix
-is committed locally at `71a23cd0` (not pushed); the unsigned, unpublished `.7`
-package was built before that commit from the same-behavior working source, with
-producer metadata still at `f8c974` plus dirty changes. Do not describe `71a23cd0`
-as a post-commit package producer.
+at `71a23cd0269c968c1d9420eddb2e2fec71e0cc29` produced the private-published
+`.8` package in [run 35955737172](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35955737172).
+The unsigned `.7` was built before that commit and is historical, not the current pin.
 The user approved the single-key product and architecture and replaced whole-effort
 upfront specification with incremental implementation on 2026-09-22. For subsequent
 slices, walk through bounded pseudocode, then implement, test and review; resolve
@@ -19,7 +18,106 @@ The [master plan](../../../2026-09-21-yubikit-async-boundaries-ISA.md) remains t
 acceptance record. The [earlier detailed program design](addenda/earlier-multi-key-program-design.md)
 is preserved as research/reference, not a prerequisite or an implementation instruction.
 
-## Subsequent bounded portable checkpoint — 2026-09-24
+## Subsequent bounded portable checkpoint — 2026-09-24 (published `.8`)
+
+The pinned `.8` (attested package SHA-256
+`c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`)
+passed seven packaged consumers, native AOT and private publish in the workflow above.
+Fresh private-feed restore succeeded in an empty cache after renaming the repo source
+key from `YubicoInternal` to `Yubico_GH` to match an existing credential name at the
+same URL, without changing credentials; normal parent restore passed 43 projects.
+This is not Windows HID driver proof. On selected serial 31683481, `.8` native-AOT
+five normal scenarios, active cancellation and three read-only OTP info queries passed;
+no new touch or unplug was run. Earlier `.3` touch and `.6` unplug remain historical
+version-specific evidence. Windows/Linux native testing is deferred pending user direction.
+
+The built-in transaction-begin withheld-native probe returns a pending task before
+release (ISC-51); custom `BeginTransactionAsync` defaults to a synchronous fallback.
+The migrated-route registry has 13 required operation rows with 26 named runnable
+Fact/Theory profile links; three registry plus 13 Core scanner tests passed (16).
+The registry covers macOS FIDO/OTP and portable PC/SC only, not universal ISC-4.
+OTP partial-send/read faults attempt one abort after attempted write, never replay
+the original command; successful abort permits reuse, while failed abort faults the
+protocol preserving the original failure. 35 focused protocol tests and one scripted
+Mac OTP test passed, not physical mid-frame failure. PublicApi 22, Fido2 471,
+YubiOtp 180 and resilience-fast 77 passed; the latest full Core tally appears below.
+`dotnet toolchain.cs complexity` passed six changed shipping methods at cyclomatic
+≤10/cognitive ≤20; manually refactored harness/test methods are excluded by that tool.
+
+Independent review accepted ISC-38/39/43–47/60, bringing the master to **14/72
+checked, 58 pending**. ISC-38's source audit finds `SCardCancel` only in monitoring,
+while controlled cancelled transmit retains its native borrow; it is not a gate
+against future callsites. ISC-39's `PcscContextIsolationTests` holds a transmit
+through production listener disposal and compares distinct fake-native context
+addresses: only monitor A is cancelled/released, connection B after its own work.
+This is not Windows/Linux operating-system native evidence. Six managed
+`ResponsivenessProbeTests` make actual legacy synchronous macOS feature open and
+OTP GET/SET fail the thread-identity responsiveness gate; built-in macOS FIDO
+open and OTP open/receive also return before withheld native release (ISC-60,
+not all-platform coverage).
+
+The five new macOS `Native_HidInput*` exports have scoped ISC-44–46 evidence:
+source and Apple callback contract retain input buffer/device/context until
+callback return or cancellation acknowledgment and accepted-delivery drain;
+synthetic destroy-BUSY, close-attempt and drain tests passed (23 Release at
+producer `71a23cd0` in continuous integration; 23 AddressSanitizer locally on
+identical runtime source before that commit, not rerun at its SHA). Real `.6`
+unplug after acknowledgment/drain and `.8` normal runs are version-specific,
+not a new `.8` unplug. Independent review accepted these as a substitution for
+the **unimplemented** proposed native retained-buffer counters. ISC-43 now
+has an explicit `hidinput/owner.h` contract, committed at unpushed comment/test-only
+native revision `760d0416`, for **one persistent registration**
+per input owner, not a new submission for each report: Create never calls back;
+Start registers before activation, which can trigger callbacks on another
+queue before Start returns (source-modeled, not observed); one Start can produce
+zero or many ordered, once-delivered reports; terminal is at most once after
+accepted reports drain; Cancel is a request and WaitShutdown acknowledges and
+drains. Existing lifecycle tests added two reports after one Start and repeat-
+Start rejection; 23 native Release tests passed without changing runtime code
+from the `.8` producer `71a23cd0`. Independent review checked ISC-43 on this
+scope, **not** on a per-report callback-count fixture or any future operation
+without its own contract. ISC-47 is checked by actual `.8` release-artifact
+LLVM inspection of all 14 shared/static files on seven RIDs (36 canonical
+`Native_*` exports except 41 on macOS; no test-only helpers) and five checker
+tests including compiled Mach-O negative controls. Checker-only native commit
+`541cfb09` is not pushed or wired into continuous integration, and did not
+rebuild `.8`; this is a one-time artifact check.
+
+Six diagnostics cases inventory logging in three files and exercise real
+PC/SC/OTP sentinel full payloads and five-byte prefixes to catch framing
+leaks; external exception payloads and other migration logs remain outside
+this proof, so ISC-56 stays unchecked. Last full Core result is **1,423
+passed/3 skipped**, including these cases before this docs-only pass. After
+scoped formatting, a targeted `BoundaryInventory` run passed **28** tests:
+13 scanner, three registry, six responsiveness and six diagnostics. The
+focused OTP protocol run passed 35; PublicApi 22, Fido2 471, YubiOtp 180 and
+resilience-fast 77 passed. Complexity checked six changed shipping methods
+at cyclomatic ≤10/cognitive ≤20; manually split verification methods are
+excluded, not tool-certified. No new full-suite count follows formatting.
+Parent owns subsequent verification and commits; no code, staging, release
+or new report is part of this docs checkpoint.
+
+The public expert `MacOSHidIOReportConnection` remains a separate synchronous
+compatibility boundary: its `GetReport` pumps the caller run loop with a six-
+second timeout/retry behavior, and callback teardown lacks native acknowledgment/drain.
+`docs/architecture/raw-access-tiers.md` and `src/Core/README.md` describe
+its direct-connection caller limits. Keep that entry point unchanged for now;
+an async facade by itself cannot make pending-read cancellation or concurrent
+dispose safe. A future source-owner compatibility decision must precede any
+native pending-read cancellation/refit; ISC-31–33 and ISC-53 remain open for
+their wider contracts despite the built-in macOS async route's passing probes.
+
+The `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
+(schema 2; SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`)
+completed two warmups, ten normal fresh-child samples and one idle sample. Normal
+medians: caller return 5.00675 ms, operation complete 24.84525 ms, disposal
+2.90555 ms, allocation 60,004 bytes. Idle CPU was 1.945 ms with zero idle
+allocations over 1,001.7302 ms. Native-only duration and pending ordinary count
+are null with explicit instrumentation-unavailable reasons. This is not comparable
+to the historical `.3` pair; ISC-62 is pending. Actual release-artifact
+inspection now checks ISC-47 as scoped above, not route or epic acceptance.
+
+### Historical `.7` checkpoint
 
 This is not a replacement for the historical first-slice pseudocode below. The
 selected macOS normal-use FIDO path passed on one key, including `.3` touch/cancel,
@@ -45,8 +143,8 @@ ten-before/ten-after measurements are descriptive with
 unmeasured native duration, allocation and idle activity and worse after-tail;
 the comparison runner's six self-tests are pinned to `.3`, not the current `.7`
 checkout. ISC-62 remains open. ISC-5/49/52 are the only master checkmarks (3/72).
-The [current status](00-status.md) records evidence limits, outstanding rows and
-future package promotion; neither a push nor a private release is part of this checkpoint.
+The [current status](00-status.md) supersedes this `.7` package blocker; no push
+or release is part of this documentation update.
 
 ## First slice
 

@@ -20,7 +20,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.2" />
     <!-- Third-party Dependencies -->
     <PackageVersion Include="System.Formats.Cbor" Version="10.0.2" />
-    <PackageVersion Include="Yubico.NativeShims" Version="1.18.1-async.7" />
+    <PackageVersion Include="Yubico.NativeShims" Version="1.18.1-async.8" />
     <!-- Test Dependencies -->
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.v3" Version="3.0.0" />

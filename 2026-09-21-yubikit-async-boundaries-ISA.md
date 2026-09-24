@@ -5,19 +5,19 @@ project: Yubico.YubiKit.NET and Yubico.NativeShims
 effort: E4
 effort_source: auto
 phase: execute
-progress: 3/72
+progress: 14/72
 mode: interactive
 started: 2026-09-21T16:01:47Z
-updated: 2026-09-23T17:05:17+02:00
+updated: 2026-09-24
 ---
 
 # YubiKit async boundaries — PRD / ideal state artifact
 
-**Status (2026-09-24):** Selected normal-use macOS FIDO route verified on one key (serial 31683481, firmware 5.7.4), **not** route or epic acceptance. The `.3` active-cancellation/touch retry passed; an actual `.6` unplug → terminal → dispose → replug → fresh-generation getInfo passed after `.3`–`.5` removal attempts failed with `BadArg`. Local unsigned, unpublished `.7` then passed five read-only native-AOT scenarios, active cancellation and three read-only OTP info queries; `.7` did **not** receive a new operator unplug test. Failed-abort OTP now latches the current protocol unusable while preserving the primary cancellation/timeout; scripted recovery passes, but physical mid-frame failure and a new session borrowing the same raw connection are not covered. The combined unplug/dispose edge remains conservatively quarantined. The Core-only S0b inventory records 198 documented/outstanding sites with 13 passing targeted tests; its reviewed negative fixture supports only ISC-5, not whole-program safety. A same-host `.3` ten-before/ten-after comparison exists, but is descriptive, not performance acceptance and not a `.7` comparison. ISC-5, ISC-49 and ISC-52 are checked (3/72). The [current checkpoint](docs/plans/yubikit-async-boundaries/00-status.md) supplies evidence grades, artifact identities and next bounded work; dated evidence below remains historical unless explicitly updated.
+**Status (2026-09-24):** Pinned private-published `1.18.1-async.8` is source-bound to native `71a23cd0`; packaged consumers and fresh private-feed restores passed. Independent review now also accepts ISC-43 for the five macOS input-bridge exports under their **persistent-registration**, not per-report submission, callback contract. **ISC-5, ISC-38, ISC-39, ISC-41, ISC-43–49, ISC-51, ISC-52 and ISC-60 are checked (14/72; 58 pending).** ISC-56 has partial diagnostic tests only. The Core-only inventory still has 198 outstanding sites. `.8` normal use, active cancellation and read-only OTP info passed on one macOS key; touch and unplug are version-specific `.3`/`.6` evidence, not `.8` repetitions. Windows/Linux native/hardware routes remain deferred pending user direction, not accepted. The `.8` current profile lacks native-only duration and pending count, so ISC-62 remains open. [Current status](docs/plans/yubikit-async-boundaries/00-status.md) records grades and limits; dated evidence below remains historical.
 
 **Purpose:** Define the behavior, boundaries, staffing, migration slices, and evidence needed to make cross-platform asynchronous device operations reliable. It also defines later, separate evaluations of Windows WinRT SmartCard and Apple CryptoTokenKit.
 
-**Current implementation:** worktree `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-boundaries`, branch `yubikit-async-boundaries`. The first smart-card slice is committed at `db7a1bf6`; macOS route, OTP recovery, Core scanner and `.7` pin are follow-up working-tree changes over the `89420aa6` transport checkpoint. Native fix is committed locally at `71a23cd0` on the sibling native branch, not pushed. The `.7` package was built **before** that commit from the same-behavior working source (package SHA-256 `68c3ca219a5581fdce7c11f98c0bc7b83d38a0f0f191278480ae48d49fc41b83`); its recorded producer metadata is `f8c974` plus dirty changes, **not** `71a23cd0`. No post-commit rebuild or publication is claimed. The fetched pre-slice baseline `a7f2cae8` and demo baseline `99e082c4` are historical, not current source anchors.
+**Current implementation:** worktree `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-boundaries`, branch `yubikit-async-boundaries`. OTP transport-fault recovery and public lifetime documentation are committed at `efde3ef0`; migrated-operation profiles and portable boundary controls at `add0dc73`, following transport checkpoint `89420aa6` and acceptance checkpoint `a7f6a987`. Native source `71a23cd0269c968c1d9420eddb2e2fec71e0cc29` produced private-published `.8` via workflow 35955737172. Native commits `541cfb09` and `760d0416` add verification and contract documentation only; they did not produce `.8`. The earlier `.7`, pre-slice baseline `a7f2cae8`, and demo baseline `99e082c4` remain historical.
 
 **Post-replug verification:** the single selected-key PC/SC async transaction/read/reopen
 integration test now passes (one test, no skips). During the same initialization, three
@@ -49,7 +49,7 @@ YubiOtp 180 passed and documentation checks passed. The two-second wall-clock bu
 was not increased. Feature SET, touch, physical removal and permanently hung-native
 recovery remain unverified; this evidence does not satisfy a whole-platform criterion.
 
-**Current native dependency:** `Directory.Packages.props` selects local `Yubico.NativeShims` `1.18.1-async.7` (package SHA-256 `68c3ca219a5581fdce7c11f98c0bc7b83d38a0f0f191278480ae48d49fc41b83`). This unsigned candidate is **unpublished**, built before the local native `71a23cd0` commit from the same-behavior source; package producer metadata remains `f8c974` plus dirty changes. Explicit `RestoreConfigFile` selecting the local source is needed for cached restore. Fresh private-feed restore is blocked pending publication and package-read access; do not auto-publish or substitute the cached artifact for feed evidence. The last private-published version is `.3`, produced at `f8c974` by [run 35888947280](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35888947280); its artifact SHA-256 is `b6df35457da06409f5bfd6643dd7dbc9da8b0e7e8404bb5fa99fcdde076f4a3c`. The earlier `.2` preview and original 1.18.0 producer limitations are preserved in historical verification, not current dependency claims.
+**Current native dependency:** `Directory.Packages.props` pins private-published `Yubico.NativeShims` `1.18.1-async.8`, attested package SHA-256 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`. [Workflow 35955737172](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35955737172) at native source `71a23cd0269c968c1d9420eddb2e2fec71e0cc29` passed all seven packaged consumers, native AOT and private publish. Fresh private-feed restore passed in an empty cache after the repo source key `YubicoInternal` was renamed `Yubico_GH` to match the existing credential name at the same URL; no credentials changed. Parent normal `dotnet toolchain.cs restore` passed 43 projects. This does not prove Windows HID driver behavior. `.7`, `.3`, `.2` and 1.18.0 limitations below are historical.
 
 **Reading guide:** Requirements and acceptance criteria precede design and delivery details. Features contains contracts, platform direction, the single-orchestrator workflow, the 11-slice graph, ownership, and dispatch/result packet rules. Decisions distinguishes adopted direction from choices that must be settled before affected slices. Verification separates current intake evidence from historical handoff claims. This document is the one master acceptance plan; the generated boundary manifest/coverage report is its executable evidence input, not a competing source of acceptance truth. Do not create parallel agent specification or report systems.
 
@@ -130,7 +130,7 @@ Deliver cross-platform device input/output whose supported asynchronous entry po
 
 ## Criteria
 
-All criteria began unchecked; ISC-5, ISC-49 and ISC-52 are now verified below. **Production milestone P is ISC-1 through ISC-64; exploration milestone X is ISC-65 through ISC-72.** P may ship without X, but must never be reported as all 72 criteria complete. Universal criteria are parameterized by the explicit operation/adapter registry; a missing row fails verification. Slices may contribute evidence to the same criterion, but no early slice claims universal acceptance.
+All criteria began unchecked; ISC-5, ISC-38, ISC-39, ISC-41, ISC-43–49, ISC-51, ISC-52 and ISC-60 are now verified below (14/72). **Production milestone P is ISC-1 through ISC-64; exploration milestone X is ISC-65 through ISC-72.** P may ship without X, but must never be reported as all 72 criteria complete. Universal criteria are parameterized by the explicit operation/adapter registry; a missing row fails verification. Slices may contribute evidence to the same criterion, but no early slice claims universal acceptance.
 
 **Iteration 1 is a narrower delivery step, not a redefinition of P or X.** Establish
 the single-key lifecycle first and map its required operation/platform rows in the
@@ -187,26 +187,26 @@ recovery, removal-generation and monitor-context guarantees remain mandatory.
 - [ ] ISC-35: Linux HID writes and feature-report ioctls that may block never execute on the shared read reactor.
 - [ ] ISC-36: Linux readiness cancellation/removal wakes the registered wait without polling-delay dependence.
 - [ ] ISC-37: Each registered PC/SC lifecycle operation uses its classified owner rather than an incidental caller-thread wait.
-- [ ] ISC-38: Anti: portable APDU cancellation does not depend on `SCardCancel` interrupting `SCardTransmit`.
-- [ ] ISC-39: Cancelling a PC/SC monitoring wait does not cancel or release an unrelated connection's native context.
+- [x] ISC-38: Anti: portable APDU cancellation does not depend on `SCardCancel` interrupting `SCardTransmit`.
+- [x] ISC-39: Cancelling a PC/SC monitoring wait does not cancel or release an unrelated connection's native context.
 - [ ] ISC-40: Windows OTP feature reports retain verified zero-desired-access keyboard-collection opening behavior.
 
 ### NativeShims and packaging — P
 
-- [ ] ISC-41: The integration record identifies the NativeShims source revision that produced the consumed package.
+- [x] ISC-41: The integration record identifies the NativeShims source revision that produced the consumed package.
 - [ ] ISC-42: ABI compatibility checks pass for the declared old/new NativeShims consumer matrix.
-- [ ] ISC-43: Every new asynchronous shim submission obeys its submission-versus-callback completion contract.
-- [ ] ISC-44: New shim operations retain borrowed native-pointer lifetimes through documented native completion.
-- [ ] ISC-45: A shim cancellation request does not itself destroy the operation or callback context.
-- [ ] ISC-46: Shim shutdown acknowledgment establishes that no future callback can access released context.
-- [ ] ISC-47: Release artifacts expose none of the test-only fault-injection exports.
-- [ ] ISC-48: A clean packaged consumer resolves the pinned NativeShims artifact on each required verification RID.
+- [x] ISC-43: Every new asynchronous shim submission obeys its submission-versus-callback completion contract.
+- [x] ISC-44: New shim operations retain borrowed native-pointer lifetimes through documented native completion.
+- [x] ISC-45: A shim cancellation request does not itself destroy the operation or callback context.
+- [x] ISC-46: Shim shutdown acknowledgment establishes that no future callback can access released context.
+- [x] ISC-47: Release artifacts expose none of the test-only fault-injection exports.
+- [x] ISC-48: A clean packaged consumer resolves the pinned NativeShims artifact on each required verification RID.
 
 ### API, compatibility, and interaction — P
 
 - [x] ISC-49: Existing public async-surface convention tests pass for the shipping applet APIs.
 - [ ] ISC-50: A reviewed `IHidConnection` evolution decision is enforced by its consumer compatibility test.
-- [ ] ISC-51: Transaction acquisition has an async path passing the withheld-native-completion responsiveness probe.
+- [x] ISC-51: Transaction acquisition has an async path passing the withheld-native-completion responsiveness probe.
 - [x] ISC-52: Production FIDO configuration does not synchronously wait for asynchronous channel initialization.
 - [ ] ISC-53: Every retained synchronous wait reachable from public API is an explicit boundary with a verified drain contract.
 - [ ] ISC-54: Public operation documentation states the applicable cancellation and borrowed-memory lifetime contract without contradicting implementation evidence.
@@ -218,7 +218,7 @@ recovery, removal-generation and monitor-context guarantees remain mandatory.
 - [ ] ISC-57: Required managed boundary-contract tests execute with nonzero counts on Windows, Linux, and macOS CI.
 - [ ] ISC-58: A Native AOT host executes required native completion/callback paths on `win-x64`, `linux-x64`, and `osx-arm64`.
 - [ ] ISC-59: Every required S0 hardware scenario has a passing result for the accepted revision pair.
-- [ ] ISC-60: A deliberately restored synchronous HID wait causes the responsiveness gate to fail.
+- [x] ISC-60: A deliberately restored synchronous HID wait causes the responsiveness gate to fail.
 - [ ] ISC-61: Affected applet/protocol regressions pass after each adapter migration and after each required consistency refit.
 - [ ] ISC-62: Baseline/final evidence records caller-return latency, native duration, recovery duration, worker and pending counts, allocation, and idle activity for agreed scenarios.
 - [ ] ISC-63: Existing docs/examples and separately inventoried still-active demo-branch async claims match completed evidence; absence of `docs/demo` on the integration base is recorded rather than treated as a merged demo.
@@ -295,10 +295,10 @@ Every row is proposed work, not an existing passing test. Parameterized profiles
 | ISC-38 | Policy audit/test proves no portable transmit-abort reliance on `SCardCancel`. |
 | ISC-39 | Monitor cancellation leaves independent connection context active. |
 | ISC-40 | Windows OTP hardware exchange succeeds through zero-desired-access opening. |
-| ISC-41 | Release job/package metadata resolves consumed package 1.18.0 to immutable source. |
+| ISC-41 | Release job/package attestation resolves the currently consumed package to immutable source (not the historical 1.18.0 artifact). |
 | ISC-42 | Declared SDK/shim compatibility combinations pass. |
-| ISC-43 | Native harness covers reject, immediate, pending, and failure schedules and asserts the specified callback-count rule for each. |
-| ISC-44 | Native retained-buffer counters prove pointer lifetime. |
+| ISC-43 | For the five new macOS input-bridge exports, source and synthetic lifecycle tests enforce one persistent registration per owner (not one submission/callback per report); callbacks may start before `Start` returns, accepted reports deliver once in order, terminal occurs at most once, and shutdown acknowledges and drains. Future async callback operations still require their own contract. |
+| ISC-44 | Source/Apple callback-lifetime audit, synthetic destroy-BUSY and drain/close-attempt tests, pre-commit identical-runtime-source AddressSanitizer tests, and version-specific real removal evidence substitute for the proposed but unimplemented retained-buffer counters on the new macOS bridge. |
 | ISC-45 | Cancellation without completion does not destroy operation/context. |
 | ISC-46 | Native instrumentation records no callback-context access after quiescence acknowledgment. |
 | ISC-47 | Release export inspection finds zero test-only exports. |
@@ -327,6 +327,22 @@ Every row is proposed work, not an existing passing test. Parameterized profiles
 | ISC-70 | CryptoTokenKit entitlement/host/Native AOT result is captured. |
 | ISC-71 | Reviewed recommendations cite the comparison evidence. |
 | ISC-72 | Shipping factory/package review finds no unscoped backend promotion. |
+
+For the five macOS `Native_HidInput*` bridge exports, the accepted ISC-44–46
+evidence method is source/Apple callback-contract audit, synthetic destroy-BUSY,
+close-attempt and callback-drain observations under native Release and AddressSanitizer,
+and the version-specific real `.6` removal after acknowledgment and drain. Native
+retained-buffer counters proposed for ISC-44 were **not** implemented; do not report
+them as observed. For ISC-43 the bridge is a persistent registration, not a
+per-report command: Create never calls back, Start registers before activation
+and may produce callbacks on another queue before returning; zero or many reports
+may follow one Start, each accepted report delivers once in order, terminal is at
+most once, and WaitShutdown acknowledges cancellation and drains accepted callbacks.
+This scoped contract does not waive callback contracts for future operations or
+establish cross-platform/native driver acceptance. ISC-47's one-time packaged-export inspection
+is not yet a continuous integration gate; ISC-38's source audit is not a future-callsite
+scanner. ISC-60's managed sensitivity gate covers the identified legacy macOS open
+and OTP report synchronous waits, not every adapter.
 
 Exploration incompatibility is a valid research result, not production readiness. Production behavior requires passing evidence; an explanation of failure is not a pass.
 
@@ -665,7 +681,7 @@ WinRT evaluation proves raw APDU fidelity, limits/chaining, transaction mapping,
 
 ## Decisions
 
-**Current local package selection:** `.7` is an unsigned, unpublished local candidate, not the `.3` workflow output. Fresh-feed/producer evidence remains pending; the parent will record the native source commit after it actually exists. Historical published-package evidence follows.
+**Current package selection (2026-09-24):** `.8` is the private-published dependency bound to native source `71a23cd0` by workflow 35955737172. Fresh authenticated private-feed restores passed. `.7` was an earlier unsigned local candidate; `.3` and its earlier private-feed 403 remain historical checkpoints, not current blockers. Developers must configure their own private-feed credentials; `nuget.config` carries no credentials.
 
 **Historical published `.3` package consumption:** run
 [35888947280](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35888947280)
@@ -676,13 +692,13 @@ the private feed. Local private-feed access returned 403; the exact uploaded wor
 artifact was downloaded, restored from an isolated temporary source, and passed all 17
 focused macOS lifetime tests. Package SHA-256:
 `b6df35457da06409f5bfd6643dd7dbc9da8b0e7e8404bb5fa99fcdde076f4a3c`.
-Private-feed credentials remain a local setup requirement. The current local pin is `.7`. No new hardware acceptance
+Private-feed credentials remain a local setup requirement. The current pin is `.8`. No new hardware acceptance
 or universal criterion is inferred from these package checks.
 
 **Historical dependency override (D31):** the user explicitly approved moving forward with
 NativeShims **`1.18.1-async.2`**. That earlier pin restored with a temporary local feed
 and explicit `RestoreConfigFile`; it is an unsigned/unpublished preview, not a released
-stable dependency. The current pin is the local `.7` above. The
+stable dependency. The current pin is the private-published `.8` above. The
 earlier 1.18.0 override and its successful restore and 17 focused controlled-seam tests
 remain historical evidence only: the cached 1.18.0 macOS arm64 library lacked
 `Native_HidInput*` exports and could not run the persistent-input native route. Earlier
@@ -911,12 +927,36 @@ meaningful change or newly identified risk.
 
 ## Changelog
 
+- **2026-09-24** | **conjectured:** The unsigned local `.7` dependency still blocked producer and private-feed evidence. **refuted by:** workflow 35955737172 published pinned `.8` from native revision `71a23cd0` with seven packaged consumers; fresh authenticated Core and native-consumer restores passed. **learned:** keep historical `.7` limitations, but report current source-bound packaging separately from device/hardware and release-export inspection. **criterion now:** ISC-41 and ISC-48 checked; ISC-47 and platform-wide ISC-58 remain open.
+- **2026-09-24** | **conjectured:** A synchronous fallback on the public transaction interface precluded any responsive transaction acquisition. **refuted by:** the built-in PC/SC connection's controlled native begin returns a pending task before release; the fallback applies to external implementations only. **learned:** distinguish the built-in production path from the external synchronous compatibility contract. **criterion now:** ISC-51 checked; ISC-37 and ISC-53 remain open.
 - **2026-09-21** | **conjectured:** An async-looking layer stack establishes that callers are never blocked by device I/O. **refuted by:** inspected FIDO/OTP wrappers call synchronous report I/O before returning completed tasks, and macOS input pumps a run loop in `GetReport`. **learned:** signature conventions need an independent behavior probe below the production adapter. **criterion now:** ISC-9 and ISC-60.
 - **2026-09-21** | **conjectured:** A nonblocking HID descriptor and writable readiness eliminate Linux blocking transport work. **refuted by:** read readiness and output/control execution have different blocking behavior. **learned:** input readiness and output/control execution need distinct owners. **criterion now:** ISC-34 and ISC-35.
 - **2026-09-21** | **conjectured:** Cancelling an API wait equals native completion and permits immediate cleanup. **refuted by:** overlapped cancellation requires terminal completion before storage reuse, and PC/SC has no portable transmit-abort promise. **learned:** caller intent, native completion, protocol recovery, and resource release are separate boundaries. **criterion now:** ISC-11, ISC-12, ISC-15, ISC-25, and ISC-45.
 - **2026-09-21** | **conjectured:** NativeShims must be a separate repository and the available static-linking checkout is a suitable implementation base. **refuted by:** the checkout shares `https://github.com/Yubico/Yubico.NET.SDK.git`, is unrelated in-flight work, and tag 1.16.1 is only a candidate release reference rather than package-producing proof. **learned:** track code/package lineages and immutable revision/package pairs; validate release provenance before native edits. **criterion now:** ISC-41, ISC-42, and ISC-48.
 
 ## Verification
+
+### Current `.8` checkpoint — 2026-09-24
+
+Owner: orchestrator for acceptance; Native/Route Engineers for source and probes. The SDK is `a7f6a987` plus working-tree changes, not a new SDK commit; `.8` native producer source is `71a23cd0269c968c1d9420eddb2e2fec71e0cc29`. Later unpushed native commits `541cfb09` (export checker) and `760d0416` (persistent-registration contract comment and test) do not change the `.8` runtime/package and are not producer revisions. No full cross-platform acceptance or `.8` physical-unplug run is claimed. [Status](docs/plans/yubikit-async-boundaries/00-status.md) has the bounded current measurement; the older `.7` table below is historical.
+
+| Criterion | Audited evidence | Grade / limit |
+|---|---|---|
+| ISC-41 | Pinned `Directory.Packages.props:23` selects `1.18.1-async.8`. [Native workflow 35955737172](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35955737172) has head SHA `71a23cd0269c968c1d9420eddb2e2fec71e0cc29`, package/artifact source-bound attestation and SHA-256 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403` (also captured in `artifacts/measurements/current-profile-20260924T051049865Z.json:48-56`). | Published package provenance; `.7`'s pre-commit build and `.9`'s separate workflow are not this pin. |
+| ISC-48 | The same workflow's seven Native AOT packaged-consumer jobs succeeded (`linux-x64`, `linux-arm64`, `win-x86`, `win-x64`, `win-arm64`, `osx-x64`, `osx-arm64`), with packaging and private publish successful. Fresh private-feed restore passed in an empty cache after `nuget.config:8,11` source key was renamed `Yubico_GH` to match the existing credential name at the unchanged URL; no secrets were altered. Normal parent `dotnet toolchain.cs restore` passed 43 projects. | Clean packaged resolution for each required RID, **not** Windows HID driver or hardware/device-I/O coverage for ISC-58. Developers need their own private-feed credentials. |
+| ISC-51 | `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs:38-59` invokes the built-in connection's `BeginTransactionAsync` with native begin withheld; invocation returns a pending task before release, and cleanup releases begin and ends once. | Managed withheld-completion behavior for built-in acquisition; the interface's synchronous fallback for external implementations does not satisfy this probe. Not full PC/SC platform evidence. |
+| ISC-38 | Shipping Core source audit locates `SCardCancel` only in the monitoring listener path (`DesktopSmartCardDeviceListener.cs` through `ISCardApi`/interop), not in portable transmit cancellation. Controlled cancelled-transmit tests retain the borrowed native input until transmit returns. | Scoped source and fake-native borrow proof; this one-time audit is not a scanner that would prevent a future new cancel callsite. It does not claim that `SCardCancel` interrupts native `SCardTransmit`. |
+| ISC-39 | `PcscContextIsolationTests.ListenerDisposal_CancelsOnlyMonitorContext_WhileConnectionTransmits` runs the production monitoring listener and smart-card connection against controlled native seams with **actual distinct context handle addresses**. While transmit is held, listener disposal cancels/releases only monitor context A; context B remains borrowed and is disconnected/released only after its own transmit completes. | Production route with fake native contexts, not Windows or Linux operating-system/native driver proof. |
+| ISC-43 | `Yubico.NativeShims/hidinput/owner.h:32-63` at unpushed comment/test-only native commit `760d0416` specifies one persistent subscription per owner, not a submission for every report or Start. Create has no callbacks; Start registers handlers before activation. Activation **can** deliver on another queue before Start returns (source-modeled possibility, not an observed race). One Start can yield zero or many ordered, once-delivered accepted reports; terminal is at most once after drain; clean Cancel need not emit terminal, and WaitShutdown acknowledges and drains. Existing lifecycle tests extended for two reports from one Start and Start-once rejection; the native suite remains 23 Release tests green without changing runtime code from producer `71a23cd0`. | Independent review accepts the explicit persistent-registration callback contract for the five new `Native_HidInput*` exports. No per-report/per-operation callback-count fixture is claimed. Future new asynchronous callback operations must define and pass their own submission/registration contract; this does not waive ISC-9 or universal platform checks. |
+| ISC-44–46 | For the five new macOS `Native_HidInput*` exports, source audit plus Apple's callback-handler lifetime contract show input report buffer/device/context ownership through callback return or cancellation acknowledgment and accepted-delivery drain. Native synthetic Release tests (23 at producer `71a23cd0` in continuous integration) cover destroy-BUSY, close-attempt counters, acknowledgment/drain and release; 23 AddressSanitizer tests passed locally against identical runtime source **before** that commit, not rerun with the committed SHA. Actual `.6` unplug → terminal → dispose → replug passed after acknowledgment/drain on the removal source carried into `.8`; `.8` normal hardware paths passed without new operator unplug. | Independent review accepts this **substitute** for the planned native retained-buffer counters, which were not implemented. Synthetic tests and source/Apple contract plus version-specific device evidence are distinct grades. Only this new bridge is checked. |
+| ISC-47 | `Yubico.NativeShims/tests/check_package_exports.py` (verification-only native commit `541cfb09`, not pushed or wired to continuous integration) used LLVM symbol inspection of the **actual** `.8` package SHA-256 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`: all 14 shared/static artifacts across `linux-arm64`, `linux-x64`, `osx-arm64`, `osx-x64`, `win-arm64`, `win-x64`, `win-x86` passed, with 36 canonical `Native_*` symbols except 41 on each macOS artifact and zero declared test-only helpers. Five negative/positive checker tests, including compiled Mach-O shared and static negative controls, passed. | One-time actual release-artifact export proof; not a continuous-integration regression gate or runtime execution on other operating systems. `541cfb09` did not rebuild `.8`. |
+| ISC-60 | Six `BoundaryInventory/ResponsivenessProbeTests` exercise a dedicated context-bearing caller with withheld native completion. Actual legacy synchronous macOS feature open and `OtpHidConnection` GET/SET task-returning entrypoints fail the caller/native thread-identity gate; positive built-in macOS FIDO open and OTP open/receive probes additionally return before native release. | Managed sensitivity against these known synchronous HID escapes, not universal entry/profile, hardware or Windows/Linux proof. |
+
+Other current bounded evidence: the Core-only registry has 13 required migrated-route operations with 26 valid named runnable Fact/Theory profile links. The targeted `BoundaryInventory` run passed **28** tests after scoped formatting: 13 scanner, three registry, six responsiveness, six diagnostics. Diagnostics inventory logging in three files and exercise real PC/SC and OTP sentinel paths, including full payloads and five-byte prefixes to catch report-fragment leaks; externally supplied exception messages and other migration logs are not comprehensively covered, so ISC-56 stays open. The registry covers macOS FIDO/OTP and portable PC/SC, not universal ISC-4; the Core scanner's 198 sites remain outstanding.
+
+Current profile schema 2 completed two warmups, ten normal fresh-child samples and one idle sample on macOS 15.7.7 arm64 / .NET 10.0.12; [dataset](artifacts/measurements/current-profile-20260924T051049865Z.json) SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`. Normal medians: caller return 5.00675 ms, operation completion 24.84525 ms, disposal 2.90555 ms, allocated 60,004 bytes; idle CPU 1.945 ms and idle allocations zero over 1,001.7302 ms. Native-only duration and pending ordinary count are null with instrumentation-unavailable reasons; the historical `.3` pair is not comparable and ISC-62 remains unchecked. OTP partial-send/read faults attempt abort once after attempted write, without replay of the original command; successful abort permits reuse and failed abort faults the protocol preserving the original failure. 35 protocol tests and one scripted Mac OTP test passed; physical mid-frame failure remains untested.
+
+**Last full Core run:** 1,423 passed/3 skipped, including the six diagnostics cases, before this docs-only update. PublicApi 22, Fido2 471, YubiOtp 180 and resilience-fast 77 passed; 35 focused OTP protocol tests also passed. `dotnet toolchain.cs complexity` passed six changed shipping methods at cyclomatic ≤10/cognitive ≤20, while manually split verification/harness/test methods were excluded and are not tool-certified. The targeted 28-test inventory run after scoped formatting is recorded above; do not infer another full-suite count from formatting. The `.8` selected-key native-AOT five normal, active-cancel and three read-only OTP info scenarios passed; no new touch or unplug at `.8`, physical removal remains `.6`-only. Windows/Linux native runtime and hardware tests are deferred pending user direction; packaged consumer jobs do not prove them.
 
 ### First smart-card lifetime slice — 2026-09-22
 
@@ -1318,7 +1358,7 @@ D15's compatibility/visibility policy and D16's retention of both public raw-acc
 
 Append accepted evidence to this master acceptance document under the stable ISC ID, with generated boundary manifest/coverage artifacts linked by stable boundary ID. Include probe identity, exact command/result or artifact, SDK SHA, native SHA/package, system/RID, driver/firmware when relevant, and evidence level. Record failures and unavailable fixtures without checking criteria. Every required pending item blocks closure. Preserve IDs when refining interpretation.
 
-**Current limited evidence — 2026-09-24 (supersedes older “current” rows below, not their recorded outcomes).** Owner: orchestrator for evidence; Route/Native Engineers for runtime; scanner Engineer for Core inventory. The accepted source checkpoint for the comparison's AFTER transport is `89420aa6` plus its recorded working-tree diff, not a commit of all present changes. These rows add only the bounded ISC-5 fixture checkmark; ISC-1–4/6–8 and route-wide criteria remain open (3/72 overall).
+**Historical `.7` limited evidence — 2026-09-24 (superseded by the `.8` checkpoint above for package and count, not for its recorded outcomes).** Owner: orchestrator for evidence; Route/Native Engineers for runtime; scanner Engineer for Core inventory. The accepted source checkpoint for the comparison's AFTER transport is `89420aa6` plus its recorded working-tree diff, not a commit of all present changes. These rows added only the bounded ISC-5 fixture checkmark at that time; ISC-1–4/6–8 and route-wide criteria remained open (3/72 at that checkpoint).
 
 | Applicable criteria | Observed grade and remaining condition |
 |---|---|

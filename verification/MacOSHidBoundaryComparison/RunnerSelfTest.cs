@@ -15,6 +15,9 @@ internal static class RunnerSelfTest
         var taskFault = await Program.RunChildAsync("synthetic-task-fault", 2000);
         var syncFault = await Program.RunChildAsync("synthetic-sync-fault", 2000);
         var unsafeType = await Program.RunChildAsync("synthetic-unsafe-type", 2000);
+        if (!CurrentProfile.NativeVersionMatches("1.18.1-async.7", "1.18.1-async.7") ||
+            CurrentProfile.NativeVersionMatches("1.18.1-async.7", "1.18.1-async.3"))
+            throw new InvalidOperationException("Profile accepted a mismatched deployed native dependency");
         if (prefix.Classification != "censored_timeout" || prefix.Phase != "invocation_started" ||
             prefix.InvocationReturnMs is not null || pending.Classification != "censored_timeout" ||
             pending.Phase != "invocation_returned" || pending.InvocationReturnMs is null ||

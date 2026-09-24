@@ -70,7 +70,7 @@ static class SelfCheck
             }
         }
 
-        foreach (var (name, passed, detail) in ScopeFixtures().Concat(BaseComparisonFixtures()))
+        foreach (var (name, passed, detail) in ScopeFixtures().Concat(BaseComparisonFixtures()).Concat(ComplexityMarkdownFixtures()))
         {
             if (passed)
             {
@@ -328,6 +328,93 @@ static class SelfCheck
             BaseComparison.Classify(brand, BaseComparison.FindBase(brand, b, a)) == ChangeStatus.New, "Brand is new");
         yield return ("lower-score-is-improved",
             BaseComparison.Classify(mIntBase!, mInt) == ChangeStatus.Improved, "reverse of the worse case");
+    }
+
+    /// <summary>
+    /// Golden fixtures for the complexity section of the pull request comment.
+    /// </summary>
+    static IEnumerable<(string Name, bool Passed, string Detail)> ComplexityMarkdownFixtures()
+    {
+        static SourceMethod Method(string name, int cc, int cog, int start = 10) => new()
+        {
+            FilePath = "/r/src/Oath/src/OathSession.cs",
+            TypeName = "Yubico.YubiKit.Oath.OathSession",
+            NestedTypeName = "OathSession",
+            MethodName = name,
+            Parameters = "()",
+            StartLine = start,
+            EndLine = start + 20,
+            Cyclomatic = cc,
+            Cognitive = cog,
+            HasImplementation = true,
+        };
+
+        static MethodResult Result(SourceMethod m, ChangeStatus? status = null, SourceMethod? baseline = null) => new()
+        {
+            Method = m,
+            Exceeds = m.Cyclomatic > 10 || m.Cognitive > 20,
+            Status = status,
+            Base = baseline,
+        };
+
+        var settings = new ComplexityReportSettings("/r", 10, 20, 25);
+        var changed = new MetricScope
+        {
+            RepoRoot = "/r", Modules = [], Changes = new Dictionary<string, FileChanges>(), BaseRef = "abc1234",
+        };
+        var full = MetricScope.Everything("/r");
+
+        var empty = MarkdownReport.Render(settings, changed, []);
+        yield return ("markdown-empty-changed-scope",
+            empty.StartsWith("### Complexity", StringComparison.Ordinal) && empty.EndsWith("No shipping C# methods changed.", StringComparison.Ordinal),
+            empty);
+
+        var clean = MarkdownReport.Render(settings, changed, [Result(Method("A", 3, 2)), Result(Method("B", 4, 1))]);
+        yield return ("markdown-clean-names-base-and-count",
+            clean.Contains("Methods changed vs `abc1234`", StringComparison.Ordinal)
+            && clean.EndsWith("No changed method exceeds a threshold (2 methods checked).", StringComparison.Ordinal),
+            clean);
+
+        var worse = Method("ValidateAsync", 14, 12);
+        var debt = Method("ParseUri", 17, 12, start: 80);
+        var mixed = MarkdownReport.Render(settings, changed,
+        [
+            Result(debt, ChangeStatus.Unchanged, debt),
+            Result(worse, ChangeStatus.Worse, Method("ValidateAsync", 12, 11)),
+            Result(Method("Small", 2, 1)),
+        ]);
+        yield return ("markdown-status-table-action-first",
+            mixed.Contains("| cc | cog | status | method | location |", StringComparison.Ordinal)
+            && mixed.IndexOf("ValidateAsync", StringComparison.Ordinal) < mixed.IndexOf("ParseUri", StringComparison.Ordinal),
+            mixed);
+        yield return ("markdown-worse-is-bold-with-previous-scores",
+            mixed.Contains("| 14 | 12 | **worse (was 12/11)** | `OathSession.ValidateAsync` | `src/Oath/src/OathSession.cs:10-30` |", StringComparison.Ordinal)
+            && mixed.Contains("| 17 | 12 | unchanged | `OathSession.ParseUri` |", StringComparison.Ordinal),
+            mixed);
+        yield return ("markdown-summary-and-justification",
+            mixed.Contains("**1 method needs action** (new or worse); 1 is existing debt.", StringComparison.Ordinal)
+            && mixed.Contains("```\nComplexity-Justification: OathSession.ValidateAsync: <why this complexity is warranted>\n```", StringComparison.Ordinal),
+            mixed);
+
+        var debtOnly = MarkdownReport.Render(settings, changed, [Result(debt, ChangeStatus.Unchanged, debt)]);
+        yield return ("markdown-debt-only-is-optional",
+            debtOnly.EndsWith("No new or worse methods. 1 touched method is existing debt; simplifying it is welcome but optional.", StringComparison.Ordinal)
+            && !debtOnly.Contains("Complexity-Justification", StringComparison.Ordinal),
+            debtOnly);
+
+        var scan = MarkdownReport.Render(settings, full, [Result(worse), Result(debt)]);
+        yield return ("markdown-full-scan-has-no-status",
+            scan.Contains("| cc | cog | method | location |", StringComparison.Ordinal)
+            && !scan.Contains("status", StringComparison.Ordinal)
+            && scan.Contains("Methods in the shipping SDK", StringComparison.Ordinal)
+            && scan.EndsWith("2 methods exceed a threshold.", StringComparison.Ordinal),
+            scan);
+
+        var truncated = MarkdownReport.Render(settings with { Top = 1 }, full, [Result(worse), Result(debt)]);
+        yield return ("markdown-top-truncates-table",
+            truncated.Contains("… and 1 more.", StringComparison.Ordinal)
+            && truncated.Split('\n').Count(l => l.StartsWith("| 1", StringComparison.Ordinal)) == 1,
+            truncated);
     }
 
     /// <summary>

@@ -10,6 +10,7 @@
 #:include scripts/code-metrics/Coverage.cs
 #:include scripts/code-metrics/ModuleReport.cs
 #:include scripts/code-metrics/BaseComparison.cs
+#:include scripts/code-metrics/ComplexityReport.cs
 #:include scripts/code-metrics/SelfCheck.cs
 
 /*

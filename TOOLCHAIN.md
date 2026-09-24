@@ -269,7 +269,7 @@ The rules follow the [SonarQube C# specification](https://docs.sonarsource.com/s
 
 Cognitive complexity does not implement the recursion increment, which needs a semantic model; directly recursive methods score one low.
 
-Verify every rule against its golden fixtures with `dotnet crap.cs --self-check` (82 fixtures, several taken from the SonarSource white paper; they also cover the module report, the scope options, and the base comparison used by `complexity`).
+Verify every rule against its golden fixtures with `dotnet crap.cs --self-check` (90 fixtures, several taken from the SonarSource white paper; they also cover the module report, the scope options, and the base comparison and markdown section used by `complexity`).
 
 The CRAP report has no CI gate and no baseline ratchet. The soft gate for day-to-day work is the complexity check below, which leaves coverage out on purpose.
 
@@ -298,6 +298,7 @@ The script runs directly too: `dotnet complexity.cs [options]`.
 | `--top <n>` | 25 | rows in the console table |
 | `--json <path>` | off | write every in-scope method as JSON |
 | `--fail-on-findings` | off | exit 3 when a finding needs action |
+| `--markdown` | off | print a GitHub markdown section instead of the console table |
 
 In a changed scope, each flagged method is compared with the same member in the base version of its file:
 
@@ -317,6 +318,21 @@ Complexity-Justification: PivSession.ImportKeyAsync: <why this complexity is war
 Full scans (`--all`, or `--module` without `--changed`) have no base to compare with and list every finding.
 
 Exit codes: `0` on success whether or not methods were flagged, `1` for a usage, IO, or git error, and `3` when `--fail-on-findings` is set and a finding needs action. Through `dotnet toolchain.cs`, any non-zero exit fails the target and the toolchain exits `1`; call `dotnet complexity.cs --fail-on-findings` directly (for example from a git hook) when you need the exact code.
+
+### Pull request report
+
+`.github/workflows/coverage-crap-report.yml` keeps one comment up to date on each pull request that touches C# or the metric tooling. It has two sections, each written by its own job:
+
+- **Complexity** comes from a fast job that needs no build and no tests: `dotnet complexity.cs --markdown --base <first parent of the merge commit>`, so it lists exactly the methods the pull request changes. It usually appears within a couple of minutes.
+- **Coverage and CRAP** comes from the slower job, which runs two full coverage passes (head and base, both measured with the pull request's tooling). It waits for the complexity job so the two never write the comment at the same time, and runs even if that job failed.
+
+Neither job fails the pull request. Forks get both reports in the job summaries instead of the comment. To preview the complexity section locally:
+
+```bash
+dotnet complexity.cs --markdown --base origin/yubikit
+```
+
+The comment logic lives in `.github/scripts/report-comment.js`; `node .github/scripts/report-comment.test.js` tests it, and the complexity job runs that test first.
 
 ### Scope options
 

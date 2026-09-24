@@ -1,22 +1,29 @@
-name: Coverage and CRAP report
+name: Complexity, coverage, and CRAP report
+
+# Posts one sticky pull request comment with two sections, each owned by one job:
+#   - complexity: changed methods over the complexity thresholds. Source only, so it
+#     needs no build and no tests and appears within a couple of minutes.
+#   - crap: per-module coverage and CRAP, head versus base. Two full coverage passes.
+# Both are advisory; neither fails the pull request.
 
 on:
   pull_request:
     branches: [ yubikit*, yubikit/** ]
-    # Only run when the numbers could actually move. Every delta would be "." otherwise, and
-    # this job costs two full coverage passes. Of the four most recent pull requests to
-    # yubikit, all four touched no .cs file at all.
+    # Only run when the numbers could actually move. Of the four most recent pull requests
+    # to yubikit, all four touched no .cs file at all.
     #
     # Two groups of paths matter:
     #   - the measured code. src/**/*.cs covers production and tests alike, and tests belong
-    #     here because adding a test changes coverage, which is the point of the report.
-    #   - the measuring apparatus. A change to crap.cs or the coverage plumbing changes the
-    #     numbers without touching a single line of src/, so it must be validated too. This
-    #     workflow's own pull request is exactly that case.
+    #     here because adding a test changes coverage, which is the point of the CRAP report.
+    #   - the measuring apparatus. A change to the metric scripts or the coverage plumbing
+    #     changes the numbers without touching a single line of src/, so it must be
+    #     validated too.
     paths:
       - 'src/**/*.cs'
       - 'crap.cs'
+      - 'complexity.cs'
       - 'scripts/code-metrics/**'
+      - '.github/scripts/report-comment*.js'
       - 'global.json'
       - 'toolchain.cs'
       - 'coverlet.runsettings.xml'
@@ -26,8 +33,72 @@ on:
       - 'Directory.Packages.props'
       - '.github/workflows/coverage-crap-report.yml'
 
+# A new push supersedes the previous run. Cancelling it saves two coverage passes and stops a
+# stale run from overwriting the comment with older numbers after the new run has written it.
+concurrency:
+  group: coverage-crap-report-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
+  complexity:
+    name: Complexity report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - name: Check out source
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          # The checkout is the pull request's merge commit. Its first parent is the base
+          # branch, so depth 2 is all the diff below needs.
+          fetch-depth: 2
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Test the report comment helper
+        run: node .github/scripts/report-comment.test.js
+
+      - name: Check changed methods
+        # Diffing the merge commit against its first parent is exactly what the pull
+        # request changes, even if the base branch moved after the event was created.
+        run: |
+          base="$(git rev-parse --short HEAD^1)"
+          dotnet complexity.cs --markdown --base "$base" --top 50 > "$RUNNER_TEMP/complexity.md"
+          cat "$RUNNER_TEMP/complexity.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Update pull request comment
+        # Forks get a read-only GITHUB_TOKEN; they still get the job summary above.
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const { upsertSection } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/report-comment.js`);
+            const body = fs.readFileSync(`${process.env.RUNNER_TEMP}/complexity.md`, 'utf8');
+            await upsertSection({ github, context, section: 'complexity', body });
+
   coverage-crap-report:
+    name: Coverage and CRAP report
+    # Waiting for the complexity job serializes the two writes to the shared comment. It
+    # still runs when that job failed, so one broken report never hides the other.
+    needs: complexity
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -100,7 +171,10 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ runner.temp }}/base.json
-          key: crap-base-${{ github.event.pull_request.base.sha }}
+          # The base is measured with the head's tooling (see above), so the tooling is part
+          # of what the cached result depends on. Keying on the base commit alone would reuse
+          # a measurement taken with older tooling.
+          key: crap-base-${{ github.event.pull_request.base.sha }}-${{ hashFiles('crap.cs', 'scripts/code-metrics/**', 'toolchain.cs', 'coverlet.runsettings.xml', '.config/dotnet-tools.json') }}
 
       - name: Measure base coverage and CRAP
         if: steps.base-cache.outputs.cache-hit != 'true'
@@ -134,14 +208,10 @@ jobs:
           git checkout --detach "$head_sha"
 
       - name: Render coverage and CRAP report
-        # Ordering: crap.cs itself must be the PR's (head) version, since --baseline and
-        # --markdown are the features this PR adds — running the base commit's crap.cs would
-        # not understand them. `git checkout -` above already returned the worktree to head,
-        # so crap.cs is correct here. It also needs *coverage data* to compute CRAP; re-running
-        # `dotnet toolchain.cs coverage` a second time would work but costs another full test
-        # pass for output identical to the one already produced in "Measure head coverage and
-        # CRAP". Restoring the preserved head coverage artifacts is the cheaper option and
-        # produces the same result, so that is what this step does.
+        # The base step returned the worktree to the head commit, so this runs the pull
+        # request's crap.cs, the same tooling that measured both sides. It needs the head's
+        # coverage data: restoring the preserved artifacts gives the same result as a third
+        # coverage pass at none of the cost.
         run: |
           rm -rf artifacts/coverage
           mkdir -p artifacts/coverage
@@ -149,42 +219,13 @@ jobs:
           dotnet crap.cs --baseline "$RUNNER_TEMP/base.json" --markdown > "$RUNNER_TEMP/report.md"
           cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Comment on pull request
-        # pull_request from a fork gets a read-only GITHUB_TOKEN, so posting a comment would
-        # fail. The report was already written to the job summary above regardless, so forked
-        # PRs still get the report; they just don't get the sticky PR comment.
+      - name: Update pull request comment
+        # Forks get a read-only GITHUB_TOKEN; they still get the job summary above.
         if: github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const fs = require('fs');
-            const marker = '<!-- yubikit-crap-report -->';
+            const { upsertSection } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/report-comment.js`);
             const body = fs.readFileSync(`${process.env.RUNNER_TEMP}/report.md`, 'utf8');
-
-            // Paginate: listComments returns 100 per page, and on a long-running PR the
-            // bot's own comment can fall past the first page. Missing it would post a
-            // duplicate on every push instead of updating in place.
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              per_page: 100,
-            });
-
-            const existing = comments.find((c) => c.body?.startsWith(marker));
-
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }
+            await upsertSection({ github, context, section: 'crap', body });

@@ -8,6 +8,7 @@
 #:include scripts/code-metrics/CyclomaticComplexity.cs
 #:include scripts/code-metrics/CognitiveComplexity.cs
 #:include scripts/code-metrics/BaseComparison.cs
+#:include scripts/code-metrics/ComplexityReport.cs
 
 /*
  * Yubico.YubiKit Complexity Check
@@ -36,6 +37,8 @@
  *   --max-cognitive <n>     Flag when cognitive complexity exceeds n. Default: 20
  *   --top <n>               Rows in the console table. Default: 25
  *   --json <path>           Write every in-scope method as JSON.
+ *   --markdown              Print a GitHub markdown section instead of the console
+ *                           table (used for the pull request comment).
  *   --fail-on-findings      Exit 3 when a finding needs action (new or worse in a
  *                           changed scope; any finding in a full scan).
  *
@@ -69,6 +72,9 @@ sealed record ComplexityOptions
     public int Top { get; init; } = 25;
     public string? JsonPath { get; init; }
     public bool FailOnFindings { get; init; }
+    public bool Markdown { get; init; }
+
+    public ComplexityReportSettings Settings => new(RepoRoot, MaxCyclomatic, MaxCognitive, Top);
 
     public static ComplexityOptions? Parse(string[] args)
     {
@@ -86,6 +92,7 @@ sealed record ComplexityOptions
         var top = 25;
         string? json = null;
         var failOnFindings = false;
+        var markdown = false;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -115,6 +122,9 @@ sealed record ComplexityOptions
                 case "--fail-on-findings":
                     failOnFindings = true;
                     break;
+                case "--markdown":
+                    markdown = true;
+                    break;
                 case "--help" or "-h":
                     PrintUsage();
                     return null;
@@ -143,6 +153,7 @@ sealed record ComplexityOptions
             Top = top,
             JsonPath = json,
             FailOnFindings = failOnFindings,
+            Markdown = markdown,
         };
     }
 
@@ -167,6 +178,7 @@ sealed record ComplexityOptions
               --top <n>                  Rows in the console table (default: 25)
               --json <path>              Write every in-scope method as JSON
               --fail-on-findings         Exit 3 when a finding needs action
+              --markdown                 Print a GitHub markdown section instead of the console table
             """ + "\n" + ScopeArgs.Usage);
 }
 
@@ -174,24 +186,6 @@ sealed record ComplexityOptions
 // Check
 // ---------------------------------------------------------------------------
 
-sealed record MethodResult
-{
-    public required SourceMethod Method { get; init; }
-    public required bool Exceeds { get; init; }
-
-    /// <summary>Null outside a changed scope, and for methods within thresholds.</summary>
-    public ChangeStatus? Status { get; init; }
-    public SourceMethod? Base { get; init; }
-
-    /// <summary>
-    /// New and worse findings need action. In a full scan there is no base to compare with,
-    /// so every finding does.
-    /// </summary>
-    public bool NeedsAction => Exceeds && Status is null or ChangeStatus.New or ChangeStatus.Worse;
-
-    /// <summary>Type and member without the namespace, for the justification line.</summary>
-    public string ShortName => $"{Method.NestedTypeName}.{Method.MethodName}";
-}
 
 static class ComplexityCheck
 {
@@ -226,7 +220,10 @@ static class ComplexityCheck
             return new MethodResult { Method = m, Exceeds = true, Status = BaseComparison.Classify(m, baseline), Base = baseline };
         }).ToList();
 
-        Report(options, scope, files.Count, results);
+        if (options.Markdown)
+            Console.WriteLine(MarkdownReport.Render(options.Settings, scope, results));
+        else
+            Report(options, scope, files.Count, results);
 
         if (options.JsonPath is not null)
             WriteJson(options, scope, results);
@@ -305,13 +302,7 @@ static class ComplexityCheck
             return;
         }
 
-        // Action first, then the hardest to read.
-        var findings = results
-            .Where(r => r.Exceeds)
-            .OrderByDescending(r => r.NeedsAction)
-            .ThenByDescending(r => r.Method.Cognitive)
-            .ThenByDescending(r => r.Method.Cyclomatic)
-            .ToList();
+        var findings = ComplexityFindings.Ordered(results);
 
         if (findings.Count == 0)
         {
@@ -460,7 +451,10 @@ static class ComplexityCheck
         writer.WriteEndObject();
         writer.Flush();
 
-        Console.WriteLine();
-        Console.WriteLine($"JSON written to {path}");
+        // Keep stdout pure markdown when it is being captured for a comment.
+        var log = options.Markdown ? Console.Error : Console.Out;
+        log.WriteLine();
+        log.WriteLine($"JSON written to {path}");
     }
 }
+

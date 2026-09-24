@@ -68,6 +68,7 @@ The scripts can also be run directly: `dotnet complexity.cs [options]`, `dotnet 
 | `--top <n>` | 25 | rows shown in the console table |
 | `--json <path>` | off | write every in-scope method as JSON |
 | `--fail-on-findings` | off | exit 3 when a finding needs action |
+| `--markdown` | off | GitHub markdown section instead of the console table (follow-up) |
 
 ### Status (changed scope only)
 
@@ -123,6 +124,7 @@ scripts/code-metrics/
   CognitiveComplexity.cs
   Scope.cs                     --module/--changed/--base parsing, diff parser, span overlap
   BaseComparison.cs            match a member to its base version; new/worse/unchanged/improved
+  ComplexityReport.cs          findings ordering and the markdown section (follow-up)
   Coverage.cs                  CrapRow, Cobertura ingest, span correlation
   ModuleReport.cs              module aggregation, baseline diff, markdown/console module report
   SelfCheck.cs                 golden fixtures (run via `dotnet crap.cs --self-check`)
@@ -145,7 +147,7 @@ Each include is a literal `#:include` line; globs would disable the file-based a
 
 ## Non-goals
 
-- No hard CI gate, no per-module ratchet, no change to the pull request CRAP report's content.
+- No hard CI gate and no per-module ratchet. (The pull request report gains a complexity section in the follow-up below; its CRAP table is unchanged.)
 - No complexity checks on tests or examples.
 - No recursion increment in cognitive complexity (unchanged limitation).
 
@@ -184,3 +186,60 @@ Run on 2026-09-24 with SDK 10.0.401 (macOS arm64).
 | 11 | Warm `dotnet toolchain.cs complexity`: 1.2 s with nothing changed; `dotnet complexity.cs --all`: about 4 s. |
 | 12 | Cross-vendor review (GPT): no blockers. Fixed: a failed base lookup is now an error instead of "new"; git-quoted paths are decoded and `ls-files -z` is used; base matching moved to a shared file with fixtures; the toolchain exit behaviour for `--fail-on-findings` is documented. |
 | 13 | Console output matches the usage model: header block, `cc`/`cog`/`status` columns, location line, summary wording, and one `Complexity-Justification:` template per method that needs action. |
+
+## Follow-up: complexity in the pull request report
+
+### Announcement
+
+> **Pull requests now get complexity feedback within a couple of minutes**
+>
+> The sticky "Coverage and CRAP" comment on pull requests now opens with a **Complexity** section: the methods the pull request changes that exceed cyclomatic 10 or cognitive 20, marked new, worse, unchanged or improved, with a `Complexity-Justification:` template for each one that needs action. It comes from a separate, fast job that needs no build and no coverage, so it appears long before the coverage passes finish.
+>
+> The CRAP table below it is unchanged. It is background on coverage, not a target.
+>
+> Both are advisory: neither fails the pull request.
+>
+> Also fixed: the cached base CRAP measurement is now keyed on the measuring tooling as well as the base commit, so a pull request that changes the tooling is no longer compared against a base measured with the old tooling.
+
+### Usage model
+
+- `dotnet complexity.cs --markdown` prints the same findings as a GitHub markdown section instead of the console table. It combines with every scope option, `--top`, `--json` and `--fail-on-findings`. Locally: `dotnet complexity.cs --markdown --base origin/yubikit`.
+- In CI the `complexity` job runs `dotnet complexity.cs --markdown --base <first parent of the merge commit>`, i.e. exactly what the pull request changes.
+- The comment is one sticky comment with two sections, `complexity` and `crap`, each owned by one job and replaced in place. The `crap` job waits for the `complexity` job (and runs even if it failed), so the two never write the comment at the same time.
+- Forks (read-only token) still get both sections in the job summaries.
+
+Markdown shape:
+
+```
+### Complexity
+
+Methods changed vs `abc1234` with cyclomatic complexity above 10 or cognitive complexity above 20. Source only; coverage plays no part.
+
+| cc | cog | status | method | location |
+|---:|---:|---|---|---|
+| 14 | 12 | worse (was 12/11) | `OathSession.ValidateAsync` | `src/Oath/src/OathSession.cs:613-692` |
+
+**1 method needs action** (new or worse). For each, simplify it or add to the commit message:
+
+    Complexity-Justification: OathSession.ValidateAsync: <why this complexity is warranted>
+```
+
+Clean: `No changed method exceeds a threshold (N checked).` Nothing in scope: `No shipping C# methods changed.` Debt only: a note that simplifying is welcome but optional.
+
+### Definition of done
+
+14. `complexity.cs --markdown` renders the shape above for findings, debt only, clean and empty scopes, and for full scans (no status column).
+15. A shared comment helper replaces one named section in the sticky comment, keeps the other, keeps a fixed section order, and replaces a comment in the old single-section format; tested locally with Node against a fake GitHub client.
+16. The workflow has a fast `complexity` job (no build, no coverage) and the `crap` job `needs` it with `!cancelled()`; both write their job summary; forks skip only the comment.
+17. The base cache key includes a hash of the measuring tooling; stale workflow comments are corrected; `actionlint` passes.
+18. `TOOLCHAIN.md` documents `--markdown` and the pull request report.
+
+### Verification log (follow-up)
+
+| DoD | Evidence |
+|---|---|
+| 14 | Eight self-check fixtures render the empty, clean, mixed (action first, bold worse with previous scores, justification block), debt-only, full-scan and truncated shapes; `self-check: 90 passed`. Live runs: `--module Oath --markdown`, `--base 0a22a278 --markdown` (87 changed methods, clean). |
+| 15 | `node .github/scripts/report-comment.test.js`: 7 scenarios (create, update keeping the other section, replace own section, fixed order, legacy comment, marker text inside a cell, unknown section). The marker scenario fails against the earlier `indexOf` parser and passes against the line-anchored one. |
+| 16 | Depth-2 clone of a real merge commit: `--base $(git rev-parse --short HEAD^1)` reports exactly the pull request's worse method. The workflow has `needs: complexity` with `!cancelled()`, a per-pull-request concurrency group with `cancel-in-progress`, job summaries in both jobs, and comment steps guarded for forks. |
+| 17 | Cache key: `crap-base-<base sha>-<hash of crap.cs, scripts/code-metrics/**, toolchain.cs, coverlet.runsettings.xml, .config/dotnet-tools.json>`. Stale comments rewritten. `actionlint` passes on the workflow. |
+| 18 | `TOOLCHAIN.md` § Pull request report and the `--markdown` option row; `CLAUDE.md` checklist points at the branch-wide check. Cross-vendor review (GPT): no blockers; its two findings (renderer tests, marker text in cells) are fixed. `crap.cs` output is still byte-identical to the original script on the current source. |

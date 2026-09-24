@@ -28,6 +28,9 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
     private int _endTransactionCalls;
     private int _releaseContextCalls;
     private int _transmitCalls;
+    private nint _releasedContextHandle;
+    private nint _establishedContextHandle;
+    private nint _connectedContextHandle;
 
     public TaskCompletionSource FirstTransmitEntered { get; } =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -46,6 +49,9 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
     public int DisconnectCalls => Volatile.Read(ref _disconnectCalls);
     public int EndTransactionCalls => Volatile.Read(ref _endTransactionCalls);
     public int ReleaseContextCalls => Volatile.Read(ref _releaseContextCalls);
+    public nint ReleasedContextHandle => Volatile.Read(ref _releasedContextHandle);
+    public nint EstablishedContextHandle => Volatile.Read(ref _establishedContextHandle);
+    public nint ConnectedContextHandle => Volatile.Read(ref _connectedContextHandle);
     public bool FailNextConnect { get; set; }
     public bool HoldBegin { get; set; }
     public uint EndTransactionResult { get; set; } = ErrorCode.SCARD_S_SUCCESS;
@@ -60,6 +66,7 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
     {
         Record("establish");
         context = new RecordingSCardContext((nint)1);
+        Volatile.Write(ref _establishedContextHandle, context.DangerousGetHandle());
         ContextReference = new WeakReference(context);
         return ErrorCode.SCARD_S_SUCCESS;
     }
@@ -72,6 +79,7 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
         out SCardCardHandle cardHandle,
         out SCARD_PROTOCOL activeProtocol)
     {
+        Volatile.Write(ref _connectedContextHandle, context.DangerousGetHandle());
         Record("connect");
         _ = Interlocked.Increment(ref _connectCalls);
         if (FailNextConnect)
@@ -139,6 +147,7 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
 
     public uint ReleaseContext(SCardContext context)
     {
+        Volatile.Write(ref _releasedContextHandle, context.DangerousGetHandle());
         Record("release-context");
         _ = Interlocked.Increment(ref _releaseContextCalls);
         ContextReleased.TrySetResult();

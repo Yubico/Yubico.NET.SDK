@@ -36,6 +36,7 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
     private readonly ILogger<PcscProtocol> _logger;
     private readonly ExchangeGuard _exchangeGuard = new();
     private readonly DisposalGate _disposalGate = new();
+    private Exception? _recoveryFailure;
     internal byte InsSendRemaining { get; private set; }
     private IApduProcessor _processor;
     private bool _disposed;
@@ -58,16 +59,16 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
 
     public FirmwareVersion? FirmwareVersion { get; private set; }
 
-    private IApduProcessor BuildCommandProcessor()
+    private IApduProcessor BuildCommandProcessor(bool secure = false)
     {
         return UseExtendedApdus
             ? new ApduTransmitter(_connection, new ApduFormatterExtended(MaxApduSize))
-            : new ChainedApduTransmitter(_connection, new ApduFormatterShort());
+            : new ChainedApduTransmitter(_connection, new ApduFormatterShort(), MarkRecoveryRequired, secure);
     }
 
     private IApduProcessor BuildBaseProcessor()
     {
-        return new ChainedResponseReceiver(FirmwareVersion, BuildCommandProcessor(), InsSendRemaining);
+        return new ChainedResponseReceiver(FirmwareVersion, BuildCommandProcessor(), InsSendRemaining, MarkRecoveryRequired);
     }
 
     private void ReconfigureProcessor() =>
@@ -75,7 +76,7 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
 
     internal IApduProcessor GetBaseProcessor() => BuildBaseProcessor();
 
-    internal IApduProcessor GetBaseCommandProcessor() => BuildCommandProcessor();
+    internal IApduProcessor GetBaseCommandProcessor() => BuildCommandProcessor(secure: true);
 
     /// <summary>
     ///     The guard refusing overlapping logical exchanges on this protocol's connection. Shared with
@@ -83,6 +84,15 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
     ///     plain and wrapped traffic can never interleave.
     /// </summary>
     internal ExchangeGuard ExchangeGuard => _exchangeGuard;
+
+    internal void MarkRecoveryRequired(Exception failure) => _recoveryFailure ??= failure;
+
+    internal void ThrowIfRecoveryRequired()
+    {
+        if (_recoveryFailure is { } failure)
+            throw new InvalidOperationException(
+                "SmartCard continuation failed; dispose and reopen the connection before another exchange.", failure);
+    }
 
 
     /// <summary>
@@ -111,7 +121,11 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
         _logger.LogTrace("Transmitting APDU: {CommandApdu}", command);
 
         var response = await _exchangeGuard.RunAsync(
-                exchangeToken => _processor.TransmitAsync(command, false, exchangeToken),
+                exchangeToken =>
+                {
+                    ThrowIfRecoveryRequired();
+                    return _processor.TransmitAsync(command, false, exchangeToken);
+                },
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -133,7 +147,11 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
         var response = await _exchangeGuard.RunAsync(
-                exchangeToken => _processor.TransmitAsync(selectCommand, false, exchangeToken),
+                exchangeToken =>
+                {
+                    ThrowIfRecoveryRequired();
+                    return _processor.TransmitAsync(selectCommand, false, exchangeToken);
+                },
                 cancellationToken)
             .ConfigureAwait(false);
         return !response.IsOK()
@@ -147,6 +165,7 @@ internal partial class PcscProtocol : ISmartCardProtocol, IAsyncDisposable
 
         _exchangeGuard.Run(() =>
         {
+            ThrowIfRecoveryRequired();
             FirmwareVersion = firmwareVersion;
             var insSendRemainingChanged = ConfigureInsSendRemaining(configuration);
 

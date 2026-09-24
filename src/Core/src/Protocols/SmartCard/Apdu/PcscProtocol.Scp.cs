@@ -25,12 +25,17 @@ internal partial class PcscProtocol
         ArgumentNullException.ThrowIfNull(keyParams);
 
         var (scpProcessor, encryptor) = await ExchangeGuard.RunAsync(
-                exchangeToken => ScpInitializer.InitializeScpAsync(
-                    GetBaseProcessor(),
-                    GetBaseCommandProcessor(),
-                    InsSendRemaining,
-                    keyParams,
-                    exchangeToken),
+                exchangeToken =>
+                {
+                    ThrowIfRecoveryRequired();
+                    return ScpInitializer.InitializeScpAsync(
+                        GetBaseProcessor(),
+                        GetBaseCommandProcessor(),
+                        InsSendRemaining,
+                        keyParams,
+                        exchangeToken,
+                        MarkRecoveryRequired);
+                },
                 cancellationToken)
             .ConfigureAwait(false);
 

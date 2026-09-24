@@ -142,6 +142,70 @@ public class PcscProtocolConcurrencyTests
         Assert.True(response.IsOK());
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FailedResponseContinuation_RefusesFurtherPlainAndWrappedTrafficWithoutReplay(bool failThroughWrapper)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var transportFailure = new InvalidOperationException("GET RESPONSE transport failed");
+        var fake = new HoldingFakeConnection
+        {
+            Responder = ins => ins switch
+            {
+                InsOperationA => new byte[] { 0xDE, 0x61, 0x01 },
+                InsSendRemaining => throw transportFailure,
+                _ => throw new InvalidOperationException($"Unexpected INS 0x{ins:X2}")
+            }
+        };
+        var baseProtocol = new PcscProtocol(fake);
+        var wrappedProcessor = new ChainedResponseReceiver(
+            null,
+            new ApduTransmitter(fake, new ApduFormatterExtended(SmartCardMaxApduSizes.Yk43)),
+            InsSendRemaining,
+            baseProtocol.MarkRecoveryRequired);
+        var wrapped = new PcscProtocolScp(baseProtocol, wrappedProcessor, data => data.ToArray());
+
+        Task<ApduResponse> exchange = failThroughWrapper
+            ? wrapped.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationA }, cancellationToken: ct)
+            : baseProtocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationA }, cancellationToken: ct);
+        Assert.Same(transportFailure, await Assert.ThrowsAsync<InvalidOperationException>(() => exchange));
+        Assert.Equal(new byte[] { InsOperationA, InsSendRemaining }, fake.WireOrder);
+
+        var plainFailure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            baseProtocol.TransmitAndReceiveAsync(new ApduCommand { Ins = InsOperationB }, cancellationToken: ct));
+        Assert.Contains("reopen", plainFailure.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Same(transportFailure, plainFailure.InnerException);
+
+        var wrappedFailure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            wrapped.SelectAsync(new byte[] { 0x01 }, ct));
+        Assert.Same(transportFailure, wrappedFailure.InnerException);
+        Assert.Throws<InvalidOperationException>(() => baseProtocol.Configure(new FirmwareVersion(5, 7, 2)));
+        Assert.Equal(new byte[] { InsOperationA, InsSendRemaining }, fake.WireOrder);
+    }
+
+    [Fact]
+    public async Task FailedCommandContinuation_RefusesSubsequentExchange()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var transportFailure = new InvalidOperationException("second chunk failed");
+        var chunks = 0;
+        var fake = new HoldingFakeConnection
+        {
+            Responder = _ => ++chunks == 1 ? new byte[] { 0x90, 0x00 } : throw transportFailure,
+            ExtendedApdus = false
+        };
+        var protocol = new PcscProtocol(fake);
+        var command = new ApduCommand(0, InsOperationA, 0, 0, new byte[300]);
+
+        Assert.Same(transportFailure, await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.TransmitAndReceiveAsync(command, cancellationToken: ct)));
+        var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            protocol.SelectAsync(new byte[] { 0x01 }, ct));
+        Assert.Same(transportFailure, refusal.InnerException);
+        Assert.Equal(2, fake.WireOrder.Count);
+    }
+
     /// <summary>
     ///     Cancellation applies at entry only: a token canceled after an exchange has claimed the guard
     ///     must not abort the exchange between its constituent transmits. Aborting mid-exchange would
@@ -232,6 +296,8 @@ public class PcscProtocolConcurrencyTests
 
         public required Func<byte, ReadOnlyMemory<byte>> Responder { get; init; }
 
+        public bool ExtendedApdus { get; init; } = true;
+
         public List<byte> WireOrder
         {
             get
@@ -290,7 +356,7 @@ public class PcscProtocolConcurrencyTests
         public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
-        public bool SupportsExtendedApdu() => true;
+        public bool SupportsExtendedApdu() => ExtendedApdus;
 
         public void Dispose()
         {

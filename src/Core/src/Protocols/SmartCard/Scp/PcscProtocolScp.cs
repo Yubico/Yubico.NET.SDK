@@ -68,7 +68,11 @@ internal sealed class PcscProtocolScp : ISmartCardProtocol, IAsyncDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         var response = await _exchangeGuard.RunAsync(
-                exchangeToken => _scpProcessor.TransmitAsync(command, true, exchangeToken),
+                exchangeToken =>
+                {
+                    _baseProtocol.ThrowIfRecoveryRequired();
+                    return _scpProcessor.TransmitAsync(command, true, exchangeToken);
+                },
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -92,7 +96,11 @@ internal sealed class PcscProtocolScp : ISmartCardProtocol, IAsyncDisposable
 
         var selectCommand = new ApduCommand { Ins = INS_SELECT, P1 = P1_SELECT, P2 = P2_SELECT, Data = applicationId };
         var response = await _exchangeGuard.RunAsync(
-                exchangeToken => _scpProcessor.TransmitAsync(selectCommand, false, exchangeToken),
+                exchangeToken =>
+                {
+                    _baseProtocol.ThrowIfRecoveryRequired();
+                    return _scpProcessor.TransmitAsync(selectCommand, false, exchangeToken);
+                },
                 cancellationToken)
             .ConfigureAwait(false);
 

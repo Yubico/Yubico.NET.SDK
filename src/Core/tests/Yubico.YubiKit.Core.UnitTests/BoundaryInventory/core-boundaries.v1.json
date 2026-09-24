@@ -191,9 +191,9 @@
     },
     {
       "path": "Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs:120 offloads Dispose."],
+      "evidence": ["Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs:17-39 synchronously waits on worker-owned open, reports, and checked shutdown."],
       "status": ["documented", "outstanding"],
-      "entries": ["DisposeAsync#C7A654D6FFED#worker#Legacy macOS feature-report connection offloads synchronous disposal with Task.Run; native GetFeature/SetFeature remain synchronous."]
+      "entries": ["GetReport#FEE38F1FF2B1#sync-boundary#Expert GET blocks its caller until the OTP worker completes native input; no public cancellation token.", "MacOSHidFeatureReportConnection#460FDCC00D7E#sync-boundary#Expert constructor blocks its caller on worker-owned open and checked partial-open cleanup.", "SetReport#D180C800261A#sync-boundary#Expert SET blocks its caller on worker-owned native output; accepted work drains before checked shutdown."]
     },
     {
       "path": "Transports/Hid/MacOS/MacOSHidIOReportConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",

@@ -32,10 +32,14 @@ if (args is ["--child", "--expert-io", "--serial", var expertSerial]
     && int.TryParse(expertSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedExpertSerial)
     && selectedExpertSerial > 0)
     return await ExpertIoScenario.RunAsync(selectedExpertSerial);
+if (args is ["--child", "--expert-feature", "--serial", var featureSerial]
+    && int.TryParse(featureSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedFeatureSerial)
+    && selectedFeatureSerial > 0)
+    return await ExpertFeatureScenario.RunAsync(selectedFeatureSerial);
 
-if (args is not ["--list"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal" or "--expert-io", "--serial", _])
+if (args is not ["--list"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal" or "--expert-io" or "--expert-feature", "--serial", _])
 {
-    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal | --expert-io) --serial SERIAL");
+    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal | --expert-io | --expert-feature) --serial SERIAL");
     return 2;
 }
 if (args is [_, "--serial", var serial]

@@ -9,20 +9,35 @@ namespace Yubico.YubiKit.Core.UnitTests.BoundaryInventory;
 public class ResponsivenessProbeTests
 {
     [Fact]
-    public async Task LegacySynchronousMacOpen_IsRejectedByTheResponsivenessGate()
+    public async Task SynchronousExpertMacOpen_BlocksOnlyItsCallerWhileWorkerOpens()
     {
         using var probe = new Probe();
         var native = new BlockingOtpLifetime(probe) { HoldOpen = true };
-        // Models restoring the legacy synchronous constructor under a task-returning open entry.
+        // The expert constructor is synchronous by contract; native open belongs to the worker.
         probe.Start(() => Task.FromResult(new MacOSHidFeatureReportConnection(42, native)));
+        try
+        {
+            Assert.True(native.OpenEntered.Wait(TimeSpan.FromSeconds(5)));
+            Assert.NotEqual(probe.CallerThread, native.OpenThread);
+            Assert.False(probe.Returned.IsSet);
+        }
+        finally { probe.Release.Set(); }
+        var opening = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        using var connection = await ((Task<MacOSHidFeatureReportConnection>)opening).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task DirectNativeOpenUnderTaskReturningEntry_FailsResponsivenessGate()
+    {
+        using var probe = new Probe();
+        probe.Start(() => { probe.EnterNative(); return Task.CompletedTask; });
         try
         {
             Assert.Throws<NotEqualException>(probe.AssertResponsive);
             Assert.False(probe.Returned.IsSet);
         }
         finally { probe.Release.Set(); }
-        var opening = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        using var connection = await ((Task<MacOSHidFeatureReportConnection>)opening).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        _ = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
     }
 
     [Theory]
@@ -93,6 +108,7 @@ public class ResponsivenessProbeTests
         internal ManualResetEventSlim Release { get; } = new();
         internal ManualResetEventSlim Returned { get; } = new();
         internal TaskCompletionSource<Task> Invocation { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        internal int CallerThread => Volatile.Read(ref _callerThread);
 
         internal void Start(Func<Task> invoke)
         {
@@ -150,8 +166,17 @@ public class ResponsivenessProbeTests
     {
         public bool HoldGet { get; init; }
         public bool HoldOpen { get; init; }
+        public ManualResetEventSlim OpenEntered { get; } = new();
+        public int OpenThread { get; private set; }
         public nint CreateDevice(long id) { if (!HoldGet && !HoldOpen) probe.EnterNative(); return 1; }
         public void OpenDevice(nint device) { if (HoldOpen) probe.EnterNative(); }
+        public int OpenDeviceResult(nint device)
+        {
+            OpenThread = Environment.CurrentManagedThreadId;
+            OpenEntered.Set();
+            OpenDevice(device);
+            return 0;
+        }
         public void CloseDevice(nint device) { }
         public bool CloseDeviceChecked(nint device) => true;
         public void ReleaseCFObject(nint device) { }

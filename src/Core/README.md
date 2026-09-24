@@ -142,11 +142,13 @@ The public expert `IHidDevice.ConnectToIOReports()` / `ConnectToFeatureReports()
 synchronous. On macOS, the IO connection blocks the caller while the same persistent FIDO input
 owner used by typed connections opens, receives, sends and shuts down. A six-second read timeout
 detaches only that read; a late report remains available on retry. Native output and shutdown can
-still block indefinitely. Feature-report connections retain their legacy native behavior.
+still block indefinitely. Feature-report connections retain their synchronous expert interface but
+open and perform native report calls on the OTP connection's worker, without a GET timeout.
 Expert IO `SetReport(byte[])` forwards the supplied report length; typed FIDO sends still require 64-byte packets.
 `IHidConnection.GetReport()` / `SetReport(byte[])` offer no cancellation token. The caller owns the
-direct connection; do not overlap report calls. Feature-report disposal still has no concurrent
-operation drain. Synchronous
+direct connection; do not overlap report calls. Expert feature SET forwards any supplied report length;
+typed OTP sends require eight bytes. Built-in macOS feature reports drain accepted calls before checked
+release; direct expert opens do not take a grouped-key registry claim. Synchronous
 `ISmartCardConnection.BeginTransaction()` and transaction-scope `Dispose()` can also block on
 native work; synchronous connection `Dispose()` is not uniformly nonblocking. For
 method-by-method execution, ownership and evidence gaps, see

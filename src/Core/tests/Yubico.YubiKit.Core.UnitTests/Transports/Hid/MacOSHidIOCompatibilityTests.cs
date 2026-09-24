@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
@@ -68,6 +69,29 @@ public class MacOSHidIOCompatibilityTests
         connection.SetReport(new byte[72]);
         Assert.Equal(1, bridge.SendCount);
         Assert.Equal(72, bridge.SentLength);
+    }
+
+    [Fact]
+    public void QueuedInputReport_TransfersTheOwnersOriginalArray()
+    {
+        var bridge = new Bridge();
+        using var connection = new MacOSHidIOReportConnection(1, bridge);
+        bridge.Emit(42);
+
+        // The owner queues a fresh array; inspecting that queue before dequeue pins the ownership contract.
+        var facadeField = typeof(MacOSHidIOReportConnection).GetField("_connection", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Missing FIDO connection field");
+        var owner = facadeField.GetValue(connection) ?? throw new InvalidOperationException("Missing FIDO connection");
+        var ownerField = owner.GetType().GetField("_owner", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Missing input owner field");
+        var inputOwner = ownerField.GetValue(owner) ?? throw new InvalidOperationException("Missing input owner");
+        var queueField = inputOwner.GetType().GetField("_reports", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Missing input queue field");
+        var queue = (Queue<byte[]>)(queueField.GetValue(inputOwner) ?? throw new InvalidOperationException("Missing input queue"));
+        byte[] owned = queue.Peek();
+
+        Assert.Same(owned, connection.GetReport());
+        Assert.Equal((byte)42, owned[0]);
     }
 
     [Fact]

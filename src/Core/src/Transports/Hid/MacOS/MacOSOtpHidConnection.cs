@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
+using Yubico.YubiKit.Core.Native.MacOS.IOKitFramework;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 
@@ -14,12 +15,14 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
     private MacOSOtpHidConnection(Owner owner) => _owner = owner;
     public ConnectionType Type => ConnectionType.HidOtp;
     public int FeatureReportSize => 8;
+    internal int InputReportSize => _owner.InputReportSize;
+    internal int OutputReportSize => _owner.OutputReportSize;
 
     internal static async Task<MacOSOtpHidConnection> OpenAsync(long entryId, IIOKitDeviceLifetime lifetime,
-        CancellationToken cancellationToken, IDisposable? registration = null)
+        CancellationToken cancellationToken, IDisposable? registration = null, bool featureMetadata = false)
     {
         Owner owner;
-        try { owner = new Owner(entryId, lifetime, registration); }
+        try { owner = new Owner(entryId, lifetime, registration, featureMetadata); }
         catch { registration?.Dispose(); throw; }
         try
         {
@@ -42,8 +45,10 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
 
     public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
         _owner.SendAsync(report, cancellationToken);
+    internal Task SendReportAsync(ReadOnlyMemory<byte> report) => _owner.SendAsync(report, CancellationToken.None, expert: true);
     public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
         _owner.ReceiveAsync(cancellationToken);
+    internal Task<ReadOnlyMemory<byte>> GetReportAsync() => _owner.ReceiveAsync(CancellationToken.None, expert: true);
     public void Dispose()
     {
         if (_owner.IsWorkerThread)
@@ -65,6 +70,7 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
         private readonly long _entryId;
         private readonly IIOKitDeviceLifetime _lifetime;
         private readonly IDisposable? _registration;
+        private readonly bool _featureMetadata;
         private readonly Lock _sync = new();
         private readonly AutoResetEvent _signal = new(false);
         private readonly TaskCompletionSource _closed = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -78,11 +84,15 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
         private bool _stopping;
         private int _workerId;
 
-        internal Owner(long entryId, IIOKitDeviceLifetime lifetime, IDisposable? registration)
+        internal int InputReportSize { get; private set; }
+        internal int OutputReportSize { get; private set; }
+
+        internal Owner(long entryId, IIOKitDeviceLifetime lifetime, IDisposable? registration, bool featureMetadata)
         {
             _entryId = entryId;
             _lifetime = lifetime;
             _registration = registration;
+            _featureMetadata = featureMetadata;
             _root = GCHandle.Alloc(this);
         }
 
@@ -185,6 +195,11 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
                         _opened = status == 0 || status == unchecked((int)0xE00002C5);
                         if (status != 0)
                             throw new PlatformApiException("IOHIDDeviceOpen", status, "Failed to open OTP HID device.");
+                        if (_featureMetadata)
+                        {
+                            InputReportSize = _lifetime.GetIntProperty(_device, IOKitHidConstants.MaxInputReportSize);
+                            OutputReportSize = _lifetime.GetIntProperty(_device, IOKitHidConstants.MaxOutputReportSize);
+                        }
                         result.TrySetResult();
                     }
                     catch (Exception ex) { result.TrySetException(ex); }
@@ -194,10 +209,10 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
             return result.Task;
         }
 
-        internal Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken token)
+        internal Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken token, bool expert = false)
         {
             token.ThrowIfCancellationRequested();
-            if (report.Length != 8) throw new ArgumentException("OTP feature report must be exactly 8 bytes.", nameof(report));
+            if (!expert && report.Length != 8) throw new ArgumentException("OTP feature report must be exactly 8 bytes.", nameof(report));
             var result = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             lock (_sync)
             {
@@ -243,7 +258,7 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
             return result.Task;
         }
 
-        internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken token)
+        internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken token, bool expert = false)
         {
             token.ThrowIfCancellationRequested();
             var result = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -264,7 +279,7 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
                             long length = report.Length;
                             var status = _lifetime.GetFeatureReport(_device, report, ref length);
                             if (status != 0) throw new PlatformApiException("IOHIDDeviceGetReport", status, "Failed to get OTP feature report.");
-                            if (length != 8) throw new InvalidOperationException($"Expected 8-byte OTP feature report, got {length} bytes.");
+                            ValidateReportLength(length, expert);
                         }
                     }
                     catch (Exception ex) { error = ex; }
@@ -274,10 +289,7 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
                             CryptographicOperations.ZeroMemory(report);
                         lock (_sync) _active = false;
                     }
-                    if (cancelled) result.TrySetCanceled(token);
-                    else if (error is not null) result.TrySetException(error);
-                    else if (report is null) result.TrySetException(new InvalidOperationException("Native GET returned no report."));
-                    else result.TrySetResult(report);
+                    CompleteReceive(result, report, error, cancelled, token);
                 }, ex =>
                 {
                     if (report is not null) CryptographicOperations.ZeroMemory(report);
@@ -290,6 +302,21 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
                 }
             }
             return result.Task;
+        }
+
+        private static void ValidateReportLength(long length, bool expert)
+        {
+            if (expert ? length is < 0 or > 8 : length != 8)
+                throw new InvalidOperationException($"Expected 8-byte OTP feature report, got {length} bytes.");
+        }
+
+        private static void CompleteReceive(TaskCompletionSource<ReadOnlyMemory<byte>> result, byte[]? report,
+            Exception? error, bool cancelled, CancellationToken token)
+        {
+            if (cancelled) result.TrySetCanceled(token);
+            else if (error is not null) result.TrySetException(error);
+            else if (report is null) result.TrySetException(new InvalidOperationException("Native GET returned no report."));
+            else result.TrySetResult(report);
         }
 
         private void Admit()

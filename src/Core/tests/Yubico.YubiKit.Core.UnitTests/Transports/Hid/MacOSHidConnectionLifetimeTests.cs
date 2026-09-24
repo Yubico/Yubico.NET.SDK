@@ -31,9 +31,8 @@ public class MacOSHidConnectionLifetimeTests
 
         _ = Assert.Throws<PlatformApiException>(() => new MacOSHidFeatureReportConnection(EntryId, lifetime));
 
-        Assert.Contains(
-            lifetime.CreatedDevice,
-            lifetime.Released);
+        Assert.Contains(lifetime.CreatedDevice, lifetime.Released);
+        Assert.Empty(lifetime.Closed); // A non-exclusive failed open never established an open device.
     }
 
     [Fact]
@@ -72,6 +71,8 @@ public class MacOSHidConnectionLifetimeTests
         {
             if (ThrowOnOpen) throw new PlatformApiException("simulated device open failure");
         }
+
+        public int OpenDeviceResult(nint device) => ThrowOnOpen ? -1 : 0;
 
         public void CloseDevice(nint device) => Closed.Add(device);
 

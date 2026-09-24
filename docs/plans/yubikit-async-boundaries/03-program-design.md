@@ -45,7 +45,7 @@ The earlier `dotnet toolchain.cs complexity` run passed six changed shipping
 methods at cyclomatic ≤10/cognitive ≤20; the later 21-method result is below.
 
 Independent review accepted ISC-38/39/43–47/60 at this earlier checkpoint;
-the later ISC-31 slice brings the master to **15/72 checked, 57 pending**.
+the later ISC-31 and ISC-32 slices bring the master to **16/72 checked, 56 pending**.
 ISC-38's source audit finds `SCardCancel` only in monitoring,
 while controlled cancelled transmit retains its native borrow; it is not a gate
 against future callsites. ISC-39's `PcscContextIsolationTests` holds a transmit
@@ -97,7 +97,7 @@ at cyclomatic ≤10/cognitive ≤20; manually split verification methods are
 excluded, not tool-certified. The latest full-suite and complexity counts
 are in the next slice below.
 
-### Subsequent expert macOS input slice — uncommitted over `1539598e`
+### Subsequent expert macOS input slice — committed at `4f361504`
 
 The typed macOS FIDO owner now detaches a cancelled expected reader under lock,
 without cancelling native input or producing a terminal; late reports queue
@@ -141,20 +141,60 @@ predates this facade; it does not measure its performance. No new physical
 touch/unplug or cross-platform native execution is inferred.
 
 `docs/architecture/raw-access-tiers.md` and `src/Core/README.md` describe
-current direct-connection limits. Next bounded decisions concern remaining
-macOS feature-report synchronous ownership and discovery-manager callback
-quiescence, not a claim that all macOS callbacks or sync waits are finished.
-The parent owns the later SDK commit; no new report, staging or code change
-is part of this documentation pass.
+direct-connection limits. The feature-report ownership gap described at this
+earlier checkpoint is superseded by the next slice; discovery-manager callback
+quiescence and global synchronous-wait inventory remain open.
 
-The pre-facade `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
+### Subsequent expert macOS feature slice — uncommitted over `4f361504`
+
+The public `MacOSHidFeatureReportConnection` now delegates to the typed OTP
+connection-owned worker for native open, descriptor metadata, feature GET/SET
+and checked close. Typed FIDO output plus expert IO SET use the FIDO worker;
+typed OTP GET/SET plus expert feature GET/SET use the OTP worker: explicit
+blocking-executor fallbacks rather than claims of native callback GET/SET.
+Expert public open/Get/Set/dispose still block synchronously; each connection
+has one worker/one admitted operation, **not** process-global bounded capacity.
+An expert GET returns an owned eight-byte array: short native responses of
+0–8 bytes remain zero-padded; more than eight bytes fails and zeros the
+buffer. Typed send still requires eight bytes; expert SET accepts arbitrary
+length for native validation. Accepted calls drain before checked close.
+Both IO and feature public `GetReport` return the owned whole array via
+`MemoryMarshal.TryGetArray`, with no second uncleared copy; tests pin array
+identity. The public `IHidConnection` shape is unchanged.
+
+Independent review: **PASS WITH NOTES** after the copy fix. Eleven feature
+compatibility and nine IO compatibility tests passed post-fix. The Native-AOT
+host built from this worktree with pinned `.8` passed
+`--expert-feature --serial 31683481`: 3/3 eight-byte feature GETs and
+read-only Management device info via feature SET/GET with dispose/reopen and
+serial match. Separate `--otp-info` typed queries passed 3/3 on that key.
+This checks **ISC-32** only for identified macOS output/feature directions;
+it does not prove a native callback feature API, all-platform runtime, or
+ISC-33 listener/manager callback quiescence. ISC-53 still covers remaining
+public synchronous waits.
+
+After this fix full Core **1,451 passed/3 skipped**, PublicApi 22, YubiOtp 180
+and resilience-fast 77 passed. Fido2 471 and 35 focused OTP protocol tests
+were earlier results, not post-fix claims. `dotnet toolchain.cs complexity`
+passed 21 changed shipping methods at cyclomatic ≤10/cognitive ≤20;
+verification methods excluded by that tool remain manually split, not
+tool-certified. The current Core inventory asserts **200 outstanding sites**:
+130 native imports, 24 waits, 15 scheduling, 21 pre-task-return gaps,
+six callback registrations, two delegate conversions and two callback
+addresses. The older 198-site count belongs to the input checkpoint.
+The 13-operation registry omits expert raw IO/feature; ISC-4 stays open.
+Parent owns the later expert-feature SDK commit. Next scoped study is macOS
+listener/manager callback quiescence and remaining inventory classification,
+without claiming epic completion or requiring new operator hardware actions.
+
+The pre-expert-facade `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
 (schema 2; SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`)
 completed two warmups, ten normal fresh-child samples and one idle sample. Normal
 medians: caller return 5.00675 ms, operation complete 24.84525 ms, disposal
 2.90555 ms, allocation 60,004 bytes. Idle CPU was 1.945 ms with zero idle
 allocations over 1,001.7302 ms. Native-only duration and pending ordinary count
 are null with explicit instrumentation-unavailable reasons. This does not
-measure the new expert facade and is not comparable to the historical `.3`
+measure either expert facade and is not comparable to the historical `.3`
 pair; ISC-62 is pending. Actual release-artifact
 inspection now checks ISC-47 as scoped above, not route or epic acceptance.
 

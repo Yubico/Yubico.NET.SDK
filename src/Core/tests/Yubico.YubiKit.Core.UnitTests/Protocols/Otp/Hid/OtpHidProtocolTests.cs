@@ -35,9 +35,18 @@ public class OtpHidProtocolTests
         public int ReportsReceived { get; private set; }
         public Action<byte[]>? OnReportDequeued { get; set; }
         public Exception? ResetFailure { get; set; }
+        public int? FailOnReceiveNumber { get; set; }
+        public IOException? ReceiveFailure { get; set; }
+        public int? FailOnFrameSendNumber { get; set; }
+        public IOException? SendFailure { get; set; }
 
         public byte[] GetReport()
         {
+            if (ReportsReceived + 1 == FailOnReceiveNumber)
+            {
+                FailOnReceiveNumber = null;
+                throw ReceiveFailure ?? new IOException("Scripted receive failure.");
+            }
             if (_reportsToReturn.Count == 0)
                 throw new InvalidOperationException("No reports queued - test setup incomplete");
             byte[] report = _reportsToReturn.Dequeue();
@@ -51,6 +60,8 @@ public class OtpHidProtocolTests
             _reportsSent.Add(report.ToArray());
             if (report[OtpConstants.FeatureReportDataSize] == OtpConstants.DummyReportWrite && ResetFailure is not null)
                 throw ResetFailure;
+            if (_reportsSent.Count == FailOnFrameSendNumber)
+                throw SendFailure ?? new IOException("Scripted frame write failure.");
         }
 
         public void Dispose() { }
@@ -82,6 +93,127 @@ public class OtpHidProtocolTests
 
         await Assert.ThrowsAsync<ArgumentException>(
             () => protocol.SendAndReceiveAsync(0x13, oversizedPayload, TestContext.Current.CancellationToken));
+        Assert.Empty(mock.SentReports);
+        Assert.Equal(0, mock.ReportsReceived);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task TransportFaultAfterWireAttempt_AbortsOnceAndEitherReusesOrRefuses(
+        bool duringResponse, bool abortFails)
+    {
+        var receiveFailure = new IOException("Original transport failure.");
+        var resetFailure = new IOException("Abort failed.");
+        var mock = new MockHidConnection
+        {
+            ReceiveFailure = receiveFailure,
+            ResetFailure = abortFails ? resetFailure : null,
+            FailOnReceiveNumber = duringResponse ? 14 : 6
+        };
+        var protocol = CreateProtocolWithMock(mock);
+        mock.QueueReport(Status(programmingSequence: 1));
+        for (int i = 0; i < (duringResponse ? 10 : 3); i++)
+            mock.QueueReport(Status(programmingSequence: 1));
+        if (duringResponse)
+            mock.QueueReport(DataReport(sequence: 0, startValue: 1));
+
+        IOException actual = await Assert.ThrowsAsync<IOException>(() => protocol.SendAndReceiveAsync(
+            0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        Assert.Same(receiveFailure, actual);
+        int frameReports = duringResponse ? 10 : 3;
+        Assert.Equal(frameReports + 1, mock.SentReports.Count);
+        Assert.Equal(1, mock.SentReports.Count(report =>
+            report[OtpConstants.FeatureReportDataSize] == OtpConstants.DummyReportWrite));
+
+        if (abortFails)
+        {
+            int received = mock.ReportsReceived;
+            mock.QueueReport(Status(programmingSequence: 2));
+            InvalidOperationException refusal = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            Assert.Same(resetFailure, refusal.InnerException);
+            Assert.Equal(frameReports + 1, mock.SentReports.Count);
+            Assert.Equal(received, mock.ReportsReceived);
+        }
+        else
+        {
+            QueueStatusOnlyExchangeAfterInitialization(mock);
+            Assert.Equal(6, (await protocol.SendAndReceiveAsync(
+                0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken)).Length);
+            Assert.Equal(frameReports + 11, mock.SentReports.Count);
+            Assert.Equal(1, mock.SentReports.Count(report =>
+                report[OtpConstants.FeatureReportDataSize] == OtpConstants.DummyReportWrite));
+        }
+    }
+
+    [Fact]
+    public async Task TransportFaultBeforeFirstWrite_DoesNotSendAbort()
+    {
+        var mock = new MockHidConnection
+        {
+            FailOnReceiveNumber = 2,
+            ReceiveFailure = new IOException("Programming sequence read failed.")
+        };
+        var protocol = CreateProtocolWithMock(mock);
+        mock.QueueReport(Status(programmingSequence: 1));
+
+        IOException actual = await Assert.ThrowsAsync<IOException>(() => protocol.SendAndReceiveAsync(
+            0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        Assert.Same(mock.ReceiveFailure, actual);
+        Assert.Empty(mock.SentReports);
+        QueueStatusOnlyExchangeAfterInitialization(mock);
+        Assert.Equal(6, (await protocol.SendAndReceiveAsync(
+            0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken)).Length);
+        Assert.Equal(10, mock.SentReports.Count);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FourthFrameWriteFails_AbortsOnceWithoutReplayingCommand(bool abortFails)
+    {
+        var sendFailure = new IOException("Fourth frame write failed.");
+        var resetFailure = new IOException("Abort failed.");
+        var mock = new MockHidConnection
+        {
+            SendFailure = sendFailure,
+            FailOnFrameSendNumber = 4,
+            ResetFailure = abortFails ? resetFailure : null
+        };
+        var protocol = CreateProtocolWithMock(mock);
+        mock.QueueReport(Status(programmingSequence: 1));
+        for (int i = 0; i < 4; i++)
+            mock.QueueReport(Status(programmingSequence: 1));
+
+        IOException actual = await Assert.ThrowsAsync<IOException>(() => protocol.SendAndReceiveAsync(
+            0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+
+        Assert.Same(sendFailure, actual);
+        Assert.Equal(5, mock.SentReports.Count);
+        Assert.Equal(1, mock.SentReports.Count(report =>
+            report[OtpConstants.FeatureReportDataSize] == OtpConstants.DummyReportWrite));
+
+        if (abortFails)
+        {
+            int received = mock.ReportsReceived;
+            InvalidOperationException refusal = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+            Assert.Same(resetFailure, refusal.InnerException);
+            Assert.Equal(5, mock.SentReports.Count);
+            Assert.Equal(received, mock.ReportsReceived);
+        }
+        else
+        {
+            QueueStatusOnlyExchangeAfterInitialization(mock);
+            Assert.Equal(6, (await protocol.SendAndReceiveAsync(
+                0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken)).Length);
+            Assert.Equal(15, mock.SentReports.Count);
+        }
     }
 
     [Fact]
@@ -311,6 +443,8 @@ public class OtpHidProtocolTests
         InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             protocol.SendAndReceiveAsync(0x13, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
         Assert.Same(reports.ResetFailure, failure.InnerException);
+        Assert.Equal(1, reports.SentReports.Count(report =>
+            report[OtpConstants.FeatureReportDataSize] == OtpConstants.DummyReportWrite));
         Assert.Equal(sent, reports.SentReports.Count);
         Assert.Equal(received, reports.ReportsReceived);
         Assert.Equal(1, reports.ReportsRemaining);
@@ -515,9 +649,12 @@ public class OtpHidProtocolTests
             TestContext.Current.CancellationToken));
 
         Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, callerPayload);
-        ReadOnlyMemory<byte> retained = Assert.Single(connection.RetainedSentReports);
-        Assert.All(retained.ToArray(), value => Assert.Equal(0, value));
-        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, Assert.Single(connection.SentReportSnapshots)[..3]);
+        Assert.Equal(2, connection.RetainedSentReports.Count);
+        Assert.All(connection.RetainedSentReports, retained =>
+            Assert.All(retained.ToArray(), value => Assert.Equal(0, value)));
+        Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, connection.SentReportSnapshots[0][..3]);
+        Assert.Equal(OtpConstants.DummyReportWrite,
+            connection.SentReportSnapshots[1][OtpConstants.FeatureReportDataSize]);
     }
 
     [Fact]

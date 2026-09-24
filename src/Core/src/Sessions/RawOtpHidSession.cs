@@ -24,8 +24,9 @@ namespace Yubico.YubiKit.Core.Sessions;
 ///     applet or slot-configuration semantics. Inbound CRC is command-specific and is not validated. It borrows a
 ///     directly supplied connection. Direct connection <c>SendAsync</c>/<c>ReceiveAsync</c> calls bypass the
 ///     session's overlap guard.
-///     If protocol reset fails, the session refuses further exchanges. Dispose the session and reopen
-///     its connection; creating another session over the same borrowed connection does not recover it.
+///     After an interrupted frame, the protocol attempts one abort before allowing reuse. If the abort or
+///     response-completion reset fails, this session refuses further exchanges. Dispose the session and reopen
+///     its connection; creating another session over the same borrowed connection is not a recovery procedure.
 /// </remarks>
 public sealed class RawOtpHidSession : ApplicationSession
 {

@@ -111,6 +111,13 @@ if (response.Length < expectedLength + 2 ||
 }
 ```
 
+Once an OTP frame write is attempted, transport errors, cancellation during touch, timeouts, and incomplete
+responses trigger one dummy-report abort before another exchange is admitted. A successful abort permits reuse of
+that session; an abort or response-completion reset failure makes the protocol instance refuse further operations
+without replaying the command. The original exchange error is preserved on abort failure. Pre-wire validation
+does not issue an abort. Recovery after a failed reset requires disposal and reopening the connection; a new
+session over the same borrowed connection is not a recovery procedure.
+
 ### Raw SmartCard With SCP
 
 Load SCP parameters from secure application storage; do not embed or log real keys:
@@ -151,6 +158,34 @@ dispatch, the task remains pending until PC/SC returns; only then may the caller
 `DisposeAsync` closes admission promptly and completes after accepted work and checked native cleanup. If cleanup
 cannot prove both card disconnect and context release, the physical-interface claim remains quarantined and later
 managed opens fail with `UnrecoveredConnectionException`.
+
+### Retained synchronous expert boundaries
+
+Prefer applet sessions or typed raw sessions for normal asynchronous exchanges. A1 retains public raw access
+responsibilities and A5 keeps discovery visibility unchanged in the current sequence; neither establishes a drain
+guarantee for the lower expert compatibility paths. `FindHidDevices.Create().FindAllAsync(token)` runs its platform
+scan via `Task.Run` and can return an `IHidDevice` backed by `MacOSHidDevice`; that discovery task does not make
+the resulting report connection asynchronous or cancel an already-running native scan. Built-in typed macOS FIDO
+and OTP connections opened through `IYubiKey.ConnectAsync<TConnection>()` use separate migrated routes in
+`HidConnectionSlot`, not the following direct report connections.
+
+| Public method(s) | Execution and owner | Evidence gap / caller limit |
+|---|---|---|
+| `IHidDevice.ConnectToIOReports()` / `IHidDevice.ConnectToFeatureReports()` | The public `MacOSHidDevice.ConnectToIOReports()` / `MacOSHidDevice.ConnectToFeatureReports()` implementations synchronously construct `MacOSHidIOReportConnection` / `MacOSHidFeatureReportConnection`. The caller owns the returned `IHidConnection`. | Direct opens do not take the grouped-key registry claim used by `IYubiKey.ConnectAsync<TConnection>()`; do not infer its quarantine or native-release guarantees. |
+| `IHidConnection.GetReport()` / `IHidConnection.SetReport(byte[])` | Legacy macOS IO `GetReport` pumps the caller's Core Foundation run loop (`CFRunLoopRunInMode`); feature `GetReport` and both `SetReport` implementations call IOKit synchronously. The caller keeps the input buffer valid throughout `SetReport`. | No cancellation token or verified drain against concurrent disposal. Do not dispose during a report call. The IO read's six-second run-loop invocation is not a proven end-to-end deadline. |
+| `ISmartCardConnection.BeginTransaction(token)` / returned `IDisposable.Dispose()` | On built-in PC/SC connections, synchronous begin and transaction end block the caller awaiting the connection's native worker. The caller ends the scope before disposing the connection. | Admitted native acquisition/end has no guaranteed duration. Prefer `BeginTransactionAsync` and async-dispose the built-in scope as in the [Core example](../../src/Core/README.md#send-raw-apdus); the interface returns only `IDisposable`, and its default async begin for custom implementations calls synchronous begin. |
+| `IConnection.Dispose()` / `IConnection.DisposeAsync()` | Legacy macOS report `Dispose` closes synchronously; its `DisposeAsync` schedules that same close with `Task.Run`. Built-in PC/SC `Dispose` blocks for the shared native-worker shutdown outcome. | Scheduling legacy close is not native async teardown or an acknowledged callback drain. Built-in PC/SC shutdown waits for accepted work and checked release, possibly indefinitely; do not generalize that guarantee to legacy HID or custom connections. |
+
+`MacOSHidIOReportConnection.Dispose` unregisters callbacks, closes and releases the device, then frees the
+report-buffer and callback-context handles without waiting for an in-flight `GetReport` or callback to finish.
+Its source comment treats ordering as sufficient, but no acknowledged callback drain is present. If disposal
+races a read or callback, freeing those handles may be unsafe: this is a **potential native lifetime defect**,
+not a reproduced crash or a proven safe teardown. The feature-report connection likewise has no operation
+drain for concurrent synchronous report calls. Avoid concurrent disposal; documentation does not repair either
+path. Built-in macOS FIDO has its own persistent input owner and checked shutdown, and built-in macOS OTP
+has a connection-owned worker; neither upgrades legacy `IHidConnection`. The
+[async-boundaries master](../../2026-09-21-yubikit-async-boundaries-ISA.md) still leaves ISC-31 and ISC-53
+unchecked across required routes and retained public waits. This table is not acceptance evidence for either.
 
 ## Ownership And Sequencing
 

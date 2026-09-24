@@ -35,6 +35,11 @@ public interface IOtpHidConnection : IConnection
     ///     <c>ConnectionSessionGuard</c>, and <c>ExchangeGuard</c>. The caller owns OTP report
     ///     framing, sequencing, polling, CRC, concurrency exclusion, and recovery. Do not interleave it with a live
     ///     session or another raw operation; dispose and reopen when state is uncertain.
+    ///     Keep borrowed <paramref name="report" /> memory valid until the returned task is terminal;
+    ///     only then zero sensitive caller-owned input. This applies to every implementation, even though
+    ///     built-in macOS output copies the report. Built-in macOS rejects cancellation before native dispatch;
+    ///     after dispatch output may succeed, and the task waits for native completion and resource drain.
+    ///     Cancellation alone does not make a raw connection reusable.
     /// </remarks>
     /// <param name="report">The report data (must be 8 bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -46,7 +51,10 @@ public interface IOtpHidConnection : IConnection
     /// <remarks>
     ///     This Tier 2 method bypasses <see cref="Sessions.ApplicationSession" />,
     ///     <c>ConnectionSessionGuard</c>, and <c>ExchangeGuard</c>. Pair receives with the
-    ///     caller's own serialized send state. After interruption or interleaving, dispose and reopen the connection.
+    ///     caller's own serialized send state. Built-in macOS OTP rejects cancellation before native dispatch;
+    ///     afterward a read may succeed, and the task waits for native completion and resource drain. Await the
+    ///     task before another operation. Cancellation alone does not make a raw connection reusable; after
+    ///     interruption or interleaving, dispose and reopen it, awaiting disposal for native drain.
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The received report (8 bytes).</returns>

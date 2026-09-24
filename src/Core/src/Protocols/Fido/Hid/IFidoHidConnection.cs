@@ -42,6 +42,11 @@ public interface IFidoHidConnection : IConnection
     ///     <c>ConnectionSessionGuard</c>, and <c>ExchangeGuard</c>. The caller owns CTAP HID
     ///     framing, sequencing, response correlation, keep-alive handling, concurrency exclusion, and recovery.
     ///     Do not interleave it with a live session or another raw operation; dispose and reopen when state is uncertain.
+    ///     Keep borrowed <paramref name="packet" /> memory valid until the returned task is terminal;
+    ///     only then zero sensitive caller-owned input. This applies to every implementation, even though
+    ///     built-in macOS output copies the packet. Built-in macOS rejects cancellation before dispatch;
+    ///     after dispatch output may succeed, and the task waits for native completion and resource drain.
+    ///     Cancellation alone does not make a raw connection reusable.
     /// </remarks>
     /// <param name="packet">The packet data (must be 64 bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -53,7 +58,13 @@ public interface IFidoHidConnection : IConnection
     /// <remarks>
     ///     This Tier 2 method bypasses <see cref="Sessions.ApplicationSession" />,
     ///     <c>ConnectionSessionGuard</c>, and <c>ExchangeGuard</c>. Pair receives with the
-    ///     caller's own serialized send state. After interruption or interleaving, dispose and reopen the connection.
+    ///     caller's own serialized send state. Built-in macOS rejects cancellation before a read is accepted;
+    ///     after acceptance, canceling a pending read does not necessarily complete it or free its overlap slot:
+    ///     a report or terminal wake completes the read.
+    ///     Drain the pending task or dispose the connection before another operation. Cancellation between
+    ///     reads does not immediately abort an in-flight device protocol exchange. After interruption or
+    ///     interleaving, dispose and reopen the connection; await disposal for native drain. Cancellation alone
+    ///     does not make a raw connection reusable.
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The received packet (64 bytes).</returns>

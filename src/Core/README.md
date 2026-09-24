@@ -114,6 +114,41 @@ Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
 `RawFidoHidSession` and `RawOtpHidSession` are the HID equivalents, created with
 `device.CreateRawFidoHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
 
+For expert raw SmartCard transactions, `BeginTransactionAsync` returns `IDisposable`. The built-in
+scope also implements `IAsyncDisposable` at runtime; the interface does not promise that for custom
+connections. End the transaction before disposing the connection:
+
+```csharp
+await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();
+IDisposable transaction = await connection.BeginTransactionAsync();
+try
+{
+    // Perform serialized raw operations on connection here.
+}
+finally
+{
+    if (transaction is IAsyncDisposable asyncTransaction)
+        await asyncTransaction.DisposeAsync();
+    else
+        transaction.Dispose();
+}
+```
+
+On built-in SmartCard connections, async begin does not block the caller; synchronous begin and
+scope disposal can wait on native work. A custom connection using the interface's default async
+begin calls synchronous begin and can block until it is overridden.
+
+The public expert `IHidDevice.ConnectToIOReports()` / `ConnectToFeatureReports()` methods open
+legacy synchronous report connections even on macOS; they are not the built-in async connections
+used by `device.ConnectAsync<TConnection>()`. `IHidConnection.GetReport()` / `SetReport(byte[])`
+offer no cancellation token or native-async guarantee. The caller owns the direct connection;
+avoid concurrent report calls and disposal. Legacy macOS IO teardown frees callback handles without
+an acknowledged in-flight callback drain, so concurrent disposal may be unsafe. Synchronous
+`ISmartCardConnection.BeginTransaction()` and transaction-scope `Dispose()` can also block on
+native work; synchronous connection `Dispose()` is not uniformly nonblocking. For
+method-by-method execution, ownership and evidence gaps, see
+[retained synchronous expert boundaries](../../docs/architecture/raw-access-tiers.md#retained-synchronous-expert-boundaries).
+
 In the development worktree, the built-in macOS FIDO connection uses asynchronous open,
 awaited channel initialization and persistent native input delivery. Blocking output and
 checked shutdown have connection-owned execution; uncertain native close retains the
@@ -156,8 +191,15 @@ device with `Yubico.YubiKit.SecurityDomain`.
   refuses overlapping raw native operations instead of queuing them. Never interleave raw I/O with a live
   session, and dispose and reopen after an interrupted exchange.
 - Built-in SmartCard cancellation prevents dispatch when observed first. Once a native PC/SC call starts, its
-  task remains pending until the call returns so caller-owned input remains borrowed safely. Async disposal
-  waits for accepted work, transaction end, disconnect, and context release without blocking the caller.
+  task remains pending until the call returns so caller-owned input remains borrowed safely. Zero sensitive
+  caller-owned input only after the task is terminal. Async disposal waits for accepted work, transaction end,
+  disconnect, and context release without blocking the caller. Custom implementations must provide their own
+  drain and borrowed-memory lifetime guarantees; these are not automatic for every SDK connection.
+- On built-in macOS FIDO, canceling a pending raw read may leave it occupying the overlap slot until a report
+  or terminal wake; drain it or dispose the connection before another operation. Cancellation between reads
+  does not immediately abort the native device protocol. Built-in macOS OTP calls already active at cancellation
+  may finish successfully. Do not assume cancellation releases native resources early; await the operation and
+  connection disposal. Other HID implementations may have different cancellation behavior.
 - If native release cannot be proven, the physical-interface claim remains quarantined and a later open throws
   `UnrecoveredConnectionException` rather than treating the key as ordinarily busy.
 - `ProtocolFactory` and the `IProtocol` family are internal. Use `Raw*Session.CreateAsync(connection)`.

@@ -183,11 +183,13 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         // Pad data to slot data size (64 bytes)
         var payload = new byte[OtpConstants.SlotDataSize];
         data.Span.CopyTo(payload);
+        var wireAttempted = false;
         try
         {
             _logger.LogTrace("Sending OTP slot command 0x{Slot:X2} with {Length} bytes payload", slot, data.Length);
 
-            var programmingSequence = await SendFrameAsync(slot, payload, exchangeToken).ConfigureAwait(false);
+            var programmingSequence = await SendFrameAsync(
+                slot, payload, exchangeToken, () => wireAttempted = true).ConfigureAwait(false);
 
             // Read response using Java-style single polling loop
             return await ReadFrameJavaStyleAsync(
@@ -196,6 +198,15 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                     exchangeToken,
                     callerToken)
                 .ConfigureAwait(false);
+        }
+        catch
+        {
+            // The first attempted write may have reached the device even when the transport throws.
+            // A failed completion reset already latched the cause; do not send a second abort.
+            if (wireAttempted && _resetFailure is null)
+                await ResetStateAfterAbandonmentAsync("incomplete OTP HID exchange", exchangeToken)
+                    .ConfigureAwait(false);
+            throw;
         }
         finally
         {
@@ -223,20 +234,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         // Phase 1: Wait for ReadPending flag (legacy C# WaitForReadPending approach)
         var (firstReport, hasData) = await WaitForReadyToReadAsync(
                 programmingSequence,
-                async () =>
-                {
-                    try
-                    {
-                        await userPresenceNotification.RequestAsync(UserPresenceBasis.DeviceWaiting, callerToken)
-                            .ConfigureAwait(false);
-                    }
-                    catch
-                    {
-                        await ResetStateAfterAbandonmentAsync("user-presence callback failure", exchangeToken)
-                            .ConfigureAwait(false);
-                        throw;
-                    }
-                },
+                 () => userPresenceNotification.RequestAsync(UserPresenceBasis.DeviceWaiting, callerToken),
                 exchangeToken,
                 callerToken)
             .ConfigureAwait(false);
@@ -319,8 +317,6 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             _logger.LogTrace("Device busy (statusByte=0x{Status:X2}), continuing poll", statusByte);
         }
 
-        await ResetStateAfterAbandonmentAsync("response polling timeout", exchangeToken)
-            .ConfigureAwait(false);
         throw new TimeoutException($"Timeout waiting for device response after {stopwatch.ElapsedMilliseconds}ms");
     }
 
@@ -349,8 +345,6 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                 // Check if ReadPending is still set
                 if ((statusByte & OtpConstants.ResponsePendingFlag) == 0)
                 {
-                    await ResetStateAfterAbandonmentAsync("incomplete OTP HID response", cancellationToken)
-                        .ConfigureAwait(false);
                     throw new BadResponseException("Incomplete OTP HID response transfer.");
                 }
 
@@ -366,8 +360,6 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
 
                 if (packetSeq != expectedSequence)
                 {
-                    await ResetStateAfterAbandonmentAsync("malformed OTP HID response sequence", cancellationToken)
-                        .ConfigureAwait(false);
                     throw new BadResponseException(
                         $"Unexpected OTP HID response sequence {packetSeq}; expected {expectedSequence}.");
                 }
@@ -414,8 +406,6 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         {
             if (callerToken.IsCancellationRequested)
             {
-                await ResetStateAfterAbandonmentAsync("caller cancellation", exchangeToken)
-                    .ConfigureAwait(false);
                 callerToken.ThrowIfCancellationRequested();
             }
 
@@ -432,14 +422,10 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
 
             if (callerToken.IsCancellationRequested)
             {
-                await ResetStateAfterAbandonmentAsync("caller cancellation", exchangeToken)
-                    .ConfigureAwait(false);
                 callerToken.ThrowIfCancellationRequested();
             }
         }
 
-        await ResetStateAfterAbandonmentAsync("user-presence timeout", exchangeToken)
-            .ConfigureAwait(false);
         throw new OtpHidTouchTimeoutException("Timeout waiting for user touch");
     }
 
@@ -536,7 +522,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     /// <summary>
     /// Packs and sends one 70-byte frame as multiple 8-byte feature reports.
     /// </summary>
-    private async Task<int> SendFrameAsync(byte slot, byte[] payload, CancellationToken cancellationToken)
+    private async Task<int> SendFrameAsync(
+        byte slot, byte[] payload, CancellationToken cancellationToken, Action onWireAttempt)
     {
         _logger.LogDebug("SendFrameAsync: slot=0x{Slot:X2}, payloadLen={Len}", slot, payload.Length);
         _logger.LogTrace("Sending {ByteCount}-byte payload to slot 0x{Slot:X2}", payload.Length, slot);
@@ -581,6 +568,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                 await AwaitReadyToWriteAsync(cancellationToken).ConfigureAwait(false);
                 _logger.LogTrace("Sending report #{Count} (seq={Seq}): {ByteCount} bytes",
                     sentCount, seq, report.Length);
+                onWireAttempt();
                 await WriteFeatureReportAsync(report, cancellationToken).ConfigureAwait(false);
                 sentCount++;
 

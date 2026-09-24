@@ -23,7 +23,17 @@ internal static class AdapterContractRegistry
         ("portable PCSC", "transmit", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "TransmitAndReceiveAsync", ["overlap", "cancel before", "cancel during"]),
         ("portable PCSC", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransactionAsync", ["pending", "cancel before", "cancel during"]),
         ("portable PCSC", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "DisposeAsync", ["drain", "failure"]),
-        ("portable PCSC", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "DisposeAsync", ["drain", "failure"])
+        ("portable PCSC", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "DisposeAsync", ["drain", "failure", "native worker"]),
+        ("macOS direct input (sync)", "open", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", ".ctor", ["constructor failure"]),
+        ("macOS direct input (sync)", "get", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "GetReport", ["timeout then retry", "buffer ownership"]),
+        ("macOS direct input (sync)", "set", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "SetReport", ["native drain", "failure"]),
+        ("macOS direct input (sync)", "dispose", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "Dispose", ["native drain", "shared close"]),
+        ("macOS direct feature (sync)", "open", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", ".ctor", ["constructor failure"]),
+        ("macOS direct feature (sync)", "get", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "GetReport", ["buffer ownership", "failure"]),
+        ("macOS direct feature (sync)", "set", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "SetReport", ["native worker", "native drain"]),
+        ("macOS direct feature (sync)", "dispose", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "Dispose", ["shared close", "failure"]),
+        ("macOS listener (sync)", "start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start", ["registration", "restart after timeout"]),
+        ("macOS listener (sync)", "stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop", ["callback drain", "shared stop after timeout"])
     ];
 
     internal static IReadOnlyList<string> Validate(IEnumerable<AdapterContractRow> input)
@@ -72,7 +82,9 @@ internal static class AdapterContractRegistry
 
         const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic |
             BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
-        if (string.IsNullOrWhiteSpace(row.Symbol) || !owner.GetMethods(flags).Any(method => method.Name == row.Symbol))
+        if (string.IsNullOrWhiteSpace(row.Symbol) ||
+            !(row.Symbol == ".ctor" ? owner.GetConstructors(flags).Length > 0 :
+                owner.GetMethods(flags).Any(method => method.Name == row.Symbol)))
             errors.Add($"missing symbol: {row.Owner}.{row.Symbol}");
     }
 

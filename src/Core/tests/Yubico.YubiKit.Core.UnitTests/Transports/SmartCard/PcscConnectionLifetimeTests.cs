@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Runtime.CompilerServices;
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -243,6 +242,27 @@ public class PcscConnectionLifetimeTests
             api.ReleaseTransmit.Set();
             await connection.DisposeAsync();
         }
+    }
+
+    [Fact]
+    public async Task BuiltInPcscConnection_AllLifecycleCallsShareOneNativeWorker()
+    {
+        var api = new ControlledSCardConnectionApi();
+        api.ReleaseTransmit.Set();
+        var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        try
+        {
+            using (await connection.BeginTransactionAsync(Ct))
+                _ = await connection.TransmitAndReceiveAsync(new byte[] { 0x00 }, Ct);
+        }
+        finally
+        {
+            await connection.DisposeAsync();
+        }
+
+        Assert.Equal(["establish", "connect", "begin", "transmit-enter", "transmit-exit", "end", "disconnect", "release-context"], api.Events);
+        Assert.Equal(api.Events.Length, api.NativeThreadIds.Length);
+        Assert.Single(api.NativeThreadIds.Distinct());
     }
 
     [Fact]

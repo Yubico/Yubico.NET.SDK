@@ -44,10 +44,14 @@ if (args is ["--child", "--expert-feature", "--serial", var featureSerial]
     && int.TryParse(featureSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedFeatureSerial)
     && selectedFeatureSerial > 0)
     return await ExpertFeatureScenario.RunAsync(selectedFeatureSerial);
+if (args is ["--child", "--smartcard", "--serial", var smartCardSerial]
+    && int.TryParse(smartCardSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedSmartCardSerial)
+    && selectedSmartCardSerial > 0)
+    return await SmartCardScenario.RunAsync(selectedSmartCardSerial);
 
-if (args is not ["--list"] and not ["--listener-drain"] and not ["--listener-late-drain"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal" or "--expert-io" or "--expert-feature" or "--listener-remove", "--serial", _])
+if (args is not ["--list"] and not ["--listener-drain"] and not ["--listener-late-drain"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal" or "--expert-io" or "--expert-feature" or "--smartcard" or "--listener-remove", "--serial", _])
 {
-    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | --listener-drain | --listener-late-drain | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal | --expert-io | --expert-feature | --listener-remove) --serial SERIAL");
+    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | --listener-drain | --listener-late-drain | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal | --expert-io | --expert-feature | --smartcard | --listener-remove) --serial SERIAL");
     return 2;
 }
 if (args is [_, "--serial", var serial]

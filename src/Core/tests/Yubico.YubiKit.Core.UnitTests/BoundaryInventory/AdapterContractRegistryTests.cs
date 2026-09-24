@@ -14,11 +14,36 @@ public class AdapterContractRegistryTests
     public void Migrated_routes_have_resolved_nonempty_contract_profiles()
     {
         var rows = Load();
-        Assert.Equal(13, rows.Length);
+        Assert.Equal(23, rows.Length);
         Assert.Empty(AdapterContractRegistry.Validate(rows));
         Assert.Equal(4, rows.Count(row => row.Route == "macOS FIDO"));
         Assert.Equal(4, rows.Count(row => row.Route == "macOS OTP"));
         Assert.Equal(5, rows.Count(row => row.Route == "portable PCSC"));
+        Assert.Equal(4, rows.Count(row => row.Route == "macOS direct input (sync)"));
+        Assert.Equal(4, rows.Count(row => row.Route == "macOS direct feature (sync)"));
+        Assert.Equal(2, rows.Count(row => row.Route == "macOS listener (sync)"));
+    }
+
+    [Theory]
+    [InlineData("macOS direct input (sync)", "open")]
+    [InlineData("macOS direct input (sync)", "get")]
+    [InlineData("macOS direct input (sync)", "set")]
+    [InlineData("macOS direct input (sync)", "dispose")]
+    [InlineData("macOS direct feature (sync)", "open")]
+    [InlineData("macOS direct feature (sync)", "get")]
+    [InlineData("macOS direct feature (sync)", "set")]
+    [InlineData("macOS direct feature (sync)", "dispose")]
+    [InlineData("macOS listener (sync)", "start")]
+    [InlineData("macOS listener (sync)", "stop")]
+    public void Removing_any_direct_macOS_boundary_fails_closed(string route, string operation)
+    {
+        var rows = Load();
+        var row = Assert.Single(rows, row => row.Route == route && row.Operation == operation);
+        Assert.Contains($"missing required operation: {route}/{operation}",
+            AdapterContractRegistry.Validate(rows.Where(row => row.Route != route || row.Operation != operation)));
+        Assert.Contains(AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row
+            ? candidate with { Profiles = [candidate.Profiles[0] with { Role = "wrong profile" }] }
+            : candidate)), error => error == $"unexpected role: {route}/{operation}/wrong profile");
     }
 
     [Fact]

@@ -145,7 +145,7 @@ direct-connection limits. The feature-report ownership gap described at this
 earlier checkpoint is superseded by the next slice; discovery-manager callback
 quiescence and global synchronous-wait inventory remain open.
 
-### Subsequent expert macOS feature slice — uncommitted over `4f361504`
+### Subsequent expert macOS feature slice — committed at `db378ffc`
 
 The public `MacOSHidFeatureReportConnection` now delegates to the typed OTP
 connection-owned worker for native open, descriptor metadata, feature GET/SET
@@ -183,9 +183,38 @@ tool-certified. The current Core inventory asserts **200 outstanding sites**:
 six callback registrations, two delegate conversions and two callback
 addresses. The older 198-site count belongs to the input checkpoint.
 The 13-operation registry omits expert raw IO/feature; ISC-4 stays open.
-Parent owns the later expert-feature SDK commit. Next scoped study is macOS
-listener/manager callback quiescence and remaining inventory classification,
-without claiming epic completion or requiring new operator hardware actions.
+The feature slice is now committed. The subsequent listener-generation work
+below does not yet prove actual native callback quiescence.
+
+### Subsequent macOS listener-generation slice — uncommitted over `db378ffc`
+
+`MacOSHidDeviceListener` now roots manager/run-loop/callback resources per
+generation. On the listener thread, `finally` unschedules only after `Run`
+returns, then releases mode, loop, manager and root. Stop signals and waits
+outside the lock; concurrent Stop/Dispose share one monotonic deadline. A
+timeout retains the generation without repeated eight-second waits; fresh
+Start is refused until prior cleanup succeeds. Callback self-stop does not
+join its own thread, and callback/logger exceptions cannot escape into the
+native callback. This is the existing owned IOHIDManager run loop with 100 ms
+poll, **not** a new native dispatch bridge or hardware topology change.
+
+Independent review: PASS after the shared-stop fix. Six controlled
+`MacOSHidListenerLifetimeTests` cover held callback/drain, self-stop,
+concurrent Stop/Dispose, timeout/restart and failed cleanup. Four existing
+on-host `HidDeviceListenerIntegrationTests` passed on macOS/.NET 10.0.12 for
+Start, no-change, Dispose and platform type; none observed actual native
+arrival/removal callback drain. **ISC-33 remains unchecked** pending that
+evidence and the broader teardown audit. Full Core **1,457 passed/3 skipped**,
+PublicApi 22, resilience-fast 83 (six more than the prior 77); YubiOtp 180
+passed at the feature checkpoint, with Fido2 471 and 35 OTP protocol tests
+from earlier runs. Complexity passed 33 changed shipping methods at
+cyclomatic ≤10/cognitive ≤20; verification/test methods remain outside its
+certification. Current scanner: **198 outstanding** sites (130 imports, 24
+waits, 15 scheduling, 21 pre-task-return gaps, six callback registrations,
+zero delegate conversions, two callback addresses), not verified-safe sites.
+No new operator touch/unplug is claimed. Parent owns the later SDK commit;
+next bounded work can inspect remaining listener quiescence and inventory
+without claiming whole-macOS or epic acceptance.
 
 The pre-expert-facade `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
 (schema 2; SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`)

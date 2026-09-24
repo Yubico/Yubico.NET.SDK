@@ -185,9 +185,9 @@
     },
     {
       "path": "Transports/Hid/MacOS/MacOSHidDeviceListener.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/MacOS/MacOSHidDeviceListener.cs:102-121 registers arrival/removal callbacks then starts listener thread; :153 bounds shutdown join."],
+      "evidence": ["Transports/Hid/MacOS/MacOSHidDeviceListener.cs:67-124 registers static callbacks with a generation-rooted context, starts the worker, and bounds one shutdown join; :170-188 unschedules before release. No physical-device quiescence test was run."],
       "status": ["documented", "outstanding"],
-      "entries": ["Start#7563545F879B#callback#Registers IOKit HID device-arrival callback with a retained delegate before starting the listener run loop.", "Start#01EC825251E0#callback#Registers IOKit HID device-removal callback with a retained delegate before starting the listener run loop.", "Start#0BC66ED32258#worker#Starts a dedicated IOKit listener/run-loop thread; native callbacks execute in that listener lifetime.", "Stop#6C0743B1545B#sync-boundary#Stop joins the listener thread only until MaxDisposalWaitTime; failure to drain needs separate ownership review.", "Start#D242319BBC30#callback#Marshal converts the retained arrival delegate to an unmanaged pointer before IOKit registration; pointer lifetime follows listener ownership.", "Start#4B4C266C3673#callback#Marshal converts the retained removal delegate to an unmanaged pointer before IOKit registration; pointer must not outlive the delegate."]
+      "entries": ["StartGeneration#37DD7AA11FDE#worker#Dedicated IOKit listener thread owns unschedule and release after its callback returns, including after a timed-out stop.", "WaitForExit#0B9F338C4E28#sync-boundary#One caller joins outside the lock for a bounded interval; a timed-out generation prevents restart until cleanup completes.", "RegisterMatching#C87FC5C9A1F3#callback#Registers the arrival function pointer with a generation-rooted context; the run-loop worker unschedules before freeing that root.", "RegisterRemoval#4BDC214E9827#callback#Registers the removal function pointer with the same rooted generation and shutdown order."]
     },
     {
       "path": "Transports/Hid/MacOS/MacOSHidFeatureReportConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",

@@ -3,15 +3,17 @@
 ## Current checkpoint — 2026-09-24 (published `.8` and bounded macOS evidence, not epic closure)
 
 Owner: orchestrator for acceptance and sequencing; Route/Native Engineers for the
-macOS implementation and native package. Independent review of the expert
-feature slice approves ISC-32. **ISC-5, ISC-31, ISC-32, ISC-38, ISC-39,
+macOS implementation and native package. Independent review passed the
+listener-generation slice after the shared-stop fix, but did **not** approve
+ISC-33. **ISC-5, ISC-31, ISC-32, ISC-38, ISC-39,
 ISC-41, ISC-43–49, ISC-51, ISC-52 and ISC-60 (16/72 checked, 56 pending)**
 at their stated evidence grades. Windows/Linux native and hardware
 routes and later backend explorations remain deferred pending user direction;
 no criterion is waived.
 
-Managed checkpoint HEAD `4f361504` includes the expert IO slice; the newer
-expert-feature changes are uncommitted, not yet attributable to an SDK revision. `efde3ef0`
+Managed checkpoint HEAD `db378ffc` includes the expert-feature slice; the newer
+listener-generation cleanup is uncommitted, not yet attributable to an SDK revision. `4f361504`
+committed the expert IO slice. `efde3ef0`
 contains ordinary transport-fault recovery and public contract documentation;
 `add0dc73` contains the operation registry and portable boundary controls.
 The independent solution-file edit remains outside these commits.
@@ -91,11 +93,12 @@ holds native begin, checks the returned task remains pending, releases it in
 `finally` and checks one end. The existing async transaction path and managed
 probe meet this literal criterion, not the whole PC/SC lifecycle/platform matrix.
 
-The current Core-only inventory assertion has **200 classified but outstanding
-sites** after the feature changes: 130 native imports, 24 waits, 15 scheduling
-sites, 21 pre-task-return dispatch gaps, six
-callback registrations, two delegate conversions and two unmanaged callback
-addresses. The separate registry lists **13 required operations**
+The current Core-only inventory assertion has **198 classified but outstanding
+sites** after the listener changes: 130 native imports, 24 waits, 15 scheduling
+sites, 21 pre-task-return dispatch gaps, six callback registrations, zero
+delegate conversions and two unmanaged callback addresses. The prior feature
+checkpoint's 200 sites included two conversions removed in this slice. The
+separate registry lists **13 required operations**
 and **26 profile links** across macOS FIDO, macOS OTP and portable PC/SC;
 reflection checks owner/symbol, roles, test attributes and missing/duplicate
 rows. The 26 links resolve to named runnable Fact/Theory tests. It covers only
@@ -135,7 +138,7 @@ input callback and is not the same route. ISC-33 still needs discovery-manager
 callback quiescence; ISC-53 still covers all public synchronous waits. These
 tests do not close ISC-4's registry gap or make all macOS async work complete.
 
-**Current expert macOS feature slice (ISC-32, reviewed PASS WITH NOTES):** the
+**Committed expert macOS feature slice (ISC-32, reviewed PASS WITH NOTES):** the
 public synchronous `MacOSHidFeatureReportConnection` now delegates to the
 typed macOS OTP owned worker: native open and descriptor metadata read, feature
 GET/SET and checked shutdown run there. Typed FIDO output and expert IO SET
@@ -160,6 +163,24 @@ No new touch/unplug or other-platform native driver proof. ISC-33 still needs
 listener/manager callback quiescence, and ISC-53 remains broader than these
 documented expert waits.
 
+**Current listener-generation slice (reviewed PASS after shared-stop fix;
+ISC-33 still unchecked):** `MacOSHidDeviceListener` roots each manager, run
+loop and callback context for its generation. Its listener-thread `finally`
+unschedules after `Run` returns, then releases mode, loop, manager and root.
+Stop signals the run loop and waits **outside** the lock; concurrent Stop and
+Dispose share a monotonic deadline. A timed-out generation remains retained,
+without repeatedly waiting eight seconds; Start refuses a fresh generation
+until the prior one cleans up. Callback self-stop requests shutdown without
+joining itself; callback and logger exceptions are contained. Six controlled
+`MacOSHidListenerLifetimeTests` passed, accounting for resilience-fast's
+increase from 77 to 83. Four existing on-host
+`HidDeviceListenerIntegrationTests` passed on macOS/.NET 10.0.12 (Start,
+no-change, Dispose, platform type) but **did not observe an actual arrival or
+removal callback**. Native manager handling still uses the existing owned run
+loop and 100 ms poll, not a new dispatch bridge. Neither real native callback
+quiescence nor all other teardown paths are established; ISC-33 is pending.
+No operator hardware topology was changed.
+
 At `.8`, selected-key macOS 15.7.7 arm64 / .NET 10.0.12 probes passed five
 normal Native AOT scenarios, active cancellation and three read-only OTP info
 queries on serial 31683481 (firmware 5.7.4). OTP partial-send/read faults now
@@ -174,10 +195,11 @@ grade, not a universal platform/hardware completion.
 
 Public XML contracts now describe borrowed memory/task lifetime, cancellation,
 synchronous fallback and raw reuse caveats; no public API signature was changed
-in this documentation increment. **Last full Core run: 1,451 passed/3 skipped**
-after the expert-feature fix. PublicApi 22, YubiOtp 180 and resilience-fast 77
-passed; Fido2 471 and 35 focused OTP protocol tests passed at earlier
-checkpoints. `dotnet toolchain.cs complexity` passed 21 changed shipping methods at cyclomatic
+in this documentation increment. **Last full Core run: 1,457 passed/3 skipped**
+after the shared-stop fix. PublicApi 22 and resilience-fast 83 passed;
+YubiOtp 180 passed at the prior feature checkpoint, and Fido2 471 and 35
+focused OTP protocol tests passed earlier. `dotnet toolchain.cs complexity`
+passed 33 changed shipping methods at cyclomatic
 ≤10/cognitive ≤20; verification/harness/test methods were manually split but
 excluded by the tool, so they are not tool-certified. The targeted inventory's
 28 passes after earlier scoped formatting are a separate prior run, not a
@@ -193,9 +215,11 @@ These observations predate both expert facades and are **not** a `.8` before/aft
 comparable to the historical `.3` pair. Native-only duration and pending ordinary
 count are null with instrumentation-unavailable reasons; ISC-62 stays open.
 
-Finite next work: parent integrates the uncommitted expert-feature slice and
-records its actual SDK revision later. Study macOS listener/manager callback
-quiescence separately; ISC-32 does not close ISC-33 or universal ISC-53.
+Finite next work: parent integrates the uncommitted listener-generation slice
+and records its actual SDK revision later. Study real macOS listener/manager
+callback quiescence separately without inventing an operator arrival/removal
+run; controlled and no-change integration tests do not close ISC-33 or
+universal ISC-53.
 ISC-56 still needs coverage beyond the three inventoried files and sentinel
 paths, and the registry needs expert raw IO/feature rows for universal ISC-4.
 `docs/architecture/raw-access-tiers.md`

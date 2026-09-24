@@ -6,13 +6,13 @@
 
 - Go 1.27.1.
 - GitHub CLI (`gh`), authenticated for `Yubico/Yubico.NET.SDK` attestations.
-- `Yubico/nuget-sign` at commit `e6c54452834ff9fd6bf034b253d66758ca555556` (Yubico/nuget-sign#2) or later, which makes `verify --assemblies` fail on any unverified assembly and pins assembly signers with `--certificate-fingerprint`.
+- `Yubico/nuget-sign` at commit `7b632e016c57c4cf0025d918210b6926b85ef9d8` or later (includes Yubico/nuget-sign#2), which makes `verify --assemblies` fail on any unverified assembly and pins assembly signers with `--certificate-fingerprint`.
 - A Personal Identity Verification (PIV) signing key, a leaf-first Privacy-Enhanced Mail (PEM) certificate chain, and PEM roots for the signer and timestamp authority.
 
 ```sh
 git clone git@github.com:Yubico/nuget-sign.git
 cd nuget-sign
-git checkout e6c54452834ff9fd6bf034b253d66758ca555556
+git checkout 7b632e016c57c4cf0025d918210b6926b85ef9d8
 go install -tags nogcpkms .
 cd /path/to/Yubico.NET.SDK
 go -C build/release-sign build -o /tmp/release-sign .

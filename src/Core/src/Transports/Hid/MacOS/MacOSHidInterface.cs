@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 ///     macOS implementation of a Human Interface Device (HID).
 /// </summary>
 [SupportedOSPlatform("macos")]
-internal sealed class MacOSHidDevice : IHidDevice
+internal sealed class MacOSHidInterface : IHidInterface
 {
     private readonly long _entryId;
     internal long EntryId => _entryId;
@@ -42,7 +42,7 @@ internal sealed class MacOSHidDevice : IHidDevice
     /// </summary>
     public HidInterfaceType InterfaceType { get; }
 
-    internal MacOSHidDevice(long entryId, HidDescriptorInfo descriptorInfo)
+    internal MacOSHidInterface(long entryId, HidDescriptorInfo descriptorInfo)
     {
         _entryId = entryId;
         DescriptorInfo = descriptorInfo;
@@ -55,7 +55,7 @@ internal sealed class MacOSHidDevice : IHidDevice
     /// <returns>
     ///     An enumerable list of all the supported Yubico HID devices present on the system.
     /// </returns>
-    public static IReadOnlyList<IHidDevice> GetList()
+    public static IReadOnlyList<IHidInterface> GetList()
     {
         nint manager = 0;
         nint deviceSet = 0;
@@ -72,7 +72,7 @@ internal sealed class MacOSHidDevice : IHidDevice
             var devices = new IntPtr[deviceSetCount];
             CFNativeMethods.CFSetGetValues(deviceSet, devices);
 
-            var result = new List<IHidDevice>((int)deviceSetCount);
+            var result = new List<IHidInterface>((int)deviceSetCount);
             foreach (var device in devices)
             {
                 var descriptorInfo = new HidDescriptorInfo
@@ -88,7 +88,7 @@ internal sealed class MacOSHidDevice : IHidDevice
                 if (descriptorInfo.VendorId == HidConstants.YubicoVendorId &&
                     HidInterfaceClassifier.IsSupported(descriptorInfo))
                 {
-                    result.Add(new MacOSHidDevice(GetEntryId(device), descriptorInfo));
+                    result.Add(new MacOSHidInterface(GetEntryId(device), descriptorInfo));
                 }
             }
 

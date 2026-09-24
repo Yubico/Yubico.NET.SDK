@@ -31,12 +31,12 @@ public class HidEnumerationTests
     [Fact]
     [Trait("Category", "Integration")]
     [Trait("RequiresHardware", "true")]
-    public async Task FindHidDevices_EnumeratesYubicoDevices()
+    public async Task FindHidInterfaces_EnumeratesYubicoInterfaces()
     {
         var loggerFactory = LoggerFactory.Create(builder =>
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
 
-        var finder = new FindHidDevices(loggerFactory.CreateLogger<FindHidDevices>());
+        var finder = new FindHidInterfaces(loggerFactory.CreateLogger<FindHidInterfaces>());
 
         var devices = await finder.FindAllAsync();
 

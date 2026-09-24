@@ -22,17 +22,17 @@ using Yubico.YubiKit.Core.Transports.Hid.Windows;
 
 namespace Yubico.YubiKit.Core.Transports.Hid;
 
-public interface IFindHidDevices
+public interface IFindHidInterfaces
 {
-    Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default);
 }
 
-public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
+public class FindHidInterfaces(ILogger<FindHidInterfaces> logger) : IFindHidInterfaces
 {
-    public async Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
+    public async Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
         await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
 
-    private IReadOnlyList<IHidDevice> FindAll()
+    private IReadOnlyList<IHidInterface> FindAll()
     {
         logger.LogDebug("Getting list of HID devices");
 
@@ -47,7 +47,7 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
         return yubicoDevices;
     }
 
-    private IReadOnlyList<IHidDevice> GetPlatformDevices() =>
+    private IReadOnlyList<IHidInterface> GetPlatformDevices() =>
         SdkPlatformInfo.OperatingSystem switch
         {
             SdkPlatform.MacOS => FindAllMacOS(),
@@ -58,15 +58,15 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
         };
 
     [SupportedOSPlatform("macos")]
-    private static IReadOnlyList<IHidDevice> FindAllMacOS() =>
-        MacOSHidDevice.GetList();
+    private static IReadOnlyList<IHidInterface> FindAllMacOS() =>
+        MacOSHidInterface.GetList();
 
     [SupportedOSPlatform("linux")]
-    private IReadOnlyList<IHidDevice> FindAllLinux()
+    private IReadOnlyList<IHidInterface> FindAllLinux()
     {
         try
         {
-            return LinuxHidDevice.GetList();
+            return LinuxHidInterface.GetList();
         }
         catch (DllNotFoundException ex)
         {
@@ -76,9 +76,9 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
     }
 
     [SupportedOSPlatform("windows")]
-    private static IReadOnlyList<IHidDevice> FindAllWindows() =>
-        WindowsHidDevice.GetList();
+    private static IReadOnlyList<IHidInterface> FindAllWindows() =>
+        WindowsHidInterface.GetList();
 
-    public static FindHidDevices Create(ILogger<FindHidDevices>? logger = null) =>
-        new(logger ?? NullLogger<FindHidDevices>.Instance);
+    public static FindHidInterfaces Create(ILogger<FindHidInterfaces>? logger = null) =>
+        new(logger ?? NullLogger<FindHidInterfaces>.Instance);
 }

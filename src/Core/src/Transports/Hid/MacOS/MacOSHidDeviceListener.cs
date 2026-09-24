@@ -330,7 +330,7 @@ internal sealed class MacOSHidListenerNative : IMacOSHidListenerNative
     public void SetDeviceMatching(nint manager) => IOKitNativeMethods.IOHIDManagerSetDeviceMatching(manager, 0);
     public void RegisterMatching(nint manager, nint callback, nint context) => IOKitNativeMethods.IOHIDManagerRegisterDeviceMatchingCallback(manager, callback, context);
     public void RegisterRemoval(nint manager, nint callback, nint context) => IOKitNativeMethods.IOHIDManagerRegisterDeviceRemovalCallback(manager, callback, context);
-    public long GetEntryId(nint device) => MacOSHidDevice.GetEntryId(device);
+    public long GetEntryId(nint device) => MacOSHidInterface.GetEntryId(device);
     public nint RetainCurrentRunLoop() => CFNativeMethods.CFRetain(CFNativeMethods.CFRunLoopGetCurrent());
     public nint CreateRunLoopMode() => CoreFoundationString.Create("kCFRunLoopDefaultMode");
     public void Schedule(nint manager, nint loop, nint mode) => IOKitNativeMethods.IOHIDManagerScheduleWithRunLoop(manager, loop, mode);

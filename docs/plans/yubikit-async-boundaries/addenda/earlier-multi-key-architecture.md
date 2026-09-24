@@ -21,7 +21,7 @@ implementation sequence belongs to Gate 4. No implementation is authorized yet.
 | Existing area | Proposed responsibility |
 |---|---|
 | Public device factories, applet sessions/interfaces, and raw sessions | Retain the approved consumer experience and visible protocol flow. Coordinate affected public changes across applets; retain the shared options/cancellation/ownership grammar. |
-| Public typed raw connections | Retain expert packet/transmit operations, caller-owned lifetime and external implementations. They are not a second public logical-exchange queue. |
+| Public typed raw connections | Retain direct packet/transmit operations, caller-owned lifetime and external implementations. They are not a second public logical-exchange queue. |
 | Core protocol owners | Keep framing, chaining, secure-channel state, prompt pairing, cancellation messages, and recovery here. Native adapters cannot infer applet success or replay uncertain commands. |
 | Core transport/platform implementations | Own asynchronous open/report/lifecycle execution and native request lifetime. Keep platform details behind the public typed connection contracts. |
 | Existing guards and registry | Keep logical admission, one-session binding, physical ownership and shared teardown as distinct responsibilities; adapt their interactions where native lifetime demands it. |
@@ -39,7 +39,7 @@ Replace the synchronous implementation contract currently represented by
 low-level opening contract and necessarily connected implementation types internal
 as a coordinated change, rather than preserving a second public platform-report layer.
 Exact members and visibility closure must be reviewed at Gate 3.
-That review must name `FindHidDevices`, `IFindHidDevices`, `IHidDevice` and their
+That review must name `FindHidInterfaces`, `IFindHidInterfaces`, `IHidInterface` and their
 consumer replacements explicitly; raw-operation retention alone does not settle
 every public enumeration use case. Include the public `HidDeviceListener`,
 `ISmartCardDeviceListener` and `DesktopSmartCardDeviceListener` delegate surfaces:
@@ -52,7 +52,7 @@ Public/protected factory and base-type dependencies must remain accessible.
 
 This cut follows the approved surface-minimization policy. It does not mean all
 synchronous methods are forbidden: local work and deliberately retained synchronous
-expert/disposal boundaries remain classified contracts. A broader unrelated Core
+compatibility and disposal boundaries remain classified contracts. A broader unrelated Core
 visibility cleanup is not part of this proposal.
 
 ### A3 — native completion where available; one bounded blocking mechanism
@@ -97,7 +97,7 @@ explicit at Gate 2 instead of leaving them compressed into the two rows above.
 (`IOHIDManagerSetDeviceMatchingMultiple`, referenced but unused at
 `Native/MacOS/IOKitFramework/IOKitHid.Interop.cs:70`) to replace the current
 match-all-then-filter discovery approach (`MacOSHidDeviceListener.cs:92`,
-`MacOSHidDevice.cs:65`). That is a discovery-shape question, not a blocking/async
+`MacOSHidInterface.cs:65`). That is a discovery-shape question, not a blocking/async
 boundary, and is out of scope here unless the user asks for it to be folded in.
 
 These are implementation directions, not verified platform capabilities. Backend
@@ -155,7 +155,7 @@ over submission, completion, cancellation, removal and release. Exercise actual
 production adapters through them, including the prefix before their first await.
 Reuse existing seams where they fit; exact extensions versus sibling seams are Gate 3.
 
-Current coverage is partial: `IHidDDevice` is synchronous; `IIOKitDeviceLifetime`
+Current coverage is partial: `IWindowsHidReportAccess` is synchronous; `IIOKitDeviceLifetime`
 deliberately excludes report execution; `ILinuxHidEventSource` covers monitoring;
 `ISCardApi` covers discovery/status, not full connection/transaction lifetime.
 Fake typed connections remain useful for protocol tests but cannot alone prove the

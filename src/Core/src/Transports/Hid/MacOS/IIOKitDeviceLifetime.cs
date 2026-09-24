@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 ///         paths of <see cref="MacOSHidFeatureReportConnection" />,
 ///         <see cref="MacOSHidIOReportConnection" />, and <see cref="MacOSOtpHidConnection" />
 ///         can be tested without macOS hardware — the same
-///         reason <c>IHidDDevice</c> exists on the Windows side. It deliberately mirrors the native calls
+///         reason <c>IWindowsHidReportAccess</c> exists on the Windows side. It deliberately mirrors the native calls
 ///         one-for-one and adds no policy.
 ///     </para>
 ///     <para>

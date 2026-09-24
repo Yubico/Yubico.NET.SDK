@@ -24,13 +24,13 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 /// Windows implementation of a Human Interface Device (HID).
 /// </summary>
 [SupportedOSPlatform("windows")]
-internal sealed class WindowsHidDevice : IHidDevice
+internal sealed class WindowsHidInterface : IHidInterface
 {
-    private static readonly ILogger<WindowsHidDevice> Logger = YubiKitLogging.CreateLogger<WindowsHidDevice>();
+    private static readonly ILogger<WindowsHidInterface> Logger = YubiKitLogging.CreateLogger<WindowsHidInterface>();
 
     private readonly string _devicePath;
 
-    private WindowsHidDevice(HidDescriptorInfo descriptorInfo)
+    private WindowsHidInterface(HidDescriptorInfo descriptorInfo)
     {
         DescriptorInfo = descriptorInfo;
         InterfaceType = HidInterfaceClassifier.Classify(descriptorInfo);
@@ -43,9 +43,9 @@ internal sealed class WindowsHidDevice : IHidDevice
 
     public HidInterfaceType InterfaceType { get; }
 
-    public static IReadOnlyList<IHidDevice> GetList()
+    public static IReadOnlyList<IHidInterface> GetList()
     {
-        var devices = new List<IHidDevice>();
+        var devices = new List<IHidInterface>();
 
         foreach (var interfacePath in CmDevice.GetDevicePaths(CmInterfaceGuid.Hid, null))
         {
@@ -59,7 +59,7 @@ internal sealed class WindowsHidDevice : IHidDevice
                 if (descriptorInfo.VendorId == HidConstants.YubicoVendorId &&
                     HidInterfaceClassifier.IsSupported(descriptorInfo))
                 {
-                    devices.Add(new WindowsHidDevice(descriptorInfo));
+                    devices.Add(new WindowsHidInterface(descriptorInfo));
                 }
             }
             catch (PlatformApiException ex)

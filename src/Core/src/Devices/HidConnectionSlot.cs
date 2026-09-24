@@ -26,22 +26,22 @@ internal sealed class HidConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryConn
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<HidConnectionSlot>();
 
-    private readonly IHidDevice _hidDevice;
+    private readonly IHidInterface _hidInterface;
     private readonly IHidInputBridge? _inputBridge;
     private readonly IIOKitDeviceLifetime? _otpLifetime;
 
-    internal HidConnectionSlot(IHidDevice hidDevice, IHidInputBridge? inputBridge = null, IIOKitDeviceLifetime? otpLifetime = null)
+    internal HidConnectionSlot(IHidInterface hidInterface, IHidInputBridge? inputBridge = null, IIOKitDeviceLifetime? otpLifetime = null)
     {
-        _hidDevice = hidDevice;
+        _hidInterface = hidInterface;
         _inputBridge = inputBridge;
         _otpLifetime = otpLifetime;
-        InterfaceId = $"hid:{hidDevice.ReaderName}:{hidDevice.DescriptorInfo.Usage:X4}";
-        ConnectionType = ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType)
+        InterfaceId = $"hid:{hidInterface.ReaderName}:{hidInterface.DescriptorInfo.Usage:X4}";
+        ConnectionType = ConnectionTypeMapper.ToConnectionType(hidInterface.InterfaceType)
             .SingleConcreteConnectionOrUnknown();
         if (ConnectionType == ConnectionType.Unknown)
         {
             throw new NotSupportedException(
-                $"HID interface type {hidDevice.InterfaceType} is not supported as a connection slot.");
+                $"HID interface type {hidInterface.InterfaceType} is not supported as a connection slot.");
         }
     }
 
@@ -66,34 +66,34 @@ internal sealed class HidConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryConn
         Logger.LogInformation(
             "Connecting to {ConnectionType} HID interface VID={VendorId:X4} PID={ProductId:X4}",
             ConnectionType,
-            _hidDevice.DescriptorInfo.VendorId,
-            _hidDevice.DescriptorInfo.ProductId);
+            _hidInterface.DescriptorInfo.VendorId,
+            _hidInterface.DescriptorInfo.ProductId);
 
-        if (ConnectionType == ConnectionType.HidFido && _hidDevice is MacOSHidDevice macDevice)
+        if (ConnectionType == ConnectionType.HidFido && _hidInterface is MacOSHidInterface macDevice)
             return OpenMacFidoAsync(macDevice, cancellationToken);
 
-        if (ConnectionType == ConnectionType.HidOtp && _hidDevice is MacOSHidDevice macOtpDevice)
+        if (ConnectionType == ConnectionType.HidOtp && _hidInterface is MacOSHidInterface macOtpDevice)
             return OpenMacOtpAsync(macOtpDevice, cancellationToken);
 
         // The ctor guarantees exactly these two values.
         return Task.FromResult<IConnection>(ConnectionType == ConnectionType.HidFido
-            ? new FidoHidConnection(_hidDevice.ConnectToIOReports())
-            : new OtpHidConnection(_hidDevice.ConnectToFeatureReports()));
+            ? new FidoHidConnection(_hidInterface.ConnectToIOReports())
+            : new OtpHidConnection(_hidInterface.ConnectToFeatureReports()));
     }
 
-    private async Task<IConnection> OpenMacFidoAsync(MacOSHidDevice device, CancellationToken token) =>
+    private async Task<IConnection> OpenMacFidoAsync(MacOSHidInterface device, CancellationToken token) =>
         await MacOSFidoHidConnection.OpenAsync(device.EntryId, _inputBridge ?? new NativeHidInputBridge(), token).ConfigureAwait(false);
 
-    private async Task<IConnection> OpenMacOtpAsync(MacOSHidDevice device, CancellationToken token) =>
+    private async Task<IConnection> OpenMacOtpAsync(MacOSHidInterface device, CancellationToken token) =>
         await MacOSOtpHidConnection.OpenAsync(device.EntryId, _otpLifetime ?? IOKitDeviceLifetime.Instance, token).ConfigureAwait(false);
 
-    internal bool IsBuiltInMacFido => ConnectionType == ConnectionType.HidFido && _hidDevice is MacOSHidDevice;
+    internal bool IsBuiltInMacFido => ConnectionType == ConnectionType.HidFido && _hidInterface is MacOSHidInterface;
 
-    internal bool IsBuiltInMacOtp => ConnectionType == ConnectionType.HidOtp && _hidDevice is MacOSHidDevice;
+    internal bool IsBuiltInMacOtp => ConnectionType == ConnectionType.HidOtp && _hidInterface is MacOSHidInterface;
 
     internal async Task<IConnection> OpenRegisteredConnectionAsync(IDisposable registration, CancellationToken token)
     {
-        if (_hidDevice is not MacOSHidDevice device)
+        if (_hidInterface is not MacOSHidInterface device)
             throw new InvalidOperationException("Only built-in macOS HID owns its claim before native open.");
         return IsBuiltInMacFido
             ? await MacOSFidoHidConnection.OpenAsync(device.EntryId, _inputBridge ?? new NativeHidInputBridge(), token, registration).ConfigureAwait(false)

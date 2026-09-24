@@ -148,10 +148,10 @@
       "entries": ["Configure#1552618D4F71#sync-boundary#Configure waits synchronously for exchange-guard initialization including initial feature-report I/O; not an async-safe caller boundary."]
     },
     {
-      "path": "Transports/Hid/FindHidDevices.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/FindHidDevices.cs:33 awaits Task.Run(FindAll, cancellationToken)."],
+      "path": "Transports/Hid/FindHidInterfaces.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Transports/Hid/FindHidInterfaces.cs:33 awaits Task.Run(FindAll, cancellationToken)."],
       "status": ["documented", "outstanding"],
-      "entries": ["FindAllAsync#5AD028711B94#worker#Task.Run moves synchronous HID discovery off the initiating thread; cancellation of the awaiting caller cannot necessarily interrupt native enumeration."]
+      "entries": ["FindAllAsync#CA7B3F797351#worker#Task.Run moves synchronous HID discovery off the initiating thread; cancellation of the awaiting caller cannot necessarily interrupt native enumeration."]
     },
     {
       "path": "Transports/Hid/Linux/LinuxHidDeviceListener.cs", "reviewOwner": "Core maintainers", "rationale": "",
@@ -239,9 +239,9 @@
     },
     {
       "path": "Devices/HidConnectionSlot.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/HidConnectionSlot.cs:53-82 returns Task.FromResult only after non-macOS IHidDevice.ConnectToIOReports or ConnectToFeatureReports runs."],
+      "evidence": ["Devices/HidConnectionSlot.cs:53-82 returns Task.FromResult only after non-macOS IHidInterface.ConnectToIOReports or ConnectToFeatureReports runs."],
       "status": ["documented", "outstanding"],
-      "entries": ["OpenRawConnectionAsync#6FEB2137CC93#async-blocked#Feature-report connection opens synchronously through IHidDevice before the task is returned; native open may block on Windows or Linux.", "OpenRawConnectionAsync#DCB7685FF1DD#async-blocked#Input/output-report connection opens synchronously through IHidDevice before Task.FromResult, not on a dedicated worker."]
+      "entries": ["OpenRawConnectionAsync#2D6CDB08BA90#async-blocked#Feature-report connection opens synchronously through IHidInterface before the task is returned; native open may block on Windows or Linux.", "OpenRawConnectionAsync#ABE529EA2920#async-blocked#Input/output-report connection opens synchronously through IHidInterface before Task.FromResult, not on a dedicated worker."]
     },
     {
       "path": "Protocols/Fido/Hid/IFidoHidProtocol.cs", "reviewOwner": "Core maintainers", "rationale": "",

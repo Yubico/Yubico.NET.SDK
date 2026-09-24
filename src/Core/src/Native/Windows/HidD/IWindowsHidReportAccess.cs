@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 
-internal interface IHidDDevice : IDisposable
+internal interface IWindowsHidReportAccess : IDisposable
 {
     string DevicePath { get; }
     short Usage { get; }

@@ -7,7 +7,7 @@ using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 
-/// <summary>Synchronous expert feature reports over the connection-owned macOS OTP worker.</summary>
+/// <summary>Synchronous feature reports over the connection-owned macOS OTP worker.</summary>
 [SupportedOSPlatform("macos")]
 internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 {
@@ -17,7 +17,7 @@ internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 
     internal MacOSHidFeatureReportConnection(long entryId, IIOKitDeviceLifetime lifetime)
     {
-        // The public expert API is synchronous; the native open and any partial-open cleanup
+        // The public report API is synchronous; the native open and any partial-open cleanup
         // still belong to the same worker as report I/O and checked shutdown.
         _connection = MacOSOtpHidConnection.OpenAsync(entryId, lifetime, CancellationToken.None,
             featureMetadata: true).GetAwaiter().GetResult();

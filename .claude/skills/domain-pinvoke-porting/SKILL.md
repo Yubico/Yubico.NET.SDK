@@ -188,19 +188,19 @@ Always add platform support attributes:
 using System.Runtime.Versioning;
 
 [SupportedOSPlatform("macos")]
-public sealed class MacOSHidDevice : IHidDevice
+public sealed class MacOSHidInterface : IHidInterface
 {
     // ...
 }
 
 [SupportedOSPlatform("windows")]
-public sealed class WindowsHidDevice : IHidDevice
+public sealed class WindowsHidInterface : IHidInterface
 {
     // ...
 }
 
 [SupportedOSPlatform("linux")]
-public sealed class LinuxHidDevice : IHidDevice
+public sealed class LinuxHidInterface : IHidInterface
 {
     // ...
 }
@@ -228,7 +228,7 @@ dotnet toolchain.cs build
 dotnet toolchain.cs build 2>&1 | grep -i warning
 ```
 
-## Example: Porting MacOSHidDevice
+## Example: Porting MacOSHidInterface
 
 ### Legacy Code
 ```csharp
@@ -252,18 +252,18 @@ namespace Yubico.Core.Devices.Hid
 
 ### Modern Ported Code
 ```csharp
-// src/Core/src/Transports/Hid/MacOS/MacOSHidDevice.cs
+// src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs
 using System.Runtime.Versioning;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 
 [SupportedOSPlatform("macos")]
-public sealed class MacOSHidDevice : IHidDevice
+public sealed class MacOSHidInterface : IHidInterface
 {
     public int VendorId { get; }
     // ... (no #region)
 
-    public static IReadOnlyList<IHidDevice> GetList()
+    public static IReadOnlyList<IHidInterface> GetList()
     {
         // Same IOKit logic, modern return type
     }
@@ -274,8 +274,8 @@ public sealed class MacOSHidDevice : IHidDevice
 
 ```bash
 # Platform layer commits
-git add src/Core/src/Transports/Hid/MacOS/MacOSHidDevice.cs
-git commit -m "feat(hid): add MacOSHidDevice ported from legacy SDK"
+git add src/Core/src/Transports/Hid/MacOS/MacOSHidInterface.cs
+git commit -m "feat(hid): add MacOSHidInterface ported from legacy SDK"
 
 git add src/Core/src/Transports/Hid/MacOS/MacOSHidIOReportConnection.cs
 git commit -m "feat(hid): add MacOSHidIOReportConnection for FIDO HID"

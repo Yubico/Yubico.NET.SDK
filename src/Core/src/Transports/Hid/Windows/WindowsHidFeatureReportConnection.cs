@@ -19,11 +19,11 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 
 internal sealed class WindowsHidFeatureReportConnection : IHidConnection
 {
-    private readonly IHidDDevice _hidDDevice;
+    private readonly IWindowsHidReportAccess _reportAccess;
     private bool _disposed;
 
     internal WindowsHidFeatureReportConnection(string path)
-        : this(new HidDDevice(path))
+        : this(new WindowsHidReportAccess(path))
     {
     }
 
@@ -32,20 +32,20 @@ internal sealed class WindowsHidFeatureReportConnection : IHidConnection
     ///     constructor never completes, so nothing else can dispose the device and its native handle would leak.
     ///     The seam also lets the failure path be unit-tested without Windows hardware.
     /// </remarks>
-    internal WindowsHidFeatureReportConnection(IHidDDevice hidDDevice)
+    internal WindowsHidFeatureReportConnection(IWindowsHidReportAccess reportAccess)
     {
-        _hidDDevice = hidDDevice;
+        _reportAccess = reportAccess;
         try
         {
-            _hidDDevice.OpenFeatureConnection();
+            _reportAccess.OpenFeatureConnection();
 
             // HidD report lengths include the report ID byte; IHidConnection sizes are payload-only.
-            InputReportSize = _hidDDevice.FeatureReportByteLength - 1;
-            OutputReportSize = _hidDDevice.FeatureReportByteLength - 1;
+            InputReportSize = _reportAccess.FeatureReportByteLength - 1;
+            OutputReportSize = _reportAccess.FeatureReportByteLength - 1;
         }
         catch
         {
-            _hidDDevice.Dispose();
+            _reportAccess.Dispose();
             throw;
         }
     }
@@ -57,14 +57,14 @@ internal sealed class WindowsHidFeatureReportConnection : IHidConnection
     public byte[] GetReport()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return _hidDDevice.GetFeatureReport();
+        return _reportAccess.GetFeatureReport();
     }
 
     public void SetReport(byte[] report)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(report);
-        _hidDDevice.SetFeatureReport(report);
+        _reportAccess.SetFeatureReport(report);
     }
 
     public void Dispose()
@@ -72,7 +72,7 @@ internal sealed class WindowsHidFeatureReportConnection : IHidConnection
         if (_disposed)
             return;
 
-        _hidDDevice.Dispose();
+        _reportAccess.Dispose();
         _disposed = true;
     }
 

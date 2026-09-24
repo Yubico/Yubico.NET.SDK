@@ -32,7 +32,7 @@ public class WindowsHidConnectionOpenFailureTests
     [Fact]
     public void FeatureReportConnection_WhenFeatureOpenThrows_DisposesTheDevice()
     {
-        var device = new ThrowingHidDDevice(throwOnFeatureOpen: true);
+        var device = new ThrowingWindowsHidReportAccess(throwOnFeatureOpen: true);
 
         Assert.Throws<InvalidOperationException>(
             () => new WindowsHidFeatureReportConnection(device));
@@ -43,7 +43,7 @@ public class WindowsHidConnectionOpenFailureTests
     [Fact]
     public void IOReportConnection_WhenIOOpenThrows_DisposesTheDevice()
     {
-        var device = new ThrowingHidDDevice(throwOnIOOpen: true);
+        var device = new ThrowingWindowsHidReportAccess(throwOnIOOpen: true);
 
         Assert.Throws<InvalidOperationException>(
             () => new WindowsHidIOReportConnection(device));
@@ -58,7 +58,7 @@ public class WindowsHidConnectionOpenFailureTests
     [Fact]
     public void FeatureReportConnection_WhenOpenSucceeds_DoesNotDisposeTheDevice()
     {
-        var device = new ThrowingHidDDevice();
+        var device = new ThrowingWindowsHidReportAccess();
 
         var connection = new WindowsHidFeatureReportConnection(device);
 
@@ -67,8 +67,8 @@ public class WindowsHidConnectionOpenFailureTests
         Assert.Equal(device.FeatureReportByteLength - 1, connection.InputReportSize);
     }
 
-    private sealed class ThrowingHidDDevice(bool throwOnFeatureOpen = false, bool throwOnIOOpen = false)
-        : IHidDDevice
+    private sealed class ThrowingWindowsHidReportAccess(bool throwOnFeatureOpen = false, bool throwOnIOOpen = false)
+        : IWindowsHidReportAccess
     {
         public bool WasDisposed { get; private set; }
 

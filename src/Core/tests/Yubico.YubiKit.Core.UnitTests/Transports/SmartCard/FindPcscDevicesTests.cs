@@ -171,10 +171,10 @@ public class FindPcscDevicesTests
         public uint SCardCancel(SCardContext context) => ErrorCode.SCARD_S_SUCCESS;
     }
 
-    private sealed class EmptyHidFinder : IFindHidDevices
+    private sealed class EmptyHidFinder : IFindHidInterfaces
     {
-        public Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult<IReadOnlyList<IHidDevice>>([]);
+        public Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<IHidInterface>>([]);
     }
 
     private static IYubiKeyConnectionSlot UnexpectedSlotCreation(IDevice device) =>

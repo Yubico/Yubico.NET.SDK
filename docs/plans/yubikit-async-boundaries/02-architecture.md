@@ -90,7 +90,7 @@ indefinitely; this is an explicit safety/liveness limit. A faulted teardown can 
 an error with ownership retained. Positive late completion can still permit cleanup.
 
 This bounds work **per connection lifetime**. Registry-managed attempts against a held
-or quarantined key must be refused before creating another owner/worker. Direct expert
+or quarantined key must be refused before creating another owner/worker. Direct report
 factories and external implementations retain their documented concurrency responsibilities;
 this proposal does not claim a global bound on arbitrarily many explicit direct opens.
 Process-wide admission limits belong to the deferred iteration.
@@ -230,7 +230,7 @@ not provide dedicated-thread execution after an await; do not claim it does.
 Retaining those owners does not exempt listener delivery from callback isolation.
 The affected-route checkpoint must review its selected route's callback and removal
 delivery behavior even when discovery and public visibility remain unchanged. The proposed
-sequencing default leaves `FindHidDevices`/`IFindHidDevices`/`IHidDevice` visibility
+sequencing default leaves `FindHidInterfaces`/`IFindHidInterfaces`/`IHidInterface` visibility
 unchanged. A broader visibility migration requires a separate walkthrough and user
 approval. Current `HidDeviceListener`/`ISmartCardDeviceListener`/
 `DesktopSmartCardDeviceListener` callbacks cannot simply be declared safe.

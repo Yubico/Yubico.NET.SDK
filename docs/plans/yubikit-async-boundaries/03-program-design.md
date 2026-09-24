@@ -97,16 +97,16 @@ at cyclomatic ≤10/cognitive ≤20; manually split verification methods are
 excluded, not tool-certified. The latest full-suite and complexity counts
 are in the next slice below.
 
-### Subsequent expert macOS input slice — committed at `4f361504`
+### Subsequent direct report input slice on macOS — committed at `4f361504`
 
 The typed macOS FIDO owner now detaches a cancelled expected reader under lock,
 without cancelling native input or producing a terminal; late reports queue
-and a stale token cannot detach its replacement. The public expert
+and a stale token cannot detach its replacement. The public direct report connection
 `MacOSHidIOReportConnection` delegates to this persistent native input owner,
 removing its caller-run-loop pump and legacy callback-handle cleanup.
 `IHidConnection` remains public with unchanged shape: direct open, GetReport,
 SetReport and dispose stay synchronous. `GetReport` retains the six-second
-`PlatformApiException` timeout followed by same-connection retry. Expert
+`PlatformApiException` timeout followed by same-connection retry. Direct report
 output accepts any report length for native validation while typed FIDO still
 requires 64 bytes. Input accepts 64 bytes or 65 with zero report ID;
 malformed input becomes terminal, without a claim of exact legacy failure
@@ -116,16 +116,16 @@ failure now surfaces status-bearing `PlatformApiException` instead of the
 typed path's `InvalidOperationException`; this exception difference is
 intentional.
 
-Five pending-read cancellation, eight expert IO compatibility and three
+Five pending-read cancellation, eight direct IO compatibility and three
 facade tests passed (16); six old legacy tests were removed after meaningful
 cases moved. On selected serial 31683481 with pinned `.8`, native-AOT
 `--expert-io` observed a 6,011 ms timeout, then same-connection INIT/getInfo
 and dispose/reopen/getInfo passed without operator interaction. Independent
 cross-vendor review: PASS. This checks **ISC-31** for macOS HID input waits:
-typed and public expert input both use the persistent event owner. OTP feature
+typed and public direct report input both use the persistent event owner. OTP feature
 GET/SET is not an input callback. ISC-33 still lacks discovery-manager
-callback-quiescence proof; ISC-53 is wider than this synchronous expert
-surface. The 13-operation registry does not include expert raw IO, so
+callback-quiescence proof; ISC-53 is wider than this synchronous report
+surface. The 13-operation registry does not include direct raw IO, so
 universal ISC-4 remains open.
 
 After this slice, full Core **1,434 passed/3 skipped**, PublicApi 22, Fido2 471
@@ -145,18 +145,18 @@ direct-connection limits. The feature-report ownership gap described at this
 earlier checkpoint is superseded by the next slice; discovery-manager callback
 quiescence and global synchronous-wait inventory remain open.
 
-### Subsequent expert macOS feature slice — committed at `db378ffc`
+### Subsequent direct feature-report slice on macOS — committed at `db378ffc`
 
 The public `MacOSHidFeatureReportConnection` now delegates to the typed OTP
 connection-owned worker for native open, descriptor metadata, feature GET/SET
-and checked close. Typed FIDO output plus expert IO SET use the FIDO worker;
-typed OTP GET/SET plus expert feature GET/SET use the OTP worker: explicit
+and checked close. Typed FIDO output plus direct IO SET use the FIDO worker;
+typed OTP GET/SET plus direct feature GET/SET use the OTP worker: explicit
 blocking-executor fallbacks rather than claims of native callback GET/SET.
-Expert public open/Get/Set/dispose still block synchronously; each connection
+Direct report open/Get/Set/dispose still block synchronously; each connection
 has one worker/one admitted operation, **not** process-global bounded capacity.
-An expert GET returns an owned eight-byte array: short native responses of
+Direct feature GET returns an owned eight-byte array: short native responses of
 0–8 bytes remain zero-padded; more than eight bytes fails and zeros the
-buffer. Typed send still requires eight bytes; expert SET accepts arbitrary
+buffer. Typed send still requires eight bytes; direct feature SET accepts arbitrary
 length for native validation. Accepted calls drain before checked close.
 Both IO and feature public `GetReport` return the owned whole array via
 `MemoryMarshal.TryGetArray`, with no second uncleared copy; tests pin array
@@ -182,7 +182,7 @@ tool-certified. The current Core inventory asserts **200 outstanding sites**:
 130 native imports, 24 waits, 15 scheduling, 21 pre-task-return gaps,
 six callback registrations, two delegate conversions and two callback
 addresses. The older 198-site count belongs to the input checkpoint.
-The 13-operation registry omits expert raw IO/feature; ISC-4 stays open.
+The 13-operation registry omits direct raw IO/feature routes; ISC-4 stays open.
 The feature slice is now committed. The subsequent listener-generation work
 below does not yet prove actual native callback quiescence.
 
@@ -216,14 +216,14 @@ No new operator touch/unplug is claimed. Parent owns the later SDK commit;
 next bounded work can inspect remaining listener quiescence and inventory
 without claiming whole-macOS or epic acceptance.
 
-The pre-expert-facade `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
+The pre-compatibility-facade `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
 (schema 2; SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`)
 completed two warmups, ten normal fresh-child samples and one idle sample. Normal
 medians: caller return 5.00675 ms, operation complete 24.84525 ms, disposal
 2.90555 ms, allocation 60,004 bytes. Idle CPU was 1.945 ms with zero idle
 allocations over 1,001.7302 ms. Native-only duration and pending ordinary count
 are null with explicit instrumentation-unavailable reasons. This does not
-measure either expert facade and is not comparable to the historical `.3`
+measure either report compatibility facade and is not comparable to the historical `.3`
 pair; ISC-62 is pending. Actual release-artifact
 inspection now checks ISC-47 as scoped above, not route or epic acceptance.
 
@@ -398,7 +398,7 @@ safety findings require explicit re-scope; materially new scope requires user ap
 |---|---|
 | Internal helper/seam names, final method signatures and exact file list | Deferred to implementation effort — choose against the first failing tests and surrounding code. |
 | Precise task, lock, signal and finalizer plumbing | Deferred to implementation effort — demonstrate the safety rules above before considering the slice complete. |
-| Exact new public transaction signature and consumer-example updates | Deferred to implementation effort — discuss when that surface is reached; preserve existing synchronous expert behavior meanwhile. |
+| Exact new public transaction signature and consumer-example updates | Deferred to implementation effort — discuss when that surface is reached; preserve existing synchronous compatibility behavior meanwhile. |
 | Per-connection report-buffer size and platform operation-record shapes | Deferred to implementation effort — before their respective adapter changes. |
 | Single-key measurement runner details and numerical budgets | Deferred to implementation effort — record the unchanged baseline before altering production behavior and agree relevant thresholds. |
 | macOS bridge exports, callback-timeout interpretation and deployment evidence | Deferred to implementation effort — D28 settles the modern API direction; verify the concrete bridge contract and current .NET 10 environment before enabling the affected native path. |
@@ -534,10 +534,10 @@ integration; master D29 records the original experiment's native/AOT commands.
 The implemented seam is internal and asynchronous only on the built-in typed raw FIDO
 path. `HidConnectionSlot` opens the macOS FIDO route asynchronously; terminal wake and
 claim-transfer paths follow the connection owner. Public `IHidConnection`,
-`IHidDevice`, `IFidoHidConnection`, OTP and other-platform signatures stay unchanged. No
+`IHidInterface`, `IFidoHidConnection`, OTP and other-platform signatures stay unchanged. No
 shared Core scheduler or all-route HID migration is included.
 
-Managed implementation includes `MacOSFidoHidConnection.cs`, `MacOSHidDevice.cs`,
+Managed implementation includes `MacOSFidoHidConnection.cs`, `MacOSHidInterface.cs`,
 `HidConnectionSlot.cs`, terminal-wake and initialization in `FidoHidProtocol.cs`/
 `ApplicationSession.cs`, and claim-transfer updates in `YubiKeyDevice.cs`,
 `RegisteredConnections.cs` and `ProtocolDeviceInfo.cs`. The new native exports bind the

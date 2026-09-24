@@ -11,7 +11,7 @@ The golden path is applet sessions. Advanced users must retain a strict, narrow,
 1. Add public raw sessions for SmartCard/APDU, FIDO HID, and OTP HID.
 2. Internalize `ProtocolFactory`, `IProtocol`, `ISmartCardProtocol`, `IFidoHidProtocol`, `IOtpHidProtocol`, and protocol implementation/decorator types that have no independent public construction story.
 3. Close external `ApplicationSession` protocol extension seams as needed; third-party composition should wrap a raw session instead of injecting SDK protocol internals.
-4. Keep public raw connection-level methods (`TransmitAndReceiveAsync`, `SendAsync`, `ReceiveAsync`) as the at-your-own-risk expert escape hatch.
+4. Keep public raw connection-level methods (`TransmitAndReceiveAsync`, `SendAsync`, `ReceiveAsync`) for direct raw-connection access, with framing, sequencing, and recovery left to the caller.
 5. Do not relitigate these decisions during fit audit. Craftsman governs implementation shape and discretionary improvements only.
 
 ## Access Model
@@ -28,7 +28,7 @@ Tier 1: Raw sessions
 
 Tier 2: Raw connections
         ISmartCardConnection, IFidoHidConnection, IOtpHidConnection
-        Public expert escape hatch: raw bytes/reports, caller owns all framing,
+        Public direct raw-connection access: raw bytes/reports, caller owns all framing,
         sequencing, final-command response correlation, cancellation recovery, and safety.
 
 Internal: ProtocolFactory and IProtocol family

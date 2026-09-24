@@ -86,7 +86,7 @@ public class ConnectionOwnershipContractTests
     [Fact]
     public async Task ConnectAsync_SecondConnectionToHeldOtpHidInterface_IsRefusedBeforePhysicalOpen()
     {
-        var hidDevice = new FakeHidDevice(
+        var hidDevice = new FakeHidInterface(
             $"ownership-otp-{Guid.NewGuid():N}",
             HidInterfaceType.Otp);
         var device = CreateHidDevice(hidDevice);
@@ -103,7 +103,7 @@ public class ConnectionOwnershipContractTests
     [Fact]
     public async Task ConnectAsync_OtpHidConnectionDisposed_InterfaceReopens()
     {
-        var hidDevice = new FakeHidDevice(
+        var hidDevice = new FakeHidInterface(
             $"ownership-otp-{Guid.NewGuid():N}",
             HidInterfaceType.Otp);
         var device = CreateHidDevice(hidDevice);
@@ -123,7 +123,7 @@ public class ConnectionOwnershipContractTests
     [Fact]
     public async Task ConnectAsync_SecondConnectionToHeldFidoHidInterface_IsRefusedBeforePhysicalOpen()
     {
-        var hidDevice = new FakeHidDevice(
+        var hidDevice = new FakeHidInterface(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
         var device = CreateHidDevice(hidDevice);
@@ -143,7 +143,7 @@ public class ConnectionOwnershipContractTests
     [Fact]
     public async Task ConnectAsync_FidoHidConnectionDisposed_InterfaceReopens()
     {
-        var hidDevice = new FakeHidDevice(
+        var hidDevice = new FakeHidInterface(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
         var device = CreateHidDevice(hidDevice);
@@ -165,7 +165,7 @@ public class ConnectionOwnershipContractTests
     {
         var factory = new CountingFactory();
         var smartCard = CreateSmartCardSlot(factory);
-        var hidDevice = new FakeHidDevice(
+        var hidDevice = new FakeHidInterface(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
         var hid = CreateHidSlot(hidDevice);
@@ -197,7 +197,7 @@ public class ConnectionOwnershipContractTests
     {
         var firstSmartCardFactory = new CountingFactory();
         var firstSmartCard = CreateSmartCardSlot(firstSmartCardFactory);
-        var firstHidDevice = new FakeHidDevice(
+        var firstHidDevice = new FakeHidInterface(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido);
         var firstHid = CreateHidSlot(firstHidDevice);
@@ -208,7 +208,7 @@ public class ConnectionOwnershipContractTests
             hidOtp: null,
             deviceInfo: null);
 
-        var laterHid = CreateHidSlot(new FakeHidDevice(
+        var laterHid = CreateHidSlot(new FakeHidInterface(
             $"ownership-fido-{Guid.NewGuid():N}",
             HidInterfaceType.Fido));
         _ = new YubiKeyDevice(
@@ -349,7 +349,7 @@ public class ConnectionOwnershipContractTests
             new PcscDevice { ReaderName = $"ownership-reader-{Guid.NewGuid():N}", Atr = null },
             factory);
 
-    private static YubiKeyDevice CreateHidDevice(IHidDevice hidDevice)
+    private static YubiKeyDevice CreateHidDevice(IHidInterface hidDevice)
     {
         var slot = CreateHidSlot(hidDevice);
         return slot.ConnectionType switch
@@ -362,7 +362,7 @@ public class ConnectionOwnershipContractTests
         };
     }
 
-    private static HidConnectionSlot CreateHidSlot(IHidDevice hidDevice) =>
+    private static HidConnectionSlot CreateHidSlot(IHidInterface hidDevice) =>
         new(hidDevice);
 
     private sealed class CountingFactory : ISmartCardConnectionFactory
@@ -380,7 +380,7 @@ public class ConnectionOwnershipContractTests
         }
     }
 
-    private sealed class FakeHidDevice(string name, HidInterfaceType interfaceType) : IHidDevice
+    private sealed class FakeHidInterface(string name, HidInterfaceType interfaceType) : IHidInterface
     {
         private int _featureReportConnectCalls;
         private int _ioReportConnectCalls;

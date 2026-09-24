@@ -88,8 +88,8 @@ dependency or file outside this list must return to the orchestrator before edit
 
 | Action | Files | Purpose |
 |---|---|---|
-| modify | `src/Core/src/Transports/Hid/IHidConnection.cs`, `IHidDevice.cs` in that directory | Internal asynchronous report/open contracts. |
-| modify | `src/Core/src/Transports/Hid/FindHidDevices.cs`, `HidDeviceListener.cs`, `HidDescriptorInfo.cs`, `HidInterfaceType.cs`, `HidInterfaceClassifier.cs`, `HidDeviceRescanHint.cs`, `HidDeviceChangeKind.cs`, `HidReportType.cs` in that directory | Internalize low-level enumeration (both finder and IFindHidDevices), classification and listener types. |
+| modify | `src/Core/src/Transports/Hid/IHidConnection.cs`, `IHidInterface.cs` in that directory | Internal asynchronous report/open contracts. |
+| modify | `src/Core/src/Transports/Hid/FindHidInterfaces.cs`, `HidDeviceListener.cs`, `HidDescriptorInfo.cs`, `HidInterfaceType.cs`, `HidInterfaceClassifier.cs`, `HidDeviceRescanHint.cs`, `HidDeviceChangeKind.cs`, `HidReportType.cs` in that directory | Internalize low-level enumeration (both finder and IFindHidInterfaces), classification and listener types. |
 | modify | `src/Core/src/DeviceListenerStatus.cs`, `src/Core/src/Devices/ConnectionTypeMapper.cs` | Close public dependencies on internal listener/classification types. |
 | modify | `src/Core/src/Transports/SmartCard/ISmartCardDeviceListener.cs`, `DesktopSmartCardDeviceListener.cs` in that directory | Internal listener surface; keep public manager events. |
 | modify | `src/Core/src/Transports/SmartCard/ISmartCardConnection.cs`, `UsbSmartCardConnection.cs`, `SmartCardConnectionFactory.cs`, `FindPcscDevices.cs` in that directory | Async transactions, bounded native lifecycle, partial-open cleanup and discovery reservation use. |
@@ -125,15 +125,15 @@ typed raw acquisition and external connection implementations remain supported.
 
 | Owner | Existing files to modify | Proposed files to add |
 |---|---|---|
-| Windows | `src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs`; `src/Core/src/Native/Windows/HidD/HidDDevice.cs`, `IHidDDevice.cs`; `src/Core/src/Transports/Hid/Windows/WindowsHidDevice.cs`, `WindowsHidDeviceListener.cs`, `WindowsHidIOReportConnection.cs`, `WindowsHidFeatureReportConnection.cs` | `src/Core/src/Native/Windows/HidD/IWindowsHidReportApi.cs`, `WindowsHidReportApi.cs`, `WindowsHidOverlappedOperation.cs` |
-| macOS | `src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs`; `src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs`, `MacOSHidDevice.cs`, `MacOSHidDeviceListener.cs`, `MacOSHidIOReportConnection.cs`, `MacOSHidFeatureReportConnection.cs` | `src/Core/src/Native/MacOS/IOKitFramework/IOKitDispatch.Interop.cs`; `src/Core/src/Transports/Hid/MacOS/IIOKitDeviceEventOwner.cs`, `IOKitDeviceEventOwner.cs`, `IIOKitReportApi.cs`, `IOKitReportApi.cs`, `IOKitReportOperation.cs`, `HidReportReceiver.cs` |
-| Linux | `src/Core/src/Native/Linux/Libc/Libc.Interop.cs`; `src/Core/src/Transports/Hid/Linux/LinuxHidDevice.cs`, `LinuxHidDeviceListener.cs`, `LinuxHidIOReportConnection.cs`, `LinuxHidFeatureReportConnection.cs` | `src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs`, `LinuxHidReportApi.cs`, `ILinuxHidReadReactor.cs`, `LinuxHidReadReactor.cs` |
+| Windows | `src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs`; `src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs`, `IWindowsHidReportAccess.cs`; `src/Core/src/Transports/Hid/Windows/WindowsHidInterface.cs`, `WindowsHidDeviceListener.cs`, `WindowsHidIOReportConnection.cs`, `WindowsHidFeatureReportConnection.cs` | `src/Core/src/Native/Windows/HidD/IWindowsHidReportApi.cs`, `WindowsHidReportApi.cs`, `WindowsHidOverlappedOperation.cs` |
+| macOS | `src/Core/src/Native/MacOS/IOKitFramework/IOKitHid.Interop.cs`; `src/Core/src/Transports/Hid/MacOS/IIOKitDeviceLifetime.cs`, `MacOSHidInterface.cs`, `MacOSHidDeviceListener.cs`, `MacOSHidIOReportConnection.cs`, `MacOSHidFeatureReportConnection.cs` | `src/Core/src/Native/MacOS/IOKitFramework/IOKitDispatch.Interop.cs`; `src/Core/src/Transports/Hid/MacOS/IIOKitDeviceEventOwner.cs`, `IOKitDeviceEventOwner.cs`, `IIOKitReportApi.cs`, `IOKitReportApi.cs`, `IOKitReportOperation.cs`, `HidReportReceiver.cs` |
+| Linux | `src/Core/src/Native/Linux/Libc/Libc.Interop.cs`; `src/Core/src/Transports/Hid/Linux/LinuxHidInterface.cs`, `LinuxHidDeviceListener.cs`, `LinuxHidIOReportConnection.cs`, `LinuxHidFeatureReportConnection.cs` | `src/Core/src/Transports/Hid/Linux/ILinuxHidReportApi.cs`, `LinuxHidReportApi.cs`, `ILinuxHidReadReactor.cs`, `LinuxHidReadReactor.cs` |
 | Smart card | `src/Core/src/Native/Desktop/SCard/SCardContext.cs`, `SCardCardHandle.cs`, `SCard.Interop.cs`; shared smart-card lifecycle files above | `src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs`, `SCardConnectionApi.cs` |
 
 No discovery-matching rewrite is included. Existing status-monitor seams retain their
 scope. The new smart-card seam is a sibling of `ISCardApi`, not a silent enlargement
 of the discovery/status interface. Windows tests can control submission below the
-real `HidDDevice`; a fake asynchronous `IHidDDevice` alone is insufficient.
+real `WindowsHidReportAccess`; a fake asynchronous `IWindowsHidReportAccess` alone is insufficient.
 
 Native-lineage files, **conditional on verified source/base/package approval**:
 
@@ -260,7 +260,7 @@ internal interface IHidConnection : IConnection
     Task<ReadOnlyMemory<byte>> GetReportAsync(CancellationToken cancellationToken);
 }
 
-internal interface IHidDevice : IDevice
+internal interface IHidInterface : IDevice
 {
     HidDescriptorInfo DescriptorInfo { get; }
     HidInterfaceType InterfaceType { get; }
@@ -608,7 +608,7 @@ test matrix covers each named owner, including partial construction and dropped 
 
 ### Platform seams
 
-Windows extends the existing connection-facing `IHidDDevice` with Task-returning input/
+Windows extends the existing connection-facing `IWindowsHidReportAccess` with Task-returning input/
 output methods and asynchronous disposal; synchronous feature methods remain under
 bounded execution. The lower seam is synchronous submission, below the real owner:
 
@@ -640,7 +640,7 @@ if completion races submission return, defer storage reclamation until both are 
 CancelIoEx is only a request, including its already-completed/not-found race. Retain the
 handle reference, owned report-ID-normalized buffer and overlapped storage until terminal
 completion. Verify the actual policy in the Windows native harness, including Native AOT.
-HidDDevice remains the single handle owner; its OpenIOConnection delegates handle
+WindowsHidReportAccess remains the single handle owner; its OpenIOConnection delegates handle
 creation to OpenIoHandle using read/write access plus FILE_FLAG_OVERLAPPED. Remove its
 NULL-overlapped ReadFile/WriteFile calls on that handle rather than wrapping them.
 Feature handles keep the separate zero-access synchronous mode. Teardown closes admission,

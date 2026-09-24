@@ -31,7 +31,7 @@ public class HidConnectionSlotTests
         string expectedInterfaceId,
         Type expectedConnectionType)
     {
-        var device = new FakeHidDevice("test-hid", interfaceType, usage);
+        var device = new FakeHidInterface("test-hid", interfaceType, usage);
         var slot = new HidConnectionSlot(device);
         var connectionType = ConnectionTypeMapper.ToConnectionType(interfaceType);
 
@@ -47,7 +47,7 @@ public class HidConnectionSlotTests
     [Fact]
     public void HidSlot_UnsupportedInterfaceType_ThrowsAtConstruction()
     {
-        var device = new FakeHidDevice("test-hid", HidInterfaceType.Unknown, 0x0001);
+        var device = new FakeHidInterface("test-hid", HidInterfaceType.Unknown, 0x0001);
 
         Assert.Throws<NotSupportedException>(() => new HidConnectionSlot(device));
     }
@@ -55,17 +55,17 @@ public class HidConnectionSlotTests
     [Fact]
     public async Task HidSlot_WrongConnectionType_ThrowsWithoutConnecting()
     {
-        var slot = new HidConnectionSlot(new FakeHidDevice("test-hid", HidInterfaceType.Fido, 0x0001));
+        var slot = new HidConnectionSlot(new FakeHidInterface("test-hid", HidInterfaceType.Fido, 0x0001));
 
         await Assert.ThrowsAsync<NotSupportedException>(() => slot.OpenRawConnectionAsync(
             ConnectionType.SmartCard,
             TestContext.Current.CancellationToken));
     }
 
-    private sealed class FakeHidDevice(
+    private sealed class FakeHidInterface(
         string readerName,
         HidInterfaceType interfaceType,
-        ushort usage) : IHidDevice
+        ushort usage) : IHidInterface
     {
         public string ReaderName { get; } = readerName;
 

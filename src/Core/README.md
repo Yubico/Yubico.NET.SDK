@@ -114,7 +114,7 @@ Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
 `RawFidoHidSession` and `RawOtpHidSession` are the HID equivalents, created with
 `device.CreateRawFidoHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
 
-For expert raw SmartCard transactions, `BeginTransactionAsync` returns `IDisposable`. The built-in
+For direct raw SmartCard transactions, `BeginTransactionAsync` returns `IDisposable`. The built-in
 scope also implements `IAsyncDisposable` at runtime; the interface does not promise that for custom
 connections. End the transaction before disposing the connection:
 
@@ -138,21 +138,25 @@ On built-in SmartCard connections, async begin does not block the caller; synchr
 scope disposal can wait on native work. A custom connection using the interface's default async
 begin calls synchronous begin and can block until it is overridden.
 
-The public expert `IHidDevice.ConnectToIOReports()` / `ConnectToFeatureReports()` methods remain
+`IYubiKey` represents a physical key; `FindHidInterfaces` returns operating-system-exposed
+`IHidInterface` report interfaces, not necessarily one per physical USB interface. An opened
+`IHidConnection` owns report I/O; the Windows-only `IWindowsHidReportAccess` is an internal
+report-handle seam. The public direct report access methods `IHidInterface.ConnectToIOReports()` /
+`ConnectToFeatureReports()` remain
 synchronous. On macOS, the IO connection blocks the caller while the same persistent FIDO input
 owner used by typed connections opens, receives, sends and shuts down. A six-second read timeout
 detaches only that read; a late report remains available on retry. Native output and shutdown can
-still block indefinitely. Feature-report connections retain their synchronous expert interface but
+still block indefinitely. Feature-report connections retain their synchronous report interface but
 open and perform native report calls on the OTP connection's worker, without a GET timeout.
-Expert IO `SetReport(byte[])` forwards the supplied report length; typed FIDO sends still require 64-byte packets.
+Direct IO `SetReport(byte[])` forwards the supplied report length; typed FIDO sends still require 64-byte packets.
 `IHidConnection.GetReport()` / `SetReport(byte[])` offer no cancellation token. The caller owns the
-direct connection; do not overlap report calls. Expert feature SET forwards any supplied report length;
+direct connection; do not overlap report calls. Direct feature SET forwards any supplied report length;
 typed OTP sends require eight bytes. Built-in macOS feature reports drain accepted calls before checked
-release; direct expert opens do not take a grouped-key registry claim. Synchronous
+release; direct report opens do not take a grouped-key registry claim. Synchronous
 `ISmartCardConnection.BeginTransaction()` and transaction-scope `Dispose()` can also block on
 native work; synchronous connection `Dispose()` is not uniformly nonblocking. For
 method-by-method execution, ownership and evidence gaps, see
-[retained synchronous expert boundaries](../../docs/architecture/raw-access-tiers.md#retained-synchronous-expert-boundaries).
+[retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths).
 
 In the development worktree, the built-in macOS FIDO connection uses asynchronous open,
 awaited channel initialization and persistent native input delivery. Blocking output and

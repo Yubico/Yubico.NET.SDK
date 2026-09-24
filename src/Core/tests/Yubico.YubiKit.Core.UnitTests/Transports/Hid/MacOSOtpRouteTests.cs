@@ -21,7 +21,7 @@ public class MacOSOtpRouteTests
             UsagePage = 1,
             Usage = 6
         };
-        var slot = new HidConnectionSlot(new MacOSHidDevice(42, descriptor), otpLifetime: native);
+        var slot = new HidConnectionSlot(new MacOSHidInterface(42, descriptor), otpLifetime: native);
         var device = new YubiKeyDevice(slot.InterfaceId, smartCard: null, hidFido: null,
             hidOtp: slot, deviceInfo: null);
 
@@ -266,7 +266,7 @@ public class MacOSOtpRouteTests
             UsagePage = 1,
             Usage = 6
         };
-        var slot = new HidConnectionSlot(new MacOSHidDevice(42, descriptor), otpLifetime: native);
+        var slot = new HidConnectionSlot(new MacOSHidInterface(42, descriptor), otpLifetime: native);
         var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([slot.InterfaceId]);
         var opening = slot.OpenRegisteredConnectionAsync(claim, CancellationToken.None);
         Assert.True(DeviceConnectionRegistry.IsInUse(slot.InterfaceId));

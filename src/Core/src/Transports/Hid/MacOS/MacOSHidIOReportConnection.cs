@@ -20,7 +20,7 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
 
     internal MacOSHidIOReportConnection(long entryId, IHidInputBridge bridge)
     {
-        // This expert API intentionally blocks the caller while its worker owns native open.
+        // This direct report API intentionally blocks the caller while its worker owns native open.
         try
         {
             _connection = MacOSFidoHidConnection.OpenAsync(entryId, bridge, CancellationToken.None)

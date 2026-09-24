@@ -143,7 +143,7 @@ forcing short APDUs.
 ## Tier 2: Raw Connections
 
 `ISmartCardConnection.TransmitAndReceiveAsync`, `IFidoHidConnection.SendAsync` / `ReceiveAsync`, and
-`IOtpHidConnection.SendAsync` / `ReceiveAsync` remain public as an expert escape hatch. These methods bypass
+`IOtpHidConnection.SendAsync` / `ReceiveAsync` remain public for direct raw-connection access. These methods bypass
 `ApplicationSession`, `ConnectionSessionGuard`, and `ExchangeGuard`.
 
 At Tier 2 the caller owns APDU or packet formatting, command chaining, response correlation, CRC validation,
@@ -159,27 +159,27 @@ dispatch, the task remains pending until PC/SC returns; only then may the caller
 cannot prove both card disconnect and context release, the physical-interface claim remains quarantined and later
 managed opens fail with `UnrecoveredConnectionException`.
 
-### Retained synchronous expert boundaries
+### Retained synchronous compatibility paths
 
 Prefer applet sessions or typed raw sessions for normal asynchronous exchanges. A1 retains public raw access
 responsibilities and A5 keeps discovery visibility unchanged in the current sequence; neither establishes a drain
-guarantee for the lower expert compatibility paths. `FindHidDevices.Create().FindAllAsync(token)` runs its platform
-scan via `Task.Run` and can return an `IHidDevice` backed by `MacOSHidDevice`; that discovery task does not make
+guarantee for the lower synchronous compatibility paths. `FindHidInterfaces.Create().FindAllAsync(token)` runs its platform
+scan via `Task.Run` and can return an `IHidInterface` backed by `MacOSHidInterface`; that discovery task does not make
 the resulting report connection asynchronous or cancel an already-running native scan. Built-in typed macOS FIDO
 and the direct macOS FIDO report connection share the persistent input-owner implementation; OTP uses its
 own migrated route through `HidConnectionSlot`.
 
 | Public method(s) | Execution and owner | Evidence gap / caller limit |
 |---|---|---|
-| `IHidDevice.ConnectToIOReports()` / `IHidDevice.ConnectToFeatureReports()` | The public `MacOSHidDevice.ConnectToIOReports()` / `MacOSHidDevice.ConnectToFeatureReports()` implementations synchronously construct `MacOSHidIOReportConnection` / `MacOSHidFeatureReportConnection`. The caller owns the returned `IHidConnection`. | Direct opens do not take the grouped-key registry claim used by `IYubiKey.ConnectAsync<TConnection>()`; do not infer its quarantine or native-release guarantees. |
-| `IHidConnection.GetReport()` / `IHidConnection.SetReport(byte[])` | macOS IO `GetReport` synchronously awaits the persistent input owner's receive with a six-second cancellation timeout; `SetReport` synchronously awaits an owner-worker output using an operation-owned copy and accepts the caller's report length (unlike typed FIDO sends, which require 64 bytes). macOS feature reports synchronously await the OTP owner worker; expert `SetReport` accepts arbitrary length, unlike typed eight-byte OTP sends. | No public cancellation token. The IO timeout detaches the reader, not the native owner; late reports remain queued for retry. Native output duration is not bounded. |
+| `IHidInterface.ConnectToIOReports()` / `IHidInterface.ConnectToFeatureReports()` | The `MacOSHidInterface.ConnectToIOReports()` / `MacOSHidInterface.ConnectToFeatureReports()` implementations synchronously construct `MacOSHidIOReportConnection` / `MacOSHidFeatureReportConnection`. The caller owns the returned `IHidConnection`. | Direct opens do not take the grouped-key registry claim used by `IYubiKey.ConnectAsync<TConnection>()`; do not infer its quarantine or native-release guarantees. |
+| `IHidConnection.GetReport()` / `IHidConnection.SetReport(byte[])` | macOS IO `GetReport` synchronously awaits the persistent input owner's receive with a six-second cancellation timeout; `SetReport` synchronously awaits an owner-worker output using an operation-owned copy and accepts the caller's report length (unlike typed FIDO sends, which require 64 bytes). macOS feature reports synchronously await the OTP owner worker; direct feature `SetReport` accepts arbitrary length, unlike typed eight-byte OTP sends. | No public cancellation token. The IO timeout detaches the reader, not the native owner; late reports remain queued for retry. Native output duration is not bounded. |
 | `ISmartCardConnection.BeginTransaction(token)` / returned `IDisposable.Dispose()` | On built-in PC/SC connections, synchronous begin and transaction end block the caller awaiting the connection's native worker. The caller ends the scope before disposing the connection. | Admitted native acquisition/end has no guaranteed duration. Prefer `BeginTransactionAsync` and async-dispose the built-in scope as in the [Core example](../../src/Core/README.md#send-raw-apdus); the interface returns only `IDisposable`, and its default async begin for custom implementations calls synchronous begin. |
 | `IConnection.Dispose()` / `IConnection.DisposeAsync()` | macOS IO report disposal shares the typed FIDO owner's acknowledged shutdown; macOS feature-report disposal shares the OTP worker's checked shutdown and drains accepted GET/SET work without `Task.Run`. Built-in PC/SC `Dispose` blocks for its shared native-worker shutdown outcome. | Native shutdown may wait indefinitely for release proof; do not generalize that guarantee to other or custom connections. |
 
 macOS IO report reads wake on disposal; native callback state and the physical owner are retained until
 acknowledged shutdown. Failed native release retains the owner instead of claiming successful disposal.
 The feature-report connection drains an admitted report before release; overlapping raw report calls are
-refused. Direct expert opens do not acquire a grouped-key claim. The
+refused. Direct report opens do not acquire a grouped-key claim. The
 [async-boundaries master](../../2026-09-21-yubikit-async-boundaries-ISA.md) still leaves ISC-31 and ISC-53
 unchecked across required routes and retained public waits. This table is not acceptance evidence for either.
 

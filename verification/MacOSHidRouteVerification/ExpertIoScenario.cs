@@ -16,8 +16,8 @@ internal static class ExpertIoScenario
             IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
             IYubiKey[] selected = devices.Where(d => d.SerialNumber == serial &&
                 d.SupportsConnection(ConnectionType.HidFido)).ToArray();
-            IReadOnlyList<IHidDevice> hidDevices = await FindHidDevices.Create().FindAllAsync();
-            IHidDevice[] fidoInterfaces = hidDevices.Where(d => d.InterfaceType == HidInterfaceType.Fido).ToArray();
+            IReadOnlyList<IHidInterface> hidInterfaces = await FindHidInterfaces.Create().FindAllAsync();
+            IHidInterface[] fidoInterfaces = hidInterfaces.Where(d => d.InterfaceType == HidInterfaceType.Fido).ToArray();
             if (devices.Count != 1 || selected.Length != 1 || fidoInterfaces.Length != 1)
             {
                 Console.Error.WriteLine($"BLOCKED: serial={serial} discovered {devices.Count} keys, matched {selected.Length} keys, {fidoInterfaces.Length} FIDO HID interfaces; cannot uniquely associate interface");
@@ -74,7 +74,7 @@ internal static class ExpertIoScenario
     }
 
     // Verification-only adapter: the production packet adapter is internal, while this mode
-    // must exercise IHidDevice.ConnectToIOReports rather than the managed device route.
+    // must exercise IHidInterface.ConnectToIOReports rather than the managed device route.
     private sealed class ExpertIoConnection(IHidConnection io) : IFidoHidConnection
     {
         public ConnectionType Type => ConnectionType.HidFido;

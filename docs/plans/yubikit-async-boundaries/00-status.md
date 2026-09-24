@@ -12,10 +12,29 @@ routes and later backend explorations remain deferred pending user direction;
 no criterion is waived.
 
 Managed checkpoint `69946394` contains the reviewed listener-generation cleanup;
-`db378ffc` contains the expert-feature slice and `4f361504` the expert input slice. `efde3ef0`
+`db378ffc` contains the direct feature-report slice and `4f361504` the direct report input slice. `efde3ef0`
 contains ordinary transport-fault recovery and public contract documentation;
 `add0dc73` contains the operation registry and portable boundary controls.
 The independent solution-file edit remains outside these commits.
+
+### v2 alpha naming checkpoint
+
+The user approved source-breaking naming cleanup without compatibility aliases.
+`IHidInterface` and `MacOSHidInterface`/`WindowsHidInterface`/`LinuxHidInterface` name
+an operating-system-exposed report interface, distinct from the physical `IYubiKey`.
+`FindHidInterfaces`/`IFindHidInterfaces` enumerate those interfaces.
+`WindowsHidReportAccess`/`IWindowsHidReportAccess` name the internal native handle and
+report-access implementation. Native `HidD_*` functions and the `HidD` namespace remain
+unchanged. Public baselines, callers, tests, inventory fingerprints and diagrams were
+updated mechanically; no transport behavior or additional acceptance criterion changed.
+“Expert” prose was replaced with direct-access or synchronous-compatibility terminology;
+existing executable verification flags remain unchanged for reproducibility.
+
+Verification: solution build passed with zero warnings/errors; Core 1,457 passed/3
+skipped, PublicApi 22, Fido2 471 and YubiOtp 180 passed. All 72 methods checked by the
+changed-source complexity gate met the 10/20 limits. Documentation and architecture
+image/map checks passed. Formal progress remains **16/72**, with Windows/Linux native
+transport verification deferred. Naming cleanup does not advance the percentage.
 
 After the listener commit, the native-AOT host was republished and the selected
 31683481 key again passed all five normal/pending-read/cancellation scenarios and
@@ -109,7 +128,7 @@ separate registry lists **13 required operations**
 and **26 profile links** across macOS FIDO, macOS OTP and portable PC/SC;
 reflection checks owner/symbol, roles, test attributes and missing/duplicate
 rows. The 26 links resolve to named runnable Fact/Theory tests. It covers only
-the previously migrated typed routes, not expert raw IO/feature rows or every required
+the previously migrated typed routes, not direct raw IO/feature rows or every required
 adapter in the master ISC-4 matrix.
 After scoped formatting, the targeted `BoundaryInventory` run passed **28**:
 13 scanner, three registry, six responsiveness and six diagnostics. The six
@@ -119,15 +138,15 @@ externally sourced exception messages and all other migration logs have not
 been exhaustively proved safe. ISC-56 remains open. Scanner/registry coverage
 is not universal.
 
-**Committed expert macOS input slice (ISC-31, reviewed PASS):** typed
+**Committed direct report input slice on macOS (ISC-31, reviewed PASS):** typed
 `MacOSFidoHidConnection` detaches a cancelled expected reader under lock. A
 pending-read cancellation does not cancel native input or create a terminal;
-late reports queue, and an old token cannot detach a new reader. Public expert
+late reports queue, and an old token cannot detach a new reader. The public direct report connection
 `MacOSHidIOReportConnection` is now a synchronous facade over the same persistent
 native owner, not a caller `CFRunLoopRunInMode` pump, with no legacy callback
 handle cleanup. Public `IHidConnection` shape and synchronous open/Get/Set/dispose
 remain unchanged. `GetReport` still times out after six seconds with
-`PlatformApiException` and can retry on the same connection. Expert output
+`PlatformApiException` and can retry on the same connection. Direct report output
 accepts any report length for native validation, while typed FIDO still requires
 64 bytes; input normalizes 64 bytes or 65 with zero report ID, and malformed
 input terminates rather than promising identical legacy failure behavior.
@@ -145,30 +164,30 @@ input callback and is not the same route. ISC-33 still needs discovery-manager
 callback quiescence; ISC-53 still covers all public synchronous waits. These
 tests do not close ISC-4's registry gap or make all macOS async work complete.
 
-**Committed expert macOS feature slice (ISC-32, reviewed PASS WITH NOTES):** the
+**Committed direct feature-report slice on macOS (ISC-32, reviewed PASS WITH NOTES):** the
 public synchronous `MacOSHidFeatureReportConnection` now delegates to the
 typed macOS OTP owned worker: native open and descriptor metadata read, feature
-GET/SET and checked shutdown run there. Typed FIDO output and expert IO SET
-use the FIDO connection-owned worker; typed OTP GET/SET and expert feature
+GET/SET and checked shutdown run there. Typed FIDO output and direct IO SET
+use the FIDO connection-owned worker; typed OTP GET/SET and direct feature
 GET/SET use the OTP worker. These are classified blocking-worker fallbacks,
-**not** claims that native callback GET/SET APIs are used or that public expert
+**not** claims that native callback GET/SET APIs are used or that public direct report
 methods are nonblocking. Each connection has one worker/one admitted operation;
-no process-global capacity guarantee is established. Expert GET always returns
+no process-global capacity guarantee is established. Direct feature GET always returns
 one owned eight-byte array: native lengths 0–8 remain zero-padded, lengths over
 eight fail and zero the buffer. Typed OTP send still requires exactly eight
-bytes; expert SET permits any length for native validation. Accepted calls
-drain before checked close. Both expert IO and feature `GetReport` now return
+bytes; direct feature SET permits any length for native validation. Accepted calls
+drain before checked close. Both direct IO and feature `GetReport` now return
 their owned whole arrays via `MemoryMarshal.TryGetArray`, not an extra
 uncleared copy; identity tests pin the ownership contract. Eleven feature and
 nine IO compatibility tests passed after that fix. The public `IHidConnection`
-shape remains unchanged; synchronous expert open/Get/Set/dispose still block.
+shape remains unchanged; synchronous direct report open/Get/Set/dispose still block.
 The **parent worktree's** Native-AOT host with pinned `.8` ran
 `--expert-feature --serial 31683481`: 3/3 eight-byte feature GETs and read-only
 Management device info via feature SET/GET, with dispose/reopen and matching
 serial, passed. Separate `--otp-info` typed queries passed 3/3 on the same key.
 No new touch/unplug or other-platform native driver proof. ISC-33 still needs
 listener/manager callback quiescence, and ISC-53 remains broader than these
-documented expert waits.
+documented synchronous report waits.
 
 **Current listener-generation slice (reviewed PASS after shared-stop fix;
 ISC-33 still unchecked):** `MacOSHidDeviceListener` roots each manager, run
@@ -212,13 +231,13 @@ excluded by the tool, so they are not tool-certified. The targeted inventory's
 28 passes after earlier scoped formatting are a separate prior run, not a
 claimed rerun from this docs update.
 
-The pre-expert-facade `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
+The pre-compatibility-facade `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
 (SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`)
 records schema 2, two completed warmups, ten completed normal samples, and one
 completed idle sample (.NET 10.0.12). Normal medians: caller return 5.00675 ms,
 operation completion 24.84525 ms, disposal 2.90555 ms, allocated 60004 bytes;
 one idle sample recorded 1.945 ms CPU and zero idle allocated bytes over ~1 s.
-These observations predate both expert facades and are **not** a `.8` before/after comparison or
+These observations predate both report compatibility facades and are **not** a `.8` before/after comparison or
 comparable to the historical `.3` pair. Native-only duration and pending ordinary
 count are null with instrumentation-unavailable reasons; ISC-62 stays open.
 
@@ -228,9 +247,9 @@ callback quiescence separately without inventing an operator arrival/removal
 run; controlled and no-change integration tests do not close ISC-33 or
 universal ISC-53.
 ISC-56 still needs coverage beyond the three inventoried files and sentinel
-paths, and the registry needs expert raw IO/feature rows for universal ISC-4.
+paths, and the registry needs direct raw IO/feature rows for universal ISC-4.
 `docs/architecture/raw-access-tiers.md`
-and `src/Core/README.md` now describe the expert boundary; their earlier
+and `src/Core/README.md` now describe the direct report access boundary; their earlier
 snapshots are historical. Physical `.8` removal awaits an operator. Prioritize
 normal-use correctness over hot-plug storm tuning; do not infer Windows/Linux
 native results from packaged consumers. Parent owns subsequent commits; no

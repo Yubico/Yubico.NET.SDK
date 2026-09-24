@@ -312,6 +312,11 @@ token is passed to discovery, but a cached result may complete without observing
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
 handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by production discovery.
 
+`IYubiKey` models the physical key; `IHidInterface` models one operating-system-exposed HID report
+interface discovered by `FindHidInterfaces`. `IHidConnection` is an opened report connection, while
+`IWindowsHidReportAccess` is the internal Windows report-handle seam. These names do not imply a
+one-to-one mapping between operating-system interfaces and physical USB interfaces.
+
 ### ConnectionType Semantics
 
 `ConnectionType` is a `[Flags]` enum with explicit values. `HidFido`, `HidOtp`, and `SmartCard` represent concrete discovered device interfaces. `Hid` is a group filter that includes both HID FIDO and HID OTP interfaces when used with discovery/cache filtering APIs. `Unknown` matches no devices.

@@ -16,7 +16,7 @@ public class MacOSHidFidoRouteLifetimeTests
         var bridge = new ControlledBridge();
         var descriptor = new HidDescriptorInfo { VendorId = 0x1050, ProductId = 0x0407,
             UsagePage = 0xF1D0, Usage = 1 };
-        var slot = new HidConnectionSlot(new MacOSHidDevice(13579, descriptor), bridge);
+        var slot = new HidConnectionSlot(new MacOSHidInterface(13579, descriptor), bridge);
         var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([slot.InterfaceId], TestContext.Current.CancellationToken);
         var opening = slot.OpenRegisteredConnectionAsync(claim, TestContext.Current.CancellationToken);
         await bridge.OpenEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);

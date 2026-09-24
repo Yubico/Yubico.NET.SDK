@@ -13,7 +13,7 @@ public class ResponsivenessProbeTests
     {
         using var probe = new Probe();
         var native = new BlockingOtpLifetime(probe) { HoldOpen = true };
-        // The expert constructor is synchronous by contract; native open belongs to the worker.
+        // The direct report constructor is synchronous by contract; native open belongs to the worker.
         probe.Start(() => Task.FromResult(new MacOSHidFeatureReportConnection(42, native)));
         try
         {

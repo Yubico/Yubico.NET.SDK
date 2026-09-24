@@ -15,11 +15,11 @@ internal static class ExpertFeatureScenario
             IReadOnlyList<IYubiKey> devices = await YubiKeyManager.FindAllAsync();
             IYubiKey[] selected = devices.Where(d => d.SerialNumber == serial &&
                 d.SupportsConnection(ConnectionType.HidOtp)).ToArray();
-            IReadOnlyList<IHidDevice> hidDevices = await FindHidDevices.Create().FindAllAsync();
-            IHidDevice[] otpInterfaces = hidDevices.Where(d => d.InterfaceType == HidInterfaceType.Otp &&
+            IReadOnlyList<IHidInterface> hidInterfaces = await FindHidInterfaces.Create().FindAllAsync();
+            IHidInterface[] otpInterfaces = hidInterfaces.Where(d => d.InterfaceType == HidInterfaceType.Otp &&
                 d.DescriptorInfo.UsagePage == 1 && d.DescriptorInfo.Usage == 6).ToArray();
             if (devices.Count != 1 || selected.Length != 1 || otpInterfaces.Length != 1 ||
-                hidDevices.Count(d => d.InterfaceType == HidInterfaceType.Otp) != 1)
+                hidInterfaces.Count(d => d.InterfaceType == HidInterfaceType.Otp) != 1)
             {
                 Console.Error.WriteLine($"BLOCKED: serial={serial} discovered {devices.Count} keys, matched {selected.Length} OTP keys, {otpInterfaces.Length} keyboard OTP interfaces; cannot uniquely associate interface");
                 return 2;

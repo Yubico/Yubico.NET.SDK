@@ -324,7 +324,7 @@ public class CompositeDiscoveryIntegrationTests : IAsyncLifetime
     {
         var pcscDevices = await TransientScanRetry.ScanAsync(() => FindPcscDevices.Create().FindAllAsync());
 
-        var hidDevices = await FindHidDevices.Create().FindAllAsync();
+        var hidDevices = await FindHidInterfaces.Create().FindAllAsync();
 
         var interfaces = new List<RawUsbInterface>();
 

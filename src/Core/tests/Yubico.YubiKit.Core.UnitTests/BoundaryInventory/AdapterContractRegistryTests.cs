@@ -14,7 +14,8 @@ public class AdapterContractRegistryTests
     public void Migrated_routes_have_resolved_nonempty_contract_profiles()
     {
         var rows = Load();
-        Assert.Equal(23, rows.Length);
+        Assert.Equal(27, rows.Length);
+        Assert.Equal(49, rows.Sum(row => row.Profiles.Length));
         Assert.Empty(AdapterContractRegistry.Validate(rows));
         Assert.Equal(4, rows.Count(row => row.Route == "macOS FIDO"));
         Assert.Equal(4, rows.Count(row => row.Route == "macOS OTP"));
@@ -22,6 +23,29 @@ public class AdapterContractRegistryTests
         Assert.Equal(4, rows.Count(row => row.Route == "macOS direct input (sync)"));
         Assert.Equal(4, rows.Count(row => row.Route == "macOS direct feature (sync)"));
         Assert.Equal(2, rows.Count(row => row.Route == "macOS listener (sync)"));
+        Assert.Equal(4, rows.Count(row => row.Route == "portable PCSC (sync)"));
+    }
+
+    [Theory]
+    [InlineData("transaction begin", "native wait")]
+    [InlineData("transaction end", "native drain")]
+    [InlineData("dispose", "native drain")]
+    [InlineData("async default begin", "caller block")]
+    public void Removing_any_sync_smartcard_boundary_or_role_fails_closed(string operation, string role)
+    {
+        const string route = "portable PCSC (sync)";
+        var rows = Load();
+        var row = Assert.Single(rows, row => row.Route == route && row.Operation == operation);
+        Assert.Contains($"missing required operation: {route}/{operation}",
+            AdapterContractRegistry.Validate(rows.Where(candidate => candidate != row)));
+        Assert.Contains($"empty profile: {route}/{operation}",
+            AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row
+                ? candidate with { Profiles = candidate.Profiles.Where(profile => profile.Role != role).ToArray() }
+                : candidate)));
+        Assert.Contains($"missing role: {route}/{operation}/{role}",
+            AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row
+                ? candidate with { Profiles = [candidate.Profiles[0] with { Role = "wrong role" }] }
+                : candidate)));
     }
 
     [Theory]

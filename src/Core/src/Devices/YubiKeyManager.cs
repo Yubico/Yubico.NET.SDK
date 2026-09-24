@@ -121,7 +121,9 @@ public static class YubiKeyManager
     /// </summary>
     /// <remarks>
     /// <para>This method is idempotent - calling it when monitoring is not active has no effect.</para>
-    /// <para>Waits for any in-flight scan to complete (with a 10-second timeout).</para>
+    /// <para>Waits up to 10 seconds for the monitoring loop to stop. A scan already dispatched to
+    /// native enumeration may continue after this method returns; the stop timeout does not cancel
+    /// native work or prove it has drained.</para>
     /// <para>Device listeners are disposed and events will no longer be emitted to <see cref="WatchAsync"/>
     /// consumers until <see cref="StartMonitoring()"/> is called again.</para>
     /// </remarks>
@@ -214,7 +216,10 @@ public static class YubiKeyManager
     /// <exception cref="OperationCanceledException">Thrown when the cancellation token is triggered.</exception>
     /// <remarks>
     /// <para>This method stops monitoring if active, clears the internal device cache,
-    /// and disposes all managed resources. It is idempotent.</para>
+    /// and disposes managed monitoring resources. It is idempotent. Monitor shutdown waits up to
+    /// 10 seconds; if a scan does not finish within that bound, shutdown can return while the old
+    /// scan is still running. Its late result cannot publish into the disposed manager, but this
+    /// return is not proof that native enumeration has finished.</para>
     /// <para><strong>Testing Pattern:</strong> Call this in test cleanup to reset static state:</para>
     /// <code>
     /// public async ValueTask DisposeAsync()
@@ -251,7 +256,8 @@ public static class YubiKeyManager
     /// </summary>
     /// <remarks>
     /// <para>This is a convenience wrapper around <see cref="ShutdownAsync(CancellationToken)"/>.</para>
-    /// <para>For async contexts, prefer the async version to avoid blocking.</para>
+    /// <para>For async contexts, prefer the async version to avoid blocking. A bounded monitor stop
+    /// may abandon an in-flight native scan; return is not proof that all native work ended.</para>
     /// </remarks>
     /// <seealso cref="ShutdownAsync"/>
     public static void Shutdown() => ShutdownAsync().GetAwaiter().GetResult();

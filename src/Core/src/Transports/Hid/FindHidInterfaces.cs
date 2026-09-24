@@ -27,22 +27,38 @@ public interface IFindHidInterfaces
     Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default);
 }
 
-public class FindHidInterfaces(ILogger<FindHidInterfaces> logger) : IFindHidInterfaces
+public class FindHidInterfaces : IFindHidInterfaces
 {
+    private readonly ILogger<FindHidInterfaces> _logger;
+    private readonly Func<IReadOnlyList<IHidInterface>> _getPlatformDevices;
+
+    public FindHidInterfaces(ILogger<FindHidInterfaces> logger)
+    {
+        _logger = logger;
+        _getPlatformDevices = GetPlatformDevices;
+    }
+
+    internal FindHidInterfaces(ILogger<FindHidInterfaces> logger,
+        Func<IReadOnlyList<IHidInterface>> getPlatformDevices)
+    {
+        _logger = logger;
+        _getPlatformDevices = getPlatformDevices;
+    }
+
     public async Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
         await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
 
     private IReadOnlyList<IHidInterface> FindAll()
     {
-        logger.LogDebug("Getting list of HID devices");
+        _logger.LogDebug("Getting list of HID devices");
 
-        var allDevices = GetPlatformDevices();
+        var allDevices = _getPlatformDevices();
 
         var yubicoDevices = allDevices
             .Where(d => d.DescriptorInfo.VendorId == HidConstants.YubicoVendorId)
             .ToList();
 
-        logger.LogDebug("Found {Count} Yubico HID devices", yubicoDevices.Count);
+        _logger.LogDebug("Found {Count} Yubico HID devices", yubicoDevices.Count);
 
         return yubicoDevices;
     }
@@ -70,7 +86,7 @@ public class FindHidInterfaces(ILogger<FindHidInterfaces> logger) : IFindHidInte
         }
         catch (DllNotFoundException ex)
         {
-            logger.LogWarning("udev native library not available, returning no HID devices: {Message}", ex.Message);
+            _logger.LogWarning("udev native library not available, returning no HID devices: {Message}", ex.Message);
             return [];
         }
     }

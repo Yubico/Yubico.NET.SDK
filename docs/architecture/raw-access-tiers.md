@@ -168,9 +168,11 @@ managed opens fail with `UnrecoveredConnectionException`.
 ### Retained synchronous compatibility paths
 
 Prefer applet sessions or typed raw sessions for normal asynchronous exchanges. Public raw report access
-and discovery remain available, but neither establishes a drain guarantee for the lower synchronous
-compatibility paths. `FindHidInterfaces.Create().FindAllAsync(token)` runs its platform
-scan via `Task.Run` and can return an `IHidInterface` backed by `MacOSHidInterface`; that discovery task does not make
+remains an expert blocking path; its method names do not promise caller-thread responsiveness.
+`FindHidInterfaces.Create().FindAllAsync(token)` runs its platform
+scan via per-call `Task.Run` (an unbounded thread-pool queue, not a bounded scan executor) and can return an
+`IHidInterface` backed by `MacOSHidInterface`. Cancellation before dispatch skips enumeration; once dispatched,
+the task stays pending through enumeration even if the token is canceled. The discovery task does not make
 the resulting report connection asynchronous or cancel an already-running native scan. Built-in typed macOS FIDO
 and the direct macOS FIDO report connection share the persistent input-owner implementation; OTP uses its
 own migrated route through `HidConnectionSlot`.
@@ -179,8 +181,8 @@ own migrated route through `HidConnectionSlot`.
 |---|---|---|
 | `IHidInterface.ConnectToIOReports()` / `IHidInterface.ConnectToFeatureReports()` | The `MacOSHidInterface.ConnectToIOReports()` / `MacOSHidInterface.ConnectToFeatureReports()` implementations synchronously construct `MacOSHidIOReportConnection` / `MacOSHidFeatureReportConnection`. The caller owns the returned `IHidConnection`. | Direct opens do not take the grouped-key registry claim used by `IYubiKey.ConnectAsync<TConnection>()`; do not infer its quarantine or native-release guarantees. |
 | `IHidConnection.GetReport()` / `IHidConnection.SetReport(byte[])` | macOS IO `GetReport` synchronously awaits the persistent input owner's receive with a six-second cancellation timeout; `SetReport` synchronously awaits an owner-worker output using an operation-owned copy and accepts the caller's report length (unlike typed FIDO sends, which require 64 bytes). macOS feature reports synchronously await the OTP owner worker; direct feature `SetReport` accepts arbitrary length, unlike typed eight-byte OTP sends. | No public cancellation token. The IO timeout detaches the reader, not the native owner; late reports remain queued for retry. Native output duration is not bounded. |
-| `ISmartCardConnection.BeginTransaction(token)` / returned `IDisposable.Dispose()` | On built-in PC/SC connections, synchronous begin and transaction end block the caller awaiting the connection's native worker. The caller ends the scope before disposing the connection. | Admitted native acquisition/end has no guaranteed duration. Prefer `BeginTransactionAsync` and async-dispose the built-in scope as in the [Core example](../../src/Core/README.md#send-raw-apdus); the interface returns only `IDisposable`, and its default async begin for custom implementations calls synchronous begin. |
-| `IConnection.Dispose()` / `IConnection.DisposeAsync()` | macOS IO report disposal shares the typed FIDO owner's acknowledged shutdown; macOS feature-report disposal shares the OTP worker's checked shutdown and drains accepted GET/SET work without `Task.Run`. Built-in PC/SC `Dispose` blocks for its shared native-worker shutdown outcome. | Native shutdown may wait indefinitely for release proof; do not generalize that guarantee to other or custom connections. |
+| `ISmartCardConnection.BeginTransaction(token)` / returned `IDisposable.Dispose()` | On built-in PC/SC connections, synchronous begin and transaction end block the caller awaiting the connection's native worker. The caller ends the scope before disposing the connection. A held transmit delays synchronous scope disposal until native work exits. | Admitted native acquisition/end has no guaranteed duration. Prefer `BeginTransactionAsync` and async-dispose the built-in scope as in the [Core example](../../src/Core/README.md#send-raw-apdus). The default `BeginTransactionAsync` on an external implementation executes its synchronous `BeginTransaction` **before returning a task**; an async name does not make that implementation nonblocking. An override can provide caller-thread responsiveness, but its native drain behavior depends on that implementation. |
+| `IConnection.Dispose()` / `IConnection.DisposeAsync()` | macOS IO report disposal shares the typed FIDO owner's acknowledged shutdown; macOS feature-report disposal shares the OTP worker's checked shutdown and drains accepted GET/SET work without `Task.Run`. Built-in PC/SC `Dispose` blocks for its shared native-worker shutdown outcome: a held transmit delays disconnect and context release; repeat callers share the outcome. | Native shutdown may wait indefinitely for release proof. Never dispose synchronously from work whose completion disposal must await. Custom connections own their own drain and failure semantics. |
 
 macOS IO report reads wake on disposal; native callback state and the physical owner are retained until
 acknowledged shutdown. Failed native release retains the owner instead of claiming successful disposal.
@@ -190,14 +192,22 @@ behavior does not establish drain guarantees for all public synchronous entry po
 
 The Core [source-site inventory](../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md)
 classifies waits and pre-task-return dispatch, but a listed site is not automatically a public boundary
-or a verified drain. The scoped public reachability map below is separate from that scanner:
+or a verified drain. The [finite public entry registry](../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs)
+independently requires sixteen macOS direct-report, portable SmartCard, listener, manager and scan
+entry links from public symbols to their current internal owners. It links existing behavioral tests
+where possible; its reflection validation is not a native drain test. The separate
+[adapter contract registry](../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs)
+requires 27 operation rows and 49 links to runnable behavior tests, including synchronous
+SmartCard begin, scope end and disposal and the external default async-begin fallback. Removing
+a required operation or profile role fails validation independently of the JSON rows. Neither
+registry certifies custom implementations. The scoped reachability map:
 
 | Public entry / path | Contract and existing evidence | Remaining disposition |
 |---|---|---|
-| `FindHidInterfaces.Create().FindAllAsync(token)` → platform `GetList()` → `IHidInterface.ConnectToIOReports()` / `ConnectToFeatureReports()` | Scan uses `Task.Run`; returned interfaces expose synchronous constructors. macOS direct report facades have IO/feature compatibility tests and selected-key read-only probes. | Cancellation before dispatch prevents scan; cancellation after dispatch does not prove native scan drain. Windows/Linux direct report teardown and cancellation remain unverified. |
+| `FindHidInterfaces.Create().FindAllAsync(token)` → platform `GetList()` → `IHidInterface.ConnectToIOReports()` / `ConnectToFeatureReports()` | `FindHidInterfacesBoundaryTests` gates real `FindAllAsync` dispatch with injected platform enumeration: pre-cancellation submits no scan; invocation returns a pending task while enumeration is withheld; cancellation after dispatch does not complete it early; enumeration faults propagate without replay. Returned interfaces expose synchronous constructors. macOS direct report facades have IO/feature compatibility tests and selected-key read-only probes. | This is an enumeration delegate gate, not proof of native handle teardown. `Task.Run` has no per-finder or global worker bound; Windows/Linux direct report teardown and cancellation remain unverified. |
 | `IYubiKey.ConnectAsync<TConnection>()` → `HidConnectionSlot.OpenRawConnectionAsync()` | macOS built-in FIDO/OTP open on connection-owned workers; both direct and typed macOS paths have focused tests. Non-macOS fallback invokes `IHidInterface.ConnectTo*Reports()` *before* `Task.FromResult`. | Windows/Linux fallback can block at task invocation and remains outstanding; custom `IHidInterface` code is external. |
-| `ISmartCardConnection.BeginTransaction()` / `BeginTransactionAsync()` → scope `Dispose()` | Built-in PC/SC synchronous begin/end wait on one worker; controlled withheld-native begin proves built-in async entry returns pending. | Synchronous begin/end may wait indefinitely for native completion. The interface async default invokes custom synchronous begin before task return; external implementations have no SDK-enforced drain. |
-| `IConnection.Dispose()` → `DisposalGate`, `ExchangeGuard.CloseAndDrain()` or listener `Stop()` | Built-in PC/SC, macOS FIDO/OTP and direct report connections share their respective native-owner shutdown; controlled lifetime tests cover held operations. `YubiKeyManager.Shutdown()` blocks on its async shutdown; monitor/listener stop has a bounded wait with possible retained/abandoned work. | Caller must not dispose from its own admitted operation. Manager timeout is not native drain proof. Custom connections and other-platform listener teardown remain outstanding. |
+| `ISmartCardConnection.BeginTransaction()` / `BeginTransactionAsync()` → scope `Dispose()` | Built-in PC/SC synchronous begin/end wait on one worker; controlled withheld-native begin proves built-in async entry returns pending. A controlled custom sync-only implementation proves default async begin does not return until sync begin does. | Synchronous begin/end may wait indefinitely for native completion. External implementations have no SDK-enforced native drain; returned scopes promise only `IDisposable`. |
+| `IConnection.Dispose()` → `DisposalGate`, `ExchangeGuard.CloseAndDrain()` or listener `Stop()` | Built-in PC/SC, macOS FIDO/OTP and direct report connections share their respective native-owner shutdown; controlled synchronous PC/SC disposal holds disconnect/context release behind a native transmit and observes the same native worker. `YubiKeyManager.Shutdown()` blocks on its async shutdown; monitor/listener stop has a bounded wait with possible retained/abandoned work. `YubiKeyDeviceManagerTests.DisposeAsync_WithAPublicationResumingAfterDisposeReturned_EmitsNothing` pins late publication suppression after the timeout, not a held native scan. | Caller must not dispose from its own admitted operation. Manager timeout is not native drain proof. Custom connections and other-platform listener teardown remain outstanding. |
 | `OtpHidProtocol.Configure()` via applet initialization | Synchronous protocol configuration can wait for a feature-report exchange when firmware state is not initialized; raw OTP session creation defers status initialization and exposes no `Configure` method. | This is an internal session initialization boundary, not a public `RawOtpHidSession.Configure` API. Native wait has no proven upper bound. |
 | Raw session `SendAndReceiveAsync`/`SelectAsync` → protocol interface; registered connection `SendAsync`/`ReceiveAsync`/`TransmitAndReceiveAsync` | Forwarding happens before the returned task; built-in macOS and PC/SC adapter lifecycle tests cover their selected paths. | External interfaces and legacy FIDO/OTP wrappers use synchronous `IHidConnection.GetReport`/`SetReport` before task return; task shape is not responsiveness proof. |
 
@@ -206,7 +216,7 @@ call-graph certification. The inventory also records worker parking, credential-
 polling and native imports; those are not additional public synchronous report methods.
 Direct calls on other platforms may block until native operations drain; custom implementations
 own their own dispatch, cancellation and disposal behavior. Do not infer macOS drain behavior
-for either case.
+for either case. These Core-only inventories do not certify other SDK-wide boundaries.
 
 ## Ownership And Sequencing
 

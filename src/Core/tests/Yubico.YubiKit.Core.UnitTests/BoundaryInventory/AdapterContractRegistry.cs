@@ -33,7 +33,13 @@ internal static class AdapterContractRegistry
         ("macOS direct feature (sync)", "set", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "SetReport", ["native worker", "native drain"]),
         ("macOS direct feature (sync)", "dispose", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "Dispose", ["shared close", "failure"]),
         ("macOS listener (sync)", "start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start", ["registration", "restart after timeout"]),
-        ("macOS listener (sync)", "stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop", ["callback drain", "shared stop after timeout"])
+        ("macOS listener (sync)", "stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop", ["callback drain", "shared stop after timeout"]),
+        // Built-in PC/SC behavior only. Custom ISmartCardConnection implementations' native
+        // lifetime behavior is not verified; the default async fallback only verifies caller blocking.
+        ("portable PCSC (sync)", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransaction", ["native wait"]),
+        ("portable PCSC (sync)", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "Dispose", ["native drain"]),
+        ("portable PCSC (sync)", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose", ["native drain"]),
+        ("portable PCSC (sync)", "async default begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync", ["caller block"])
     ];
 
     internal static IReadOnlyList<string> Validate(IEnumerable<AdapterContractRow> input)

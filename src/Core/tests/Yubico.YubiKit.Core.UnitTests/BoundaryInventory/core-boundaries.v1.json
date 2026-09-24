@@ -125,7 +125,7 @@
     },
     {
       "path": "Devices/YubiKeyManager.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Devices/YubiKeyManager.cs:257 calls ShutdownAsync().GetAwaiter().GetResult() in the synchronous Shutdown entry point."],
+      "evidence": ["Devices/YubiKeyManager.cs:263 calls ShutdownAsync().GetAwaiter().GetResult() in the synchronous Shutdown entry point."],
       "status": ["documented", "outstanding"],
       "entries": ["Shutdown#9872F46D8981#sync-boundary#Shutdown is the synchronous compatibility boundary and blocks the initiating thread until ShutdownAsync completes."]
     },
@@ -149,7 +149,7 @@
     },
     {
       "path": "Transports/Hid/FindHidInterfaces.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/FindHidInterfaces.cs:33 awaits Task.Run(FindAll, cancellationToken)."],
+      "evidence": ["Transports/Hid/FindHidInterfaces.cs:49 awaits Task.Run(FindAll, cancellationToken)."],
       "status": ["documented", "outstanding"],
       "entries": ["FindAllAsync#CA7B3F797351#worker#Task.Run moves synchronous HID discovery off the initiating thread; cancellation of the awaiting caller cannot necessarily interrupt native enumeration."]
     },

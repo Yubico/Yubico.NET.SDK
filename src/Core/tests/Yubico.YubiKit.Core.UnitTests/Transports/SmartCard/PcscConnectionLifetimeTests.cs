@@ -35,6 +35,88 @@ public class PcscConnectionLifetimeTests
     }
 
     [Fact]
+    public async Task AsyncTransaction_ExternalDefaultFallback_BlocksCallerUntilSynchronousBeginReturns()
+    {
+        using var entered = new ManualResetEventSlim();
+        using var release = new ManualResetEventSlim();
+        using var returned = new ManualResetEventSlim();
+        var callerThreadId = 0;
+        var beginThreadId = 0;
+        ISmartCardConnection connection = new SyncOnlyTransactionConnection(() =>
+        {
+            Volatile.Write(ref beginThreadId, Environment.CurrentManagedThreadId);
+            entered.Set();
+            release.Wait(Ct);
+        });
+        // Do not unwrap the returned task: that would hide whether the default interface method returned.
+        Task<Task<IDisposable>> invocation = Task.Factory.StartNew(() =>
+        {
+            Volatile.Write(ref callerThreadId, Environment.CurrentManagedThreadId);
+            Task<IDisposable> result = connection.BeginTransactionAsync(Ct);
+            returned.Set();
+            return result;
+        }, Ct, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        try
+        {
+            Assert.True(entered.Wait(TimeSpan.FromSeconds(5), Ct));
+            Assert.Equal(Volatile.Read(ref callerThreadId), Volatile.Read(ref beginThreadId));
+            Assert.False(returned.Wait(TimeSpan.FromMilliseconds(200), Ct));
+            Assert.False(invocation.IsCompleted);
+        }
+        finally
+        {
+            release.Set();
+        }
+        Task<IDisposable> returnedTask = await invocation.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+        Assert.True(returned.Wait(TimeSpan.FromSeconds(5), Ct));
+        using var scope = await returnedTask.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+        Assert.Equal(1, ((SyncOnlyTransactionConnection)connection).BeginCalls);
+    }
+
+    [Fact]
+    public async Task BuiltInPcscConnection_SynchronousDispose_DrainsHeldNativeTransmitBeforeReleasingContext()
+    {
+        var api = new ControlledSCardConnectionApi();
+        var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        var transmit = connection.TransmitAndReceiveAsync(new byte[] { 0x00 }, Ct);
+        using var callerEntered = new ManualResetEventSlim();
+        using var returned = new ManualResetEventSlim();
+        Task<(bool TransmitExited, int Disconnects, int Releases)>? dispose = null;
+        (bool TransmitExited, int Disconnects, int Releases) snapshot = default;
+        try
+        {
+            await api.FirstTransmitEntered.Task.WaitAsync(Ct);
+            dispose = Task.Factory.StartNew(() =>
+            {
+                callerEntered.Set();
+                connection.Dispose();
+                var snapshot = (api.Events.Contains("transmit-exit"), api.DisconnectCalls, api.ReleaseContextCalls);
+                returned.Set();
+                return snapshot;
+            }, Ct, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            Assert.True(callerEntered.Wait(TimeSpan.FromSeconds(5), Ct));
+            // Finite observation while native transmit is held, not a proof of every scheduling race.
+            Assert.False(returned.Wait(TimeSpan.FromMilliseconds(200), Ct));
+            Assert.Equal(0, api.DisconnectCalls);
+            Assert.Equal(0, api.ReleaseContextCalls);
+        }
+        finally
+        {
+            api.ReleaseTransmit.Set();
+            _ = await transmit;
+            if (dispose is not null)
+                snapshot = await dispose.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            else
+                await connection.DisposeAsync();
+        }
+        Assert.True(snapshot.TransmitExited);
+        Assert.Equal(1, snapshot.Disconnects);
+        Assert.Equal(1, snapshot.Releases);
+        Assert.Equal(["establish", "connect", "transmit-enter", "transmit-exit", "disconnect", "release-context"], api.Events);
+        Assert.Single(api.NativeThreadIds.Distinct());
+    }
+
+    [Fact]
     public async Task AsyncTransaction_BlockedNativeBegin_ReturnsPendingTaskWithoutBlockingCaller()
     {
         var api = new ControlledSCardConnectionApi { HoldBegin = true };
@@ -426,6 +508,91 @@ public class PcscConnectionLifetimeTests
     }
 
     [Fact]
+    public async Task BuiltInPcscConnection_SynchronousBegin_WaitsForBlockedNativeBegin()
+    {
+        var api = new ControlledSCardConnectionApi { HoldBegin = true };
+        var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        using var callerEntered = new ManualResetEventSlim();
+        using var returned = new ManualResetEventSlim();
+        Task<(IDisposable Scope, bool NativeExited)> begin = Task.Factory.StartNew(() =>
+        {
+            callerEntered.Set();
+            IDisposable scope = connection.BeginTransaction(Ct);
+            bool nativeExited = api.Events.Contains("begin-exit");
+            returned.Set();
+            return (scope, nativeExited);
+        }, Ct, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        var nativeExitedOnReturn = false;
+
+        try
+        {
+            Assert.True(callerEntered.Wait(TimeSpan.FromSeconds(5), Ct));
+            await api.BeginEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            // Finite observation while native begin is held, not a proof of every scheduling race.
+            Assert.False(returned.Wait(TimeSpan.FromMilliseconds(200), Ct));
+            Assert.Equal(1, api.BeginTransactionCalls);
+            Assert.Equal(0, api.EndTransactionCalls);
+            Assert.Equal(0, api.DisconnectCalls);
+        }
+        finally
+        {
+            api.ReleaseBegin.Set();
+            var result = await begin.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            using var scope = result.Scope;
+            nativeExitedOnReturn = result.NativeExited;
+            await connection.DisposeAsync();
+        }
+
+        Assert.True(nativeExitedOnReturn);
+        Assert.Equal(["establish", "connect", "begin-enter", "begin-exit", "end", "disconnect", "release-context"], api.Events);
+    }
+
+    [Fact]
+    public async Task BuiltInPcscConnection_SynchronousScopeDispose_WaitsForBlockedNativeTransmitBeforeEnd()
+    {
+        var api = new ControlledSCardConnectionApi();
+        var connection = await PcscTestDevices.Create(api).ConnectAsync<ISmartCardConnection>(Ct);
+        var scope = connection.BeginTransaction(Ct);
+        var transmit = connection.TransmitAndReceiveAsync(new byte[] { 0x00 }, Ct);
+        using var callerEntered = new ManualResetEventSlim();
+        using var returned = new ManualResetEventSlim();
+        Task<(bool TransmitExited, int EndCalls)>? end = null;
+        (bool TransmitExited, int EndCalls) snapshot = default;
+
+        try
+        {
+            await api.FirstTransmitEntered.Task.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            end = Task.Factory.StartNew(() =>
+            {
+                callerEntered.Set();
+                scope.Dispose();
+                var snapshot = (api.Events.Contains("transmit-exit"), api.EndTransactionCalls);
+                returned.Set();
+                return snapshot;
+            }, Ct, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            Assert.True(callerEntered.Wait(TimeSpan.FromSeconds(5), Ct));
+            // Finite observation while native transmit is held, not a proof of every scheduling race.
+            Assert.False(returned.Wait(TimeSpan.FromMilliseconds(200), Ct));
+            Assert.Equal(0, api.EndTransactionCalls);
+            Assert.Equal(0, api.DisconnectCalls);
+        }
+        finally
+        {
+            api.ReleaseTransmit.Set();
+            _ = await transmit;
+            if (end is not null)
+                snapshot = await end.WaitAsync(TimeSpan.FromSeconds(5), Ct);
+            scope.Dispose();
+            await connection.DisposeAsync();
+        }
+
+        Assert.True(snapshot.TransmitExited);
+        Assert.Equal(1, snapshot.EndCalls);
+        Assert.Equal(1, api.EndTransactionCalls);
+        Assert.Equal(["establish", "connect", "begin", "transmit-enter", "transmit-exit", "end", "disconnect", "release-context"], api.Events);
+    }
+
+    [Fact]
     public async Task BuiltInPcscConnection_ConcurrentDisposalOfSameScope_SharesOneEndCompletion()
     {
         var api = new ControlledSCardConnectionApi();
@@ -635,6 +802,8 @@ public class PcscConnectionLifetimeTests
 
     private sealed class SyncOnlyTransactionConnection : ISmartCardConnection
     {
+        private readonly Action? _onBegin;
+        public SyncOnlyTransactionConnection(Action? onBegin = null) => _onBegin = onBegin;
         public int BeginCalls { get; private set; }
         public ConnectionType Type => ConnectionType.SmartCard;
         public Transport Transport => Transport.Usb;
@@ -642,6 +811,7 @@ public class PcscConnectionLifetimeTests
         public IDisposable BeginTransaction(CancellationToken cancellationToken = default)
         {
             BeginCalls++;
+            _onBegin?.Invoke();
             return new CancellationTokenSource();
         }
 

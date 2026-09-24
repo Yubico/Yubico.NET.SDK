@@ -135,8 +135,12 @@ finally
 ```
 
 On built-in SmartCard connections, async begin does not block the caller; synchronous begin and
-scope disposal can wait on native work. A custom connection using the interface's default async
-begin calls synchronous begin and can block until it is overridden.
+scope disposal wait for native work and have no fixed completion deadline. A custom connection
+using the interface's default `BeginTransactionAsync` executes synchronous `BeginTransaction`
+**before returning a task**. For a responsive calling thread, a custom implementation must override
+the default; the override's responsiveness and native drain depend on its implementation, and neither
+the override nor the returned scope automatically inherits the built-in
+connection's native drain guarantees. End the scope before disposing its connection.
 
 `IYubiKey` represents a physical key; `FindHidInterfaces` returns operating-system-exposed
 `IHidInterface` report interfaces, not necessarily one per physical USB interface. An opened
@@ -149,12 +153,15 @@ detaches only that read; a late report remains available on retry. Native output
 still block indefinitely. Feature-report connections retain their synchronous report interface but
 open and perform native report calls on the OTP connection's worker, without a GET timeout.
 Direct IO `SetReport(byte[])` forwards the supplied report length; typed FIDO sends still require 64-byte packets.
-`IHidConnection.GetReport()` / `SetReport(byte[])` offer no cancellation token. The caller owns the
+`IHidConnection.GetReport()` / `SetReport(byte[])` offer no cancellation token and wait on the caller's
+thread. The caller owns the
 direct connection; do not overlap report calls. Direct feature SET forwards any supplied report length;
 typed OTP sends require eight bytes. Built-in macOS feature reports drain accepted calls before checked
 release; direct report opens do not take a grouped-key registry claim. Synchronous
 `ISmartCardConnection.BeginTransaction()` and transaction-scope `Dispose()` can also block on
-native work; synchronous connection `Dispose()` is not uniformly nonblocking. For
+native work; built-in SmartCard synchronous `Dispose()` waits for an admitted transmit to finish
+before disconnect and context release. Do not dispose synchronously inside the operation it must
+drain; prefer `DisposeAsync` in asynchronous code. For
 method-by-method execution, ownership and evidence gaps, see
 [retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths).
 

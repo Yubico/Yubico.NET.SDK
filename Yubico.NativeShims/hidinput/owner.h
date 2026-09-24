@@ -29,7 +29,31 @@ hidinput_result hidinput_wait_shutdown(hidinput_owner *owner, uint32_t timeout_m
    repeated destroy returns CLOSE_FAULT without retrying close. */
 hidinput_result hidinput_destroy(hidinput_owner *owner);
 
-/* Shipping macOS-only exports (other platforms have no input-owner symbols). */
+/* Shipping macOS-only ABI for the managed input source (no other-platform exports).
+   This is one persistent, already-open device subscription, NOT one operation per
+   report or a new submission for each Start. The five exports below are the
+   managed entry points; result integers use hidinput_result values above.
+   Create returns NULL for invalid arguments/allocation failure (including NULL
+   device or callbacks, zero/overflowing sizes); it never calls either callback.
+   Start returns OK only after queue, report/removal and cancel-handler
+   registration followed by activation. INVALID (NULL owner or repeated Start,
+   including after a started owner is cancelled) creates no new registration.
+   Activation can cause callbacks on another queue before Start returns;
+   callbacks are not inline Start calls.
+   A successful Start does not promise any report: zero reports is valid, and
+   multiple input reports may arrive during the same activation. Each accepted
+   report is delivered once in order, with data borrowed only during the callback.
+   The required terminal callback runs at most once per owner, after accepted
+   reports drain: removed=1, overflow=2, malformed/report failure=3. A clean
+   explicit Cancel does not promise a terminal callback. Cancel before Start is
+   a no-op; after Start it requests cancellation, not completion. WaitShutdown
+   waits for native cancellation acknowledgment AND accepted callback drain;
+   UINT32_MAX means indefinite wait. OK means quiescent, FAULT means quiescent
+   after report/overflow fault, TIMEOUT leaves resources live; neither OK nor
+   FAULT proves close succeeded. Destroy is the checked, potentially blocking
+   close: BUSY retains the owner, OK frees it, CLOSE_FAULT retains owner/backend
+   permanently and does not retry close. Never wait/destroy inside a callback;
+   serialize Destroy with all other external calls to the same owner. */
 hidinput_owner *Native_HidInputCreate(void *already_open_device, size_t max_report,
     size_t capacity, hidinput_receiver report_cb, hidinput_terminal_cb terminal_cb,
     void *context);

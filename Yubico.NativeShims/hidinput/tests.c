@@ -70,6 +70,9 @@ static void lifecycle(void) {
     assert(c.byte == 42);
     assert(c.self_wait == HIDINPUT_SELF_WAIT);
     pthread_mutex_unlock(&c.mutex);
+    /* One start owns a continuing registration, not a single report request. */
+    reusable[0] = 17;
+    hidinput_test_inject(o, reusable, sizeof(reusable));
     hidinput_cancel(o); hidinput_cancel(o);
     assert(hidinput_destroy(o) == HIDINPUT_BUSY);
     assert(hidinput_wait_shutdown(o, 0) == HIDINPUT_TIMEOUT);
@@ -77,8 +80,9 @@ static void lifecycle(void) {
     assert(hidinput_destroy(o) == HIDINPUT_BUSY);
     unblock(&c);
     assert(hidinput_wait_shutdown(o, 2000) == HIDINPUT_OK);
+    assert(c.byte == 17);
     hidinput_test_inject(o, reusable, sizeof(reusable));
-    assert(c.count == 1);
+    assert(c.count == 2);
     assert(hidinput_destroy(o) == HIDINPUT_OK);
     finish(&c);
 }

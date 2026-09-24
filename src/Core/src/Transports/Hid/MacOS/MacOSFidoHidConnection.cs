@@ -23,6 +23,7 @@ internal interface IHidInputBridge
         return 0;
     }
     int InputSize(nint device);
+    int OutputSize(nint device) => InputSize(device);
     bool CloseUnstarted(nint device);
     void ReleaseDevice(nint device);
     nint CreateInput(nint device, int size, Action<ReadOnlyMemory<byte>> report, Action<int> terminal);
@@ -101,6 +102,7 @@ internal sealed unsafe class NativeHidInputBridge : IHidInputBridge
     public void OpenDevice(nint device) => IOKitDeviceLifetime.Instance.OpenDevice(device);
     public int OpenDeviceResult(nint device) => IOKitDeviceLifetime.Instance.OpenDeviceResult(device);
     public int InputSize(nint device) => IOKitDeviceLifetime.Instance.GetIntProperty(device, IOKitHidConstants.MaxInputReportSize);
+    public int OutputSize(nint device) => IOKitDeviceLifetime.Instance.GetIntProperty(device, IOKitHidConstants.MaxOutputReportSize);
     public bool CloseUnstarted(nint device) => NativeMethods.IOHIDDeviceClose(device, 0) == 0;
     public void ReleaseDevice(nint device) => IOKitDeviceLifetime.Instance.ReleaseCFObject(device);
     public void SetReport(nint device, byte[] report)
@@ -108,7 +110,8 @@ internal sealed unsafe class NativeHidInputBridge : IHidInputBridge
         var status = NativeMethods.IOHIDDeviceSetReport(device, IOKitHidConstants.kIOHidReportTypeOutput, 0, report, report.Length);
         if (status != 0)
         {
-            throw new InvalidOperationException($"IOHIDDeviceSetReport failed: {status}");
+            throw new Yubico.YubiKit.Core.Native.PlatformApiException(nameof(NativeMethods.IOHIDDeviceSetReport), status,
+                "Failed to set HID report.");
         }
     }
 
@@ -163,6 +166,8 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
     private readonly Owner _owner;
     private MacOSFidoHidConnection(Owner owner) => _owner = owner;
     public int PacketSize => FidoPacketSize;
+    internal int InputReportSize => _owner.InputReportSize;
+    internal int OutputReportSize => _owner.OutputReportSize;
     public ConnectionType Type => ConnectionType.HidFido;
 
     internal static async Task<MacOSFidoHidConnection> OpenAsync(long entryId, IHidInputBridge bridge,
@@ -191,8 +196,16 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
         }
     }
 
-    public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
-        _owner.SendAsync(packet, cancellationToken);
+    public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (packet.Length != FidoPacketSize)
+        {
+            throw new ArgumentException("FIDO packet must be exactly 64 bytes", nameof(packet));
+        }
+        return _owner.SendAsync(packet, cancellationToken);
+    }
+    internal Task SendReportAsync(ReadOnlyMemory<byte> report) => _owner.SendAsync(report, CancellationToken.None);
     public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
         _owner.ReceiveAsync(cancellationToken);
     public void RequestTerminalWake() => _owner.Terminal(ShutdownTerminalReason);
@@ -235,6 +248,8 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
         private bool _stopping;
         private bool _terminal;
         private int _workerId;
+        internal int InputReportSize { get; private set; }
+        internal int OutputReportSize { get; private set; }
 
         internal Owner(long entryId, IHidInputBridge bridge, IDisposable? registration, Action? beforeSendPublication)
         {
@@ -360,6 +375,8 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
                     {
                         throw new InvalidOperationException("FIDO input report size is smaller than 64");
                     }
+                    InputReportSize = size;
+                    OutputReportSize = _bridge.OutputSize(_device);
                     _input = _bridge.CreateInput(_device, size, Report, Terminal);
                     if (_input == 0)
                     {
@@ -431,9 +448,36 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             _reader = null;
         }
 
+        private void CancelRead(TaskCompletionSource<ReadOnlyMemory<byte>> reader, CancellationToken token)
+        {
+            bool detached;
+            lock (_sync)
+            {
+                detached = ReferenceEquals(_reader, reader);
+                if (detached)
+                {
+                    _reader = null;
+                    _active = false;
+                }
+            }
+            if (detached)
+            {
+                reader.TrySetCanceled(token);
+            }
+        }
+
+        private static async Task<ReadOnlyMemory<byte>> AwaitReadAsync(
+            Task<ReadOnlyMemory<byte>> task, CancellationTokenRegistration registration)
+        {
+            try { return await task.ConfigureAwait(false); }
+            finally { registration.Dispose(); }
+        }
+
         internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
+            TaskCompletionSource<ReadOnlyMemory<byte>> reader;
+            CancellationTokenRegistration registration;
             lock (_sync)
             {
                 if (_terminal || _stopping)
@@ -449,18 +493,24 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
                     return Task.FromResult<ReadOnlyMemory<byte>>(report);
                 }
                 _active = true;
-                _reader = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
-                return _reader.Task;
+                reader = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
+                _reader = reader;
+                // Register may invoke synchronously for an already-cancelled token.
+                // The lock is reentrant, and the callback only detaches this reader.
+                registration = token.Register(static state =>
+                {
+                    var (owner, pending, cancellation) =
+                        ((Owner, TaskCompletionSource<ReadOnlyMemory<byte>>, CancellationToken))state!;
+                    owner.CancelRead(pending, cancellation);
+                }, (this, reader, token));
             }
+            // Dispose outside _sync: disposal may wait for a callback acquiring it.
+            return AwaitReadAsync(reader.Task, registration);
         }
 
         internal Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            if (packet.Length != FidoPacketSize)
-            {
-                throw new ArgumentException("FIDO packet must be exactly 64 bytes", nameof(packet));
-            }
             var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             lock (_sync)
             {

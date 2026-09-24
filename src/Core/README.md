@@ -138,12 +138,15 @@ On built-in SmartCard connections, async begin does not block the caller; synchr
 scope disposal can wait on native work. A custom connection using the interface's default async
 begin calls synchronous begin and can block until it is overridden.
 
-The public expert `IHidDevice.ConnectToIOReports()` / `ConnectToFeatureReports()` methods open
-legacy synchronous report connections even on macOS; they are not the built-in async connections
-used by `device.ConnectAsync<TConnection>()`. `IHidConnection.GetReport()` / `SetReport(byte[])`
-offer no cancellation token or native-async guarantee. The caller owns the direct connection;
-avoid concurrent report calls and disposal. Legacy macOS IO teardown frees callback handles without
-an acknowledged in-flight callback drain, so concurrent disposal may be unsafe. Synchronous
+The public expert `IHidDevice.ConnectToIOReports()` / `ConnectToFeatureReports()` methods remain
+synchronous. On macOS, the IO connection blocks the caller while the same persistent FIDO input
+owner used by typed connections opens, receives, sends and shuts down. A six-second read timeout
+detaches only that read; a late report remains available on retry. Native output and shutdown can
+still block indefinitely. Feature-report connections retain their legacy native behavior.
+Expert IO `SetReport(byte[])` forwards the supplied report length; typed FIDO sends still require 64-byte packets.
+`IHidConnection.GetReport()` / `SetReport(byte[])` offer no cancellation token. The caller owns the
+direct connection; do not overlap report calls. Feature-report disposal still has no concurrent
+operation drain. Synchronous
 `ISmartCardConnection.BeginTransaction()` and transaction-scope `Dispose()` can also block on
 native work; synchronous connection `Dispose()` is not uniformly nonblocking. For
 method-by-method execution, ownership and evidence gaps, see
@@ -152,7 +155,7 @@ method-by-method execution, ownership and evidence gaps, see
 In the development worktree, the built-in macOS FIDO connection uses asynchronous open,
 awaited channel initialization and persistent native input delivery. Blocking output and
 checked shutdown have connection-owned execution; uncertain native close retains the
-physical claim. This does not make the public lower-level `IHidConnection` interface or
+  physical claim. This does not make the public lower-level `IHidConnection` interface or
 OTP/Windows/Linux HID routes asynchronous. The development worktree's read-only macOS
 FIDO open/init/getInfo/dispose/reopen path has run on one connected 5.7.4 YubiKey, but
 touch, removal and interrupted shutdown are not verified. The current development pin is
@@ -195,8 +198,8 @@ device with `Yubico.YubiKit.SecurityDomain`.
   caller-owned input only after the task is terminal. Async disposal waits for accepted work, transaction end,
   disconnect, and context release without blocking the caller. Custom implementations must provide their own
   drain and borrowed-memory lifetime guarantees; these are not automatic for every SDK connection.
-- On built-in macOS FIDO, canceling a pending raw read may leave it occupying the overlap slot until a report
-  or terminal wake; drain it or dispose the connection before another operation. Cancellation between reads
+- On built-in macOS FIDO, canceling a pending raw read detaches that reader and frees its overlap slot;
+  a later report remains queued for the next read. Cancellation between reads
   does not immediately abort the native device protocol. Built-in macOS OTP calls already active at cancellation
   may finish successfully. Do not assume cancellation releases native resources early; await the operation and
   connection disposal. Other HID implementations may have different cancellation behavior.

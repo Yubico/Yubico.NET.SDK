@@ -41,11 +41,12 @@ the original command; successful abort permits reuse, while failed abort faults 
 protocol preserving the original failure. 35 focused protocol tests and one scripted
 Mac OTP test passed, not physical mid-frame failure. PublicApi 22, Fido2 471,
 YubiOtp 180 and resilience-fast 77 passed; the latest full Core tally appears below.
-`dotnet toolchain.cs complexity` passed six changed shipping methods at cyclomatic
-≤10/cognitive ≤20; manually refactored harness/test methods are excluded by that tool.
+The earlier `dotnet toolchain.cs complexity` run passed six changed shipping
+methods at cyclomatic ≤10/cognitive ≤20; the later 21-method result is below.
 
-Independent review accepted ISC-38/39/43–47/60, bringing the master to **14/72
-checked, 58 pending**. ISC-38's source audit finds `SCardCancel` only in monitoring,
+Independent review accepted ISC-38/39/43–47/60 at this earlier checkpoint;
+the later ISC-31 slice brings the master to **15/72 checked, 57 pending**.
+ISC-38's source audit finds `SCardCancel` only in monitoring,
 while controlled cancelled transmit retains its native borrow; it is not a gate
 against future callsites. ISC-39's `PcscContextIsolationTests` holds a transmit
 through production listener disposal and compares distinct fake-native context
@@ -86,35 +87,75 @@ rebuild `.8`; this is a one-time artifact check.
 Six diagnostics cases inventory logging in three files and exercise real
 PC/SC/OTP sentinel full payloads and five-byte prefixes to catch framing
 leaks; external exception payloads and other migration logs remain outside
-this proof, so ISC-56 stays unchecked. Last full Core result is **1,423
-passed/3 skipped**, including these cases before this docs-only pass. After
+this proof, so ISC-56 stays unchecked. At this earlier checkpoint full Core
+passed **1,423/3 skipped**, including these cases. After
 scoped formatting, a targeted `BoundaryInventory` run passed **28** tests:
 13 scanner, three registry, six responsiveness and six diagnostics. The
 focused OTP protocol run passed 35; PublicApi 22, Fido2 471, YubiOtp 180 and
 resilience-fast 77 passed. Complexity checked six changed shipping methods
 at cyclomatic ≤10/cognitive ≤20; manually split verification methods are
-excluded, not tool-certified. No new full-suite count follows formatting.
-Parent owns subsequent verification and commits; no code, staging, release
-or new report is part of this docs checkpoint.
+excluded, not tool-certified. The latest full-suite and complexity counts
+are in the next slice below.
 
-The public expert `MacOSHidIOReportConnection` remains a separate synchronous
-compatibility boundary: its `GetReport` pumps the caller run loop with a six-
-second timeout/retry behavior, and callback teardown lacks native acknowledgment/drain.
+### Subsequent expert macOS input slice — uncommitted over `1539598e`
+
+The typed macOS FIDO owner now detaches a cancelled expected reader under lock,
+without cancelling native input or producing a terminal; late reports queue
+and a stale token cannot detach its replacement. The public expert
+`MacOSHidIOReportConnection` delegates to this persistent native input owner,
+removing its caller-run-loop pump and legacy callback-handle cleanup.
+`IHidConnection` remains public with unchanged shape: direct open, GetReport,
+SetReport and dispose stay synchronous. `GetReport` retains the six-second
+`PlatformApiException` timeout followed by same-connection retry. Expert
+output accepts any report length for native validation while typed FIDO still
+requires 64 bytes. Input accepts 64 bytes or 65 with zero report ID;
+malformed input becomes terminal, without a claim of exact legacy failure
+parity. Ordinary constructor failures retain `PlatformApiException`, while
+unproven release propagates `UnrecoveredConnectionException`. Native SET
+failure now surfaces status-bearing `PlatformApiException` instead of the
+typed path's `InvalidOperationException`; this exception difference is
+intentional.
+
+Five pending-read cancellation, eight expert IO compatibility and three
+facade tests passed (16); six old legacy tests were removed after meaningful
+cases moved. On selected serial 31683481 with pinned `.8`, native-AOT
+`--expert-io` observed a 6,011 ms timeout, then same-connection INIT/getInfo
+and dispose/reopen/getInfo passed without operator interaction. Independent
+cross-vendor review: PASS. This checks **ISC-31** for macOS HID input waits:
+typed and public expert input both use the persistent event owner. OTP feature
+GET/SET is not an input callback. ISC-33 still lacks discovery-manager
+callback-quiescence proof; ISC-53 is wider than this synchronous expert
+surface. The 13-operation registry does not include expert raw IO, so
+universal ISC-4 remains open.
+
+After this slice, full Core **1,434 passed/3 skipped**, PublicApi 22, Fido2 471
+and resilience-fast 77 passed. YubiOtp 180 and 35 focused OTP protocol tests
+passed at the prior checkpoint. `dotnet toolchain.cs complexity` passed 21
+changed shipping methods at cyclomatic ≤10/cognitive ≤20; manually split
+verification methods are excluded, not tool-certified. The Core inventory
+still has **198 documented/outstanding** sites after removing the legacy input
+path: 130 native imports, 21 waits, 16 scheduling, 21 pre-task-return gaps,
+six callback registrations, two delegate conversions, two unmanaged callback
+addresses. The older [`.8` current-profile dataset](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
+predates this facade; it does not measure its performance. No new physical
+touch/unplug or cross-platform native execution is inferred.
+
 `docs/architecture/raw-access-tiers.md` and `src/Core/README.md` describe
-its direct-connection caller limits. Keep that entry point unchanged for now;
-an async facade by itself cannot make pending-read cancellation or concurrent
-dispose safe. A future source-owner compatibility decision must precede any
-native pending-read cancellation/refit; ISC-31–33 and ISC-53 remain open for
-their wider contracts despite the built-in macOS async route's passing probes.
+current direct-connection limits. Next bounded decisions concern remaining
+macOS feature-report synchronous ownership and discovery-manager callback
+quiescence, not a claim that all macOS callbacks or sync waits are finished.
+The parent owns the later SDK commit; no new report, staging or code change
+is part of this documentation pass.
 
-The `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
+The pre-facade `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
 (schema 2; SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`)
 completed two warmups, ten normal fresh-child samples and one idle sample. Normal
 medians: caller return 5.00675 ms, operation complete 24.84525 ms, disposal
 2.90555 ms, allocation 60,004 bytes. Idle CPU was 1.945 ms with zero idle
 allocations over 1,001.7302 ms. Native-only duration and pending ordinary count
-are null with explicit instrumentation-unavailable reasons. This is not comparable
-to the historical `.3` pair; ISC-62 is pending. Actual release-artifact
+are null with explicit instrumentation-unavailable reasons. This does not
+measure the new expert facade and is not comparable to the historical `.3`
+pair; ISC-62 is pending. Actual release-artifact
 inspection now checks ISC-47 as scoped above, not route or epic acceptance.
 
 ### Historical `.7` checkpoint

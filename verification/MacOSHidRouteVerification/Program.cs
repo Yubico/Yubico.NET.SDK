@@ -28,10 +28,14 @@ if (args is ["--child", "--active-cancel" or "--otp-info" or "--touch" or "--rem
     && int.TryParse(scenarioSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedScenarioSerial)
     && selectedScenarioSerial > 0)
     return await AcceptanceScenarios.RunAsync(args[1], selectedScenarioSerial);
+if (args is ["--child", "--expert-io", "--serial", var expertSerial]
+    && int.TryParse(expertSerial, NumberStyles.None, CultureInfo.InvariantCulture, out int selectedExpertSerial)
+    && selectedExpertSerial > 0)
+    return await ExpertIoScenario.RunAsync(selectedExpertSerial);
 
-if (args is not ["--list"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal", "--serial", _])
+if (args is not ["--list"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal" or "--expert-io", "--serial", _])
 {
-    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal) --serial SERIAL");
+    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal | --expert-io) --serial SERIAL");
     return 2;
 }
 if (args is [_, "--serial", var serial]
@@ -56,7 +60,7 @@ Task output = CopyAsync(child.StandardOutput, Console.Out);
 Task error = CopyAsync(child.StandardError, Console.Error);
 try
 {
-    await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(args[0] == "--removal" ? 180 : args[0] == "--touch" ? 60 : 20));
+    await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(args[0] == "--removal" ? 180 : args[0] == "--touch" ? 60 : args[0] == "--expert-io" ? 30 : 20));
     await Task.WhenAll(output, error);
     Console.WriteLine($"child exit={child.ExitCode}");
     return child.ExitCode;

@@ -197,9 +197,9 @@
     },
     {
       "path": "Transports/Hid/MacOS/MacOSHidIOReportConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Transports/Hid/MacOS/MacOSHidIOReportConnection.cs:157 offloads Dispose; :166-175 registers report/removal delegates."],
+      "evidence": ["Transports/Hid/MacOS/MacOSHidIOReportConnection.cs:21-59 synchronously waits on the persistent FIDO input owner; native callback roots and checked release belong to that owner."],
       "status": ["documented", "outstanding"],
-      "entries": ["DisposeAsync#C40721A7DC64#worker#Legacy macOS input/output connection offloads synchronous disposal, including report and removal callback teardown, onto Task.Run.", "SetupConnection#B669B3C30E17#callback#Report delegate is converted to an unmanaged function pointer then registered with the IOKit device; delegate and buffer must outlive callbacks.", "SetupConnection#CD1939546E62#callback#Removal delegate is converted to an unmanaged function pointer then registered; unregister must precede delegate release."]
+      "entries": ["GetReport#7BEB08180D77#sync-boundary#Synchronous six-second input wait on the modern owner; timeout detaches this reader without stopping native input.", "MacOSHidIOReportConnection#1CF28ED6B80C#sync-boundary#Synchronous constructor waits for worker-owned native open and checked partial-open cleanup.", "SetReport#9F7E8DC9278F#sync-boundary#Synchronous output waits for worker-owned native send; accepted output drains before checked shutdown."]
     },
     {
       "path": "Transports/Hid/MacOS/MacOSOtpHidConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",

@@ -58,13 +58,11 @@ public interface IFidoHidConnection : IConnection
     /// <remarks>
     ///     This Tier 2 method bypasses <see cref="Sessions.ApplicationSession" />,
     ///     <c>ConnectionSessionGuard</c>, and <c>ExchangeGuard</c>. Pair receives with the
-    ///     caller's own serialized send state. Built-in macOS rejects cancellation before a read is accepted;
-    ///     after acceptance, canceling a pending read does not necessarily complete it or free its overlap slot:
-    ///     a report or terminal wake completes the read.
-    ///     Drain the pending task or dispose the connection before another operation. Cancellation between
-    ///     reads does not immediately abort an in-flight device protocol exchange. After interruption or
-    ///     interleaving, dispose and reopen the connection; await disposal for native drain. Cancellation alone
-    ///     does not make a raw connection reusable.
+    ///     caller's own serialized send state. Built-in macOS cancellation of a pending read completes
+    ///     that read and frees its overlap slot; input remains active and later reports are queued.
+    ///     Cancellation does not abort an in-flight device protocol exchange. After interruption or
+    ///     interleaving, dispose and reopen the connection; await disposal for native drain. Cancellation
+    ///     alone does not make a raw protocol exchange reusable.
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The received packet (64 bytes).</returns>

@@ -18,7 +18,118 @@ The [master plan](../../../2026-09-21-yubikit-async-boundaries-ISA.md) remains t
 acceptance record. The [earlier detailed program design](addenda/earlier-multi-key-program-design.md)
 is preserved as research/reference, not a prerequisite or an implementation instruction.
 
-## Subsequent bounded portable checkpoint — 2026-09-24 (published `.8`)
+## Current scope: macOS evidence closure
+
+Baseline at dispatch: naming checkpoint `90443131`, pinned native package
+`1.18.1-async.8`, 16/72 accepted criteria. Current reconciliation: **17/72
+checked, 55 pending**, with ISC-33 accepted at the bounded macOS listener
+teardown grade below. The user requested this milestone before another backend.
+The orchestrator owns scope, acceptance and reconciliation; one Engineer owns the
+bounded implementation. Follow the master's five closure conditions and A3–A4.
+
+| Package | Work and allowed files | Required exit evidence |
+|---|---|---|
+| E1: listener callback drain (ISC-33) | Extend existing Core listener tests and `verification/MacOSHidRouteVerification/`; modify the listener only for an evidenced defect or a narrowly justified observation seam. | Observe a real topology callback, hold delivery while another thread stops the listener, then prove callback exit precedes cleanup. Do not substitute a no-event start/stop run. Source/runtime limitations or unavailable operator participation remain explicit blockers. |
+| E2: synchronous waits and diagnostics (ISC-53/56) | Extend existing `BoundaryInventory/` classifications, profile links and logging probes; update `docs/architecture/raw-access-tiers.md`. | Enumerate scoped public synchronous paths and migration logging sites independently of the evidence list. Give each a concrete contract/test or an outstanding gap. Reuse existing tests; add negative controls only for missing assertions. Do not downgrade whole-epic criteria to Mac-only scope. |
+| E3: practical measurement acceptance (ISC-62) | Review existing paired/current datasets and `verification/MacOSHidBoundaryComparison/`; extend tooling only for material missing observations. | Record source/package/runtime/fixture provenance, collection outcome and metric definitions. Measure normal-use caller return, recovery/disposal, allocation, idle and counts where directly observable; leave native-only durations/counts unavailable where no trustworthy observation exists. No invented budgets or improvement claims from incomparable runs. |
+| E4: acceptance reconciliation | Update the existing master, `00-status.md` and this plan. | Distinguish fulfilled Mac-verifiable criteria, implemented/evidence-pending work, actual blockers and cross-platform aggregates. Keep stable criterion IDs and Windows/Linux deferrals. No new summary-report document. |
+
+Order: inspect and reuse evidence, freeze the exact new probes/measurement scenarios,
+implement with failing tests for real gaps, then review the settled shape. Default is
+one implementation pass and at most one readability pass; two review/fix cycles is the
+escalation limit. Preserve existing patterns and avoid shared-framework extraction for
+future routes. Inline comments explain only non-obvious ordering/ownership. All changed
+methods must meet cyclomatic complexity 10 and cognitive complexity 20.
+
+Verification uses `dotnet toolchain.cs -- test --project Core` with focused filters first,
+then affected regressions; listener changes additionally require
+`dotnet toolchain.cs -- resilience --fast`. Run `dotnet toolchain.cs complexity`,
+`dotnet toolchain.cs docs-qa` and diff checks. Native-AOT and selected-device probes
+must identify the actual package and key. Only one process owns hardware testing;
+no touch/unplug/replug is assumed available without operator coordination. Read-only
+queries are allowed; device configuration, credentials and security settings are outside scope.
+
+Stop after the agreed checks and bounded review pass. Missing required native/operator
+evidence leaves that acceptance item blocked, not passed. Finish independent packages
+and record the precise next action; do not fill the wait with speculative refactoring.
+
+### Reviewed implementation checkpoint — removal and late-drain evidence, ISC-33 accepted
+
+E1: The verification-only `IMacOSHidListenerNative` decorator forwards actual
+IOHIDManager calls, gates the first real matching callback, invokes the original
+production callback and records exit before returning to native. The `.8` Native
+AOT host saw entry ID 4294970786 on the final verification run (not identified as a particular YubiKey), and
+captured callback exit before real close, unschedule, manager release and Stop
+return. No production observation hooks remain. A subsequent selected-key
+physical removal on serial 31683481, HID entry 4305321102, passed the
+opened-manager probe (actual open result 0): real removal callback and matching
+`Removed` hint, then stop request 1 < callback exit 2 < close return 3 <
+unschedule 4 < manager release 5 < Stop return 6. No unschedule or release
+occurred while the callback was held. Manager close returned nonzero
+`0x10000003` (`MACH_SEND_INVALID_DEST`) after physical disconnection; this is
+**not** a zero-result per-device close. Apple's `IOHIDManager.c` source inspection
+explains that manager close unschedules/marks itself closed before returning a
+per-device close error. A real matching-callback late-drain probe (open result
+0) passed timeout retention, restart refusal and eventual cleanup after
+callback exit before restart. An operator `--listener-remove-without-open`
+attempt took at least ten minutes beyond the 180-second watchdog without a
+timely callback: **BLOCKED/inconclusive**, not evidence that open is required.
+The no-open verification command was removed; it is not the selected
+opened-manager proof.
+Vendor matching (`0x1050`) excludes unrelated keyboards but does not prove
+permissionless operation on another host with YubiKey OTP keyboard interfaces;
+manager open may itself trigger keyboard Input Monitoring despite the filter.
+Independent cross-vendor review: PASS WITH NOTES. These results support native
+manager teardown ordering on this host, not every close-error/permission case.
+Nonzero open/close results are per-device warnings; throws quarantine the
+generation. Apple's [IOHIDManager.c](https://github.com/apple-oss-distributions/IOKitUser/blob/main/hid.subproj/IOHIDManager.c)
+supports close unscheduling before per-device close, not all-host runtime proof.
+The orchestrator accepted ISC-33 for callback-context/device-storage teardown
+on this observed macOS manager path, not for permissionless operation on every
+host. Manager open can still trigger Input Monitoring for YubiKey OTP keyboard
+interfaces even with the vendor filter; permission and normal-user experience
+risk is an orchestrator-owned follow-up, not an ISC-33 teardown blocker. The
+listener starts despite a per-device open error. ISC-53/56/62 and universal
+ISC-4 remain open. Earlier matching-probe runs passed Core 1,460 with
+three skipped, BoundaryInventory 32, listener lifetime six and resilience-fast
+83; they are not claimed as post-removal-source verification. Later verification
+reported eleven focused listener tests, Core 1,465 passed/3 skipped,
+resilience-fast 88 passed, and complexity passed for nine changed shipping
+methods within cyclomatic 10/cognitive 20. The user asks for faster checks;
+no further physical unplug or Stop probe is required in this session. Do not
+repeat topology experiments.
+
+E4: Master checklist, progress, verification and status are reconciled to
+17/72. E1 is accepted at the stated macOS teardown grade; E2 maps public waits
+and migration logs but ISC-53/56 remain partial, and E3 collected a bounded
+profile but ISC-62 remains open. Universal ISC-4 and Windows/Linux native and
+hardware requirements are not promoted from this Mac evidence.
+
+E2: The public wait map in `docs/architecture/raw-access-tiers.md` and Core
+BoundaryInventory logging map now enumerate scoped call paths independently of
+tests. Existing lifecycle and responsiveness profiles remain linked; an additional
+real smart-card protocol logger probe checks structured APDU metadata against
+command/response sentinels. External exception text and other-platform drains
+are not cleared. ISC-53/56 retain their universal outstanding status.
+
+E3: Frozen runner plan before collection: two fresh-child warmups, ten normal
+read-only typed FIDO GetInfo/close/reopen samples, one one-second idle sample,
+10-second per-child watchdog; serial 31683481 only, no touch or removal. The
+[new current dataset](../../../artifacts/measurements/current-profile-20260924T112625843Z.json)
+records 2/10/1 completed on `.8` and macOS 15.7.7/.NET 10.0.12; normal medians
+are 4.82655 ms caller return, 25.5306 ms completion, 2.78275 ms disposal and
+60,880 process-allocated bytes. Idle measured 2.011 ms process CPU and zero
+allocations over 1,001.2176 ms. Per-sample reopen and thread counts are present;
+native-only duration and pending count are null with explicit reasons, firmware
+was not parsed by this runner, and no approved budgets exist. Earlier paired
+`.3` source and the earlier `.8` pre-facade profile are different cohorts, not
+before/after baselines for this run; its source/binary provenance is a snapshot,
+not independent final-source proof or a performance pass. ISC-62 remains open.
+
+## Earlier bounded portable checkpoint — 2026-09-24 (published `.8`)
+
+The route snapshots below predate E1 removal/late-drain acceptance above;
+their 16/72 tally and ISC-33-pending statements are historical evidence grades.
 
 The pinned `.8` (attested package SHA-256
 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`)
@@ -186,7 +297,7 @@ The 13-operation registry omits direct raw IO/feature routes; ISC-4 stays open.
 The feature slice is now committed. The subsequent listener-generation work
 below does not yet prove actual native callback quiescence.
 
-### Subsequent macOS listener-generation slice — uncommitted over `db378ffc`
+### Subsequent macOS listener-generation slice — committed at `69946394`
 
 `MacOSHidDeviceListener` now roots manager/run-loop/callback resources per
 generation. On the listener thread, `finally` unschedules only after `Run`
@@ -212,8 +323,8 @@ cyclomatic ≤10/cognitive ≤20; verification/test methods remain outside its
 certification. Current scanner: **198 outstanding** sites (130 imports, 24
 waits, 15 scheduling, 21 pre-task-return gaps, six callback registrations,
 zero delegate conversions, two callback addresses), not verified-safe sites.
-No new operator touch/unplug is claimed. Parent owns the later SDK commit;
-next bounded work can inspect remaining listener quiescence and inventory
+No new operator touch/unplug is claimed. The source is checkpointed at `69946394`;
+the next bounded work inspects remaining listener quiescence and inventory
 without claiming whole-macOS or epic acceptance.
 
 The pre-compatibility-facade `.8` [current profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
@@ -228,6 +339,7 @@ pair; ISC-62 is pending. Actual release-artifact
 inspection now checks ISC-47 as scoped above, not route or epic acceptance.
 
 ### Historical `.7` checkpoint
+
 
 This is not a replacement for the historical first-slice pseudocode below. The
 selected macOS normal-use FIDO path passed on one key, including `.3` touch/cancel,

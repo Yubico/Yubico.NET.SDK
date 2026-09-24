@@ -179,9 +179,28 @@ own migrated route through `HidConnectionSlot`.
 macOS IO report reads wake on disposal; native callback state and the physical owner are retained until
 acknowledged shutdown. Failed native release retains the owner instead of claiming successful disposal.
 The feature-report connection drains an admitted report before release; overlapping raw report calls are
-refused. Direct report opens do not acquire a grouped-key claim. The
-[async-boundaries master](../../2026-09-21-yubikit-async-boundaries-ISA.md) still leaves ISC-31 and ISC-53
-unchecked across required routes and retained public waits. This table is not acceptance evidence for either.
+refused. Direct report opens do not acquire a grouped-key claim. ISC-31 covers the identified macOS
+input waits only; [ISC-53](../../2026-09-21-yubikit-async-boundaries-ISA.md) still requires a
+zero-gap public sync-boundary registry and verified drains across required routes.
+
+The Core [source-site inventory](../../src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md)
+classifies waits and pre-task-return dispatch, but a listed site is not automatically a public boundary
+or a verified drain. The scoped public reachability map below is separate from that scanner:
+
+| Public entry / path | Contract and existing evidence | Remaining disposition |
+|---|---|---|
+| `FindHidInterfaces.Create().FindAllAsync(token)` → platform `GetList()` → `IHidInterface.ConnectToIOReports()` / `ConnectToFeatureReports()` | Scan uses `Task.Run`; returned interfaces expose synchronous constructors. macOS direct report facades have IO/feature compatibility tests and selected-key read-only probes. | Cancellation before dispatch prevents scan; cancellation after dispatch does not prove native scan drain. Windows/Linux direct report teardown and cancellation remain unverified. |
+| `IYubiKey.ConnectAsync<TConnection>()` → `HidConnectionSlot.OpenRawConnectionAsync()` | macOS built-in FIDO/OTP open on connection-owned workers; both direct and typed macOS paths have focused tests. Non-macOS fallback invokes `IHidInterface.ConnectTo*Reports()` *before* `Task.FromResult`. | Windows/Linux fallback can block at task invocation and remains outstanding; custom `IHidInterface` code is external. |
+| `ISmartCardConnection.BeginTransaction()` / `BeginTransactionAsync()` → scope `Dispose()` | Built-in PC/SC synchronous begin/end wait on one worker; controlled withheld-native begin proves built-in async entry returns pending. | Synchronous begin/end may wait indefinitely for native completion. The interface async default invokes custom synchronous begin before task return; external implementations have no SDK-enforced drain. |
+| `IConnection.Dispose()` → `DisposalGate`, `ExchangeGuard.CloseAndDrain()` or listener `Stop()` | Built-in PC/SC, macOS FIDO/OTP and direct report connections share their respective native-owner shutdown; controlled lifetime tests cover held operations. `YubiKeyManager.Shutdown()` blocks on its async shutdown; monitor/listener stop has a bounded wait with possible retained/abandoned work. | Caller must not dispose from its own admitted operation. Manager timeout is not native drain proof. Custom connections and other-platform listener teardown remain outstanding. |
+| `OtpHidProtocol.Configure()` via applet initialization | Synchronous protocol configuration can wait for a feature-report exchange when firmware state is not initialized; raw OTP session creation defers status initialization and exposes no `Configure` method. | This is an internal session initialization boundary, not a public `RawOtpHidSession.Configure` API. Native wait has no proven upper bound. |
+| Raw session `SendAndReceiveAsync`/`SelectAsync` → protocol interface; registered connection `SendAsync`/`ReceiveAsync`/`TransmitAndReceiveAsync` | Forwarding happens before the returned task; built-in macOS and PC/SC adapter lifecycle tests cover their selected paths. | External interfaces and legacy FIDO/OTP wrappers use synchronous `IHidConnection.GetReport`/`SetReport` before task return; task shape is not responsiveness proof. |
+
+This is a macOS-first disposition of identified escapes, not a complete all-platform or
+whole-assembly call-graph certification. The inventory also records worker parking,
+credential-console polling and native imports; those are not additional public synchronous
+report methods. ISC-53 stays outstanding until required platform and custom-boundary contracts
+are independently checked.
 
 ## Ownership And Sequencing
 

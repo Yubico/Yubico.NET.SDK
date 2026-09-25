@@ -40,7 +40,7 @@ internal static class Program
         }
         if (args is not ["--check"] && (args is not ["--measure", "before"] && args is not ["--measure", "after"]))
         {
-            Console.WriteLine("--self-test | --check | --compare before.json after.json (hardware-free) | --measure before|after (historical .3) | --profile --serial N (current native dependency; two warmups, ten normal cycles and one 1s idle cycle)");
+            Console.WriteLine("--self-test | --check | --compare before.json after.json (hardware-free) | --measure before|after (.8) | --profile --serial N (current native dependency; two warmups, ten normal cycles and one 1s idle cycle)");
             return 2;
         }
         if (!OperatingSystem.IsMacOS()) return 2;
@@ -54,7 +54,7 @@ internal static class Program
             throw new InvalidOperationException("Runner is not using the selected Core assembly");
         using var dependencies = JsonDocument.Parse(await File.ReadAllTextAsync(
             Path.Combine(AppContext.BaseDirectory, "MacOSHidBoundaryComparison.deps.json")));
-        const string expectedNativeVersion = "1.18.1-async.3";
+        const string expectedNativeVersion = "1.18.1-async.8";
         var native = dependencies.RootElement.GetProperty("libraries").EnumerateObject()
             .Single(e => e.Name == $"Yubico.NativeShims/{expectedNativeVersion}");
         var nativeFile = Path.Combine(AppContext.BaseDirectory, "libYubico.NativeShims.dylib");
@@ -72,7 +72,7 @@ internal static class Program
         if (Convert.ToHexString(SHA256.HashData(asset)) != nativeHash)
             throw new InvalidOperationException("Deployed native asset differs from pinned package");
         var packageHash = Hash(package);
-        const string expectedPackageHash = "B6DF35457DA06409F5BFD6643DD7DBC9DA8B0E7E8404BB5FA99FCDDE076F4A3C";
+        const string expectedPackageHash = "C85C56F7A41C6999B48B1A5FDCD82C56FBFB3E5EE6FF18CCC64A41144F760403";
         if (packageHash != expectedPackageHash)
             throw new InvalidOperationException("Unexpected native package hash");
         var diff = await GitAsync(root, "diff", "HEAD", "--binary", "--", "Directory.Packages.props", "src");
@@ -92,9 +92,8 @@ internal static class Program
         var runnerHashes = new { project = Hash(projectPath), buildProps = Hash(propsPath),
             program = Hash(programPath), selfTest = Hash(testsPath) };
         var selectedCommit = await GitAsync(root, "rev-parse", "HEAD");
-        if (!checkOnly && ((variant == "before" && !selectedCommit.StartsWith("65964966", StringComparison.Ordinal)) ||
-            (variant == "after" && !selectedCommit.StartsWith("89420aa6", StringComparison.Ordinal))))
-            throw new InvalidOperationException("Measurement checkout does not match the original before/after source commits");
+        if (!checkOnly && !AcceptsComparisonCommit(variant, selectedCommit))
+            throw new InvalidOperationException("Measurement checkout does not match the before/after source commits");
         if (checkOnly)
         {
             Console.WriteLine($"Comparison preflight: source {selectedCommit}, checkout native version {checkoutNativeVersion}, comparison package {expectedNativeVersion} {packageHash}, native {nativeHash}, Core {Hash(core)}, runner source {runnerHashes.program}; no hardware accessed");
@@ -307,6 +306,13 @@ internal static class Program
 
     private static string Hash(string path) => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
     private static string HashText(string text) => Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text)));
+
+    internal static bool AcceptsComparisonCommit(string variant, string commit) => variant switch
+    {
+        "before" => commit == "65964966cc21f431e16793264c899c30a5b957a3",
+        "after" => commit == "21498d241f74d64055b10e5b0fb36a47d68acc3b",
+        _ => false
+    };
 
     internal static void CheckPair(string beforePath, string afterPath)
     {

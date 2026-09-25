@@ -23,10 +23,15 @@ jobs:
           - os: macos-latest
             rid: osx-arm64
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      packages: read
     env:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_NOLOGO: 1
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      # Never pass private-feed access to code from fork pull requests.
+      NuGetPackageSourceCredentials_Yubico_GH: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && format('Username={0};Password={1}', github.actor, secrets.GITHUB_TOKEN) || '' }}
     steps:
       - name: Check out source
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1

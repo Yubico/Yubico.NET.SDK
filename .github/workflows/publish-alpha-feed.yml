@@ -27,6 +27,7 @@ concurrency:
 
 permissions:
   contents: read
+  packages: read
   id-token: write        # provenance attestation + Pages deploy
   attestations: write
   pages: write           # deploy to Pages
@@ -41,6 +42,7 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_NOLOGO: 1
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      NuGetPackageSourceCredentials_Yubico_GH: Username=${{ github.actor }};Password=${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out source
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1

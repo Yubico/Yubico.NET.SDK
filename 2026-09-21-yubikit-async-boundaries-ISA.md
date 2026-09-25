@@ -5,7 +5,7 @@ project: Yubico.YubiKit.NET and Yubico.NativeShims
 effort: E4
 effort_source: auto
 phase: execute
-progress: 18/72
+progress: 19/72
 mode: interactive
 started: 2026-09-21T16:01:47Z
 updated: 2026-09-25
@@ -13,7 +13,7 @@ updated: 2026-09-25
 
 # YubiKit async boundaries — PRD / ideal state artifact
 
-**Current acceptance (2026-09-25): 18/72 checked, 54 pending.** The checklist
+**Current acceptance (2026-09-25): 19/72 checked, 53 pending.** The checklist
 below is authoritative. ISC-19 has one accepted managed protected-continuation
 profile; ISC-33 covers observed macOS listener teardown, not every host.
 ISC-4/37/53/56/62 remain open. After replug the selected-key smart-card
@@ -26,12 +26,51 @@ is closed (D1–D5)** at shipping source `21498d241f74d64055b10e5b0fb36a47d68acc
 The finite diagnostics/synchronous increment (`8d13fd1e`, `8ebcd026`) and
 public pending-read completion fix (`21498d24`) are implemented. This is not
 production epic closure or a new criterion checkmark. The
-[current lane board](docs/plans/yubikit-async-boundaries/00-status.md#current-lane-board)
+[current lane board](docs/plans/yubikit-async-boundaries/00-status.md#current-lane-board-and-epic-slices)
 separates completed selected-key local proof, verified `.8` packaging,
 deferred Windows/Linux work and unstarted backend exploration. Global inventory,
 diagnostics, full public sync closure and ISC-62 instrumentation/budget work
 remain open. This documentation edit itself ran no device or software regression
 tests; recorded results below belong to the preceding implementation checkpoint.
+
+**Delivery checkpoint (separate from local acceptance):** Closure docs commit
+`3e928106` follows final shipping source `21498d24` and measurement driver
+`d23cca94`; local close-out was **18/72**; after reviewed portable consumer
+acceptance, current progress is **19/72, 53 pending**. Published
+`.8` clean packaged consumers and fresh private-feed restore are historical
+successes, not proof that remote branch head `3e928106` passes CI. Its Build
+[36130687541](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130687541),
+Native AOT [36130687588](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130687588)
+and Dependency Submission [36130685528](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130685528)
+checks failed. Build stopped at docs QA: seven Markdown links pointed into
+ignored/local measurement files absent on the runner. Native AOT restore failed
+with `NU1301` / 401 for private `Yubico.NativeShims`; Dependency Submission's
+project validation failed on the same 401. A separate Engineer owns the restore-
+authentication investigation; it is not established as a runtime regression.
+Repository-owned private-feed workflow authentication is now committed in
+`5680901f`; the portable cross-layer/consumer tests, borrowed-input XML,
+native compatibility consumer and timing verifier are committed in `5fd0712f`
+(local branch HEAD, not pushed). Neither commit changes the selected-key
+shipping runtime behavior at `21498d24`. The local-only measurement-link
+documentation repair remains uncommitted in this planning edit. The remote
+checks above still belong to `3e928106`, not this local HEAD.
+**Next phase approved and in progress: portable behavior, compatibility,
+measurement and claims, in that order after delivery repair.** Fresh-checkout
+documentation validation passes locally; repository-owned workflow credentials
+are committed locally, but none of the failed remote checks above is green at
+the new head; GitHub's automatic Dependency Submission workflow has separate,
+unresolved authentication. Do not promote cached local build success into hosted
+restore proof. Under the existing user authorization, Engineers can pursue the
+four bounded steps in the [program design](docs/plans/yubikit-async-boundaries/03-program-design.md#next-bounded-milestone-portable-acceptance-and-build-reproducibility)
+without another approval or operator action. This does **not** reopen local
+Mac/smart-card acceptance absent a demonstrated regression or waive deferred
+Windows/Linux, fresh-host permissions or original global acceptance.
+
+Measurement filenames below are **LOCAL-only provenance**, not repository links:
+the raw JSON files are ignored and not included in this repository; a fresh
+checkout cannot verify their contents against the recorded SHA-256 hashes without
+separate artifact transfer. The historical measurements and hash records are
+retained, not replaced by a clean-checkout raw-data reproducibility claim.
 
 **Current implementation and limits:** The pinned `.8` package and macOS
 typed/direct facades, portable smart-card async begin, and vendor-filtered
@@ -95,7 +134,7 @@ The remaining engineering gap is **complete** traceability. A Core-only inventor
 | FIDO HID | `FidoHidConnection.cs:43,56` | Async methods call synchronous report methods. |
 | FIDO initialization | `FidoHidProtocol.cs:50` | Configuration synchronously waits for initialization. |
 | OTP HID | `OtpHidConnection.cs:44,57` | Async methods call synchronous report methods. |
-| HID contract | `IHidConnection` | The lower-level contract is synchronous; ISC-50 must enforce the agreed surface after evolution. D15 permits breaking changes/internalization; D16 retains the distinct public raw connection operations. |
+| HID contract | `IHidConnection` | ISC-50 accepts retaining the public synchronous report interface with borrowed `SetReport` input through return, documented and enforced by a compiled external implementation exercised through actual internal FIDO/OTP raw adapters. This is not public-factory end-to-end access. D15's separate alpha discovery-interface rename remains intentionally breaking; D16 retains distinct public raw connection operations. |
 | Windows HID | `WindowsHidReportAccess.cs:155,183,222` | Null overlapped pointers and `FILE_FLAG.NORMAL` are used; OTP zero-desired-access behavior must remain distinct. |
 | macOS HID | `MacOSHidIOReportConnection.cs:100-113,216-219` | Input waits pump the caller run loop; removal callback is empty. |
 | Linux HID | `LinuxHidIOReportConnection.cs:41,63,96` | Opens with `O_RDWR`; read and write are synchronous. |
@@ -155,7 +194,7 @@ Deliver cross-platform device input/output whose supported asynchronous entry po
 
 ## Criteria
 
-All criteria began unchecked; ISC-5, ISC-19, ISC-31–33, ISC-38–39, ISC-41, ISC-43–49, ISC-51–52 and ISC-60 are now verified below (18/72; 54 pending). **Production milestone P is ISC-1 through ISC-64; exploration milestone X is ISC-65 through ISC-72.** P may ship without X, but must never be reported as all 72 criteria complete. Universal criteria are parameterized by the explicit operation/adapter registry; a missing row fails verification. Slices may contribute evidence to the same criterion, but no early slice claims universal acceptance.
+All criteria began unchecked; ISC-5, ISC-19, ISC-31–33, ISC-38–39, ISC-41, ISC-43–52 and ISC-60 are now verified below (19/72; 53 pending). **Production milestone P is ISC-1 through ISC-64; exploration milestone X is ISC-65 through ISC-72.** P may ship without X, but must never be reported as all 72 criteria complete. Universal criteria are parameterized by the explicit operation/adapter registry; a missing row fails verification. Slices may contribute evidence to the same criterion, but no early slice claims universal acceptance.
 
 **Iteration 1 is a narrower delivery step, not a redefinition of P or X.** Establish
 the single-key lifecycle first and map its required operation/platform rows in the
@@ -230,7 +269,7 @@ recovery, removal-generation and monitor-context guarantees remain mandatory.
 ### API, compatibility, and interaction — P
 
 - [x] ISC-49: Existing public async-surface convention tests pass for the shipping applet APIs.
-- [ ] ISC-50: A reviewed `IHidConnection` evolution decision is enforced by its consumer compatibility test.
+- [x] ISC-50: A reviewed `IHidConnection` evolution decision is enforced by its consumer compatibility test.
 - [x] ISC-51: Transaction acquisition has an async path passing the withheld-native-completion responsiveness probe.
 - [x] ISC-52: Production FIDO configuration does not synchronously wait for asynchronous channel initialization.
 - [ ] ISC-53: Every retained synchronous wait reachable from public API is an explicit boundary with a verified drain contract.
@@ -977,6 +1016,7 @@ Owner: orchestrator for acceptance; Native/Route Engineers for source and probes
 |---|---|---|
 | ISC-41 | Pinned `Directory.Packages.props:23` selects `1.18.1-async.8`. [Native workflow 35955737172](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35955737172) has head SHA `71a23cd0269c968c1d9420eddb2e2fec71e0cc29`, package/artifact source-bound attestation and SHA-256 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403` (also captured in `artifacts/measurements/current-profile-20260924T051049865Z.json:48-56`). | Published package provenance; `.7`'s pre-commit build and `.9`'s separate workflow are not this pin. |
 | ISC-48 | The same workflow's seven Native AOT packaged-consumer jobs succeeded (`linux-x64`, `linux-arm64`, `win-x86`, `win-x64`, `win-arm64`, `osx-x64`, `osx-arm64`), with packaging and private publish successful. Fresh private-feed restore passed in an empty cache after `nuget.config:8,11` source key was renamed `Yubico_GH` to match the existing credential name at the unchanged URL; no secrets were altered. Normal parent `dotnet toolchain.cs restore` passed 43 projects. | Clean packaged resolution for each required RID, **not** Windows HID driver or hardware/device-I/O coverage for ISC-58. Developers need their own private-feed credentials. |
+| ISC-50 | Retain public synchronous `IHidConnection` members. `IHidConnection.SetReport` XML specifies that the caller's array may be reused on return; a consumer retaining data must copy before return. Two PublicApi tests compile a custom implementation of the actual public interface, use reflection only to construct the existing internal FIDO and OTP adapters, and invoke typed SDK send/receive/dispose methods. They verify a zeroed SDK-owned send copy, unchanged caller input, received data and forwarded disposal; final PublicApi suite reported 24 passed. Independent review: PASS, no findings after the bounded refit; orchestrator accepted the retain decision. | Consumer compatibility through actual adapters, **not** a public factory/discovery end-to-end path or runtime enforcement on all third-party implementations. D15's intentional alpha `IHidDevice` → `IHidInterface` source break is separate. Native old/new managed-consumer matrix ISC-42 remains open; wholesale async interface evolution would require separate scope. |
 | ISC-51 | `src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/SmartCard/PcscConnectionLifetimeTests.cs:38-59` invokes the built-in connection's `BeginTransactionAsync` with native begin withheld; invocation returns a pending task before release, and cleanup releases begin and ends once. | Managed withheld-completion behavior for built-in acquisition; the interface's synchronous fallback for external implementations does not satisfy this probe. Not full PC/SC platform evidence. |
 | ISC-38 | Shipping Core source audit locates `SCardCancel` only in the monitoring listener path (`DesktopSmartCardDeviceListener.cs` through `ISCardApi`/interop), not in portable transmit cancellation. Controlled cancelled-transmit tests retain the borrowed native input until transmit returns. | Scoped source and fake-native borrow proof; this one-time audit is not a scanner that would prevent a future new cancel callsite. It does not claim that `SCardCancel` interrupts native `SCardTransmit`. |
 | ISC-39 | `PcscContextIsolationTests.ListenerDisposal_CancelsOnlyMonitorContext_WhileConnectionTransmits` runs the production monitoring listener and smart-card connection against controlled native seams with **actual distinct context handle addresses**. While transmit is held, listener disposal cancels/releases only monitor context A; context B remains borrowed and is disconnected/released only after its own transmit completes. | Production route with fake native contexts, not Windows or Linux operating-system/native driver proof. |
@@ -1001,7 +1041,7 @@ above, and no current checkmark is pending for this teardown route.
 
 ISC-53: [retained synchronous paths](docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths) maps public entry points to owners, tests or gaps. A separate 16-entry `PublicSyncBoundaryRegistry` pins public type/method, internal owner/method and test link or explicit gap: eight macOS direct input/feature open/get/set/dispose, four portable smart-card begin/end/dispose and external default async begin, two listener start/stop, manager shutdown and HID scan dispatch. Its five negative cases reject missing/duplicate/wrong symbol or owner and arbitrary bare/stale evidence. The HID scan row now links three controlled `FindHidInterfaces` tests through a narrow internal enumeration delegate: pre-cancel submits nothing, a held enumeration returns a pending task without blocking the caller, late cancellation waits for resource completion, and enumeration failure preserves the original exception without replay. The held-scan test cleanup now releases the gate and awaits the actual scan before disposing its gates; the targeted three tests passed after that fix. This is **not** actual native platform enumeration. Manager Shutdown remains an explicit gap: bounded monitor stop can abandon native work, not prove global native drain. Links are not executed tests or universal drain proof. Controlled synchronous PC/SC tests use a `LongRunning` caller, a caller-returned event, native holds, disposal snapshots and a finite 200 ms observation before release; they do not prove every scheduling race. The external `ISmartCardConnection.BeginTransactionAsync` default invokes synchronous begin before returning its task and **may block**; the built-in async path's ISC-51 proof does not generalize to custom implementations. Windows/Linux and other public escapes remain open. ISC-56: current bounded real-logger sentinel coverage spans FIDO callback/failed cancel, OTP failed reset, PC/SC connection and APDU protocol. FIDO/OTP failure logs use only `ExceptionType` (`FullName`) metadata, excluding externally supplied exception messages; caller-visible original exceptions are preserved. Twelve diagnostics tests include positive controls for formatted text, structured state and exception text; the first real sentinel exposed an opaque exception payload and was fixed. PC/SC commands log explicit structured headers and length, not a raw command object; SELECT retains its public application identifier in hex, not response/token/raw payload. This is three protocols' logging, **not** all Core, applets or external mappings. Both universal criteria remain unchecked.
 
-ISC-62: the frozen 2 warmup/10 normal/1 idle fresh-child `.8` [current dataset](artifacts/measurements/current-profile-20260924T112625843Z.json), SHA-256 `95af4be6d2d5b553db709b228d0ce8a4761a7bfe66e1f0368e5572730676ccee`, completed 2/10/1 on serial 31683481, macOS 15.7.7 arm64, .NET 10.0.12, package SHA-256 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`. The dataset captures source SHA plus shipping diff/core binary hash; source-to-binary proof is not independent. It measures typed FIDO read-only GetInfo, close/reopen and 1-second idle: normal medians caller return 4.82655 ms, operation complete 25.5306 ms, disposal 2.78275 ms, process allocations 60,880 bytes; idle CPU 2.011 ms, zero allocations/zero thread delta over 1,001.2176 ms. Sample reopen/close CPU/allocations/thread counts are retained. Firmware is not read by this runner (historical selected-key firmware 5.7.4), loaded native library path not observed; native-only duration and owner pending count are explicitly null, not derived from caller time. This is not comparable to the `.3` historical pair or earlier pre-facade `.8` cohort; no approved numerical budget or performance improvement is claimed. ISC-62 stays open.
+ISC-62: the frozen 2 warmup/10 normal/1 idle fresh-child `.8` LOCAL-only current dataset `artifacts/measurements/current-profile-20260924T112625843Z.json`, SHA-256 `95af4be6d2d5b553db709b228d0ce8a4761a7bfe66e1f0368e5572730676ccee`, completed 2/10/1 on serial 31683481, macOS 15.7.7 arm64, .NET 10.0.12, package SHA-256 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`. The dataset captures source SHA plus shipping diff/core binary hash; source-to-binary proof is not independent. It measures typed FIDO read-only GetInfo, close/reopen and 1-second idle: normal medians caller return 4.82655 ms, operation complete 25.5306 ms, disposal 2.78275 ms, process allocations 60,880 bytes; idle CPU 2.011 ms, zero allocations/zero thread delta over 1,001.2176 ms. Sample reopen/close CPU/allocations/thread counts are retained. Firmware is not read by this runner (historical selected-key firmware 5.7.4), loaded native library path not observed; native-only duration and owner pending count are explicitly null, not derived from caller time. This is not comparable to the `.3` historical pair or earlier pre-facade `.8` cohort; no approved numerical budget or performance improvement is claimed. ISC-62 stays open.
 
 **Current source classification and test-link coverage (implementation checkpoints `8d13fd1e` and `8ebcd026`):** `BoundaryInventory` classifies **205 outstanding Core sites**: 134 native imports, 3 native exports, 24 blocking waits, 15 scheduling sites, 21 pre-task-return dispatch gaps, 6 callback registrations, 0 delegate conversions and 2 unmanaged callback addresses. Classified is not verified. Its freeform source evidence now points to the shifted HID scan Task.Run and manager Shutdown lines; the discovered site IDs/counts are unchanged. The independent adapter registry requires **27 operation rows and 49 named Fact/Theory profile links, not 49 distinct tests**: typed macOS FIDO 4, typed macOS OTP 4, portable PC/SC 5, synchronous macOS direct input 4, direct feature 4, listener 2, and four synchronous portable PC/SC rows (begin/end/dispose/external default async begin). The separate 16-entry public-sync map above tracks reachability rather than multiplying adapter counts; manager Shutdown is an explicit bounded-monitor gap, while the scan row links three controlled tests, not native-platform execution. Links resolve owners, symbols, roles and runnable named methods; they neither run the tests recursively nor establish universal ISC-4. Windows/Linux, external implementations and further public reachability remain open. The adapter registry suite passed 17 and public-sync registry suite passed five at the recorded source; the PC/SC lifetime suite passed 30. **Historical pre-expansion checkpoints:** 23 rows/45 links preceded the four PC/SC sync rows; before direct/listener rows, 13 rows/26 profiles and 198 outstanding sites were reported (130 native imports, 24 waits, 15 scheduling, 21 dispatch gaps, 6 callback registrations, 0 delegate conversions, 2 addresses). An earlier feature slice recorded 200 sites. Earlier targeted `BoundaryInventory` runs passed 28 and then 32 tests at their respective source checkpoints; neither is a current result.
 
@@ -1013,9 +1053,81 @@ ISC-62: the frozen 2 warmup/10 normal/1 idle fresh-child `.8` [current dataset](
 
 **Local close-out evidence (2026-09-25; D1–D5 only):** On macOS 15.7.7 arm64 / .NET 10.0.12, selected serial 31683481, firmware 5.7.4, published NativeShims `1.18.1-async.8` (package SHA-256 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`), the Native AOT host ran **all eight modes** at the final `21498d24` shipping-source checkpoint: `--probe` five FIDO normal/pending-dispose/pre-dispatch scenarios with public task completion checked; `--active-cancel` actual device-waiting automatic cancellation without operator action; `--otp-info` three queries; `--expert-io` six-second timeout followed by same-connection GetInfo and reopen; `--expert-feature` three read-only device queries; `--smartcard` three async open/begin/read/end/dispose/reopen cycles; `--listener-drain` actual matching callback; `--listener-late-drain` actual matching callback timeout/retention followed by restart. Probe runtime source bytes were unchanged on commit; this does not assert a fresh physical removal or permissionless host. Full final-source regressions: Core **1,515 passed/3 skipped**, PublicApi 22, Fido2 471, YubiOtp 180, Management 86, Piv 209, resilience-fast 88. Three changed shipping methods met cyclomatic 10/cognitive 20. Bounded independent Engineer close-out review found D1–D4 evidenced and only stale D5 documentation notes; no cross-vendor final review is claimed. D5 was reconciled in the existing documents and validated by docs QA; local milestone closed, **18/72** unchanged.
 
-**Final-source local D2 (not ISC-62 acceptance):** Baseline `65964966cc21f431e16793264c899c30a5b957a3` [before dataset](/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-baseline-65964966-async3/artifacts/measurements/comparison-v2-before-20260925T111722670Z.json), SHA-256 `75150b30488091623487b55b8c7d961c1a100fb9a211dd2b6388c230b15ac440`, Core binary SHA-256 `928a0b6fcc75e6940d385621065aebed716957ef7d5988d27c5e251e6e2550c6`; final `21498d241f74d64055b10e5b0fb36a47d68acc3b` [after dataset](artifacts/measurements/comparison-v2-after-20260925T111741620Z.json), SHA-256 `948146da4cb5d12453698a7fd9497939609d4c6402ba5c966cd868a43bbd5488`, Core binary SHA-256 `bb88e2dea542c97a94c597c893f62f56862a8ab7dc43567aa3fc8c3f7b46e43c`. Both use identical runner sources, same `.8` package/deployed native SHA-256 `65499e77151d483d8e04bd793c2d520b4f344478ffcacff91bff8e771ae9d8af`, host/runtime/key, two warmups and ten completed lifecycle samples. Medians/p95 (ms, before → after): invocation 23.49/26.72 → 4.69/6.11; task terminal 23.79/27.81 → 26.48/28.71; lifecycle 70.74/81.75 → 74.31/78.23. **Median lifecycle increased about 5%; not all metrics improved.** Baseline no-input failed with PlatformApiException at invocation; final no-input returned pending and was censored after ten seconds, not proof of native cleanup. Separately, final selected-key pending-dispose hardware probe passed the public task-completion assertion. [Final current profile](artifacts/measurements/current-profile-20260925T111800158Z.json), SHA-256 `ddabbd997198dc1641474a78afc1bcab78a098036ee5141f0872e51500693b45`: two warmups, ten normal, one idle completed; median caller return 4.95045 ms, operation 26.4551 ms, disposal 3.4911 ms, process allocation 62,252 bytes; idle 1,002.2526 ms, CPU 1.963 ms, zero allocations and zero thread delta. Descriptive samples only: no preapproved budget or statistical population claim. Native-only duration and pending worker counts unavailable; ISC-62 remains open.
+**Committed portable acceptance evidence (only ISC-50 accepted):** One
+`CrossLayerAcceptanceTests` managed test drives the actual Core FIDO protocol
+through the macOS input connection and a controlled native bridge fake. Its
+58-byte request requires two frames; after device-waiting keepalives it sends
+one cancel, refuses a second logical exchange with the exchange-guard error
+(distinct from native overlap), holds that guard while the 58-byte response
+continuation is withheld, then drains before same-channel reuse. The prompt
+requests cancellation *after* receiving `DeviceWaiting`: one request and zero
+Core resolutions. The backend owns resolution; three existing backend mapping
+cases substitute the protocol and do not prove full-layer presence outcome
+(ISC-55 remains open). Two PublicApi tests compile a custom public
+`IHidConnection`, use reflection **only** to construct the internal FIDO/OTP
+raw adapters, then exercise their typed SDK interfaces: send copy is zeroed,
+caller input unchanged, receive and disposal forwarded. They do not exercise
+a public factory or end-to-end discovery. The `IHidConnection.SetReport` XML
+contract now specifies caller ownership until return and requires an
+implementation retaining the report afterward to copy it; this does not
+validate third-party overrides at runtime. The earlier alpha
+`IHidDevice` → `IHidInterface` source break was intentional under D15, not an
+alias on this report-connection interface. Independent review passed with no
+findings after a bounded test refit. The orchestrator accepts ISC-50 for the
+retained public synchronous interface and borrowed-through-return contract;
+neither public-factory integration nor wholesale async interface evolution is
+part of this decision. ISC-16/17 remain open at their global platform scope.
 
-The **pre-compatibility-facade** `.8` current profile schema 2 completed two warmups, ten normal fresh-child samples and one idle sample on macOS 15.7.7 arm64 / .NET 10.0.12; [dataset](artifacts/measurements/current-profile-20260924T051049865Z.json) SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`. Normal medians: caller return 5.00675 ms, operation completion 24.84525 ms, disposal 2.90555 ms, allocated 60,004 bytes; idle CPU 1.945 ms and idle allocations zero over 1,001.7302 ms. Native-only duration and pending ordinary count are null with instrumentation-unavailable reasons; this dataset does not measure either report compatibility facade, the historical `.3` pair is not comparable, and ISC-62 remains unchecked. OTP partial-send/read faults attempt abort once after attempted write, without replay of the original command; successful abort permits reuse and failed abort faults the protocol preserving the original failure. 35 protocol tests and one scripted Mac OTP test passed at the earlier checkpoint; physical mid-frame failure remains untested.
+The native consumer verifier checks the canonical **36-export package set**
+in 1.18.0 and `.8` with native big-number allocate/free smoke. The earlier
+Core revision imported only **28** of those exports; 36 is **not** its managed
+import count. The five new input-owner exports exist only in `.8`; old 1.18.0
+is **unsupported** for the current input-owner path. A separately compiled
+runtime consumer used the **locally built** baseline `65964966` Core binary
+(SHA-256 `928a0b6fcc75e6940d385621065aebed716957ef7d5988d27c5e251e6e2550c6`)
+in isolated processes against both 1.18.0 and `.8`; the same P-256 and
+AES-128 CMAC known-answer vectors passed for both. Current Core plus `.8`
+passed those vectors too. Each pairing recorded 17 managed native-resolver
+calls (8 EC, 4 BN, 5 CMAC); native binaries were hash-checked against their
+known digests, and a mismatched hash was rejected **before resolver load**.
+The consumer invokes internal Core primitives through typed delegates, not
+a public application factory. Independent review: PASS WITH NOTES. The
+baseline binary is a local build, **not** an independently attested published
+old managed artifact; only crypto success paths ran. Eleven SCard imports,
+five input-owner callback signatures/lifetimes, errors, Windows/Linux and
+public journeys remain untested by this consumer; ISC-42 stays open. The
+verifier README records the matrix and limits. Production runtime
+source remains at `21498d24`; local D1–D5 stay closed. The registry is still
+27 operations/49 profile links, 205 classified outstanding Core sites and 16
+public-sync entries. Full Core **1,516 passed/3 skipped**, PublicApi **24
+passed**, Fido2 **471 passed** and YubiOtp **180 passed** are reported for this
+local precommit checkpoint of the same tested functional sources. The latest guard/prompt assertion refit changed only
+the test; its targeted cross-layer test passed **1** afterward. Resilience-fast
+**88 passed** on the final rerun (the earlier aggregate-command timeout was not
+a test-runtime failure). Documentation QA validated 72 active files and 10
+package readmes; architecture checks passed 6 maps/7 images and local workflow
+lint passed. These are reported checkpoint results, not tests run by this
+documentation edit. Checklist **19/72**, 53 pending.
+
+An added `--active-cancel` read-only hardware observation on selected serial
+31683481 with published `.8` recorded resolved=1, same-session GetInfo=1 and
+reopen GetInfo=1; cancel-to-resolution 91.274 ms, cancel-to-terminal-catch
+91.399 ms, cancel-to-reuse 111.377 ms (resolution-to-catch 0.126 ms). Timing
+helper refactoring afterward has three self-test cases using explicit monotonic
+ticks, but the physical sample was **not rerun** after that refactor. This
+single public path is not native-only duration, a distribution, a fixed budget
+or a cross-package comparison; ISC-62 still needs native counts and all agreed
+scenarios. Changed-method complexity 10/20 has manual review pending (observed
+maximum cyclomatic complexity 9); no shipping-tool or test/harness coverage
+gate is claimed (zero). Active documentation corrected in the concurrent docs
+lane distinguishes raw tiers and Core/backend presence ownership without
+claiming native interrupt. Demo/v2-slide was read-only, not merged; ownership
+and still-active deck claims have not been settled against a completed boundary
+report. ISC-63 remains open. No additional criterion was checked.
+
+**Final-source local D2 (not ISC-62 acceptance):** Baseline `65964966cc21f431e16793264c899c30a5b957a3` LOCAL-only before dataset `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-baseline-65964966-async3/artifacts/measurements/comparison-v2-before-20260925T111722670Z.json`, SHA-256 `75150b30488091623487b55b8c7d961c1a100fb9a211dd2b6388c230b15ac440`, Core binary SHA-256 `928a0b6fcc75e6940d385621065aebed716957ef7d5988d27c5e251e6e2550c6`; final `21498d241f74d64055b10e5b0fb36a47d68acc3b` LOCAL-only after dataset `artifacts/measurements/comparison-v2-after-20260925T111741620Z.json`, SHA-256 `948146da4cb5d12453698a7fd9497939609d4c6402ba5c966cd868a43bbd5488`, Core binary SHA-256 `bb88e2dea542c97a94c597c893f62f56862a8ab7dc43567aa3fc8c3f7b46e43c`. Both use identical runner sources, same `.8` package/deployed native SHA-256 `65499e77151d483d8e04bd793c2d520b4f344478ffcacff91bff8e771ae9d8af`, host/runtime/key, two warmups and ten completed lifecycle samples. Medians/p95 (ms, before → after): invocation 23.49/26.72 → 4.69/6.11; task terminal 23.79/27.81 → 26.48/28.71; lifecycle 70.74/81.75 → 74.31/78.23. **Median lifecycle increased about 5%; not all metrics improved.** Baseline no-input failed with PlatformApiException at invocation; final no-input returned pending and was censored after ten seconds, not proof of native cleanup. Separately, final selected-key pending-dispose hardware probe passed the public task-completion assertion. LOCAL-only final current profile `artifacts/measurements/current-profile-20260925T111800158Z.json`, SHA-256 `ddabbd997198dc1641474a78afc1bcab78a098036ee5141f0872e51500693b45`: two warmups, ten normal, one idle completed; median caller return 4.95045 ms, operation 26.4551 ms, disposal 3.4911 ms, process allocation 62,252 bytes; idle 1,002.2526 ms, CPU 1.963 ms, zero allocations and zero thread delta. Descriptive samples only: no preapproved budget or statistical population claim. Native-only duration and pending worker counts unavailable; ISC-62 remains open.
+
+The **pre-compatibility-facade** `.8` current profile schema 2 completed two warmups, ten normal fresh-child samples and one idle sample on macOS 15.7.7 arm64 / .NET 10.0.12; LOCAL-only dataset `artifacts/measurements/current-profile-20260924T051049865Z.json` SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`. Normal medians: caller return 5.00675 ms, operation completion 24.84525 ms, disposal 2.90555 ms, allocated 60,004 bytes; idle CPU 1.945 ms and idle allocations zero over 1,001.7302 ms. Native-only duration and pending ordinary count are null with instrumentation-unavailable reasons; this dataset does not measure either report compatibility facade, the historical `.3` pair is not comparable, and ISC-62 remains unchecked. OTP partial-send/read faults attempt abort once after attempted write, without replay of the original command; successful abort permits reuse and failed abort faults the protocol preserving the original failure. 35 protocol tests and one scripted Mac OTP test passed at the earlier checkpoint; physical mid-frame failure remains untested.
 
 **Historical post-listener checkpoint, not the latest run:** Core 1,457 passed/3 skipped; PublicApi 22 and resilience-fast 83 passed. Targeted feature and IO compatibility runs passed 11 and nine; complexity passed 33 then-changed shipping methods. The later Core 1,492/3 skipped and 18-method complexity checkpoint were themselves superseded by the newer scoped software results above. The `.6` input-owner unplug and `.8` listener-removal probes are separate version-specific routes. Windows/Linux native and hardware checks remain deferred.
 
@@ -1484,9 +1596,9 @@ integration filter passed **one** test on the same fixture: three connections, e
 with two transactions and device-info reads. This result is separate from the earlier
 smart-card test at 1.16.1; it does not prove Windows/Linux smart-card behavior.
 
-Benchmark-tooling artifacts
-[`lifecycle`](artifacts/measurements/async-boundary-20260923T153527498Z-911932a49f5d4a47a85b420e233e0410.json)
-and [`no-input-return`](artifacts/measurements/async-boundary-20260923T153539866Z-85978c78e9af4e80bf6b11e101a4d184.json)
+LOCAL-only benchmark-tooling artifacts
+`artifacts/measurements/async-boundary-20260923T153527498Z-911932a49f5d4a47a85b420e233e0410.json` (lifecycle)
+and `artifacts/measurements/async-boundary-20260923T153539866Z-85978c78e9af4e80bf6b11e101a4d184.json` (no-input-return; no recorded dataset SHA-256)
 record three completed lifecycle samples and one **censored** no-input sample (watchdog
 invocation exit 1; child exit code unrecorded; `phase=invocation_returned`, invocation
 return 79.9447 ms). The no-input

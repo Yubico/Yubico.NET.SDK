@@ -2,15 +2,111 @@
 
 ## Current checkpoint — 2026-09-25
 
-### Current lane board
+### Current lane board and epic slices
 
-| Lane | Current state / next boundary |
+| Slice / lane | Current state / next boundary |
 |---|---|
-| macOS typed/direct HID and listener | **Local milestone closed** at shipping `21498d24`: all eight Native AOT selected-key route modes passed, including automatic active cancellation, public pending-read completion, direct IO/feature and actual matching listener callback/drain. No fresh removal or permissionless-host claim. |
-| Smart-card lifetime and recovery | **Local milestone closed**: after replug, final-source selected-key PC/SC async open/begin/read/end/dispose/reopen passed three cycles. Historical pre-open sharing contention is resolved for this fixture. |
-| Portable diagnostics, discovery and synchronous wait maps | Last finite increment completed in `8d13fd1e`/`8ebcd026`, with bounded tests and explicit gaps; full inventory, diagnostics and public-wait closure remain open. |
-| Native package | `.8` published and clean packaged Native AOT consumers verified; this is not Windows/Linux driver or hardware proof. |
-| Windows/Linux and backend exploration | Windows/Linux native/hardware lanes deferred; WinRT SmartCard and CryptoTokenKit exploration not started (after production milestone). |
+| S0 baseline / S0b shared foundation | Baseline and bounded foundation evidence exists; source classification and universal contracts are not closed. |
+| S1 Windows FIDO | Windows native/hardware proof **user-deferred**; not accepted. |
+| S2 macOS HID | **Local Mac milestone closed** at shipping `21498d24`: eight selected-key `.8` Native AOT route modes, including public pending-read completion and matching listener drain. Fresh-host Input Monitoring/normal-user permissions **user-deferred**; no permissionless-host claim or global S2 closure. |
+| S3 Linux HID | Linux native/hardware proof **user-deferred**; not accepted. |
+| S4 portable PC/SC lifecycle/discovery | **Local smart-card milestone closed**: after replug, selected-key async open/begin/read/end/dispose/reopen passed three cycles. Discovery/global PC/SC matrix still open. |
+| S5 remaining boundaries | Portable diagnostics, discovery and public synchronous waits have bounded evidence (`8d13fd1e`/`8ebcd026`); global inventory, diagnostics and public-contract closure remain open. S5 still depends on deferred platform feedback. |
+| S6 delivery and cross-platform evidence | `.8` published; clean packaged Native AOT consumers and fresh private-feed restore verified historically. **Separate delivery blocker at remote `3e928106`:** Build [36130687541](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130687541) stopped at seven local-only measurement links; the documentation fix in this checkpoint passes locally in a fresh checkout. Native AOT [36130687588](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130687588) failed private-package restore with `NU1301`/401; repository-owned workflow credential/permission repair is committed locally at `5680901f`, not hosted-verified or pushed. GitHub-managed Dependency Submission [36130685528](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130685528) failed the same restore and does not inherit this patch. Its authentication remains unresolved. No local runtime milestone is reopened by these delivery failures. |
+| X exploration (after production milestone) | WinRT SmartCard/CryptoTokenKit exploration unstarted; no production acceptance claim. |
+
+**Approved next phase, in progress:** repair delivery first, then four ordered
+bounded steps: (1) cross-layer behavior, (2) consumer and native compatibility,
+(3) comparable measurement, (4) active claims. Engineers own probes; no new
+operator action or approval is requested. Fresh-checkout docs QA now passes
+locally; Build, Native AOT and automatic Dependency Submission remain failed
+at the old remote head, not verified green for the local implementation checkpoints. Follow the [finish
+rules](03-program-design.md#next-bounded-milestone-portable-acceptance-and-build-reproducibility).
+Reconcile the existing **205 outstanding classified Core sites**, **27 operation
+rows/49 profile links** and **16 public-sync entries** into one gap-classified
+map, without calling classification universal proof. ISC-1–4/6–8, ISC-53–56
+and ISC-61–64 retain their full scope. Windows/Linux native, fresh-host
+permissions, external implementations and unavailable global metrics remain
+blocked/deferred. Keep local D1–D5 closed absent a demonstrated regression;
+remote pushes and repository settings changes require separate authorization.
+
+Committed workflow repair `5680901f` supplies `NuGetPackageSourceCredentials_Yubico_GH` using the
+workflow token and package-read permission, excluding fork pull requests. Workflow
+linting and the local Core build passed. Hosted package access is not proven by that
+cached local build. GitHub's automatic dependency submission is a separate dynamic
+workflow, so changing repository workflow environment variables does not fix it;
+a supported credential mechanism or separately configured submission workflow and
+managed-workflow setting change must be settled before calling all checks green.
+
+**Portable checkpoint committed at `5fd0712f`; active-document contract corrections
+are committed at `62388695`. The orchestrator accepted only ISC-50 after
+independent review PASS with no findings (not global closure):** One managed `CrossLayerAcceptanceTests` case uses actual
+Core FIDO protocol and macOS input connection with a controlled native bridge
+fake. The 58-byte request takes two frames before one cancel; the exchange
+guard (not a native-overlap error) refuses a second logical exchange while a
+58-byte response continuation is withheld, then permits same-channel reuse
+after draining. The prompt requests cancellation after `DeviceWaiting`: one
+request, zero Core resolutions. The backend owns resolution; three existing
+backend tests substitute the protocol, so full-layer presence outcome remains
+unproved (ISC-55 open). Two PublicApi tests compile an external
+`IHidConnection` and construct real internal FIDO/OTP raw adapters by
+reflection only at construction; typed-interface sends verify zeroed SDK copy
+and unchanged caller input, plus receive and disposal. No public-factory or
+discovery end-to-end result follows. `SetReport` XML now says borrowed caller
+data is valid through return and third-party implementations retaining it
+must copy; no runtime test of every override. The alpha discovery-interface
+rename under D15 was an intentional source break, not a compatibility alias
+for `IHidConnection`. The orchestrator accepted ISC-50 for the reviewed retain
+decision and these consumer tests, not for public-factory end-to-end access or
+wholesale async interface evolution.
+
+The native consumer verifier requires the canonical 36-export **package** set
+in both 1.18.0 and `.8`, plus native big-number allocate/free smoke. Pre-owner
+Core imported 28 of these, **not 36**. Current input-owner's five exports are
+present only in `.8`; old 1.18.0 is **unsupported** for that consumer. There
+is now a separate, locally compiled runtime consumer of the baseline
+`65964966` Core binary (SHA-256
+`928a0b6fcc75e6940d385621065aebed716957ef7d5988d27c5e251e6e2550c6`):
+isolated processes against 1.18.0 and `.8` both passed P-256 and AES-128
+CMAC known-answer vectors. Current Core plus `.8` passed too; each pairing
+recorded 17 Core native resolver calls (8 EC, 4 BN, 5 CMAC), with known
+native hashes checked. A wrong hash fails before resolver load. Independent
+review: PASS WITH NOTES. This baseline is a **local build**, not an attested
+published managed artifact. It exercises internal crypto success paths, not
+the 11 SCard imports, five new input callback signatures/lifetimes, failure
+paths, Windows/Linux or a public consumer journey; ISC-42 remains open. The
+verifier README states the matrix limits. Registry 27 operations/49 links, 205 classified outstanding Core
+sites and 16 public-sync entries are unchanged. Reported precommit
+results: Core **1,516 passed/3 skipped**, PublicApi **24 passed**, Fido2
+**471 passed**, YubiOtp **180 passed**; the final resilience-fast rerun passed
+**88** (an earlier aggregate-command timeout was not a test failure). The
+targeted cross-layer case passed **1** after the guard/prompt test-only refit.
+Production runtime
+behavior remains at `21498d24`; `5fd0712f` adds `SetReport` XML without changing
+its members or runtime implementation. The bounded refinement and final independent review
+passed; changed verification methods were manually assessed against the 10/20
+limits (maximum reported cyclomatic complexity nine). The shipping-only command
+does not cover these test/harness methods. **19/72 checked, 53 pending**;
+ISC-16/17, ISC-42, ISC-55, ISC-62 and ISC-63 remain open at original scope.
+
+The `--active-cancel` read-only hardware observation on selected serial
+31683481 and `.8` recorded resolved=1, same-session GetInfo=1, reopen
+GetInfo=1; cancel-to-resolution 91.274 ms, cancel-to-terminal-catch 91.399 ms,
+cancel-to-reuse 111.377 ms, resolution-to-catch 0.126 ms. The subsequent
+timing-helper refactor has three explicit-monotonic-tick self-test cases but
+no repeated physical sample. This single public route is not native-only
+duration, a fixed budget, a cross-package comparison or a full scenario
+matrix; ISC-62 and ISC-55 remain open. Concurrent active-doc corrections are
+not ISC-63 closure: demo/v2-slide was inspected read-only, not integrated;
+still-active deck claims and ownership need resolution against the completed
+boundary/evidence report, not a false merged-demo claim.
+
+**Measurement provenance is LOCAL-only:** `artifacts/measurements/` is ignored;
+the raw JSON collection files (including those in the separate baseline worktree)
+are not in the repository. Code-formatted paths and recorded SHA-256 hashes below
+identify historical local collections, not accessible links. A fresh checkout
+cannot verify raw contents against those hashes without separate artifact transfer;
+passing docs QA is not raw measurement reproducibility.
 
 User-requested Mac and smart-card **local** close-out after replug is **CLOSED:
 D1–D5 met** at committed shipping `21498d241f74d64055b10e5b0fb36a47d68acc3b`.
@@ -24,15 +120,16 @@ operator action is requested; global criteria retain their original scope.
 Implementation checkpoints: `8d13fd1e` (logging/FIDO), `8ebcd026`
 (synchronous drain/scan/registry), `c417621b` and final public pending-read
 completion fix `21498d24`. Measurement driver `d23cca94` pins the compared shipping
-revisions and `.8` package; its commit does not change shipping code. This is the current dispatch view; the
+revisions and `.8` package; its commit does not change shipping code. Closure
+documentation commit `3e928106` changes no shipping runtime. This is the current dispatch view; the
 [product](01-product.md), [architecture](02-architecture.md) and
 [finish rules](03-program-design.md) keep their separate responsibilities.
 
-**18/72 checked, 54 pending.** The [master checklist](../../../2026-09-21-yubikit-async-boundaries-ISA.md#criteria)
+**19/72 checked, 53 pending.** The [master checklist](../../../2026-09-21-yubikit-async-boundaries-ISA.md#criteria)
 owns acceptance and the [verification rows](../../../2026-09-21-yubikit-async-boundaries-ISA.md#verification)
 own detailed proof and limits. ISC-5, ISC-19, ISC-31–33, ISC-38–39, ISC-41,
-ISC-43–49, ISC-51–52 and ISC-60 are checked. No additional criterion was checked
-in this increment. This is bounded macOS and
+ISC-43–52 and ISC-60 are checked. ISC-50 alone was accepted in the portable
+increment; all other unchecked criteria retain their original scope. This is bounded macOS and
 portable managed evidence, **not** production epic closure. The orchestrator
 owns acceptance; the Route/Native Engineers own their probes and implementation.
 
@@ -135,10 +232,10 @@ same macOS 15.7.7 arm64 / .NET 10.0.12 host and selected serial 31683481,
 with identical runner sources and NativeShims `1.18.1-async.8` (package SHA-256
 `c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`,
 deployed native SHA-256 `65499e77151d483d8e04bd793c2d520b4f344478ffcacff91bff8e771ae9d8af`).
-Before: `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-baseline-65964966-async3/artifacts/measurements/comparison-v2-before-20260925T111722670Z.json`
+LOCAL-only before: `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-baseline-65964966-async3/artifacts/measurements/comparison-v2-before-20260925T111722670Z.json`
 (SHA-256 `75150b30488091623487b55b8c7d961c1a100fb9a211dd2b6388c230b15ac440`,
 Core binary `928a0b6fcc75e6940d385621065aebed716957ef7d5988d27c5e251e6e2550c6`);
-[after](../../../artifacts/measurements/comparison-v2-after-20260925T111741620Z.json)
+LOCAL-only after: `artifacts/measurements/comparison-v2-after-20260925T111741620Z.json`
 (SHA-256 `948146da4cb5d12453698a7fd9497939609d4c6402ba5c966cd868a43bbd5488`,
 Core binary `bb88e2dea542c97a94c597c893f62f56862a8ab7dc43567aa3fc8c3f7b46e43c`).
 Each used two fresh-child warmups and ten completed lifecycle samples.
@@ -147,8 +244,8 @@ task terminal 23.79/27.81 → 26.48/28.71; lifecycle 70.74/81.75 →
 74.31/78.23. **Median lifecycle increased about 5%; not all metrics got faster.**
 Baseline no-input failed with PlatformApiException at invocation; after returned
 pending and was censored after ten seconds, not a native cleanup proof. The
-separate final-source pending-dispose hardware assertion passed. The
-[final current profile](../../../artifacts/measurements/current-profile-20260925T111800158Z.json)
+separate final-source pending-dispose hardware assertion passed. The LOCAL-only
+final current profile `artifacts/measurements/current-profile-20260925T111800158Z.json`
 (SHA-256 `ddabbd997198dc1641474a78afc1bcab78a098036ee5141f0872e51500693b45`)
 has two completed warmups, ten normal and one idle, zero failed/censored:
 median caller return 4.95045 ms, operation 26.4551 ms, disposal 3.4911 ms,
@@ -260,10 +357,10 @@ fallback lifecycle matrix is incomplete, despite five registered connection rows
   16-test controlled suite checks refusal before late release. These historical
   failures do not block the `.8` typed/direct normal paths or establish recovery
   from a permanently hung driver. The two-second identity budget was not raised.
-- The `.3` same-host comparison retains before dataset
+- The `.3` same-host comparison retains LOCAL-only before dataset
   `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-baseline-65964966-async3/artifacts/measurements/comparison-before-20260923T212640783Z.json`
   (SHA-256 `36852b85c6d0a2f7170da3b62c7625ecaffc02e0fcd7fbbbba1c586963b2fd01`)
-  and [after dataset](../../../artifacts/measurements/comparison-after-20260923T212725515Z.json)
+  and LOCAL-only after dataset `artifacts/measurements/comparison-after-20260923T212725515Z.json`
   (SHA-256 `218016c00bac31fb1e364f5ec4b88a0e9754c7cb8b510043d7711a7f1d3fdb21`).
   Ten completed pairs showed invocation 47.881 → 28.538 ms, terminal
   48.467 → 47.953 ms, lifecycle 78.456 → 80.144 ms; AFTER maximum worsened
@@ -276,5 +373,5 @@ universal acceptance. Global inventory (205 outstanding, including transitive/ap
 coverage), ISC-56 diagnostics, ISC-53 all-public synchronous waits including
 external implementations, and ISC-62 full measurement/budget remain global work,
 not an indefinitely open Mac implementation label. The parent has not accepted
-additional criteria: **18/72 unchanged**. No further device configuration change,
+additional criteria at that local close-out: **18/72 then, 19/72 now after ISC-50**. No further device configuration change,
 touch or new physical topology probe is requested.

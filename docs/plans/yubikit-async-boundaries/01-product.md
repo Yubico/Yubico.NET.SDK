@@ -4,7 +4,7 @@ Status: revised single-key-first Gate 1 approved by the user on 2026-09-22.
 The earlier broader product approval remains historical. Public access and
 compatibility decisions remain settled. This is the product target, not a claim
 of release completion: the [master checklist](../../../2026-09-21-yubikit-async-boundaries-ISA.md#criteria)
-is currently 18/72 checked. The [status](00-status.md) separates verified
+is currently 19/72 checked. The [status](00-status.md) separates verified
 macOS typed/direct paths and listener removal, smart-card async acquisition,
 and published `.8` packaging from remaining universal and other-platform work.
 The selected-host macOS and smart-card milestone is closed at `21498d24`

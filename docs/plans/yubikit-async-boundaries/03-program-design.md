@@ -21,7 +21,7 @@ asking for further operator action. This is a local phase decision, **not** a
 waiver of the original 72-criterion epic or retrospective acceptance of an
 unapproved performance budget. Parent accepted this local phase on actual
 results at shipping `21498d241f74d64055b10e5b0fb36a47d68acc3b`;
-**D1–D5 complete, global 18/72 unchanged**. Local D1–D5 are distinct from the
+**D1–D5 complete at 18/72; current global checklist 19/72 after ISC-50**. Local D1–D5 are distinct from the
 master's historical D1–D31 program decisions.
 
 | Local check | Evidence required before parent can mark local closure | State |
@@ -38,14 +38,106 @@ and operator-present touch are also deferred, not declared passing. Global
 ISC-4 inventory (205 outstanding, including transitive/app coverage), ISC-56
 all-SDK diagnostics, ISC-53 all-public sync waits including external owners,
 and ISC-62 full native-only metrics/budgets remain open at original scope. The
-master still reads **18/72**; local acceptance does not change its checklist.
+master now reads **19/72** solely because of the later reviewed ISC-50
+consumer decision; local acceptance itself did not change its checklist.
 Current shipping source pointers for audit: `src/Core/src/Transports/Hid/MacOS/`
 (`MacOSHidInterface.cs`, typed/direct connections and listener),
 `src/Core/src/Transports/SmartCard/`, `src/Core/src/Protocols/SmartCard/Apdu/`
 and `src/Core/src/Devices/PcscConnectionSlot.cs`; use current paths rather than
 historical renamed HID interface references.
 
-## Last bounded increment and next work
+## Next bounded milestone: portable acceptance and build reproducibility
+
+Under the existing orchestration authorization, prioritize fresh-checkout docs validation and reproducible
+branch delivery before portable acceptance coverage, without another unbounded
+Mac refactor. Build [36130687541](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130687541)
+stopped at docs QA on seven links into ignored local measurement collections;
+these planning docs now record code-formatted LOCAL-only paths and hashes instead.
+Native AOT [36130687588](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130687588)
+and Dependency Submission [36130685528](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130685528)
+failed private-package restore with `NU1301`/401. Repository-owned workflow
+authentication was committed locally at `5680901f` and linted, but is not pushed
+or hosted-verified. The GitHub-managed dynamic
+dependency workflow does not inherit those changes and remains unresolved.
+No runtime defect is established. Fresh-checkout docs QA passed locally after
+the still-uncommitted link repair; hosted checks remain unverified at local
+HEAD `5fd0712f` (remote failures are at `3e928106`). Hosted
+verification is required before closing delivery; independent acceptance-map
+work may proceed. Prior clean `.8` package consumption is not a substitute for
+green branch checks. A real
+runtime regression found during CI investigation is evaluated on its own evidence,
+not assumed from the failed checks.
+
+The user authorized the four-step behavior/compatibility/measurement/claims
+phase after delivery repair, using Engineers without further operator action.
+The finite deliverables, in order, are:
+
+1. Delivery owner records reproducible branch restore/build and actual green
+   Build, Native AOT and Dependency Submission checks at the relevant head.
+   GitHub's managed dynamic dependency workflow does not inherit repository
+   workflow credentials; its private-feed authentication is a distinct blocker.
+2. Behavior: orchestrator and boundary owner reconcile one coherent gap-classified list
+   of required operation/adapter and source paths from the existing 205
+   outstanding Core sites, 27 required rows/49 named profile links and 16
+   public-sync entries, with named runnable cross-layer profiles or explicit
+   gaps. The new Core FIDO + macOS bridge-fake profile checks two request frames,
+   single cancel, a distinct exchange-guard refusal while a 58-byte response
+   continuation is withheld, and drain before same-channel reuse. Cancellation
+   starts inside the device-waiting prompt callback: one request and zero Core
+   resolutions because backend owns resolution. Three existing backend mapping
+   tests substitute the protocol. Full-layer presence
+   outcome, external paths and ISC-55 remain pending. Add bounded diagnostics
+   with positive/negative controls rather than infer ISC-56 from three protocols.
+3. Compatibility: parent accepted ISC-50 after independent review PASS with
+   no findings following a bounded refit. Two tests compile a public custom
+   `IHidConnection` and exercising real typed raw adapters constructed by
+   reflection (not a public factory or discovery route). The `SetReport` XML describes caller ownership until return and
+   third-party copy responsibility; it does not prove external runtime behavior.
+   D15's alpha discovery-interface rename was an intentional source break, not
+   a report-interface alias. Native export and big-number allocate/free smoke
+   for 1.18.0/`.8` covers the canonical **36 package exports**; old Core
+   imported 28 of them. Five input-owner exports are `.8` only, so old 1.18.0
+   is unsupported for current input-owner Core. A separate locally compiled
+   consumer runs the baseline `65964966` Core binary against 1.18.0 and `.8`
+   in isolated processes and current Core against `.8`: all three pass P-256
+   and AES-128 CMAC known-answer vectors with 17 Core native resolver calls
+   each (8 EC, 4 BN, 5 CMAC). Core/native digests are checked and a bad hash
+   fails before resolver load. Independent review: PASS WITH NOTES. The old
+   Core binary is a local build, not an attested published artifact; the
+   11 SCard imports, five input-owner callback signatures/lifetimes, failure
+   paths, Windows/Linux and public consumer journeys remain untested by this
+   runtime consumer. ISC-42 remains pending. Preserve the verifier's README limits.
+4. Measurement, then claims: one read-only selected-key active-cancel run gives
+   public-path ordering and timings, not native-only durations, distribution or
+   approved budget. Three explicit-monotonic-tick timing-helper self-tests
+   passed after that physical sample; hardware was not rerun after the helper
+   refactor. Do not compare `.7` with `.8` as a matched cohort. Global ISC-62
+   still needs its original native counts/scenarios.
+   Active documentation corrections distinguish raw tiers and Core/backend
+   presence ownership; inspect still-active demo/v2-slide claims separately
+   before ISC-63 closure. No demo branch is merged by inspection.
+
+The bounded portable probes, consumer fixture and timing verifier are committed
+at `5fd0712f`; ISC-50 alone is parent accepted after independent review PASS.
+`SetReport` XML is the only Core source change in that commit, not a change to
+the selected-key runtime implementation at `21498d24`. Other criteria remain pending; the
+delivery exit is still blocked by remote checks and automatic submission
+authentication. Exit requires recorded deliverables and an honest gap list,
+**not** a checkmark increase from partial probes. Reported precommit
+results: full Core 1,516 passed/3 skipped; PublicApi 24, Fido2 471 and
+YubiOtp 180 passed. The targeted cross-layer test passed one after its
+guard/prompt assertion refit, and the final resilience-fast rerun passed 88;
+an earlier aggregate-command timeout was not a test failure. Method complexity 10/20 remains manual-review pending (observed
+maximum cyclomatic complexity nine), with zero shipping-tool or test/harness
+coverage claimed. Fresh-host permissions, Windows/Linux native
+and hardware, external implementations and unavailable global native metrics
+remain explicit blockers/deferred evidence for original production acceptance.
+The original S5-after-platform-feedback and S6-after-S5 dependencies still
+govern global closure. Remote pushes and repository settings changes require
+their own authorization. Preserve the closed local milestone unless a demonstrated
+runtime regression justifies reopening it; no operator action is part of this scope.
+
+## Last bounded increment and remaining global work
 
 The prior E1 listener callback-drain package finished: actual vendor-filtered
 matching, selected removal and late matching-callback drain on pinned `.8`
@@ -189,8 +281,10 @@ this documentation reconciliation.
 ## Decisions still requiring real evidence
 
 - Public `IHidConnection` stays synchronous for direct report compatibility;
-  its wholesale evolution (ISC-50) remains a separate consumer/visibility
-  decision. Typed macOS FIDO/OTP use internal owned boundaries; external
+  ISC-50 accepts this retained public member set and the borrowed-through-return
+  `SetReport` contract, enforced by actual adapter consumer tests. Wholesale
+  async evolution is future scope, not an open ISC-50 decision. Typed macOS
+  FIDO/OTP use internal owned boundaries; external
   implementations retain their own documented synchronous fallback and
   lifetime responsibilities. Do not add a compatibility shim merely to
   conceal a proposed v2 surface change.

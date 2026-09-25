@@ -8,7 +8,7 @@ The user-approved local Mac and smart-card milestone is closed at committed
 shipping source `21498d241f74d64055b10e5b0fb36a47d68acc3b`, with eight
 selected-key published `.8` Native AOT route modes passing. Fresh-host Input
 Monitoring permission testing was user-deferred. Full epic acceptance remains
-pending (18/72 checked, including bounded ISC-19). The Core-only inventory
+pending (19/72 checked, including bounded ISC-19 and reviewed ISC-50). The Core-only inventory
 classifies 205 outstanding sites:
 134 native imports, 3 native exports, 24 waits, 15 scheduling sites,
 21 pre-task-return gaps, 6 callback registrations, 0 delegate conversions
@@ -45,14 +45,22 @@ Equivalent public concepts keep consistent creation, cancellation, ownership and
 disposal conventions. Breaking changes and internalization remain permitted; material
 public-surface scope changes still require user escalation under D30.
 
-The lower-level synchronous `IHidConnection` interface remains public and
-unchanged for direct report access. Built-in macOS typed routes use internal
+The lower-level synchronous `IHidConnection` members remain public and
+unchanged for direct report access. `SetReport` documents a borrowed caller
+array valid through method return; an implementation retaining its contents
+must copy before returning. Built-in macOS typed routes use internal
 asynchronous owners, and direct report facades share those owners. Keep local
 validation, encoding, parsing and bounded cryptographic computation synchronous.
 
 **Implemented sequence, not renewed architecture approval:** the internal macOS
 asynchronous seam coexists with synchronous public direct report methods.
-Wholesale interface migration remains a separate ISC-50 consumer decision.
+ISC-50 is accepted for this retained synchronous contract: an external
+implementation compiles against the public interface, and the real internal
+FIDO/OTP adapters (constructed by reflection only) pass typed send/receive and
+disposal consumer tests, including SDK send-copy clearing and unchanged caller
+input. This is not public-factory/discovery end-to-end evidence. Wholesale
+asynchronous interface evolution is separate future scope, not an open ISC-50
+decision; D15's alpha discovery-interface rename remains intentionally breaking.
 
 Reuse the existing ownership roles:
 

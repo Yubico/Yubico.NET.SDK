@@ -4,15 +4,21 @@ Status: revised single-key Gate 2 approved by the user on 2026-09-22; independen
 The first smart-card lifetime slice is committed at `db7a1bf6`; macOS typed/direct
 reports and listener teardown have since been verified at bounded grades in the
 [master verification](../../../2026-09-21-yubikit-async-boundaries-ISA.md#verification).
-Full epic acceptance remains pending (18/72 checked, including bounded ISC-19).
-At current source checkpoint `fdedd61c` plus uncommitted continuation and
-registry work, the Core-only inventory classifies 205 outstanding sites:
+The user-approved local Mac and smart-card milestone is closed at committed
+shipping source `21498d241f74d64055b10e5b0fb36a47d68acc3b`, with eight
+selected-key published `.8` Native AOT route modes passing. Fresh-host Input
+Monitoring permission testing was user-deferred. Full epic acceptance remains
+pending (18/72 checked, including bounded ISC-19). The Core-only inventory
+classifies 205 outstanding sites:
 134 native imports, 3 native exports, 24 waits, 15 scheduling sites,
 21 pre-task-return gaps, 6 callback registrations, 0 delegate conversions
-and 2 unmanaged callback addresses. The test-link registry now has 23 required
-operation rows/45 profiles (typed Mac FIDO 4, OTP 4, portable PC/SC 5, direct
-input 4, direct feature 4, listener 2). It includes direct raw and listener
-paths but does not prove complete public/platform coverage or check ISC-4.
+and 2 unmanaged callback addresses. The test-link registry has 27 required
+operation rows/49 named profile links, including direct raw and listener paths;
+the public synchronous map has 16 entries. These do not prove complete
+public/platform coverage or check ISC-4. A matched same-package/runtime
+baseline-to-`21498d24` comparison and final normal/idle profile support the
+local finish descriptively, **not** a global performance budget or ISC-62;
+native-only duration and pending-worker counts remain unavailable.
 Design baseline: `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`, which matched fetched `origin/yubikit`.
 Reconciled 2026-09-23: approved A1/A5 policy remains unchanged; D30 delegates in-scope
 route-local implementation without repeated microapprovals. Public raw invariants remain.
@@ -58,7 +64,7 @@ Reuse the existing ownership roles:
 | DisposalGate | One shared teardown outcome; a fault is not authority to release native ownership. |
 | Platform connection/native operation | Handles, report buffers, callback context, accepted operations, generation and terminal native completion. |
 
-The reviewed uncommitted PC/SC fix marks interrupted plain command/response
+The reviewed PC/SC fix committed at `cc13b518` marks interrupted plain command/response
 chains recovery-required. After protected state advances, first transport,
 response-MAC or intermediate-fragment failures also latch refusal on the same
 protocol, retaining the original exception without replay. Wrapped plain
@@ -67,11 +73,12 @@ terminal application error permits reuse. One independent-card command-MAC
 profile holds a protected continuation through caller cancellation, then
 validates the next protected command (accepted ISC-19 at managed grade).
 Creating a new protocol on the borrowed raw connection bypasses per-protocol
-refusal, so the raw caller must reopen after uncertainty. Latest full Core
-1,492 passed/3 skipped, secure filter 159 passed/2 skipped; the latest
-selected-key smart-card hardware attempts were blocked before open by
-`SCARD_E_SHARING_VIOLATION`. ISC-37 still needs the global monitor/discovery
-and custom-fallback lifecycle matrix; five connection rows are not its closure.
+refusal, so the raw caller must reopen after uncertainty. At the final local
+checkpoint `21498d24`, Core passed 1,515 tests with 3 skipped, and selected-key
+smart-card async transaction/read/end/dispose/reopen passed three native cycles.
+The earlier sharing violation is historical. ISC-37 still needs the global
+monitor/discovery and custom-fallback lifecycle matrix; local connection proof
+does not close that wider requirement.
 
 No actor framework, command hierarchy, universal connection-state base class, new
 shipping project, process-global single-key lock, or global reservation framework.
@@ -146,10 +153,10 @@ table rather than being repeated in every cell.
 | Platform/transport | Classified execution and direction | Implementation/evidence status |
 |---|---|---|
 | Windows HID | FIDO input and output use owned overlapped `ReadFile`/`WriteFile` completion; immediate-success notification rules prevent double completion. `CancelIoEx` requests cancellation, while terminal completion controls storage release. Preserve OTP zero-desired-access opening; classify feature GET and SET independently, using the connection's blocking owner unless that direction is separately verified for overlapped execution. | Approved design only for this effort. Existing HID code/tests remain, but no Windows HID route has migrated and native-runtime/hardware evidence is pending. |
-| macOS HID | FIDO input uses persistent IOKit event delivery and bounded owned reports instead of per-call caller-run-loop pumping. FIDO output and OTP feature GET and SET use connection-owned workers, not unverified callback APIs. | Typed FIDO/OTP and direct IO/feature paths have selected-key `.8` read-only native-AOT evidence. Real listener matching, removal and late-drain probes support bounded ISC-33 teardown acceptance. Public direct calls remain synchronous; other-host permission and universal coverage remain open. |
+| macOS HID | FIDO input uses persistent IOKit event delivery and bounded owned reports instead of per-call caller-run-loop pumping. FIDO output and OTP feature GET and SET use connection-owned workers, not unverified callback APIs. | Final-source `21498d24` selected-key `.8` Native AOT passed typed FIDO/OTP, direct IO/feature, automatic active cancellation, and real matching listener/late-drain modes. The public pending-read completion barrier was fixed without weakening its probe. Earlier physical removal and late-drain evidence supports bounded ISC-33. Public direct calls remain synchronous; fresh-host permission was user-deferred and universal coverage remains open. |
 | Linux HID | FIDO input uses nonblocking read plus `poll`/`eventfd` readiness and wake signaling. FIDO output uses the connection's blocking owner when it may block. OTP feature GET and SET ioctls are classified independently and never run on the read-readiness loop. | Approved design only for this effort. Existing HID code/tests remain, but no Linux HID route has migrated and native-runtime/hardware evidence is pending. |
 | Windows smart card | Apply the portable smart-card policy: adapt classified blocking context/connect/transmit/transaction/end/disconnect/release calls through the connection owner; keep status monitoring's context/lifetime independent. Platform release and monitor semantics require their own evidence. | Portable owner slice implemented and managed-tested. Windows native-runtime/hardware evidence remains pending. |
-| macOS smart card | Apply the same portable smart-card policy without inferring that one platform's release/monitor result proves another's. | Portable owner and built-in async acquisition passed managed withheld-native probes; selected-key async transaction/read/reopen passed after earlier sharing contention. Other platforms and interrupted native release remain pending. |
+| macOS smart card | Apply the same portable smart-card policy without inferring that one platform's release/monitor result proves another's. | Portable owner and built-in async acquisition passed managed withheld-native probes; after replug, final-source `21498d24` selected-key `.8` Native AOT passed three async open/begin/read/end/dispose/reopen cycles. Pre-open sharing contention is historical; other platforms and interrupted native release remain pending. |
 | Linux smart card | Apply the same portable smart-card policy. Interpret release results by established platform evidence without changing the approved cleanup policy. | Portable owner slice implemented and managed-tested. Linux native-runtime/hardware evidence remains pending. |
 
 These rows map to the existing parameterized ISC-4, ISC-8–20, ISC-26–40, ISC-44–46,
@@ -347,8 +354,10 @@ target minimum 12, while the .NET 10 upstream
 support matrix currently starts at macOS 14 and the approved dispatch APIs are available
 from 10.15. These facts are distinct; D28 selects modern dispatch across the current
 upstream-supported systems and does not require an old-API fallback solely for the binary
-minimum. Other platform/reader fixtures, exact firmware, callback behavior and baseline
-measurements remain explicit prerequisites.
+minimum. Other platform/reader fixtures and full-scope callback/performance
+evidence remain global prerequisites; selected-key firmware 5.7.4, actual
+matching callbacks and local matched baseline/final measurements are recorded
+in [status](00-status.md).
 
 | Earlier signed 1.18.0 package evidence | Architectural meaning |
 |---|---|

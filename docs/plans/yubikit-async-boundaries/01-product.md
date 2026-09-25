@@ -7,16 +7,20 @@ of release completion: the [master checklist](../../../2026-09-21-yubikit-async-
 is currently 18/72 checked. The [status](00-status.md) separates verified
 macOS typed/direct paths and listener removal, smart-card async acquisition,
 and published `.8` packaging from remaining universal and other-platform work.
-At source `fdedd61c` plus uncommitted continuation/registry changes, the
-Core-only inventory has 205 classified/outstanding sites (134 native imports,
-3 native exports, 24 waits, 15 scheduling, 21 dispatch gaps, 6 callback
-registrations, 0 delegate conversions, 2 unmanaged addresses); the test-link
-registry has 23 required rows and 45 profiles, including macOS direct and
-listener paths. These counts do not change the success metric or check ISC-4.
-The accepted protected-chain result is one managed cancellation/next-command
-profile, not smart-card hardware proof: fresh selected-key smart-card attempts
-were blocked by a pre-open sharing violation. The latest selected-key `.8`
-FIDO/typed OTP checks passed with two keys attached; only one was selected.
+The selected-host macOS and smart-card milestone is closed at `21498d24`
+under the local definition of done in the program design. The latest native
+verification passed on one connected key, serial 31683481, including three
+smart-card transaction/read/dispose/reopen cycles after replug resolved the earlier
+sharing contention. Protected-chain cancellation/state proof remains managed evidence.
+The Core inventory has 205 classified/outstanding sites; the test-link registry
+has 27 required operation rows and 49 profile links, and the public synchronous
+map has 16 entries. None closes global coverage. Matched final-source same-package/
+runtime before/after measurements and a normal/idle profile exist; median
+invocation return decreased while median lifecycle increased about 5% across
+ten completed samples per variant. This descriptive local evidence approves no
+global budget: native-only duration and pending worker counts are unavailable,
+so ISC-62 remains open. Fresh-host Input Monitoring permission testing was
+explicitly deferred by the user, not accepted as full production evidence.
 
 ## Problem
 
@@ -46,10 +50,11 @@ must no longer use the caller's borrowed input. Where recovery cannot be establi
 the failure must make the connection's usability clear.
 
 Record before/after responsiveness, operation duration, resource use (including thread count), and idle
-activity for the agreed scenarios. Numerical performance budgets must be agreed
-before changing production behavior; test-suite duration is not a performance
-baseline. Measure one selected key at a time. This product gate does not invent a
-universal millisecond target or a cross-key throughput/fairness target.
+activity for the agreed scenarios. Numerical performance budgets remain a
+global acceptance requirement; none is retroactively approved from local
+descriptive data. Test-suite duration is not a performance baseline. Measure
+one selected key at a time. This product gate does not invent a universal
+millisecond target or a cross-key throughput/fairness target.
 
 ## Scope and product commitments
 

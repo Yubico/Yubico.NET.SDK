@@ -2,11 +2,29 @@
 
 ## Current checkpoint — 2026-09-25
 
-Current implementation checkpoints: `8d13fd1e` (logging and FIDO response
-refactor) and `8ebcd026` (synchronous drain, scan, registry and docs) on
-`yubikit-async-boundaries`. Selected-device evidence was collected from the
-working tree before those commits, with implementation source now recorded in
-them; no post-commit rerun or new native package is implied. This is the current dispatch view; the
+### Current lane board
+
+| Lane | Current state / next boundary |
+|---|---|
+| macOS typed/direct HID and listener | **Local milestone closed** at shipping `21498d24`: all eight Native AOT selected-key route modes passed, including automatic active cancellation, public pending-read completion, direct IO/feature and actual matching listener callback/drain. No fresh removal or permissionless-host claim. |
+| Smart-card lifetime and recovery | **Local milestone closed**: after replug, final-source selected-key PC/SC async open/begin/read/end/dispose/reopen passed three cycles. Historical pre-open sharing contention is resolved for this fixture. |
+| Portable diagnostics, discovery and synchronous wait maps | Last finite increment completed in `8d13fd1e`/`8ebcd026`, with bounded tests and explicit gaps; full inventory, diagnostics and public-wait closure remain open. |
+| Native package | `.8` published and clean packaged Native AOT consumers verified; this is not Windows/Linux driver or hardware proof. |
+| Windows/Linux and backend exploration | Windows/Linux native/hardware lanes deferred; WinRT SmartCard and CryptoTokenKit exploration not started (after production milestone). |
+
+User-requested Mac and smart-card **local** close-out after replug is **CLOSED:
+D1–D5 met** at committed shipping `21498d241f74d64055b10e5b0fb36a47d68acc3b`.
+The predeclared [five local finish checks](03-program-design.md#user-approved-local-mac-and-smart-card-finish-decision)
+cover selected-key routes, matched visible measurements, implemented-profile
+correctness, relevant regression/review, and durable evidence/docs validation.
+Fresh-host Input Monitoring was explicitly deferred by the user, not treated as
+a failure or waiver of the original epic. No further local implementation or
+operator action is requested; global criteria retain their original scope.
+
+Implementation checkpoints: `8d13fd1e` (logging/FIDO), `8ebcd026`
+(synchronous drain/scan/registry), `c417621b` and final public pending-read
+completion fix `21498d24`. Measurement driver `d23cca94` pins the compared shipping
+revisions and `.8` package; its commit does not change shipping code. This is the current dispatch view; the
 [product](01-product.md), [architecture](02-architecture.md) and
 [finish rules](03-program-design.md) keep their separate responsibilities.
 
@@ -27,30 +45,24 @@ that is packaging, not Windows/Linux driver or hardware execution. The separate
 `.9` release and verification-only native commits `541cfb09`/`760d0416`
 did not produce this pin. Developers still require private-feed access.
 
-On macOS 15.7.7 arm64, the published `.8` Native AOT host ran `--probe` and
-`--otp-info` from the pre-commit working tree on selected serial 31683481
-(firmware 5.7.4), discovering
-**one key**, PID 0407 with fallback identity. All five production FIDO scenarios
-passed, including pending-read disposal/reopen and pre-dispatch cancellation;
-typed OTP info passed three cycles. No touch or replug was performed. A prior
-`.8` probe saw **two attached keys**, 25555459 and 31683481; it selected only
-31683481. Do not transfer that topology to the final probe. Earlier `.8` probes on that key passed
-direct IO timeout followed by same-connection
-INIT/getInfo and reopen, and three direct feature GETs plus read-only Management
-device info through feature SET/GET and reopen. Typed and direct HID input use
-the persistent event owner (ISC-31). Typed FIDO output, typed OTP feature GET/SET
-and direct IO/feature output use connection-owned blocking workers (ISC-32), not
-native callback feature operations. Public direct report open/Get/Set/dispose
-remain synchronous compatibility paths. Built-in smart-card async transaction
-acquisition returned a pending task with native begin held (ISC-51). A selected-key
-async transaction/read/reopen test passed at an **earlier** source checkpoint.
-At the latest smart-card attempt, both broad Core integration and isolated
-`--smartcard` for 31683481 failed `SCARD_E_SHARING_VIOLATION` **before open**;
-no transaction or read completed. No fresh smart-card probe accompanied the
-final FIDO/OTP run. The read-only isolated scenario has phase
-diagnostics and a 20-second watchdog; this is a blocked hardware cell, not
-proof of an API defect. No retry or operator action is requested.
-External implementations still have a synchronous transaction fallback.
+On macOS 15.7.7 arm64 / .NET 10.0.12, selected serial 31683481 (firmware
+5.7.4), published `.8` Native AOT, **all eight** modes passed at final shipping
+source: `--probe` five FIDO normal/pending-dispose/pre-dispatch scenarios;
+`--active-cancel` actual device-waiting automatic cancellation without operator
+interaction; `--otp-info` three queries; `--expert-io` six-second timeout,
+same-connection GetInfo and reopen; `--expert-feature` three read-only queries;
+`--smartcard` three async open/begin/read/end/dispose/reopen cycles;
+`--listener-drain` actual matching callback; `--listener-late-drain` actual
+matching callback timeout/retention then restart. Probe source bytes did not
+change on commit. The initial `c417621b` pending-dispose probe exposed Dispose
+returning before the *public* read task terminated through the async cancellation-
+registration Dispose wrapper. `21498d24` fixes this with shared shutdown waiting
+and public task markers; four new tests include two red against the old code.
+The probe assertion was not weakened. Historical pre-replug
+`SCARD_E_SHARING_VIOLATION` occurred before open; replug resolved it for this
+selected fixture, not every reader. External smart-card implementations retain
+a synchronous transaction fallback; direct report compatibility paths remain
+synchronous. No physical removal was requested for final verification.
 
 ISC-33 is accepted **only** for observed macOS listener callback-context/device-
 storage teardown. Real matching, operator-assisted selected-key removal (HID
@@ -70,24 +82,23 @@ other hosts. Permission/normal-user experience is a separate orchestrator follow
 not an ISC-33 teardown blocker. No repeat physical removal/Stop experiment is
 needed for this checkpoint.
 
-Latest-source full Core **1,511 passed/3 skipped**, PublicApi 22, Fido2 471,
-YubiOtp 180 and resilience-fast 88 passed with public SELECT application-ID
-hex logging restored and the HID discovery seam. These runs preceded the
-implementation commits, not the changes they record. Focused adapter registry
+Final-source Core **1,515 passed/3 skipped**, PublicApi 22, Fido2 471,
+YubiOtp 180, Management 86, Piv 209 and resilience-fast 88 passed. Three
+changed shipping methods met cyclomatic 10/cognitive 20. Independent Engineer
+close-out audit found D1–D4 evidenced and only stale D5 docs notes, now
+reconciled; this is not a cross-vendor final review. Earlier focused adapter registry
 **17**, public-sync registry **5**, PC/SC lifetime **30** and HID scan boundary
 **3** passed; after the held-scan test cleanup fix, targeted HID scan boundary
 **3** passed again. Earlier post-restoration targeted diagnostics 12, PC/SC 23 and
 FIDO 40 are not replacements for the latest full Core result.
 The first real sentinel failed on an opaque exception payload before the logging
 fix. Twelve diagnostics tests include positive controls for formatted, structured
-and exception text. Independent review: PASS WITH NOTES after a bounded
+and exception text. Earlier independent review: PASS WITH NOTES after a bounded
 test false-negative fix; held-scan cleanup now releases the delegate, awaits
 the actual scan, then disposes gates. No production defect was established.
-Public SELECT application-ID hex logging remains. Twelve
-changed shipping methods, including the extracted FIDO receive terminal,
-validation and copy helpers, were within cyclomatic 10/cognitive 20; this is
-not a whole-project or untracked-test complexity proof. Docs QA and architecture
-validation passed at the latest source. Historical listener
+Public SELECT application-ID hex logging remains. Twelve then-changed shipping
+methods met cyclomatic 10/cognitive 20 at that earlier checkpoint, not a
+whole-project proof. Historical listener
 checkpoint counts are in master Verification. These results do not establish
 cross-platform native or all-scenario hardware execution. The current Core `BoundaryInventory` classifies
 205 **outstanding** sites: 134 native imports, 3 native exports, 24 blocking
@@ -118,24 +129,39 @@ Neither tally means all sites or routes are verified.
 
 ### Measured comparison, not a performance acceptance claim
 
-ISC-62 has a [current `.8` dataset](../../../artifacts/measurements/current-profile-20260924T112625843Z.json),
-SHA-256 `95af4be6d2d5b553db709b228d0ce8a4761a7bfe66e1f0368e5572730676ccee`:
-two warmups, ten typed FIDO read-only normal samples and one idle sample completed
-on macOS 15.7.7 arm64/.NET 10.0.12. Normal medians: caller return 4.82655 ms,
-completion 25.5306 ms, disposal 2.78275 ms, process allocation 60,880 bytes;
-idle over 1,001.2176 ms: 2.011 ms CPU, zero allocated bytes and zero thread
-delta. The dataset records checkout `90443131` plus shipping diff and binary
-hash at collection, not independent final-source proof. Firmware was not parsed
-by this runner; loaded native path, native-only duration and pending ordinary
-count are unavailable. The [earlier pre-facade `.8` profile](../../../artifacts/measurements/current-profile-20260924T051049865Z.json)
-(SHA-256 `9bbd8837afab35e1143385bc6e383a9baf330a5c5ce20de5892b2090b7ba1f65`)
-and the historical `.3` before/after pair are different cohorts, not comparable
-final/baseline proof. No numerical budget or performance acceptance is approved.
-The final-source selected-key `--probe` observed a first initialization of 229 ms
-and a subsequent one of 20 ms; these cold/normal observations do not replace
-the comparable baseline/final dataset or approve a budget.
+Local D2 compares baseline `65964966cc21f431e16793264c899c30a5b957a3`
+to final shipping `21498d241f74d64055b10e5b0fb36a47d68acc3b` on the
+same macOS 15.7.7 arm64 / .NET 10.0.12 host and selected serial 31683481,
+with identical runner sources and NativeShims `1.18.1-async.8` (package SHA-256
+`c85c56f7a41c6999b48b1a5fdcd82c56fbfb3e5ee6ff18ccc64a41144f760403`,
+deployed native SHA-256 `65499e77151d483d8e04bd793c2d520b4f344478ffcacff91bff8e771ae9d8af`).
+Before: `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-baseline-65964966-async3/artifacts/measurements/comparison-v2-before-20260925T111722670Z.json`
+(SHA-256 `75150b30488091623487b55b8c7d961c1a100fb9a211dd2b6388c230b15ac440`,
+Core binary `928a0b6fcc75e6940d385621065aebed716957ef7d5988d27c5e251e6e2550c6`);
+[after](../../../artifacts/measurements/comparison-v2-after-20260925T111741620Z.json)
+(SHA-256 `948146da4cb5d12453698a7fd9497939609d4c6402ba5c966cd868a43bbd5488`,
+Core binary `bb88e2dea542c97a94c597c893f62f56862a8ab7dc43567aa3fc8c3f7b46e43c`).
+Each used two fresh-child warmups and ten completed lifecycle samples.
+Medians/p95 (ms, before → after): invocation 23.49/26.72 → 4.69/6.11;
+task terminal 23.79/27.81 → 26.48/28.71; lifecycle 70.74/81.75 →
+74.31/78.23. **Median lifecycle increased about 5%; not all metrics got faster.**
+Baseline no-input failed with PlatformApiException at invocation; after returned
+pending and was censored after ten seconds, not a native cleanup proof. The
+separate final-source pending-dispose hardware assertion passed. The
+[final current profile](../../../artifacts/measurements/current-profile-20260925T111800158Z.json)
+(SHA-256 `ddabbd997198dc1641474a78afc1bcab78a098036ee5141f0872e51500693b45`)
+has two completed warmups, ten normal and one idle, zero failed/censored:
+median caller return 4.95045 ms, operation 26.4551 ms, disposal 3.4911 ms,
+process allocation 62,252 bytes; idle 1,002.2526 ms, CPU 1.963 ms, zero
+allocated bytes and zero thread delta. This is descriptive local evidence, not
+population inference or an approved budget. Native-only duration and pending
+ordinary count remain unavailable; global ISC-62 is open.
 
-## Remaining unattended lanes and decisions
+Earlier `.8` profiles and the pre-fix `c417621b` comparison remain historical
+snapshots, not the final-source D2 comparison above. No numerical budget or
+global ISC-62 performance acceptance is approved.
+
+## Separate global epic lanes and decisions (not local Mac blockers)
 
 - **ISC-4/1–3/6–8:** independently enumerate remaining required adapter/operation
   rows and transitive wrappers; resolve all 205 outstanding classified Core sites
@@ -169,28 +195,25 @@ the comparable baseline/final dataset or approve a budget.
   behavior separately from native-runtime and selected-device evidence;
   record gaps, not invented universal guarantees. Keep ISC-54 open until the
   full public-operation scope is reconciled.
-- **ISC-62:** obtain comparable frozen baseline/final data for the accepted
+- **Global ISC-62:** local matched before/after and current normal-profile data
+  are recorded above. Local closure does not require a new arbitrary speed
+  promise. Global ISC-62 still requires comparable frozen baseline/final data for the accepted
   source/binary/package and selected fixture, separate caller-return, native
   duration, recovery, active/pending workers, allocation and idle metrics,
   and approved budgets. Missing instrumentation remains unavailable; do not
   infer native metrics from managed elapsed time or compare different cohorts.
-- **Finite unattended Mac/portable run:** final-source selected-key FIDO and OTP
-  passed with one key discovered; the last smart-card attempts stopped at pre-open
-  sharing contention in both broad integration and isolated child. No final-source
-  smart-card retry was run. Parent owns later hardware reconciliation;
-  do not count historical smart-card success as this source's pass or retry
-  without operator availability. No touch, replug, security setting, unplug/Stop
-  probe or configuration write is authorized.
 - **Platform and hardware lanes:** Windows overlapped HID/OTP access, Linux
-  readiness/write isolation, Windows/Linux PC/SC lifecycle, Native AOT path
-  execution and required hardware/reader matrix remain deferred pending user
+  readiness/write isolation, Windows/Linux PC/SC lifecycle, cross-platform
+  Native AOT execution and required hardware/reader matrix remain deferred pending user
   direction and suitable hosts (ISC-29–30/34–37/40/57–59). Complete protocol,
   prompting, public-contract, regression and cross-layer closure rows before P;
   exploration ISC-65–72 remains separate. Physical OTP mid-frame failure,
   borrowed-connection cross-session reuse and combined unplug/dispose uncertainty
   remain unproved; retain conservative quarantine. No hardware mutation is implied.
-- **Permission follow-up:** assess Input Monitoring on other macOS hosts and
-  normal-user listener experience independently of accepted ISC-33 teardown.
+- **Authorized deferrals:** fresh-host Input Monitoring permission/normal-user
+  experience is not a current local blocker. Windows/Linux native execution,
+  extra NFC/other-reader fixtures and operator-present touch remain deferred,
+  not passed or waived from global scope; do not request new operator work.
 
 The reviewed PC/SC protocol change marks plain interrupted command/response
 chains recovery-required. Once protected state has advanced, first transport
@@ -249,6 +272,9 @@ fallback lifecycle matrix is incomplete, despite five registered connection rows
   were censored, not proof of cleanup.
 
 Do not promote managed tests, clean packages or one host's normal route to
-universal acceptance. The user authorized unattended implementation and checkpoints;
-device configuration changes, touch and new physical topology probes remain outside
-this unattended scope.
+universal acceptance. Global inventory (205 outstanding, including transitive/app
+coverage), ISC-56 diagnostics, ISC-53 all-public synchronous waits including
+external implementations, and ISC-62 full measurement/budget remain global work,
+not an indefinitely open Mac implementation label. The parent has not accepted
+additional criteria: **18/72 unchanged**. No further device configuration change,
+touch or new physical topology probe is requested.

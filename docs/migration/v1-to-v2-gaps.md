@@ -265,7 +265,7 @@ Overall: **strong parity**. SCP03 and SCP11(a/b/c) authentication, static key ma
   **Severity**: Minor | **Confidence**: Medium (spot-checked PivSession only)
 
 - **Feature/API**: Synchronous API surface (all v1 SCP methods are blocking)
-  **v2 status**: Behavior-changed — v2 is fully async (`*Async(..., CancellationToken)`). Mechanical migration cost, not a functional loss.
+  **v2 status**: Behavior-changed — v2 exposes awaitable SCP session operations (`*Async(..., CancellationToken)`), not synchronous applet facades. Mechanical migration cost, not a functional loss; this does not imply native I/O can always be interrupted by cancellation.
   **Severity**: Minor | **Confidence**: High
 
 No genuine SCP03/SCP11 protocol, key-management, or certificate-chain regressions found.
@@ -353,8 +353,8 @@ v2 location: `src/Management/src/**`
   **User impact**: Consumers catching specific v1 exception types lose that precision and fall back to broad/generic catching.
   **Severity**: Major | **Confidence**: High
 
-- **Synchronous API availability**: v1 is fully synchronous; v2 is 100% async with zero sync facades anywhere (`.Result`/`.Wait()`/`GetAwaiter().GetResult()` grep across all of `src/*/src` returns nothing).
-  **User impact**: Simple synchronous console-app/script consumers must adopt async/await throughout, including `await using` for disposal — a non-trivial rewrite for straightforward use cases v1 didn't require.
+- **Synchronous applet API availability**: v1 has synchronous applet operations; v2 has no synchronous applet facades. The lower-level public API still includes synchronous HID report access, SmartCard transaction begin, and disposal; see [raw access tiers](../architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths). An async signature does not itself prove native I/O is nonblocking or immediately cancellable.
+  **User impact**: Simple synchronous console-app/script consumers must adopt async/await for applet operations, including `await using` for disposal — a non-trivial rewrite for straightforward use cases v1 didn't require.
   **Severity**: Major (understandable architecturally, but a real DX cost) | **Confidence**: High
 
 - **`KeyCollector` delegate pattern**: removed entirely. V1 used it for both credential acquisition and touch. V2 splits those responsibilities. Most applets still take PIN, PUK, password, and key material as direct parameters; `ICredentialPrompt` is currently consumed by `WebAuthnClient`, and retry behavior remains applet-specific. `ISecureCredentialReader` remains a separate synchronous, application-initiated terminal helper.

@@ -116,8 +116,14 @@ exchanges with `ExchangeGuard`. Sequential awaited calls are unchanged. If a sec
 while one is active, it throws `InvalidOperationException` immediately rather than queueing.
 
 A token already canceled at entry throws before the guard is claimed. Once claimed, the logical
-exchange receives `CancellationToken.None` and runs to completion so APDU chaining, CTAP/OTP frames,
-and SCP state cannot be stranded between constituent transmits. The guard resets in `finally`.
+exchange receives `CancellationToken.None` for constituent transmits so caller cancellation cannot
+interrupt APDU chaining, CTAP/OTP frames, or SCP state midway. During a FIDO HID keep-alive, the caller
+token can signal `CTAPHID_CANCEL`; the protocol waits for a terminal response and drains its frames
+before reporting cancellation when that response is valid. During an OTP HID touch wait, the caller
+token can trigger a dummy-report reset;
+reuse requires that reset to succeed. Neither signal rolls back work already sent. A failed partial
+APDU exchange or failed OTP reset requires disposing and reopening the connection. The guard resets
+in `finally`, but this alone is not proof that device state is reusable.
 
 Session disposal closes the protocol guard atomically with respect to operation admission. New operations are
 refused immediately; an operation already admitted is drained before protocol state, SCP session keys, or an

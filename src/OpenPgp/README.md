@@ -167,7 +167,7 @@ await using var session = await device.CreateOpenPgpSessionAsync(
     new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
 ```
 
-Signing, decryption, internal authentication, and attestation notify before their APDU, with the `KeyRef` name as scope; attestation reports `KeyRef.Att` because the attestation key performs that operation. `Uif.On` and `Uif.Fixed` report `PolicyRequires`, `Uif.Cached` and `Uif.CachedFixed` report `PolicyMayRequire`, and `Uif.Off` is silent, as is firmware that cannot configure UIF at all. A UIF read that fails for any reason other than cancellation degrades to `PolicyMayRequire` rather than failing the operation. Outcomes are `Completed`, `Cancelled`, or `Failed`; no OpenPGP status word is treated as a touch timeout. Cancel the operation's token to give up on it.
+Signing, decryption, internal authentication, and attestation notify before their APDU, with the `KeyRef` name as scope; attestation reports `KeyRef.Att` because the attestation key performs that operation. `Uif.On` and `Uif.Fixed` report `PolicyRequires`, `Uif.Cached` and `Uif.CachedFixed` report `PolicyMayRequire`, and `Uif.Off` is silent, as is firmware that cannot configure UIF at all. A UIF read that fails for any reason other than cancellation degrades to `PolicyMayRequire` rather than failing the operation. Outcomes are `Completed`, `Cancelled`, or `Failed`; no OpenPGP status word is treated as a touch timeout. Cancelling the operation's token does not interrupt a SmartCard exchange already admitted or roll back a command already sent.
 
 ## Constraints
 

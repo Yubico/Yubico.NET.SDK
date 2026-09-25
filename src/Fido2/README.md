@@ -154,7 +154,11 @@ var verified = await session.GetAssertionAsync("example.com", clientDataHash, as
 ## User interaction
 
 `MakeCredentialAsync`, `GetAssertionAsync`, `SelectionAsync`, and `ResetAsync` require a touch; `GetInfoAsync`
-and the `ClientPin` commands are silent. Cancel a pending operation with its `cancellationToken`.
+and the `ClientPin` commands are silent. Pass a `cancellationToken` to request cancellation;
+it does not instantly stop an admitted device exchange or undo a command already sent. On HID,
+the SDK sends `CTAPHID_CANCEL` when it observes cancellation during a keep-alive, then waits
+for and drains a valid terminal response before reporting cancellation. On SmartCard, admitted
+exchanges run to completion.
 
 ```csharp
 sealed class TouchPrompt : IUserPresencePrompt

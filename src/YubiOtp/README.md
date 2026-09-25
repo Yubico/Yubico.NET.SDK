@@ -131,7 +131,10 @@ await using var session = await device.CreateYubiOtpSessionAsync(
 
 The context carries application `YubiOTP` and the slot name as its scope. Over OTP HID it fires once the device reports
 it is waiting; SmartCard fires up front, and only when cached status marks the slot touch-triggered. Cancelling the
-operation's token resolves the notification as cancelled.
+operation's token during an OTP HID touch wait requests a dummy-report reset before the
+notification resolves as cancelled. The reset is not a rollback of commands already sent; if it
+fails, dispose the session and connection rather than reusing them. SmartCard operations already
+admitted run to completion even if the caller cancels their token.
 
 ## Constraints
 

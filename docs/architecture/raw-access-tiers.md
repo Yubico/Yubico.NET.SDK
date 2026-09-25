@@ -156,6 +156,12 @@ At Tier 2 the caller owns APDU or packet formatting, command chaining, response 
 keep-alive handling, sequencing, concurrency exclusion, and recovery from partial or cancelled exchanges.
 Never drive a raw connection concurrently with a live session or another raw operation. If traffic is interrupted,
 interleaved, or otherwise leaves device state uncertain, dispose the connection and open a new one before continuing.
+Keep caller-owned command memory valid until the returned task finishes, even after requesting cancellation;
+only then clear sensitive input. The built-in macOS HID sends copy their reports before native dispatch, but
+the public interfaces also admit custom implementations and do not promise that copy. A raw FIDO receive
+cancelled while waiting may detach its reader while the input owner remains active; the next report can still
+arrive. A built-in OTP report already dispatched may succeed after cancellation. Neither case proves the
+device protocol is reset. Custom connections define their own scheduling, cancellation and release behavior.
 
 The built-in PC/SC connection enforces the caller-exclusion rule at native admission: a second raw operation is
 refused immediately rather than queued. Open, transmit, transaction begin/end, disconnect, and context release use
@@ -227,7 +233,12 @@ for either case. These Core-only inventories do not certify other SDK-wide bound
 - `IYubiKey.CreateRaw*SessionAsync(...)` owns its hidden connection and disposes it with the returned session.
 - Overlapping operations on one raw session throw `InvalidOperationException` immediately.
 - Overlapping raw calls on a built-in SmartCard connection also throw `InvalidOperationException` immediately.
-- Once admitted, a stateful exchange runs to completion so cancellation cannot strand protocol state.
+- Once admitted, constituent I/O in a stateful session exchange is not cancelled mid-frame. FIDO HID
+  sends `CTAPHID_CANCEL` if it observes caller cancellation during a keep-alive, then reads and validates
+  the terminal response before reporting cancellation when that response is valid; OTP HID attempts a
+  dummy-report reset after touch-wait cancellation. A failed partial APDU or failed OTP reset makes that
+  protocol instance unusable; dispose and reopen the connection. Cancellation does not roll back a device
+  command, and native work has no guaranteed completion deadline.
 - Disposal atomically closes admission, waits for an admitted exchange, and only then disposes protocol/SCP state
   and any convenience-owned connection. New operations are refused as soon as disposal begins.
 - Prefer `DisposeAsync`. Synchronous `Dispose` performs the same drain by blocking and must not be invoked from

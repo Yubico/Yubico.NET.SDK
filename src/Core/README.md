@@ -95,7 +95,7 @@ Subscription starts on first enumeration; events raised before that are not repl
 ### Send raw APDUs
 
 When no application module models what you need, a raw session gives you framing, ownership, and
-sequencing without applet checks. You own every protocol concern.
+sequencing without applet checks. You still own the application-specific payload and response semantics.
 
 ```csharp
 await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();
@@ -113,6 +113,25 @@ Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
 
 `RawFidoHidSession` and `RawOtpHidSession` are the HID equivalents, created with
 `device.CreateRawFidoHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
+
+An admitted session exchange protects its framing: cancellation is not an immediate abort or a
+rollback of a command already sent. FIDO HID can send `CTAPHID_CANCEL` during keep-alives, then
+waits for and drains a valid terminal response; OTP HID can send a dummy-report reset after
+touch-wait cancellation.
+A failed partial SmartCard chain or failed OTP reset requires disposal and reopening the connection,
+even if a new session could otherwise borrow it. See [raw access tiers](../../docs/architecture/raw-access-tiers.md).
+
+Direct connection calls are an expert escape hatch. They bypass session and protocol exchange guards;
+do not interleave them with a session or retry on the same connection after an interrupted exchange.
+Keep caller-owned input unchanged until the returned task finishes, then clear sensitive buffers.
+Built-in macOS HID sends copy reports before native dispatch; custom connections need not. Async method
+names do not guarantee caller-thread responsiveness or an immediate native cancellation.
+
+```csharp
+await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();
+// Direct I/O takes a preformatted APDU: no applet selection or command chaining is added here.
+ReadOnlyMemory<byte> reply = await connection.TransmitAndReceiveAsync(commandBytes, cancellationToken);
+```
 
 For direct raw SmartCard transactions, `BeginTransactionAsync` returns `IDisposable`. The built-in
 scope also implements `IAsyncDisposable` at runtime; the interface does not promise that for custom
@@ -198,7 +217,10 @@ device with `Yubico.YubiKit.SecurityDomain`.
 - Whoever creates a connection disposes it; use `await using`. A session from a `device.Create...` factory
   owns the hidden connection it opened. Built-in SmartCard connections request safe shutdown from their
   finalizer, but finalization is nondeterministic and is not a substitute for disposal.
-- Sessions refuse overlapping operations. An exchange already in flight runs to completion.
+- Sessions refuse overlapping operations. Caller cancellation does not interrupt constituent I/O
+  after admission; FIDO keep-alive or OTP touch-wait cancellation can still end an exchange after
+  protocol-specific cancel or reset handling. A failed partial exchange may require reopening the
+  connection. Native work may not have a bounded completion time.
 - Raw `IConnection` I/O bypasses session and exchange guards. The built-in SmartCard connection additionally
   refuses overlapping raw native operations instead of queuing them. Never interleave raw I/O with a live
   session, and dispose and reopen after an interrupted exchange.
@@ -212,8 +234,9 @@ device with `Yubico.YubiKit.SecurityDomain`.
   does not immediately abort the native device protocol. Built-in macOS OTP calls already active at cancellation
   may finish successfully. Do not assume cancellation releases native resources early; await the operation and
   connection disposal. Other HID implementations may have different cancellation behavior.
-- If native release cannot be proven, the physical-interface claim remains quarantined and a later open throws
-  `UnrecoveredConnectionException` rather than treating the key as ordinarily busy.
+- Built-in SmartCard and macOS HID owners retain their physical-interface claim if native release cannot
+  be proven; a later managed open throws `UnrecoveredConnectionException` rather than treating the key
+  as ordinarily busy. Custom connections do not inherit those native-release guarantees.
 - `ProtocolFactory` and the `IProtocol` family are internal. Use `Raw*Session.CreateAsync(connection)`.
 
 ## Security notes

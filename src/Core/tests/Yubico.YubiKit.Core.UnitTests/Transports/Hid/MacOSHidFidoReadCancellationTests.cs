@@ -86,6 +86,41 @@ public class MacOSHidFidoReadCancellationTests
         Assert.Equal(1, bridge.ReleaseCount);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task DisposalCompletesAdmittedPublicReadBeforeReturning(bool cancellable)
+    {
+        var bridge = new ControlledBridge();
+        var connection = await MacOSFidoHidConnection.OpenAsync(1, bridge, TestContext.Current.CancellationToken);
+        using var cancellation = new CancellationTokenSource();
+        var read = connection.ReceiveAsync(cancellable ? cancellation.Token : CancellationToken.None);
+
+        await connection.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        Assert.True(read.IsCompleted);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => read);
+        Assert.Equal(1, bridge.ReleaseCount);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SynchronousDisposalCompletesAdmittedPublicReadBeforeReturning(bool cancellable)
+    {
+        var bridge = new ControlledBridge();
+        var connection = await MacOSFidoHidConnection.OpenAsync(1, bridge, TestContext.Current.CancellationToken);
+        using var cancellation = new CancellationTokenSource();
+        var read = connection.ReceiveAsync(cancellable ? cancellation.Token : CancellationToken.None);
+
+        await Task.Run(connection.Dispose, TestContext.Current.CancellationToken)
+            .WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        Assert.True(read.IsCompleted);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => read);
+        Assert.Equal(1, bridge.ReleaseCount);
+    }
+
     private sealed class ControlledBridge : IHidInputBridge
     {
         private Action<ReadOnlyMemory<byte>>? _report;

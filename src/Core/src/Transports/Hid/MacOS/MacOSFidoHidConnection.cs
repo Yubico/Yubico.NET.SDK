@@ -234,7 +234,9 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
         private readonly Lock _sync = new();
         private readonly AutoResetEvent _signal = new(false);
         private readonly Queue<byte[]> _reports = new();
+        private readonly HashSet<Task> _publicReads = [];
         private readonly TaskCompletionSource _closed = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private Task? _shutdown;
         private GCHandle _root;
         private Thread? _worker;
         private Action? _work;
@@ -478,6 +480,7 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             token.ThrowIfCancellationRequested();
             TaskCompletionSource<ReadOnlyMemory<byte>> reader;
             CancellationTokenRegistration registration;
+            var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             lock (_sync)
             {
                 if (_terminal || _stopping)
@@ -503,9 +506,19 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
                         ((Owner, TaskCompletionSource<ReadOnlyMemory<byte>>, CancellationToken))state!;
                     owner.CancelRead(pending, cancellation);
                 }, (this, reader, token));
+                _publicReads.Add(finished.Task);
             }
-            // Dispose outside _sync: disposal may wait for a callback acquiring it.
-            return AwaitReadAsync(reader.Task, registration);
+            // Registration disposal may wait for a callback acquiring _sync.
+            var publicRead = AwaitReadAsync(reader.Task, registration);
+            _ = publicRead.ContinueWith(_ =>
+            {
+                lock (_sync)
+                {
+                    _publicReads.Remove(finished.Task);
+                    finished.TrySetResult();
+                }
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            return publicRead;
         }
 
         internal Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken token)
@@ -565,15 +578,22 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
             {
                 if (_stopping)
                 {
-                    return _closed.Task;
+                    return _shutdown ?? _closed.Task;
                 }
                 _stopping = true;
                 TerminalLocked(ShutdownTerminalReason);
+                _shutdown = DrainShutdownAsync(_publicReads.ToArray());
                 // The worker processes any accepted output before teardown; no ordinary backlog.
                 _signal.Set();
                 if (_worker is null) Schedule(static () => { });
             }
-            return _closed.Task;
+            return _shutdown;
+        }
+
+        private async Task DrainShutdownAsync(Task[] reads)
+        {
+            await Task.WhenAll(reads).ConfigureAwait(false);
+            await _closed.Task.ConfigureAwait(false);
         }
 
         private void Close()

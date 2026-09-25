@@ -164,10 +164,13 @@ public class MacOSHidFidoRouteLifetimeTests
             {
                 var bridge = new ControlledBridge { CloseResult = 6 }; bridge.ReleaseOpen.SetResult();
                 const string interfaceId = "hid:close-fault-test";
-                var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([interfaceId], TestContext.Current.CancellationToken);
-                var connection = await MacOSFidoHidConnection.OpenAsync(1, bridge, TestContext.Current.CancellationToken, claim);
-                await Assert.ThrowsAsync<Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
-                await Assert.ThrowsAsync<Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
+                 var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([interfaceId], TestContext.Current.CancellationToken);
+                 var connection = await MacOSFidoHidConnection.OpenAsync(1, bridge, TestContext.Current.CancellationToken, claim);
+                 var read = connection.ReceiveAsync(CancellationToken.None);
+                 await Assert.ThrowsAsync<Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
+                 Assert.True(read.IsCompleted);
+                 await Assert.ThrowsAsync<InvalidOperationException>(() => read);
+                 await Assert.ThrowsAsync<Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
                 Assert.Equal(1, bridge.DestroyCount);
                 Assert.Equal(0, bridge.ReleaseCount);
                 Assert.True(DeviceConnectionRegistry.IsInUse(interfaceId));

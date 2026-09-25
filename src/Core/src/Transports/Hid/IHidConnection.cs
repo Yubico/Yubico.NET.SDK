@@ -21,6 +21,12 @@ public interface IHidConnection : IConnection
     int InputReportSize { get; }
     int OutputReportSize { get; }
 
+    /// <summary>Sends a report through this synchronous connection.</summary>
+    /// <remarks>
+    ///     The caller owns <paramref name="report" />. Its contents are valid only until this method returns;
+    ///     the caller may clear or reuse the array immediately afterward. An implementation that needs the
+    ///     report after returning must copy it before returning.
+    /// </remarks>
     void SetReport(byte[] report);
     byte[] GetReport();
 }

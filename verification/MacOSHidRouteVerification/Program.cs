@@ -16,6 +16,9 @@ if (!OperatingSystem.IsMacOS())
     return 2;
 }
 
+if (args is ["--timing-selftest"])
+    return AcceptanceScenarios.TimingSelfTest();
+
 if (args is ["--child", "--list"])
     return await DiscoverAsync(null);
 if (args is ["--child", "--listener-drain"])
@@ -49,9 +52,9 @@ if (args is ["--child", "--smartcard", "--serial", var smartCardSerial]
     && selectedSmartCardSerial > 0)
     return await SmartCardScenario.RunAsync(selectedSmartCardSerial);
 
-if (args is not ["--list"] and not ["--listener-drain"] and not ["--listener-late-drain"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal" or "--expert-io" or "--expert-feature" or "--smartcard" or "--listener-remove", "--serial", _])
+if (args is not ["--timing-selftest"] and not ["--list"] and not ["--listener-drain"] and not ["--listener-late-drain"] and not ["--probe" or "--otp-get" or "--active-cancel" or "--otp-info" or "--touch" or "--removal" or "--expert-io" or "--expert-feature" or "--smartcard" or "--listener-remove", "--serial", _])
 {
-    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --list | --listener-drain | --listener-late-drain | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal | --expert-io | --expert-feature | --smartcard | --listener-remove) --serial SERIAL");
+    Console.Error.WriteLine("Usage: MacOSHidRouteVerification --timing-selftest | --list | --listener-drain | --listener-late-drain | (--probe | --otp-get | --active-cancel | --otp-info | --touch | --removal | --expert-io | --expert-feature | --smartcard | --listener-remove) --serial SERIAL");
     return 2;
 }
 if (args is [_, "--serial", var serial]

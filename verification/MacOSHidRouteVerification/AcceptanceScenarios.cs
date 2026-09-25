@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Globalization;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
@@ -10,6 +12,67 @@ using Yubico.YubiKit.Management;
 
 internal static class AcceptanceScenarios
 {
+    internal static int TimingSelfTest()
+    {
+        long tick = Stopwatch.Frequency / 1000;
+        var resolvedFirst = CreateResolvedFirstFixture(tick);
+        AssertFirstEvent(resolvedFirst, tick);
+        var caughtFirst = new CancelTiming();
+        caughtFirst.MarkCancelInvocation(100 * tick);
+        caughtFirst.MarkTerminalCatch(150 * tick);
+        caughtFirst.MarkResolved(200 * tick);
+        caughtFirst.MarkSameSessionInfo(300 * tick);
+        var simultaneous = new CancelTiming();
+        simultaneous.MarkCancelInvocation(100 * tick);
+        simultaneous.MarkTerminalCatch(150 * tick);
+        simultaneous.MarkResolved(150 * tick);
+        simultaneous.MarkSameSessionInfo(300 * tick);
+        var late = caughtFirst.Snapshot();
+        var equal = simultaneous.Snapshot();
+        var missing = new CancelTiming().Snapshot();
+        AssertCallbackOrdering(late, equal, missing, simultaneous);
+        Console.WriteLine("PASS timing self-test: resolved-before-catch, caught-before-resolved, and equal timestamps");
+        return 0;
+    }
+
+    private static CancelTiming CreateResolvedFirstFixture(long tick)
+    {
+        var timing = new CancelTiming();
+        timing.MarkCancelInvocation(100 * tick);
+        timing.MarkCancelInvocation(400 * tick);
+        timing.MarkResolved(150 * tick);
+        timing.MarkTerminalCatch(200 * tick);
+        timing.MarkSameSessionInfo(300 * tick);
+        timing.MarkResolved(400 * tick);
+        timing.MarkTerminalCatch(400 * tick);
+        timing.MarkSameSessionInfo(400 * tick);
+        return timing;
+    }
+
+    private static void AssertFirstEvent(CancelTiming timing, long tick)
+    {
+        var early = timing.Snapshot();
+        if (early.Request != 100 * tick ||
+            early.Resolved != 150 * tick || early.Terminal != 200 * tick || early.Reuse != 300 * tick ||
+            CancelTiming.IntervalMs(early.Request, early.Resolved) != 50 ||
+            CancelTiming.IntervalMs(early.Request, early.Terminal) != 100 ||
+            CancelTiming.IntervalMs(early.Terminal, early.Resolved) != -50 ||
+            CancelTiming.IntervalMs(early.Request, early.Reuse) != 200)
+            throw new InvalidOperationException("Resolved-before-catch timing or first-event recording failed");
+    }
+
+    private static void AssertCallbackOrdering(
+        (long Request, long Terminal, long Resolved, long Reuse) late,
+        (long Request, long Terminal, long Resolved, long Reuse) equal,
+        (long Request, long Terminal, long Resolved, long Reuse) missing, CancelTiming simultaneous)
+    {
+        if (CancelTiming.IntervalMs(late.Terminal, late.Resolved) != 50 ||
+            CancelTiming.IntervalMs(equal.Terminal, equal.Resolved) != 0 ||
+            !simultaneous.Format().Contains("terminalCatchToResolvedCallbackMs=0.000", StringComparison.Ordinal) ||
+            CancelTiming.IntervalMs(missing.Request, missing.Terminal) is not null)
+            throw new InvalidOperationException("Caught-before-resolved, equal, or missing timing failed");
+    }
+
     internal static async Task<int> RunAsync(string mode, int serial)
     {
         try
@@ -44,27 +107,10 @@ internal static class AcceptanceScenarios
     }
 
     private static async Task PresenceAsyncOnSession(FidoSession session, PresencePrompt prompt, bool cancel,
-        CancellationToken token)
+        CancellationToken token, CancelTiming? timing)
     {
         if (cancel)
-        {
-            var cancelled = false;
-            try
-            {
-                await session.SelectionAsync(token);
-            }
-            catch (OperationCanceledException) when (token.IsCancellationRequested)
-            {
-                await prompt.CancellationTask;
-                cancelled = true;
-            }
-            catch (CtapException ex) when (ex.Status == CtapStatus.InvalidCommand)
-            {
-                throw new NotSupportedException("BLOCKED: selected firmware does not support CTAP Selection", ex);
-            }
-            if (!cancelled)
-                throw new InvalidOperationException("Selection succeeded despite cancellation");
-        }
+            await CancelSelectionAsync(session, prompt, token, timing);
         else
         {
             try { await session.SelectionAsync(token); }
@@ -74,16 +120,44 @@ internal static class AcceptanceScenarios
             }
         }
 
+        RequirePairedPresence(prompt, cancel);
+
+        var info = await session.GetInfoAsync();
+        if (info.Versions.Count == 0)
+            throw new InvalidOperationException("Same-session getInfo returned no versions");
+        timing?.MarkSameSessionInfo();
+        Console.WriteLine($"PHASE_SAME_SESSION_INFO serial={prompt.Serial}");
+    }
+
+    private static async Task CancelSelectionAsync(FidoSession session, PresencePrompt prompt,
+        CancellationToken token, CancelTiming? timing)
+    {
+        var cancelled = false;
+        try
+        {
+            await session.SelectionAsync(token);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            timing?.MarkTerminalCatch();
+            await prompt.CancellationTask;
+            cancelled = true;
+        }
+        catch (CtapException ex) when (ex.Status == CtapStatus.InvalidCommand)
+        {
+            throw new NotSupportedException("BLOCKED: selected firmware does not support CTAP Selection", ex);
+        }
+        if (!cancelled)
+            throw new InvalidOperationException("Selection succeeded despite cancellation");
+    }
+
+    private static void RequirePairedPresence(PresencePrompt prompt, bool cancel)
+    {
         if (prompt.Requested.Count != 1 || prompt.Requested[0].Basis != UserPresenceBasis.DeviceWaiting ||
             prompt.Resolved.Count != 1 || !ReferenceEquals(prompt.Requested[0], prompt.Resolved[0].Context) ||
             prompt.Resolved[0].Outcome != (cancel ? UserPresenceOutcome.Cancelled : UserPresenceOutcome.Completed) ||
             prompt.Resolved[0].Token != CancellationToken.None)
             throw new InvalidOperationException("User presence request/resolution did not pair exactly once");
-
-        var info = await session.GetInfoAsync();
-        if (info.Versions.Count == 0)
-            throw new InvalidOperationException("Same-session getInfo returned no versions");
-        Console.WriteLine($"PHASE_SAME_SESSION_INFO serial={prompt.Serial}");
     }
 
     private static async Task<int> PresenceAsync(int serial, bool cancel)
@@ -92,7 +166,9 @@ internal static class AcceptanceScenarios
         using var operation = new CancellationTokenSource();
         if (!cancel)
             operation.CancelAfter(TimeSpan.FromSeconds(50));
-        var prompt = new PresencePrompt(serial, cancel ? "ACTIVE_CANCEL" : "TOUCH_SELECTED", cancel ? operation.Cancel : null);
+        CancelTiming? timing = cancel ? new CancelTiming() : null;
+        var prompt = new PresencePrompt(serial, cancel ? "ACTIVE_CANCEL" : "TOUCH_SELECTED",
+            cancel ? () => { timing?.MarkCancelInvocation(); operation.Cancel(); } : null, timing);
         await using (var connection = await selected.ConnectAsync<IFidoHidConnection>())
         {
             if (connection.GetType().Name != "MacOSFidoHidConnection")
@@ -100,7 +176,7 @@ internal static class AcceptanceScenarios
             await using (var session = await FidoSession.CreateAsync(connection,
                 new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido, UserPresencePrompt = prompt }))
             {
-                await PresenceAsyncOnSession(session, prompt, cancel, operation.Token);
+                await PresenceAsyncOnSession(session, prompt, cancel, operation.Token, timing);
             }
         }
 
@@ -112,6 +188,8 @@ internal static class AcceptanceScenarios
             if ((await session.GetInfoAsync()).Versions.Count == 0)
                 throw new InvalidOperationException("Reopened getInfo returned no versions");
         }
+        if (timing is not null)
+            Console.WriteLine($"TIMING mode=active-cancel serial={serial} {timing.Format()}");
         Console.WriteLine($"PASS mode={(cancel ? "active-cancel" : "touch")} serial={serial} resolved=1 sameSessionInfo=1 reopenInfo=1");
         return 0;
     }
@@ -209,7 +287,7 @@ internal static class AcceptanceScenarios
         return 0;
     }
 
-    private sealed class PresencePrompt(int serial, string phase, Action? cancel) : IUserPresencePrompt
+    private sealed class PresencePrompt(int serial, string phase, Action? cancel, CancelTiming? timing) : IUserPresencePrompt
     {
         public int Serial { get; } = serial;
         public List<UserPresenceContext> Requested { get; } = [];
@@ -231,9 +309,56 @@ internal static class AcceptanceScenarios
         public ValueTask OnUserPresenceResolvedAsync(UserPresenceContext context, UserPresenceOutcome outcome,
             CancellationToken cancellationToken)
         {
+            if (outcome == UserPresenceOutcome.Cancelled)
+                timing?.MarkResolved();
             Resolved.Add((context, outcome, cancellationToken));
             Console.WriteLine($"PHASE_PRESENCE_RESOLVED serial={Serial} outcome={outcome}");
             return default;
         }
+    }
+
+    // Stopwatch timestamps are monotonic across the callback worker and the awaiting thread.
+    // Zero denotes missing; each event is recorded at most once, even when callbacks race.
+    private sealed class CancelTiming
+    {
+        private long _cancelInvocation;
+        private long _terminalCatch;
+        private long _resolved;
+        private long _sameSessionInfo;
+
+        public void MarkCancelInvocation() => MarkCancelInvocation(Stopwatch.GetTimestamp());
+        public void MarkTerminalCatch() => MarkTerminalCatch(Stopwatch.GetTimestamp());
+        public void MarkResolved() => MarkResolved(Stopwatch.GetTimestamp());
+        public void MarkSameSessionInfo() => MarkSameSessionInfo(Stopwatch.GetTimestamp());
+
+        public void MarkCancelInvocation(long tick) => RecordFirst(ref _cancelInvocation, tick);
+        public void MarkTerminalCatch(long tick) => RecordFirst(ref _terminalCatch, tick);
+        public void MarkResolved(long tick) => RecordFirst(ref _resolved, tick);
+        public void MarkSameSessionInfo(long tick) => RecordFirst(ref _sameSessionInfo, tick);
+
+        private static void RecordFirst(ref long field, long tick) => Interlocked.CompareExchange(ref field, tick, 0);
+
+        public (long Request, long Terminal, long Resolved, long Reuse) Snapshot() =>
+            (Volatile.Read(ref _cancelInvocation), Volatile.Read(ref _terminalCatch),
+                Volatile.Read(ref _resolved), Volatile.Read(ref _sameSessionInfo));
+
+        public string Format()
+        {
+            var (request, terminal, resolved, reuse) = Snapshot();
+            return $"clock=Stopwatch ticksFrequencyHz={Stopwatch.Frequency} cancelInvokeTicks={Tick(request)} " +
+                $"terminalCatchTicks={Tick(terminal)} resolvedCallbackTicks={Tick(resolved)} sameSessionInfoVerifiedTicks={Tick(reuse)} " +
+                $"cancelInvokeToTerminalCatchMs={Interval(request, terminal)} " +
+                $"cancelInvokeToResolvedCallbackMs={Interval(request, resolved)} " +
+                $"terminalCatchToResolvedCallbackMs={Interval(terminal, resolved)} " +
+                $"cancelInvokeToSameSessionInfoVerifiedMs={Interval(request, reuse)} " +
+                "nativeOnlyMs=null nativeOnlyReason=managedCallbackAndSchedulingBoundariesNotNativeIsolation";
+        }
+
+        public static double? IntervalMs(long start, long end) => start == 0 || end == 0
+            ? null : Stopwatch.GetElapsedTime(start, end).TotalMilliseconds;
+
+        private static string Interval(long start, long end) => IntervalMs(start, end)?.ToString("F3", CultureInfo.InvariantCulture) ?? "null";
+
+        private static string Tick(long value) => value == 0 ? "null" : value.ToString(CultureInfo.InvariantCulture);
     }
 }

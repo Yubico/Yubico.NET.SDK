@@ -19,56 +19,101 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
 /// <summary>
-///     Hardware demonstration that concurrent operations on a single ManagementSession over HID
-///     transports do not interleave packets/reports on the wire.
+///     Hardware checks of the protocol exchange guard on one ManagementSession over each HID transport.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         GetDeviceInfoAsync is a multi-exchange operation (device info paging), so concurrent
-///         calls exercise the protocol-level exchange gate: without serialization, CTAP packets or
-///         OTP feature reports from the two operations would interleave and corrupt both exchanges
-///         (typically timeouts or garbled TLVs).
+///         The guard protects each logical exchange (one GetDeviceInfo page read); it refuses, and
+///         never queues, an exchange that starts while another is admitted. A public operation made of
+///         several exchanges is not atomic: an overlapping call may be refused, or may run its own
+///         exchanges between the first call's exchanges. Callers must sequence public operations.
 ///     </para>
 ///     <para>
-///         Companion unit tests (deterministic gates):
+///         Real hardware gives no control over when two calls overlap, so these tests assert only
+///         outcomes that hold for every timing. They never assert that a refusal happened. The
+///         deterministic refusal proofs are
+///         ManagementSessionExchangeOverlapTests in Management.UnitTests and
 ///         FidoHidProtocolConcurrencyTests / OtpHidProtocolConcurrencyTests in Core.UnitTests.
 ///     </para>
 /// </remarks>
 public class ManagementHidConcurrencyTests
 {
+    private const int Rounds = 5;
+
     /// <summary>
-    ///     Concurrent GetDeviceInfoAsync calls on one session over each HID transport succeed and
-    ///     return consistent data. Pre-fix, interleaved packets caused timeouts/corruption.
+    ///     Awaited GetDeviceInfoAsync calls reuse one HID session and return the device's data each time.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
-    public async Task GetDeviceInfo_ConcurrentCallsOnOneHidSession_DoNotCorruptExchanges(
-        YubiKeyTestState state) =>
-        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+    public async Task GetDeviceInfo_SequentialCallsOnOneHidSession_ReturnDeviceData(YubiKeyTestState state) =>
+        await state.WithManagementAsync(async (mgmt, _) =>
         {
-            // The attribute above is a device FILTER, not a transport pin: a composite key exposing
-            // SmartCard satisfies a HID request. Without an explicit preferredConnection this test ran
-            // over SmartCard on every composite key and proved nothing about HID. Assert the transport
-            // so the test cannot silently stop testing what its name claims.
-            Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
+            AssertOpenedOverRequestedHidTransport(state, mgmt);
 
-            const int iterations = 5;
+            for (var i = 0; i < Rounds; i++)
+                AssertMatchesDevice(state, await mgmt.GetDeviceInfoAsync());
+        },
+        preferredConnection: state.ConnectionType);
 
-            for (var i = 0; i < iterations; i++)
+    /// <summary>
+    ///     Two unawaited GetDeviceInfoAsync calls on one HID session never corrupt each other. Each call
+    ///     either returns the device's data or is refused by the exchange guard, at least one returns
+    ///     data, and the session serves the next awaited call. A timeout, garbled response, or any other
+    ///     failure fails the test.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+    public async Task GetDeviceInfo_OverlappingCallsOnOneHidSession_CompleteOrAreRefusedWithoutCorruption(
+        YubiKeyTestState state) =>
+        await state.WithManagementAsync(async (mgmt, _) =>
+        {
+            AssertOpenedOverRequestedHidTransport(state, mgmt);
+
+            for (var i = 0; i < Rounds; i++)
             {
-                var first = mgmt.GetDeviceInfoAsync();
-                var second = mgmt.GetDeviceInfoAsync();
+                var results = await Task.WhenAll(
+                    ReadOrRefusedAsync(mgmt),
+                    ReadOrRefusedAsync(mgmt));
 
-                var results = await Task.WhenAll(first, second);
-
-                Assert.All(results, info =>
+                // Only one call can lose: once it is refused, the other runs alone to completion.
+                Assert.Contains(results, info => info is not null);
+                foreach (var info in results)
                 {
-                    Assert.Equal(state.SerialNumber, info.SerialNumber);
-                    Assert.Equal(state.FirmwareVersion, info.FirmwareVersion);
-                    Assert.Equal(state.FormFactor, info.FormFactor);
-                });
+                    if (info is { } read)
+                        AssertMatchesDevice(state, read);
+                }
+
+                AssertMatchesDevice(state, await mgmt.GetDeviceInfoAsync());
             }
         },
         preferredConnection: state.ConnectionType);
+
+    /// <summary>
+    ///     Returns <c>null</c> only for the exchange guard's refusal; every other failure propagates.
+    /// </summary>
+    private static async Task<DeviceInfo?> ReadOrRefusedAsync(ManagementSession mgmt)
+    {
+        try
+        {
+            return await mgmt.GetDeviceInfoAsync();
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("one operation at a time", StringComparison.Ordinal))
+        {
+            return null;
+        }
+    }
+
+    // The WithYubiKey attribute is a device filter, not a transport pin: a composite key exposing SmartCard
+    // satisfies a HID request. Assert the opened transport so these tests cannot silently run over SmartCard.
+    private static void AssertOpenedOverRequestedHidTransport(YubiKeyTestState state, ManagementSession mgmt) =>
+        Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
+
+    private static void AssertMatchesDevice(YubiKeyTestState state, DeviceInfo info)
+    {
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+        Assert.Equal(state.FirmwareVersion, info.FirmwareVersion);
+        Assert.Equal(state.FormFactor, info.FormFactor);
+    }
 }

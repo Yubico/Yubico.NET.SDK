@@ -233,14 +233,19 @@ for either case. These Core-only inventories do not certify other SDK-wide bound
 - `IYubiKey.CreateRaw*SessionAsync(...)` owns its hidden connection and disposes it with the returned session.
 - Overlapping operations on one raw session throw `InvalidOperationException` immediately.
 - Overlapping raw calls on a built-in SmartCard connection also throw `InvalidOperationException` immediately.
-- Once admitted, constituent I/O in a stateful session exchange is not cancelled mid-frame. FIDO HID
-  sends `CTAPHID_CANCEL` if it observes caller cancellation during a keep-alive, then reads and validates
-  the terminal response before reporting cancellation when that response is valid; OTP HID attempts a
-  dummy-report reset after touch-wait cancellation. A failed partial APDU or failed OTP reset makes that
-  protocol instance unusable; dispose and reopen the connection. Cancellation does not roll back a device
-  command, and native work has no guaranteed completion deadline.
+- Once admitted, constituent I/O in a stateful session exchange is not cancelled mid-frame. A SmartCard
+  exchange observes the token only at admission; canceling afterwards lets the exchange finish and return
+  its response or failure. FIDO HID sends `CTAPHID_CANCEL` if it observes caller cancellation during a
+  keep-alive, then reads and validates the terminal response before reporting cancellation when that
+  response is valid; OTP HID attempts a dummy-report reset after touch-wait cancellation. A failed partial
+  APDU or failed OTP reset makes that protocol instance unusable; dispose and reopen the connection.
+  Cancellation does not roll back a device command, and native work has no guaranteed completion deadline.
 - Disposal atomically closes admission, waits for an admitted exchange, and only then disposes protocol/SCP state
   and any convenience-owned connection. New operations are refused as soon as disposal begins.
+- A borrowed connection can host the next session after healthy idle or sequential use, and after a SmartCard
+  disposal whose drained exchange succeeded. If a FIDO HID exchange is active when disposal begins, the built-in
+  macOS connection is terminally woken so the drain cannot wait indefinitely; the connection is not disposed but may
+  become unusable, even if the exchange finishes concurrently with the wake. Dispose and reopen it in that case.
 - Prefer `DisposeAsync`. Synchronous `Dispose` performs the same drain by blocking and must not be invoked from
   inside the operation being drained.
 

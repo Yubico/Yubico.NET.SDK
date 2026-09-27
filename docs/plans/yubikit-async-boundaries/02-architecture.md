@@ -9,8 +9,8 @@ shipping source `21498d241f74d64055b10e5b0fb36a47d68acc3b`, with eight
 selected-key published `.8` Native AOT route modes passing. Fresh-host Input
 Monitoring permission testing was user-deferred. Full epic acceptance remains
 pending (19/72 checked, including bounded ISC-19 and reviewed ISC-50). The Core-only inventory
-classifies 205 outstanding sites:
-134 native imports, 3 native exports, 24 waits, 15 scheduling sites,
+classifies 206 outstanding sites:
+134 native imports, 3 native exports, 25 waits, 15 scheduling sites,
 21 pre-task-return gaps, 6 callback registrations, 0 delegate conversions
 and 2 unmanaged callback addresses. The test-link registry has 27 required
 operation rows/49 named profile links, including direct raw and listener paths;
@@ -92,6 +92,23 @@ No actor framework, command hierarchy, universal connection-state base class, ne
 shipping project, process-global single-key lock, or global reservation framework.
 The library continues enumerating other keys. This iteration verifies one selected
 key at a time and makes no new cross-key fairness/scale guarantee.
+
+### Cross-applet comparison rule
+
+For equivalent public journeys, compare the caller-visible contract before
+choosing shared implementation. Record where concurrency is enforced (operation,
+session, connection or device), how overlap is handled, who owns cancellation and
+terminal presence resolution, when borrowed data is released, and what establishes
+safe reuse or requires reopening. Trace these promises through Core and backend
+ownership; a shared base class or matching method name is not proof.
+
+Classify differences as justified transport/domain behavior, documentation mismatch,
+behavioral defect, missing proof, or unrelated pre-existing drift. Each justified
+difference needs source evidence and discoverable public documentation. Prefer
+existing conventions and a bounded refit; do not introduce a universal concurrency
+abstraction or flatten the three public access tiers to make surfaces look alike.
+The [program design](03-program-design.md#public-journey-and-cross-applet-consistency)
+owns the finite comparison and acceptance work.
 
 ### A2 — connection-owned execution for blocking native work
 

@@ -241,6 +241,7 @@ static async Task<int> DiscoverAsync(int? serial)
                 }
             }
         }
+        await ProbeBorrowedSessionReuseAsync(selected, serial.Value);
         // A fresh connection has not sent INIT: there should be no solicited packet to complete
         // the raw read. The invocation barrier proves ReceiveAsync registered before disposal.
         IFidoHidConnection pendingConnection = await selected.ConnectAsync<IFidoHidConnection>();
@@ -335,7 +336,7 @@ static async Task<int> DiscoverAsync(int? serial)
                 throw new InvalidOperationException("Post-cancellation reopen getInfo returned no versions");
         }
         Console.WriteLine("PASS predispatch cancellation → read-only getInfo → dispose → reopen/getInfo/dispose");
-        Console.WriteLine("PASS 5 production HID scenarios (3 cycles + pending read disposal/reopen + predispatch cancellation/reopen); removal and touch pending (not performed)");
+        Console.WriteLine("PASS 6 production HID scenarios (3 cycles + borrowed connection two-session reuse + pending read disposal/reopen + predispatch cancellation/reopen); removal and touch pending (not performed)");
         return 0;
     }
     catch (Exception ex)
@@ -346,5 +347,44 @@ static async Task<int> DiscoverAsync(int? serial)
     finally
     {
         await YubiKeyManager.ShutdownAsync();
+    }
+}
+
+// Caller-owned connection: two public sessions borrow it in sequence. Idle session disposal must
+// detach without ending the connection, so the second INIT/getInfo must succeed on the same owner.
+static async Task ProbeBorrowedSessionReuseAsync(IYubiKey selected, int serial)
+{
+    IFidoHidConnection connection = await selected.ConnectAsync<IFidoHidConnection>();
+    try
+    {
+        if (connection.GetType().Name != "MacOSFidoHidConnection")
+            throw new InvalidOperationException("Borrowed reuse probe did not use the production macOS native owner");
+        await UseBorrowedSessionAsync(connection, 1);
+        await UseBorrowedSessionAsync(connection, 2);
+    }
+    finally
+    {
+        var drain = Stopwatch.StartNew();
+        await connection.DisposeAsync();
+        Console.WriteLine($"borrowed caller connection DisposeAsync completedMs={drain.Elapsed.TotalMilliseconds:F3}");
+    }
+    Console.WriteLine($"PASS borrowed connection: session1 init/getInfo/idle dispose → session2 init/getInfo/idle dispose on same connection → caller dispose; serial={serial}");
+}
+
+static async Task UseBorrowedSessionAsync(IFidoHidConnection connection, int use)
+{
+    FidoSession session = await FidoSession.CreateAsync(connection);
+    try
+    {
+        AuthenticatorInfo info = await session.GetInfoAsync();
+        if (info.Versions.Count == 0)
+            throw new InvalidOperationException($"Borrowed session {use} authenticatorGetInfo returned no versions");
+        Console.WriteLine($"borrowed session={use} init+getInfo sessionFirmware={session.FirmwareVersion} responseFirmware={info.FirmwareVersion} versionCount={info.Versions.Count}");
+    }
+    finally
+    {
+        var timer = Stopwatch.StartNew();
+        await session.DisposeAsync();
+        Console.WriteLine($"borrowed session={use} idle DisposeAsync completedMs={timer.Elapsed.TotalMilliseconds:F3}");
     }
 }

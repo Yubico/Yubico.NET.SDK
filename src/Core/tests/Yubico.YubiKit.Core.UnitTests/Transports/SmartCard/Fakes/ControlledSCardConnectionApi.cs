@@ -22,6 +22,7 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
 {
     private readonly ConcurrentQueue<string> _events = new();
     private readonly ConcurrentQueue<int> _nativeThreadIds = new();
+    private readonly ConcurrentQueue<byte[]> _transmitBuffers = new();
     private int _connectCalls;
     private int _beginTransactionCalls;
     private int _disconnectCalls;
@@ -54,11 +55,15 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
     public nint ConnectedContextHandle => Volatile.Read(ref _connectedContextHandle);
     public bool FailNextConnect { get; set; }
     public bool HoldBegin { get; set; }
+    // Opt in only for non-sensitive test commands; never retain arbitrary caller payloads by default.
+    public bool CaptureTransmitBuffers { get; set; }
+    public Func<int, (uint Result, byte[] Response)>? TransmitResult { get; set; }
     public uint EndTransactionResult { get; set; } = ErrorCode.SCARD_S_SUCCESS;
     public uint DisconnectResult { get; set; } = ErrorCode.SCARD_S_SUCCESS;
     public uint ReleaseContextResult { get; set; } = ErrorCode.SCARD_S_SUCCESS;
     public string[] Events => [.. _events];
     public int[] NativeThreadIds => [.. _nativeThreadIds];
+    public byte[][] TransmitBuffers => [.. _transmitBuffers];
     public WeakReference? ContextReference { get; private set; }
     public WeakReference? CardReference { get; private set; }
 
@@ -124,6 +129,8 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
         out int bytesReceived)
     {
         var call = Interlocked.Increment(ref _transmitCalls);
+        if (CaptureTransmitBuffers)
+            _transmitBuffers.Enqueue(sendBuffer.ToArray());
         if (call == 1)
         {
             Record("transmit-enter");
@@ -132,10 +139,11 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
             Record("transmit-exit");
         }
 
-        receiveBuffer[0] = 0x90;
-        receiveBuffer[1] = 0x00;
-        bytesReceived = 2;
-        return ErrorCode.SCARD_S_SUCCESS;
+        var (result, response) = TransmitResult?.Invoke(call) ??
+            (ErrorCode.SCARD_S_SUCCESS, new byte[] { 0x90, 0x00 });
+        response.CopyTo(receiveBuffer);
+        bytesReceived = response.Length;
+        return result;
     }
 
     public uint Disconnect(SCardCardHandle cardHandle, SCARD_DISPOSITION disposition)

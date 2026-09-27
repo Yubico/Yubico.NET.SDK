@@ -136,6 +136,12 @@
       "entries": ["SendAsync#FEE109F8B4EC#async-blocked#The legacy FIDO adapter performs synchronous report I/O before returning a completed task; this is not an asynchronous transport boundary.", "ReceiveAsync#F1D18E227FDE#async-blocked#Legacy FIDO receive calls IHidConnection.GetReport on the initiating thread before Task.FromResult; hardware read can block."]
     },
     {
+      "path": "Protocols/Fido/Hid/FidoHidProtocol.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Protocols/Fido/Hid/FidoHidProtocol.cs:523-536 rejects own-exchange Dispose, starts CloseAndDrainAsync, requests terminal wake only while an admitted exchange is pending, then blocks on that drain; the borrowed connection is not disposed. FidoHidProtocolTests.Dispose_WhenExchangePending_WakesAndDrainsWithoutReleasingBorrowedConnection and Dispose_WhenIdle_DoesNotTerminallyWakeBorrowedConnection cover both paths."],
+      "status": ["documented", "outstanding"],
+      "entries": ["Dispose#34DB043E1D07#sync-boundary#Synchronous FIDO protocol Dispose blocks until the admitted exchange drains after a conditional terminal wake; own-exchange self-drain is refused and DisposeAsync awaits the same drain."]
+    },
+    {
       "path": "Protocols/Otp/Hid/OtpHidConnection.cs", "reviewOwner": "Core maintainers", "rationale": "",
       "evidence": ["Protocols/Otp/Hid/OtpHidConnection.cs:32-50 invokes IHidConnection.SetReport synchronously before returning Task.CompletedTask."],
       "status": ["documented", "outstanding"],

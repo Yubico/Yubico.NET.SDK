@@ -526,8 +526,10 @@ internal class FidoHidProtocol(
             throw new InvalidOperationException("Cannot synchronously dispose FIDO from its own exchange.");
         _disposalGate.Dispose(() =>
         {
-            if (_connection is ITerminalWakeControl wake) wake.RequestTerminalWake();
-            _exchangeGuard.CloseAndDrain();
+            ValueTask drain = _exchangeGuard.CloseAndDrainAsync();
+            if (!drain.IsCompleted && _connection is ITerminalWakeControl wake)
+                wake.RequestTerminalWake();
+            drain.AsTask().GetAwaiter().GetResult();
             _channelId = null;
             _disposed = true;
         });
@@ -539,8 +541,10 @@ internal class FidoHidProtocol(
             throw new InvalidOperationException("Cannot dispose FIDO from its own exchange.");
         return _disposalGate.DisposeAsync(async () =>
         {
-            if (_connection is ITerminalWakeControl wake) wake.RequestTerminalWake();
-            await _exchangeGuard.CloseAndDrainAsync().ConfigureAwait(false);
+            ValueTask drain = _exchangeGuard.CloseAndDrainAsync();
+            if (!drain.IsCompleted && _connection is ITerminalWakeControl wake)
+                wake.RequestTerminalWake();
+            await drain.ConfigureAwait(false);
             _channelId = null;
             _disposed = true;
         });

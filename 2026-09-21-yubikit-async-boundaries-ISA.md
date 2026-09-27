@@ -8,18 +8,28 @@ phase: execute
 progress: 19/72
 mode: interactive
 started: 2026-09-21T16:01:47Z
-updated: 2026-09-25
+updated: 2026-09-27
 ---
 
 # YubiKit async boundaries — PRD / ideal state artifact
 
-**Current acceptance (2026-09-25): 19/72 checked, 53 pending.** The checklist
+**Current acceptance (2026-09-27): 19/72 checked, 53 pending.** The checklist
 below is authoritative. ISC-19 has one accepted managed protected-continuation
 profile; ISC-33 covers observed macOS listener teardown, not every host.
 ISC-4/37/53/56/62 remain open. After replug the selected-key smart-card
 probe passes; pre-open sharing contention is historical, not a current blocker.
 Windows/Linux native and hardware routes remain deferred. See [current evidence](#verification)
 and [remaining work](docs/plans/yubikit-async-boundaries/00-status.md).
+
+**Final local public-contract increment, 2026-09-25:** implemented idle borrowed
+FIDO connection reuse, composed public cancellation/recovery and smart-card
+boundary proof, native context/error compatibility checks, and truthful
+exchange-level concurrency/ownership documentation. Current inventory is **206
+classified/outstanding sites / 25 blocking waits**, adding the reviewed explicit
+synchronous FIDO disposal drain. Final matrix and residual blockers are in the
+[program design](docs/plans/yubikit-async-boundaries/03-program-design.md#final-local-acceptance-matrix--2026-09-25)
+and latest status checkpoint. Working-tree implementation is not a new global
+acceptance claim; no new criterion is checked, commit/push or hosted green is claimed.
 
 **Progress checkpoint:** The user-approved **local Mac and smart-card milestone
 is closed (D1–D5)** at shipping source `21498d241f74d64055b10e5b0fb36a47d68acc3b`.
@@ -50,12 +60,20 @@ authentication investigation; it is not established as a runtime regression.
 Repository-owned private-feed workflow authentication is now committed in
 `5680901f`; the portable cross-layer/consumer tests, borrowed-input XML,
 native compatibility consumer and timing verifier are committed in `5fd0712f`
-(local branch HEAD, not pushed). Neither commit changes the selected-key
+(local checkpoints, not pushed). Neither commit changes the selected-key
 shipping runtime behavior at `21498d24`. The local-only measurement-link
-documentation repair remains uncommitted in this planning edit. The remote
+documentation repair is committed in `70e35389`, following durable claim corrections
+in `62388695`. The recorded remote
 checks above still belong to `3e928106`, not this local HEAD.
-**Next phase approved and in progress: portable behavior, compatibility,
-measurement and claims, in that order after delivery repair.** Fresh-checkout
+**Next phase approved and in progress: public-journey and cross-applet consistency
+organizes portable behavior, compatibility, measurement and claims.** Prioritize
+hosted delivery verification while independent local acceptance work proceeds.
+The user requires learning one applet to establish reliable expectations for
+equivalent public creation, concurrency, asynchronous return, cancellation,
+recovery, presence and disposal in the others, with justified transport/domain
+differences explicit. The [program design](docs/plans/yubikit-async-boundaries/03-program-design.md#public-journey-and-cross-applet-consistency)
+records comparison dimensions and the first bounded probe. Existing criteria
+49, 53–56 and 61–64 carry this work; planning does not increase acceptance. Fresh-checkout
 documentation validation passes locally; repository-owned workflow credentials
 are committed locally, but none of the failed remote checks above is green at
 the new head; GitHub's automatic Dependency Submission workflow has separate,
@@ -989,6 +1007,8 @@ meaningful change or newly identified risk.
 - No unbounded thread replacement, speculative all-primitives foundation, generic native hierarchy, whole-program theorem, unrelated `TimeProvider` sweep, or mandatory shared P2.
 - Do not force platform differences into inheritance or hide wire flow in operation-specific commands.
 
+- 2026-09-25: Public-journey and cross-applet consistency is the organizing lens of the next portable acceptance slice. Compare equivalent public contracts across applets and raw tiers before implementing missing probes; preserve justified transport/domain differences and established ownership boundaries. Engineers implement bounded proof/fix slices, starting with composed Fido2/macOS presence cancellation and recovery. Keep local D1–D5 closed, all 72 criterion identities and 19 accepted entries unchanged, and hosted delivery as a separate obligation. See the product commitment and program-design comparison/finish rules; this is exploration and acceptance work, not blanket authorization for a public-surface redesign.
+
 ## Changelog
 
 - **2026-09-24** | **conjectured:** Managed listener tests and no-change on-host integration sufficed for callback teardown acceptance. **refuted by:** they observed no topology callback; later real vendor-filtered matching, selected-key removal and late-drain probes observed callback exit before cleanup. **learned:** Apple's manager Close unschedules before per-device close; the dead-port `0x10000003` is not successful per-device close. The no-open command was removed after operator coordination exceeded its 180-second watchdog by at least ten minutes; the inconclusive attempt says nothing about whether open is required. Input Monitoring on other hosts is a separate concern, not a waived teardown requirement. **criterion now:** orchestrator accepts ISC-33 at the observed macOS teardown grade; ISC-53/56/62 remain open.
@@ -1000,6 +1020,46 @@ meaningful change or newly identified risk.
 - **2026-09-21** | **conjectured:** NativeShims must be a separate repository and the available static-linking checkout is a suitable implementation base. **refuted by:** the checkout shares `https://github.com/Yubico/Yubico.NET.SDK.git`, is unrelated in-flight work, and tag 1.16.1 is only a candidate release reference rather than package-producing proof. **learned:** track code/package lineages and immutable revision/package pairs; validate release provenance before native edits. **criterion now:** ISC-41, ISC-42, and ISC-48.
 
 ## Verification
+
+2026-09-27 operator-assisted evidence: selected-key `--touch`, `--expert-io`,
+`--expert-feature`, `--removal`, `--listener-remove` (retry), `--smartcard` and
+`--probe` all returned exit 0 from the existing native-compiled verifier. Touch
+paired Completed once and passed same-session/reopened GetInfo. Physical removal
+terminated the pending read, observed absence, disposed and reopened a fresh
+device generation. Listener removal matched entry 4305440554 and ordered callback
+exit before unschedule/release/stop return; close result `0x10000003` is not
+successful per-device close. Initial listener attempt timed out before operator
+readiness. Direct-interface tests passed with only the selected key attached.
+Three smart-card transaction cycles and borrowed two-session reuse passed after
+replug. Executable hash, exact mode/serial arguments and limits are in the latest
+status checkpoint. No global criterion is newly accepted; 19/72 is unchanged.
+
+2026-09-25 final local increment supersedes the following first-probe checkpoint:
+Core **1,524 passed/3 skipped**, Fido2 **474**, PublicApi **24**, Management **87**,
+WebAuthn **221**, SecurityDomain **45**, YubiOtp **180**, resilience **88**.
+Two changed shipping methods pass the 10/20 complexity gate; test/harness review
+is manual. Public borrowed two-session macOS reuse passed on the selected physical
+key using the extended native-compiled host. Automatic cancellation, OTP info,
+smart-card lifecycle and listener drains also passed. Direct interface probes
+were blocked by ambiguous association with two attached keys; touch request
+timed out without a reply. Four actual SCard context/error imports pass across
+three hash-identified native consumer pairings, not the full compatibility matrix.
+Current profile and cancellation intervals, local-only provenance and remaining
+measurement limitations are recorded in status. Hosted delivery and active demo
+ownership remain unresolved. All 19 accepted criteria retain original scope.
+
+2026-09-25 public-journey checkpoint: new `FidoSessionHidCrossLayerTests` uses
+public session, production backend/protocol/macOS connection and controlled bridge.
+`dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~FidoSessionHidCrossLayerTests"`:
+1 passed; `dotnet toolchain.cs -- test --project Fido2`: 472 passed;
+`dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~CrossLayerAcceptanceTests"`:
+1 passed. Cancellation, overlap refusal during drain, terminal prompt pairing and
+same-session reuse are composed managed evidence toward ISC-55, not full closure.
+Native-release ownership is tested separately from borrowed-connection reusability.
+Source review found session disposal makes the borrowed macOS connection terminal
+despite documented reuse by another session; the next bounded investigation is
+recorded in program design. No shipping fix or new hardware evidence is claimed;
+acceptance remains 19/72.
 
 ### `.8` evidence checkpoints — 2026-09-24
 

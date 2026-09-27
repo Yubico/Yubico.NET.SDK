@@ -46,6 +46,136 @@ Current shipping source pointers for audit: `src/Core/src/Transports/Hid/MacOS/`
 and `src/Core/src/Devices/PcscConnectionSlot.cs`; use current paths rather than
 historical renamed HID interface references.
 
+## Public journey and cross-applet consistency
+
+User-approved refinement, 2026-09-25: make transferable public expectations the
+organizing goal of the next portable slice. The orchestrator owns comparison and
+acceptance; Engineers own bounded tests and fixes. Begin this work while hosted
+delivery is blocked. No push or repository-settings authorization is implied.
+
+1. Compare representative public creation → operation → cancellation/failure →
+   recovery → disposal journeys across Management, Piv, Fido2, WebAuthn, Oath,
+   YubiOtp, OpenPgp, SecurityDomain and YubiHsm, plus the two raw-access tiers.
+   Record naming/options, concurrency scope and overlap outcome, asynchronous
+   invocation return, cancellation completion, prompt pairing, borrowed-memory and
+   connection ownership, and same-session reuse versus reopen requirements.
+2. Reconcile each row with existing evidence before adding checks. Record public
+   entry point, promise, owner, source/test reference, evidence grade, justified
+   difference or gap, and next action. Distinguish documentation mismatch,
+   behavioral defect, proof gap and unrelated pre-existing drift. An unreviewed
+   row stays pending. Extend the existing evidence map rather than create a report.
+3. Implement named missing public-journey probes over production backend/protocol/
+   migrated transport with a controlled native boundary. Use deterministic holds
+   for pending completion and overlap assertions. Test prompt outcome, safe reuse
+   or explicit refusal, and cleanup—not only cancellation-token forwarding.
+4. Address demonstrated defects and misleading promises in bounded slices; retain
+   transport-specific constraints. Review fit and rerun affected regressions. A
+   material public-contract redesign still requires the established scope decision.
+5. Define agreed measurement fields before instrumentation, collect the selected
+   evidence, then reconcile durable docs and still-active demo claims. Missing
+   native observations and deferred platforms remain pending at original scope.
+
+Finish: every selected row has linked evidence or an explicit remaining gap,
+justified differences are documented, and no known mismatch remains in the
+selected journey. This advances criteria 37, 42, 49, 53–56 and 61–64 only where
+their own evidence obligations are satisfied; no new checklist or acceptance
+checkmark is created by planning. Local Mac/smart-card D1–D5 remains closed.
+
+### First selected public journey
+
+Read-only source comparison found composed presence tests in other applet routes,
+but the existing Fido2 backend outcome tests replace the protocol, while Core's
+`CrossLayerAcceptanceTests` omit the backend that owns terminal resolution. This
+is a proof gap, not an established runtime defect. The first Engineer slice is a
+public `FidoSession` over real backend, protocol and macOS connection with a
+controlled input bridge, in Fido2 unit tests. Prove one device-waiting prompt,
+one cancellation frame, drain before terminal completion, exactly one cancelled
+resolution, same-session reuse and caller-owned connection lifetime. Include
+overlap rejection while draining if reachable through the same fixture.
+
+Reuse existing framing and response conventions; keep the fixture local. No
+hardware or shipping refactor is required merely to add this proof. Escalate any
+unexpected Core ownership defect before broadening the slice. Verification:
+`dotnet toolchain.cs -- test --project Fido2 --filter "FullyQualifiedName~FidoSessionHidCrossLayerTests"`,
+then the affected Fido2 suite and existing Core cross-layer case. This single route
+cannot close all presence outcomes or cross-applet consistency.
+
+Checkpoint, 2026-09-25: the new `FidoSessionHidCrossLayerTests` probe passes
+through public `MakeCredentialAsync`, real backend/protocol/macOS connection and
+a controlled bridge. It verifies overlap refusal during drain, caller-token
+cancellation, exactly one cancelled resolution, same-session recovery without
+reinitialization, and native release only on caller disposal. Targeted probe:
+1 passed; full Fido2 suite: 472 passed; Core cross-layer case: 1 passed. These
+are managed tests, not a real credential creation or new native/hardware proof.
+
+**Defect investigation (subsequently resolved below):** same-session recovery before disposal was
+proved; borrowed-connection reuse after session disposal was not. Source review
+traced `FidoHidProtocol.DisposeAsync` through `RequestTerminalWake` to macOS
+connection terminal state, contradicting `ApplicationSession.Connection`'s
+documented reuse by another session. The test deliberately claims only native
+release ownership. Reproduce sequential public sessions over the borrowed
+connection and repair the ownership mismatch with pending-operation disposal
+regressions before claiming that public journey consistent. Do not normalize
+the mismatch by weakening the documented retained composition contract.
+
+### Operator evidence update — 2026-09-27
+
+The user attended touch/unplug/replug verification. With one selected key attached,
+the previous direct-interface blockers cleared; touch success, physical pending-read
+removal/reopen, matched listener removal on retry, smart-card cycles and normal/
+borrowed-session reuse passed. The latest status checkpoint records the executable
+hash and individual outcomes. This supersedes the operator/fixture limitations in
+the historical matrix below for the tested host only. Listener close returned
+`0x10000003`; ordered cleanup passed without claiming successful per-device close.
+No new implementation or criterion acceptance follows merely from these runs.
+
+### Final local acceptance matrix — 2026-09-25
+
+This is the finite matrix for this increment, not an assertion that every applet
+operation has independent native proof. Comparison covered Management, Piv, Fido2,
+WebAuthn, Oath, YubiOtp, OpenPgp, SecurityDomain, YubiHsm and both raw tiers.
+
+| Selected contract | Evidence / resolution | Remaining limit |
+|---|---|---|
+| Equivalent creation/options and asynchronous public shape | Existing `AppletSessionShapeTests`, `AsyncSurfaceConventionTests`, `PublicReturnContractTests`; PublicApi 24 pass | Signature checks do not prove invocation responsiveness; WebAuthn remains a higher-level facade and raw tiers have different responsibilities. |
+| Borrowed idle session disposal and sequential composition | Conditional wake fix; `FidoHidProtocolTests` sync/async probes; `FidoSessionHidCrossLayerTests`; real selected-key two-session native-compiled probe | Active disposal may terminate the connection; no recoverable active-abort promise. |
+| Overlap / concurrency | Public Fido2 drain probe, `RawSmartCardNativeBoundaryTests`, `ManagementSessionExchangeOverlapTests` | Guard is per logical exchange; multi-exchange operations are not atomic or queued. Caller sequencing is required. |
+| Cancellation and recovery | Public Fido2 cancellation/presence/reuse; four public raw smart-card native-seam journeys and existing secure-chain tests | Smart-card cancellation after admission can return a successful result; FIDO drains cancellation; OTP requires successful reset. No blanket reuse promise. |
+| Presence ownership | Full public Fido2 composition and selected-device automatic cancellation; existing applet-specific notification tests reused | Touch-success not newly performed; no claim that all outcomes on all applet transports ran. Management/SecurityDomain have no equivalent touch ceremony. |
+| Smart-card native binding compatibility | Historical Core × old/new native, current hashed Core × new native: four context/error imports plus existing crypto vectors | Success connect/transmit/transaction on every pairing and other operating systems remain unproved. Current Core × old input-owner native is unsupported. |
+| Public measurements | Ten current normal samples, idle observation and one cancellation/reuse interval; provenance and numbers in status | Native-only durations, owner counts and global budgets remain pending. Current profile is not the historical matched comparison. |
+| Truthful durable claims and delivery | Ownership/cancellation/exchange granularity corrected; obsolete Management queuing test replaced; fresh docs validation | Demo branch ownership unresolved; hosted fixes not pushed; direct-interface reruns blocked by two-key association, Telegram touch request unanswered. |
+
+The ownership defect is implemented and verified: idle disposal no longer sends
+the terminal wake. Active disposal preserves the previous terminal behavior and
+public docs explicitly describe reopening after uncertainty. Additional changes
+were limited to discovered contract/test defects and native verifier cleanup.
+Current inventory is 206/25 total/blocking-wait sites, with the explicit synchronous
+FIDO disposal classified and backed by drain tests. No criterion scope or count
+was changed. See the status checkpoint for commands/results and residual blockers.
+
+Final local commands (run from this worktree):
+
+```sh
+dotnet toolchain.cs -- test --project Core
+dotnet toolchain.cs -- test --project Fido2
+dotnet toolchain.cs -- test --project PublicApi
+dotnet toolchain.cs -- test --project Management.UnitTests
+dotnet toolchain.cs -- test --project WebAuthn
+dotnet toolchain.cs -- test --project SecurityDomain
+dotnet toolchain.cs -- test --project YubiOtp
+dotnet toolchain.cs -- resilience --fast
+dotnet toolchain.cs complexity
+dotnet toolchain.cs docs-qa
+git diff --check
+```
+
+The standalone verifier README owns exact compatibility commands and hash choices.
+The native-compiled route host ran `--probe`, `--active-cancel`, `--otp-info`,
+`--smartcard`, `--listener-drain` and `--listener-late-drain`; device-specific modes
+used `--serial 31683481`. `--expert-io` and `--expert-feature` returned explicit
+blocked results. No touch or removal action was inferred from silence.
+
 ## Next bounded milestone: portable acceptance and build reproducibility
 
 Under the existing orchestration authorization, prioritize fresh-checkout docs validation and reproducible
@@ -60,17 +190,18 @@ authentication was committed locally at `5680901f` and linted, but is not pushed
 or hosted-verified. The GitHub-managed dynamic
 dependency workflow does not inherit those changes and remains unresolved.
 No runtime defect is established. Fresh-checkout docs QA passed locally after
-the still-uncommitted link repair; hosted checks remain unverified at local
-HEAD `5fd0712f` (remote failures are at `3e928106`). Hosted
+link repair committed in `70e35389`; hosted checks remain unverified for the local
+checkpoints (recorded remote failures are at `3e928106`). Hosted
 verification is required before closing delivery; independent acceptance-map
 work may proceed. Prior clean `.8` package consumption is not a substitute for
 green branch checks. A real
 runtime regression found during CI investigation is evaluated on its own evidence,
 not assumed from the failed checks.
 
-The user authorized the four-step behavior/compatibility/measurement/claims
-phase after delivery repair, using Engineers without further operator action.
-The finite deliverables, in order, are:
+The user authorized the behavior/compatibility/measurement/claims phase using
+Engineers without further operator action. The public-journey refinement above
+governs local sequencing; hosted delivery remains a separate closure obligation.
+The finite deliverables are:
 
 1. Delivery owner records reproducible branch restore/build and actual green
    Build, Native AOT and Dependency Submission checks at the relevant head.

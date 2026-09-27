@@ -12,7 +12,8 @@ under the local definition of done in the program design. The latest native
 verification passed on one connected key, serial 31683481, including three
 smart-card transaction/read/dispose/reopen cycles after replug resolved the earlier
 sharing contention. Protected-chain cancellation/state proof remains managed evidence.
-The Core inventory has 205 classified/outstanding sites; the test-link registry
+The current Core inventory has 206 classified/outstanding sites, including the
+newly explicit synchronous FIDO disposal drain; the test-link registry
 has 27 required operation rows and 49 profile links, and the public synchronous
 map has 16 entries. None closes global coverage. Matched final-source same-package/
 runtime before/after measurements and a normal/idle profile exist; median
@@ -91,6 +92,27 @@ millisecond target or a cross-key throughput/fairness target.
 - Production delivery is accepted separately from later evaluation of alternative
   smart-card backends. Evaluation alone never changes the default shipping behavior.
   Single-key iteration completion is also distinct from full production-epic completion.
+
+## Cross-applet public-contract consistency
+
+User refinement, 2026-09-25: learning one applet should let a developer predict
+equivalent operations in the others. Review public naming, creation/options,
+connection ownership, asynchronous return, overlap/concurrency scope, cancellation,
+presence outcomes, recovery and disposal together. Matching signatures alone are
+not acceptance: documented promises must match observable public journeys.
+
+Compare all applet surfaces, including Management, Piv, Fido2, WebAuthn, Oath,
+YubiOtp, OpenPgp, SecurityDomain and YubiHsm. Normalize equivalent concepts where
+feasible; explicitly explain transport, device and domain differences rather than
+promise identical capabilities or cancellation latency. Keep applet sessions,
+guarded raw sessions and direct raw connections distinct in their guarantees.
+
+This is the organizing lens of the next portable acceptance slice, before final
+measurement and claims closure. Exploration may identify older inconsistencies;
+record them, but select bounded fixes based on broken transferable expectations
+and relevance to this migration rather than start an unrelated whole-library redesign.
+The program design owns the comparison matrix, evidence grades and implementation
+queue. Existing criteria 49, 53–56 and 61–64 retain their scope and acceptance count.
 
 ## Explicit limits
 

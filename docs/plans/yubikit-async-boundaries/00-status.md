@@ -1,6 +1,123 @@
 # Status: YubiKit async boundaries
 
-## Current checkpoint — 2026-09-25
+## Current checkpoint — 2026-09-27
+
+### Authorized delivery — 2026-09-27
+
+The user authorized committing and pushing this local increment and submitting
+the native changes for review. Native pull request:
+[677](https://github.com/Yubico/Yubico.NET.SDK/pull/677), branch
+`feature/macos-hid-input-dev`, head `64d056ce`, targeting `develop`.
+Independent review passed after wiring the assembled-package export checker
+before upload; fresh native harness **23/23**, Python checker tests **5/5**, and
+inspection of all **14** shared/static assets in `.8` passed locally.
+
+The internal development package already exists and remains pinned in
+`Directory.Packages.props`: **1.18.1-async.8**, producer `71a23cd0`, successful
+[publish workflow](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/35955737172).
+Subsequent native commits change tests, comments and workflow validation, not
+the shipping native implementation. No replacement package is required. Hosted
+execution of the new package-check step is not established by local validation.
+The managed commit/push supersedes the historical no-authorization/uncommitted
+notes below; hosted results must still be evaluated at the pushed head.
+
+### Operator-assisted local verification — 2026-09-27
+
+With only selected serial 31683481 attached, firmware 5.7.4, the existing published
+native-compiled verifier passed the following modes. No source changes or rebuild
+were made for this run; executable SHA-256:
+`872735b23bebec8efb1df0b1b2a9cec7d7f11eea6100e8b9a097821859975d27`.
+
+| Mode | Observed evidence |
+|---|---|
+| `--touch` | Exactly one Completed presence resolution; same-session GetInfo and reopen GetInfo passed. |
+| `--expert-io` | Expected timeout at 6002 ms, followed by same-connection and reopened GetInfo. |
+| `--expert-feature` | Three direct feature reads and three Management info reads passed. |
+| `--removal` | Pending native input terminated after physical unplug, absence observed, native disposal completed, replug produced a fresh generation and successful GetInfo. |
+| `--listener-remove` | Retry observed matching Removed callback for entry 4305440554; stop=1, callback exit=2, close returned=3, unscheduled=4, manager released=5, stop returned=6. Close result `0x10000003` is retained as an error result, not successful per-device close. Initial attempt timed out before the operator was ready; it is not counted as passing. |
+| `--smartcard` | Three open/transaction/read/end/close cycles, two reopens, firmware 5.7.4. |
+| `--probe` | Three normal cycles, two public sessions sequentially sharing one borrowed connection, pending-read disposal/reopen, and pre-admission cancellation/reopen all passed. |
+
+Each invocation used `--serial 31683481` and the executable at
+`verification/MacOSHidRouteVerification/bin/Release/net10.0/osx-arm64/publish/MacOSHidRouteVerification`.
+The `--probe` summary's “touch/removal pending” describes that invocation only;
+the separate successful modes above supply those observations. The prior two-key
+direct-interface blocker and unanswered touch request are superseded for this
+selected-host run. No credential creation/configuration writes were performed.
+
+Full epic acceptance remains **19/72**: these are additional local evidence, not
+complete all-applet outcome, cross-platform or native-metric acceptance. Hosted
+delivery, full native consumer/lifecycle matrices, fresh-host permissions,
+global instrumentation/budgets and active demo ownership remain open. Latest
+implementation is still uncommitted; original local D1–D5 remains closed.
+
+### Final local public-contract increment
+
+The bounded local implementation and unattended verification are recorded in the
+working tree. No commit or push was
+authorized for this increment. Original D1–D5 remains closed; full epic acceptance
+remains **19/72**. The following evidence supersedes the earlier first-probe/next-fix
+notes below, not the deferred global criteria.
+
+- Fixed idle FIDO protocol disposal: close admission and inspect the drain before
+  requesting a terminal wake. Public sessions can now sequentially reuse the same
+  borrowed macOS connection. Active disposal retains terminal-wake protection;
+  reopen after uncertain recovery. Both disposal forms have managed wake/drain tests.
+- Public Fido2 composition proves cancellation, exactly-once terminal prompt,
+  overlap refusal while draining, same-session recovery and idle two-session reuse.
+  Four new public raw smart-card journeys prove pre-admission cancellation/no dispatch,
+  admitted-result completion despite cancellation, drain before sequential reuse,
+  exact response-continuation bytes and refusal without replay after failure.
+- Cross-applet review found the meaningful concurrency limit: guards reject
+  overlapping **logical exchanges**, not whole multi-exchange public operations.
+  Callers sequence those operations. Corrected the durable contract and obsolete
+  Management hardware queuing expectation; a deterministic public Management
+  two-page probe verifies refusal without a second dispatch. Hardware theories
+  were compiled, not run against arbitrary attached keys.
+- Native compatibility: the three supported old/current Core × 1.18.0/`.8`
+  pairings passed crypto plus four actual smart-card imports (context establish,
+  invalid-context cancel, nonexistent-reader connect, context release). Observed
+  error codes were `0x80100003` and `0x80100009`. Wrong hashes, missing export and
+  release-failure controls reject as intended. Binary hashes and limits are in
+  `verification/NativeCompatibilityVerification/README.md`; this is not the full
+  native matrix or every smart-card operation.
+- Fresh native-compiled selected-key runs passed normal FIDO, automatic cancellation,
+  OTP info, three smart-card transaction/read/end/close cycles, and both listener
+  drain modes. The extended normal probe also passed **two public sessions on one
+  borrowed physical connection**. Firmware was 5.7.4. Direct-interface I/O and
+  feature reruns were **blocked**, because two attached keys could not be uniquely
+  associated by those verification modes; no interface was guessed.
+- Telegram availability request timed out; no touch/removal test was performed.
+  Hosted checks still target `3e928106` and fail; no new push/settings authorization
+  exists. Active demo ownership and global native metrics remain open.
+
+Current boundary inventory: **206 classified/outstanding sites, 25 blocking waits**
+(formerly 205/24). The explicit synchronous FIDO disposal drain is a reviewed
+`sync-boundary` with named tests; it adds no asynchronous blocking entry point.
+Latest suites: **Core 1,524 passed/3 skipped; Fido2 474; PublicApi 24; Management 87;
+WebAuthn 221; SecurityDomain 45; YubiOtp 180; resilience 88**. The first full Core
+run caught the new inventory site; it passed after classification, not suppression.
+Shipping complexity checked both changed methods; tests/harness complexity was
+reviewed manually. Review found and corrected test-race, hold-cleanup and verifier
+handle-cleanup issues.
+
+**Current measurements, not a matched before/after claim:** automatic cancellation
+to resolution **99.967 ms**, terminal catch **100.037 ms**, verified reuse
+**116.374 ms** (one run). Profile: two warmups, ten completed normal samples and one
+completed idle sample. Medians: caller return **0.150 ms**, operation **19.902 ms**,
+disposal **1.977 ms**, process allocation **37,416 bytes**. One-second idle observed
+**1.918 ms** process CPU, **0 bytes** allocated, thread delta **0**. Native-only
+duration and owner worker/pending counts are unavailable, not zero or waived.
+LOCAL-only dataset: `artifacts/measurements/current-profile-20260925T192637011Z.json`,
+SHA-256 `4ec5dce4bb4456529d673f07909e0244ba2e924a4b8a71ac75bcea0936311235`.
+It records Core hash `38f43b1c4dc7e7efff69381554f190159b0c56f2ffa80ad28d1b6ead93e81417`,
+HEAD `70e35389` plus working-tree/untracked hashes; source-to-binary identity is
+not independently attested. An initial stale-runner mismatch was rejected before
+hardware access; publishing the runner with the selected Core restored hash agreement.
+
+Next work is limited to explicit blockers or new findings: authorized hosted delivery,
+operator/fixture-dependent probes, active demo ownership, and original cross-platform/
+full-metric acceptance. No further general Mac transport refactor is scheduled.
 
 ### Current lane board and epic slices
 
@@ -15,9 +132,10 @@
 | S6 delivery and cross-platform evidence | `.8` published; clean packaged Native AOT consumers and fresh private-feed restore verified historically. **Separate delivery blocker at remote `3e928106`:** Build [36130687541](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130687541) stopped at seven local-only measurement links; the documentation fix in this checkpoint passes locally in a fresh checkout. Native AOT [36130687588](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130687588) failed private-package restore with `NU1301`/401; repository-owned workflow credential/permission repair is committed locally at `5680901f`, not hosted-verified or pushed. GitHub-managed Dependency Submission [36130685528](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/36130685528) failed the same restore and does not inherit this patch. Its authentication remains unresolved. No local runtime milestone is reopened by these delivery failures. |
 | X exploration (after production milestone) | WinRT SmartCard/CryptoTokenKit exploration unstarted; no production acceptance claim. |
 
-**Approved next phase, in progress:** repair delivery first, then four ordered
-bounded steps: (1) cross-layer behavior, (2) consumer and native compatibility,
-(3) comparable measurement, (4) active claims. Engineers own probes; no new
+**Approved next phase, in progress:** prioritize delivery verification while
+independently pursuing public-journey and cross-applet consistency. Compare
+equivalent applet contracts first, then implement bounded cross-layer behavior,
+consumer/native compatibility, measurement and active-claim work. Engineers own probes; no new
 operator action or approval is requested. Fresh-checkout docs QA now passes
 locally; Build, Native AOT and automatic Dependency Submission remain failed
 at the old remote head, not verified green for the local implementation checkpoints. Follow the [finish
@@ -29,6 +147,28 @@ and ISC-61–64 retain their full scope. Windows/Linux native, fresh-host
 permissions, external implementations and unavailable global metrics remain
 blocked/deferred. Keep local D1–D5 closed absent a demonstrated regression;
 remote pushes and repository settings changes require separate authorization.
+
+**New work item — public journey and cross-applet consistency (2026-09-25):**
+the user requires transferable expectations across applets for creation, concurrency,
+asynchronous return, cancellation, recovery, presence and disposal, with explicit
+transport/domain differences. Recorded in the product commitment, architectural
+comparison rule and [executable slice](03-program-design.md#public-journey-and-cross-applet-consistency).
+Initial source comparison selected the missing public Fido2/macOS cancellation,
+terminal prompt resolution and same-session recovery composition as the first
+Engineer probe. Other comparison dimensions and applet/raw-tier rows remain
+pending; a presence-focused scan is not a completed consistency review. Planning
+adds no acceptance: **19/72 remains checked**. Hosted delivery remains separately blocked.
+
+The first new public-journey probe now passes: one cancellation frame, overlap
+refusal during drain, caller-token cancellation, one cancelled terminal prompt,
+and same-session recovery on the existing channel. Fido2 full suite **472 passed**;
+targeted new probe **1 passed** and Core cross-layer case **1 passed**. Managed
+bridge evidence only. Independent source review found a separate ownership
+mismatch: session disposal terminally wakes the borrowed macOS connection, while
+the public base documentation promises reuse by another session. Next: reproduce
+and fix that bounded ownership defect; native handle retention alone is not
+connection reusability. Existing selected-key local acceptance is not reclassified
+as universal borrowed-session proof. See program design for scope and evidence.
 
 Committed workflow repair `5680901f` supplies `NuGetPackageSourceCredentials_Yubico_GH` using the
 workflow token and package-read permission, excluding fork pull requests. Workflow

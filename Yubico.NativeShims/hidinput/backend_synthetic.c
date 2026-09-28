@@ -1,19 +1,16 @@
 #include "internal.h"
 #include <stdlib.h>
 
-typedef struct { int registered, activated, fail_close, close_attempts, close_status; } synthetic;
+typedef struct { int close_attempts, close_status; } synthetic;
 static void register_all(hidinput_owner *o) {
-    synthetic *s = o->backend_data;
-    /* Called under owner mutex: registration precedes activation. */
-    s->registered = 1;
-    s->activated = s->registered;
+    (void)o;
 }
 static void cancel_backend(hidinput_owner *o) { (void)o; }
 static hidinput_result try_release(hidinput_owner *o) {
     synthetic *s = o->backend_data;
     if (o->started) {
         s->close_attempts++;
-        if (s->fail_close || !hidinput_close_proven(o, s->close_status)) return HIDINPUT_CLOSE_FAULT;
+        if (!hidinput_close_proven(o, s->close_status)) return HIDINPUT_CLOSE_FAULT;
     }
     free(s);
     return HIDINPUT_OK;
@@ -47,18 +44,6 @@ void hidinput_test_ack(hidinput_owner *o) {
     if (cancelling) hidinput_acked(o);
 }
 void hidinput_test_remove(hidinput_owner *o) { if (o) hidinput_removed(o); }
-int hidinput_test_activated_with_registration(hidinput_owner *o) {
-    pthread_mutex_lock(&o->mutex);
-    synthetic *s = o->backend_data;
-    int result = s->activated && s->registered;
-    pthread_mutex_unlock(&o->mutex);
-    return result;
-}
-void hidinput_test_fail_close(hidinput_owner *o) {
-    pthread_mutex_lock(&o->mutex);
-    ((synthetic *)o->backend_data)->fail_close = 1;
-    pthread_mutex_unlock(&o->mutex);
-}
 void hidinput_test_set_close_status(hidinput_owner *o, int status) {
     pthread_mutex_lock(&o->mutex);
     ((synthetic *)o->backend_data)->close_status = status;

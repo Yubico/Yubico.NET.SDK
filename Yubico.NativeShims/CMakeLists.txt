@@ -181,20 +181,13 @@ set(NATIVE_SHIMS_SOURCES
     )
 
 if(APPLE)
+    include(cmake/hidinput-common.cmake)
     list(APPEND NATIVE_SHIMS_SOURCES
-        hidinput/owner.c
-        hidinput/backend_iohid.c
+        ${HIDINPUT_COMMON_SOURCES}
         hidinput/native_exports.c)
-    option(HIDINPUT_DIAG_CLOSE "Print failed macOS HID input close status for local probes" OFF)
-    if(HIDINPUT_DIAG_CLOSE)
-        target_compile_definitions(Yubico.NativeShims PRIVATE HIDINPUT_DIAG_CLOSE=1)
-        if(YUBICO_BUILD_STATIC)
-            target_compile_definitions(Yubico.NativeShims.Static PRIVATE HIDINPUT_DIAG_CLOSE=1)
-        endif()
-    endif()
-    target_compile_options(Yubico.NativeShims PRIVATE -fblocks)
+    target_compile_options(Yubico.NativeShims PRIVATE ${HIDINPUT_COMPILE_OPTIONS})
     if(YUBICO_BUILD_STATIC)
-        target_compile_options(Yubico.NativeShims.Static PRIVATE -fblocks)
+        target_compile_options(Yubico.NativeShims.Static PRIVATE ${HIDINPUT_COMPILE_OPTIONS})
     endif()
 endif()
 
@@ -225,7 +218,7 @@ target_link_libraries(
         )
 
 if(APPLE)
-    target_link_libraries(Yubico.NativeShims "-framework IOKit" "-framework CoreFoundation")
+    target_link_libraries(Yubico.NativeShims ${HIDINPUT_FRAMEWORKS})
 endif()
 
 if(YUBICO_BUILD_STATIC)

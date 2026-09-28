@@ -2,9 +2,6 @@
 #include <IOKit/hid/IOHIDDevice.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <stdlib.h>
-#ifdef HIDINPUT_DIAG_CLOSE
-#include <stdio.h>
-#endif
 
 typedef struct {
     IOHIDDeviceRef device;
@@ -65,11 +62,6 @@ static hidinput_result try_release(hidinput_owner *o) {
     iohid *b = o->backend_data;
     if (o->started) {
         IOReturn status = IOHIDDeviceClose(b->device, kIOHIDOptionsTypeNone);
-#ifdef HIDINPUT_DIAG_CLOSE
-        if (status != kIOReturnSuccess)
-            fprintf(stderr, "hidinput IOHIDDeviceClose status=0x%08x terminal=%d acked=%d service_terminated=%d\n",
-                    (unsigned int)status, o->terminal_reason, o->acked, o->service_terminated);
-#endif
         if (!hidinput_close_proven(o, status)) {
             return HIDINPUT_CLOSE_FAULT;
         }

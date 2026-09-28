@@ -120,8 +120,7 @@ hidinput_result hidinput_start(hidinput_owner *o) {
     pthread_mutex_lock(&o->mutex);
     if (o->started || o->cancelling) { pthread_mutex_unlock(&o->mutex); return HIDINPUT_INVALID; }
     o->started = 1;
-    /* register_all is synchronous and may not call owner callbacks before activation;
-       synthetic activation follows this same ordering. */
+    /* register_all is synchronous and may not call owner callbacks before activation. */
     o->backend->register_all(o);
     pthread_mutex_unlock(&o->mutex);
     return HIDINPUT_OK;

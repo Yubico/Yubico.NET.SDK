@@ -40,18 +40,14 @@
                         Condition="'$(_YubicoNativeShimsPlatform)' == 'linux'" />
             <LinkerArg Include="@(_YubicoNativeShimsStaticArchive->'-Wl,--exclude-libs,%(Filename)%(Extension)')"
                         Condition="'$(_YubicoNativeShimsPlatform)' == 'linux'" />
-            <LinkerArg Include="-framework"
-                        Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
-            <LinkerArg Include="PCSC"
-                        Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
-            <LinkerArg Include="-framework"
-                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
-            <LinkerArg Include="IOKit"
-                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
-            <LinkerArg Include="-framework"
-                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
-            <LinkerArg Include="CoreFoundation"
-                         Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'" />
+        </ItemGroup>
+        <ItemGroup Condition="'$(_YubicoNativeShimsPlatform)' == 'macos'">
+            <LinkerArg Include="-framework" />
+            <LinkerArg Include="PCSC" />
+            <LinkerArg Include="-framework" />
+            <LinkerArg Include="IOKit" />
+            <LinkerArg Include="-framework" />
+            <LinkerArg Include="CoreFoundation" />
         </ItemGroup>
     </Target>
 

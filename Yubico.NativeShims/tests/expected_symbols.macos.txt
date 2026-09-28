@@ -1,0 +1,6 @@
+# Additional exports provided only by the macOS HID input implementation.
+Native_HidInputCreate
+Native_HidInputStart
+Native_HidInputCancel
+Native_HidInputWaitShutdown
+Native_HidInputDestroy

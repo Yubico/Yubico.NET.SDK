@@ -12,6 +12,7 @@ from check_package_exports import check_symbols, shared_symbols, static_symbols,
 
 
 class PackageExportsTests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == "darwin", "Requires a native Mach-O compiler")
     def test_macho_shared_rejects_synthetic_helper_even_with_complete_native_set(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -32,6 +33,7 @@ class PackageExportsTests(unittest.TestCase):
             self.assertEqual(["create_synthetic", "hidinput_test_inject"],
                              check_symbols(symbols, {"Native_Fixture"}, True))
 
+    @unittest.skipUnless(sys.platform == "darwin", "Requires a native Mach-O compiler")
     def test_macho_static_rejects_synthetic_helper_even_with_complete_native_set(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -52,7 +54,6 @@ class PackageExportsTests(unittest.TestCase):
     def test_synthetic_inventory_is_exactly_owner_header_declarations(self):
         self.assertEqual({"hidinput_test_create", "hidinput_test_create_with_terminal",
                            "hidinput_test_inject", "hidinput_test_ack", "hidinput_test_remove",
-                           "hidinput_test_activated_with_registration", "hidinput_test_fail_close",
                            "hidinput_test_set_close_status", "hidinput_test_close_attempts"},
                          synthetic_symbols() - {"create_synthetic"})
         self.assertIn("create_synthetic", synthetic_symbols())

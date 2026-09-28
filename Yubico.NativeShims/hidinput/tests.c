@@ -60,7 +60,6 @@ static void lifecycle(void) {
     hidinput_owner *o = hidinput_test_create(8, 2, receive, &c);
     assert(o); c.owner = o;
     assert(hidinput_start(o) == HIDINPUT_OK);
-    assert(hidinput_test_activated_with_registration(o));
     assert(hidinput_start(o) == HIDINPUT_INVALID);
     uint8_t reusable[8] = {42};
     hidinput_test_inject(o, reusable, sizeof(reusable));
@@ -168,7 +167,7 @@ static void close_failure_retains(void) {
     hidinput_owner *o = hidinput_test_create(1, 1, receive, &c);
     assert(o); c.owner = o;
     assert(hidinput_start(o) == HIDINPUT_OK);
-    hidinput_test_fail_close(o);
+    hidinput_test_set_close_status(o, kIOReturnError);
     hidinput_cancel(o);
     assert(hidinput_destroy(o) == HIDINPUT_BUSY);
     hidinput_test_ack(o);

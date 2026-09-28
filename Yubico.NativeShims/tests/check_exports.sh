@@ -21,6 +21,7 @@ fi
 LIB="$1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXPECTED_FILE="$SCRIPT_DIR/expected_symbols.txt"
+MACOS_EXPECTED_FILE="$SCRIPT_DIR/expected_symbols.macos.txt"
 
 if [ ! -f "$LIB" ]; then
     echo "ERROR: native library not found: $LIB" >&2
@@ -34,11 +35,12 @@ fi
 # Strip comments + blank lines from expected list
 EXPECTED=$(grep -v '^[[:space:]]*#' "$EXPECTED_FILE" | grep -v '^[[:space:]]*$' | sort -u)
 if [ "$(uname -s)" = Darwin ]; then
-    EXPECTED=$(printf '%s\n%s\n' "$EXPECTED" 'Native_HidInputCreate
-Native_HidInputStart
-Native_HidInputCancel
-Native_HidInputWaitShutdown
-Native_HidInputDestroy' | sort -u)
+    if [ ! -f "$MACOS_EXPECTED_FILE" ]; then
+        echo "ERROR: expected_symbols.macos.txt not found at $MACOS_EXPECTED_FILE" >&2
+        exit 2
+    fi
+    MACOS_EXPECTED=$(grep -v '^[[:space:]]*#' "$MACOS_EXPECTED_FILE" | grep -v '^[[:space:]]*$')
+    EXPECTED=$(printf '%s\n%s\n' "$EXPECTED" "$MACOS_EXPECTED" | sort -u)
 fi
 
 # Extract Native_* symbols from the binary. Static archives use the ordinary

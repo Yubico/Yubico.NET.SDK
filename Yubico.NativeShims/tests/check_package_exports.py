@@ -72,9 +72,9 @@ def shared_symbols(path, rid):
 
 
 def check_symbols(symbols, expected, macos):
-    canonical = expected | ({"Native_HidInputCreate", "Native_HidInputStart",
-                             "Native_HidInputCancel", "Native_HidInputWaitShutdown",
-                             "Native_HidInputDestroy"} if macos else set())
+    macos_expected = {line.strip() for line in (HERE / "expected_symbols.macos.txt").read_text().splitlines()
+                      if line.strip() and not line.lstrip().startswith("#")} if macos else set()
+    canonical = expected | macos_expected
     errors = [f"missing: {s}" for s in sorted(canonical - symbols)]
     errors += [f"extra Native_: {s}" for s in sorted(symbols - canonical)
                if s.startswith("Native_")]

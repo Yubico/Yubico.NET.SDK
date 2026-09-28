@@ -84,8 +84,6 @@ hidinput_owner *hidinput_test_create_with_terminal(size_t max_report, size_t cap
 void hidinput_test_inject(hidinput_owner *owner, const uint8_t *data, size_t length);
 void hidinput_test_ack(hidinput_owner *owner);
 void hidinput_test_remove(hidinput_owner *owner);
-int hidinput_test_activated_with_registration(hidinput_owner *owner);
-void hidinput_test_fail_close(hidinput_owner *owner);
 void hidinput_test_set_close_status(hidinput_owner *owner, int status);
 int hidinput_test_close_attempts(hidinput_owner *owner);
 #endif

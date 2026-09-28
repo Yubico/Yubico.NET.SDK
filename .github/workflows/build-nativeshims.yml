@@ -283,6 +283,12 @@ jobs:
       - name: Validate static package targets
         working-directory: Yubico.NativeShims
         run: bash tests/check_static_package.sh
+      - name: Verify macOS input-owner lifetime
+        working-directory: Yubico.NativeShims
+        run: |
+          cmake -S hidinput -B hidinput/build-ci -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
+          cmake --build hidinput/build-ci
+          ctest --test-dir hidinput/build-ci --output-on-failure
       - name: Verify export tables match canonical symbol list
         working-directory: Yubico.NativeShims
         run: |
@@ -327,6 +333,10 @@ jobs:
         with:
           egress-policy: audit
 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          path: source
       - name: Download contents, set metadata and package
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
       - name: Set package metadata
@@ -404,6 +414,18 @@ jobs:
           foreach ($archive in $archives) {
             "| $($archive.FullName) | $($archive.Length) |" >> $env:GITHUB_STEP_SUMMARY
           }
+
+      - name: Verify packaged native exports
+        shell: pwsh
+        run: |
+          python -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)"
+          if ($LASTEXITCODE -ne 0) { throw 'Python 3.11 or newer is required to inspect package exports.' }
+          $env:PATH = "${env:ProgramFiles}\LLVM\bin;$env:PATH"
+          Get-Command llvm-nm, llvm-readobj -ErrorAction Stop | Out-Host
+          $packages = @(Get-ChildItem -File -Filter 'Yubico.NativeShims.*.nupkg')
+          if ($packages.Count -ne 1) { throw "Expected exactly one NativeShims package, found $($packages.Count)." }
+          python source/Yubico.NativeShims/tests/check_package_exports.py $packages[0].FullName
+          if ($LASTEXITCODE -ne 0) { throw 'Packaged native export check failed.' }
 
       - name: Upload Nuget Package
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1

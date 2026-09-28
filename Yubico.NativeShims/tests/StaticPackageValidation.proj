@@ -3,7 +3,7 @@
     <PropertyGroup>
         <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('win-'))">winscard.lib</ExpectedLinkerArgs>
         <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('linux-'))">-lpcsclite|-Wl,--exclude-libs,$([System.IO.Path]::GetFileName('$(ExpectedArchive)'))</ExpectedLinkerArgs>
-        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('osx-'))">-framework|PCSC</ExpectedLinkerArgs>
+        <ExpectedLinkerArgs Condition="$(RuntimeIdentifier.StartsWith('osx-'))">-framework|PCSC|-framework|IOKit|-framework|CoreFoundation</ExpectedLinkerArgs>
     </PropertyGroup>
 
     <Import Project="$(TargetsPath)" />

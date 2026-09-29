@@ -20,7 +20,7 @@ limitations under the License. -->
 
 PIN complexity is an optional feature available on YubiKeys with firmware version 5.7 or later. If PIN complexity is enabled, the YubiKey will block the usage of non-trivial PINs, such as `11111111`, `password`, or `12345678`. 
 
-YubiKeys can also be programmed during the pre-registration process to refuse other specific values. For more information on PIN complexity and the full PIN blocklist, see the <a href="https://docs.yubico.com/hardware/yubikey/yk-tech-manual/5.7-firmware-specifics.html#pin-complexity">YubiKey Technical Manual</a>.
+YubiKeys can also be programmed during the pre-registration process to refuse other specific values. For more information on PIN complexity and the full PIN blocklist, see the <a href="https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-firmware-5.7.html#pin-complexity">YubiKey Technical Manual</a>.
 
 > [!NOTE]
 > PIN complexity policy is derived from the current Revision 3 of <a href="https://pages.nist.gov/800-63-3/sp800-63-3.html">NIST SP 800-63</a> (specifically SP 800-63B-3), with additional consideration of <a href="https://pages.nist.gov/800-63-4/sp800-63.html">Revision 4 of SP 800-63</a> (specifically SP 800-63B-4).

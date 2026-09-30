@@ -492,7 +492,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         EnsureBackend();
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(slot, cancellationToken).ConfigureAwait(false));
+            await GetUserPresenceContextAsync(slot, UserPresenceOperations.Piv.SignOrDecrypt, cancellationToken).ConfigureAwait(false));
         return await SignOrDecryptWithUserPresenceAsync(
                 slot,
                 algorithm,
@@ -533,7 +533,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         Logger.LogDebug("PIV: Auto-detected algorithm {Algorithm} for slot 0x{Slot:X2}", slotMetadata.Algorithm, (byte)slot);
 
         UserPresenceNotification userPresenceNotification =
-            CreateUserPresenceNotification(CreateUserPresenceContext(slot, slotMetadata));
+            CreateUserPresenceNotification(CreateUserPresenceContext(slot, slotMetadata, UserPresenceOperations.Piv.SignOrDecrypt));
         return await SignOrDecryptWithUserPresenceAsync(
                 slot,
                 slotMetadata.Algorithm,
@@ -554,7 +554,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
         UserPresenceNotification userPresenceNotification =
-            CreateUserPresenceNotification(CreateUserPresenceContext(slot, metadata));
+            CreateUserPresenceNotification(CreateUserPresenceContext(slot, metadata, UserPresenceOperations.Piv.Decrypt));
 
         return await RunWithUserPresenceResolutionAsync(
                 userPresenceNotification,
@@ -579,7 +579,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         EnsureBackend();
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(slot, cancellationToken).ConfigureAwait(false));
+            await GetUserPresenceContextAsync(slot, UserPresenceOperations.Piv.CalculateSecret, cancellationToken).ConfigureAwait(false));
         return await RunWithUserPresenceResolutionAsync(
                 userPresenceNotification,
                 token => PivCryptographicOperations.CalculateSecretAsync(
@@ -831,29 +831,31 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     private async Task<UserPresenceContext?> GetUserPresenceContextAsync(
         PivSlot slot,
+        string operation,
         CancellationToken cancellationToken)
     {
         if (!IsUserPresenceNotificationEnabled)
             return null;
 
         if (!IsSupported(PivFeatures.Metadata))
-            return CreateUserPresenceContext(slot, UserPresenceBasis.PolicyMayRequire);
+            return CreateUserPresenceContext(slot, UserPresenceBasis.PolicyMayRequire, operation);
 
         try
         {
             var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
-            return CreateUserPresenceContext(slot, metadata);
+            return CreateUserPresenceContext(slot, metadata, operation);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             Logger.LogDebug(ex, "PIV: Failed to query slot metadata for touch policy, notifying conservatively");
-            return CreateUserPresenceContext(slot, UserPresenceBasis.PolicyMayRequire);
+            return CreateUserPresenceContext(slot, UserPresenceBasis.PolicyMayRequire, operation);
         }
     }
 
     private static UserPresenceContext? CreateUserPresenceContext(
         PivSlot slot,
-        PivSlotMetadata? metadata)
+        PivSlotMetadata? metadata,
+        string operation)
     {
         if (metadata is null)
             return null;
@@ -866,14 +868,15 @@ public sealed class PivSession : ApplicationSession, IPivSession
             _ => UserPresenceBasis.PolicyMayRequire
         };
 
-        return basis is { } value ? CreateUserPresenceContext(slot, value) : null;
+        return basis is { } value ? CreateUserPresenceContext(slot, value, operation) : null;
     }
 
-    private static UserPresenceContext CreateUserPresenceContext(PivSlot slot, UserPresenceBasis basis) =>
+    private static UserPresenceContext CreateUserPresenceContext(PivSlot slot, UserPresenceBasis basis, string operation) =>
         new()
         {
             Basis = basis,
-            Application = "PIV",
+            Application = UserPresenceApplications.Piv,
+            Operation = operation,
             Scope = slot.ToString()
         };
 

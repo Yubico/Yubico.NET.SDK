@@ -105,11 +105,28 @@ public class YubiOtpSessionTests
         UserPresenceContext requested = Assert.Single(prompt.Requested);
         Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Basis);
         Assert.Equal("YubiOTP", requested.Application);
+        Assert.Equal(UserPresenceOperations.YubiOtp.CalculateHmacSha1, requested.Operation);
         Assert.Equal(Slot.One.ToString(), requested.Scope);
         var resolved = Assert.Single(prompt.Resolved);
         Assert.Same(requested, resolved.Context);
         Assert.Equal(UserPresenceOutcome.Completed, resolved.Outcome);
         Assert.Equal(CancellationToken.None, resolved.CancellationToken);
+    }
+
+    [Fact]
+    public async Task CalculateYubicoOtpAsync_TouchConfiguredSmartCard_ReportsOperation()
+    {
+        var prompt = new RecordingUserPresencePrompt();
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
+        using var sessionLease = session;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult((ReadOnlyMemory<byte>)CreateApduResponseData(16)));
+
+        _ = await session.CalculateYubicoOtpAsync(
+            Slot.One, new byte[6], TestContext.Current.CancellationToken);
+
+        Assert.Equal(UserPresenceOperations.YubiOtp.CalculateYubicoOtp, Assert.Single(prompt.Requested).Operation);
+        Assert.Same(prompt.Requested[0], Assert.Single(prompt.Resolved).Context);
     }
 
     [Fact]

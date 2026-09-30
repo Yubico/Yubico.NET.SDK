@@ -196,6 +196,7 @@ public sealed class OpenPgpSessionWireTests
 
         var requested = Assert.Single(prompt.Requested);
         Assert.Equal("OpenPGP", requested.Context.Application);
+        Assert.Equal(UserPresenceOperations.OpenPgp.Sign, requested.Context.Operation);
         Assert.Equal("Sig", requested.Context.Scope);
         Assert.Equal(expectedBasis, requested.Context.Basis);
         Assert.Equal(commandsBeforeOperation, requested.CommandCount);
@@ -238,6 +239,9 @@ public sealed class OpenPgpSessionWireTests
             TestContext.Current.CancellationToken);
 
         Assert.Equal(["Sig", "Dec", "Aut"], prompt.Requested.Select(entry => entry.Context.Scope));
+        Assert.Equal(
+            [UserPresenceOperations.OpenPgp.Sign, UserPresenceOperations.OpenPgp.Decrypt, UserPresenceOperations.OpenPgp.Authenticate],
+            prompt.Requested.Select(entry => entry.Context.Operation));
         Assert.Equal(new byte[] { 0x01, 0x02, 0x03 }, decrypted.ToArray());
         Assert.All(prompt.Requested, entry =>
         {
@@ -345,6 +349,7 @@ public sealed class OpenPgpSessionWireTests
 
         var requested = Assert.Single(prompt.Requested);
         Assert.Equal("Att", requested.Context.Scope);
+        Assert.Equal(UserPresenceOperations.OpenPgp.AttestKey, requested.Context.Operation);
         Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Context.Basis);
         Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
         Assert.DoesNotContain(connection.TransmittedCommands, command =>

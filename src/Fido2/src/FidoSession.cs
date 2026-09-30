@@ -45,8 +45,6 @@ namespace Yubico.YubiKit.Fido2;
 /// </remarks>
 public sealed class FidoSession : ApplicationSession, IFidoSession
 {
-    private const string UserPresenceApplication = "FIDO2";
-
     /// <summary>
     /// Feature flag for FIDO2 support (requires firmware 5.0+).
     /// </summary>
@@ -200,7 +198,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
                     ? new UserPresenceContext
                     {
                         Basis = UserPresenceBasis.PolicyMayRequire,
-                        Application = UserPresenceApplication
+                        Application = UserPresenceApplications.Fido2,
+                        Operation = UserPresenceOperations.Fido2.Selection
                     }
                     : null),
                 cancellationToken: cancellationToken)
@@ -217,7 +216,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
                     ? new UserPresenceContext
                     {
                         Basis = UserPresenceBasis.PolicyMayRequire,
-                        Application = UserPresenceApplication
+                        Application = UserPresenceApplications.Fido2,
+                        Operation = UserPresenceOperations.Fido2.Reset
                     }
                     : null),
                 cancellationToken: cancellationToken)
@@ -271,7 +271,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
                     : new UserPresenceContext
                     {
                         Basis = UserPresenceBasis.PolicyRequires,
-                        Application = UserPresenceApplication,
+                        Application = UserPresenceApplications.Fido2,
+                        Operation = UserPresenceOperations.Fido2.MakeCredential,
                         Scope = rp.Id
                     });
 
@@ -330,7 +331,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
                     : new UserPresenceContext
                     {
                         Basis = UserPresenceBasis.PolicyRequires,
-                        Application = UserPresenceApplication,
+                        Application = UserPresenceApplications.Fido2,
+                        Operation = UserPresenceOperations.Fido2.GetAssertion,
                         Scope = rpId
                     });
 

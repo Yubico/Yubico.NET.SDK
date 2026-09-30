@@ -77,6 +77,11 @@ If a change touches Core runtime loops, polling paths, recovery logic, or listen
 
 ### User-presence notification ownership
 
+SDK-created `UserPresenceContext` values set `Operation` from the applet's nested group in
+`UserPresenceOperations` (for example `UserPresenceOperations.Piv.Decrypt`) and `Application` from
+`UserPresenceApplications`. Operation values have the form `Group.Method` and must stay unique across
+groups; a Core unit test enforces this. When a new applet method notifies presence, add a constant to its group.
+
 `ApplicationSession` creates one non-null `UserPresenceNotification` for each operation. Pass that
 same handle down every participating layer; use `UserPresenceNotification.None` for deliberately
 silent raw, management, and device-information paths. A transport may request the handle when it

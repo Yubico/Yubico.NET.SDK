@@ -38,7 +38,8 @@ public class TouchNotificationTests
         Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
         Assert.Equal(2, prompt.CommandCountAtRequest);
         Assert.Equal(0x03, connection.TransmittedCommands[^1][1]);
-        AssertNotification(prompt, UserPresenceBasis.PolicyRequires, UserPresenceOutcome.Completed);
+        AssertNotification(prompt, UserPresenceBasis.PolicyRequires, UserPresenceOutcome.Completed,
+            UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysSymmetric);
     }
 
     [Fact]
@@ -59,7 +60,8 @@ public class TouchNotificationTests
             TestContext.Current.CancellationToken);
 
         Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
-        AssertNotification(prompt, UserPresenceBasis.PolicyRequires, UserPresenceOutcome.Completed);
+        AssertNotification(prompt, UserPresenceBasis.PolicyRequires, UserPresenceOutcome.Completed,
+            UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysAsymmetric);
     }
 
     [Fact]
@@ -280,11 +282,13 @@ public class TouchNotificationTests
     private static void AssertNotification(
         RecordingUserPresencePrompt prompt,
         UserPresenceBasis basis,
-        UserPresenceOutcome outcome)
+        UserPresenceOutcome outcome,
+        string operation = UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysSymmetric)
     {
         var request = Assert.Single(prompt.Requests);
         Assert.Equal(basis, request.Context.Basis);
         Assert.Equal("YubiHSM Auth", request.Context.Application);
+        Assert.Equal(operation, request.Context.Operation);
         Assert.Equal("cred", request.Context.Scope);
 
         var resolution = Assert.Single(prompt.Resolutions);

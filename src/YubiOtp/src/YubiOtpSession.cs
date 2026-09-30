@@ -378,7 +378,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                     configSlot,
                     paddedChallenge,
                     YubiOtpConstants.HmacResponseSize,
-                    CreateUserPresenceNotification(CreateUserPresenceContext(configSlot, UserPresenceOperations.CalculateHmacSha1)),
+                    CreateUserPresenceNotification(CreateUserPresenceContext(configSlot, UserPresenceOperations.YubiOtp.CalculateHmacSha1)),
                     cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -416,7 +416,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                 configSlot,
                 challenge,
                 YubiOtpConstants.YubicoOtpResponseSize,
-                CreateUserPresenceNotification(CreateUserPresenceContext(configSlot, UserPresenceOperations.CalculateYubicoOtp)),
+                CreateUserPresenceNotification(CreateUserPresenceContext(configSlot, UserPresenceOperations.YubiOtp.CalculateYubicoOtp)),
                 cancellationToken)
             .ConfigureAwait(false);
     }

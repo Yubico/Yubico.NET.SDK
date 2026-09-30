@@ -44,34 +44,36 @@ uses reference equality so ordinary dictionaries cannot conflate equal-valued co
 Its generic string formatting omits `Scope`, but caller-created contexts can contain arbitrary values
 in the other fields; do not assume formatting is always safe to log.
 
-`UserPresenceContext.Application` and `Operation` identify the applet and the SDK method awaiting
-presence. SDK-created contexts set both using `UserPresenceApplications` and `UserPresenceOperations`;
-`Operation` is optional for caller-created contexts. These are stable identifiers, not localized display
-text. Method names omit `Async`, and names such as PIV `SignOrDecrypt` need not be single user-facing
-verbs. Interpret the pair together and use a generic prompt for unknown or null operations. The
-application knows the user's intent (why an action is being performed); the SDK does not.
+`UserPresenceContext.Operation` identifies the SDK operation awaiting presence, and `Application`
+identifies the applet. SDK-created contexts set both, using `UserPresenceOperations` and
+`UserPresenceApplications`; `Operation` is optional for caller-created contexts. Operations are grouped by
+applet, and each value is unique across applets (`"Piv.Decrypt"` and `"OpenPgp.Decrypt"` differ), so a
+prompt can switch on `Operation` alone. The values are stable identifiers, not localized display text.
+They name the SDK method without `Async`, so some, such as `Piv.SignOrDecrypt`, are not single
+user-facing verbs. The application knows the user's intent (why an action is being performed); the SDK
+does not.
 
-| Application constant | Operation constants |
+| Group | Operation constants |
 |---|---|
-| `UserPresenceApplications.Fido2` | `Selection`, `Reset`, `MakeCredential`, `GetAssertion` |
-| `UserPresenceApplications.Piv` | `SignOrDecrypt`, `Decrypt`, `CalculateSecret` |
-| `UserPresenceApplications.OpenPgp` | `Sign`, `Decrypt`, `Authenticate`, `AttestKey` |
-| `UserPresenceApplications.Oath` | `Calculate`, `CalculateCode` |
-| `UserPresenceApplications.YubiOtp` | `CalculateHmacSha1`, `CalculateYubicoOtp` |
-| `UserPresenceApplications.YubiHsmAuth` | `CalculateSessionKeysSymmetric`, `CalculateSessionKeysAsymmetric` |
+| `UserPresenceOperations.Fido2` | `Selection`, `Reset`, `MakeCredential`, `GetAssertion` |
+| `UserPresenceOperations.Piv` | `SignOrDecrypt`, `Decrypt`, `CalculateSecret` |
+| `UserPresenceOperations.OpenPgp` | `Sign`, `Decrypt`, `Authenticate`, `AttestKey` |
+| `UserPresenceOperations.Oath` | `Calculate`, `CalculateCode` |
+| `UserPresenceOperations.YubiOtp` | `CalculateHmacSha1`, `CalculateYubicoOtp` |
+| `UserPresenceOperations.YubiHsmAuth` | `CalculateSessionKeysSymmetric`, `CalculateSessionKeysAsymmetric` |
 
-All operation names in the table are members of `UserPresenceOperations`. This is an open set;
-future SDK versions can add identifiers. For example, an application can supply its own wording:
+This is an open set; future SDK versions can add identifiers, so keep a default branch. Use
+`Application` for applet-wide fallback wording. For example, an application can supply its own wording:
 
 ```csharp
 using Yubico.YubiKit.Core.Credentials;
 
-string message = (context.Application, context.Operation) switch
+string message = context.Operation switch
 {
-    (UserPresenceApplications.Fido2, UserPresenceOperations.MakeCredential) =>
-        "Touch your YubiKey to create a passkey.",
-    (UserPresenceApplications.Piv, UserPresenceOperations.SignOrDecrypt) =>
-        "Touch your YubiKey for the PIV key operation.",
+    UserPresenceOperations.Fido2.MakeCredential => "Touch your YubiKey to create a passkey.",
+    UserPresenceOperations.Fido2.GetAssertion => "Touch your YubiKey to sign in.",
+    UserPresenceOperations.Piv.SignOrDecrypt => "Touch your YubiKey for the PIV key operation.",
+    _ when context.Application == UserPresenceApplications.Oath => "Touch your YubiKey to generate a code.",
     _ => "Touch your YubiKey to continue."
 };
 ```

@@ -65,8 +65,9 @@ await using var piv = await device.CreatePivSessionAsync();
 
 Pass a `SessionCreationOptions` to override the transport, establish SCP, or receive touch notifications;
 see [User interaction](../../docs/usage/user-interaction.md).
-Touch notification contexts carry `Application` and optional `Operation` identifiers; SDK-created contexts
-use `UserPresenceApplications` and `UserPresenceOperations` from Core's credentials namespace.
+Touch notification contexts carry an `Application` and an optional `Operation` identifier. SDK-created
+contexts set `Operation` to a unique constant such as `UserPresenceOperations.Fido2.GetAssertion`, so a prompt
+can switch on it directly.
 
 ### Select one device
 

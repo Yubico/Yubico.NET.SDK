@@ -32,13 +32,14 @@ public sealed record UserPresenceContext
     public required string Application { get; init; }
 
     /// <summary>
-    ///     Gets a stable identifier for the SDK method requesting presence, normally one of
-    ///     <see cref="UserPresenceOperations" />. This is the method name without <c>Async</c>, not localized
-    ///     display text or necessarily a single user-facing verb (for example, PIV <c>SignOrDecrypt</c>).
+    ///     Gets a stable identifier for the SDK operation requesting presence, normally one of the constants in
+    ///     <see cref="UserPresenceOperations" />, such as <see cref="UserPresenceOperations.Fido2.GetAssertion" />.
     /// </summary>
     /// <remarks>
-    ///     Always set on SDK-created contexts; may be null on caller-created contexts. Interpret together with
-    ///     <see cref="Application" /> and treat unknown values as a generic prompt.
+    ///     Values are unique across applications, so a prompt can switch on this property alone. They identify the
+    ///     SDK method, not localized display text, and are not always a single user-facing verb (for example,
+    ///     <see cref="UserPresenceOperations.Piv.SignOrDecrypt" />). Always set on SDK-created contexts; may be null
+    ///     on caller-created contexts. Treat null or unknown values as a generic prompt.
     /// </remarks>
     public string? Operation { get; init; }
 

@@ -209,7 +209,7 @@ public class FidoSessionTests
         UserPresenceContext requested = Assert.Single(prompt.Requested);
         Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Basis);
         Assert.Equal("FIDO2", requested.Application);
-        Assert.Equal(UserPresenceOperations.MakeCredential, requested.Operation);
+        Assert.Equal(UserPresenceOperations.Fido2.MakeCredential, requested.Operation);
         Assert.Equal("example.com", requested.Scope);
         var resolved = Assert.Single(prompt.Resolved);
         Assert.Same(requested, resolved.Context);
@@ -293,7 +293,7 @@ public class FidoSessionTests
         _ = await Assert.ThrowsAsync<CtapException>(() => session.GetAssertionAsync(
             "example.com", new byte[32], cancellationToken: TestContext.Current.CancellationToken));
 
-        Assert.Equal(UserPresenceOperations.GetAssertion, Assert.Single(prompt.Requested).Operation);
+        Assert.Equal(UserPresenceOperations.Fido2.GetAssertion, Assert.Single(prompt.Requested).Operation);
         Assert.Same(prompt.Requested[0], Assert.Single(prompt.Resolved).Context);
     }
 
@@ -363,8 +363,8 @@ public class FidoSessionTests
     }
 
     [Theory]
-    [InlineData(false, UserPresenceOperations.Selection)]
-    [InlineData(true, UserPresenceOperations.Reset)]
+    [InlineData(false, UserPresenceOperations.Fido2.Selection)]
+    [InlineData(true, UserPresenceOperations.Fido2.Reset)]
     public async Task HidWait_ReportsSessionOperation(bool reset, string expectedOperation)
     {
         var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse());

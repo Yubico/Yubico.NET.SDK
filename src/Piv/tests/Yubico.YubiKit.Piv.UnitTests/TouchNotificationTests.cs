@@ -47,7 +47,7 @@ public class TouchNotificationTests
             UserPresenceBasis.PolicyRequires,
             PivSlot.Authentication,
             UserPresenceOutcome.Completed,
-            UserPresenceOperations.SignOrDecrypt);
+            UserPresenceOperations.Piv.SignOrDecrypt);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class TouchNotificationTests
             UserPresenceBasis.PolicyRequires,
             PivSlot.KeyManagement,
             UserPresenceOutcome.Completed,
-            UserPresenceOperations.Decrypt);
+            UserPresenceOperations.Piv.Decrypt);
         Assert.Equal(5, prompt.CommandCountAtResolution);
     }
 
@@ -124,7 +124,7 @@ public class TouchNotificationTests
             UserPresenceBasis.PolicyMayRequire,
             PivSlot.KeyManagement,
             UserPresenceOutcome.Completed,
-            UserPresenceOperations.CalculateSecret);
+            UserPresenceOperations.Piv.CalculateSecret);
     }
 
     [Theory]
@@ -351,7 +351,7 @@ public class TouchNotificationTests
         UserPresenceBasis basis,
         PivSlot slot,
         UserPresenceOutcome outcome,
-        string operation = UserPresenceOperations.SignOrDecrypt)
+        string operation = UserPresenceOperations.Piv.SignOrDecrypt)
     {
         var request = Assert.Single(prompt.Requests);
         Assert.Equal(basis, request.Context.Basis);

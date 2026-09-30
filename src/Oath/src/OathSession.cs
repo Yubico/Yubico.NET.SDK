@@ -395,7 +395,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
         UserPresenceNotification userPresenceNotification =
-            CreateUserPresenceNotification(CreateUserPresenceContext(credential, UserPresenceOperations.Calculate));
+            CreateUserPresenceNotification(CreateUserPresenceContext(credential, UserPresenceOperations.Oath.Calculate));
         try
         {
             return await RunWithUserPresenceNotificationAsync(
@@ -461,7 +461,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
         UserPresenceNotification userPresenceNotification =
-            CreateUserPresenceNotification(CreateUserPresenceContext(credential, UserPresenceOperations.CalculateCode));
+            CreateUserPresenceNotification(CreateUserPresenceContext(credential, UserPresenceOperations.Oath.CalculateCode));
         try
         {
             return await RunWithUserPresenceNotificationAsync(

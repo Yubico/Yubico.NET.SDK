@@ -434,7 +434,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var labelBytes = ValidateAndEncodeLabel(label);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(label, UserPresenceOperations.CalculateSessionKeysSymmetric, cancellationToken).ConfigureAwait(false));
+            await GetUserPresenceContextAsync(label, UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysSymmetric, cancellationToken).ConfigureAwait(false));
 
         byte[]? credPwBytes = null;
         Memory<byte> data = default;
@@ -554,7 +554,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var labelBytes = ValidateAndEncodeLabel(label);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(label, UserPresenceOperations.CalculateSessionKeysAsymmetric, cancellationToken).ConfigureAwait(false));
+            await GetUserPresenceContextAsync(label, UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysAsymmetric, cancellationToken).ConfigureAwait(false));
 
         byte[]? credPwBytes = null;
         Memory<byte> data = default;

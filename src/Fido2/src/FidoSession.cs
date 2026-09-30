@@ -199,7 +199,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
                     {
                         Basis = UserPresenceBasis.PolicyMayRequire,
                         Application = UserPresenceApplications.Fido2,
-                        Operation = UserPresenceOperations.Selection
+                        Operation = UserPresenceOperations.Fido2.Selection
                     }
                     : null),
                 cancellationToken: cancellationToken)
@@ -217,7 +217,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
                     {
                         Basis = UserPresenceBasis.PolicyMayRequire,
                         Application = UserPresenceApplications.Fido2,
-                        Operation = UserPresenceOperations.Reset
+                        Operation = UserPresenceOperations.Fido2.Reset
                     }
                     : null),
                 cancellationToken: cancellationToken)
@@ -272,7 +272,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
                     {
                         Basis = UserPresenceBasis.PolicyRequires,
                         Application = UserPresenceApplications.Fido2,
-                        Operation = UserPresenceOperations.MakeCredential,
+                        Operation = UserPresenceOperations.Fido2.MakeCredential,
                         Scope = rp.Id
                     });
 
@@ -332,7 +332,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
                     {
                         Basis = UserPresenceBasis.PolicyRequires,
                         Application = UserPresenceApplications.Fido2,
-                        Operation = UserPresenceOperations.GetAssertion,
+                        Operation = UserPresenceOperations.Fido2.GetAssertion,
                         Scope = rpId
                     });
 

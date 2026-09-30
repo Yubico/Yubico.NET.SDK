@@ -77,8 +77,8 @@ public sealed class UserPresenceNotificationTests
 
         Assert.NotSame(initialContext, prompt.RequestContext);
         Assert.Equal(UserPresenceBasis.DeviceWaiting, prompt.RequestContext?.Basis);
-        Assert.Equal("MakeCredential", prompt.RequestContext?.Operation);
-        Assert.Equal("MakeCredential", prompt.ResolutionContext?.Operation);
+        Assert.Equal(UserPresenceOperations.Fido2.MakeCredential, prompt.RequestContext?.Operation);
+        Assert.Equal(UserPresenceOperations.Fido2.MakeCredential, prompt.ResolutionContext?.Operation);
         Assert.Same(prompt.RequestContext, prompt.ResolutionContext);
     }
 
@@ -176,7 +176,7 @@ public sealed class UserPresenceNotificationTests
         Assert.NotEqual(first, equalValues);
         Assert.False(contexts.ContainsKey(equalValues));
         Assert.Contains("FIDO2", first.ToString(), StringComparison.Ordinal);
-        Assert.Contains("Operation = MakeCredential", first.ToString(), StringComparison.Ordinal);
+        Assert.Contains("Operation = Fido2.MakeCredential", first.ToString(), StringComparison.Ordinal);
         Assert.DoesNotContain("example.com", first.ToString(), StringComparison.Ordinal);
     }
 
@@ -191,12 +191,29 @@ public sealed class UserPresenceNotificationTests
         Assert.Equal("YubiHSM Auth", UserPresenceApplications.YubiHsmAuth);
     }
 
+    [Fact]
+    public void UserPresenceOperations_AreUniqueAndQualifiedByTheirGroup()
+    {
+        var operations = typeof(UserPresenceOperations)
+            .GetNestedTypes()
+            .SelectMany(group => group
+                .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+                .Where(field => field.IsLiteral)
+                .Select(field => (Expected: $"{group.Name}.{field.Name}", Actual: (string)field.GetRawConstantValue()!)))
+            .ToList();
+
+        Assert.Equal(6, typeof(UserPresenceOperations).GetNestedTypes().Length);
+        Assert.NotEmpty(operations);
+        Assert.All(operations, operation => Assert.Equal(operation.Expected, operation.Actual));
+        Assert.Equal(operations.Count, operations.Select(operation => operation.Actual).Distinct().Count());
+    }
+
     private static UserPresenceContext CreateContext(
         UserPresenceBasis basis = UserPresenceBasis.DeviceWaiting) => new()
         {
             Basis = basis,
             Application = "FIDO2",
-            Operation = "MakeCredential",
+            Operation = UserPresenceOperations.Fido2.MakeCredential,
             Scope = "example.com"
         };
 

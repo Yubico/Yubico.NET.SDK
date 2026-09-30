@@ -105,7 +105,7 @@ public class YubiOtpSessionTests
         UserPresenceContext requested = Assert.Single(prompt.Requested);
         Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Basis);
         Assert.Equal("YubiOTP", requested.Application);
-        Assert.Equal(UserPresenceOperations.CalculateHmacSha1, requested.Operation);
+        Assert.Equal(UserPresenceOperations.YubiOtp.CalculateHmacSha1, requested.Operation);
         Assert.Equal(Slot.One.ToString(), requested.Scope);
         var resolved = Assert.Single(prompt.Resolved);
         Assert.Same(requested, resolved.Context);
@@ -125,7 +125,7 @@ public class YubiOtpSessionTests
         _ = await session.CalculateYubicoOtpAsync(
             Slot.One, new byte[6], TestContext.Current.CancellationToken);
 
-        Assert.Equal(UserPresenceOperations.CalculateYubicoOtp, Assert.Single(prompt.Requested).Operation);
+        Assert.Equal(UserPresenceOperations.YubiOtp.CalculateYubicoOtp, Assert.Single(prompt.Requested).Operation);
         Assert.Same(prompt.Requested[0], Assert.Single(prompt.Resolved).Context);
     }
 

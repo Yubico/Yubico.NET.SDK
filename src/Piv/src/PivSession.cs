@@ -492,7 +492,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         EnsureBackend();
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(slot, UserPresenceOperations.SignOrDecrypt, cancellationToken).ConfigureAwait(false));
+            await GetUserPresenceContextAsync(slot, UserPresenceOperations.Piv.SignOrDecrypt, cancellationToken).ConfigureAwait(false));
         return await SignOrDecryptWithUserPresenceAsync(
                 slot,
                 algorithm,
@@ -533,7 +533,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         Logger.LogDebug("PIV: Auto-detected algorithm {Algorithm} for slot 0x{Slot:X2}", slotMetadata.Algorithm, (byte)slot);
 
         UserPresenceNotification userPresenceNotification =
-            CreateUserPresenceNotification(CreateUserPresenceContext(slot, slotMetadata, UserPresenceOperations.SignOrDecrypt));
+            CreateUserPresenceNotification(CreateUserPresenceContext(slot, slotMetadata, UserPresenceOperations.Piv.SignOrDecrypt));
         return await SignOrDecryptWithUserPresenceAsync(
                 slot,
                 slotMetadata.Algorithm,
@@ -554,7 +554,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         var metadata = await GetSlotMetadataAsync(slot, cancellationToken).ConfigureAwait(false);
         UserPresenceNotification userPresenceNotification =
-            CreateUserPresenceNotification(CreateUserPresenceContext(slot, metadata, UserPresenceOperations.Decrypt));
+            CreateUserPresenceNotification(CreateUserPresenceContext(slot, metadata, UserPresenceOperations.Piv.Decrypt));
 
         return await RunWithUserPresenceResolutionAsync(
                 userPresenceNotification,
@@ -579,7 +579,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         EnsureBackend();
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(slot, UserPresenceOperations.CalculateSecret, cancellationToken).ConfigureAwait(false));
+            await GetUserPresenceContextAsync(slot, UserPresenceOperations.Piv.CalculateSecret, cancellationToken).ConfigureAwait(false));
         return await RunWithUserPresenceResolutionAsync(
                 userPresenceNotification,
                 token => PivCryptographicOperations.CalculateSecretAsync(

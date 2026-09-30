@@ -253,7 +253,7 @@ public class OathSessionTests
 
         var requested = Assert.Single(prompt.Requested);
         Assert.Equal("OATH", requested.Context.Application);
-        Assert.Equal(UserPresenceOperations.CalculateCode, requested.Context.Operation);
+        Assert.Equal(UserPresenceOperations.Oath.CalculateCode, requested.Context.Operation);
         Assert.Equal("issuer:alice", requested.Context.Scope);
         Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Context.Basis);
         Assert.Equal(commandsBeforeCalculation, requested.CommandCount);
@@ -280,7 +280,7 @@ public class OathSessionTests
             new byte[8],
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(UserPresenceOperations.Calculate, Assert.Single(prompt.Requested).Context.Operation);
+        Assert.Equal(UserPresenceOperations.Oath.Calculate, Assert.Single(prompt.Requested).Context.Operation);
         Assert.Same(prompt.Requested[0].Context, Assert.Single(prompt.Resolved).Context);
     }
 

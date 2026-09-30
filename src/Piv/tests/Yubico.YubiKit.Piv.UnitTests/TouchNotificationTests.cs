@@ -46,7 +46,32 @@ public class TouchNotificationTests
             prompt,
             UserPresenceBasis.PolicyRequires,
             PivSlot.Authentication,
-            UserPresenceOutcome.Completed);
+            UserPresenceOutcome.Completed,
+            UserPresenceOperations.Piv.SignOrDecrypt);
+    }
+
+    [Fact]
+    public async Task SignOrDecryptAsync_InsideIntentScope_ReportsIntentAfterMetadataLookup()
+    {
+        var connection = CreateInitializedConnection(
+            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            CryptoResponse(0xAA));
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await CreateSessionAsync(connection, prompt);
+
+        using (UserPresenceIntent.BeginScope("sign the release"))
+        {
+            _ = await session.SignOrDecryptAsync(
+                PivSlot.Signature,
+                PivAlgorithm.EccP256,
+                new byte[32],
+                TestContext.Current.CancellationToken);
+        }
+
+        UserPresenceContext requested = Assert.Single(prompt.Requests).Context;
+        Assert.Equal("sign the release", requested.Intent);
+        Assert.Equal(UserPresenceOperations.Piv.SignOrDecrypt, requested.Operation);
+        Assert.Same(requested, Assert.Single(prompt.Resolutions).Context);
     }
 
     [Fact]
@@ -97,7 +122,8 @@ public class TouchNotificationTests
             prompt,
             UserPresenceBasis.PolicyRequires,
             PivSlot.KeyManagement,
-            UserPresenceOutcome.Completed);
+            UserPresenceOutcome.Completed,
+            UserPresenceOperations.Piv.Decrypt);
         Assert.Equal(5, prompt.CommandCountAtResolution);
     }
 
@@ -121,7 +147,8 @@ public class TouchNotificationTests
             prompt,
             UserPresenceBasis.PolicyMayRequire,
             PivSlot.KeyManagement,
-            UserPresenceOutcome.Completed);
+            UserPresenceOutcome.Completed,
+            UserPresenceOperations.Piv.CalculateSecret);
     }
 
     [Theory]
@@ -347,11 +374,13 @@ public class TouchNotificationTests
         RecordingUserPresencePrompt prompt,
         UserPresenceBasis basis,
         PivSlot slot,
-        UserPresenceOutcome outcome)
+        UserPresenceOutcome outcome,
+        string operation = UserPresenceOperations.Piv.SignOrDecrypt)
     {
         var request = Assert.Single(prompt.Requests);
         Assert.Equal(basis, request.Context.Basis);
         Assert.Equal("PIV", request.Context.Application);
+        Assert.Equal(operation, request.Context.Operation);
         Assert.Equal(slot.ToString(), request.Context.Scope);
 
         var resolution = Assert.Single(prompt.Resolutions);

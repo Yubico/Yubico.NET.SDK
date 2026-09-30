@@ -35,8 +35,6 @@ namespace Yubico.YubiKit.YubiOtp;
 /// </summary>
 public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 {
-    private const string UserPresenceApplication = "YubiOTP";
-
     private static readonly Feature FeatureSerial = new("Serial Number Read", 2, 2, 0);
     private static readonly Feature FeatureHmacSha1 = new("HMAC-SHA1 Challenge-Response", 2, 2, 0);
     private static readonly Feature FeatureYubicoOtpChallengeResponse = new("Yubico OTP Challenge-Response", 2, 2, 0);
@@ -380,7 +378,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                     configSlot,
                     paddedChallenge,
                     YubiOtpConstants.HmacResponseSize,
-                    CreateUserPresenceNotification(CreateUserPresenceContext(configSlot)),
+                    CreateUserPresenceNotification(CreateUserPresenceContext(configSlot, UserPresenceOperations.YubiOtp.CalculateHmacSha1)),
                     cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -418,7 +416,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                 configSlot,
                 challenge,
                 YubiOtpConstants.YubicoOtpResponseSize,
-                CreateUserPresenceNotification(CreateUserPresenceContext(configSlot)),
+                CreateUserPresenceNotification(CreateUserPresenceContext(configSlot, UserPresenceOperations.YubiOtp.CalculateYubicoOtp)),
                 cancellationToken)
             .ConfigureAwait(false);
     }
@@ -596,7 +594,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return 0;
     }
 
-    private UserPresenceContext? CreateUserPresenceContext(ConfigSlot configSlot)
+    private UserPresenceContext? CreateUserPresenceContext(ConfigSlot configSlot, string operation)
     {
         if (!IsUserPresenceNotificationEnabled)
         {
@@ -612,7 +610,8 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             return new UserPresenceContext
             {
                 Basis = UserPresenceBasis.DeviceWaiting,
-                Application = UserPresenceApplication,
+                Application = UserPresenceApplications.YubiOtp,
+                Operation = operation,
                 Scope = slot.ToString()
             };
         }
@@ -625,7 +624,8 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return new UserPresenceContext
         {
             Basis = UserPresenceBasis.PolicyRequires,
-            Application = UserPresenceApplication,
+            Application = UserPresenceApplications.YubiOtp,
+            Operation = operation,
             Scope = slot.ToString()
         };
     }

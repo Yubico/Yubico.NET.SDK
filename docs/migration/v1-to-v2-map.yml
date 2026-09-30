@@ -147,8 +147,24 @@ mappings:
       - yubikit:src/YubiOtp/src/YubiOtpSession.cs
       - yubikit:src/YubiHsm/src/HsmAuthSession.cs
       - yubikit:docs/usage/user-interaction.md
-    notes: V2 uses one asynchronous, cancellable request/resolution contract for touch notification across PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. FIDO HID and OTP HID can report DeviceWaiting from live transport status. Smart-card paths use PolicyRequires when policy is known and PolicyMayRequire for cached or unknown policy; they do not infer a smart-card timeout. YubiHSM Auth specifically remains silent when a requested label is absent from a successful LIST, while an unknown touch value on a found credential or LIST failure maps to PolicyMayRequire. The same UserPresenceContext instance correlates Requested and Resolved. This is not PIN KeyCollector parity; most PIN, PUK, password, and key inputs remain direct parameters, and retry behavior remains operation-specific. The alpha-only PIV and YubiHSM Auth OnTouchRequired properties were removed outright with no compatibility adapter.
+    notes: V2 uses one asynchronous, cancellable request/resolution contract for touch notification across PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. FIDO HID and OTP HID can report DeviceWaiting from live transport status. Smart-card paths use PolicyRequires when policy is known and PolicyMayRequire for cached or unknown policy; they do not infer a smart-card timeout. YubiHSM Auth specifically remains silent when a requested label is absent from a successful LIST, while an unknown touch value on a found credential or LIST failure maps to PolicyMayRequire. The same UserPresenceContext instance correlates Requested and Resolved. This is not PIN KeyCollector parity; most PIN, PUK, password, and key inputs remain direct parameters, and retry behavior remains operation-specific. The alpha-only PIV and YubiHSM Auth OnTouchRequired properties were removed outright with no compatibility adapter. See `user-presence-operation-and-intent` for the later addition of stable operation identifiers and caller-supplied intent text to the same context.
     last_reviewed_commit: 2918ae0774e182a58cbc98c03c27defc5d18bc43
+  - id: user-presence-operation-and-intent
+    status: assisted
+    confidence: high
+    migration_kind: behavior
+    v1: No v1 equivalent; v1 touch callbacks (PIV/YubiHSM Auth TouchNotificationCallback, Fido2Session KeyCollector touch notifications, YubiOTP UseTouchNotifier) carried no stable operation identifier and no application-supplied reason text.
+    v2: UserPresenceContext.Operation (stable per-applet identifiers in UserPresenceOperations, applet identifiers in UserPresenceApplications) and UserPresenceContext.Intent (set from the innermost active UserPresenceIntent.BeginScope scope when the operation starts)
+    evidence:
+      - yubikit:src/Core/src/Credentials/UserPresenceContext.cs
+      - yubikit:src/Core/src/Credentials/UserPresenceIntent.cs
+      - yubikit:src/Core/src/Credentials/UserPresenceOperations.cs
+      - yubikit:src/Core/src/Credentials/UserPresenceApplications.cs
+      - yubikit:src/Core/src/Credentials/UserPresenceNotification.cs
+      - yubikit:src/Cli.Shared/src/Output/ConsoleUserPresencePrompt.cs
+      - yubikit:docs/usage/user-interaction.md
+    notes: Purely additive to the `user-presence-prompt` contract, so it requires no v1 call-site change on its own. `Operation` is always set on SDK-created contexts (one unique, stable identifier per applet method, named after the method without `Async`) and may be null on caller-created contexts; treat it as an open set and keep a default branch. `Intent` is optional application-supplied display text attached by wrapping an SDK call in `UserPresenceIntent.BeginScope("...")`; the scope follows the async flow (AsyncLocal-based, like Activity.Current), the innermost undisposed scope wins, and the SDK copies the value into the context when the operation starts so it survives to wherever the notification is later raised. Both fields are excluded from UserPresenceContext.ToString(). Applications migrating a v1 touch callback can adopt Operation/Intent to replace ad hoc per-call-site wording, but adoption is optional; the prompt still works with only Application and Basis.
+    last_reviewed_commit: a58815339e8b0569e5988a07c675392f413718c5
   - id: applet-piv
     status: assisted
     confidence: high

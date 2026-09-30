@@ -80,6 +80,12 @@ session-factory delegates from earlier v2 alphas were removed; call the static f
 FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. This is touch notification only; PIN, PUK, password,
 and key parameters remain explicit unless an applet documents a separate credential-prompt or retry helper.
 
+`UserPresenceContext` also carries `Operation` (a stable per-applet identifier from `UserPresenceOperations`,
+always set on SDK-created contexts) and `Intent` (optional application-supplied text attached with
+`UserPresenceIntent.BeginScope("...")` around the SDK call). Neither has a v1 equivalent; adopting them when
+migrating a v1 touch callback is optional. See `user-presence-operation-and-intent` in `v1-to-v2-map.yml` and
+`docs/usage/user-interaction.md`.
+
 ### 2.0.0-alpha.1 -> 2.0.0-alpha.2 applet API normalization
 
 These are source and, where noted, binary breaks between v2 alpha packages. Apply the mechanical replacements

@@ -31,7 +31,10 @@ namespace Yubico.YubiKit.Core.Credentials;
 public interface IUserPresencePrompt
 {
     /// <summary>Notifies the application that an operation requires or may require user presence.</summary>
-    /// <param name="context">Describes the application, scope, and basis for the notification.</param>
+    /// <param name="context">
+    ///     Describes the application, operation, scope, and basis for the notification, plus any application intent
+    ///     supplied through <see cref="UserPresenceIntent.BeginScope" />.
+    /// </param>
     /// <param name="cancellationToken">Token that the implementation must monitor for cancellation requests.</param>
     /// <remarks>
     ///     Implementations should present or update their user-presence indication and return without waiting for

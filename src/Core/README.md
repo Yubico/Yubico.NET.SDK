@@ -65,6 +65,10 @@ await using var piv = await device.CreatePivSessionAsync();
 
 Pass a `SessionCreationOptions` to override the transport, establish SCP, or receive touch notifications;
 see [User interaction](../../docs/usage/user-interaction.md).
+Touch notification contexts carry an `Application` and an optional `Operation` identifier. SDK-created
+contexts set `Operation` to a unique constant such as `UserPresenceOperations.Fido2.GetAssertion`, so a prompt
+can switch on it directly. Wrap a call in `UserPresenceIntent.BeginScope("approve the transfer")` to pass the
+application's reason to the prompt as `UserPresenceContext.Intent`.
 
 ### Select one device
 

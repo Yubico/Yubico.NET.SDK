@@ -307,59 +307,69 @@ internal sealed class PcscConnectionNativeState
         while (true)
         {
             _signal.WaitOne();
-
-            while (true)
-            {
-                NativeWorkItem? work;
-                TransactionState? transactionToEnd = null;
-                var shutdown = false;
-                lock (_sync)
-                {
-                    work = _ordinaryWork;
-                    _ordinaryWork = null;
-                    if (work is null && !_ordinaryActive)
-                    {
-                        if (_transaction is { Phase: TransactionPhase.Active } active && _shutdownRequested)
-                            active.RequestEnd(SCARD_DISPOSITION.LEAVE_CARD);
-
-                        if (_transaction is { Phase: TransactionPhase.EndRequested, EndAttempted: false } ending)
-                        {
-                            ending.EndAttempted = true;
-                            transactionToEnd = ending;
-                        }
-                        else if (_shutdownRequested &&
-                                 _transaction is not { Phase: TransactionPhase.Beginning or TransactionPhase.EndRequested })
-                        {
-                            shutdown = true;
-                        }
-                    }
-                }
-
-                if (work is not null)
-                {
-                    _executingWork = work;
-                    work.Invoke();
-                    work.AfterInvoke();
-                    lock (_sync)
-                        _ordinaryActive = false;
-                    work.PublishCompletion();
-                    _executingWork = null;
-                    continue;
-                }
-
-                if (transactionToEnd is not null)
-                {
-                    EndTransaction(transactionToEnd);
-                    continue;
-                }
-
-                if (!shutdown)
-                    break;
-
-                CompleteShutdown();
+            if (DrainWorkerSteps())
                 return;
-            }
         }
+    }
+
+    /// <summary>Runs queued steps until the worker is idle (returns false) or shutdown completes (returns true).</summary>
+    private bool DrainWorkerSteps()
+    {
+        while (true)
+        {
+            var step = TakeWorkerStep();
+            if (step.Work is not null)
+                ExecuteOrdinaryWork(step.Work);
+            else if (step.TransactionToEnd is not null)
+                EndTransaction(step.TransactionToEnd);
+            else if (step.Shutdown)
+            {
+                CompleteShutdown();
+                return true;
+            }
+            else
+                return false;
+        }
+    }
+
+    private WorkerStep TakeWorkerStep()
+    {
+        lock (_sync)
+        {
+            var work = _ordinaryWork;
+            _ordinaryWork = null;
+            if (work is not null || _ordinaryActive)
+                return new WorkerStep(work, null, false);
+
+            return TakeIdleWorkerStepLocked();
+        }
+    }
+
+    private WorkerStep TakeIdleWorkerStepLocked()
+    {
+        if (_transaction is { Phase: TransactionPhase.Active } active && _shutdownRequested)
+            active.RequestEnd(SCARD_DISPOSITION.LEAVE_CARD);
+
+        if (_transaction is { Phase: TransactionPhase.EndRequested, EndAttempted: false } ending)
+        {
+            ending.EndAttempted = true;
+            return new WorkerStep(null, ending, false);
+        }
+
+        var shutdown = _shutdownRequested &&
+            _transaction is not { Phase: TransactionPhase.Beginning or TransactionPhase.EndRequested };
+        return new WorkerStep(null, null, shutdown);
+    }
+
+    private void ExecuteOrdinaryWork(NativeWorkItem work)
+    {
+        _executingWork = work;
+        work.Invoke();
+        work.AfterInvoke();
+        lock (_sync)
+            _ordinaryActive = false;
+        work.PublishCompletion();
+        _executingWork = null;
     }
 
     private void EndTransaction(TransactionState transaction)
@@ -500,6 +510,11 @@ internal sealed class PcscConnectionNativeState
         Ended,
         EndFailed
     }
+
+    private readonly record struct WorkerStep(
+        NativeWorkItem? Work,
+        TransactionState? TransactionToEnd,
+        bool Shutdown);
 
     private sealed class TransactionState(SCARD_DISPOSITION scopeDisposition)
     {

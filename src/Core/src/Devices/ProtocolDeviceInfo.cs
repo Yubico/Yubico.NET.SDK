@@ -479,11 +479,13 @@ internal static class ProtocolDeviceInfo
     private static HidConnectionSlot? ResolveMacHidSlot(IDiscoveryConnectionProvider provider, ConnectionType connection)
     {
         if (connection is not (ConnectionType.HidFido or ConnectionType.HidOtp)) return null;
-        if (provider is HidConnectionSlot direct && (direct.IsBuiltInMacFido || direct.IsBuiltInMacOtp)) return direct;
-        return provider is YubiKeyDevice published &&
-                published.TryResolveSlot(connection, out var selected) &&
-                selected is HidConnectionSlot hid && (hid.IsBuiltInMacFido || hid.IsBuiltInMacOtp) ? hid : null;
+        if (provider is YubiKeyDevice published)
+            return published.TryResolveSlot(connection, out var selected) ? AsBuiltInMacHidSlot(selected) : null;
+        return AsBuiltInMacHidSlot(provider);
     }
+
+    private static HidConnectionSlot? AsBuiltInMacHidSlot(object candidate) =>
+        candidate is HidConnectionSlot hid && (hid.IsBuiltInMacFido || hid.IsBuiltInMacOtp) ? hid : null;
 
     private static PcscConnectionSlot? ResolvePcscSlot(
         IDiscoveryConnectionProvider provider,

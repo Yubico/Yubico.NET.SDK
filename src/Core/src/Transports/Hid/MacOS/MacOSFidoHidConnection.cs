@@ -600,44 +600,65 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
         {
             try
             {
-                if (_input != 0)
-                {
-                    if (_started)
-                    {
-                        _bridge.Cancel(_input);
-                        var ack = _bridge.WaitShutdown(_input);
-                        // FAULT reports a terminal input error but still proves native quiescence.
-                        if (ack is not (HidInputResult.Ok or HidInputResult.Fault))
-                        {
-                            throw new InvalidOperationException($"FIDO input cancel acknowledgment failed: {ack}");
-                        }
-                    }
-                    var result = _bridge.Destroy(_input);
-                    if (result != HidInputResult.Ok)
-                    {
-                        throw new InvalidOperationException($"FIDO input destroy failed: {result}");
-                    }
-                }
-                if (_openAttempted && !_started && !_bridge.CloseUnstarted(_device))
-                {
-                    throw new InvalidOperationException("FIDO partial open close failed");
-                }
-                if (_device != 0)
-                {
-                    _bridge.ReleaseDevice(_device);
-                }
-                _device = 0;
-                Exception? registrationFailure = null;
-                try { _registration?.Dispose(); }
-                catch (Exception ex) { registrationFailure = ex; }
-                _root.Free();
-                if (registrationFailure is null) _closed.TrySetResult();
-                else _closed.TrySetException(registrationFailure);
+                ReleaseInput();
+                ReleaseDevice();
+                CompleteClose();
             }
             catch (Exception ex)
             {
                 FailUnreleased("macOS FIDO native release was not proven", ex);
             }
+        }
+
+        private void ReleaseInput()
+        {
+            if (_input == 0)
+            {
+                return;
+            }
+            if (_started)
+            {
+                AcknowledgeInputShutdown();
+            }
+            var result = _bridge.Destroy(_input);
+            if (result != HidInputResult.Ok)
+            {
+                throw new InvalidOperationException($"FIDO input destroy failed: {result}");
+            }
+        }
+
+        private void AcknowledgeInputShutdown()
+        {
+            _bridge.Cancel(_input);
+            var ack = _bridge.WaitShutdown(_input);
+            // FAULT reports a terminal input error but still proves native quiescence.
+            if (ack is not (HidInputResult.Ok or HidInputResult.Fault))
+            {
+                throw new InvalidOperationException($"FIDO input cancel acknowledgment failed: {ack}");
+            }
+        }
+
+        private void ReleaseDevice()
+        {
+            if (_openAttempted && !_started && !_bridge.CloseUnstarted(_device))
+            {
+                throw new InvalidOperationException("FIDO partial open close failed");
+            }
+            if (_device != 0)
+            {
+                _bridge.ReleaseDevice(_device);
+            }
+            _device = 0;
+        }
+
+        private void CompleteClose()
+        {
+            Exception? registrationFailure = null;
+            try { _registration?.Dispose(); }
+            catch (Exception ex) { registrationFailure = ex; }
+            _root.Free();
+            if (registrationFailure is null) _closed.TrySetResult();
+            else _closed.TrySetException(registrationFailure);
         }
 
         private void FailUnreleased(string message, Exception cause)

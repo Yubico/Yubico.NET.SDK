@@ -134,48 +134,65 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
                 while (true)
                 {
                     _signal.WaitOne();
-                    Action? action;
-                    lock (_sync)
-                    {
-                        action = _work;
-                        runningFailure = _pendingFailure;
-                        _work = null;
-                        _pendingFailure = null;
-                    }
+                    var action = TakeWork(out runningFailure);
                     action?.Invoke();
                     runningFailure = null;
-                    lock (_sync)
-                    {
-                        if (!_stopping || _work is not null) continue;
-                    }
+                    if (HasMoreWork()) continue;
                     Close();
                     return;
                 }
             }
             catch (Exception ex)
             {
-                Action<Exception>? queuedFailure;
-                lock (_sync)
-                {
-                    _stopping = true;
-                    queuedFailure = _pendingFailure;
-                    _pendingFailure = null;
-                    _work = null;
-                }
-                try { runningFailure?.Invoke(ex); }
-                catch (Exception completionFailure) { ex = new AggregateException(ex, completionFailure); }
-                try { queuedFailure?.Invoke(ex); }
-                catch (Exception completionFailure) { ex = new AggregateException(ex, completionFailure); }
-                if (_device != 0) FailUnreleased(ex);
-                else
-                {
-                    try { _registration?.Dispose(); }
-                    catch (Exception releaseFailure) { ex = new AggregateException(ex, releaseFailure); }
-                    _root.Free();
-                    _closed.TrySetException(ex);
-                }
+                FailWorker(ex, runningFailure);
             }
             finally { _signal.Dispose(); }
+        }
+
+        private Action? TakeWork(out Action<Exception>? onFailure)
+        {
+            lock (_sync)
+            {
+                var action = _work;
+                onFailure = _pendingFailure;
+                _work = null;
+                _pendingFailure = null;
+                return action;
+            }
+        }
+
+        private bool HasMoreWork()
+        {
+            lock (_sync) return !_stopping || _work is not null;
+        }
+
+        private void FailWorker(Exception ex, Action<Exception>? runningFailure)
+        {
+            Action<Exception>? queuedFailure;
+            lock (_sync)
+            {
+                _stopping = true;
+                queuedFailure = _pendingFailure;
+                _pendingFailure = null;
+                _work = null;
+            }
+            ex = NotifyFailure(runningFailure, ex);
+            ex = NotifyFailure(queuedFailure, ex);
+            if (_device != 0) FailUnreleased(ex);
+            else
+            {
+                try { _registration?.Dispose(); }
+                catch (Exception releaseFailure) { ex = new AggregateException(ex, releaseFailure); }
+                _root.Free();
+                _closed.TrySetException(ex);
+            }
+        }
+
+        private static Exception NotifyFailure(Action<Exception>? onFailure, Exception failure)
+        {
+            try { onFailure?.Invoke(failure); }
+            catch (Exception completionFailure) { return new AggregateException(failure, completionFailure); }
+            return failure;
         }
 
         internal Task OpenAsync(CancellationToken token)

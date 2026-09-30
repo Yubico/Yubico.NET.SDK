@@ -192,3 +192,11 @@
 
 - Analyzed range `2f1d912a1c8d4779c7e6a9ca9b7753417287f99c..HEAD`; no migration-relevant source, package, namespace, or project-shape changes were found.
 - Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c`.
+
+## 2026-09-30 - User-presence operation and intent reporting
+
+- Analyzed range `a7f2cae8c32ad6e0ada55e404f85442f6a266f6c..a58815339e8b0569e5988a07c675392f413718c5` (31 changed files; PRs #681 "report operation in user-presence context" and #682 "let apps attach intent to user-presence prompts").
+- `UserPresenceContext` gained two optional fields on the existing `SessionCreationOptions.UserPresencePrompt` contract: `Operation`, a stable per-applet identifier set by the SDK from the new `UserPresenceOperations` constants (grouped by the existing `UserPresenceApplications` identifiers), and `Intent`, application-supplied display text captured from the innermost active `UserPresenceIntent.BeginScope("...")` scope when the SDK operation starts. Both additions are purely additive to the already-documented `user-presence-prompt` mapping and have no v1 analog, so no new "V1 -> V2" recipe was added; added `user-presence-operation-and-intent` in `v1-to-v2-map.yml` instead and cross-referenced it from `user-presence-prompt` and from the Session Lifecycle section of `v1-to-v2.md`.
+- `docs/usage/user-interaction.md` (project usage doc, not a migration artifact) was updated in the same range with the full `Operation`/`Intent` contract and examples; used as source evidence for the new map entry rather than duplicated into the migration guide.
+- No-impact items confirmed in this range: `ConsoleUserPresencePrompt`'s new `Touch your YubiKey to {intent}.` wording is the reference terminal implementation adopting the new fields, not an API surface change; the PIV/FIDO2/OATH/OpenPGP/YubiOTP/YubiHSM session-file and test-file diffs in this range only thread the new optional fields/scopes through existing touch-notification call sites already covered by `user-presence-prompt` and its per-applet notes.
+- Advanced `docs/migration/.state.yml` `last_analyzed_commit` to `a58815339e8b0569e5988a07c675392f413718c5`.

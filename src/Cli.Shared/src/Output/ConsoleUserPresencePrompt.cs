@@ -17,6 +17,10 @@ using Yubico.YubiKit.Core.Credentials;
 namespace Yubico.YubiKit.Cli.Shared.Output;
 
 /// <summary>Writes user-presence instructions for terminal applications.</summary>
+/// <remarks>
+///     Writes <c>Touch your YubiKey.</c>, or <c>Touch your YubiKey to {intent}.</c> when the operation runs inside a
+///     <see cref="UserPresenceIntent.BeginScope" />.
+/// </remarks>
 public sealed class ConsoleUserPresencePrompt : IUserPresencePrompt
 {
     private const string TouchInstruction = "Touch your YubiKey.";
@@ -61,7 +65,7 @@ public sealed class ConsoleUserPresencePrompt : IUserPresencePrompt
 
         if (context.Basis is not UserPresenceBasis.PolicyMayRequire)
         {
-            _writeLine(TouchInstruction);
+            _writeLine(FormatInstruction(context));
             return default;
         }
 
@@ -120,7 +124,7 @@ public sealed class ConsoleUserPresencePrompt : IUserPresencePrompt
                 }
 
                 _pending.Remove(context);
-                _writeLine(TouchInstruction);
+                _writeLine(FormatInstruction(context));
             }
         }
         catch (OperationCanceledException) when (pending.Cancellation.IsCancellationRequested)
@@ -144,6 +148,10 @@ public sealed class ConsoleUserPresencePrompt : IUserPresencePrompt
             pending.Cancellation.Dispose();
         }
     }
+
+    // Scope may identify a relying party or credential, so only the application-supplied intent is shown.
+    private static string FormatInstruction(UserPresenceContext context) =>
+        context.Intent is { } intent ? $"Touch your YubiKey to {intent}." : TouchInstruction;
 
     private sealed class PendingPrompt(CancellationTokenSource cancellation)
     {

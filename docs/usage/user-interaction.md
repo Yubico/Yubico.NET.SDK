@@ -30,7 +30,8 @@ await using PivSession session = await yubiKey.CreatePivSessionAsync(
 `ConsoleUserPresencePrompt` is the reference terminal implementation. It writes `Touch your
 YubiKey.` immediately for certain requests and debounces uncertain requests for about 300 ms so a
 fast operation does not flash a speculative prompt. It does not print `UserPresenceContext.Scope`,
-which may contain a relying-party identifier, credential label, or key slot.
+which may contain a relying-party identifier, credential label, or key slot. Inside a
+`UserPresenceIntent` scope it writes `Touch your YubiKey to {intent}.` instead.
 
 ## Request and resolution contract
 
@@ -77,6 +78,54 @@ string message = context.Operation switch
     _ => "Touch your YubiKey to continue."
 };
 ```
+
+### Adding the application's intent
+
+`Operation` says what the key is doing; only the application knows why the user is doing it, such as
+approving a payment. Wrap the SDK call in `UserPresenceIntent.BeginScope`, and every notification that
+call raises carries the text in `UserPresenceContext.Intent`. No per-call prompt state is needed, and the
+same prompt instance stays registered for the whole session:
+
+```csharp
+using (UserPresenceIntent.BeginScope("approve the transfer of 500 EUR"))
+{
+    await client.GetAssertionAsync(options, cancellationToken);
+}
+```
+
+```csharp
+public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken)
+{
+    string operation = context.Operation switch
+    {
+        UserPresenceOperations.Fido2.GetAssertion => "sign-in",
+        UserPresenceOperations.Fido2.MakeCredential => "passkey registration",
+        _ => "key operation"
+    };
+
+    // "Touch your YubiKey to approve the transfer of 500 EUR (sign-in)."
+    Console.WriteLine(context.Intent is { } intent
+        ? $"Touch your YubiKey to {intent} ({operation})."
+        : $"Touch your YubiKey to confirm the {operation}.");
+    return default;
+}
+```
+
+- The SDK copies the intent into the context when the operation starts, so it does not matter which layer
+  or thread later raises the notification. Changing or ending the scope during the operation does not
+  change a notification already in progress.
+- Scopes follow the async flow, like `Activity.Current`. Concurrent operations in other flows keep their own
+  intent, and work started inside the scope, including `Task.Run`, inherits it.
+- Scopes nest; the innermost undisposed scope wins. Disposing a scope removes only that scope, even out of
+  order or more than once, so a finished scope is never reported again.
+- Open the scope in the method that awaits the SDK call, or in a synchronous helper. Do not open it inside
+  an `async` helper and return it: the scope object is still undisposed, but the intent does not flow back
+  to the caller, so the caller's operation gets no intent.
+- If your prompt describes the operation, show the intent next to it rather than instead of it. One application call can issue several
+  device operations, and the operation lets the user notice a touch that does not match what they expected.
+- Write the intent as a lowercase verb phrase, such as `"approve the transfer"`, so it reads naturally after
+  "Touch your YubiKey to", which is how `ConsoleUserPresencePrompt` shows it.
+- `Intent` is application-supplied display text. The SDK never logs it, and `ToString` omits it.
 
 The SDK coordinates each operation through one internal lifecycle handle. A transport can request that
 handle when it observes a live wait, while the applet layer that understands the complete response resolves

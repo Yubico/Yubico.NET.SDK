@@ -84,12 +84,27 @@ internal sealed class UserPresenceNotification
     /// <param name="prompt">The optional application-owned notification callback.</param>
     /// <param name="context">The optional operation context.</param>
     /// <returns>An enabled per-operation notification, or <see cref="None" />.</returns>
+    /// <remarks>
+    ///     Captures the active <see cref="UserPresenceIntent" /> here, in the caller's async flow at the start of the
+    ///     operation, so the intent does not depend on where the request is later raised. An intent already set on
+    ///     <paramref name="context" /> is kept.
+    /// </remarks>
     public static UserPresenceNotification Create(
         IUserPresencePrompt? prompt,
-        UserPresenceContext? context) =>
-        prompt is not null && context is not null
-            ? new UserPresenceNotification(prompt, context)
-            : None;
+        UserPresenceContext? context)
+    {
+        if (prompt is null || context is null)
+        {
+            return None;
+        }
+
+        if (context.Intent is null && UserPresenceIntent.Current is { } intent)
+        {
+            context = context with { Intent = intent };
+        }
+
+        return new UserPresenceNotification(prompt, context);
+    }
 
     /// <summary>Requests user presence once using the context supplied to <see cref="Create" />.</summary>
     /// <param name="cancellationToken">The operation cancellation token supplied to the callback.</param>

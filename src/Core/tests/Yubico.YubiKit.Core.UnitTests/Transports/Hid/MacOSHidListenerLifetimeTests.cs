@@ -116,13 +116,17 @@ public class MacOSHidListenerLifetimeTests
     public async Task ConcurrentStopAfterDeadline_UsesRemainingBudgetAndLaterDisposeDoesNotWaitAgain()
     {
         var native = new RecordingManager { InvokeCallback = true };
-        var listener = new MacOSHidDeviceListener(native, TimeSpan.FromMilliseconds(250));
+        // The second Stop must enter before the first exhausts the shared budget; after the
+        // deadline Stop deliberately skips StopRunLoop. Keep the budget well above scheduling
+        // jitter and run the second Stop on a dedicated thread, not the (blocked) thread pool.
+        var listener = new MacOSHidDeviceListener(native, TimeSpan.FromSeconds(1));
         listener.DeviceEvent = _ => { native.InCallback.Set(); native.ContinueCallback.Wait(); };
         listener.Start();
         Assert.True(native.InCallback.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         var first = Task.Run(listener.Stop, TestContext.Current.CancellationToken);
         Assert.True(native.StopSignaled.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-        var second = Task.Run(listener.Stop, TestContext.Current.CancellationToken);
+        var second = Task.Factory.StartNew(
+            listener.Stop, TestContext.Current.CancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         try
         {
             Assert.True(SpinWait.SpinUntil(() => native.StopCalls == 2, TimeSpan.FromSeconds(5)));

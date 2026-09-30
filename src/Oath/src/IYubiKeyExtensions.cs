@@ -41,8 +41,7 @@ public static class IYubiKeyExtensions
             CancellationToken cancellationToken = default)
         {
             var preferredConnectionType = options?.PreferredConnectionType;
-            if (options?.CredentialPrompt is not null)
-                throw new ArgumentException("OATH does not support CredentialPrompt.", nameof(options));
+            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "OATH");
             var transport = yubiKey.ResolveSessionTransport(
                 preferredConnectionType,
                 "OATH",

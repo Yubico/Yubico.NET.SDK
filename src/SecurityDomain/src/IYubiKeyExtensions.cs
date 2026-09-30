@@ -47,8 +47,7 @@ public static class IYubiKeyExtensions
             CancellationToken cancellationToken = default)
         {
             var preferredConnectionType = options?.PreferredConnectionType;
-            if (options?.CredentialPrompt is not null)
-                throw new ArgumentException("Security Domain does not support CredentialPrompt.", nameof(options));
+            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "Security Domain");
             var transport = yubiKey.ResolveSessionTransport(
                 preferredConnectionType,
                 "Security Domain",

@@ -39,8 +39,7 @@ public static class IYubiKeyExtensions
             CancellationToken cancellationToken = default)
         {
             var preferredConnectionType = options?.PreferredConnectionType;
-            if (options?.CredentialPrompt is not null)
-                throw new ArgumentException("OpenPGP does not support CredentialPrompt.", nameof(options));
+            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "OpenPGP");
             var transport = yubiKey.ResolveSessionTransport(
                 preferredConnectionType,
                 "OpenPGP",

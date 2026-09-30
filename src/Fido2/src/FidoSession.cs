@@ -45,6 +45,8 @@ namespace Yubico.YubiKit.Fido2;
 /// </remarks>
 public sealed class FidoSession : ApplicationSession, IFidoSession
 {
+    internal const string CredentialPromptAlternative = "WebAuthnClientOptions.CredentialPrompt with WebAuthnClient";
+
     /// <summary>
     /// Feature flag for FIDO2 support (requires firmware 5.0+).
     /// </summary>
@@ -119,10 +121,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         var userPresencePrompt = options?.UserPresencePrompt;
 
         ValidatePreferredConnectionType(connection, options);
-        if (options?.CredentialPrompt is not null)
-            throw new ArgumentException(
-                "FIDO2 sessions do not support on-demand prompting. Use WebAuthnClientOptions.CredentialPrompt with WebAuthnClient.",
-                nameof(options));
+        SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(
+            options, "FIDO2", CredentialPromptAlternative);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.

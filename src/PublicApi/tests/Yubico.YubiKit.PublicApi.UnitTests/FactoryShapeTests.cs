@@ -39,7 +39,7 @@ public sealed class FactoryShapeTests
     {
         var connection = DispatchProxy.Create<ISmartCardConnection, NoTransportCalls>();
         var options = new SessionCreationOptions { CredentialPrompt = new DecliningPrompt() };
-        foreach (var (session, _, _) in AppletSessionShapeTests.Sessions)
+        foreach (var (session, _, factoryName) in AppletSessionShapeTests.Sessions)
         {
             if (session.Name == "PivSession")
                 continue;
@@ -47,7 +47,15 @@ public sealed class FactoryShapeTests
                 .Single(m => m.Name == "CreateAsync");
             var task = (Task)(method.Invoke(null, [connection, options, CancellationToken.None])
                 ?? throw new InvalidOperationException("Factory returned no task"));
-            await Assert.ThrowsAsync<ArgumentException>(() => task);
+            var directError = await Assert.ThrowsAsync<ArgumentException>(() => task);
+            MethodInfo extension = AppletSessionShapeTests.GetDeviceExtensionMethods(session)
+                .Single(method => method.Name == factoryName);
+            var deviceTask = (Task)(extension.Invoke(null, [null, options, CancellationToken.None])
+                ?? throw new InvalidOperationException("Factory returned no task"));
+            var deviceError = await Assert.ThrowsAsync<ArgumentException>(() => deviceTask);
+            Assert.Equal(directError.Message, deviceError.Message);
+            if (session.Name == "FidoSession")
+                Assert.Contains("WebAuthnClientOptions.CredentialPrompt", directError.Message);
         }
     }
 

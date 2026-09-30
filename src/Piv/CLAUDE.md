@@ -16,7 +16,11 @@ The PIV module implements YubiKey PIV smart-card operations through a single pub
 
 Current structure:
 
-- `PivSession.cs` - public facade, lifecycle, authentication state, user-presence notification, and one-hop delegation.
+- `PivSession.cs` - public facade, operation admission/lifecycle, PIV-only prompt ownership,
+  management-authentication state, user-presence notification, and one-hop delegation.
+- `Authentication/PivPromptedAuthentication.cs` - PIV-only PIN requirement and bounded credential-attempt
+  orchestration for prompted signing and management-key authentication; the session still owns admission,
+  cancellation linked to disposal, and the final management-authentication state transition.
 - `IPivSession.cs` - public session contract.
 - `IYubiKeyExtensions.cs` - `IYubiKey.CreatePivSessionAsync(...)` convenience creation.
 - `Authentication/` - PIN, PUK, and management-key protocol helpers.

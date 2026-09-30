@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -51,6 +50,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private const byte P2Puk = 0x81;
 
     private readonly ScpKeyParameters? _scpKeyParams;
+    private readonly ICredentialPrompt? _credentialPrompt;
+    private readonly int _maxCredentialPromptAttempts;
     private IPivBackend? _backend;
     private bool _isAuthenticated;
     private readonly object _operationLock = new();
@@ -106,8 +107,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
         : base(connection, userPresencePrompt)
     {
         _scpKeyParams = scpKeyParams;
-        CredentialPrompt = credentialPrompt;
-        MaxCredentialPromptAttempts = maxCredentialPromptAttempts;
+        _credentialPrompt = credentialPrompt;
+        _maxCredentialPromptAttempts = maxCredentialPromptAttempts;
     }
 
     /// <summary>
@@ -484,7 +485,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         using var admission = EnterOperation();
         EnsureBackend();
 
-        if (CredentialPrompt is not null && !_isAuthenticated)
+        if (_credentialPrompt is not null && !_isAuthenticated)
             await EnsureManagementKeyAuthenticatedAsync(cancellationToken).ConfigureAwait(false);
 
         ThrowIfDisposed();
@@ -556,7 +557,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         using var admission = EnterOperation();
         EnsureBackend();
 
-        if (CredentialPrompt is not null && IsSupported(PivFeatures.Metadata))
+        if (_credentialPrompt is not null && IsSupported(PivFeatures.Metadata))
             return await SignWithCredentialPromptAsync(slot, algorithm, data, cancellationToken).ConfigureAwait(false);
 
         UserPresenceNotification userPresenceNotification = CreatePivPresenceNotification(
@@ -581,7 +582,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         using var admission = EnterOperation();
         ThrowIfDisposed();
 
-        if (CredentialPrompt is not null && IsSupported(PivFeatures.Metadata))
+        if (_credentialPrompt is not null && IsSupported(PivFeatures.Metadata))
             return await SignWithCredentialPromptAsync(slot, null, data, cancellationToken).ConfigureAwait(false);
 
         Logger.LogDebug("PIV: SignOrDecryptAsync auto-detecting algorithm for slot 0x{Slot:X2}", (byte)slot);
@@ -924,8 +925,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
         if (requestedAlgorithm is { } algorithm && algorithm != metadata.Algorithm)
             throw new ArgumentException("Requested algorithm does not match slot metadata.", nameof(requestedAlgorithm));
 
-        if (snapshot.PinPolicy is not (PivPinPolicy.Never or PivPinPolicy.MatchOnce or PivPinPolicy.MatchAlways))
-            await EnsurePinVerifiedAsync(slot, snapshot.PinPolicy is PivPinPolicy.Always, token).ConfigureAwait(false);
+        await new PivPromptedAuthentication(this, _backend, Logger,
+            _credentialPrompt ?? throw new InvalidOperationException("No credential prompt"), _maxCredentialPromptAttempts)
+            .VerifyPinForSigningAsync(slot, snapshot.PinPolicy, token).ConfigureAwait(false);
 
         token.ThrowIfCancellationRequested();
         ThrowIfDisposed();
@@ -934,117 +936,23 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return await SignOrDecryptWithUserPresenceAsync(slot, metadata.Algorithm, data, notification, token).ConfigureAwait(false);
     }
 
-    private async Task EnsurePinVerifiedAsync(PivSlot slot, bool forceFresh, CancellationToken cancellationToken)
-    {
-        EnsureBackend();
-        // A 9000 status can reflect a preceding Once verification even though an Always key
-        // rejects the signature until VERIFY is sent again. Do not use that query to skip Always.
-        (bool Verified, int? RetriesRemaining) state = forceFresh
-            ? (false, (await PivMetadataProtocol.GetPinMetadataSnapshotAsync(_backend, Logger, cancellationToken)
-                .ConfigureAwait(false)).RetriesRemaining)
-            : await PivAuthenticationProtocol.GetPinVerificationStateAsync(_backend, cancellationToken).ConfigureAwait(false);
-        if (state.Verified)
-            return;
-        if (state.RetriesRemaining == 0)
-            throw new InvalidPinException(0, "PIN is blocked.");
-
-        Exception? lastRejection = null;
-        int? retries = state.RetriesRemaining;
-        for (int attempt = 0; attempt < MaxCredentialPromptAttempts; attempt++)
-        {
-            var context = new CredentialPromptContext
-            {
-                Kind = CredentialKind.Pin,
-                Application = "PIV",
-                Scope = slot.ToString(),
-                RetriesRemaining = retries,
-                IsRetry = attempt > 0,
-                MinLengthBytes = 6,
-                MaxLengthBytes = 8
-            };
-            IMemoryOwner<byte> owner = await PivCredentialAcquisition.AcquireAsync(
-                CredentialPrompt ?? throw new InvalidOperationException("No credential prompt"), context,
-                cancellationToken, MarkCredentialCallback).ConfigureAwait(false);
-            try
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                ThrowIfDisposed();
-                if (owner.Memory.Length is < 6 or > 8)
-                {
-                    lastRejection = new ArgumentException("PIN must be 6-8 bytes");
-                    continue;
-                }
-                try
-                {
-                    await PivAuthenticationProtocol.VerifyPinAsync(_backend, Logger, owner.Memory, cancellationToken)
-                        .ConfigureAwait(false);
-                    return;
-                }
-                catch (InvalidPinException ex) when (ex.RetriesRemaining > 0)
-                {
-                    retries = ex.RetriesRemaining;
-                    lastRejection = ex;
-                }
-            }
-            finally
-            {
-                PivCredentialAcquisition.Release(owner);
-            }
-        }
-        throw lastRejection ?? new InvalidOperationException("No PIN was submitted.");
-    }
-
     private async Task EnsureManagementKeyAuthenticatedAsync(CancellationToken cancellationToken)
     {
         EnsureBackend();
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _operationDisposal.Token);
         CancellationToken token = cancellation.Token;
-        int keyLength = ManagementKeyType.KeyLength();
-        Exception? lastRejection = null;
-        for (int attempt = 0; attempt < MaxCredentialPromptAttempts; attempt++)
-        {
-            var context = new CredentialPromptContext
-            {
-                Kind = CredentialKind.ManagementKey,
-                Application = "PIV",
-                Scope = "Card management",
-                IsRetry = attempt > 0,
-                MinLengthBytes = keyLength,
-                MaxLengthBytes = keyLength
-            };
-            IMemoryOwner<byte> owner = await PivCredentialAcquisition.AcquireAsync(
-                CredentialPrompt ?? throw new InvalidOperationException("No credential prompt"), context,
-                token, MarkCredentialCallback).ConfigureAwait(false);
-            try
-            {
-                token.ThrowIfCancellationRequested();
-                ThrowIfDisposed();
-                if (owner.Memory.Length != keyLength)
-                {
-                    lastRejection = new ArgumentException($"Management key must be {keyLength} bytes");
-                    continue;
-                }
-                SetManagementKeyAuthenticationState(false);
-                try
-                {
-                    await PivAuthenticationProtocol.AuthenticateAsync(_backend, Logger, ManagementKeyType, owner.Memory, token)
-                        .ConfigureAwait(false);
-                    token.ThrowIfCancellationRequested();
-                    ThrowIfDisposed();
-                    SetManagementKeyAuthenticationState(true);
-                    return;
-                }
-                catch (PivAuthenticationProtocol.ManagementKeyRejectedException ex)
-                {
-                    lastRejection = ex;
-                }
-            }
-            finally
-            {
-                PivCredentialAcquisition.Release(owner);
-            }
-        }
-        throw lastRejection ?? new InvalidOperationException("No management key was submitted.");
+        SetManagementKeyAuthenticationState(false);
+        await new PivPromptedAuthentication(this, _backend, Logger,
+            _credentialPrompt ?? throw new InvalidOperationException("No credential prompt"), _maxCredentialPromptAttempts)
+            .AuthenticateManagementKeyAsync(ManagementKeyType, token).ConfigureAwait(false);
+        CheckPromptActive(token);
+        SetManagementKeyAuthenticationState(true);
+    }
+
+    internal void CheckPromptActive(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
     }
 
     private IDisposable EnterOperation()
@@ -1059,7 +967,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
     }
 
-    private void MarkCredentialCallback(bool inside) =>
+    internal void MarkCredentialCallback(bool inside) =>
         _callbackOperation.Value = inside ? _activeOperation : null;
 
     private UserPresenceNotification CreatePivPresenceNotification(UserPresenceContext? context) =>

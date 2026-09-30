@@ -105,8 +105,7 @@ public static class IYubiKeyExtensions
         {
             var scpKeyParams = options?.ScpKeyParameters;
             var preferredConnectionType = options?.PreferredConnectionType;
-            if (options?.CredentialPrompt is not null)
-                throw new ArgumentException("YubiOTP does not support CredentialPrompt.", nameof(options));
+            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "YubiOTP");
             var transport = yubiKey.ResolveSessionTransport(
                 scpKeyParams is not null && preferredConnectionType is null
                     ? ConnectionType.SmartCard

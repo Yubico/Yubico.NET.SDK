@@ -131,7 +131,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         var userPresencePrompt = options?.UserPresencePrompt;
 
         ValidatePreferredConnectionType(connection, options);
-        RejectUnsupportedCredentialPrompt(options);
+        SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "YubiOTP");
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.

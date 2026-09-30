@@ -26,6 +26,47 @@ public sealed class ConsoleUserPresencePromptTests
     }
 
     [Fact]
+    public void Requested_WithIntent_IncludesIntentButNotScope()
+    {
+        var output = new ConcurrentQueue<string>();
+        var prompt = new ConsoleUserPresencePrompt(output.Enqueue, Task.Delay, Debounce);
+        UserPresenceContext context = CreateContext(UserPresenceBasis.PolicyRequires) with
+        {
+            Intent = "approve the transfer"
+        };
+
+        _ = prompt.OnUserPresenceRequestedAsync(context, CancellationToken.None);
+
+        Assert.Equal(["Touch your YubiKey to approve the transfer."], output);
+    }
+
+    [Fact]
+    public async Task Requested_WithIntentAndPolicyMayRequireAfterDelay_IncludesIntent()
+    {
+        var output = new ConcurrentQueue<string>();
+        var written = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var delay = new ControlledDelay();
+        var prompt = new ConsoleUserPresencePrompt(
+            message =>
+            {
+                output.Enqueue(message);
+                written.TrySetResult();
+            },
+            delay.WaitAsync,
+            Debounce);
+        UserPresenceContext context = CreateContext(UserPresenceBasis.PolicyMayRequire) with
+        {
+            Intent = "sign the release"
+        };
+
+        _ = prompt.OnUserPresenceRequestedAsync(context, CancellationToken.None);
+        delay.Complete(0);
+
+        await written.Task.WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
+        Assert.Equal(["Touch your YubiKey to sign the release."], output);
+    }
+
+    [Fact]
     public async Task Requested_WithPolicyMayRequireResolvedBeforeDelay_WritesNothing()
     {
         var output = new ConcurrentQueue<string>();

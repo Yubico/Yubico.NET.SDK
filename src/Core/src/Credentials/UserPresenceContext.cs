@@ -44,6 +44,18 @@ public sealed record UserPresenceContext
     public string? Operation { get; init; }
 
     /// <summary>
+    ///     Gets the application's description of why the user is performing the operation, such as
+    ///     <c>"approve the transfer"</c>, or <c>null</c> when none was supplied.
+    /// </summary>
+    /// <remarks>
+    ///     The SDK sets this from the innermost <see cref="UserPresenceIntent.BeginScope" /> active when the operation
+    ///     started. It is application-supplied display text, so it is excluded from <see cref="ToString" />. Show it
+    ///     alongside <see cref="Operation" /> rather than instead of it, so the user can still spot a touch that does not
+    ///     match what they expected.
+    /// </remarks>
+    public string? Intent { get; init; }
+
+    /// <summary>
     ///     Gets an optional display-oriented description of the operation or object requiring presence, such as a
     ///     relying-party identifier, credential label, or key slot.
     /// </summary>
@@ -55,7 +67,7 @@ public sealed record UserPresenceContext
     /// <summary>Returns an identity-based hash code for this notification context.</summary>
     public override int GetHashCode() => RuntimeHelpers.GetHashCode(this);
 
-    /// <summary>Formats the context without including <see cref="Scope" />.</summary>
+    /// <summary>Formats the context without including <see cref="Scope" /> or <see cref="Intent" />.</summary>
     /// <remarks>
     ///     <see cref="Application" /> and <see cref="Operation" /> are SDK identifiers on SDK-created contexts;
     ///     caller-created contexts can carry arbitrary values and should not be assumed non-sensitive.

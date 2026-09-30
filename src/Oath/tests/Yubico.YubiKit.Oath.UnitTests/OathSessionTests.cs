@@ -284,6 +284,30 @@ public class OathSessionTests
         Assert.Same(prompt.Requested[0].Context, Assert.Single(prompt.Resolved).Context);
     }
 
+    [Fact]
+    public async Task CalculateCodeAsync_InsideIntentScope_ReportsIntent()
+    {
+        var connection = new RecordingSmartCardConnection(SelectResponse(), TruncatedResponse());
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        using (UserPresenceIntent.BeginScope("sign in to the VPN"))
+        {
+            _ = await session.CalculateCodeAsync(
+                CreateCredential(touchRequired: true),
+                timestamp: 1_704_067_200,
+                TestContext.Current.CancellationToken);
+        }
+
+        UserPresenceContext requested = Assert.Single(prompt.Requested).Context;
+        Assert.Equal("sign in to the VPN", requested.Intent);
+        Assert.Equal(UserPresenceOperations.Oath.CalculateCode, requested.Operation);
+        Assert.Same(requested, Assert.Single(prompt.Resolved).Context);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(null)]

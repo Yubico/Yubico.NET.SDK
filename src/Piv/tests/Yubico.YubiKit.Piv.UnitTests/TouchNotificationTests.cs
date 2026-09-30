@@ -51,6 +51,30 @@ public class TouchNotificationTests
     }
 
     [Fact]
+    public async Task SignOrDecryptAsync_InsideIntentScope_ReportsIntentAfterMetadataLookup()
+    {
+        var connection = CreateInitializedConnection(
+            SlotMetadataResponse(PivAlgorithm.EccP256, PivTouchPolicy.Always),
+            CryptoResponse(0xAA));
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await CreateSessionAsync(connection, prompt);
+
+        using (UserPresenceIntent.BeginScope("sign the release"))
+        {
+            _ = await session.SignOrDecryptAsync(
+                PivSlot.Signature,
+                PivAlgorithm.EccP256,
+                new byte[32],
+                TestContext.Current.CancellationToken);
+        }
+
+        UserPresenceContext requested = Assert.Single(prompt.Requests).Context;
+        Assert.Equal("sign the release", requested.Intent);
+        Assert.Equal(UserPresenceOperations.Piv.SignOrDecrypt, requested.Operation);
+        Assert.Same(requested, Assert.Single(prompt.Resolutions).Context);
+    }
+
+    [Fact]
     public async Task SignOrDecryptAsync_AutoDetect_ReusesLoadedMetadata()
     {
         var connection = CreateInitializedConnection(

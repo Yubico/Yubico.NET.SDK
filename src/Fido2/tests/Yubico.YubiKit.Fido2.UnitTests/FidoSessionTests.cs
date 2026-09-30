@@ -218,6 +218,87 @@ public class FidoSessionTests
     }
 
     [Fact]
+    public async Task MakeCredentialAsync_InsideIntentScope_ReportsIntentWithOperation()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00],
+            [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00],
+            [(byte)CtapStatus.UserActionTimeout, 0x90, 0x00]);
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await FidoSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        using (UserPresenceIntent.BeginScope("register your work passkey"))
+        {
+            _ = await Assert.ThrowsAsync<CtapException>(() =>
+                session.MakeCredentialAsync(
+                    new byte[32],
+                    new PublicKeyCredentialRpEntity("example.com"),
+                    new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
+                    [PublicKeyCredentialParameters.CreateES256()],
+                    cancellationToken: TestContext.Current.CancellationToken));
+        }
+
+        UserPresenceContext requested = Assert.Single(prompt.Requested);
+        Assert.Equal("register your work passkey", requested.Intent);
+        Assert.Equal(UserPresenceOperations.Fido2.MakeCredential, requested.Operation);
+        Assert.Same(requested, Assert.Single(prompt.Resolved).Context);
+    }
+
+    [Fact]
+    public async Task HidWait_InsideIntentScope_ReportsIntentWhenTransportRequestsPresence()
+    {
+        var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse());
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await FidoSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        using (UserPresenceIntent.BeginScope("pick this key"))
+        {
+            _ = await Assert.ThrowsAsync<CtapException>(() =>
+                session.SelectionAsync(TestContext.Current.CancellationToken));
+        }
+
+        UserPresenceContext requested = Assert.Single(prompt.Requested);
+        Assert.Equal(UserPresenceBasis.DeviceWaiting, requested.Basis);
+        Assert.Equal(UserPresenceOperations.Fido2.Selection, requested.Operation);
+        Assert.Equal("pick this key", requested.Intent);
+        Assert.Same(requested, Assert.Single(prompt.Resolved).Context);
+    }
+
+    [Fact]
+    public async Task MakeCredentialAsync_AfterIntentScopeEnds_ReportsNoIntent()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00],
+            [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00],
+            [(byte)CtapStatus.UserActionTimeout, 0x90, 0x00]);
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await FidoSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        using (UserPresenceIntent.BeginScope("earlier operation"))
+        {
+        }
+
+        _ = await Assert.ThrowsAsync<CtapException>(() =>
+            session.MakeCredentialAsync(
+                new byte[32],
+                new PublicKeyCredentialRpEntity("example.com"),
+                new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
+                [PublicKeyCredentialParameters.CreateES256()],
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Null(Assert.Single(prompt.Requested).Intent);
+    }
+
+    [Fact]
     public async Task SmartCardBackend_WhenResolutionThrowsAfterSuccess_PropagatesResolutionException()
     {
         var connection = new DisposeTrackingSmartCardConnection([0x00, 0xAA, 0x90, 0x00]);

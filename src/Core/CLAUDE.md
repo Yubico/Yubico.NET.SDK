@@ -77,6 +77,9 @@ If a change touches Core runtime loops, polling paths, recovery logic, or listen
 
 ### User-presence notification ownership
 
+SDK-created `UserPresenceContext` values set `Operation` from `UserPresenceOperations` and `Application`
+from `UserPresenceApplications`. Interpret the open operation set together with the application.
+
 `ApplicationSession` creates one non-null `UserPresenceNotification` for each operation. Pass that
 same handle down every participating layer; use `UserPresenceNotification.None` for deliberately
 silent raw, management, and device-information paths. A transport may request the handle when it

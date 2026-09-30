@@ -155,7 +155,7 @@ public sealed partial class OpenPgpSession
         // This matches ykman canonical: send_apdu → get_certificate(key_ref).
         var command = new ApduCommand(0x80, (int)Ins.GetAttestation, (int)keyRef, 0x00);
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(KeyRef.Att, cancellationToken).ConfigureAwait(false));
+            await GetUserPresenceContextAsync(KeyRef.Att, UserPresenceOperations.AttestKey, cancellationToken).ConfigureAwait(false));
         return await RunWithUserPresenceNotificationAsync(
                 userPresenceNotification,
                 async token =>

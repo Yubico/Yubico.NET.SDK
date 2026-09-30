@@ -27,9 +27,20 @@ public sealed record UserPresenceContext
     public required UserPresenceBasis Basis { get; init; }
 
     /// <summary>
-    ///     Gets the SDK application or applet performing the operation, such as <c>"FIDO2"</c> or <c>"PIV"</c>.
+    ///     Gets the SDK application or applet performing the operation. See <see cref="UserPresenceApplications" />.
     /// </summary>
     public required string Application { get; init; }
+
+    /// <summary>
+    ///     Gets a stable identifier for the SDK method requesting presence, normally one of
+    ///     <see cref="UserPresenceOperations" />. This is the method name without <c>Async</c>, not localized
+    ///     display text or necessarily a single user-facing verb (for example, PIV <c>SignOrDecrypt</c>).
+    /// </summary>
+    /// <remarks>
+    ///     Always set on SDK-created contexts; may be null on caller-created contexts. Interpret together with
+    ///     <see cref="Application" /> and treat unknown values as a generic prompt.
+    /// </remarks>
+    public string? Operation { get; init; }
 
     /// <summary>
     ///     Gets an optional display-oriented description of the operation or object requiring presence, such as a
@@ -43,7 +54,12 @@ public sealed record UserPresenceContext
     /// <summary>Returns an identity-based hash code for this notification context.</summary>
     public override int GetHashCode() => RuntimeHelpers.GetHashCode(this);
 
-    /// <summary>Formats non-sensitive context fields without including <see cref="Scope" />.</summary>
+    /// <summary>Formats the context without including <see cref="Scope" />.</summary>
+    /// <remarks>
+    ///     <see cref="Application" /> and <see cref="Operation" /> are SDK identifiers on SDK-created contexts;
+    ///     caller-created contexts can carry arbitrary values and should not be assumed non-sensitive.
+    /// </remarks>
     public override string ToString() =>
-        $"{nameof(UserPresenceContext)} {{ {nameof(Basis)} = {Basis}, {nameof(Application)} = {Application} }}";
+        $"{nameof(UserPresenceContext)} {{ {nameof(Basis)} = {Basis}, {nameof(Application)} = {Application}, " +
+        $"{nameof(Operation)} = {Operation} }}";
 }

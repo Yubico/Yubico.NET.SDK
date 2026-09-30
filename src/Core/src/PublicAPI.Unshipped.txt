@@ -95,6 +95,8 @@ Yubico.YubiKit.Core.Credentials.UserPresenceContext.Application.get -> string!
 Yubico.YubiKit.Core.Credentials.UserPresenceContext.Application.init -> void
 Yubico.YubiKit.Core.Credentials.UserPresenceContext.Basis.get -> Yubico.YubiKit.Core.Credentials.UserPresenceBasis
 Yubico.YubiKit.Core.Credentials.UserPresenceContext.Basis.init -> void
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.Operation.get -> string?
+Yubico.YubiKit.Core.Credentials.UserPresenceContext.Operation.init -> void
 Yubico.YubiKit.Core.Credentials.UserPresenceContext.<Clone>$() -> Yubico.YubiKit.Core.Credentials.UserPresenceContext!
 Yubico.YubiKit.Core.Credentials.UserPresenceContext.Equals(Yubico.YubiKit.Core.Credentials.UserPresenceContext? other) -> bool
 override Yubico.YubiKit.Core.Credentials.UserPresenceContext.Equals(object? obj) -> bool
@@ -105,6 +107,30 @@ Yubico.YubiKit.Core.Credentials.UserPresenceContext.Scope.get -> string?
 Yubico.YubiKit.Core.Credentials.UserPresenceContext.Scope.init -> void
 override Yubico.YubiKit.Core.Credentials.UserPresenceContext.ToString() -> string!
 Yubico.YubiKit.Core.Credentials.UserPresenceContext.UserPresenceContext() -> void
+Yubico.YubiKit.Core.Credentials.UserPresenceApplications
+const Yubico.YubiKit.Core.Credentials.UserPresenceApplications.Fido2 = "FIDO2" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceApplications.Piv = "PIV" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceApplications.Oath = "OATH" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceApplications.OpenPgp = "OpenPGP" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceApplications.YubiOtp = "YubiOTP" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceApplications.YubiHsmAuth = "YubiHSM Auth" -> string!
+Yubico.YubiKit.Core.Credentials.UserPresenceOperations
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Selection = "Selection" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Reset = "Reset" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.MakeCredential = "MakeCredential" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.GetAssertion = "GetAssertion" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.SignOrDecrypt = "SignOrDecrypt" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Decrypt = "Decrypt" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.CalculateSecret = "CalculateSecret" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Sign = "Sign" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Authenticate = "Authenticate" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.AttestKey = "AttestKey" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Calculate = "Calculate" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.CalculateCode = "CalculateCode" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.CalculateHmacSha1 = "CalculateHmacSha1" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.CalculateYubicoOtp = "CalculateYubicoOtp" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.CalculateSessionKeysSymmetric = "CalculateSessionKeysSymmetric" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.CalculateSessionKeysAsymmetric = "CalculateSessionKeysAsymmetric" -> string!
 Yubico.YubiKit.Core.Credentials.UserPresenceOutcome
 Yubico.YubiKit.Core.Credentials.UserPresenceOutcome.Cancelled = 1 -> Yubico.YubiKit.Core.Credentials.UserPresenceOutcome
 Yubico.YubiKit.Core.Credentials.UserPresenceOutcome.Completed = 0 -> Yubico.YubiKit.Core.Credentials.UserPresenceOutcome

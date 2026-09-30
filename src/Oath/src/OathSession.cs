@@ -395,7 +395,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
         UserPresenceNotification userPresenceNotification =
-            CreateUserPresenceNotification(CreateUserPresenceContext(credential));
+            CreateUserPresenceNotification(CreateUserPresenceContext(credential, UserPresenceOperations.Calculate));
         try
         {
             return await RunWithUserPresenceNotificationAsync(
@@ -461,7 +461,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         byte[] data = [.. nameTlv.AsSpan(), .. challengeTlv.AsSpan()];
         UserPresenceNotification userPresenceNotification =
-            CreateUserPresenceNotification(CreateUserPresenceContext(credential));
+            CreateUserPresenceNotification(CreateUserPresenceContext(credential, UserPresenceOperations.CalculateCode));
         try
         {
             return await RunWithUserPresenceNotificationAsync(
@@ -501,14 +501,15 @@ public sealed class OathSession : ApplicationSession, IOathSession
         }
     }
 
-    private UserPresenceContext? CreateUserPresenceContext(Credential credential)
+    private UserPresenceContext? CreateUserPresenceContext(Credential credential, string operation)
     {
         if (!IsUserPresenceNotificationEnabled || credential.TouchRequired is not true)
             return null;
 
         return new UserPresenceContext
         {
-            Application = "OATH",
+            Application = UserPresenceApplications.Oath,
+            Operation = operation,
             Scope = credential.Issuer is not null
                 ? $"{credential.Issuer}:{credential.Name}"
                 : credential.Name,

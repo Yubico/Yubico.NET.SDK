@@ -253,6 +253,7 @@ public class OathSessionTests
 
         var requested = Assert.Single(prompt.Requested);
         Assert.Equal("OATH", requested.Context.Application);
+        Assert.Equal(UserPresenceOperations.CalculateCode, requested.Context.Operation);
         Assert.Equal("issuer:alice", requested.Context.Scope);
         Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Context.Basis);
         Assert.Equal(commandsBeforeCalculation, requested.CommandCount);
@@ -262,6 +263,25 @@ public class OathSessionTests
         Assert.Equal(UserPresenceOutcome.Completed, resolved.Outcome);
         Assert.Equal(CancellationToken.None, resolved.CancellationToken);
         Assert.Equal(commandsBeforeCalculation + 1, resolved.CommandCount);
+    }
+
+    [Fact]
+    public async Task CalculateAsync_WhenTouchIsRequired_ReportsCalculateOperation()
+    {
+        var connection = new RecordingSmartCardConnection(SelectResponse(), FullResponse());
+        var prompt = new RecordingUserPresencePrompt(connection);
+        await using var session = await OathSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+
+        _ = await session.CalculateAsync(
+            CreateCredential(touchRequired: true),
+            new byte[8],
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(UserPresenceOperations.Calculate, Assert.Single(prompt.Requested).Context.Operation);
+        Assert.Same(prompt.Requested[0].Context, Assert.Single(prompt.Resolved).Context);
     }
 
     [Theory]

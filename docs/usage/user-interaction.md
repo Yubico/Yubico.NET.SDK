@@ -41,7 +41,40 @@ any transport-required cancellation, drain, or reset and propagates that excepti
 Resolution reports `Completed`, `Cancelled`, `TimedOut`, or `Failed`; it does not prove whether or when
 a touch occurred. The same `UserPresenceContext` instance correlates the two calls, and the context
 uses reference equality so ordinary dictionaries cannot conflate equal-valued concurrent requests.
-Its generic string formatting omits `Scope` to avoid disclosing that display context in logs.
+Its generic string formatting omits `Scope`, but caller-created contexts can contain arbitrary values
+in the other fields; do not assume formatting is always safe to log.
+
+`UserPresenceContext.Application` and `Operation` identify the applet and the SDK method awaiting
+presence. SDK-created contexts set both using `UserPresenceApplications` and `UserPresenceOperations`;
+`Operation` is optional for caller-created contexts. These are stable identifiers, not localized display
+text. Method names omit `Async`, and names such as PIV `SignOrDecrypt` need not be single user-facing
+verbs. Interpret the pair together and use a generic prompt for unknown or null operations. The
+application knows the user's intent (why an action is being performed); the SDK does not.
+
+| Application constant | Operation constants |
+|---|---|
+| `UserPresenceApplications.Fido2` | `Selection`, `Reset`, `MakeCredential`, `GetAssertion` |
+| `UserPresenceApplications.Piv` | `SignOrDecrypt`, `Decrypt`, `CalculateSecret` |
+| `UserPresenceApplications.OpenPgp` | `Sign`, `Decrypt`, `Authenticate`, `AttestKey` |
+| `UserPresenceApplications.Oath` | `Calculate`, `CalculateCode` |
+| `UserPresenceApplications.YubiOtp` | `CalculateHmacSha1`, `CalculateYubicoOtp` |
+| `UserPresenceApplications.YubiHsmAuth` | `CalculateSessionKeysSymmetric`, `CalculateSessionKeysAsymmetric` |
+
+All operation names in the table are members of `UserPresenceOperations`. This is an open set;
+future SDK versions can add identifiers. For example, an application can supply its own wording:
+
+```csharp
+using Yubico.YubiKit.Core.Credentials;
+
+string message = (context.Application, context.Operation) switch
+{
+    (UserPresenceApplications.Fido2, UserPresenceOperations.MakeCredential) =>
+        "Touch your YubiKey to create a passkey.",
+    (UserPresenceApplications.Piv, UserPresenceOperations.SignOrDecrypt) =>
+        "Touch your YubiKey for the PIV key operation.",
+    _ => "Touch your YubiKey to continue."
+};
+```
 
 The SDK coordinates each operation through one internal lifecycle handle. A transport can request that
 handle when it observes a live wait, while the applet layer that understands the complete response resolves

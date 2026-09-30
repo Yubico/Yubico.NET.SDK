@@ -38,7 +38,7 @@ public sealed partial class OpenPgpSession
         try
         {
             UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-                await GetUserPresenceContextAsync(KeyRef.Sig, cancellationToken).ConfigureAwait(false));
+                await GetUserPresenceContextAsync(KeyRef.Sig, UserPresenceOperations.Sign, cancellationToken).ConfigureAwait(false));
 
             // PSO: COMPUTE DIGITAL SIGNATURE — INS=0x2A, P1=0x9E, P2=0x9A
             var command = new ApduCommand(0x00, (int)Ins.Pso, 0x9E, 0x9A, payload);
@@ -76,7 +76,7 @@ public sealed partial class OpenPgpSession
         try
         {
             UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-                await GetUserPresenceContextAsync(KeyRef.Dec, cancellationToken).ConfigureAwait(false));
+                await GetUserPresenceContextAsync(KeyRef.Dec, UserPresenceOperations.Decrypt, cancellationToken).ConfigureAwait(false));
 
             // PSO: DECIPHER — INS=0x2A, P1=0x80, P2=0x86
             var command = new ApduCommand(0x00, (int)Ins.Pso, 0x80, 0x86, payload);
@@ -120,7 +120,7 @@ public sealed partial class OpenPgpSession
         try
         {
             UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-                await GetUserPresenceContextAsync(KeyRef.Aut, cancellationToken).ConfigureAwait(false));
+                await GetUserPresenceContextAsync(KeyRef.Aut, UserPresenceOperations.Authenticate, cancellationToken).ConfigureAwait(false));
 
             // INTERNAL AUTHENTICATE — INS=0x88, P1=0x00, P2=0x00
             var command = new ApduCommand(0x00, (int)Ins.InternalAuthenticate, 0x00, 0x00, payload);

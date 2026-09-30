@@ -434,7 +434,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var labelBytes = ValidateAndEncodeLabel(label);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(label, cancellationToken).ConfigureAwait(false));
+            await GetUserPresenceContextAsync(label, UserPresenceOperations.CalculateSessionKeysSymmetric, cancellationToken).ConfigureAwait(false));
 
         byte[]? credPwBytes = null;
         Memory<byte> data = default;
@@ -554,7 +554,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var labelBytes = ValidateAndEncodeLabel(label);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-            await GetUserPresenceContextAsync(label, cancellationToken).ConfigureAwait(false));
+            await GetUserPresenceContextAsync(label, UserPresenceOperations.CalculateSessionKeysAsymmetric, cancellationToken).ConfigureAwait(false));
 
         byte[]? credPwBytes = null;
         Memory<byte> data = default;
@@ -872,6 +872,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     private async Task<UserPresenceContext?> GetUserPresenceContextAsync(
         string label,
+        string operation,
         CancellationToken cancellationToken)
     {
         if (!IsUserPresenceNotificationEnabled)
@@ -886,7 +887,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             Logger.LogDebug(
                 ex, "YubiHSM Auth: failed to query credential list for touch policy, notifying conservatively");
-            return CreateUserPresenceContext(label, UserPresenceBasis.PolicyMayRequire);
+            return CreateUserPresenceContext(label, UserPresenceBasis.PolicyMayRequire, operation);
         }
 
         var credential = credentials.FirstOrDefault(
@@ -902,14 +903,15 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             null => UserPresenceBasis.PolicyMayRequire
         };
 
-        return basis is { } value ? CreateUserPresenceContext(label, value) : null;
+        return basis is { } value ? CreateUserPresenceContext(label, value, operation) : null;
     }
 
-    private static UserPresenceContext CreateUserPresenceContext(string label, UserPresenceBasis basis) =>
+    private static UserPresenceContext CreateUserPresenceContext(string label, UserPresenceBasis basis, string operation) =>
         new()
         {
             Basis = basis,
-            Application = "YubiHSM Auth",
+            Application = UserPresenceApplications.YubiHsmAuth,
+            Operation = operation,
             Scope = label
         };
 

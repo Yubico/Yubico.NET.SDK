@@ -77,6 +77,8 @@ public sealed class UserPresenceNotificationTests
 
         Assert.NotSame(initialContext, prompt.RequestContext);
         Assert.Equal(UserPresenceBasis.DeviceWaiting, prompt.RequestContext?.Basis);
+        Assert.Equal("MakeCredential", prompt.RequestContext?.Operation);
+        Assert.Equal("MakeCredential", prompt.ResolutionContext?.Operation);
         Assert.Same(prompt.RequestContext, prompt.ResolutionContext);
     }
 
@@ -174,7 +176,19 @@ public sealed class UserPresenceNotificationTests
         Assert.NotEqual(first, equalValues);
         Assert.False(contexts.ContainsKey(equalValues));
         Assert.Contains("FIDO2", first.ToString(), StringComparison.Ordinal);
+        Assert.Contains("Operation = MakeCredential", first.ToString(), StringComparison.Ordinal);
         Assert.DoesNotContain("example.com", first.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void UserPresenceApplications_KeepExistingIdentifiers()
+    {
+        Assert.Equal("FIDO2", UserPresenceApplications.Fido2);
+        Assert.Equal("PIV", UserPresenceApplications.Piv);
+        Assert.Equal("OATH", UserPresenceApplications.Oath);
+        Assert.Equal("OpenPGP", UserPresenceApplications.OpenPgp);
+        Assert.Equal("YubiOTP", UserPresenceApplications.YubiOtp);
+        Assert.Equal("YubiHSM Auth", UserPresenceApplications.YubiHsmAuth);
     }
 
     private static UserPresenceContext CreateContext(
@@ -182,6 +196,7 @@ public sealed class UserPresenceNotificationTests
         {
             Basis = basis,
             Application = "FIDO2",
+            Operation = "MakeCredential",
             Scope = "example.com"
         };
 

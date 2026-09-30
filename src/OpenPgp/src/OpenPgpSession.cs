@@ -334,6 +334,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
     private async Task<UserPresenceContext?> GetUserPresenceContextAsync(
         KeyRef keyRef,
+        string operation,
         CancellationToken cancellationToken)
     {
         if (!IsUserPresenceNotificationEnabled || !IsSupported(FeatureUif))
@@ -376,7 +377,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
         return new UserPresenceContext
         {
-            Application = "OpenPGP",
+            Application = UserPresenceApplications.OpenPgp,
+            Operation = operation,
             Scope = keyRef.ToString(),
             Basis = basis
         };

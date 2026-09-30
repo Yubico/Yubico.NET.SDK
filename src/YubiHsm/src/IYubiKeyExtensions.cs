@@ -43,6 +43,8 @@ public static class IYubiKeyExtensions
             CancellationToken cancellationToken = default)
         {
             var preferredConnectionType = options?.PreferredConnectionType;
+            if (options?.CredentialPrompt is not null)
+                throw new ArgumentException("YubiHSM Auth does not support CredentialPrompt.", nameof(options));
             var transport = yubiKey.ResolveSessionTransport(
                 preferredConnectionType,
                 "YubiHSM Auth",

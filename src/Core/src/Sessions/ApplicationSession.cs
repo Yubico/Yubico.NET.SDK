@@ -48,6 +48,12 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     private bool _ownsConnection;
     private readonly IUserPresencePrompt? _userPresencePrompt;
 
+    /// <summary>Caller-owned prompt retained by adopting applets only.</summary>
+    internal ICredentialPrompt? CredentialPrompt { get; private protected set; }
+
+    /// <summary>Configured bound on requests of fresh credentials.</summary>
+    internal int MaxCredentialPromptAttempts { get; private protected set; } = 3;
+
     protected ILogger Logger { get; }
     internal IProtocol? Protocol { get; set; }
     protected bool IsDisposalStarted => Volatile.Read(ref _disposalStarted) != 0;
@@ -101,6 +107,9 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 
     /// <summary>Gets whether this session retained a user-presence prompt.</summary>
     internal bool IsUserPresenceNotificationEnabled => _userPresencePrompt is not null;
+
+    /// <summary>Allows an applet to scope its own notification callbacks to an admitted operation.</summary>
+    internal IUserPresencePrompt? SessionUserPresencePrompt => _userPresencePrompt;
 
     /// <summary>Creates the non-null notification handle for one operation.</summary>
     /// <param name="context">The optional policy context determined by the applet session.</param>
@@ -253,6 +262,13 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
                 $"The provided connection is {connection.Type}, not the requested {preferredConnectionType}.",
                 nameof(options));
         }
+    }
+
+    /// <summary>Rejects a credential provider in applets that do not implement interactive authentication.</summary>
+    private protected static void RejectUnsupportedCredentialPrompt(SessionCreationOptions? options)
+    {
+        if (options?.CredentialPrompt is not null)
+            throw new ArgumentException("This session does not support CredentialPrompt.", nameof(options));
     }
 
     /// <summary>

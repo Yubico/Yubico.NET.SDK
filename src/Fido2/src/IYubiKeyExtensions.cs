@@ -127,6 +127,10 @@ public static class IYubiKeyExtensions
         {
             var scpKeyParams = options?.ScpKeyParameters;
             var preferredConnectionType = options?.PreferredConnectionType;
+            if (options?.CredentialPrompt is not null)
+                throw new ArgumentException(
+                    "FIDO2 sessions do not support on-demand prompting. Use WebAuthnClientOptions.CredentialPrompt with WebAuthnClient.",
+                    nameof(options));
             var transport = yubiKey.ResolveFidoSessionTransport(
                 scpKeyParams is not null && preferredConnectionType is null
                     ? ConnectionType.SmartCard

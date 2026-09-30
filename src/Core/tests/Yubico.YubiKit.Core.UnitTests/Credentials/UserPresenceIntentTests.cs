@@ -229,6 +229,129 @@ public sealed class UserPresenceIntentTests
         await Task.CompletedTask;
     }
 
+    [Fact]
+    public async Task UndisposedScope_StaysActiveInItsFlowButEndsWithItsAsyncMethod()
+    {
+        LeakSynchronously("leaked from a synchronous helper");
+        Assert.Equal("leaked from a synchronous helper", UserPresenceIntent.Current);
+
+        await LeakFromAsyncHelperAsync();
+        Assert.Equal("leaked from a synchronous helper", UserPresenceIntent.Current);
+
+        await RunInChildAsyncMethodAsync();
+        Assert.Equal("leaked from a synchronous helper", UserPresenceIntent.Current);
+
+        static void LeakSynchronously(string intent) => UserPresenceIntent.BeginScope(intent);
+
+        static async Task LeakFromAsyncHelperAsync()
+        {
+            UserPresenceIntent.BeginScope("leaked from an async helper");
+            Assert.Equal("leaked from an async helper", UserPresenceIntent.Current);
+            await Task.Yield();
+        }
+
+        static async Task RunInChildAsyncMethodAsync()
+        {
+            await Task.Yield();
+            Assert.Equal("leaked from a synchronous helper", UserPresenceIntent.Current);
+        }
+    }
+
+    [Fact]
+    public async Task ScopeReturnedFromAsyncHelper_IsNotSeenByTheCaller()
+    {
+        using IDisposable scope = await OpenScopeAsync();
+
+        Assert.Null(UserPresenceIntent.Current);
+
+        static async Task<IDisposable> OpenScopeAsync()
+        {
+            await Task.Yield();
+            return UserPresenceIntent.BeginScope("opened in an async helper");
+        }
+    }
+
+    [Fact]
+    public async Task WorkStartedAfterItsScopeIsDisposed_FallsBackToTheOuterScope()
+    {
+        var prompt = new RecordingPrompt();
+        var startOperation = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Task background;
+
+        using (UserPresenceIntent.BeginScope("outer"))
+        {
+            using (UserPresenceIntent.BeginScope("inner"))
+            {
+                background = Task.Run(async () =>
+                {
+                    await startOperation.Task;
+                    await RequestAndResolveAsync(prompt, CreateContext());
+                }, TestContext.Current.CancellationToken);
+            }
+
+            startOperation.SetResult();
+            await background;
+        }
+
+        Assert.Equal("outer", Assert.Single(prompt.Requested).Intent);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    public async Task RandomOpenAndDisposeSequences_MatchTheReferenceModel(int seed)
+    {
+        // Reference model: the active intent is the most recently opened scope that is not yet disposed.
+        var random = new Random(seed);
+        var scopes = new List<(string Intent, IDisposable Handle, bool Disposed)>();
+        var prompt = new RecordingPrompt();
+
+        for (int step = 0; step < 200; step++)
+        {
+            int action = random.Next(10);
+            if (action < 4 || scopes.Count == 0)
+            {
+                string intent = $"intent {step}";
+                scopes.Add((intent, UserPresenceIntent.BeginScope(intent), false));
+            }
+            else if (action < 9)
+            {
+                int index = random.Next(scopes.Count);
+                (string intent, IDisposable handle, _) = scopes[index];
+                if (random.Next(4) == 0)
+                {
+                    // Dispose from another flow, which cannot unwind this flow's AsyncLocal directly.
+                    await Task.Run(handle.Dispose, TestContext.Current.CancellationToken);
+                }
+                else
+                {
+                    handle.Dispose();
+                }
+
+                scopes[index] = (intent, handle, true);
+            }
+            else
+            {
+                await RequestAndResolveAsync(prompt, CreateContext());
+                Assert.Equal(ExpectedIntent(), prompt.Requested[^1].Intent);
+            }
+
+            Assert.Equal(ExpectedIntent(), UserPresenceIntent.Current);
+        }
+
+        foreach ((_, IDisposable handle, _) in scopes)
+        {
+            handle.Dispose();
+        }
+
+        Assert.Null(UserPresenceIntent.Current);
+
+        string? ExpectedIntent() => scopes.LastOrDefault(scope => !scope.Disposed).Intent;
+    }
+
     private static async Task RequestAndResolveAsync(IUserPresencePrompt prompt, UserPresenceContext context)
     {
         UserPresenceNotification notification = UserPresenceNotification.Create(prompt, context);

@@ -33,8 +33,19 @@ namespace Yubico.YubiKit.Core.Credentials;
 ///         The scope follows the async flow of the code that opened it, like <c>Activity.Current</c>. Concurrent
 ///         operations in other flows do not see it, and code started from inside it, including <c>Task.Run</c>, does.
 ///         The SDK copies the intent into the context when the operation begins, so the prompt receives it regardless
-///         of which thread the notification is raised on. Scopes nest: the innermost undisposed scope wins, and
-///         disposing a scope, in any order and any number of times, removes only that scope.
+///         of which thread the notification is raised on.
+///     </para>
+///     <para>
+///         Scopes nest. The innermost undisposed scope replaces outer ones rather than being combined with them, so a
+///         helper that opens its own scope overrides the caller's wording until it is disposed. Disposing a scope, in
+///         any order and any number of times, removes only that scope, and a disposed scope is never reported again.
+///         Work started inside a scope that begins its SDK operation after the scope is disposed, such as a
+///         fire-and-forget task, gets the next outer undisposed scope, or no intent.
+///     </para>
+///     <para>
+///         Always dispose the scope, normally with <c>using</c>. A scope that is never disposed stays active for the
+///         rest of the async flow that opened it: in synchronous code or top-level statements that means every later
+///         operation reports its intent. Inside an <c>async</c> method, the scope ends when that method returns.
 ///     </para>
 ///     <para>
 ///         Call <see cref="BeginScope" /> in the same method that awaits the SDK call, or in a synchronous helper. Do not

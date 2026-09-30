@@ -116,13 +116,21 @@ public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, Cance
   change a notification already in progress.
 - Scopes follow the async flow, like `Activity.Current`. Concurrent operations in other flows keep their own
   intent, and work started inside the scope, including `Task.Run`, inherits it.
-- Scopes nest; the innermost undisposed scope wins. Disposing a scope removes only that scope, even out of
-  order or more than once, so a finished scope is never reported again.
+- Always dispose the scope, normally with `using`. A scope that is never disposed stays active for the rest
+  of the async flow that opened it. In synchronous code or top-level statements, every later operation then
+  reports that intent. Inside an `async` method, the scope ends when the method returns.
+- Scopes nest, and the innermost undisposed scope replaces outer ones rather than being combined with them.
+  A helper that opens its own scope therefore overrides the caller's wording until the helper's scope is
+  disposed. Disposing a scope removes only that scope, even out of order or more than once, so a finished
+  scope is never reported again.
+- Work started inside a scope that begins its SDK operation after the scope is disposed, such as a
+  fire-and-forget task, gets the next outer undisposed scope, or no intent.
 - Open the scope in the method that awaits the SDK call, or in a synchronous helper. Do not open it inside
   an `async` helper and return it: the scope object is still undisposed, but the intent does not flow back
   to the caller, so the caller's operation gets no intent.
-- If your prompt describes the operation, show the intent next to it rather than instead of it. One application call can issue several
-  device operations, and the operation lets the user notice a touch that does not match what they expected.
+- If your prompt describes the operation, show the intent next to it rather than instead of it. One
+  application call can issue several device operations, and the operation lets the user notice a touch
+  that does not match what they expected.
 - Write the intent as a lowercase verb phrase, such as `"approve the transfer"`, so it reads naturally after
   "Touch your YubiKey to", which is how `ConsoleUserPresencePrompt` shows it.
 - `Intent` is application-supplied display text. The SDK never logs it, and `ToString` omits it.

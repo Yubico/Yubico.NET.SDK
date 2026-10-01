@@ -66,6 +66,30 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
 
 ## Security Patterns
 
+### Prompted calculation and deletion
+
+The session snapshots the caller-owned credential provider and acquisition bound at creation.
+`CalculateSessionKeysSymmetricWithPromptAsync` uses one strict LIST snapshot for algorithm, retry
+count, and touch policy; tolerant public LIST decoding is unchanged. `DeleteCredentialWithPromptAsync`
+queries management retries once and never performs a production LIST lookup. Both classify retries
+only from their raw single-command response, outside callback catches. Do not catch
+`HsmAuthRetryException` as provenance: a provider or cleanup implementation can throw it too.
+
+Private `SendCalculateCoreAsync` and `SendDeleteCoreAsync` visibly encode the existing ordered fields,
+send once with status exceptions disabled, and wipe their payloads in `finally`. Calculation retains
+key ownership through secret release, terminal notification, and final cancellation/disposal checks.
+Each submitted attempt creates its own presence handle; failed resolution is terminal, not retryable.
+The shared internal Core `CredentialAcquisition` helper is also used by PIV; WebAuthn keeps its distinct
+decline mapping. Admission/disposal remain session-local, with operation identity in callback context
+to prevent stale callbacks skipping a later operation's drain. Internal composition uses private cores,
+not admitted public entry points. Every public device operation must keep its admission lease.
+
+The hardware retry test checks unchanged peer bytes and independent OpenSSL known-answer vectors,
+then observes LIST immediately after a rejected deletion through its test-only recording connection.
+It resets and verifies the fixture in `finally`, preserving an existing primary failure. This is
+applet-only evidence, not external connector authentication. Do not silently regenerate challenges
+if firmware rejects reuse.
+
 ### Credential Password Handling
 
 Credential passwords cross the public API as **UTF-8 `ReadOnlyMemory<byte>`**, never `string`.

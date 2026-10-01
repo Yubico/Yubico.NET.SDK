@@ -75,6 +75,11 @@ and management-key authentication when generating a key. `MaxCredentialPromptAtt
 three. Other applet factories reject a credential provider until they support interactive credentials;
 the provider remains caller-owned. See the [PIV guide](../Piv/README.md#user-interaction).
 
+YubiHSM Auth also accepts this option for `CalculateSessionKeysSymmetricWithPromptAsync` and
+`DeleteCredentialWithPromptAsync`. Existing explicit-input methods never prompt or retry. The typed
+`HsmAuthCredentialPromptContext.CredentialLabel` identifies the target, while `Kind` distinguishes
+its password from the applet-wide management key. See the [YubiHSM Auth guide](../YubiHsm/README.md#prompted-authentication).
+
 ### Select one device
 
 ```csharp

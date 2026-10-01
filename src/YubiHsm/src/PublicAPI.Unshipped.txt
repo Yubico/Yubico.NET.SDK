@@ -1,4 +1,20 @@
 #nullable enable
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.DeleteCredentialWithPromptAsync(string! label, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.HsmAuthSession.DeleteCredentialWithPromptAsync(string! label, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.YubiHsm.IHsmAuthSession.CalculateSessionKeysSymmetricWithPromptAsync(string! label, System.ReadOnlyMemory<byte> context, System.ReadOnlyMemory<byte>? cardCryptogram = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiHsm.SessionKeys!>!
+Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext
+Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.HsmAuthCredentialPromptContext() -> void
+Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.CredentialLabel.get -> string!
+Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.CredentialLabel.init -> void
+Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.Equals(Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext? other) -> bool
+override Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.<Clone>$() -> Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext!
+override Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.Equals(object? obj) -> bool
+override sealed Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.Equals(Yubico.YubiKit.Core.Credentials.CredentialPromptContext? other) -> bool
+override Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.GetHashCode() -> int
+override Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.ToString() -> string!
+static Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.operator !=(Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext? left, Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext? right) -> bool
+static Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext.operator ==(Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext? left, Yubico.YubiKit.YubiHsm.HsmAuthCredentialPromptContext? right) -> bool
+Yubico.YubiKit.YubiHsm.HsmAuthSession.CalculateSessionKeysSymmetricWithPromptAsync(string! label, System.ReadOnlyMemory<byte> context, System.ReadOnlyMemory<byte>? cardCryptogram = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.YubiHsm.SessionKeys!>!
 Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm
 Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm.Aes128YubicoAuthentication = 38 -> Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm
 Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm.EcP256YubicoAuthentication = 39 -> Yubico.YubiKit.YubiHsm.HsmAuthAlgorithm

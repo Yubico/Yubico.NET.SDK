@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Credentials;
+using System.Buffers;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -33,13 +34,16 @@ public sealed class SessionCreationOptionsTests
         };
         var firmwareVersion = new FirmwareVersion(5, 7, 2);
         var userPresencePrompt = new TestUserPresencePrompt();
+        var credentialPrompt = new TestCredentialPrompt();
         var options = new SessionCreationOptions
         {
             ProtocolConfiguration = configuration,
             ScpKeyParameters = scpKeyParameters,
             PreferredConnectionType = ConnectionType.HidFido,
             FirmwareVersionOverride = firmwareVersion,
-            UserPresencePrompt = userPresencePrompt
+            UserPresencePrompt = userPresencePrompt,
+            CredentialPrompt = credentialPrompt,
+            MaxCredentialPromptAttempts = 2
         };
 
         SessionCreationOptions copy = options.WithPreferredConnectionType(ConnectionType.SmartCard);
@@ -50,7 +54,21 @@ public sealed class SessionCreationOptionsTests
         Assert.Equal(ConnectionType.SmartCard, copy.PreferredConnectionType);
         Assert.Same(firmwareVersion, copy.FirmwareVersionOverride);
         Assert.Same(userPresencePrompt, copy.UserPresencePrompt);
+        Assert.Same(credentialPrompt, copy.CredentialPrompt);
+        Assert.Equal(2, copy.MaxCredentialPromptAttempts);
         Assert.Equal(ConnectionType.HidFido, options.PreferredConnectionType);
+    }
+
+    [Fact]
+    public void MaxCredentialPromptAttempts_NonPositive_RejectsConfiguration()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new SessionCreationOptions { MaxCredentialPromptAttempts = 0 });
+    }
+
+    private sealed class TestCredentialPrompt : ICredentialPrompt
+    {
+        public ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(CredentialPromptContext context, CancellationToken cancellationToken) =>
+            ValueTask.FromResult<IMemoryOwner<byte>?>(null);
     }
 
     private sealed class TestUserPresencePrompt : IUserPresencePrompt

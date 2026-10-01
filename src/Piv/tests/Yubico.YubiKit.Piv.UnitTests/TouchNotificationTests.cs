@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Piv.UnitTests;
@@ -72,6 +74,32 @@ public class TouchNotificationTests
         Assert.Equal("sign the release", requested.Intent);
         Assert.Equal(UserPresenceOperations.Piv.SignOrDecrypt, requested.Operation);
         Assert.Same(requested, Assert.Single(prompt.Resolutions).Context);
+    }
+
+    [Fact]
+    public async Task PromptedSign_ReportsOperationAndIntentToOriginalPresenceService()
+    {
+        var connection = CreateInitializedConnection(
+            [0x01, 0x01, (byte)PivAlgorithm.EccP256, 0x02, 0x02,
+                (byte)PivPinPolicy.Always, (byte)PivTouchPolicy.Always, 0x90, 0x00],
+            [0x06, 0x02, 3, 3, 0x90, 0x00],
+            OkResponse(),
+            CryptoResponse(0xAA));
+        var presence = new RecordingUserPresencePrompt();
+        await using var session = await PivSession.CreateAsync(connection,
+            new SessionCreationOptions { UserPresencePrompt = presence, CredentialPrompt = new PinPrompt() },
+            TestContext.Current.CancellationToken);
+
+        using (UserPresenceIntent.BeginScope("approve release"))
+        {
+            _ = await session.SignOrDecryptAsync(PivSlot.Signature, new byte[32],
+                TestContext.Current.CancellationToken);
+        }
+
+        AssertNotification(presence, UserPresenceBasis.PolicyRequires, PivSlot.Signature,
+            UserPresenceOutcome.Completed, UserPresenceOperations.Piv.SignOrDecrypt);
+        Assert.Equal("approve release", Assert.Single(presence.Requests).Context.Intent);
+        Assert.Equal(1, connection.TransmittedCommands.Count(c => c[1] == 0xF7 && c[3] == (byte)PivSlot.Signature));
     }
 
     [Fact]
@@ -387,6 +415,13 @@ public class TouchNotificationTests
         Assert.Same(request.Context, resolution.Context);
         Assert.Equal(outcome, resolution.Outcome);
         Assert.Equal(CancellationToken.None, resolution.CancellationToken);
+    }
+
+    private sealed class PinPrompt : ICredentialPrompt
+    {
+        public ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(CredentialPromptContext context,
+            CancellationToken cancellationToken) =>
+            ValueTask.FromResult<IMemoryOwner<byte>?>(DisposableArrayPoolBuffer.CreateFromSpan("123456"u8));
     }
 
     private sealed class RecordingUserPresencePrompt(Func<int>? getCommandCount = null) : IUserPresencePrompt

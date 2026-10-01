@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -39,9 +40,10 @@ public static class IYubiKeyExtensions
             CancellationToken cancellationToken = default)
         {
             var preferredConnectionType = options?.PreferredConnectionType;
+            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, UserPresenceApplications.OpenPgp);
             var transport = yubiKey.ResolveSessionTransport(
                 preferredConnectionType,
-                "OpenPGP",
+                UserPresenceApplications.OpenPgp,
                 ConnectionType.SmartCard);
             var sessionOptions = (options ?? new SessionCreationOptions())
                 .WithPreferredConnectionType(transport);

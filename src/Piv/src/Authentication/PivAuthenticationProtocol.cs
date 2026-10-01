@@ -25,6 +25,30 @@ namespace Yubico.YubiKit.Piv.Authentication;
 
 internal static class PivAuthenticationProtocol
 {
+    // An empty VERIFY is a state query, not an attempt at verifying a candidate PIN.
+    internal static async Task<(bool Verified, int? RetriesRemaining)> GetPinVerificationStateAsync(
+        IPivBackend backend, CancellationToken cancellationToken)
+    {
+        var command = new ApduCommand(0x00, 0x20, 0x00, 0x80, ReadOnlyMemory<byte>.Empty);
+        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        if (response.IsOK())
+            return (true, null);
+        if (SWConstants.ExtractRetryCount(response.SW) is { } retries)
+            return (false, retries);
+        if (response.SW == SWConstants.AuthenticationMethodBlocked)
+            return (false, 0);
+        throw ApduException.FromStatusWord(response.SW, "Could not determine PIN verification state");
+    }
+
+    // Only a rejected host challenge at the second APDU is a credential rejection.
+    internal sealed class ManagementKeyRejectedException : ApduException
+    {
+        public ManagementKeyRejectedException(short statusWord)
+            : base($"Management key authentication failed - challenge response: Security status not satisfied (SW=0x{statusWord:X4})")
+        {
+            SW = statusWord;
+        }
+    }
     /// <summary>
     /// Gets the well-known 24-byte factory-default PIV management key value.
     /// </summary>
@@ -82,14 +106,7 @@ internal static class PivAuthenticationProtocol
         logger.LogDebug("PIV: Starting management key authentication with {KeyType}", managementKeyType);
 
         // Validate key length based on management key type
-        int expectedKeyLength = managementKeyType switch
-        {
-            PivManagementKeyType.TripleDes => 24,
-            PivManagementKeyType.Aes128 => 16,
-            PivManagementKeyType.Aes192 => 24,
-            PivManagementKeyType.Aes256 => 32,
-            _ => throw new ArgumentException($"Unsupported management key type: {managementKeyType}")
-        };
+        int expectedKeyLength = managementKeyType.KeyLength();
 
         if (managementKey.Length != expectedKeyLength)
         {
@@ -154,6 +171,8 @@ internal static class PivAuthenticationProtocol
 
                 if (!challengeResponse.IsOK())
                 {
+                    if (challengeResponse.SW == SWConstants.SecurityStatusNotSatisfied)
+                        throw new ManagementKeyRejectedException(challengeResponse.SW);
                     throw ApduException.FromStatusWord(challengeResponse.SW, "Management key authentication failed - challenge response");
                 }
 

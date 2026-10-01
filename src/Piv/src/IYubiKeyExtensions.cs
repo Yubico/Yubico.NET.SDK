@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Devices;
@@ -42,7 +43,7 @@ public static class IYubiKeyExtensions
             var preferredConnectionType = options?.PreferredConnectionType;
             var transport = yubiKey.ResolveSessionTransport(
                 preferredConnectionType,
-                "PIV",
+                UserPresenceApplications.Piv,
                 ConnectionType.SmartCard);
             var sessionOptions = (options ?? new SessionCreationOptions())
                 .WithPreferredConnectionType(transport);

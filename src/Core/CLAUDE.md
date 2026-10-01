@@ -295,7 +295,9 @@ Prefer using `IsSupported(feature)` / `EnsureSupports(feature)` on `IApplication
 
 Applet factories snapshot `SessionCreationOptions` without retaining the options object. Secure-channel parameters
 remain borrowed. A session retains the caller-owned `UserPresencePrompt` service reference for its lifetime but
-never disposes it; this is the sole retained-service exception.
+never disposes it. PIV also retains the caller-owned `CredentialPrompt` reference (bounded by
+`MaxCredentialPromptAttempts`) in PIV-only state; other applet factories reject that option through
+the same internal validator at direct and device creation boundaries before any transport exchange.
 
 ## Test Infrastructure
 

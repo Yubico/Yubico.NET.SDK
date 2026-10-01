@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -105,12 +106,12 @@ public static class IYubiKeyExtensions
         {
             var scpKeyParams = options?.ScpKeyParameters;
             var preferredConnectionType = options?.PreferredConnectionType;
-            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "YubiOTP");
+            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, UserPresenceApplications.YubiOtp);
             var transport = yubiKey.ResolveSessionTransport(
                 scpKeyParams is not null && preferredConnectionType is null
                     ? ConnectionType.SmartCard
                     : preferredConnectionType,
-                "YubiOTP",
+                UserPresenceApplications.YubiOtp,
                 YubiOtpTransportOrder);
             var sessionOptions = (options ?? new SessionCreationOptions())
                 .WithPreferredConnectionType(transport);

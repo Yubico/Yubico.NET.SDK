@@ -46,12 +46,13 @@ internal sealed class PivPromptedAuthentication(
 
         Exception? lastRejection = null;
         int? retries = state.RetriesRemaining;
+        // Invalid local input consumes an attempt; after transmission, retry only a rejected PIN with retries left.
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             var context = new CredentialPromptContext
             {
                 Kind = CredentialKind.Pin,
-                Application = "PIV",
+                Application = UserPresenceApplications.Piv,
                 Scope = slot.ToString(),
                 RetriesRemaining = retries,
                 IsRetry = attempt > 0,
@@ -82,6 +83,7 @@ internal sealed class PivPromptedAuthentication(
             }
             finally
             {
+                // The prompt transfers ownership even when validation, verification, or cancellation fails.
                 PivCredentialAcquisition.Release(owner);
             }
         }
@@ -92,12 +94,13 @@ internal sealed class PivPromptedAuthentication(
     {
         int keyLength = keyType.KeyLength();
         Exception? lastRejection = null;
+        // Local invalid input also consumes an attempt; after transmission, retry only a rejected challenge.
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             var context = new CredentialPromptContext
             {
                 Kind = CredentialKind.ManagementKey,
-                Application = "PIV",
+                Application = UserPresenceApplications.Piv,
                 Scope = "Card management",
                 IsRetry = attempt > 0,
                 MinLengthBytes = keyLength,

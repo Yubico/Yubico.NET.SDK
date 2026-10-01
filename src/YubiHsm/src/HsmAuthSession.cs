@@ -134,7 +134,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var firmwareVersionOverride = options?.FirmwareVersionOverride;
 
         ValidatePreferredConnectionType(connection, options);
-        SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "YubiHSM Auth");
+        SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, UserPresenceApplications.YubiHsmAuth);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.

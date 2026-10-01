@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -43,10 +44,10 @@ public static class IYubiKeyExtensions
             CancellationToken cancellationToken = default)
         {
             var preferredConnectionType = options?.PreferredConnectionType;
-            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "YubiHSM Auth");
+            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, UserPresenceApplications.YubiHsmAuth);
             var transport = yubiKey.ResolveSessionTransport(
                 preferredConnectionType,
-                "YubiHSM Auth",
+                UserPresenceApplications.YubiHsmAuth,
                 ConnectionType.SmartCard);
             var sessionOptions = (options ?? new SessionCreationOptions())
                 .WithPreferredConnectionType(transport);

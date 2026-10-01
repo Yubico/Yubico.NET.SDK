@@ -17,6 +17,7 @@ namespace Yubico.YubiKit.Core.Sessions;
 /// <summary>Rejects unsupported shared options before an applet factory touches a transport.</summary>
 internal static class SessionCreationOptionsValidation
 {
+    // Keep the applet-specific alternative in the caller: Core must not depend on WebAuthn.
     internal static void RejectUnsupportedCredentialPrompt(
         SessionCreationOptions? options,
         string application,

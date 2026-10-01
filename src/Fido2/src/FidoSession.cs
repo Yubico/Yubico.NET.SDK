@@ -45,12 +45,13 @@ namespace Yubico.YubiKit.Fido2;
 /// </remarks>
 public sealed class FidoSession : ApplicationSession, IFidoSession
 {
+    // WebAuthn owns on-demand PIN prompting; FidoSession only reports the supported route.
     internal const string CredentialPromptAlternative = "WebAuthnClientOptions.CredentialPrompt with WebAuthnClient";
 
     /// <summary>
     /// Feature flag for FIDO2 support (requires firmware 5.0+).
     /// </summary>
-    public static readonly Feature FeatureFido2 = new("FIDO2", 5, 0, 0);
+    public static readonly Feature FeatureFido2 = new(UserPresenceApplications.Fido2, 5, 0, 0);
 
     /// <summary>
     /// Feature flag for Bio Enrollment support (requires firmware 5.2+).
@@ -122,7 +123,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
 
         ValidatePreferredConnectionType(connection, options);
         SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(
-            options, "FIDO2", CredentialPromptAlternative);
+            options, UserPresenceApplications.Fido2, CredentialPromptAlternative);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.

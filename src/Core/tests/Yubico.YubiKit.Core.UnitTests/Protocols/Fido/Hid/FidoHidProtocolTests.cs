@@ -180,6 +180,76 @@ public class FidoHidProtocolTests
     }
 
     [Fact]
+    public async Task DisposeFromOwnExchangeRefusesSelfDrainAndKeepsExchangeUsable()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        connection.QueueResponsePackets(CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xA5]));
+        var refused = false;
+        connection.OnResponseDequeued = _ =>
+        {
+            Assert.Throws<InvalidOperationException>(protocol.Dispose);
+            refused = true;
+        };
+
+        var response = await protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst,
+            ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.True(refused);
+        Assert.Equal((byte)0xA5, response.Span[0]);
+        protocol.Dispose();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Dispose_WhenIdle_DoesNotTerminallyWakeBorrowedConnection(bool asynchronous)
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        await protocol.InitializeAsync(TestContext.Current.CancellationToken);
+
+        if (asynchronous)
+            await protocol.DisposeAsync();
+        else
+            protocol.Dispose();
+
+        Assert.Equal(0, connection.TerminalWakeCount);
+        Assert.False(connection.IsDisposed);
+        var next = new FidoHidProtocol(connection);
+        await next.InitializeAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(2, connection.InitRequestCount);
+        await next.DisposeAsync();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Dispose_WhenExchangePending_WakesAndDrainsWithoutReleasingBorrowedConnection(bool asynchronous)
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        await protocol.InitializeAsync(TestContext.Current.CancellationToken);
+        connection.HoldNextReceive = true;
+        Task<ReadOnlyMemory<byte>> exchange = protocol.SendVendorCommandAsync(
+            CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty,
+            cancellationToken: TestContext.Current.CancellationToken);
+        await connection.PendingReceive.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        if (asynchronous)
+            await protocol.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        else
+            await Task.Run(protocol.Dispose, TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => exchange.WaitAsync(
+            TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+        Assert.Equal(1, connection.TerminalWakeCount);
+        Assert.False(connection.IsDisposed);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+            protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty,
+                cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task SendVendorCommandAsync_RepeatedUserPresenceKeepAlive_NotifiesOnceAndCompletes()
     {
         var connection = new FakeFidoHidConnection();
@@ -598,7 +668,8 @@ public class FidoHidProtocolTests
         var connection = new FakeFidoHidConnection();
         var logger = new RecordingLogger();
         var protocol = new FidoHidProtocol(connection, logger);
-        var promptFailure = new InvalidOperationException("prompt failed");
+        const string marker = "ISC56-callback-credential-sentinel";
+        var promptFailure = new ArgumentException($"prompt failed with {marker}");
         var prompt = new RecordingUserPresencePrompt(promptFailure);
         connection.QueueResponsePackets(
             CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
@@ -612,7 +683,12 @@ public class FidoHidProtocolTests
                 TestContext.Current.CancellationToken));
 
         Assert.Contains("does not match request command", actual.Message, StringComparison.Ordinal);
-        Assert.Contains(promptFailure, logger.Exceptions);
+        Assert.NotEmpty(logger.Events);
+        Assert.Contains(logger.Events, entry => entry.Contains("User-presence callback failed before CTAP HID terminal response validation also failed", StringComparison.Ordinal));
+        Assert.Contains(logger.Events, entry => entry == $"ExceptionType={typeof(ArgumentException).FullName}");
+        Assert.DoesNotContain(logger.Events, entry => entry == $"ExceptionType={typeof(InvalidOperationException).FullName}");
+        Assert.DoesNotContain(logger.Events, entry => entry.Contains(marker, StringComparison.Ordinal));
+        Assert.DoesNotContain(logger.Exceptions, exception => exception is not null);
     }
 
     /// <summary>
@@ -724,9 +800,11 @@ public class FidoHidProtocolTests
         return packet;
     }
 
-    private sealed class FakeFidoHidConnection : IFidoHidConnection
+    private sealed class FakeFidoHidConnection : IFidoHidConnection, ITerminalWakeControl
     {
         private readonly Queue<byte[]> _responsePackets = new();
+        private readonly TaskCompletionSource<ReadOnlyMemory<byte>> _heldRead =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
         private byte[]? _lastInitRequest;
         private bool _initResponseSent;
 
@@ -735,6 +813,10 @@ public class FidoHidProtocolTests
         public ConnectionType Type => ConnectionType.HidFido;
 
         public int InitRequestCount { get; private set; }
+        public int TerminalWakeCount { get; private set; }
+        public bool IsDisposed { get; private set; }
+        public bool HoldNextReceive { get; set; }
+        public TaskCompletionSource PendingReceive { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public bool ThrowOnNextSend { get; set; }
 
         /// <summary>
@@ -765,6 +847,7 @@ public class FidoHidProtocolTests
             {
                 InitRequestCount++;
                 _lastInitRequest = snapshot;
+                _initResponseSent = false;
             }
 
             if (ThrowOnNextSend)
@@ -785,6 +868,12 @@ public class FidoHidProtocolTests
         public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            if (HoldNextReceive)
+            {
+                HoldNextReceive = false;
+                PendingReceive.TrySetResult();
+                return _heldRead.Task;
+            }
             if (!_initResponseSent)
             {
                 _initResponseSent = true;
@@ -798,9 +887,16 @@ public class FidoHidProtocolTests
 
         public void Dispose()
         {
+            IsDisposed = true;
         }
 
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+        public void RequestTerminalWake()
+        {
+            TerminalWakeCount++;
+            _heldRead.TrySetException(new InvalidOperationException("Terminal wake"));
+        }
 
         private byte[] CreateInitResponse()
         {
@@ -856,6 +952,7 @@ public class FidoHidProtocolTests
     private sealed class RecordingLogger : ILogger<FidoHidProtocol>
     {
         public List<Exception?> Exceptions { get; } = [];
+        public List<string> Events { get; } = [];
 
         public IDisposable? BeginScope<TState>(TState state)
             where TState : notnull => null;
@@ -867,6 +964,17 @@ public class FidoHidProtocolTests
             EventId eventId,
             TState state,
             Exception? exception,
-            Func<TState, Exception?, string> formatter) => Exceptions.Add(exception);
+            Func<TState, Exception?, string> formatter)
+        {
+            Events.Add(formatter(state, exception));
+            if (state is IEnumerable<KeyValuePair<string, object?>> values)
+            {
+                foreach (var value in values)
+                    Events.Add($"{value.Key}={value.Value}");
+            }
+            if (exception is not null)
+                Events.Add(exception.ToString());
+            Exceptions.Add(exception);
+        }
     }
 }

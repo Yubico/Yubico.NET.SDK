@@ -53,9 +53,19 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     protected bool IsDisposalStarted => Volatile.Read(ref _disposalStarted) != 0;
 
     /// <summary>
-    ///     The connection this session runs over. The session is a USER of it, not its owner: disposing the
-    ///     session leaves a caller-created connection open and reusable by the next session.
+    ///     The connection this session runs over. Unless an <c>IYubiKey.Create*SessionAsync</c> entry point
+    ///     transferred ownership, the session borrows it: disposing the session detaches the session but never
+    ///     disposes a caller-created connection.
     /// </summary>
+    /// <remarks>
+    ///     After healthy idle or sequential use, the borrowed connection can host the next session. Detaching
+    ///     is ownership bookkeeping, not proof that connection or device state is reusable. A failed partial
+    ///     exchange, a failed OTP reset, or disposal that begins while a FIDO HID exchange is active on the
+    ///     built-in macOS connection can leave the connection unusable; the terminal wake used for that disposal
+    ///     may do so even when the exchange finishes concurrently with it. After such uncertainty, dispose and
+    ///     reopen the connection. Disposal does not always end the connection: a SmartCard disposal drains an
+    ///     admitted exchange, and a successful drained exchange leaves the borrowed connection reusable.
+    /// </remarks>
     protected IConnection Connection { get; }
 
     public FirmwareVersion FirmwareVersion { get; protected set; } = new();
@@ -290,6 +300,8 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
             return Protocol ?? protocol;
 
         protocol.Configure(firmwareVersion, configuration);
+        if (protocol is Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidProtocol fidoProtocol)
+            await fidoProtocol.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         IProtocol effectiveProtocol = protocol;
         var isAuthenticated = false;

@@ -27,7 +27,7 @@ Guidance for AI agents working in this repository. Yubico.NET.SDK (YubiKit) is a
 | `Tests.Shared/` | Multi-transport test harness |
 | `Tests.TestProject/` | xUnit v3 test project layout |
 
-**Platform interop** lives in `Core/PlatformInterop/{Windows,macOS,Linux}/` with P/Invoke declarations. `UnmanagedDynamicLibrary` + `SafeLibraryHandle` manage native loading; `SdkPlatformInfo` detects runtime platform.
+**Platform interop** lives in `src/Core/src/Native/{Windows,MacOS,Linux,Desktop}/` with the P/Invoke declarations; the managed transport implementations that call them are in `src/Core/src/Transports/`. `UnmanagedDynamicLibrary` + `SafeLibraryHandle` manage native loading; `SdkPlatformInfo` detects runtime platform.
 
 ## Quick Reference — Critical Rules
 
@@ -76,10 +76,22 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 
 > Deep dive: `docs/CSHARP-PATTERNS.md` (load when designing new types, choosing property accessors, writing switch expressions, or using primary constructors / records).
 
+**Native Interop — `LibraryImport`, never `DllImport`:**
+- ✅ ALWAYS declare new native entry points with `[LibraryImport]` on an `internal static partial` method in a `partial` class
+- ✅ ALWAYS pair it with `[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]`
+- ✅ ALWAYS marshal explicitly — `StringMarshalling`/`StringMarshallingCustomType`, `[MarshalAs(UnmanagedType.U1)]` on `bool`, `SetLastError = true` only where the caller actually reads `errno`/`GetLastError`
+- ✅ ALWAYS use `delegate* unmanaged[Cdecl]<...>` + `[UnmanagedCallersOnly]` for native callbacks — the source-generated marshaller does **not** marshal C# delegate types
+- ❌ NEVER write `[DllImport]` / `extern` in new interop. It emits a runtime-generated IL stub: not trim- or AOT-friendly, invisible to the marshalling source generator, and it silently accepts non-blittable signatures that then fail at runtime. **`DllImport` = wrong.**
+- ⚠️ The `SYSLIB1054` analyzer that flags this is a *suggestion*, not an error — it will not stop you. Don't rely on the build to catch it.
+- 🔁 There is no legacy exception left — the repo has **zero** `[DllImport]`/`static extern` sites. `grep -rn "\[DllImport(\|static extern" --include="*.cs" src/ benchmarks/ verification/` must come back empty; a hit is a regression to fix, not debt to defer.
+
+> Deep dive: `src/Core/CLAUDE.md` § Platform Interop Pattern (conversion recipe and the traps: `CharSet.Ansi`, `bool`, `SafeHandle`, string returns), `docs/NATIVE-AOT.md`, and `.claude/skills/domain-pinvoke-porting/SKILL.md`.
+
 **Code Quality:**
 - ✅ ALWAYS follow `.editorconfig` (see Pre-Commit Checklist for the formatting workflow)
 - ✅ ALWAYS handle `CancellationToken` in async methods
 - ✅ ALWAYS use `readonly` on fields that don't change
+- ✅ Keep methods simple: cyclomatic complexity ≤ 10 and cognitive complexity ≤ 20, checked by `dotnet toolchain.cs complexity` (see Pre-Commit Checklist). Prefer the repo's existing conventions over clever code.
 - ❌ NEVER use `#region` (split large classes instead)
 - ❌ NEVER use exceptions for control flow
 
@@ -144,8 +156,9 @@ Valid device response data that the SDK does not yet model must not block users.
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
 - **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow through one internal `DeviceEventHub` (per-watcher bounded buffers), surfaced as `YubiKeyManager.WatchAsync` (`IAsyncEnumerable`), the only public device change stream. No reactive dependency - see `docs/usage/device-discovery.md`.
-- **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawFidoHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is an explicitly unguarded expert escape hatch. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
+- **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawFidoHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is explicitly unguarded direct raw-connection access, with framing, sequencing, and recovery left to the caller. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
 - **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
+- **HID vocabulary** — `IYubiKey` is the physical key; `IHidInterface` is an operating-system-exposed report interface enumerated by `FindHidInterfaces`; `IHidConnection` is an opened report connection. Windows `IWindowsHidReportAccess` is the internal report-handle seam, not another physical device.
 - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
 - **Application sessions** — `ApplicationSession` base; protocol-specific sessions like `ManagementSession<TConnection>` are generic over connection type.
 - **User interaction** — `ICredentialPrompt` acquires secret bytes where adopted; `IUserPresencePrompt`, supplied through `SessionCreationOptions.UserPresencePrompt`, is the cross-applet touch-notification contract. Sessions retain but do not own the prompt. See [User interaction](docs/usage/user-interaction.md).
@@ -571,6 +584,7 @@ If you answered "no" to any of these, don't write the test.
 - ❌ Public mutable state (`public byte[] Data;`) — use `{ get; init; }` or `ReadOnlyMemory<byte>`
 - ❌ `#region` — split the class instead
 - ❌ `var` when the type isn't obvious from the right-hand side
+- ❌ `[DllImport]` / `extern` for a new native entry point — use `[LibraryImport]` + `static partial`
 
 > Examples for each: `docs/CSHARP-PATTERNS.md` ("What NOT to Do" section).
 
@@ -597,19 +611,18 @@ Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL
 1. ✅ `git status` — only your files staged
 2. ✅ Build clean: `dotnet toolchain.cs build`
 3. ✅ Tests pass: `dotnet toolchain.cs test`
-4. ✅ Formatted — scope `dotnet format` to your staged files, never the whole solution:
-   ```
-   dotnet format Yubico.YubiKit.sln --include $(git diff --name-only --cached -- '*.cs')
-   ```
-   Note: `--include` silently skips nonexistent/stale paths — re-run `git diff --cached --name-only` if a file seems to be missed.
+4. ✅ Formatted — use `dotnet format` freely to apply style, whitespace, and analyzer fixes. Always scope it with `--include` to only your edited files; never format the whole solution:
+    ```
+    dotnet format Yubico.YubiKit.sln --include $(git diff --name-only HEAD -- '*.cs')
+    ```
+    This example includes staged and unstaged tracked C# edits. Add any new, untracked C# files explicitly. `--include` silently skips nonexistent/stale paths, so check the file list if a file seems to be missed.
 
-   The `whitespace` subcommand (`dotnet format whitespace ... --include <files>`) is fine and often faster, **as long as it is scoped with `--include` to your own files**. The rule being enforced is "never reformat files you did not change", not "never use a particular subcommand". Unscoped formatting of the whole solution is what is forbidden.
+    Caveat: `dotnet format` only visits documents that belong to a project in the solution. Scoping it to a file-based app script such as `toolchain.cs`, or to a Markdown/props file, matches zero documents and exits `0` — that is "skipped", not "verified clean". Do not report it as a passing gate.
 
-   Caveat: `dotnet format` only visits documents that belong to a project in the solution. Scoping it to a file-based app script such as `toolchain.cs`, or to a Markdown/props file, matches zero documents and exits `0` — that is "skipped", not "verified clean". Do not report it as a passing gate.
-
-   Caveat: `--include` takes a **space-separated** list, which is why the command above leaves `$(...)` unquoted and lets the shell word-split it. Passing several paths as one quoted string joined by `;` or `,` matches **zero** documents and exits `0`, indistinguishable from a clean run. If you build the file list yourself, prove the check is live before trusting it: introduce a trailing space in one of your own files, confirm the command reports `error WHITESPACE`, then revert. A gate that cannot fail has not passed.
-5. ✅ No nullable warnings
-6. ✅ Sensitive data zeroed (`ZeroMemory` / `Dispose`)
-7. ✅ No unnecessary allocations in hot paths
-8. ✅ Modern C# (`is null`, switch expressions, file-scoped namespaces)
-9. ✅ EditorConfig followed
+    Caveat: `--include` takes a **space-separated** list, which is why the command above leaves `$(...)` unquoted and lets the shell word-split it. Passing several paths as one quoted string joined by `;` or `,` matches **zero** documents and exits `0`, indistinguishable from a clean run. Ensure the paths passed to `--include` are the files you edited.
+5. ✅ Complexity checked: `dotnet toolchain.cs complexity`. It reports the methods you changed that exceed cyclomatic 10 or cognitive 20, marked new, worse, unchanged, or improved compared with `HEAD`. For each method marked **new** or **worse**, simplify it, or keep it and add the `Complexity-Justification:` line the report prints to your commit message with a real reason. Unchanged and improved methods are existing debt; simplifying them is welcome but optional. Coverage is not part of this check. The same check runs on every pull request and appears in its report comment; before opening one, check the whole branch with `dotnet toolchain.cs -- complexity --complexity-args "--base $(git merge-base HEAD origin/yubikit)"`. Details: `TOOLCHAIN.md` § Complexity check.
+6. ✅ No nullable warnings
+7. ✅ Sensitive data zeroed (`ZeroMemory` / `Dispose`)
+8. ✅ No unnecessary allocations in hot paths
+9. ✅ Modern C# (`is null`, switch expressions, file-scoped namespaces)
+10. ✅ EditorConfig followed

@@ -149,9 +149,9 @@ internal static partial class NativeMethods
     // settings). It does not currently have any effect on platforms other
     // than Windows, but is included because of the analyzer and in the hope
     // that it will be supported by these platforms in the future.
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern kern_return_t IOObjectRelease(int self);
+    internal static partial kern_return_t IOObjectRelease(int self);
 
     /*! @function IORegistryEntryGetRegistryEntryID
         @abstract Returns an ID for the registry entry that is global to all tasks.
@@ -159,18 +159,18 @@ internal static partial class NativeMethods
         @param entry The registry entry handle whose ID to look up.
         @param entryID The resulting ID.
         @result A kern_return_t error code. */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern kern_return_t IORegistryEntryGetRegistryEntryID(int self, out long entryID);
+    internal static partial kern_return_t IORegistryEntryGetRegistryEntryID(int self, out long entryID);
 
     /*! @function IORegistryEntryIDMatching
         @abstract Create a matching dictionary that specifies an IOService match based on a registry entry ID.
         @discussion This function creates a matching dictionary that will match a registered, active IOService found with the given registry entry ID. The entry ID for a registry entry is returned by IORegistryEntryGetRegistryEntryID().
         @param entryID The registry entry ID to be found.
         @result The matching dictionary created, is returned on success, or zero on failure. The dictionary is commonly passed to IOServiceGetMatchingServices or IOServiceAddNotification which will consume a reference, otherwise it should be released with CFRelease by the caller. */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern IntPtr IORegistryEntryIDMatching(ulong entryID); /* Returns retained */
+    internal static partial IntPtr IORegistryEntryIDMatching(ulong entryID); /* Returns retained */
 
     /*!
         @function IOServiceGetMatchingService
@@ -180,7 +180,7 @@ internal static partial class NativeMethods
         @param matching A CF dictionary containing matching information, of which one reference is always consumed by this function (Note prior to the Tiger release there was a small chance that the dictionary might not be released if there was an error attempting to serialize the dictionary). IOKitLib can construct matching dictionaries for common criteria with helper functions such as IOServiceMatching, IOServiceNameMatching, IOBSDNameMatching.
         @result The first service matched is returned on success. The service must be released by the caller.
       */
-    [DllImport(Libraries.IOKitFramework)]
+    [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static extern int IOServiceGetMatchingService(int masterPort, IntPtr matching /* Releases arg */);
+    internal static partial int IOServiceGetMatchingService(int masterPort, IntPtr matching /* Releases arg */);
 }

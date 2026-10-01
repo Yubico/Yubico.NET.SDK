@@ -74,10 +74,10 @@
 //         }
 //
 //         // Get a list of all the devices discovered, represented as a List of
-//         // LinuxHidDevice.
-//         public IEnumerable<LinuxHidDevice> GetLinuxHidDeviceList()
+//         // LinuxHidInterface.
+//         public IEnumerable<LinuxHidInterface> GetLinuxHidDeviceList()
 //         {
-//             var returnValue = new List<LinuxHidDevice>();
+//             var returnValue = new List<LinuxHidInterface>();
 //
 //             // Get the first entry in the list.
 //             // The return is a reference to an object that belongs to the
@@ -95,7 +95,7 @@
 //                     NativeMethods.udev_device_new_from_syspath(_udevObject, Marshal.PtrToStringAnsi(namePtr));
 //                 _ = ThrowIfFailedNull(currentDevice);
 //
-//                 var linuxHid = new LinuxHidDevice(currentDevice);
+//                 var linuxHid = new LinuxHidInterface(currentDevice);
 //                 returnValue.Add(linuxHid);
 //
 //                 // Get the next entry in the list. As with a link list, it is

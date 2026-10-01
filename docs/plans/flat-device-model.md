@@ -17,7 +17,7 @@ interfaces as a language feature.
 
 - One returned `IYubiKey` represents one physical key with zero or one slot for each concrete connection
   type: SmartCard, HID FIDO, and HID OTP.
-- The slots own live enumerated `IPcscDevice` / `IHidDevice` handles. Core cannot reopen HID interfaces by
+- The slots own live enumerated `IPcscDevice` / `IHidInterface` handles. Core cannot reopen HID interfaces by
   path, so a string-only Rust model is not viable.
 - A typed connection and `DeviceConnectionRegistry.ResolveInterfaceId` select the same slot.
 - One connection claims every known interface identifier of the physical key.
@@ -127,7 +127,7 @@ integration); approval is recorded in the Assignment.
 #### Target shape
 
 Two internal sealed slot types — `PcscConnectionSlot` and `HidConnectionSlot` — are constructed
-directly from live enumerated `IPcscDevice` and `IHidDevice` handles behind
+directly from live enumerated `IPcscDevice` and `IHidInterface` handles behind
 `IYubiKeyConnectionSlot`:
 
 - carries the live handle, the unchanged interface-id string, and its single `ConnectionType`;

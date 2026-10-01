@@ -16,7 +16,9 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
-internal class ChainedApduTransmitter(ISmartCardConnection connection, IApduFormatter formatter)
+internal class ChainedApduTransmitter(
+    ISmartCardConnection connection, IApduFormatter formatter, Action<Exception>? onContinuationFailure = null,
+    bool rejectIntermediateFragment = false)
     : ApduTransmitter(connection, formatter) // TODO refactor to use composition instead of inheritance
 {
     private const int HasMoreData = 0x10;
@@ -33,20 +35,32 @@ internal class ChainedApduTransmitter(ISmartCardConnection connection, IApduForm
 
         // Split data into chunks and send chained APDUs
         var offset = 0;
-        while (offset + ShortApduMaxChunk < data.Length)
+        try
         {
-            var chunk = data[offset..(offset + ShortApduMaxChunk)];
-            var chainedCommand = new ApduCommand(command.Cla | HasMoreData, command.Ins, command.P1, command.P2, chunk, command.Le);
+            while (offset + ShortApduMaxChunk < data.Length)
+            {
+                var chunk = data[offset..(offset + ShortApduMaxChunk)];
+                var chainedCommand = new ApduCommand(command.Cla | HasMoreData, command.Ins, command.P1, command.P2, chunk, command.Le);
 
-            var result = await base.TransmitAsync(chainedCommand, useScp, cancellationToken).ConfigureAwait(false);
-            if (result.SW != SWConstants.Success)
-                return result;
+                var result = await base.TransmitAsync(chainedCommand, useScp, cancellationToken).ConfigureAwait(false);
+                if (result.SW != SWConstants.Success)
+                {
+                    if (rejectIntermediateFragment)
+                        throw ApduException.FromResponse(result, chainedCommand, "Secure command fragment rejected");
+                    return result;
+                }
 
-            offset += ShortApduMaxChunk;
+                offset += ShortApduMaxChunk;
+            }
+
+            var finalChunk = data[offset..];
+            var finalCommand = new ApduCommand(command.Cla, command.Ins, command.P1, command.P2, finalChunk, command.Le);
+            return await base.TransmitAsync(finalCommand, useScp, cancellationToken).ConfigureAwait(false);
         }
-
-        var finalChunk = data[offset..];
-        var finalCommand = new ApduCommand(command.Cla, command.Ins, command.P1, command.P2, finalChunk, command.Le);
-        return await base.TransmitAsync(finalCommand, useScp, cancellationToken).ConfigureAwait(false);
+        catch (Exception ex) when (offset > 0 && !rejectIntermediateFragment)
+        {
+            onContinuationFailure?.Invoke(ex);
+            throw;
+        }
     }
 }

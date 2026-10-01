@@ -27,7 +27,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 ///     Linux implementation of a Human Interface Device (HID) using hidraw.
 /// </summary>
 [SupportedOSPlatform("linux")]
-internal sealed class LinuxHidDevice : IHidDevice
+internal sealed class LinuxHidInterface : IHidInterface
 {
     private readonly string _devNode;
 
@@ -43,7 +43,7 @@ internal sealed class LinuxHidDevice : IHidDevice
     /// </summary>
     public HidInterfaceType InterfaceType { get; }
 
-    private LinuxHidDevice(HidDescriptorInfo descriptorInfo)
+    private LinuxHidInterface(HidDescriptorInfo descriptorInfo)
     {
         DescriptorInfo = descriptorInfo;
         InterfaceType = HidInterfaceClassifier.Classify(descriptorInfo);
@@ -56,7 +56,7 @@ internal sealed class LinuxHidDevice : IHidDevice
     /// <returns>
     ///     An enumerable list of all the supported Yubico HID devices present on the system.
     /// </returns>
-    public static IReadOnlyList<IHidDevice> GetList()
+    public static IReadOnlyList<IHidInterface> GetList()
     {
         using var udev = UdevNativeMethods.udev_new();
         if (udev.IsInvalid)
@@ -94,7 +94,7 @@ internal sealed class LinuxHidDevice : IHidDevice
                 "Failed to scan for devices.");
         }
 
-        var devices = new List<IHidDevice>();
+        var devices = new List<IHidInterface>();
         var currentEntry = UdevNativeMethods.udev_enumerate_get_list_entry(enumerate);
 
         while (currentEntry != IntPtr.Zero)
@@ -113,7 +113,7 @@ internal sealed class LinuxHidDevice : IHidDevice
                     if (descriptorInfo.VendorId == HidConstants.YubicoVendorId &&
                         HidInterfaceClassifier.IsSupported(descriptorInfo))
                     {
-                        devices.Add(new LinuxHidDevice(descriptorInfo));
+                        devices.Add(new LinuxHidInterface(descriptorInfo));
                     }
                 }
             }

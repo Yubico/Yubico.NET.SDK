@@ -44,7 +44,7 @@ internal interface IOtpHidProtocol : IProtocol
 
     /// <summary>
     /// Sends an SDK operation's slot command and reports an observed in-flight touch wait.
-    /// Raw and expert callers use the overload without notification parameters.
+    /// Raw-session and direct raw-connection callers use the overload without notification parameters.
     /// </summary>
     /// <param name="slot">The slot/command byte.</param>
     /// <param name="data">The command payload.</param>

@@ -60,4 +60,39 @@ internal sealed class PcscConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryCon
         ConnectionType connection,
         CancellationToken cancellationToken) =>
         OpenRawConnectionAsync(connection, cancellationToken);
+
+    internal async Task<IConnection> OpenRegisteredConnectionAsync(
+        IDisposable registration,
+        CancellationToken cancellationToken)
+    {
+        if (_smartCardConnectionFactory is IRegisteredSmartCardConnectionFactory registeredFactory)
+        {
+            var registered = await registeredFactory
+                .CreateRegisteredAsync(_pcscDevice, registration, cancellationToken)
+                .ConfigureAwait(false);
+            Logger.LogInformation("Connected to YubiKey in reader {ReaderName}", _pcscDevice.ReaderName);
+            return registered;
+        }
+
+        try
+        {
+            var raw = await _smartCardConnectionFactory
+                .CreateAsync(_pcscDevice, cancellationToken)
+                .ConfigureAwait(false);
+            Logger.LogInformation("Connected to YubiKey in reader {ReaderName}", _pcscDevice.ReaderName);
+            return new RegisteredSmartCardConnection(raw, registration);
+        }
+        catch (UnrecoveredConnectionException ex)
+        {
+            DeviceConnectionRegistry.MarkUnrecovered(registration, ex);
+            throw;
+        }
+        catch
+        {
+            // External factories own partial-open cleanup until they return a connection. An ordinary failure
+            // therefore releases this managed claim; factories that cannot prove cleanup signal that explicitly.
+            registration.Dispose();
+            throw;
+        }
+    }
 }

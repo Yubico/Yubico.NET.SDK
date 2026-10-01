@@ -60,7 +60,7 @@ public class FindYubiKeys : IFindYubiKeys
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FindYubiKeys>();
 
     private readonly IFindPcscDevices findPcscService;
-    private readonly IFindHidDevices findHidService;
+    private readonly IFindHidInterfaces findHidService;
     private readonly Func<IDevice, IYubiKeyConnectionSlot> createSlot;
     private readonly Lock _evidenceLock = new();
 
@@ -70,7 +70,7 @@ public class FindYubiKeys : IFindYubiKeys
 
     internal FindYubiKeys(
         IFindPcscDevices findPcscService,
-        IFindHidDevices findHidService,
+        IFindHidInterfaces findHidService,
         Func<IDevice, IYubiKeyConnectionSlot> createSlot)
     {
         this.findPcscService = findPcscService;
@@ -133,9 +133,9 @@ public class FindYubiKeys : IFindYubiKeys
             // Enumerate all transports regardless of the requested filter so per-interface devices can be
             // merged into physical devices; the filter is applied to the merged capability set at the end.
             var pcscDevices = await findPcscService.FindAllAsync(cancellationToken).ConfigureAwait(false);
-            var hidDevices = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
+            var hidInterfaces = await findHidService.FindAllAsync(cancellationToken).ConfigureAwait(false);
 
-            var interfaces = BuildInterfaces(pcscDevices, hidDevices);
+            var interfaces = BuildInterfaces(pcscDevices, hidInterfaces);
             EvictAbsentIdentities(evidence, interfaces);
 
             // Reader-name drift: if any USB CCID reader name failed to parse to a known PID, PID correlation
@@ -179,9 +179,9 @@ public class FindYubiKeys : IFindYubiKeys
 
     private List<InterfaceCandidate> BuildInterfaces(
         IReadOnlyList<IPcscDevice> pcscDevices,
-        IReadOnlyList<IHidDevice> hidDevices)
+        IReadOnlyList<IHidInterface> hidInterfaces)
     {
-        var interfaces = new List<InterfaceCandidate>(pcscDevices.Count + hidDevices.Count);
+        var interfaces = new List<InterfaceCandidate>(pcscDevices.Count + hidInterfaces.Count);
 
         foreach (var pcscDevice in pcscDevices)
         {
@@ -193,23 +193,23 @@ public class FindYubiKeys : IFindYubiKeys
             interfaces.Add(new InterfaceCandidate(device, ConnectionType.SmartCard, isUsb, pid, topologyKey));
         }
 
-        foreach (var hidDevice in hidDevices)
+        foreach (var hidInterface in hidInterfaces)
         {
-            var connection = ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType)
+            var connection = ConnectionTypeMapper.ToConnectionType(hidInterface.InterfaceType)
                 .SingleConcreteConnectionOrUnknown();
             if (connection == ConnectionType.Unknown)
             {
                 Logger.LogDebug(
                     "Skipping unsupported HID interface {ReaderName} classified as {HidInterfaceType}.",
-                    hidDevice.ReaderName,
-                    hidDevice.InterfaceType);
+                    hidInterface.ReaderName,
+                    hidInterface.InterfaceType);
                 continue;
             }
 
-            var device = createSlot(hidDevice);
-            var rawPid = hidDevice.DescriptorInfo.ProductId;
+            var device = createSlot(hidInterface);
+            var rawPid = hidInterface.DescriptorInfo.ProductId;
             ushort? pid = rawPid > 0 && ReaderNamePidParser.IsKnownPid((ushort)rawPid) ? (ushort)rawPid : null;
-            var topologyKey = ResolveTopologyKey(hidDevice, connection);
+            var topologyKey = ResolveTopologyKey(hidInterface, connection);
             interfaces.Add(new InterfaceCandidate(device, connection, IsUsb: true, pid, topologyKey));
         }
 
@@ -374,11 +374,11 @@ public class FindYubiKeys : IFindYubiKeys
         var smartCardConnectionFactory = SmartCardConnectionFactory.CreateDefault();
         return new(
             FindPcscDevices.Create(),
-            FindHidDevices.Create(),
+            FindHidInterfaces.Create(),
             device => device switch
             {
                 IPcscDevice pcscDevice => new PcscConnectionSlot(pcscDevice, smartCardConnectionFactory),
-                IHidDevice hidDevice => new HidConnectionSlot(hidDevice),
+                IHidInterface hidInterface => new HidConnectionSlot(hidInterface),
                 _ => throw new NotSupportedException(
                     $"Device type {device.GetType().Name} is not supported as a connection slot.")
             });

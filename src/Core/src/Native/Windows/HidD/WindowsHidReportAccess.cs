@@ -17,7 +17,7 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 
-internal sealed class HidDDevice : IHidDDevice
+internal sealed class WindowsHidReportAccess : IWindowsHidReportAccess
 {
     private const int ErrorAccessDenied = 5;
     private const string WindowsHidAccessDeniedGuidance =
@@ -26,7 +26,7 @@ internal sealed class HidDDevice : IHidDDevice
     private SafeFileHandle _handle;
     private bool _disposed;
 
-    public HidDDevice(string devicePath)
+    public WindowsHidReportAccess(string devicePath)
     {
         DevicePath = devicePath;
 

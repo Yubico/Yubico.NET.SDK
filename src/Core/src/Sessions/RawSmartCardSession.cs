@@ -28,6 +28,8 @@ namespace Yubico.YubiKit.Core.Sessions;
 ///     passed to <see cref="CreateAsync(ISmartCardConnection,CancellationToken)" />; an
 ///     <see cref="Abstractions.IYubiKey" /> convenience factory owns its hidden connection. Operations refuse overlap,
 ///     while direct <see cref="ISmartCardConnection.TransmitAndReceiveAsync" /> calls bypass that guard.
+///     If a command or response continuation fails, this session refuses further exchanges without replaying them.
+///     Dispose and reopen the connection before continuing; disposing a borrowed session alone does not recover it.
 /// </remarks>
 public sealed class RawSmartCardSession : ApplicationSession
 {

@@ -23,7 +23,8 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 /// </summary>
 internal class ScpProcessor(
     IApduProcessor @delegate,
-    ScpState state) : IApduProcessor, IDisposable
+    ScpState state,
+    Action<Exception>? onSecureFailure = null) : IApduProcessor, IDisposable
 {
     // SCP Constants
     private const byte ClaBitSecureMessaging = 0x04; // Bit 2 in CLA byte indicates secure messaging
@@ -61,6 +62,7 @@ internal class ScpProcessor(
         byte[]? mac = null;
         byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
         Memory<byte> formattedApdu = default;
+        var stateAdvanced = false;
 
         try
         {
@@ -70,6 +72,7 @@ internal class ScpProcessor(
             if (encrypt)
             {
                 encryptedData = State.Encrypt(commandData.Span);
+                stateAdvanced = true;
                 commandData = encryptedData;
             }
 
@@ -106,6 +109,7 @@ internal class ScpProcessor(
             var macLength = apduToMac.Length - MacLength - leLength;
 
             mac = State.Mac(apduToMac[..macLength]);
+            stateAdvanced = true;
 
             // Step 7: Fill in the MAC in the last 8 bytes
             mac.AsSpan().CopyTo(macedData.Span[commandData.Length..]);
@@ -114,7 +118,8 @@ internal class ScpProcessor(
             finalCommandData = macedData.Span.ToArray();
             var finalCommand = new ApduCommand(cla, command.Ins, command.P1, command.P2, finalCommandData, command.Le);
 
-            // Step 9: Transmit the command (useScp=false because we already wrapped it with SCP)
+            // The command is already wrapped; the secure transmitter detects rejected
+            // intermediate chunks before they can masquerade as terminal responses.
             var response = await @delegate.TransmitAsync(finalCommand, false, cancellationToken).ConfigureAwait(false);
 
             // Step 10: Verify and remove MAC from response
@@ -136,13 +141,18 @@ internal class ScpProcessor(
 
             return response;
         }
+        catch (Exception ex) when (stateAdvanced)
+        {
+            onSecureFailure?.Invoke(ex);
+            throw;
+        }
         finally
         {
-            if (encryptedData is not null) CryptographicOperations.ZeroMemory(encryptedData);
-            if (!formattedApdu.IsEmpty) CryptographicOperations.ZeroMemory(formattedApdu.Span);
-            if (scpCommandData is not null) CryptographicOperations.ZeroMemory(scpCommandData);
-            if (finalCommandData is not null) CryptographicOperations.ZeroMemory(finalCommandData);
-            if (mac is not null) CryptographicOperations.ZeroMemory(mac);
+            CryptographicOperations.ZeroMemory(encryptedData.AsSpan());
+            CryptographicOperations.ZeroMemory(formattedApdu.Span);
+            CryptographicOperations.ZeroMemory(scpCommandData.AsSpan());
+            CryptographicOperations.ZeroMemory(finalCommandData.AsSpan());
+            CryptographicOperations.ZeroMemory(mac.AsSpan());
         }
     }
 

@@ -34,7 +34,7 @@ public class FindYubiKeysPidMergeTests
                 new FakePcscDevice("Yubico YubiKey OTP+FIDO+CCID", PscsConnectionKind.Usb),
                 new FakePcscDevice("Yubico YubiKey OTP+FIDO+CCID 01", PscsConnectionKind.Usb)
             ]),
-            new FakeFindHidDevices([]),
+            new FakeFindHidInterfaces([]),
             factory.Create);
 
         IReadOnlyList<IYubiKey> result;
@@ -63,7 +63,7 @@ public class FindYubiKeysPidMergeTests
         // exclusive CCID holder / unavailable interfaces). Grouping must still merge by PID alone.
         var find = new FindYubiKeys(
             new FakeFindPcscDevices([new FakePcscDevice("Yubico YubiKey OTP+FIDO+CCID 00 00", PscsConnectionKind.Usb)]),
-            new FakeFindHidDevices([new FakeHidDevice(0x0407, HidInterfaceType.Fido), new FakeHidDevice(0x0407, HidInterfaceType.Otp)]),
+            new FakeFindHidInterfaces([new FakeHidInterface(0x0407, HidInterfaceType.Fido), new FakeHidInterface(0x0407, HidInterfaceType.Otp)]),
             ThrowingFactory.Create);
 
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
@@ -80,7 +80,7 @@ public class FindYubiKeysPidMergeTests
         // Defaulted/unknown ProductId (0) must not become a merge key — the interfaces stay separate.
         var find = new FindYubiKeys(
             new FakeFindPcscDevices([]),
-            new FakeFindHidDevices([new FakeHidDevice(0, HidInterfaceType.Fido), new FakeHidDevice(0, HidInterfaceType.Otp)]),
+            new FakeFindHidInterfaces([new FakeHidInterface(0, HidInterfaceType.Fido), new FakeHidInterface(0, HidInterfaceType.Otp)]),
             ThrowingFactory.Create);
 
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
@@ -95,9 +95,9 @@ public class FindYubiKeysPidMergeTests
             Task.FromResult(devices);
     }
 
-    private sealed class FakeFindHidDevices(IReadOnlyList<IHidDevice> devices) : IFindHidDevices
+    private sealed class FakeFindHidInterfaces(IReadOnlyList<IHidInterface> devices) : IFindHidInterfaces
     {
-        public Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
+        public Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult(devices);
     }
 
@@ -108,7 +108,7 @@ public class FindYubiKeysPidMergeTests
         public PscsConnectionKind Kind { get; } = kind;
     }
 
-    private sealed class FakeHidDevice(short productId, HidInterfaceType interfaceType) : IHidDevice
+    private sealed class FakeHidInterface(short productId, HidInterfaceType interfaceType) : IHidInterface
     {
         public string ReaderName { get; } = $"hid-{productId:X4}-{interfaceType}";
         public HidDescriptorInfo DescriptorInfo { get; } = new() { VendorId = 0x1050, ProductId = productId };
@@ -122,7 +122,7 @@ public class FindYubiKeysPidMergeTests
         public static IYubiKeyConnectionSlot Create(IDevice device) => device switch
         {
             IPcscDevice p => new ThrowingYubiKey($"pcsc:{p.ReaderName}", ConnectionType.SmartCard),
-            IHidDevice h => new ThrowingYubiKey(
+            IHidInterface h => new ThrowingYubiKey(
                 $"hid:{h.ReaderName}", ConnectionTypeMapper.ToConnectionType(h.InterfaceType)),
             _ => throw new NotSupportedException()
         };

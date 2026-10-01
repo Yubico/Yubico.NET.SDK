@@ -132,7 +132,7 @@ await using var promptingClient = await device.CreateWebAuthnClientAsync(
 
 ## User interaction
 
-Both ceremonies require a touch, and CTAP gives a client no way to suppress it for registration. Touch notification comes from the FIDO2 session, so pass your `IUserPresencePrompt` in `sessionOptions`. It is informational; cancel the token you passed to the ceremony to give up on it.
+Both ceremonies require a touch, and CTAP gives a client no way to suppress it for registration. Touch notification comes from the FIDO2 session, so pass your `IUserPresencePrompt` in `sessionOptions`. It is informational; cancel the ceremony token to request cancellation, not to instantly abort an admitted exchange. HID can signal `CTAPHID_CANCEL` during a keep-alive and drain a valid terminal response; SmartCard exchanges already admitted run to completion.
 
 ```csharp
 sealed class TouchPrompt : IUserPresencePrompt

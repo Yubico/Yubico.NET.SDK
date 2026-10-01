@@ -99,7 +99,7 @@ Subscription starts on first enumeration; events raised before that are not repl
 ### Send raw APDUs
 
 When no application module models what you need, a raw session gives you framing, ownership, and
-sequencing without applet checks. You own every protocol concern.
+sequencing without applet checks. You still own the application-specific payload and response semantics.
 
 ```csharp
 await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();
@@ -117,6 +117,84 @@ Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
 
 `RawFidoHidSession` and `RawOtpHidSession` are the HID equivalents, created with
 `device.CreateRawFidoHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
+
+An admitted session exchange protects its framing: cancellation is not an immediate abort or a
+rollback of a command already sent. FIDO HID can send `CTAPHID_CANCEL` during keep-alives, then
+waits for and drains a valid terminal response; OTP HID can send a dummy-report reset after
+touch-wait cancellation.
+A failed partial SmartCard chain or failed OTP reset requires disposal and reopening the connection,
+even if a new session could otherwise borrow it. See [raw access tiers](../../docs/architecture/raw-access-tiers.md).
+
+Direct connection calls are an expert escape hatch. They bypass session and protocol exchange guards;
+do not interleave them with a session or retry on the same connection after an interrupted exchange.
+Keep caller-owned input unchanged until the returned task finishes, then clear sensitive buffers.
+Built-in macOS HID sends copy reports before native dispatch; custom connections need not. Async method
+names do not guarantee caller-thread responsiveness or an immediate native cancellation.
+
+```csharp
+await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();
+// Direct I/O takes a preformatted APDU: no applet selection or command chaining is added here.
+ReadOnlyMemory<byte> reply = await connection.TransmitAndReceiveAsync(commandBytes, cancellationToken);
+```
+
+For direct raw SmartCard transactions, `BeginTransactionAsync` returns `IDisposable`. The built-in
+scope also implements `IAsyncDisposable` at runtime; the interface does not promise that for custom
+connections. End the transaction before disposing the connection:
+
+```csharp
+await using ISmartCardConnection connection = await device.ConnectAsync<ISmartCardConnection>();
+IDisposable transaction = await connection.BeginTransactionAsync();
+try
+{
+    // Perform serialized raw operations on connection here.
+}
+finally
+{
+    if (transaction is IAsyncDisposable asyncTransaction)
+        await asyncTransaction.DisposeAsync();
+    else
+        transaction.Dispose();
+}
+```
+
+On built-in SmartCard connections, async begin does not block the caller; synchronous begin and
+scope disposal wait for native work and have no fixed completion deadline. A custom connection
+using the interface's default `BeginTransactionAsync` executes synchronous `BeginTransaction`
+**before returning a task**. For a responsive calling thread, a custom implementation must override
+the default; the override's responsiveness and native drain depend on its implementation, and neither
+the override nor the returned scope automatically inherits the built-in
+connection's native drain guarantees. End the scope before disposing its connection.
+
+`IYubiKey` represents a physical key; `FindHidInterfaces` returns operating-system-exposed
+`IHidInterface` report interfaces, not necessarily one per physical USB interface. An opened
+`IHidConnection` owns report I/O; the Windows-only `IWindowsHidReportAccess` is an internal
+report-handle seam. The public direct report access methods `IHidInterface.ConnectToIOReports()` /
+`ConnectToFeatureReports()` remain
+synchronous. On macOS, the IO connection blocks the caller while the same persistent FIDO input
+owner used by typed connections opens, receives, sends and shuts down. A six-second read timeout
+detaches only that read; a late report remains available on retry. Native output and shutdown can
+still block indefinitely. Feature-report connections retain their synchronous report interface but
+open and perform native report calls on the OTP connection's worker, without a GET timeout.
+Direct IO `SetReport(byte[])` forwards the supplied report length; typed FIDO sends still require 64-byte packets.
+`IHidConnection.GetReport()` / `SetReport(byte[])` offer no cancellation token and wait on the caller's
+thread. The caller owns the
+direct connection; do not overlap report calls. Direct feature SET forwards any supplied report length;
+typed OTP sends require eight bytes. Built-in macOS feature reports drain accepted calls before checked
+release; direct report opens do not take a grouped-key registry claim. Synchronous
+`ISmartCardConnection.BeginTransaction()` and transaction-scope `Dispose()` can also block on
+native work; built-in SmartCard synchronous `Dispose()` waits for an admitted transmit to finish
+before disconnect and context release. Do not dispose synchronously inside the operation it must
+drain; prefer `DisposeAsync` in asynchronous code. For
+method-by-method execution, ownership and evidence gaps, see
+[retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths).
+
+The built-in macOS FIDO connection opens asynchronously, initializes its channel with an
+awaited operation, and receives input through a persistent native owner. Blocking output
+and checked shutdown run on connection-owned execution; an unconfirmed native close retains
+the physical claim. This does not make the public lower-level `IHidConnection` interface
+asynchronous or establish the same execution and drain behavior on Windows or Linux. See
+[retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
+before using direct report access.
 
 ### Use a secure channel
 
@@ -141,11 +219,28 @@ device with `Yubico.YubiKit.SecurityDomain`.
   guard is process-local.
 - One live session per connection. Dispose it before creating another over the same connection.
 - Whoever creates a connection disposes it; use `await using`. A session from a `device.Create...` factory
-  owns the hidden connection it opened. There is no finalizer backstop, and a leaked connection can hold
-  the device lease for the life of the process.
-- Sessions refuse overlapping operations. An exchange already in flight runs to completion.
-- Raw `IConnection` I/O bypasses every guard. Never interleave it with a live session, and dispose and
-  reopen after an interrupted exchange.
+  owns the hidden connection it opened. Built-in SmartCard connections request safe shutdown from their
+  finalizer, but finalization is nondeterministic and is not a substitute for disposal.
+- Sessions refuse overlapping operations. Caller cancellation does not interrupt constituent I/O
+  after admission; FIDO keep-alive or OTP touch-wait cancellation can still end an exchange after
+  protocol-specific cancel or reset handling. A failed partial exchange may require reopening the
+  connection. Native work may not have a bounded completion time.
+- Raw `IConnection` I/O bypasses session and exchange guards. The built-in SmartCard connection additionally
+  refuses overlapping raw native operations instead of queuing them. Never interleave raw I/O with a live
+  session, and dispose and reopen after an interrupted exchange.
+- Built-in SmartCard cancellation prevents dispatch when observed first. Once a native PC/SC call starts, its
+  task remains pending until the call returns so caller-owned input remains borrowed safely. Zero sensitive
+  caller-owned input only after the task is terminal. Async disposal waits for accepted work, transaction end,
+  disconnect, and context release without blocking the caller. Custom implementations must provide their own
+  drain and borrowed-memory lifetime guarantees; these are not automatic for every SDK connection.
+- On built-in macOS FIDO, canceling a pending raw read detaches that reader and frees its overlap slot;
+  a later report remains queued for the next read. Cancellation between reads
+  does not immediately abort the native device protocol. Built-in macOS OTP calls already active at cancellation
+  may finish successfully. Do not assume cancellation releases native resources early; await the operation and
+  connection disposal. Other HID implementations may have different cancellation behavior.
+- Built-in SmartCard and macOS HID owners retain their physical-interface claim if native release cannot
+  be proven; a later managed open throws `UnrecoveredConnectionException` rather than treating the key
+  as ordinarily busy. Custom connections do not inherit those native-release guarantees.
 - `ProtocolFactory` and the `IProtocol` family are internal. Use `Raw*Session.CreateAsync(connection)`.
 
 ## Security notes

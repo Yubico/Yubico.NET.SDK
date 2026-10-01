@@ -293,7 +293,7 @@ flowchart TD
     Find["FindYubiKeys.FindAllAsync"]
 
     FPcsc["IFindPcscDevices<br/>(PC/SC readers)"]
-    FHid["IFindHidDevices<br/>(FIDO + OTP HID)"]
+    FHid["IFindHidInterfaces<br/>(FIDO + OTP HID)"]
     Merge{"Merge interfaces of<br/>same physical key<br/>(by USB Product ID)"}
 
     Slot["PcscConnectionSlot / HidConnectionSlot<br/><i>raw live interface candidate</i>"]

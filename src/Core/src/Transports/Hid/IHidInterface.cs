@@ -17,9 +17,9 @@ using Yubico.YubiKit.Core.Abstractions;
 namespace Yubico.YubiKit.Core.Transports.Hid;
 
 /// <summary>
-/// Represents a HID device.
+/// Represents an operating-system-exposed HID interface, not a physical YubiKey.
 /// </summary>
-public interface IHidDevice : IDevice
+public interface IHidInterface : IDevice
 {
     /// <summary>
     /// Raw HID descriptor information as reported by the operating system.
@@ -32,12 +32,12 @@ public interface IHidDevice : IDevice
     HidInterfaceType InterfaceType { get; }
 
     /// <summary>
-    /// Establishes an active connection to the HID device for the transmittal of data through feature reports.
+    /// Establishes an active connection to the HID interface for the transmittal of data through feature reports.
     /// </summary>
     IHidConnection ConnectToFeatureReports();
 
     /// <summary>
-    /// Establishes an active connection to the HID device for the transmittal of data through I/O reports.
+    /// Establishes an active connection to the HID interface for the transmittal of data through I/O reports.
     /// </summary>
     IHidConnection ConnectToIOReports();
 }

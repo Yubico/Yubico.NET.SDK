@@ -145,36 +145,91 @@ internal sealed class YubiKeyDevice : IYubiKey, IDiscoveryConnectionProvider
         var ownership = await DeviceConnectionRegistry
             .AcquireConnectionAsync(InterfaceIds, cancellationToken)
             .ConfigureAwait(false);
+        var ownershipTransferred = TransfersOwnership(requested, slot);
         try
         {
-            var raw = await slot.OpenRawConnectionAsync(requested, cancellationToken).ConfigureAwait(false);
+            var raw = await OpenSlotAsync(slot, requested, ownership, ownershipTransferred, cancellationToken)
+                .ConfigureAwait(false);
             try
             {
-                IConnection registered = requested switch
-                {
-                    ConnectionType.SmartCard when raw is ISmartCardConnection smartCard =>
-                        new RegisteredSmartCardConnection(smartCard, ownership),
-                    ConnectionType.HidFido when raw is IFidoHidConnection fido =>
-                        new RegisteredFidoHidConnection(fido, ownership),
-                    ConnectionType.HidOtp when raw is IOtpHidConnection otp =>
-                        new RegisteredOtpHidConnection(otp, ownership),
-                    _ => throw new InvalidOperationException(
-                        $"The {slot.GetType().Name} slot returned an unexpected connection for {requested}.")
-                };
-
+                var registered = RegisterRawConnection(raw, slot, requested, ownership, ownershipTransferred);
                 return (TConnection)(object)registered;
             }
             catch
             {
-                await raw.DisposeAsync().ConfigureAwait(false);
+                await DisposeUnexpectedConnectionAsync(raw, ownership).ConfigureAwait(false);
                 throw;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            ownership.Dispose();
+            if (!ownershipTransferred)
+                ReleaseFailedOwnership(ownership, ex);
             throw;
         }
+    }
+
+    /// <summary>
+    ///     Built-in PC/SC and macOS HID connections take the registry claim before native open and release it
+    ///     themselves after proven teardown; every other slot is wrapped in a registered connection.
+    /// </summary>
+    private static bool TransfersOwnership(ConnectionType requested, IYubiKeyConnectionSlot slot) =>
+        (requested == ConnectionType.SmartCard && slot is PcscConnectionSlot) ||
+        (requested == ConnectionType.HidFido && slot is HidConnectionSlot { IsBuiltInMacFido: true }) ||
+        (requested == ConnectionType.HidOtp && slot is HidConnectionSlot { IsBuiltInMacOtp: true });
+
+    private static async Task<IConnection> OpenSlotAsync(
+        IYubiKeyConnectionSlot slot,
+        ConnectionType requested,
+        IDisposable ownership,
+        bool ownershipTransferred,
+        CancellationToken cancellationToken) =>
+        slot switch
+        {
+            PcscConnectionSlot pcsc when ownershipTransferred =>
+                await pcsc.OpenRegisteredConnectionAsync(ownership, cancellationToken).ConfigureAwait(false),
+            HidConnectionSlot hid when ownershipTransferred =>
+                await hid.OpenRegisteredConnectionAsync(ownership, cancellationToken).ConfigureAwait(false),
+            _ => await slot.OpenRawConnectionAsync(requested, cancellationToken).ConfigureAwait(false)
+        };
+
+    private static IConnection RegisterRawConnection(
+        IConnection raw,
+        IYubiKeyConnectionSlot slot,
+        ConnectionType requested,
+        IDisposable ownership,
+        bool ownershipTransferred) =>
+        (requested, raw) switch
+        {
+            (ConnectionType.SmartCard, ISmartCardConnection smartCard) =>
+                ownershipTransferred ? smartCard : new RegisteredSmartCardConnection(smartCard, ownership),
+            (ConnectionType.HidFido, IFidoHidConnection fido) =>
+                ownershipTransferred ? fido : new RegisteredFidoHidConnection(fido, ownership),
+            (ConnectionType.HidOtp, IOtpHidConnection otp) =>
+                ownershipTransferred ? otp : new RegisteredOtpHidConnection(otp, ownership),
+            _ => throw new InvalidOperationException(
+                $"The {slot.GetType().Name} slot returned an unexpected connection for {requested}.")
+        };
+
+    private static async Task DisposeUnexpectedConnectionAsync(IConnection raw, IDisposable ownership)
+    {
+        try
+        {
+            await raw.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception cleanupFailure)
+        {
+            DeviceConnectionRegistry.MarkUnrecovered(ownership, cleanupFailure);
+            throw new UnrecoveredConnectionException("Failed to release an unexpected HID connection", cleanupFailure);
+        }
+    }
+
+    private static void ReleaseFailedOwnership(IDisposable ownership, Exception failure)
+    {
+        if (failure is UnrecoveredConnectionException)
+            DeviceConnectionRegistry.MarkUnrecovered(ownership, failure);
+        else
+            ownership.Dispose();
     }
 
     async Task<IConnection> IDiscoveryConnectionProvider.ConnectForDiscoveryAsync(

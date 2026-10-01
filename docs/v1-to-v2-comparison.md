@@ -95,9 +95,11 @@ V2 won't add an equivalent bundle. Installing only the applets you use is the
 supported path, because a catch-all package would give back exactly the
 footprint savings the split is there to deliver.
 
-**Synchronous facades or wrappers.** V2 is async from top to bottom and won't
-add sync-over-async entry points. Migrating callers must adopt async flows
-rather than blocking on SDK operations.
+**Synchronous applet facades or wrappers.** V2 does not provide synchronous
+facades for applet operations. Migrating applet callers must adopt async flows
+rather than blocking on SDK operations. This does not remove public synchronous
+raw HID report methods, SmartCard transaction begin, or synchronous disposal;
+see [raw access tiers](architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths).
 
 ## Genuinely missing
 

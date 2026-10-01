@@ -105,15 +105,15 @@ mappings:
     confidence: high
     migration_kind: type
     v1: Yubico.Core.Devices.Hid.IHidDevice.UsagePage (HidUsagePage - Unknown, Fido, Keyboard)
-    v2: Yubico.YubiKit.Core.Transports.Hid.IHidDevice.InterfaceType (HidInterfaceType - Unknown, Fido, Otp)
+    v2: Yubico.YubiKit.Core.Transports.Hid.IHidInterface.InterfaceType (HidInterfaceType - Unknown, Fido, Otp)
     evidence:
       - develop:Yubico.Core/src/Yubico/Core/Devices/Hid/HidUsagePage.cs
       - develop:Yubico.Core/src/Yubico/Core/Devices/Hid/IHidDevice.cs
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/DeviceExtensions/IHidDeviceExtension.cs
       - yubikit:src/Core/src/Transports/Hid/HidInterfaceType.cs
       - yubikit:src/Core/src/Transports/Hid/HidInterfaceClassifier.cs
-      - yubikit:src/Core/src/Transports/Hid/IHidDevice.cs
-    notes: V1's public IHidDevice.UsagePage classified a device from the HID UsagePage field alone; Keyboard = 1 was actually the Generic Desktop usage page (0x01), not specifically a keyboard, so v1's internal IsFido()/IsKeyboard() extension helpers (IHidDeviceExtension, not public) used UsagePage == HidUsagePage.Fido/Keyboard to detect the YubiKey FIDO and OTP/keyboard-emulation interfaces respectively. V2 initially carried a same-shaped HidUsagePage (Unknown=0, Fido=0xF1D0, Keyboard=1) as a near-direct v1 port, marked [Obsolete] in favor of HidInterfaceType (Unknown/Fido/Otp) plus HidInterfaceClassifier, which classify from the full UsagePage+Usage pair. This range's refactor(core)! change removing the three obsolete public members deleted the obsolete v2 HidUsagePage entirely (it had zero callers), so it is no longer available even as a same-named decoy. Migrate v1 UsagePage == HidUsagePage.Fido to InterfaceType == HidInterfaceType.Fido, and v1 IsKeyboard()/UsagePage == HidUsagePage.Keyboard to InterfaceType == HidInterfaceType.Otp. This is low-level HID device access; most applications should prefer YubiKeyManager/IYubiKey discovery and ConnectionType over raw IHidDevice interface classification.
+      - yubikit:src/Core/src/Transports/Hid/IHidInterface.cs
+    notes: V1's public IHidDevice.UsagePage classified a device from the HID UsagePage field alone; Keyboard = 1 was actually the Generic Desktop usage page (0x01), not specifically a keyboard, so v1's internal IsFido()/IsKeyboard() extension helpers (IHidDeviceExtension, not public) used UsagePage == HidUsagePage.Fido/Keyboard to detect the YubiKey FIDO and OTP/keyboard-emulation interfaces respectively. V2 initially carried a same-shaped HidUsagePage (Unknown=0, Fido=0xF1D0, Keyboard=1) as a near-direct v1 port, marked [Obsolete] in favor of HidInterfaceType (Unknown/Fido/Otp) plus HidInterfaceClassifier, which classify from the full UsagePage+Usage pair. This range's refactor(core)! change removing the three obsolete public members deleted the obsolete v2 HidUsagePage entirely (it had zero callers), so it is no longer available even as a same-named decoy. Migrate v1 UsagePage == HidUsagePage.Fido to InterfaceType == HidInterfaceType.Fido, and v1 IsKeyboard()/UsagePage == HidUsagePage.Keyboard to InterfaceType == HidInterfaceType.Otp. This is low-level HID interface access; most applications should prefer YubiKeyManager/IYubiKey discovery and ConnectionType over raw IHidInterface classification.
     last_reviewed_commit: c3b7e206fd900413cf0a64b0efa75badbe71fd49
   - id: session-lifecycle
     status: manual

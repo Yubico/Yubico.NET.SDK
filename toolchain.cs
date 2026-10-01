@@ -31,6 +31,8 @@
  *   docs-inventory - Generate report-only active documentation inventory (requires Bash)
  *   docs-architecture - Validate architecture diagram evidence map + image freshness (requires Bash)
  *   coverage       - Run tests with code coverage
+ *   crap           - Rank methods by CRAP score from collected coverage (requires: coverage)
+ *   complexity     - Flag complex methods in your uncommitted changes (source only, no coverage)
  *   pack           - Create NuGet packages
  *   setup-feed     - Configure local NuGet feed
  *   publish        - Publish packages to local feed
@@ -53,6 +55,8 @@
  *   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
  *   --fast                         Required fast mode for resilience gates
  *   --benchmark-args <args>         Arguments passed to BenchmarkDotNet
+ *   --crap-args <args>             Arguments passed to crap.cs (e.g. "--module Piv --top 50")
+ *   --complexity-args <args>       Arguments passed to complexity.cs (e.g. "--module Piv")
  *
  * EXAMPLES:
  *   dotnet toolchain.cs build
@@ -65,6 +69,8 @@
  *   dotnet toolchain.cs -- benchmark --benchmark-args "--list flat"
  *   dotnet toolchain.cs -- test --integration --project Piv --smoke   (quick integration smoke test)
  *   dotnet toolchain.cs coverage
+ *   dotnet toolchain.cs complexity
+ *   dotnet toolchain.cs -- complexity --complexity-args "--module Piv"
  *   dotnet toolchain.cs -- publish --package-version 1.0.0-preview.1
  *   dotnet toolchain.cs -- publish-remote --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key $TOKEN
  *   dotnet toolchain.cs -- --help
@@ -135,6 +141,7 @@ var smokeTest = HasFlag("--smoke");
 var fastMode = HasFlag("--fast");
 var benchmarkArgs = GetArgument("--benchmark-args") ?? "";
 var crapArgs = GetArgument("--crap-args") ?? "";
+var complexityArgs = GetArgument("--complexity-args") ?? "";
 
 // --smoke injects trait filters to skip slow and user-presence tests
 if (smokeTest)
@@ -387,6 +394,15 @@ Target("crap", () =>
     Run("dotnet", $"crap.cs {crapArgs}".TrimEnd(), workingDirectory: repoRoot);
 });
 
+Target("complexity", () =>
+{
+    // Source-only, so unlike crap it needs neither a build nor a coverage run. With no
+    // --complexity-args, complexity.cs checks your uncommitted changes against HEAD; this is
+    // the soft pre-commit gate described in CLAUDE.md.
+    PrintHeader("Checking method complexity");
+    Run("dotnet", $"complexity.cs {complexityArgs}".TrimEnd(), workingDirectory: repoRoot);
+});
+
 Target("resilience", () =>
 {
     PrintHeader("Running fast runtime resilience gates");
@@ -596,7 +612,7 @@ if (args.Contains("--help") || args.Contains("-h"))
 // Run Bullseye — strip all custom args so Bullseye only sees target names and its own flags
 var bullseyeArgs = FilterBullseyeArgs(args,
     optionsWithValues: ["--project", "--filter", "--package-version", "--nuget-feed-name", "--nuget-feed-path",
-                        "--nuget-feed-url", "--nuget-api-key", "--benchmark-args", "--crap-args"],
+                        "--nuget-feed-url", "--nuget-api-key", "--benchmark-args", "--crap-args", "--complexity-args"],
     flags: ["--integration", "--include-docs", "--embed-symbols", "--dry-run", "--clean", "--smoke", "--fast"]);
 await RunTargetsAndExitAsync(bullseyeArgs);
 
@@ -973,6 +989,8 @@ TARGETS:
   docs-inventory - Generate report-only active documentation inventory
   docs-architecture - Validate architecture diagram evidence map + image freshness
   coverage       - Run tests with code coverage
+  crap           - Rank methods by CRAP score from collected coverage (requires: coverage)
+  complexity     - Flag complex methods in your uncommitted changes (source only, no coverage)
   pack           - Create NuGet packages
   setup-feed     - Configure local NuGet feed
   publish        - Publish packages to local feed
@@ -994,6 +1012,8 @@ OPTIONS:
   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
   --fast                         Required fast mode for resilience gates
   --benchmark-args <args>         Arguments passed to BenchmarkDotNet
+  --crap-args <args>             Arguments passed to crap.cs (e.g. ""--module Piv --top 50"")
+  --complexity-args <args>       Arguments passed to complexity.cs (e.g. ""--module Piv"")
   -h, --help                     Show this help message
 
 EXAMPLES:
@@ -1008,6 +1028,8 @@ EXAMPLES:
   dotnet toolchain.cs -- benchmark --benchmark-args ""--list flat""
   dotnet toolchain.cs -- test --integration --project Piv --smoke
   dotnet toolchain.cs coverage
+  dotnet toolchain.cs complexity
+  dotnet toolchain.cs -- complexity --complexity-args ""--module Piv""
   dotnet toolchain.cs -- publish --package-version 1.0.0-preview.1
   dotnet toolchain.cs -- publish-remote --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key $TOKEN
   dotnet toolchain.cs -- publish-remote --dry-run --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key fake

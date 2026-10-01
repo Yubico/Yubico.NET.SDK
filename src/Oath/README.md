@@ -136,7 +136,9 @@ await using var session = await device.CreateOathSessionAsync(
 ```
 
 The context uses application `OATH`, basis `PolicyRequires`, and the public `issuer:name` identity.
-`CalculateAllAsync` is silent; cancelling the token passed to a calculation resolves its notification as cancelled.
+`CalculateAllAsync` is silent. Cancelling the token before the calculation's SmartCard exchange is admitted
+resolves a requested notification as cancelled; once admitted, the exchange runs to completion and cancellation
+does not interrupt the device or necessarily change the notification outcome.
 
 ## Constraints
 

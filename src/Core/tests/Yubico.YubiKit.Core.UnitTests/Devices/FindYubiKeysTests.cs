@@ -26,10 +26,10 @@ public class FindYubiKeysTests
     public async Task FindAllAsync_WithHidFido_ReturnsOnlyFidoHidDevices()
     {
         // Arrange
-        var findHid = new FakeFindHidDevices([
-            new FakeHidDevice("fido", HidInterfaceType.Fido),
-            new FakeHidDevice("generic-hid", HidInterfaceType.Unknown),
-            new FakeHidDevice("otp", HidInterfaceType.Otp)
+        var findHid = new FakeFindHidInterfaces([
+            new FakeHidInterface("fido", HidInterfaceType.Fido),
+            new FakeHidInterface("generic-hid", HidInterfaceType.Unknown),
+            new FakeHidInterface("otp", HidInterfaceType.Otp)
         ]);
         var findYubiKeys = new FindYubiKeys(new FakeFindPcscDevices([]), findHid, CreateFakeSlot);
 
@@ -46,9 +46,9 @@ public class FindYubiKeysTests
     public async Task FindAllAsync_WithHid_ReturnsFidoAndOtpHidDevices()
     {
         // Arrange
-        var findHid = new FakeFindHidDevices([
-            new FakeHidDevice("fido", HidInterfaceType.Fido),
-            new FakeHidDevice("otp", HidInterfaceType.Otp)
+        var findHid = new FakeFindHidInterfaces([
+            new FakeHidInterface("fido", HidInterfaceType.Fido),
+            new FakeHidInterface("otp", HidInterfaceType.Otp)
         ]);
         var findYubiKeys = new FindYubiKeys(new FakeFindPcscDevices([]), findHid, CreateFakeSlot);
 
@@ -64,9 +64,9 @@ public class FindYubiKeysTests
     [Fact]
     public async Task FindAllAsync_UnsupportedHid_DoesNotReachFactoryOrAbortScan()
     {
-        var findHid = new FakeFindHidDevices([
-            new FakeHidDevice("unsupported-path", HidInterfaceType.Unknown),
-            new FakeHidDevice("fido", HidInterfaceType.Fido)
+        var findHid = new FakeFindHidInterfaces([
+            new FakeHidInterface("unsupported-path", HidInterfaceType.Unknown),
+            new FakeHidInterface("fido", HidInterfaceType.Fido)
         ]);
         var factory = new RejectUnsupportedHidFactory();
         var findYubiKeys = new FindYubiKeys(new FakeFindPcscDevices([]), findHid, factory.Create);
@@ -83,7 +83,7 @@ public class FindYubiKeysTests
     {
         // Arrange
         var findPcsc = new FakeFindPcscDevices([new FakePcscDevice("smartcard")]);
-        var findHid = new FakeFindHidDevices([new FakeHidDevice("fido", HidInterfaceType.Fido)]);
+        var findHid = new FakeFindHidInterfaces([new FakeHidInterface("fido", HidInterfaceType.Fido)]);
         var findYubiKeys = new FindYubiKeys(findPcsc, findHid, CreateFakeSlot);
 
         // Act
@@ -106,11 +106,11 @@ public class FindYubiKeysTests
         }
     }
 
-    private sealed class FakeFindHidDevices(IReadOnlyList<IHidDevice> devices) : IFindHidDevices
+    private sealed class FakeFindHidInterfaces(IReadOnlyList<IHidInterface> devices) : IFindHidInterfaces
     {
         public int ScanCount { get; private set; }
 
-        public Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default)
+        public Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default)
         {
             ScanCount++;
             return Task.FromResult(devices);
@@ -120,7 +120,7 @@ public class FindYubiKeysTests
     private static IYubiKeyConnectionSlot CreateFakeSlot(IDevice device) => device switch
     {
         IPcscDevice pcscDevice => new FakeSlot(pcscDevice.ReaderName, ConnectionType.SmartCard),
-        IHidDevice hidDevice => new FakeSlot(hidDevice.ReaderName, ConnectionTypeMapper.ToConnectionType(hidDevice.InterfaceType)),
+        IHidInterface hidInterface => new FakeSlot(hidInterface.ReaderName, ConnectionTypeMapper.ToConnectionType(hidInterface.InterfaceType)),
         _ => throw new NotSupportedException()
     };
 
@@ -130,7 +130,7 @@ public class FindYubiKeysTests
 
         public IYubiKeyConnectionSlot Create(IDevice device)
         {
-            var hid = Assert.IsAssignableFrom<IHidDevice>(device);
+            var hid = Assert.IsAssignableFrom<IHidInterface>(device);
             Assert.NotEqual(HidInterfaceType.Unknown, hid.InterfaceType);
             CreateCalls++;
             return new FakeSlot(hid.ReaderName, ConnectionTypeMapper.ToConnectionType(hid.InterfaceType));
@@ -144,7 +144,7 @@ public class FindYubiKeysTests
         public PscsConnectionKind Kind => PscsConnectionKind.Usb;
     }
 
-    private sealed class FakeHidDevice(string readerName, HidInterfaceType interfaceType) : IHidDevice
+    private sealed class FakeHidInterface(string readerName, HidInterfaceType interfaceType) : IHidInterface
     {
         public string ReaderName { get; } = readerName;
         public HidDescriptorInfo DescriptorInfo { get; } = new() { VendorId = 0x1050 };

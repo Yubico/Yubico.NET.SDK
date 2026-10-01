@@ -26,6 +26,11 @@ public interface ISmartCardConnection : IConnection
     ///     and the logical exchange guard. The caller owns APDU formatting, chaining, response correlation,
     ///     concurrency exclusion, cancellation recovery, and state integrity. Do not call it concurrently with
     ///     a live session or another raw operation. Dispose and reopen the connection when state is uncertain.
+    ///     Keep borrowed <paramref name="command" /> memory valid until the returned task is terminal;
+    ///     only then zero sensitive caller-owned input. This applies to every implementation. Built-in PC/SC
+    ///     connections reject cancellation before native dispatch; after dispatch the call may succeed and the
+    ///     task waits for native completion and resource drain. Cancellation alone does not make a raw connection
+    ///     reusable; dispose and reopen if exchange state is uncertain.
     /// </remarks>
     Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,
@@ -33,9 +38,28 @@ public interface ISmartCardConnection : IConnection
 
     /// <summary>
     ///     Starts a PC/SC transaction. The transaction is ended when the returned scope is disposed.
-    ///     Uses LEAVE_CARD disposition when ending the transaction.
+    ///     Uses LEAVE_CARD disposition when ending the transaction. Built-in synchronous begin and scope
+    ///     disposal can block without a bound on native acquisition/end; prefer async begin and, for built-in
+    ///     scopes, async disposal.
     /// </summary>
     IDisposable BeginTransaction(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Starts a PC/SC transaction. Built-in connections await native acquisition without blocking the caller.
+    ///     Their returned <see cref="IDisposable" /> scope also implements <see cref="IAsyncDisposable" />;
+    ///     use async disposal when available to await transaction end.
+    /// </summary>
+    /// <remarks>
+    ///     The default for custom implementations calls <see cref="BeginTransaction" /> synchronously and may
+    ///     block the caller; override it for nonblocking acquisition. Built-in connections reject cancellation
+    ///     before native dispatch; afterward the transaction may begin successfully, and completion waits for
+    ///     native work. Do not assume cancellation releases the connection or ends the transaction.
+    /// </remarks>
+    Task<IDisposable> BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(BeginTransaction(cancellationToken));
+    }
 
     bool SupportsExtendedApdu();
     // byte[] getAtr();

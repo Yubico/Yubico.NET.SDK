@@ -4,7 +4,7 @@ This project uses a .NET 10 C# script for build automation with Bullseye task ru
 
 ## Prerequisites
 
-- .NET 10 SDK
+- .NET 10 SDK, 10.0.300 or newer (pinned by `global.json`; the metric scripts use the `#:include` directive)
 - Bash for `docs-inventory` and `docs-architecture` (macOS/Linux, Git Bash, or WSL)
 
 ## Usage
@@ -47,6 +47,7 @@ dotnet toolchain.cs -- build --project Piv --clean
 - **docs-architecture** - Validate architecture diagram evidence map and rendered-image freshness
 - **coverage** - Run tests with code coverage collection (depends on: restore, build)
 - **crap** - Compute CRAP scores from collected coverage (requires: coverage)
+- **complexity** - Flag complex methods in your uncommitted changes; source only, no build or coverage needed
 - **pack** - Create NuGet packages (depends on: restore, build)
 - **setup-feed** - Configure local NuGet feed
 - **publish** - Publish packages to local feed (depends on: pack, setup-feed)
@@ -64,6 +65,8 @@ dotnet toolchain.cs -- build --project Piv --clean
 - `--project <name>` - Build/test specific project only (partial match, e.g., `Piv`; requires the preceding `--` separator)
 - `--integration` - Include integration tests (requires `--project`)
 - `--smoke` - Smoke test mode: skip `Slow` and `RequiresUserPresence` tests (fast integration runs)
+- `--crap-args <args>` - Arguments passed to `crap.cs`
+- `--complexity-args <args>` - Arguments passed to `complexity.cs`
 - `-h, --help` - Show help message (use `dotnet toolchain.cs -- --help`)
 
 ### Examples
@@ -99,6 +102,10 @@ dotnet toolchain.cs coverage
 # Rank methods by CRAP score using the collected coverage
 dotnet toolchain.cs crap
 dotnet toolchain.cs -- crap --crap-args "--top 50 --json artifacts/crap/crap.json"
+
+# Check the complexity of the methods you changed (pre-commit gate)
+dotnet toolchain.cs complexity
+dotnet toolchain.cs -- complexity --complexity-args "--module Piv"
 
 # Run integration tests for a specific module
 dotnet toolchain.cs -- test --integration --project Piv
@@ -136,6 +143,7 @@ clean  (standalone — must be specified explicitly)
 - **Packages**: `artifacts/packages/*.nupkg`
 - **Coverage reports**: `artifacts/coverage/**/coverage.cobertura.xml`
 - **CRAP report**: `artifacts/crap/crap.json` (when `--json` is passed)
+- **Complexity report**: wherever `--complexity-args "--json <path>"` points
 - **Local NuGet feed**: `artifacts/nuget-feed/`
 
 ## Analyzers and Formatting
@@ -226,7 +234,11 @@ Pass script options through `--crap-args`:
 ```bash
 dotnet toolchain.cs -- crap --crap-args "--top 50 --min-crap 15"
 dotnet toolchain.cs -- crap --crap-args "--json artifacts/crap/crap.json"
+dotnet toolchain.cs -- crap --crap-args "--module Piv"
+dotnet toolchain.cs -- crap --crap-args "--changed"
 ```
+
+The [scope options](#scope-options) narrow what is reported. Coverage is still correlated against every method, so the stale-coverage check keeps judging the whole report. `--changed` cannot be combined with `--baseline`; `--module` with `--baseline` filters both sides to the same modules.
 
 ### Two complexity axes
 
@@ -257,9 +269,84 @@ The rules follow the [SonarQube C# specification](https://docs.sonarsource.com/s
 
 Cognitive complexity does not implement the recursion increment, which needs a semantic model; directly recursive methods score one low.
 
-Verify every rule against its golden fixtures with `dotnet crap.cs --self-check` (51 fixtures, several taken from the SonarSource white paper).
+Verify every rule against its golden fixtures with `dotnet crap.cs --self-check` (94 fixtures, several taken from the SonarSource white paper; they also cover the module report, the scope options, and the base comparison and markdown section used by `complexity`).
 
-v1 reports only. There is no CI gate and no baseline ratchet yet; those wait until the thresholds are settled.
+The CRAP report has no CI gate and no baseline ratchet. The soft gate for day-to-day work is the complexity check below, which leaves coverage out on purpose.
+
+## Complexity check
+
+The `complexity` target flags methods with **cyclomatic complexity above 10** or **cognitive complexity above 20**, the two axes described above. It measures source only: no build, no tests, and no coverage, so a warm run takes a few seconds. It exists to keep the codebase easy to read for people and agents, not to chase a coverage number.
+
+```bash
+dotnet toolchain.cs complexity                  # methods you changed vs HEAD (pre-commit)
+dotnet toolchain.cs -- complexity --complexity-args "--base $(git merge-base HEAD origin/yubikit)"
+dotnet toolchain.cs -- complexity --complexity-args "--module Piv"            # whole module
+dotnet toolchain.cs -- complexity --complexity-args "--module Piv --changed"  # changed lines in Piv
+dotnet toolchain.cs -- complexity --complexity-args "--all"                   # whole shipping SDK
+```
+
+The script runs directly too: `dotnet complexity.cs [options]`.
+
+| Option | Default | Meaning |
+|---|---|---|
+| `--changed` | on unless `--all` or `--module` | methods overlapping changed lines |
+| `--base <ref>` | `HEAD` | comparison ref; implies `--changed` |
+| `--module <Name>` | all | repeatable module filter |
+| `--all` | off | whole shipping SDK |
+| `--max-cyclomatic <n>` | 10 | flag when cyclomatic > n |
+| `--max-cognitive <n>` | 20 | flag when cognitive > n |
+| `--top <n>` | 25 | rows in the console table |
+| `--json <path>` | off | write every in-scope method as JSON |
+| `--fail-on-findings` | off | exit 3 when a finding needs action |
+| `--markdown` | off | print a GitHub markdown section instead of the console table |
+| `--link-base <url>` | off | with `--markdown`, link each method to `<url><path>#L<start>-L<end>` |
+
+In a changed scope, each flagged method is compared with the same member in the base version of its file:
+
+| Status | Meaning | Action |
+|---|---|---|
+| new | the method or its file did not exist at the base | simplify it, or justify it |
+| worse | cyclomatic or cognitive complexity went up | simplify it, or justify it |
+| unchanged | both scores are the same | optional: existing debt you touched |
+| improved | neither score went up, and at least one went down | optional |
+
+To justify a method instead of simplifying it, add a line to the commit message; the report prints a template for each method that needs action:
+
+```
+Complexity-Justification: PivSession.ImportKeyAsync: <why this complexity is warranted>
+```
+
+Full scans (`--all`, or `--module` without `--changed`) have no base to compare with and list every finding.
+
+Exit codes: `0` on success whether or not methods were flagged, `1` for a usage, IO, or git error, and `3` when `--fail-on-findings` is set and a finding needs action. Through `dotnet toolchain.cs`, any non-zero exit fails the target and the toolchain exits `1`; call `dotnet complexity.cs --fail-on-findings` directly (for example from a git hook) when you need the exact code.
+
+### Pull request report
+
+`.github/workflows/coverage-crap-report.yml` keeps one comment up to date on each pull request that touches C# or the metric tooling. It has two sections, each written by its own job:
+
+- **Complexity** comes from a fast job that needs no build and no tests. It checks out the pull request's head commit and runs `dotnet complexity.cs --markdown --base <merge base> --link-base <blob URL of the head commit>`, so it covers the same diff as the "Files changed" tab and every method links to its exact lines. The heading is the verdict (for example "Complexity: 1 method needs action"); methods that need action come first, scores that moved show as `12 → **14**`, and bold marks a score over its limit. It usually appears within a couple of minutes.
+- **Coverage and CRAP (background)** comes from the slower job, which runs two full coverage passes (head and base, both measured with the pull request's tooling). It opens with a neutral one-line summary and lists only the modules whose CRAP or coverage moved, plus the total. It waits for the complexity job so the two never write the comment at the same time, and runs even if that job failed.
+
+Neither job fails the pull request. Forks get both reports in the job summaries instead of the comment. To preview the complexity section locally:
+
+```bash
+dotnet complexity.cs --markdown --base origin/yubikit
+```
+
+The comment logic lives in `.github/scripts/report-comment.js`; `node .github/scripts/report-comment.test.js` tests it, and the complexity job runs that test first.
+
+### Scope options
+
+`crap` and `complexity` share these options. Both only ever measure shipping source: `src/<Module>/src/`, excluding tests, examples, `Tests.*`, `bin`, `obj`, and generated files.
+
+- `--module <Name>` (repeatable) keeps only `src/<Name>/src/`. Unknown names fail and list the valid modules.
+- `--changed` keeps methods whose span overlaps a line changed in the working tree (staged and unstaged) versus `HEAD`, plus every method in untracked `.cs` files. A pure deletion counts only when it falls strictly inside a method.
+- `--base <ref>` compares with `<ref>` instead of `HEAD` and implies `--changed`.
+- Options combine: `--module Piv --changed` means changed lines inside Piv.
+
+`complexity` defaults to `--changed` because it is the pre-commit gate; `crap` defaults to everything.
+
+The shared code lives in `scripts/code-metrics/` and is pulled into both entry points with `#:include`. `crap.cs` owns the coverage-based report and the self-check; `complexity.cs` owns the source-only report. A member is matched to its base version by type, name, and parameter list, so moving it or adding an overload beside it does not change its status.
 
 ## xUnit v2 vs v3 Test Runner Detection
 

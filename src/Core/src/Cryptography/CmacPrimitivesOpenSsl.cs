@@ -19,7 +19,7 @@ using Yubico.YubiKit.Core.Native;
 
 namespace Yubico.YubiKit.Core.Cryptography;
 
-internal static class NativeMethods
+internal static partial class NativeMethods
 {
     // We're calling on OpenSSL to perform CMAC.
     // Starting with OpenSSL 3.x, the way to perform CMAC is to use the
@@ -36,18 +36,16 @@ internal static class NativeMethods
     //   EVP_MAC_update(evpMacCtx, dataToMac, dataToMacLen);
     //   EVP_MAC_final(evpMacCtx, result, &outputLen, 16);
 
-    [DllImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_CTX_new", ExactSpelling = true,
-        CharSet = CharSet.Ansi)]
+    [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_CTX_new")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    private static extern IntPtr CmacEvpMacCtxNewIntPtr();
+    private static partial IntPtr CmacEvpMacCtxNewIntPtr();
 
     public static SafeEvpCmacCtx CmacEvpMacCtxNew() => new(CmacEvpMacCtxNewIntPtr(), true);
 
     // void EVP_MAC_CTX_free(EVP_MAC_CTX* c);
-    [DllImport(Libraries.NativeShims, EntryPoint = "Native_EVP_MAC_CTX_free", ExactSpelling = true,
-        CharSet = CharSet.Ansi)]
+    [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_EVP_MAC_CTX_free")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    public static extern void EvpMacCtxFree(IntPtr ctx);
+    public static partial void EvpMacCtxFree(IntPtr ctx);
 
     // This returns 1 for success, or 0 for an error.
     // In the Csharp object, the algorithm is an Enum. We're going to pass
@@ -56,10 +54,13 @@ internal static class NativeMethods
     //   1 - AES-128-CBC
     //   2 - AES-192-CBC
     //   3 - AES-256-CBC
-    [DllImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_init", ExactSpelling = true,
-        CharSet = CharSet.Ansi)]
+    [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_init")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    private static extern int CmacEvpMacInit(IntPtr ctx, int algorithm, byte[] key, int keyLength);
+    private static partial int CmacEvpMacInit(
+        IntPtr ctx,
+        int algorithm,
+        byte[] key,
+        int keyLength);
 
     public static int CmacEvpMacInit(SafeEvpCmacCtx ctx, int algorithm, byte[] key, int keyLength) =>
         CmacEvpMacInit(ctx.DangerousGetHandle(), algorithm, key, keyLength);
@@ -67,10 +68,12 @@ internal static class NativeMethods
     // int EVP_MAC_update(
     //     EVP_MAC_CTX* c, const void *data, size_t dataLen);
     // This returns 1 for success, or 0 for an error.
-    [DllImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_update", ExactSpelling = true,
-        CharSet = CharSet.Ansi)]
+    [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_update")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    private static extern int CmacEvpMacUpdate(IntPtr ctx, byte[] input, int inLen);
+    private static partial int CmacEvpMacUpdate(
+        IntPtr ctx,
+        byte[] input,
+        int inLen);
 
     // The input begins at offset 0 and if the input.Length is not big enough
     // for inLen, it will return an error code.
@@ -80,10 +83,13 @@ internal static class NativeMethods
     // int EVP_MAC_final(
     //     EVP_MAC_CTX *c, unsigned char *out, size_t *outLen);
     // This returns 1 for success, or 0 for an error.
-    [DllImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_final", ExactSpelling = true,
-        CharSet = CharSet.Ansi)]
+    [LibraryImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_final")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    private static extern int CmacEvpMacFinal(IntPtr ctx, byte[] output, int outputSize, out int outLen);
+    private static partial int CmacEvpMacFinal(
+        IntPtr ctx,
+        byte[] output,
+        int outputSize,
+        out int outLen);
 
     public static int CmacEvpMacFinal(SafeEvpCmacCtx ctx, byte[] output, int outputSize, out int outLen) =>
         CmacEvpMacFinal(ctx.DangerousGetHandle(), output, outputSize, out outLen);

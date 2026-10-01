@@ -121,13 +121,17 @@ internal static class DeviceConnectionRegistry
 
     /// <summary>
     ///     Attempts to acquire exclusive discovery ownership without waiting. Returns <c>null</c> while any
-    ///     connection owns or is already waiting for the interface.
+    ///     connection owns or is already waiting for the interface. Throws a fresh
+    ///     <see cref="UnrecoveredConnectionException" /> when an earlier native owner has not proven release.
     /// </summary>
     public static IDisposable? TryAcquireDiscovery(string deviceId) =>
         GetOwnership(deviceId).TryAcquireDiscovery();
 
+    internal static Task WaitForRecoveryForTest(string deviceId) =>
+        GetOwnership(deviceId).WaitForRecovery();
+
     private static InterfaceOwnership GetOwnership(string deviceId) =>
-        Interfaces.GetOrAdd(deviceId, static _ => new InterfaceOwnership());
+        Interfaces.GetOrAdd(deviceId, static id => new InterfaceOwnership(id));
 
     private enum LeaseKind
     {
@@ -135,13 +139,15 @@ internal static class DeviceConnectionRegistry
         Discovery
     }
 
-    private sealed class InterfaceOwnership
+    private sealed class InterfaceOwnership(string deviceId)
     {
         private readonly Lock _sync = new();
         private int _connectionCount;
         private int _waitingConnections;
         private bool _discoveryActive;
         private TaskCompletionSource? _discoveryReleased;
+        private Exception? _unrecoveredFailure;
+        private TaskCompletionSource? _recoveryCompletion;
 
         public bool HasConnections
         {
@@ -159,6 +165,8 @@ internal static class DeviceConnectionRegistry
             Task discoveryReleased;
             lock (_sync)
             {
+                ThrowIfUnrecovered();
+
                 if (!_discoveryActive)
                     return Claim(deviceId);
 
@@ -184,6 +192,8 @@ internal static class DeviceConnectionRegistry
                 if (_discoveryActive)
                     throw new InvalidOperationException("Discovery ownership was reacquired ahead of a waiting connection.");
 
+                ThrowIfUnrecovered();
+
                 return Claim(deviceId);
             }
         }
@@ -191,6 +201,8 @@ internal static class DeviceConnectionRegistry
         /// <summary>Takes the lease, or refuses when the interface is already held.</summary>
         private IDisposable Claim(string deviceId)
         {
+            ThrowIfUnrecovered();
+
             if (_connectionCount > 0)
                 throw new ConnectionInUseException(
                     $"This YubiKey already has a live connection in this process (held interface: '{deviceId}'). " +
@@ -201,10 +213,35 @@ internal static class DeviceConnectionRegistry
             return new Registration(this, LeaseKind.Connection);
         }
 
+        public void MarkUnrecovered(Exception failure)
+        {
+            TaskCompletionSource? releaseSignal;
+            UnrecoveredConnectionException? waitingFailure = null;
+            lock (_sync)
+            {
+                _unrecoveredFailure ??= failure;
+                _recoveryCompletion ??= new TaskCompletionSource(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
+                releaseSignal = _discoveryActive ? _discoveryReleased : null;
+                if (releaseSignal is not null)
+                    waitingFailure = CreateUnrecoveredFailure();
+            }
+
+            if (releaseSignal is not null)
+                releaseSignal.TrySetException(waitingFailure!);
+        }
+
+        public Task WaitForRecovery()
+        {
+            lock (_sync)
+                return _recoveryCompletion?.Task ?? Task.CompletedTask;
+        }
+
         public IDisposable? TryAcquireDiscovery()
         {
             lock (_sync)
             {
+                ThrowIfUnrecovered();
                 if (_discoveryActive || _connectionCount > 0 || _waitingConnections > 0)
                     return null;
 
@@ -214,9 +251,21 @@ internal static class DeviceConnectionRegistry
             }
         }
 
+        private void ThrowIfUnrecovered()
+        {
+            if (_unrecoveredFailure is not null)
+                throw CreateUnrecoveredFailure();
+        }
+
+        private UnrecoveredConnectionException CreateUnrecoveredFailure() =>
+            new(
+                $"A previous native operation for interface '{deviceId}' was not proven released.",
+                _unrecoveredFailure ?? throw new InvalidOperationException("No unrecovered failure was recorded."));
+
         public void Release(LeaseKind kind)
         {
             TaskCompletionSource? releaseSignal = null;
+            TaskCompletionSource? recoverySignal = null;
             lock (_sync)
             {
                 if (kind == LeaseKind.Connection)
@@ -232,28 +281,53 @@ internal static class DeviceConnectionRegistry
                     throw new InvalidOperationException("Discovery ownership was released without a matching acquisition.");
 
                 _discoveryActive = false;
+                _unrecoveredFailure = null;
+                recoverySignal = _recoveryCompletion;
+                _recoveryCompletion = null;
                 releaseSignal = _discoveryReleased;
                 _discoveryReleased = null;
             }
 
             releaseSignal?.TrySetResult();
+            recoverySignal?.TrySetResult();
         }
     }
 
-    private sealed class Registration(InterfaceOwnership ownership, LeaseKind kind) : IDisposable
+    private interface IUnrecoveredRegistration : IDisposable
     {
+        void MarkUnrecovered(Exception failure);
+    }
+
+    private sealed class Registration(InterfaceOwnership ownership, LeaseKind kind) : IUnrecoveredRegistration
+    {
+        private readonly Lock _sync = new();
         private int _disposed;
 
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _disposed, 1) != 0)
-                return;
+            lock (_sync)
+            {
+                if (_disposed != 0)
+                    return;
 
-            ownership.Release(kind);
+                _disposed = 1;
+                ownership.Release(kind);
+            }
+        }
+
+        public void MarkUnrecovered(Exception failure)
+        {
+            lock (_sync)
+            {
+                if (_disposed != 0)
+                    return;
+
+                ownership.MarkUnrecovered(failure);
+            }
         }
     }
 
-    private sealed class CompositeRegistration(IReadOnlyList<IDisposable> registrations) : IDisposable
+    private sealed class CompositeRegistration(IReadOnlyList<IDisposable> registrations) : IUnrecoveredRegistration
     {
         private int _disposed;
 
@@ -265,5 +339,20 @@ internal static class DeviceConnectionRegistry
             for (var i = registrations.Count - 1; i >= 0; i--)
                 registrations[i].Dispose();
         }
+
+        public void MarkUnrecovered(Exception failure)
+        {
+            foreach (var registration in registrations)
+                ((IUnrecoveredRegistration)registration).MarkUnrecovered(failure);
+        }
+    }
+
+    internal static void MarkUnrecovered(IDisposable registration, Exception failure) =>
+        ((IUnrecoveredRegistration)registration).MarkUnrecovered(failure);
+
+    internal static void TryMarkUnrecovered(IDisposable registration, Exception failure)
+    {
+        if (registration is IUnrecoveredRegistration tracked)
+            tracked.MarkUnrecovered(failure);
     }
 }

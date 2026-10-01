@@ -101,7 +101,7 @@ public class LinuxHidDescriptorParsingTests
     {
         _ = vectorName;
 
-        (ushort usagePage, ushort usage) = LinuxHidDevice.ParseHidDescriptorBytes(descriptor);
+        (ushort usagePage, ushort usage) = LinuxHidInterface.ParseHidDescriptorBytes(descriptor);
 
         Assert.Equal(expectedUsagePage, usagePage);
         Assert.Equal(expectedUsage, usage);

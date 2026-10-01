@@ -279,6 +279,8 @@ Yubico.YubiKit.Core.Devices.ConnectionInUseException
 Yubico.YubiKit.Core.Devices.ConnectionInUseException.ConnectionInUseException() -> void
 Yubico.YubiKit.Core.Devices.ConnectionInUseException.ConnectionInUseException(string! message) -> void
 Yubico.YubiKit.Core.Devices.ConnectionInUseException.ConnectionInUseException(string! message, System.Exception! innerException) -> void
+Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException
+Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException.UnrecoveredConnectionException(string! message, System.Exception! innerException) -> void
 Yubico.YubiKit.Core.Devices.ConnectionType
 Yubico.YubiKit.Core.Devices.ConnectionType.All = Yubico.YubiKit.Core.Devices.ConnectionType.Hid | Yubico.YubiKit.Core.Devices.ConnectionType.HidFido | Yubico.YubiKit.Core.Devices.ConnectionType.HidOtp | Yubico.YubiKit.Core.Devices.ConnectionType.SmartCard -> Yubico.YubiKit.Core.Devices.ConnectionType
 Yubico.YubiKit.Core.Devices.ConnectionType.Hid = 1 -> Yubico.YubiKit.Core.Devices.ConnectionType
@@ -616,9 +618,9 @@ Yubico.YubiKit.Core.Transport.All = Yubico.YubiKit.Core.Transport.Usb | Yubico.Y
 Yubico.YubiKit.Core.Transport.Nfc = 2 -> Yubico.YubiKit.Core.Transport
 Yubico.YubiKit.Core.Transport.None = 0 -> Yubico.YubiKit.Core.Transport
 Yubico.YubiKit.Core.Transport.Usb = 1 -> Yubico.YubiKit.Core.Transport
-Yubico.YubiKit.Core.Transports.Hid.FindHidDevices
-Yubico.YubiKit.Core.Transports.Hid.FindHidDevices.FindAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Transports.Hid.IHidDevice!>!>!
-Yubico.YubiKit.Core.Transports.Hid.FindHidDevices.FindHidDevices(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.Hid.FindHidDevices!>! logger) -> void
+Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces
+Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces.FindAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Transports.Hid.IHidInterface!>!>!
+Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces.FindHidInterfaces(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces!>! logger) -> void
 Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo
 Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.<Clone>$() -> Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo!
 Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.DevicePath.get -> string!
@@ -664,18 +666,18 @@ Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType.Unknown = 0 -> Yubico.YubiKi
 Yubico.YubiKit.Core.Transports.Hid.HidReportType
 Yubico.YubiKit.Core.Transports.Hid.HidReportType.Feature = 1 -> Yubico.YubiKit.Core.Transports.Hid.HidReportType
 Yubico.YubiKit.Core.Transports.Hid.HidReportType.InputOutput = 0 -> Yubico.YubiKit.Core.Transports.Hid.HidReportType
-Yubico.YubiKit.Core.Transports.Hid.IFindHidDevices
-Yubico.YubiKit.Core.Transports.Hid.IFindHidDevices.FindAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Transports.Hid.IHidDevice!>!>!
+Yubico.YubiKit.Core.Transports.Hid.IFindHidInterfaces
+Yubico.YubiKit.Core.Transports.Hid.IFindHidInterfaces.FindAllAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Core.Transports.Hid.IHidInterface!>!>!
 Yubico.YubiKit.Core.Transports.Hid.IHidConnection
 Yubico.YubiKit.Core.Transports.Hid.IHidConnection.GetReport() -> byte[]!
 Yubico.YubiKit.Core.Transports.Hid.IHidConnection.InputReportSize.get -> int
 Yubico.YubiKit.Core.Transports.Hid.IHidConnection.OutputReportSize.get -> int
 Yubico.YubiKit.Core.Transports.Hid.IHidConnection.SetReport(byte[]! report) -> void
-Yubico.YubiKit.Core.Transports.Hid.IHidDevice
-Yubico.YubiKit.Core.Transports.Hid.IHidDevice.ConnectToFeatureReports() -> Yubico.YubiKit.Core.Transports.Hid.IHidConnection!
-Yubico.YubiKit.Core.Transports.Hid.IHidDevice.ConnectToIOReports() -> Yubico.YubiKit.Core.Transports.Hid.IHidConnection!
-Yubico.YubiKit.Core.Transports.Hid.IHidDevice.DescriptorInfo.get -> Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo!
-Yubico.YubiKit.Core.Transports.Hid.IHidDevice.InterfaceType.get -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
+Yubico.YubiKit.Core.Transports.Hid.IHidInterface
+Yubico.YubiKit.Core.Transports.Hid.IHidInterface.ConnectToFeatureReports() -> Yubico.YubiKit.Core.Transports.Hid.IHidConnection!
+Yubico.YubiKit.Core.Transports.Hid.IHidInterface.ConnectToIOReports() -> Yubico.YubiKit.Core.Transports.Hid.IHidConnection!
+Yubico.YubiKit.Core.Transports.Hid.IHidInterface.DescriptorInfo.get -> Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo!
+Yubico.YubiKit.Core.Transports.Hid.IHidInterface.InterfaceType.get -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
 Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection
 Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.FeatureReportSize.get -> int
 Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
@@ -718,6 +720,7 @@ Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice.Atr.get -> Yubico.YubiKit.C
 Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice.Kind.get -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.BeginTransaction(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.IDisposable!
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.BeginTransactionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.IDisposable!>!
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.SupportsExtendedApdu() -> bool
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.TransmitAndReceiveAsync(System.ReadOnlyMemory<byte> command, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.Transport.get -> Yubico.YubiKit.Core.Transport
@@ -744,7 +747,7 @@ Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind.Unknown = 1 -> Yubic
 Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind.Usb = 2 -> Yubico.YubiKit.Core.Transports.SmartCard.PscsConnectionKind
 Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory
 Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.IPcscDevice! smartCardDevice, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection!>!
-Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.SmartCardConnectionFactory(Microsoft.Extensions.Logging.ILoggerFactory! loggerFactory) -> void
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.SmartCardConnectionFactory() -> void
 Yubico.YubiKit.Core.Utilities.BerLength
 Yubico.YubiKit.Core.Utilities.ByteUtils
 Yubico.YubiKit.Core.Utilities.Crc13239
@@ -1111,7 +1114,7 @@ static Yubico.YubiKit.Core.Sessions.RawFidoHidSession.CreateAsync(Yubico.YubiKit
 static Yubico.YubiKit.Core.Sessions.RawOtpHidSession.CreateAsync(Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawOtpHidSession!>!
 static Yubico.YubiKit.Core.Sessions.RawSmartCardSession.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!
 static Yubico.YubiKit.Core.Sessions.RawSmartCardSession.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection! connection, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters! scpKeyParameters, Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration? configuration = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!
-static Yubico.YubiKit.Core.Transports.Hid.FindHidDevices.Create(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.Hid.FindHidDevices!>? logger = null) -> Yubico.YubiKit.Core.Transports.Hid.FindHidDevices!
+static Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces.Create(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces!>? logger = null) -> Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces!
 static Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.operator !=(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? left, Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? right) -> bool
 static Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo.operator ==(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? left, Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo? right) -> bool
 static Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Create() -> Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener!
@@ -1123,7 +1126,7 @@ static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.GetReportType(Y
 static Yubico.YubiKit.Core.Transports.Hid.HidInterfaceClassifier.IsSupported(Yubico.YubiKit.Core.Transports.Hid.HidDescriptorInfo! descriptorInfo) -> bool
 static Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetInstance(Yubico.YubiKit.Core.Transports.Hid.Keyboard.KeyboardLayout layout) -> Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator!
 static Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices.Create(Microsoft.Extensions.Logging.ILogger<Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices!>? logger = null) -> Yubico.YubiKit.Core.Transports.SmartCard.FindPcscDevices!
-static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.CreateDefault(Microsoft.Extensions.Logging.ILoggerFactory? loggerFactory = null) -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory!
+static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.CreateDefault() -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory!
 static Yubico.YubiKit.Core.Utilities.BerLength.EncodingSize(int length) -> int
 static Yubico.YubiKit.Core.Utilities.BerLength.Write(System.Span<byte> destination, int length) -> int
 static Yubico.YubiKit.Core.Utilities.ByteUtils.ValidateByte(int byteInt, string! name) -> byte

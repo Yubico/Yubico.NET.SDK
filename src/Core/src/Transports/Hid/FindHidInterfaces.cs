@@ -22,32 +22,48 @@ using Yubico.YubiKit.Core.Transports.Hid.Windows;
 
 namespace Yubico.YubiKit.Core.Transports.Hid;
 
-public interface IFindHidDevices
+public interface IFindHidInterfaces
 {
-    Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default);
 }
 
-public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
+public class FindHidInterfaces : IFindHidInterfaces
 {
-    public async Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
+    private readonly ILogger<FindHidInterfaces> _logger;
+    private readonly Func<IReadOnlyList<IHidInterface>> _getPlatformDevices;
+
+    public FindHidInterfaces(ILogger<FindHidInterfaces> logger)
+    {
+        _logger = logger;
+        _getPlatformDevices = GetPlatformDevices;
+    }
+
+    internal FindHidInterfaces(ILogger<FindHidInterfaces> logger,
+        Func<IReadOnlyList<IHidInterface>> getPlatformDevices)
+    {
+        _logger = logger;
+        _getPlatformDevices = getPlatformDevices;
+    }
+
+    public async Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
         await Task.Run(FindAll, cancellationToken).ConfigureAwait(false);
 
-    private IReadOnlyList<IHidDevice> FindAll()
+    private IReadOnlyList<IHidInterface> FindAll()
     {
-        logger.LogDebug("Getting list of HID devices");
+        _logger.LogDebug("Getting list of HID devices");
 
-        var allDevices = GetPlatformDevices();
+        var allDevices = _getPlatformDevices();
 
         var yubicoDevices = allDevices
             .Where(d => d.DescriptorInfo.VendorId == HidConstants.YubicoVendorId)
             .ToList();
 
-        logger.LogDebug("Found {Count} Yubico HID devices", yubicoDevices.Count);
+        _logger.LogDebug("Found {Count} Yubico HID devices", yubicoDevices.Count);
 
         return yubicoDevices;
     }
 
-    private IReadOnlyList<IHidDevice> GetPlatformDevices() =>
+    private IReadOnlyList<IHidInterface> GetPlatformDevices() =>
         SdkPlatformInfo.OperatingSystem switch
         {
             SdkPlatform.MacOS => FindAllMacOS(),
@@ -58,27 +74,27 @@ public class FindHidDevices(ILogger<FindHidDevices> logger) : IFindHidDevices
         };
 
     [SupportedOSPlatform("macos")]
-    private static IReadOnlyList<IHidDevice> FindAllMacOS() =>
-        MacOSHidDevice.GetList();
+    private static IReadOnlyList<IHidInterface> FindAllMacOS() =>
+        MacOSHidInterface.GetList();
 
     [SupportedOSPlatform("linux")]
-    private IReadOnlyList<IHidDevice> FindAllLinux()
+    private IReadOnlyList<IHidInterface> FindAllLinux()
     {
         try
         {
-            return LinuxHidDevice.GetList();
+            return LinuxHidInterface.GetList();
         }
         catch (DllNotFoundException ex)
         {
-            logger.LogWarning("udev native library not available, returning no HID devices: {Message}", ex.Message);
+            _logger.LogWarning("udev native library not available, returning no HID devices: {Message}", ex.Message);
             return [];
         }
     }
 
     [SupportedOSPlatform("windows")]
-    private static IReadOnlyList<IHidDevice> FindAllWindows() =>
-        WindowsHidDevice.GetList();
+    private static IReadOnlyList<IHidInterface> FindAllWindows() =>
+        WindowsHidInterface.GetList();
 
-    public static FindHidDevices Create(ILogger<FindHidDevices>? logger = null) =>
-        new(logger ?? NullLogger<FindHidDevices>.Instance);
+    public static FindHidInterfaces Create(ILogger<FindHidInterfaces>? logger = null) =>
+        new(logger ?? NullLogger<FindHidInterfaces>.Instance);
 }

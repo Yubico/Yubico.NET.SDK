@@ -20,7 +20,9 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 internal class ChainedResponseReceiver(
     FirmwareVersion? firmwareVersion,
     IApduProcessor apduTransmitter,
-    byte insSendRemaining) : IApduProcessor, IDisposable
+    byte insSendRemaining,
+    Action<Exception>? onContinuationFailure = null,
+    bool reportProtectedFailures = true) : IApduProcessor, IDisposable
 {
     private const byte Sw1HasMoreData = 0x61;
     private readonly ApduCommand _getMoreDataApdu = new(0, insSendRemaining, 0, 0);
@@ -45,8 +47,19 @@ internal class ChainedResponseReceiver(
         while (response.SW1 == Sw1HasMoreData) // Partial response, more data available
         {
             buffer.Write(response.Data.Span);
-            response = await apduTransmitter.TransmitAsync(_getMoreDataApdu, useScp, cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                response = await apduTransmitter.TransmitAsync(_getMoreDataApdu, useScp, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // A protected transmitter may already have reported this failure; plain
+                // continuations bypass it and must still notify the recovery owner.
+                if (!useScp || reportProtectedFailures)
+                    onContinuationFailure?.Invoke(ex);
+                throw;
+            }
         }
 
         buffer.Write(response.Data.Span);

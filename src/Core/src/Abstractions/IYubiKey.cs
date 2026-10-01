@@ -161,6 +161,9 @@ public interface IYubiKey
     ///     Opens the requested interface after claiming the physical YubiKey's known member interface IDs.
     /// </summary>
     /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
+    /// <exception cref="UnrecoveredConnectionException">
+    ///     A previous native connection or discovery operation for this YubiKey was not proven released.
+    /// </exception>
     Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
         where TConnection : class, IConnection;
 
@@ -169,6 +172,9 @@ public interface IYubiKey
     ///     several connections this is ambiguous and throws; callers must use <see cref="ConnectAsync{TConnection}"/>
     ///     or an application-specific extension that selects a transport intentionally.
     /// </summary>
+    /// <exception cref="UnrecoveredConnectionException">
+    ///     A previous native connection or discovery operation for this YubiKey was not proven released.
+    /// </exception>
     async Task<IConnection> ConnectAsync(CancellationToken cancellationToken = default)
     {
         var single = AvailableConnections.SingleConcreteConnectionOrUnknown();

@@ -3,7 +3,7 @@
 Last updated: 2026-09-12
 
 V2 is a ground-up rewrite of the YubiKey .NET SDK. It speaks to YubiKey
-applications v1 never supported, it's async from top to bottom, you install
+applications v1 never supported, its applet operations are awaitable, you install
 only the pieces you actually use, and it supports Native AOT deployment with
 no .NET runtime required on the machine.
 
@@ -35,10 +35,15 @@ not planning to add it.
 time. Supported operations and firmware requirements live in the per-applet
 documentation rather than here.
 
-## Async all the way down
+## Async applet operations
 
-Every device operation in v2 is `async`/`await`. There are no synchronous
-wrappers anywhere, and that's deliberate rather than half-finished.
+Applet operations expose awaitable methods rather than v1-style synchronous
+facades. That does not mean every lower-level entry point is asynchronous:
+direct HID report calls, SmartCard transaction begin, and synchronous disposal
+remain public. An `Async` suffix is not a guarantee that native work can be
+cancelled or that a custom connection implementation will return before blocking.
+See [raw access tiers](architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
+before using those escape hatches.
 
 Talking to a YubiKey is mostly waiting on a YubiKey, and v2's API shape now
 reflects that honestly. The tradeoff is real: if you're writing a small

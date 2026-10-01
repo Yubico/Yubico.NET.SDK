@@ -125,7 +125,7 @@ public class FindYubiKeysFaultInjectionTests
 
         // Key B unplugged: only key A's interfaces remain (PID count drops to 1 → PID merge, no reads).
         pcsc.Devices = [new FakePcscDevice(ReaderA)];
-        hid.Devices = [new FakeHidDevice(0x0405, HidInterfaceType.Otp, OtpA)];
+        hid.Devices = [new FakeHidInterface(0x0405, HidInterfaceType.Otp, OtpA)];
 
         var scan2 = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
         var lonely = Assert.Single(scan2);
@@ -135,8 +135,8 @@ public class FindYubiKeysFaultInjectionTests
         pcsc.Devices = [new FakePcscDevice(ReaderA), new FakePcscDevice(ReaderB)];
         hid.Devices =
         [
-            new FakeHidDevice(0x0405, HidInterfaceType.Otp, OtpA),
-            new FakeHidDevice(0x0405, HidInterfaceType.Otp, OtpB)
+            new FakeHidInterface(0x0405, HidInterfaceType.Otp, OtpA),
+            new FakeHidInterface(0x0405, HidInterfaceType.Otp, OtpB)
         ];
         factory.FailReads(ReaderB);
         factory.FailReads(OtpB);
@@ -307,9 +307,9 @@ public class FindYubiKeysFaultInjectionTests
         factory.SucceedReads(fidoPath, serial: 333);
         var find = new FindYubiKeys(
             new MutableFindPcscDevices(),
-            new MutableFindHidDevices
+            new MutableFindHidInterfaces
             {
-                Devices = [new FakeHidDevice(0x0120, HidInterfaceType.Fido, fidoPath)]
+                Devices = [new FakeHidInterface(0x0120, HidInterfaceType.Fido, fidoPath)]
             },
             factory.Create);
 
@@ -434,9 +434,9 @@ public class FindYubiKeysFaultInjectionTests
         factory.GateReads(fidoPath, serial: 333);
         var find = new FindYubiKeys(
             new MutableFindPcscDevices(),
-            new MutableFindHidDevices
+            new MutableFindHidInterfaces
             {
-                Devices = [new FakeHidDevice(0x0120, HidInterfaceType.Fido, fidoPath)]
+                Devices = [new FakeHidInterface(0x0120, HidInterfaceType.Fido, fidoPath)]
             },
             factory.Create);
 
@@ -494,8 +494,8 @@ public class FindYubiKeysFaultInjectionTests
         // Two 0x0407 OTP instances force the serial path, so the cache is consulted under the new PID.
         hid.Devices =
         [
-            new FakeHidDevice(0x0407, HidInterfaceType.Otp, OtpA),
-            new FakeHidDevice(0x0407, HidInterfaceType.Otp, OtpB)
+            new FakeHidInterface(0x0407, HidInterfaceType.Otp, OtpA),
+            new FakeHidInterface(0x0407, HidInterfaceType.Otp, OtpB)
         ];
 
         _ = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
@@ -517,9 +517,9 @@ public class FindYubiKeysFaultInjectionTests
         factory.SucceedReads(fidoPath, serial: 333);
         var find = new FindYubiKeys(
             new MutableFindPcscDevices(),
-            new MutableFindHidDevices
+            new MutableFindHidInterfaces
             {
-                Devices = [new FakeHidDevice(0x0120, HidInterfaceType.Fido, fidoPath)]
+                Devices = [new FakeHidInterface(0x0120, HidInterfaceType.Fido, fidoPath)]
             },
             factory.Create);
 
@@ -543,7 +543,7 @@ public class FindYubiKeysFaultInjectionTests
             {
                 Devices = [new FakePcscDevice(readerName, PscsConnectionKind.Nfc)]
             },
-            new MutableFindHidDevices(),
+            new MutableFindHidInterfaces(),
             factory.Create);
 
         var result = await find.FindAllAsync(ConnectionType.All, TestContext.Current.CancellationToken);
@@ -676,7 +676,7 @@ public class FindYubiKeysFaultInjectionTests
     // Rig construction
     // ---------------------------------------------------------------------------------------------
 
-    private static (FindYubiKeys Find, ScriptedIdentityFactory Factory, MutableFindPcscDevices Pcsc, MutableFindHidDevices Hid)
+    private static (FindYubiKeys Find, ScriptedIdentityFactory Factory, MutableFindPcscDevices Pcsc, MutableFindHidInterfaces Hid)
         CreateTwoDualKeyRig()
     {
         var factory = new ScriptedIdentityFactory();
@@ -689,12 +689,12 @@ public class FindYubiKeysFaultInjectionTests
         {
             Devices = [new FakePcscDevice(ReaderA), new FakePcscDevice(ReaderB)]
         };
-        var hid = new MutableFindHidDevices
+        var hid = new MutableFindHidInterfaces
         {
             Devices =
             [
-                new FakeHidDevice(0x0405, HidInterfaceType.Otp, OtpA),
-                new FakeHidDevice(0x0405, HidInterfaceType.Otp, OtpB)
+                new FakeHidInterface(0x0405, HidInterfaceType.Otp, OtpA),
+                new FakeHidInterface(0x0405, HidInterfaceType.Otp, OtpB)
             ]
         };
 
@@ -708,14 +708,14 @@ public class FindYubiKeysFaultInjectionTests
         {
             Devices = [new FakePcscDevice(TripleReaderA), new FakePcscDevice(TripleReaderB)]
         };
-        var hid = new MutableFindHidDevices
+        var hid = new MutableFindHidInterfaces
         {
             Devices =
             [
-                new FakeHidDevice(0x0407, HidInterfaceType.Fido, TripleFidoA),
-                new FakeHidDevice(0x0407, HidInterfaceType.Otp, TripleOtpA),
-                new FakeHidDevice(0x0407, HidInterfaceType.Fido, TripleFidoB),
-                new FakeHidDevice(0x0407, HidInterfaceType.Otp, TripleOtpB)
+                new FakeHidInterface(0x0407, HidInterfaceType.Fido, TripleFidoA),
+                new FakeHidInterface(0x0407, HidInterfaceType.Otp, TripleOtpA),
+                new FakeHidInterface(0x0407, HidInterfaceType.Fido, TripleFidoB),
+                new FakeHidInterface(0x0407, HidInterfaceType.Otp, TripleOtpB)
             ]
         };
 
@@ -734,11 +734,11 @@ public class FindYubiKeysFaultInjectionTests
             Task.FromResult(Devices);
     }
 
-    private sealed class MutableFindHidDevices : IFindHidDevices
+    private sealed class MutableFindHidInterfaces : IFindHidInterfaces
     {
-        public IReadOnlyList<IHidDevice> Devices { get; set; } = [];
+        public IReadOnlyList<IHidInterface> Devices { get; set; } = [];
 
-        public Task<IReadOnlyList<IHidDevice>> FindAllAsync(CancellationToken cancellationToken = default) =>
+        public Task<IReadOnlyList<IHidInterface>> FindAllAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult(Devices);
     }
 
@@ -751,7 +751,7 @@ public class FindYubiKeysFaultInjectionTests
         public PscsConnectionKind Kind => kind;
     }
 
-    private sealed class FakeHidDevice(short productId, HidInterfaceType interfaceType, string name) : IHidDevice
+    private sealed class FakeHidInterface(short productId, HidInterfaceType interfaceType, string name) : IHidInterface
     {
         public string ReaderName { get; } = name;
         public HidDescriptorInfo DescriptorInfo { get; } = new() { VendorId = 0x1050, ProductId = productId };
@@ -813,7 +813,7 @@ public class FindYubiKeysFaultInjectionTests
         public IYubiKeyConnectionSlot Create(IDevice device) => device switch
         {
             IPcscDevice p => new ScriptedYubiKey($"{_prefix}:pcsc:{p.ReaderName}", p.ReaderName, ConnectionType.SmartCard, this),
-            IHidDevice h => new ScriptedYubiKey(
+            IHidInterface h => new ScriptedYubiKey(
                 $"{_prefix}:hid:{h.ReaderName}",
                 h.ReaderName,
                 ConnectionTypeMapper.ToConnectionType(h.InterfaceType),

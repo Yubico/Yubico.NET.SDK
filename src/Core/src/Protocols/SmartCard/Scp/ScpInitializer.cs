@@ -42,6 +42,7 @@ internal static class ScpInitializer
     /// <param name="insSendRemaining">The instruction byte for response-chaining follow-up commands.</param>
     /// <param name="keyParams">SCP key parameters (SCP03 or SCP11)</param>
     /// <param name="cancellationToken">Cancellation token</param>
+    /// <param name="onRecoveryRequired">Notifies the owning protocol when a secure exchange requires recovery.</param>
     /// <returns>Tuple of (SCP-wrapped processor, data encryptor)</returns>
     /// <exception cref="ArgumentException">Thrown when keyParams type is unsupported</exception>
     /// <exception cref="NotSupportedException">Thrown when device doesn't support SCP</exception>
@@ -51,7 +52,8 @@ internal static class ScpInitializer
         IApduProcessor commandProcessor,
         byte insSendRemaining,
         ScpKeyParameters keyParams,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Action<Exception>? onRecoveryRequired = null)
     {
         if (initializationProcessor is not ChainedResponseReceiver { FirmwareVersion: not null } mainProcessor)
             throw new ArgumentException("Initialization processor must be a ChainedResponseReceiver",
@@ -67,7 +69,8 @@ internal static class ScpInitializer
                             commandProcessor,
                             insSendRemaining,
                             scp03Parameters,
-                            cancellationToken)
+                            cancellationToken,
+                            onRecoveryRequired)
                         .ConfigureAwait(false)
                     : throw new NotSupportedException("SCP03 only supported on YubiKey 5.3.0 and later"),
                 Scp11KeyParameters scp11Parameters => Supports(mainProcessor.FirmwareVersion, FeatureScp11)
@@ -76,7 +79,8 @@ internal static class ScpInitializer
                             commandProcessor,
                             insSendRemaining,
                             scp11Parameters,
-                            cancellationToken)
+                            cancellationToken,
+                            onRecoveryRequired)
                         .ConfigureAwait(false)
                     : throw new NotSupportedException("SCP11 only supported on YubiKey 5.7.2 and later"),
                 _ => throw new ArgumentException("Unsupported SCP key parameters type")
@@ -95,10 +99,12 @@ internal static class ScpInitializer
         IApduProcessor commandProcessor,
         ScpState state,
         FirmwareVersion? firmwareVersion,
-        byte insSendRemaining)
+        byte insSendRemaining,
+        Action<Exception>? onRecoveryRequired = null)
     {
-        var scpProcessor = new ScpProcessor(commandProcessor, state);
-        return new ChainedResponseReceiver(firmwareVersion, scpProcessor, insSendRemaining);
+        var scpProcessor = new ScpProcessor(commandProcessor, state, onRecoveryRequired);
+        return new ChainedResponseReceiver(firmwareVersion, scpProcessor, insSendRemaining,
+            onRecoveryRequired, reportProtectedFailures: false);
     }
 
     /// <summary>
@@ -109,7 +115,8 @@ internal static class ScpInitializer
         IApduProcessor commandProcessor,
         byte insSendRemaining,
         Scp03KeyParameters keyParams,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<Exception>? onRecoveryRequired)
     {
         // Initialize SCP03 session (sends INITIALIZE UPDATE)
         var (state, hostCryptogram) = await ScpState.Scp03InitAsync(
@@ -128,7 +135,7 @@ internal static class ScpInitializer
             // InitScp11Async and stays correct even if the guarded block's first statement throws.
             try
             {
-                var scpProcessor = new ScpProcessor(commandProcessor, state);
+                var scpProcessor = new ScpProcessor(commandProcessor, state, onRecoveryRequired);
                 var authCommand = new ApduCommand(
                     CLA_SECURE_MESSAGING,
                     INS_EXTERNAL_AUTHENTICATE,
@@ -144,7 +151,7 @@ internal static class ScpInitializer
                 var dataEncryptor = state.GetDataEncryptor();
                 return (
                     new ChainedResponseReceiver(initializationProcessor.FirmwareVersion, scpProcessor,
-                        insSendRemaining),
+                        insSendRemaining, onRecoveryRequired, reportProtectedFailures: false),
                     dataEncryptor);
             }
             catch
@@ -169,7 +176,8 @@ internal static class ScpInitializer
         IApduProcessor commandProcessor,
         byte insSendRemaining,
         Scp11KeyParameters keyParams,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<Exception>? onRecoveryRequired)
     {
         // Initialize SCP11 session (performs ECDH key agreement)
         var state = await ScpState.Scp11InitAsync(
@@ -187,7 +195,8 @@ internal static class ScpInitializer
                 commandProcessor,
                 state,
                 initializationProcessor.FirmwareVersion,
-                insSendRemaining);
+                insSendRemaining,
+                onRecoveryRequired);
 
             var dataEncryptor = state.GetDataEncryptor();
             return (scpProcessor, dataEncryptor);

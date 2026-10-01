@@ -129,7 +129,9 @@ public class SessionTransportTests
         Assert.Same(creationFailure, exception);
         Assert.Equal(1, innerConnection.DisposeAsyncCalls);
         Assert.True(innerConnection.Disposed);
-        Assert.False(DeviceConnectionRegistry.IsInUse(leaseId));
+        Assert.True(DeviceConnectionRegistry.IsInUse(leaseId));
+        _ = await Assert.ThrowsAsync<UnrecoveredConnectionException>(async () =>
+            await DeviceConnectionRegistry.AcquireConnectionAsync([leaseId], Ct));
     }
 
     [Fact]
@@ -157,7 +159,9 @@ public class SessionTransportTests
         Assert.Same(creationFailure, exception);
         Assert.Equal(1, logger.LogCalls);
         Assert.Equal(1, innerConnection.DisposeAsyncCalls);
-        Assert.False(DeviceConnectionRegistry.IsInUse(leaseId));
+        Assert.True(DeviceConnectionRegistry.IsInUse(leaseId));
+        _ = await Assert.ThrowsAsync<UnrecoveredConnectionException>(async () =>
+            await DeviceConnectionRegistry.AcquireConnectionAsync([leaseId], Ct));
     }
 
     [Fact]

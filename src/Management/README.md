@@ -110,7 +110,8 @@ replaces the code; there is no unlock without the current one.
 
 Management operations need no touch, no PIN, and no management key. `SessionCreationOptions.UserPresencePrompt`
 is accepted by the options object but never invoked by this module. The only secret it handles is the 16-byte
-configuration lock code. Cancel a pending operation with the `cancellationToken` you pass to the call.
+configuration lock code. Pass a `cancellationToken` to request cancellation; an admitted SmartCard
+exchange drains before returning, and cancellation does not roll back configuration already sent.
 
 Configuration can change how the device behaves afterwards. `DeviceFlags.TouchEject` makes the CCID smart card
 absent until the user touches the key, affecting every SmartCard session that follows, but it only takes effect

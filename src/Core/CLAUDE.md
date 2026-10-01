@@ -69,6 +69,21 @@ If using DI, configure logging explicitly from the DI-provided `ILoggerFactory` 
 
 ## Critical Patterns
 
+### Built-in macOS FIDO lifetime
+
+The built-in macOS FIDO report connection opens asynchronously through
+`MacOSFidoHidConnection` and its internal `IHidInputBridge`. A persistent native IOKit
+input owner copies bounded reports; blocking output and checked shutdown run on the
+connection's worker. Acknowledgment and accepted-report drain precede release; a failed
+close retains the owner and physical claim rather than allowing unsafe reopen. Terminal
+wake and registry/discovery claim transfer belong to this same connection lifetime.
+`FidoHidProtocol.Configure` performs local setup only; `ApplicationSession` awaits FIDO
+channel initialization. Public lower-level `IHidConnection` compatibility remains
+synchronous; the typed macOS OTP path uses a separate worker, and Windows/Linux HID
+behavior must not be inferred from either macOS path. See
+[retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
+for public entry points and known limits.
+
 ### Listener and Native Retry Loops
 
 Background listeners and native/resource-manager retry loops must block, back off, exit, or throttle on every failure path. Do not ignore native return values inside loops unless another call in the same path provides a bounded wait. Persistent failures such as stale PC/SC handles must have no-hardware fault-injection tests that prove call cadence is backoff-bounded.
@@ -188,6 +203,83 @@ var scanner = SdkPlatformInfo.OperatingSystem switch
 };
 ```
 
+#### `LibraryImport`, not `DllImport`
+
+**`DllImport` is wrong for new code.** Every native entry point added to `Native/` must be declared
+with `[LibraryImport]` on an `internal static partial` method inside a `partial` class.
+
+```csharp
+// ❌ WRONG — runtime-generated IL stub
+[DllImport(Libraries.NativeShims, CharSet = CharSet.Ansi, EntryPoint = "Native_Foo", SetLastError = true)]
+[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+internal static extern int Foo(string name, bool flag);
+
+// ✅ RIGHT — source-generated, compile-time-visible marshalling
+[LibraryImport(Libraries.NativeShims, EntryPoint = "Native_Foo",
+    StringMarshalling = StringMarshalling.Utf8, SetLastError = true)]
+[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+internal static partial int Foo(string name, [MarshalAs(UnmanagedType.U1)] bool flag);
+```
+
+Why it matters here, beyond style:
+
+- The marshalling stub is **generated C# you can read and step through**, not IL synthesised by the
+  runtime. Native AOT and trimming see real code — `docs/NATIVE-AOT.md` support depends on it.
+- The generator **fails the build on signatures it cannot marshal**. `DllImport` accepts the same
+  signature silently and corrupts memory at runtime instead. Interop bugs in HID/PC/SC paths are the
+  most expensive class of bug in this module; move them to compile time.
+- Marshalling is explicit at the call site, so reviewers can see the ABI rather than infer it from
+  attribute defaults.
+
+Conversion traps, in the order they bite:
+
+| Trap | What to do |
+|---|---|
+| `extern` → `partial` | The method **and** its enclosing class both need `partial`. `NativeMethods` classes in `Native/` are already declared that way where converted. |
+| `CharSet = CharSet.Ansi` | There is no direct equivalent. On Unix it meant UTF-8 → use `StringMarshalling = StringMarshalling.Utf8`. On Windows it meant the ANSI code page → marshal `byte*`/`ReadOnlySpan<byte>` yourself rather than pretending it is UTF-8. `CharSet.Unicode` → `StringMarshalling.Utf16`. |
+| `bool` parameters/returns | Not blittable. Annotate `[MarshalAs(UnmanagedType.U1)]` (or `.I4` — match the C header), or change the signature to the native integer type. |
+| Delegate callbacks | Not marshalled at all by the generator. Use `delegate* unmanaged[Cdecl]<...>` with an `[UnmanagedCallersOnly]` target, as `Native/MacOS/HidInput/HidInput.Interop.cs` does. A function pointer also avoids the per-instance thunk and the "keep the delegate alive" `GCHandle` dance. |
+| `string` return values | Needs an explicit marshaller (`Utf8StringMarshaller`) or return `nint` and convert. Silent ownership bugs live here — say who frees the buffer in a comment. |
+| `SafeHandle` | **Is** supported, including as a return type. Keep the existing `LinuxUdevSafeHandle`-style pattern; do not downgrade to `nint` during conversion. |
+| `SetLastError = true` | Keep it only where a caller actually reads `errno`/`GetLastError`. It is not free. |
+| Array parameters | Delete `[MarshalAs(UnmanagedType.LPArray, SizeParamIndex = n)]` outright. Do **not** replace it with `[MarshalUsing(CountElementName = ...)]` — leave the parameter as a bare `byte[]`/`IntPtr[]`. See the note below on why that is safe, not merely tidier. |
+
+**Why bare arrays are safe, not just tidier.** A by-value array of a blittable element type is
+*pinned* by the generated stub, not allocated-and-copied:
+
+```csharp
+// from the generated stub, with or without [MarshalUsing]
+fixed (void* __output_native = &ArrayMarshaller<byte, byte>.ManagedToUnmanagedIn.GetPinnableReference(output))
+```
+
+Native writes therefore land in the caller's own buffer, exactly as they did under `[DllImport]`.
+This is load-bearing for native-written output buffers — `CmacEvpMacFinal`'s `output` and
+`BnBigNumToBinaryWithPadding`'s `buffer` are read back by their wrappers after the call. Had the
+generator copied in-only, every CMAC result and every EC coordinate would have come back silently
+zeroed, with a clean build and no warning. Count metadata is only required for arrays marshalled
+back **out** of unmanaged memory, which this repo has none of. Verify with
+`EmitCompilerGeneratedFiles` rather than reasoning about it, as was done here.
+
+Current state: **every** P/Invoke in the repository is `[LibraryImport]`. There is no remaining
+`[DllImport]` or `static extern` anywhere in `src/`, `benchmarks/`, or `verification/`. Treat any
+reappearance as a regression, not as legacy debt:
+
+```bash
+grep -rn "\[DllImport(\|static extern" --include="*.cs" src/ benchmarks/ verification/   # must be empty
+```
+
+Two macOS IOKit callback registrations (`IOHIDManagerRegisterDeviceMatchingCallback`,
+`IOHIDManagerRegisterDeviceRemovalCallback`) take the callback as a bare `IntPtr` rather than a
+function pointer, because their caller `Transports/Hid/MacOS/MacOSHidDeviceListener.cs` keeps
+per-instance delegates alive in fields (`_arrivedCallbackDelegate`, `_removedCallbackDelegate`,
+`_abandonedCallbackDelegates`) and passes `Marshal.GetFunctionPointerForDelegate(...)`. That is
+deliberate: the listener's context pointer is `IntPtr.Zero`, so an `[UnmanagedCallersOnly]` static
+would have nowhere to recover `this` from. The delegate fields are load-bearing — the function
+pointer dies with the delegate. Do not inline them.
+
+The `SYSLIB1054` analyzer that suggests this conversion is informational and is **not** configured as
+an error in `.editorconfig`. A clean build does not mean you used `LibraryImport`.
+
 ### Connection Factory Pattern
 
 Connections are created via factories:
@@ -228,6 +320,11 @@ token is passed to discovery, but a cached result may complete without observing
 
 Pre-merge candidates are raw internal `PcscConnectionSlot`/`HidConnectionSlot` instances over live enumerated PC/SC or HID
 handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by production discovery.
+
+`IYubiKey` models the physical key; `IHidInterface` models one operating-system-exposed HID report
+interface discovered by `FindHidInterfaces`. `IHidConnection` is an opened report connection, while
+`IWindowsHidReportAccess` is the internal Windows report-handle seam. These names do not imply a
+one-to-one mapping between operating-system interfaces and physical USB interfaces.
 
 ### ConnectionType Semantics
 
@@ -449,7 +546,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 - **Discovery reads are time-bounded and single-flight.** Identity reads: 2s/attempt; composite metadata: 3s budget. The budget bounds each caller's wait, while one underlying read per stable interface/`ConnectionType` continues independently within one finder. A finder owns one atomic evidence epoch containing identity cache, metadata cache, and read scope; transport activity terminally retires that scope and replaces the whole evidence object, so stale completion writes only into unreachable caches and a replacement manager cannot join its predecessor's reads. Superseded reads that have not yet opened their interface fail fast, including queued admission waits behind hung workers. Cache entries also record the PID observed at read time so a hit under a different PID is a miss. Eviction is deliberately not transport-scoped because a composite swap's events can arrive on one transport first, and retained sibling evidence would mix two keys. Without monitoring running there are no listener events and staleness detection degrades to scan-observed absence — see the identity-cache section of `docs/architecture/device-discovery-guarantees.md`.
 - **Monitor lifecycle is an epoch model, not a state machine.** Each `StartMonitoring` builds an immutable `MonitorGeneration` (`{ Id, ScanGate, Signal, Cts }`) held in one field; the loop, manual rescans, and listener callbacks capture that reference once, so a torn gate/generation pair is not representable. Publication is where safety is enforced: all publications from all generations are mutually exclusive under the never-disposed `_publishGate`, held across the admission check and `UpdateCache`, and a snapshot is admitted only if its generation is still current and the service undisposed. Superseded snapshots — including a scan hung in native I/O that returns long after its generation was retired — are discarded. Because publications never interleave, a successor's snapshot is serialized strictly after any in-flight predecessor's, so newer truth always lands last. This currently relies on `UpdateCache` enqueuing into every watcher's buffer synchronously and finishing before it returns — publication is ordered at enqueue time, not at delivery time, so a slow consumer cannot reorder a successor's snapshot ahead of its predecessor's. Lifecycle operations take only the small `_publishLock`, never `_publishGate`, so a stalled publication cannot wedge start/stop/dispose, and restart after an abandoned stop always succeeds. Nothing disposes a semaphore anyone can still acquire: scan gates live in their generation and are never disposed, and an abandoned generation is unreachable garbage. `DisposeAsync` drains `_publishGate` with the shutdown bound and, on timeout, warns and abandons — a publication already admitted may then complete after `DisposeAsync` returns, which the manager's subsequent repository disposal silences. That is a documented contract, not an accident. When editing this file, keep the three primitives one-job-each; the design collapsed a four-concept state machine and re-merging their responsibilities is what previously produced the races.
   Safety is not liveness: after abandoning a hung scan, discovery *liveness* is owned by `FindYubiKeys` (its `_scanLock` wait takes the loop's token, so blocked generations do not accumulate) and recovers when the upstream time-bounds release. The epoch model neither causes nor cures a PC/SC enumeration hang.
-- **Registered connections dispose exactly once, and disposal implies disposed.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange; it disposes the inner connection and then releases the registry lease in a `finally`, publishing its completion. Every other caller observes that same completion — async callers await it, sync callers block on it — so any disposal call returning means teardown actually finished and all callers see the same outcome, including the same exception instance. A caller can therefore never reopen an interface whose physical handle is still being torn down.
+- **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Existing HID registered-wrapper release behavior is unchanged.
 
 ## Known Gotchas
 
@@ -459,7 +556,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 4. **TLV Disposal**: `Tlv` and `DisposableTlvList` must be disposed
 5. **Platform-Specific Behavior**: PC/SC APIs behave differently across platforms; test on all three
 6. **Chained Response Assembly**: `INS_SEND_REMAINING` (0xC0) is used by default; some apps use custom values
-7. **Access Tiers**: Applet sessions are the golden path. Raw sessions bypass applet checks but retain session ownership and overlap guards. Raw `IConnection` calls bypass both session and exchange guards; do not interleave them, and dispose/reopen after an interrupted exchange. See [Raw Access Tiers](../../docs/architecture/raw-access-tiers.md)
+7. **Access Tiers**: Applet sessions are the golden path. Raw sessions bypass applet checks but retain session ownership and overlap guards. Raw `IConnection` calls bypass session and exchange guards; built-in PC/SC additionally refuses overlapping native calls at the connection boundary. Do not interleave raw calls with sessions, and dispose/reopen after an interrupted exchange. See [Raw Access Tiers](../../docs/architecture/raw-access-tiers.md)
 
 ## Related Modules
 

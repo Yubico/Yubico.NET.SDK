@@ -5,6 +5,9 @@ using System.Buffers;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.YubiHsm;
 using Yubico.YubiKit.WebAuthn;
 using Yubico.YubiKit.WebAuthn.Client;
 
@@ -12,13 +15,52 @@ namespace Yubico.YubiKit.PublicApi.UnitTests;
 
 public sealed class FactoryShapeTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task HsmAuthFactories_AcceptAndRetainCallerProvider(bool deviceFactory)
+    {
+        var connection = new AcceptingHsmConnection();
+        var options = new SessionCreationOptions { CredentialPrompt = new DecliningPrompt(), MaxCredentialPromptAttempts = 1 };
+        await using HsmAuthSession session = deviceFactory
+            ? await new AcceptingHsmDevice(connection).CreateHsmAuthSessionAsync(options, TestContext.Current.CancellationToken)
+            : await HsmAuthSession.CreateAsync(connection, options, TestContext.Current.CancellationToken);
+        IHsmAuthSession contract = session;
+        await Assert.ThrowsAsync<CredentialPromptDeclinedException>(() => contract.DeleteCredentialWithPromptAsync("cred", TestContext.Current.CancellationToken));
+        Assert.Equal(2, connection.Transmissions);
+    }
+
+    private sealed class AcceptingHsmDevice(ISmartCardConnection connection) : IYubiKey
+    {
+        public string DeviceId => "test";
+        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken token = default) where TConnection : class, IConnection =>
+            Task.FromResult((TConnection)connection);
+    }
+
+    private sealed class AcceptingHsmConnection : ISmartCardConnection
+    {
+        public int Transmissions { get; private set; }
+        public Transport Transport => Transport.Usb;
+        public ConnectionType Type => ConnectionType.SmartCard;
+        public bool SupportsExtendedApdu() => false;
+        public IDisposable BeginTransaction(CancellationToken token = default) => new EmptyTransaction();
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken token = default)
+        {
+            Transmissions++;
+            return Task.FromResult<ReadOnlyMemory<byte>>(command.Span[1] == 9 ? (byte[])[8, 0x90, 0] : (byte[])[0x90, 0]);
+        }
+        public void Dispose() { }
+        public ValueTask DisposeAsync() => default;
+        private sealed class EmptyTransaction : IDisposable { public void Dispose() { } }
+    }
     [Fact]
     public async Task NonAdoptingDeviceFactories_RejectCredentialPromptBeforeConnecting()
     {
         var options = new SessionCreationOptions { CredentialPrompt = new DecliningPrompt() };
         foreach (var (session, _, factoryName) in AppletSessionShapeTests.Sessions)
         {
-            if (session.Name == "PivSession")
+            if (session.Name is "PivSession" or "HsmAuthSession")
                 continue;
             MethodInfo factory = AppletSessionShapeTests.GetDeviceExtensionMethods(session)
                 .Single(method => method.Name == factoryName);
@@ -41,7 +83,7 @@ public sealed class FactoryShapeTests
         var options = new SessionCreationOptions { CredentialPrompt = new DecliningPrompt() };
         foreach (var (session, _, factoryName) in AppletSessionShapeTests.Sessions)
         {
-            if (session.Name == "PivSession")
+            if (session.Name is "PivSession" or "HsmAuthSession")
                 continue;
             MethodInfo method = session.GetMethods(BindingFlags.Static | BindingFlags.Public)
                 .Single(m => m.Name == "CreateAsync");
@@ -161,7 +203,7 @@ public sealed class FactoryShapeTests
     [Fact]
     public void WebAuthnDeviceFactory_UsesSessionOptionsAndCancellationShape()
     {
-        MethodInfo method = typeof(IYubiKeyExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
+        MethodInfo method = typeof(Yubico.YubiKit.WebAuthn.IYubiKeyExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
             .Single(method => method.Name == "CreateWebAuthnClientAsync");
         ParameterInfo[] parameters = method.GetParameters();
         var nullability = new NullabilityInfoContext();

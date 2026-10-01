@@ -6,7 +6,8 @@ SDK-to-application callbacks, but they have different contracts:
 - `ICredentialPrompt` obtains secret bytes such as a PIN. It returns an exactly sized owned buffer,
   and the consuming component owns verification and retry policy. `WebAuthnClient` configures it through
   `WebAuthnClientOptions.CredentialPrompt`. PIV supports it through `SessionCreationOptions.CredentialPrompt`
-  for signing and key generation; non-adopting applet factories reject this option instead of ignoring it.
+   for signing and key generation. YubiHSM Auth adopts it for explicitly prompted symmetric calculation
+   and credential deletion; non-adopting applet factories reject this option instead of ignoring it.
   A low-level FIDO2 session does not adopt `SessionCreationOptions.CredentialPrompt`; use
   `WebAuthnClientOptions.CredentialPrompt` for WebAuthn ceremonies.
 - `IUserPresencePrompt` reports that an operation requires or may require a physical touch. It never
@@ -37,6 +38,30 @@ positive) to bound fresh requests. The session zeroes and disposes each returned
 rejected or late-arriving buffers. A `null` return throws `CredentialPromptDeclinedException`, not a
 cancellation or device rejection. Direct calls to `VerifyPinAsync` and `AuthenticateAsync` remain
 single attempts; other PIV operations do not prompt. Older firmware keeps the existing signing flow.
+
+YubiHSM Auth's `CalculateSessionKeysSymmetricWithPromptAsync` requests a password of 0..16 encoded
+bytes; `DeleteCredentialWithPromptAsync` requests exactly 16 raw management-key bytes. Both require
+a configured provider before any device access. `HsmAuthCredentialPromptContext.CredentialLabel`
+contains the exact target label; `Kind` distinguishes that credential's password from the applet-wide
+management key used to delete it. `Scope` remains display text, not an identifier to parse.
+
+Each acquisition counts toward `MaxCredentialPromptAttempts`, including locally invalid lengths.
+Only a confirmed rejection status from the submitted command allows another fresh prompt. Zero
+remaining device retries stops the operation. Provider, notification, cleanup, cancellation, and
+communication failures never cause resubmission. Explicit-input methods always remain single attempts,
+even with a provider configured; an empty explicit password never means "prompt".
+
+The caller must keep the borrowed peer challenge context and optional cryptogram stable throughout
+calculation. The library reuses them unchanged after a confirmed password rejection; it never restarts
+the peer handshake. Prompted calculation reads one strict credential snapshot before acquiring input.
+Touch notification is per submitted attempt: rejected attempts resolve `Failed` before reacquisition,
+and success resolves `Completed` after input cleanup, before transferring disposable session keys.
+A failed terminal callback stops the logical call. Deletion does not add a touch indication.
+
+All YubiHSM Auth session operations reject overlap, including callback reentry. Disposal cancels pending
+credential acquisition, cleans a late owner once, and drains active work before teardown, except when
+initiated inside that operation's callback. A deletion failure after transmission may still mean the
+credential was deleted; do not resubmit merely because cleanup or cancellation failed.
 
 `ConsoleUserPresencePrompt` is the reference terminal implementation. It writes `Touch your
 YubiKey.` immediately for certain requests and debounces uncertain requests for about 300 ms so a

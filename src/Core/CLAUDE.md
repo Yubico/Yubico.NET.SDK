@@ -81,8 +81,10 @@ SDK-created `UserPresenceContext` values set `Operation` from the applet's neste
 `UserPresenceOperations` (for example `UserPresenceOperations.Piv.Decrypt`) and `Application` from
 `UserPresenceApplications`. Operation values have the form `Group.Method` and must stay unique across
 groups; a Core unit test enforces this. When a new applet method notifies presence, add a constant to its group.
-`UserPresenceNotification.Create` is the only place that captures the ambient `UserPresenceIntent` into
-`UserPresenceContext.Intent`. It runs in the caller's async flow at the start of the operation, so keep every
+`UserPresenceNotification.Create` captures the ambient `UserPresenceIntent` into
+`UserPresenceContext.Intent`. A multi-attempt applet operation may snapshot the intent once before its
+first await and explicitly apply it to each fresh attempt context, so ending the caller's scope cannot
+change later attempts. Creation runs in the caller's async flow, so keep every
 notification created through it, and never create one from a background listener or with suppressed
 `ExecutionContext` flow.
 
@@ -94,6 +96,11 @@ resolution. In particular, Core FIDO and OTP HID protocols request only; their a
 resolve after CTAP status or CRC validation. Policy-driven SmartCard operations normally request
 and resolve at the applet operation boundary. Do not pass nullable prompt/context pairs through
 downstream APIs or create competing lifecycle owners.
+
+`CredentialAcquisition` is the internal owned-secret lifecycle helper shared by PIV and YubiHSM Auth.
+It materializes a provider request once, detaches a canceled wait while observing and releasing a late
+owner, and wipes before disposing. Applets still own admission, callback identity, validation, and
+command-specific retry decisions. WebAuthn retains its separate decline mapping.
 
 ### APDU Processing Pipeline
 

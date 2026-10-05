@@ -27,6 +27,14 @@ internal static class PivMetadataProtocol
     internal static async Task<PivPinMetadata> GetPinMetadataAsync(
         IPivBackend backend,
         ILogger logger,
+        CancellationToken cancellationToken = default) =>
+        (await GetPinMetadataSnapshotAsync(backend, logger, cancellationToken).ConfigureAwait(false)).Metadata;
+
+    // Public metadata retains its existing defaults for missing tags. Only a valid, complete
+    // retry field is authoritative enough to classify a PIN as blocked or show its count.
+    internal static async Task<(PivPinMetadata Metadata, int? RetriesRemaining)> GetPinMetadataSnapshotAsync(
+        IPivBackend backend,
+        ILogger logger,
         CancellationToken cancellationToken = default)
     {
         logger.LogDebug("PIV: Getting PIN metadata");
@@ -56,15 +64,24 @@ internal static class PivMetadataProtocol
         bool isDefault = false;
         int totalRetries = 0;
         int retriesRemaining = 0;
+        int? authoritativeRetries = null;
 
         int offset = 0;
         while (offset < span.Length)
         {
             byte tag = span[offset++];
-            if (offset >= span.Length) break;
+            if (offset >= span.Length)
+            {
+                authoritativeRetries = null;
+                break;
+            }
 
             int length = span[offset++];
-            if (offset + length > span.Length) break;
+            if (offset + length > span.Length)
+            {
+                authoritativeRetries = null;
+                break;
+            }
 
             switch (tag)
             {
@@ -75,10 +92,13 @@ internal static class PivMetadataProtocol
                     }
                     break;
                 case 0x06: // Retries [total, remaining]
+                    authoritativeRetries = null;
                     if (length >= 2)
                     {
                         totalRetries = span[offset];
                         retriesRemaining = span[offset + 1];
+                        if (length == 2 && totalRetries > 0 && retriesRemaining <= totalRetries)
+                            authoritativeRetries = retriesRemaining;
                     }
                     break;
             }
@@ -86,13 +106,17 @@ internal static class PivMetadataProtocol
             offset += length;
         }
 
-        return new PivPinMetadata(isDefault, totalRetries, retriesRemaining);
+        return (new PivPinMetadata(isDefault, totalRetries, retriesRemaining), authoritativeRetries);
     }
 
     /// <summary>
     /// Gets metadata about a key slot (requires firmware 5.3+).
     /// </summary>
     internal static async Task<PivSlotMetadata?> GetSlotMetadataAsync(
+        IPivBackend backend, ILogger logger, PivSlot slot, CancellationToken cancellationToken = default) =>
+        (await GetSlotMetadataSnapshotAsync(backend, logger, slot, cancellationToken).ConfigureAwait(false)).Metadata;
+
+    internal static async Task<(PivSlotMetadata? Metadata, PivPinPolicy? PinPolicy)> GetSlotMetadataSnapshotAsync(
         IPivBackend backend,
         ILogger logger,
         PivSlot slot,
@@ -113,7 +137,7 @@ internal static class PivMetadataProtocol
         // Check for empty slot - 0x6A82 "File not found" or 0x6A88 "Referenced data not found"
         if (response.SW is 0x6A82 or 0x6A88)
         {
-            return null;
+            return (null, null);
         }
 
         if (!response.IsOK())
@@ -141,13 +165,13 @@ internal static class PivMetadataProtocol
         var isDefault = tlvDict.TryGetValue(0x05, out var def) && def.Length > 0
             && def.Span[0] == 0x01;
 
-        return new PivSlotMetadata(
+        return (new PivSlotMetadata(
             Algorithm: algorithm,
             PinPolicy: pinPolicy,
             TouchPolicy: touchPolicy,
             IsGenerated: isGenerated,
             PublicKey: publicKey ?? ReadOnlyMemory<byte>.Empty
-        );
+        ), tlvDict.TryGetValue(0x02, out policy) && policy.Length >= 2 ? pinPolicy : null);
     }
 
     /// <summary>
@@ -170,14 +194,7 @@ internal static class PivMetadataProtocol
         }
 
         // Validate key length
-        int expectedLength = keyType switch
-        {
-            PivManagementKeyType.TripleDes => 24,
-            PivManagementKeyType.Aes128 => 16,
-            PivManagementKeyType.Aes192 => 24,
-            PivManagementKeyType.Aes256 => 32,
-            _ => throw new ArgumentException($"Unsupported key type: {keyType}", nameof(keyType))
-        };
+        int expectedLength = keyType.KeyLength();
 
         if (newKey.Length != expectedLength)
         {

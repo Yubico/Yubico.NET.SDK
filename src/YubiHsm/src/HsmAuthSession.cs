@@ -101,18 +101,28 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal const int Pbkdf2DerivedKeyLength = 32;
 
     private readonly ScpKeyParameters? _scpKeyParams;
+    private readonly ICredentialPrompt? _credentialPrompt;
+    private readonly int _maxCredentialPromptAttempts;
+    private readonly object _operationLock = new();
+    private readonly CancellationTokenSource _operationDisposal = new();
+    private readonly AsyncLocal<TaskCompletionSource?> _callbackOperation = new();
+    private TaskCompletionSource? _activeOperation;
     private ISmartCardProtocol _protocol = null!;
     private IHsmAuthBackend _backend = null!;
 
     private HsmAuthSession(
         ISmartCardConnection connection,
         ScpKeyParameters? scpKeyParams = null,
-        IUserPresencePrompt? userPresencePrompt = null)
+        IUserPresencePrompt? userPresencePrompt = null,
+        ICredentialPrompt? credentialPrompt = null,
+        int maxCredentialPromptAttempts = 3)
         : base(connection, userPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
         _scpKeyParams = scpKeyParams;
+        _credentialPrompt = credentialPrompt;
+        _maxCredentialPromptAttempts = maxCredentialPromptAttempts;
     }
 
     /// <summary>
@@ -132,15 +142,17 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         var configuration = options?.ProtocolConfiguration;
         var scpKeyParams = options?.ScpKeyParameters;
         var firmwareVersionOverride = options?.FirmwareVersionOverride;
+        var credentialPrompt = options?.CredentialPrompt;
+        var maxCredentialPromptAttempts = options?.MaxCredentialPromptAttempts ?? 3;
+        var userPresencePrompt = options?.UserPresencePrompt;
 
         ValidatePreferredConnectionType(connection, options);
-        SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, UserPresenceApplications.YubiHsmAuth);
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.
         var session = Construct(
             connection,
-            () => new HsmAuthSession(connection, scpKeyParams, options?.UserPresencePrompt));
+            () => new HsmAuthSession(connection, scpKeyParams, userPresencePrompt, credentialPrompt, maxCredentialPromptAttempts));
         try
         {
             await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken)
@@ -267,6 +279,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task<IReadOnlyList<HsmAuthCredential>> ListCredentialsAsync(
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
+        return await ListCredentialsCoreAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<IReadOnlyList<HsmAuthCredential>> ListCredentialsCoreAsync(
+        CancellationToken cancellationToken, bool strict = false)
+    {
         ThrowIfDisposed();
 
         var command = new ApduCommand { Ins = InsList };
@@ -284,6 +303,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 continue;
 
             var value = tlv.Value.Span;
+            if (strict && (value.Length < MinLabelLength + 3 || value.Length > MaxLabelLength + 3))
+                throw new InvalidOperationException("Malformed credential metadata in LIST.");
             if (value.Length < 3)
                 continue;
 
@@ -297,7 +318,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             };
             var labelBytes = value[2..^1]; // Everything except algorithm, touch, and retries-remaining
             var retriesRemaining = value[^1];
-            var label = Encoding.UTF8.GetString(labelBytes);
+            var label = strict ? new UTF8Encoding(false, true).GetString(labelBytes) : Encoding.UTF8.GetString(labelBytes);
 
             credentials.Add(new HsmAuthCredential(label, algorithm, retriesRemaining, touchRequired));
         }
@@ -314,6 +335,15 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
+    {
+        using var admission = EnterOperation();
+        await PutCredentialSymmetricCoreAsync(managementKey, label, keyEnc, keyMac, credentialPassword, touchRequired, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task PutCredentialSymmetricCoreAsync(ReadOnlyMemory<byte> managementKey, string label,
+        ReadOnlyMemory<byte> keyEnc, ReadOnlyMemory<byte> keyMac, ReadOnlyMemory<byte> credentialPassword,
+        bool touchRequired, CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
         ValidateManagementKey(managementKey.Span);
@@ -366,6 +396,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         if (derivationPassword.IsEmpty)
             throw new ArgumentException(
@@ -377,7 +408,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             derivedKey = DeriveKeys(derivationPassword);
 
-            await PutCredentialSymmetricAsync(
+            await PutCredentialSymmetricCoreAsync(
                     managementKey,
                     label,
                     derivedKey.AsMemory(0, 16),
@@ -400,26 +431,86 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
 
+        var response = await SendDeleteCoreAsync(managementKey, labelBytes, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var command = new ApduCommand { Ins = InsDelete };
+            ThrowOnManagementKeyFailure(response, command);
+            if (!response.IsOK())
+                throw ApduException.FromResponse(response, command, "DELETE credential failed");
+        }
+        finally { ZeroApduResponse(response); }
+    }
+
+    private async Task<ApduResponse> SendDeleteCoreAsync(ReadOnlyMemory<byte> managementKey, ReadOnlyMemory<byte> labelBytes, CancellationToken token)
+    {
         Memory<byte> data = default;
         try
         {
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
-                new Tlv(TagLabel, labelBytes));
+                new Tlv(TagLabel, labelBytes.Span));
 
             var command = new ApduCommand { Ins = InsDelete, Data = data };
-            await TransmitWithRetryCheckAsync(
-                command, ThrowOnManagementKeyFailure, "DELETE credential", cancellationToken);
+            return await _backend.SendAsync(command, throwOnError: false, cancellationToken: token).ConfigureAwait(false);
         }
         finally
         {
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteCredentialWithPromptAsync(string label, CancellationToken cancellationToken = default)
+    {
+        var prompt = _credentialPrompt ?? throw new InvalidOperationException("No credential prompt is configured.");
+        var labelBytes = ValidateAndEncodeLabel(label);
+        using var admission = EnterOperation();
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _operationDisposal.Token);
+        var token = cancellation.Token;
+        int retries = await GetManagementKeyRetriesCoreAsync(token).ConfigureAwait(false);
+        if (retries == 0)
+            throw new HsmAuthRetryException(0, "Management key is blocked.");
+        Exception? lastRejection = null;
+        for (int attempt = 0; attempt < _maxCredentialPromptAttempts; attempt++)
+        {
+            HsmAuthRetryException? rejection;
+            var owner = await CredentialAcquisition.AcquireAsync(prompt,
+                CreateCredentialContext(label, CredentialKind.ManagementKey, retries, attempt), token, MarkCredentialCallback).ConfigureAwait(false);
+            try
+            {
+                CheckPromptActive(token);
+                if (owner.Memory.Length != ManagementKeyLength)
+                {
+                    lastRejection = new ArgumentException("Management key must be exactly 16 bytes.");
+                    continue;
+                }
+                var response = await SendDeleteCoreAsync(owner.Memory, labelBytes, token).ConfigureAwait(false);
+                try
+                {
+                    rejection = ClassifyRejection(response, InsDelete, "Management key verification failed");
+                    if (rejection is null && !response.IsOK())
+                        throw ApduException.FromResponse(response, new ApduCommand { Ins = InsDelete }, "DELETE failed");
+                }
+                finally { ZeroApduResponse(response); }
+            }
+            finally { CredentialAcquisition.Release(owner); }
+            // A confirmed DELETE keeps direct-input completion semantics even if cancellation arrived during cleanup.
+            if (rejection is null)
+                return;
+            CheckPromptActive(token);
+            if (rejection.RetriesRemaining == 0)
+                throw rejection;
+            retries = rejection.RetriesRemaining;
+            lastRejection = rejection;
+        }
+        throw lastRejection ?? new InvalidOperationException("Credential prompt attempt limit exhausted.");
     }
 
     /// <inheritdoc />
@@ -430,51 +521,174 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte>? cardCryptogram = null,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         ValidateContextLength(context, SymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+        UserPresenceNotification userPresenceNotification = CreateHsmPresenceNotification(
             await GetUserPresenceContextAsync(label, UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysSymmetric, cancellationToken).ConfigureAwait(false));
 
-        byte[]? credPwBytes = null;
+        ValidateCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
+        return await RunWithUserPresenceNotificationAsync(userPresenceNotification, async token =>
+        {
+            var response = await SendCalculateCoreAsync(labelBytes, context, cardCryptogram, credentialPassword, token).ConfigureAwait(false);
+            try
+            {
+                var command = new ApduCommand { Ins = InsCalculate };
+                ThrowOnCredentialPasswordFailure(response, command);
+                if (!response.IsOK())
+                    throw ApduException.FromResponse(response, command, "CALCULATE symmetric session keys failed");
+                var keys = SessionKeys.Parse(response.Data.Span);
+                try
+                {
+                    await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
+                    return keys;
+                }
+                catch { keys.Dispose(); throw; }
+            }
+            finally { ZeroApduResponse(response); }
+        }, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<ApduResponse> SendCalculateCoreAsync(ReadOnlyMemory<byte> labelBytes, ReadOnlyMemory<byte> context,
+        ReadOnlyMemory<byte>? cardCryptogram, ReadOnlyMemory<byte> credentialPassword, CancellationToken token)
+    {
+        byte[] password = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
-            var tlvs = new List<Tlv>
-            {
-                new(TagLabel, labelBytes),
-                new(TagContext, context.Span)
-            };
-
-            if (cardCryptogram is { } cc)
-                tlvs.Add(new Tlv(TagResponse, cc.Span));
-
-            tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
-
+            var tlvs = new List<Tlv> { new(TagLabel, labelBytes.Span), new(TagContext, context.Span) };
+            if (cardCryptogram is { } cryptogram)
+                tlvs.Add(new Tlv(TagResponse, cryptogram.Span));
+            tlvs.Add(new Tlv(TagCredentialPassword, password));
             data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
-
-            var command = new ApduCommand { Ins = InsCalculate, Data = data };
-            return await CalculateSessionKeysAsync(
-                    command,
-                    userPresenceNotification,
-                    "CALCULATE symmetric session keys",
-                    cancellationToken)
-                .ConfigureAwait(false);
+            return await _backend.SendAsync(new ApduCommand { Ins = InsCalculate, Data = data },
+                throwOnError: false, cancellationToken: token).ConfigureAwait(false);
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
-            if (!data.IsEmpty)
-                CryptographicOperations.ZeroMemory(data.Span);
+            CryptographicOperations.ZeroMemory(password);
+            CryptographicOperations.ZeroMemory(data.Span);
         }
     }
 
     /// <inheritdoc />
+    public async Task<SessionKeys> CalculateSessionKeysSymmetricWithPromptAsync(string label, ReadOnlyMemory<byte> context,
+        ReadOnlyMemory<byte>? cardCryptogram = null, CancellationToken cancellationToken = default)
+    {
+        var prompt = _credentialPrompt ?? throw new InvalidOperationException("No credential prompt is configured.");
+        var labelBytes = ValidateAndEncodeLabel(label);
+        ValidateContextLength(context, SymmetricContextLength);
+        string? intent = UserPresenceIntent.Current;
+        using var admission = EnterOperation();
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _operationDisposal.Token);
+        var token = cancellation.Token;
+        var credentials = await ListCredentialsCoreAsync(token, strict: true).ConfigureAwait(false);
+        var matches = credentials.Where(c => string.Equals(c.Label, label, StringComparison.Ordinal)).ToList();
+        if (matches.Count != 1)
+            throw new InvalidOperationException("Credential is missing or its metadata is ambiguous.");
+        var credential = matches[0];
+        if (credential.Algorithm != HsmAuthAlgorithm.Aes128YubicoAuthentication)
+            throw new InvalidOperationException("Credential is not symmetric.");
+        int retries = credential.RetriesRemaining;
+        if (retries == 0)
+            throw new HsmAuthRetryException(0, "Credential password is blocked.");
+        UserPresenceBasis? basis = credential.TouchRequired switch
+        { true => UserPresenceBasis.PolicyRequires, false => null, null => UserPresenceBasis.PolicyMayRequire };
+        UserPresenceContext? presence = basis is { } value
+            ? CreateUserPresenceContext(label, value, UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysSymmetric) with { Intent = intent }
+            : null;
+        Exception? lastRejection = null;
+        for (int attempt = 0; attempt < _maxCredentialPromptAttempts; attempt++)
+        {
+            var notification = UserPresenceNotification.None;
+            SessionKeys? pendingKeys = null;
+            HsmAuthRetryException? rejection = null;
+            try
+            {
+                var owner = await CredentialAcquisition.AcquireAsync(prompt,
+                    CreateCredentialContext(label, CredentialKind.Password, retries, attempt), token, MarkCredentialCallback).ConfigureAwait(false);
+                try
+                {
+                    CheckPromptActive(token);
+                    if (owner.Memory.Length > CredentialPasswordLength)
+                    {
+                        lastRejection = new ArgumentException("Credential password exceeds 16 bytes.");
+                        continue;
+                    }
+                    notification = CreateHsmPresenceNotification(presence is null ? null : presence with { });
+                    await notification.RequestAsync(token).ConfigureAwait(false);
+                    CheckPromptActive(token);
+                    var response = await SendCalculateCoreAsync(labelBytes, context, cardCryptogram, owner.Memory, token).ConfigureAwait(false);
+                    try
+                    {
+                        rejection = ClassifyRejection(response, InsCalculate, "Credential password verification failed");
+                        if (rejection is null)
+                        {
+                            if (!response.IsOK())
+                                throw ApduException.FromResponse(response, new ApduCommand { Ins = InsCalculate }, "CALCULATE failed");
+                            pendingKeys = SessionKeys.Parse(response.Data.Span);
+                        }
+                    }
+                    finally { ZeroApduResponse(response); }
+                }
+                finally { CredentialAcquisition.Release(owner); }
+                if (rejection is not null)
+                {
+                    await notification.ResolveAsync(UserPresenceOutcome.Failed).ConfigureAwait(false);
+                    CheckPromptActive(token);
+                    if (rejection.RetriesRemaining == 0)
+                        throw rejection;
+                    retries = rejection.RetriesRemaining;
+                    lastRejection = rejection;
+                    continue;
+                }
+                CheckPromptActive(token);
+                await notification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
+                CheckPromptActive(token);
+                var result = pendingKeys ?? throw new InvalidOperationException("Missing session keys.");
+                pendingKeys = null;
+                return result;
+            }
+            catch (Exception error)
+            {
+                await notification.ResolveAsync(error is OperationCanceledException ? UserPresenceOutcome.Cancelled : UserPresenceOutcome.Failed,
+                    error).ConfigureAwait(false);
+                throw;
+            }
+            finally { pendingKeys?.Dispose(); }
+        }
+        throw lastRejection ?? new InvalidOperationException("Credential prompt attempt limit exhausted.");
+    }
+
+    private static HsmAuthCredentialPromptContext CreateCredentialContext(string label, CredentialKind kind, int retries, int attempt) =>
+        new()
+        {
+            CredentialLabel = label,
+            Application = UserPresenceApplications.YubiHsmAuth,
+            Scope = label,
+            Kind = kind,
+            MinLengthBytes = kind == CredentialKind.ManagementKey ? ManagementKeyLength : 0,
+            MaxLengthBytes = 16,
+            RetriesRemaining = retries,
+            IsRetry = attempt > 0
+        };
+
+    private static HsmAuthRetryException? ClassifyRejection(ApduResponse response, byte instruction, string role) =>
+        ExtractRetries(response.SW) is { } retries
+            ? new HsmAuthRetryException(retries, $"{role}, {retries} attempt(s) remaining")
+            { SW = response.SW, Ins = instruction }
+            : null;
+
+    /// <inheritdoc />
     public async Task<int> GetManagementKeyRetriesAsync(CancellationToken cancellationToken = default)
+    {
+        using var admission = EnterOperation();
+        return await GetManagementKeyRetriesCoreAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<int> GetManagementKeyRetriesCoreAsync(CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
 
@@ -498,6 +712,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> newManagementKey,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         ValidateManagementKey(currentManagementKey.Span);
         ValidateManagementKey(newManagementKey.Span);
@@ -523,6 +738,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
 
         var command = new ApduCommand { Ins = InsReset, P1 = ResetP1, P2 = ResetP2 };
@@ -549,12 +765,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> cardCryptogram,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         EnsureSupports(FeatureAsymmetric);
         ValidateContextLength(context, AsymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
+        UserPresenceNotification userPresenceNotification = CreateHsmPresenceNotification(
             await GetUserPresenceContextAsync(label, UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysAsymmetric, cancellationToken).ConfigureAwait(false));
 
         byte[]? credPwBytes = null;
@@ -605,6 +822,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte>? credentialPassword = null,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         EnsureSupports(FeatureGetChallenge);
         var labelBytes = ValidateAndEncodeLabel(label);
@@ -649,6 +867,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         EnsureSupports(FeatureAsymmetric);
         ValidateManagementKey(managementKey.Span);
@@ -694,6 +913,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         EnsureSupports(FeatureAsymmetric);
         ValidateManagementKey(managementKey.Span);
@@ -733,6 +953,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         EnsureSupports(FeatureAsymmetric);
         var labelBytes = ValidateAndEncodeLabel(label);
@@ -759,6 +980,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> newPassword,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         EnsureSupports(FeaturePasswordChange);
         var labelBytes = ValidateAndEncodeLabel(label);
@@ -798,6 +1020,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> newPassword,
         CancellationToken cancellationToken = default)
     {
+        using var admission = EnterOperation();
         ThrowIfDisposed();
         EnsureSupports(FeaturePasswordChange);
         ValidateManagementKey(managementKey.Span);
@@ -828,6 +1051,79 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     }
 
     // ─── Private helpers ───────────────────────────────────────────────────────
+    private void CheckPromptActive(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+    }
+
+    private IDisposable EnterOperation()
+    {
+        lock (_operationLock)
+        {
+            ThrowIfDisposed();
+            if (_activeOperation is not null)
+                throw new InvalidOperationException("A YubiHSM Auth session operation is already in progress.");
+            _activeOperation = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            return new OperationAdmission(this);
+        }
+    }
+
+    private void MarkCredentialCallback(bool inside) =>
+        _callbackOperation.Value = inside ? _activeOperation : null;
+
+    private UserPresenceNotification CreateHsmPresenceNotification(UserPresenceContext? context) =>
+        UserPresenceNotification.Create(SessionUserPresencePrompt is { } prompt ? new AdmittedPresencePrompt(this, prompt) : null, context);
+
+    private sealed class AdmittedPresencePrompt(HsmAuthSession session, IUserPresencePrompt prompt) : IUserPresencePrompt
+    {
+        public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken token) =>
+            RunAsync(() => prompt.OnUserPresenceRequestedAsync(context, token));
+        public ValueTask OnUserPresenceResolvedAsync(UserPresenceContext context, UserPresenceOutcome outcome, CancellationToken token) =>
+            RunAsync(() => prompt.OnUserPresenceResolvedAsync(context, outcome, token));
+        private async ValueTask RunAsync(Func<ValueTask> callback)
+        {
+            var previous = session._callbackOperation.Value;
+            session._callbackOperation.Value = session._activeOperation;
+            try { await callback().ConfigureAwait(false); }
+            finally { session._callbackOperation.Value = previous; }
+        }
+    }
+
+    private sealed class OperationAdmission(HsmAuthSession session) : IDisposable
+    {
+        public void Dispose()
+        {
+            lock (session._operationLock)
+            {
+                session._activeOperation?.TrySetResult();
+                session._activeOperation = null;
+            }
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        _operationDisposal.Cancel();
+        Task? active;
+        lock (_operationLock)
+            active = _activeOperation?.Task;
+        if (active is not null && !ReferenceEquals(_callbackOperation.Value, _activeOperation))
+            active.GetAwaiter().GetResult();
+        base.Dispose(disposing);
+        _operationDisposal.Dispose();
+    }
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        _operationDisposal.Cancel();
+        Task? active;
+        lock (_operationLock)
+            active = _activeOperation?.Task;
+        if (active is not null && !ReferenceEquals(_callbackOperation.Value, _activeOperation))
+            await active.ConfigureAwait(false);
+        await base.DisposeAsyncCore().ConfigureAwait(false);
+    }
 
     /// <summary>
     ///     Derives AES-128 key pair (K-ENC, K-MAC) from a password using PBKDF2-HMAC-SHA256.
@@ -882,7 +1178,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         IReadOnlyList<HsmAuthCredential> credentials;
         try
         {
-            credentials = await ListCredentialsAsync(cancellationToken).ConfigureAwait(false);
+            credentials = await ListCredentialsCoreAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

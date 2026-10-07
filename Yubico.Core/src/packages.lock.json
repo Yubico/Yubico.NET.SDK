@@ -115,8 +115,8 @@
       "Yubico.NativeShims": {
         "type": "Direct",
         "requested": "[1.*-*, )",
-        "resolved": "1.18.0",
-        "contentHash": "RKg6/6Y1yeKRST1+4j9DphtM06ommmqpJT7D7GkvcPbudt23kDfRqzy8jpiNBZSVfjdPlgOe1qmMADfi8LwuOg=="
+        "resolved": "1.18.1",
+        "contentHash": "wY0h9CadqsHY39M5dg8Lx+kRl4tkiO4e+NQS7lLAt4DeT3dcR0y+8KoSRNoUOpazFGrxQPqxr/aFM7OQTvhnHA=="
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",

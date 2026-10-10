@@ -144,15 +144,12 @@ public class FidoCredBlobTests
 
                 Assert.NotNull(assertionResult);
 
-                // Verify we got the blob back
-                if (assertionResult.ExtensionOutputs.HasValue)
-                {
-                    var assertExtOutput = ExtensionOutput.DecodeWithRawData(assertionResult.ExtensionOutputs.Value);
-                    if (assertExtOutput.TryGetCredBlob(out var retrievedBlob))
-                    {
-                        Assert.Equal(blobData, retrievedBlob.ToArray());
-                    }
-                }
+                // Verify we got the blob back (audit YESDK-1619: asserted unconditionally so a
+                // silently dropped extension cannot pass).
+                Assert.True(assertionResult.ExtensionOutputs.HasValue, "getAssertion returned no extension outputs");
+                var assertExtOutput = ExtensionOutput.DecodeWithRawData(assertionResult.ExtensionOutputs!.Value);
+                Assert.True(assertExtOutput.TryGetCredBlob(out var retrievedBlob), "credBlob output missing");
+                Assert.Equal(blobData, retrievedBlob.ToArray());
             }
             catch (Exception ex) when (
                 (ex is NullReferenceException || ex is InvalidOperationException)

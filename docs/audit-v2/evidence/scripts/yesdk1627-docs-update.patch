@@ -1,0 +1,86 @@
+Illustrative diff only; NOT applied. Review the 2.1.199 linux-x64 digest independently before adopting. Public checkout/fetch assumed; if repository is private, fetch needs a separately scoped read-only credential.
+
+diff --git a/.github/workflows/docs-update.yml b/.github/workflows/docs-update.yml
+--- a/.github/workflows/docs-update.yml
++++ b/.github/workflows/docs-update.yml
+@@
+-permissions:
+-  contents: write
+-  pull-requests: write
++permissions:
++  contents: read
+@@
+   migration:
+     runs-on: ubuntu-latest
++    permissions:
++      contents: read
+@@
+       - name: Check out yubikit
+         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+         with:
+           fetch-depth: 0
+           ref: yubikit
++          persist-credentials: false
+@@
+       - name: Install Claude Code
+         if: ${{ steps.impact.outputs.has_migration_impact == 'true' }}
++        shell: bash
+         run: |
+-          curl -fsSL https://claude.ai/install.sh | bash -s 2.1.199
+-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
++          curl --fail --silent --show-error --location --retry 3 \
++            https://downloads.claude.ai/claude-code-releases/2.1.199/linux-x64/claude \
++            --output "$RUNNER_TEMP/claude"
++          printf '%s  %s\n' 'b31dfd5e3dee23b51c42e0d8ddb405148978237d3aabc8cbbf77c5cf83367e27' "$RUNNER_TEMP/claude" | sha256sum --check --status
++          chmod +x "$RUNNER_TEMP/claude"
+@@
+       - name: Update migration documentation
+         if: ${{ steps.impact.outputs.has_migration_impact == 'true' }}
+         env:
+           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
++          DISABLE_UPDATES: '1'
+@@
+-            | "$HOME/.local/bin/claude" -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write
++            | "$RUNNER_TEMP/claude" -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write
+@@
+   architecture:
+     needs: migration
+     runs-on: ubuntu-latest
++    permissions:
++      contents: read
+@@
+       - name: Check out yubikit
+         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+         with:
+           fetch-depth: 0
+           ref: yubikit
++          persist-credentials: false
+@@
+       - name: Install Claude Code
+         if: ${{ steps.impact.outputs.has_affected == 'true' }}
++        shell: bash
+         run: |
+-          curl -fsSL https://claude.ai/install.sh | bash -s 2.1.199
+-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
++          curl --fail --silent --show-error --location --retry 3 \
++            https://downloads.claude.ai/claude-code-releases/2.1.199/linux-x64/claude \
++            --output "$RUNNER_TEMP/claude"
++          printf '%s  %s\n' 'b31dfd5e3dee23b51c42e0d8ddb405148978237d3aabc8cbbf77c5cf83367e27' "$RUNNER_TEMP/claude" | sha256sum --check --status
++          chmod +x "$RUNNER_TEMP/claude"
+@@
+       - name: Update architecture documentation
+         if: ${{ steps.impact.outputs.has_affected == 'true' }}
+         env:
+           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
++          DISABLE_UPDATES: '1'
+@@
+-            | "$HOME/.local/bin/claude" -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write,Bash
++            | "$RUNNER_TEMP/claude" -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write,Bash
+@@
+   create-pr:
+     needs: [ migration, architecture ]
+     if: ${{ always() && needs.migration.result == 'success' && needs.architecture.result == 'success' && (needs.migration.outputs.has_changes == 'true' || needs.architecture.outputs.has_changes == 'true') }}
+     runs-on: ubuntu-latest
++    permissions:
++      contents: write
++      pull-requests: write

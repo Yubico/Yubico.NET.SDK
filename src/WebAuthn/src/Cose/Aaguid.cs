@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Runtime.InteropServices;
-using Yubico.YubiKit.Fido2.Cbor;
+using Yubico.YubiKit.Ctap2.Cbor;
 
 namespace Yubico.YubiKit.WebAuthn.Cose;
 

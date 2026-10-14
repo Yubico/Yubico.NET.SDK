@@ -16,10 +16,10 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Security.Cryptography;
 using System.Text;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -45,7 +45,7 @@ public sealed class WebAuthnClientPinRetryTests
             throw new InvalidOperationException("Failed to parse origin");
 
         // Setup default mock responses
-        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true, uvSupported: true);
+        var mockInfo = MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true, uvSupported: true);
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(mockInfo);
 

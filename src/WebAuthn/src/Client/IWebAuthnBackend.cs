@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -24,7 +23,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </summary>
 /// <remarks>
 /// This interface allows WebAuthn Client logic to be tested with mock implementations
-/// while the production implementation delegates to IFidoSession.
+/// while the production implementation delegates to ICtap2Session.
 /// </remarks>
 internal interface IWebAuthnBackend : IAsyncDisposable
 {

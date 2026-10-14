@@ -161,7 +161,7 @@ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.cspro
 ## Related
 
 - [../Core/README.md](../Core/README.md) - device discovery, connections, and the `Core.Devices` metadata types.
-- [../Piv/README.md](../Piv/README.md), [../Oath/README.md](../Oath/README.md), [../Fido2/README.md](../Fido2/README.md) - applications this module toggles.
+- [../Piv/README.md](../Piv/README.md), [../Oath/README.md](../Oath/README.md), [../Ctap2/README.md](../Ctap2/README.md) - applications this module toggles.
 - [user-interaction.md](../../docs/usage/user-interaction.md) and
   [device-discovery.md](../../docs/usage/device-discovery.md).
 - [YubiKey configuration reference](https://developers.yubico.com/yubikey-manager/Config_Reference.html).

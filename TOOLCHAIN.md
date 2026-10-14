@@ -372,7 +372,7 @@ dotnet toolchain.cs -- test --project Core
 dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTest"
 
 # ❌ WRONG - May fail if project uses xUnit v3
-dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.YubiKit.Fido2.UnitTests.csproj
+dotnet test src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj
 ```
 
 ### Test Filtering Tips
@@ -396,8 +396,8 @@ When writing scripts or automation that runs tests:
 
 1. **Always use `dotnet toolchain.cs test`** - it handles the complexity for you
 2. **Never assume** `dotnet test` will work for all projects
-3. **Use `--project`** to filter to specific projects: `dotnet toolchain.cs -- test --project Fido2`
-4. **Combine `--project` with `--filter`** for targeted test runs: `dotnet toolchain.cs -- test --project Fido2 --filter "Method~Sign"`
+3. **Use `--project`** to filter to specific projects: `dotnet toolchain.cs -- test --project Ctap2`
+4. **Combine `--project` with `--filter`** for targeted test runs: `dotnet toolchain.cs -- test --project Ctap2 --filter "Method~Sign"`
 5. **Read the per-project `total:` line, not the final summary line.** The closing
    `Passed: 1 | Failed: 0 | Skipped: 1 | Total: 2` counts **projects**, not tests. Grepping for
    `Passed:` therefore reads green off a run that executed nothing. Assert on the per-project

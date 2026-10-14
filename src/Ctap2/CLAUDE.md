@@ -1,0 +1,490 @@
+# CLAUDE.md - Ctap2 Module
+
+This file provides Claude-specific guidance for working with the CTAP2 module. **Read the root [CLAUDE.md](../../CLAUDE.md) first** for general repository patterns.
+
+## Documentation Maintenance
+
+> **Important:** This documentation is subject to change. When working on this module:
+> - **Notable changes** to APIs, patterns, or behavior should be documented here
+> - **New features** (e.g., new CTAP commands, extensions) should include usage examples
+> - **Breaking changes** require updates with migration guidance
+
+## Module Context
+
+### Naming boundaries
+
+- `Yubico.YubiKit.Ctap2` is the namespace, assembly, and package; `Ctap2Session` and
+  `ICtap2Session` expose CTAP2 operations. `CreateCtap2SessionAsync` opens a session and
+  `GetCtap2InfoAsync` is the one-shot capability read.
+- FIDO is the shared authenticator/application identity: keep `ApplicationIds.Fido`,
+  `DeviceCapabilities.Fido2`, `UserPresenceApplications.Fido2`, and FIDO2 PIN prompts.
+- CTAPHID is shared framing, not synonymous with CTAP2. Keep Core `Fido` connection/protocol
+  names and `RawCtapHidSession`; backends call `IFidoHidProtocol.SendCommandAsync`.
+- WebAuthn is the higher-level client/ceremony API. Keep standardized strings (`FIDO_2_0`,
+  `FIDO_2_1_PRE`, `FIDO_2_1`, `FIDO_2_3`, `U2F_V2`, `fido-u2f`, `WebAuthn PRF`) unchanged.
+- `CtapCommand`, `CtapStatus`, and `CtapException` belong directly to `Yubico.YubiKit.Ctap2`,
+  even though their files remain in the module-local `Ctap/` source folder. Touch operation IDs use `UserPresenceOperations.Ctap2`.
+
+The CTAP2 module implements CTAP 2.1/2.3 (Client to Authenticator Protocol) for YubiKey authenticators. This module supports passkey creation, authentication, and advanced CTAP2 features like credential management, biometric enrollment, and WebAuthn extensions.
+
+**Transports Supported:**
+- FIDO HID protocol over USB (primary transport)
+- SmartCard (CCID) over NFC or USB when the connected authenticator exposes the FIDO AID
+- USB SmartCard on firmware 5.8.0+; older USB-connected YubiKeys must use HID FIDO
+- NFC SmartCard remains allowed when the current PC/SC connection reports `Transport.Nfc`; Core classifies PC/SC YubiKey transport from ATR evidence, not from model NFC capability
+
+> **Important:** HID FIDO is the primary USB CTAP2 interface.
+> USB SmartCard CTAP2 is also supported on firmware 5.8.0+ when the FIDO AID is exposed;
+> older USB-connected YubiKeys must use `IFidoHidConnection`.
+> The firmware gate runs after SmartCard FIDO AID selection because FIDO firmware is obtained from
+> CTAP GetInfo on this transport.
+> FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
+> firmware is available through Management; firmware gates use `Feature.IsSupportedByFirmware(...)`
+> so `Major == 0` sentinel firmware is treated as modern.
+> A grouped physical YubiKey admits one live SDK connection across all known interfaces. A second
+> session is refused with `ConnectionInUseException` until the current session disposes its owned
+> connection. CTAP2/WebAuthn selects HID FIDO when exposed, otherwise SmartCard, and never switches
+> transport after a connection failure.
+
+## Architecture Overview
+
+```
+Yubico.YubiKit.Ctap2/
+├── src/
+│   ├── Ctap2Session.cs              # Main session class (entry point)
+│   ├── ICtap2Session.cs             # Session interface
+│   ├── AuthenticatorInfo.cs        # GetInfo response parsing
+│   ├── IYubiKeyExtensions.cs       # Extension methods for IYubiKey
+│   ├── Backend/                    # Transport backends
+│   │   ├── ICtap2Backend.cs
+│   │   ├── HidBackend.cs           # HID transport
+│   │   └── SmartCardBackend.cs     # SmartCard/CCID transport
+│   ├── Cbor/                       # CBOR serialization
+│   │   ├── CtapRequestBuilder.cs   # Fluent CBOR request builder
+│   │   └── CtapResponseParser.cs   # CBOR response parsing utilities
+│   ├── Config/                     # authenticatorConfig (FW 5.4+)
+│   │   ├── ConfigSubCommand.cs
+│   │   └── AuthenticatorConfig.cs
+│   ├── CredentialManagement/       # Credential enumeration/management
+│   │   ├── CredManagementSubCommand.cs
+│   │   ├── CredentialEnumerationResult.cs
+│   │   ├── CredentialManagement.cs
+│   │   ├── CredentialManagementModels.cs
+│   │   ├── RelyingPartyEnumerationResult.cs
+│   │   └── StoredCredentialInfo.cs
+│   ├── Credentials/                # MakeCredential/GetAssertion types
+│   │   ├── AuthenticatorData.cs
+│   │   ├── AttestedCredentialData.cs
+│   │   ├── GetAssertionOptions.cs
+│   │   ├── MakeCredentialOptions.cs
+│   │   ├── MakeCredentialResponse.cs
+│   │   ├── GetAssertionResponse.cs
+│   │   └── PublicKeyCredentialTypes.cs
+│   ├── Crypto/                     # YK 5.7/5.8 encrypted metadata
+│   │   └── EncryptedMetadataDecryptor.cs
+│   ├── Ctap/                       # CTAP protocol types
+│   │   ├── CtapCommand.cs
+│   │   ├── CtapStatus.cs
+│   │   └── CtapException.cs
+│   ├── Extensions/                 # WebAuthn/CTAP extension types
+│   │   ├── Shared/                 # ExtensionBuilder, identifiers, output parser
+│   │   ├── CredProtect/            # credProtect policy
+│   │   ├── CredBlob/               # credBlob inputs and outputs
+│   │   ├── HmacSecret/             # hmac-secret inputs and outputs
+│   │   ├── LargeBlob/              # largeBlob inputs, support enum, outputs
+│   │   ├── MinPinLength/           # minPinLength inputs and outputs
+│   │   ├── Prf/                    # PRF inputs and outputs
+│   │   └── PreviewSign/            # previewSign types and canonical CBOR encoder
+│   ├── BioEnrollment/              # Fingerprint enrollment (FW 5.2+)
+│   │   ├── BioEnrollmentSubCommand.cs
+│   │   ├── BioEnrollmentModels.cs
+│   │   └── FingerprintBioEnrollment.cs
+│   ├── LargeBlobs/                 # Large blob storage
+│   │   ├── LargeBlobData.cs        # Entry/Array types
+│   │   └── LargeBlobStorage.cs     # Storage API
+│   └── Pin/                        # PIN/UV authentication
+│       ├── IPinUvAuthProtocol.cs
+│       ├── PinUvAuthProtocolV1.cs
+│       ├── PinUvAuthProtocolV2.cs
+│       ├── ClientPin.cs
+│       ├── ClientPinSubCommand.cs
+│       └── PinUvAuthTokenPermissions.cs
+└── tests/
+    ├── Yubico.YubiKit.Ctap2.UnitTests/
+    └── Yubico.YubiKit.Ctap2.IntegrationTests/
+```
+
+## Key Patterns
+
+### Session Creation
+
+```csharp
+// Recommended: Use extension method
+await using var session = await yubiKey.CreateCtap2SessionAsync();
+
+// Or direct creation
+await using var directSession = await Ctap2Session.CreateAsync(connection);
+```
+
+### GetInfo (No User Presence Required)
+
+```csharp
+// Get authenticator capabilities
+var info = await session.GetInfoAsync();
+
+// Check versions
+bool ctap2_1 = info.Versions.Contains("FIDO_2_1");
+
+// Check supported extensions
+bool hasHmacSecret = info.Extensions?.Contains("hmac-secret") ?? false;
+
+// Check options
+bool hasRk = info.Options?.TryGetValue("rk", out var rk) == true && rk;
+```
+
+### PIN/UV Auth Protocols
+
+There is no separate initialization step. The protocol object is stateless with respect to the
+authenticator; `ClientPin` performs the `getKeyAgreement` round trip and ECDH encapsulation
+internally on each token request.
+
+```csharp
+// Protocol V2 (recommended, CTAP 2.1)
+using var protocol = new PinUvAuthProtocolV2();
+using var clientPin = new ClientPin(session, protocol);
+
+// Get PIN token with permissions. rpId is required for MakeCredential/GetAssertion permissions.
+byte[]? pinToken = null;
+try
+{
+    pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+        pin,
+        PinUvAuthTokenPermissions.MakeCredential,
+        rpId,
+        cancellationToken);
+
+    // Authenticate command
+    var authParam = protocol.Authenticate(pinToken, clientDataHash);
+    options.WithPinUvAuth(authParam, protocol.Version);
+}
+finally
+{
+    if (pinToken is not null) CryptographicOperations.ZeroMemory(pinToken);
+}
+```
+
+The returned token is caller-owned; zero it when done (see
+`examples/FidoTool/FidoExamples/MakeCredential.cs`). On authenticators that do not advertise the
+`pinUvAuthToken` option, `GetPinUvAuthTokenUsingPinAsync` falls back to the legacy
+`getPinToken` subcommand and the requested permissions do not apply.
+
+### Extensions (WebAuthn)
+
+The SDK uses the **ExtensionBuilder** fluent pattern for all WebAuthn/CTAP extensions. Extensions are NOT implemented as separate classes that you instantiate—instead, you compose them via the builder.
+
+#### Available Extensions
+
+| Extension | Builder Method | Description | YubiKey FW |
+|-----------|---------------|-------------|------------|
+| credProtect | `.WithCredProtect()` | Credential protection level | 5.2+ |
+| hmac-secret | `.WithHmacSecret()` | CTAP2 symmetric secret derivation | 5.2+ |
+| hmac-secret-mc | `.WithHmacSecretMakeCredential()` | hmac-secret during MakeCredential | 5.4+ |
+| credBlob | `.WithCredBlob()` | Per-credential blob storage | 5.5+ |
+| largeBlob | `.WithLargeBlobKey()` | Large blob storage key | 5.5+ |
+| minPinLength | `.WithMinPinLength()` | Require minimum PIN length | 5.4+ |
+| previewSign | `.WithPreviewSign(...)` | Delegated signing with a generated signing key | YubiKey FW with previewSign support |
+| prf | `.WithPrf()` | WebAuthn PRF extension (wraps hmac-secret) | 5.2+ |
+
+> **Note:** The `previewSign` extension is a first-class CTAP2 extension via `WithPreviewSign(PreviewSignRegistrationInput)` and `WithPreviewSign(PreviewSignAuthenticationInput)`. The generic signing API is algorithm-agile: `tbs` and optional `additionalArgs` are algorithm-specific bytes and are encoded unchanged. **WARNING -- EXPERIMENTAL --** Public ARKG helpers remain available as experimental conveniences; they are not ready for production use and must not be treated as production cryptographic guidance. Convert them to raw `additionalArgs` with `PreviewSignCbor.EncodeAdditionalArgs(...)`. WebAuthn provides a high-level adapter (`Yubico.YubiKit.WebAuthn.Extensions.PreviewSign`) for Client API consumers; both layers share the canonical encoder in Ctap2.
+
+#### Example Usage
+
+```csharp
+// Build extensions for MakeCredential
+var extensions = new ExtensionBuilder()
+    .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
+    .WithCredBlob(blobData)
+    .Build();
+
+var options = new MakeCredentialOptions
+{
+    Extensions = extensions,
+    ResidentKey = true
+};
+
+// For GetAssertion with PRF
+var prfExtensions = new ExtensionBuilder()
+    .WithPrf(new PrfInput { First = salt1, Second = salt2 })
+    .Build();
+```
+
+#### hmac-secret vs PRF Extension
+
+These extensions serve similar purposes but operate at different protocol levels:
+
+| Aspect | hmac-secret (CTAP2) | PRF (WebAuthn) |
+|--------|---------------------|----------------|
+| Protocol | CTAP2 native | WebAuthn wrapper |
+| Salt encoding | Raw bytes | Base64url encoded |
+| Output | Raw HMAC bytes | eval/evalByCredential |
+| Use case | Direct authenticator access | Browser/WebAuthn API |
+
+**When to use which:**
+- Use **hmac-secret** when building CTAP2-level tools or when you need direct authenticator interaction
+- Use **PRF** when implementing WebAuthn APIs or browser-compatible flows
+
+```csharp
+// CTAP2 hmac-secret (direct)
+var hmacExtensions = new ExtensionBuilder()
+    .WithHmacSecret(hmacSecretInput)
+    .Build();
+
+// WebAuthn PRF (browser-compatible)
+var prfExtensions = new ExtensionBuilder()
+    .WithPrf(new PrfInput { First = salt1, Second = salt2 })
+    .Build();
+```
+
+Internally, PRF extension serializes using hmac-secret wire format but presents the WebAuthn PRF input/output model.
+
+### Credential Management
+
+```csharp
+var credMgmt = new CredentialManagement(session, protocol, pinToken);
+
+// Get credential metadata
+var metadata = await credMgmt.GetCredentialsMetadataAsync();
+
+// Enumerate RPs. ReportedTotal is copied from the first response and can be null.
+var rpResult = await credMgmt.EnumerateRelyingPartiesAsync();
+var rps = rpResult.RelyingParties;
+
+// Enumerate credentials for an RP
+using var credentialResult = await credMgmt.EnumerateCredentialsAsync(rpIdHash);
+var creds = credentialResult.Credentials;
+
+// Delete credential
+await credMgmt.DeleteCredentialAsync(credentialId);
+```
+
+Credential-management enumeration results own read-only collection storage. A
+`CredentialEnumerationResult` also owns its `StoredCredentialInfo` entries and must be disposed after their
+raw or secret-bearing views are no longer needed. `StoredCredentialInfo.Decode` borrows its input and returns
+an independently disposable owner for direct decoder callers. The reported total is not recomputed from the
+collection count. `ClientPin.GetPinRetriesAsync` and `GetUvRetriesAsync` return the property-based
+`PinRetryStatus` and `UserVerificationRetryStatus` models; their response parsers retain the existing protocol
+behavior.
+
+### User-presence notifications
+
+Supply `SessionCreationOptions.UserPresencePrompt` when creating a `Ctap2Session` to receive touch
+notifications. On HID, `FidoHidProtocol` requests the operation's shared notification handle with
+`DeviceWaiting` when CTAPHID keep-alive status `0x02` is first observed. `HidBackend` owns terminal
+resolution after the response is fully drained and the CTAP status is known. SmartCard has no
+equivalent in-flight signal, so `SmartCardBackend` owns both the policy request and resolution;
+MakeCredential and GetAssertion emit `PolicyRequires` immediately before the APDU unless their
+effective `UserPresence` option is `false`. Their scope is the RP ID.
+Successful response ownership transfers only after terminal resolution succeeds; a callback failure clears
+the untransferred backend response, including secret-derived extension output.
+
+Selection and Reset carry null-scope context for an authoritative HID keep-alive, but do not predict
+touch on SmartCard. Generic `SendCborRequestAsync` calls do not infer touch semantics. Bio enrollment
+and other helpers that currently route through that generic API remain silent until their individual
+user-presence behavior is modeled explicitly.
+
+## CBOR Encoding Pattern
+
+Use `CtapRequestBuilder` for all CTAP commands:
+
+```csharp
+var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+    .WithInt(1, protocol.Version)
+    .WithInt(2, ClientPinSubCommand.GetRetries)
+    .Build();
+
+var response = await session.SendCborRequestAsync(request);
+```
+
+Key rules:
+- Parameters are **integer keys** (not strings) for CTAP
+- Use **Ctap2Canonical** conformance mode (sorted integer keys)
+- Build request returns command byte + CBOR payload
+- Use `.WithValue(key, writer => ...)` for complex values or sensitive byte spans that should be written directly instead of copied through `.WithBytes(...)`
+- Keep operation-level request builders as pure encoding helpers; do not introduce operation-specific CTAP command classes
+
+## Forward compatibility and escape hatches
+
+Valid authenticator response data that is not yet modeled must remain usable without relaxing malformed or security-critical data checks. The CTAP2 and WebAuthn response escape hatches are:
+
+- `RawData` on response owners such as `AuthenticatorInfo`, credential metadata, relying-party information, `StoredCredentialInfo`, `FingerprintSensorInfo`, and `EnrollmentSampleResult` preserves the complete response envelope. Dispose `StoredCredentialInfo` directly, or its owning `CredentialEnumerationResult`, because its envelope can contain secret fields.
+- `AttestedCredentialData.CredentialPublicKey`, with `CoseOtherKey.RawCbor` when an unmodeled key type is not claimed by a modeled algorithm. COSE keys must still report an algorithm.
+- `ExtensionOutput.TryGetRawExtension` and `WebAuthnAuthenticatorData.ParsedExtensions` for extension outputs.
+- `ICtap2Session.SendCborRequestAsync` for explicitly constructed raw CTAP CBOR requests and responses.
+
+PIN/UV key agreement is a separate security-critical boundary: forward-compatible response handling must not relax its required P-256 key type, curve, coordinates, or protocol structure. Raw response access is not a bypass, and unknown response fields must not be blindly copied into requests.
+
+Add `RawData` to models that own a complete, non-secret authenticator response. A response that can contain
+secret material instead needs explicit disposable ownership. `StoredCredentialInfo` owns one private complete
+response clone; `LargeBlobKey` is a view into it, and disposal clears that clone, including unknown fields.
+The public decoder never clears its borrowed input, and the session's read-only response contract is unchanged,
+so this is not an end-to-end cleanup guarantee. Do not duplicate the same buffer on nested entities.
+Use `RawCbor` only for an encoded nested CBOR structure, such as an attestation statement or unsupported COSE key; it may be a slice of its parent buffer rather than a separately owned copy.
+
+## Security Requirements
+
+### Memory Handling
+
+```csharp
+// ✅ Zero sensitive data
+CryptographicOperations.ZeroMemory(pinBytes);
+
+// ✅ Use ArrayPool for crypto buffers
+var buffer = ArrayPool<byte>.Shared.Rent(32);
+try
+{
+    // use buffer
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(buffer.AsSpan(0, 32));
+    ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+}
+
+// ❌ NEVER log PIN, keys, or sensitive CTAP data
+```
+
+### Protocol Disposal
+
+```csharp
+using var protocol = new PinUvAuthProtocolV2();
+// Dispose() only marks the instance disposed; it holds no key material to release.
+```
+
+The ephemeral ECDH key pair lives entirely inside a single `Encapsulate` call:
+`PinUvAuthHelpers.PerformEcdhKeyAgreement` creates it with `using var ecdh = ...` and the raw
+shared point `z` is zeroed in that call's `finally`. `Encapsulate` hands the derived shared secret
+to the caller, who owns it — `ClientPin` zeroes it in its own `finally`. Still use `using` on the
+protocol so disposed-instance misuse throws `ObjectDisposedException` rather than silently working.
+
+## Test Patterns
+
+### Unit Tests (No Hardware)
+
+```csharp
+[Fact]
+public void AuthenticatorInfo_Decode_ParsesVersions()
+{
+    // Arrange - raw CBOR bytes
+    var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+    writer.WriteStartMap(1);
+    writer.WriteInt32(1);
+    writer.WriteStartArray(1);
+    writer.WriteTextString("FIDO_2_0");
+    writer.WriteEndArray();
+    writer.WriteEndMap();
+    byte[] cborData = writer.Encode();
+    
+    // Act
+    var info = AuthenticatorInfo.Decode(cborData);
+    
+    // Assert
+    Assert.Contains("FIDO_2_0", info.Versions);
+}
+```
+
+### CBOR Test Mock Patterns
+
+When testing classes that send CBOR commands via `ICtap2Session`:
+
+```csharp
+// 1. Mock ICtap2Session (not Ctap2Session - it's sealed)
+var session = Substitute.For<ICtap2Session>();
+
+// 2. Mock SendCborRequestAsync with the 2-arg signature
+session.SendCborRequestAsync(
+    Arg.Any<ReadOnlyMemory<byte>>(), 
+    Arg.Any<CancellationToken>())
+    .Returns(mockResponse);
+
+// 3. When capturing request for assertions:
+ReadOnlyMemory<byte> capturedRequest = default;
+session.SendCborRequestAsync(
+    Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x),
+    Arg.Any<CancellationToken>())
+    .Returns(mockResponse);
+
+// 4. Request format: [command_byte][cbor_payload]
+// Skip byte 0 when parsing the CBOR payload:
+var cborPayload = capturedRequest.Slice(1);  // Skip command byte
+var reader = new CborReader(cborPayload, CborConformanceMode.Ctap2Canonical);
+```
+
+**Common gotcha:** Tests may fail if they parse `capturedRequest` directly without skipping the command byte prefix.
+
+### Hardware Integration Tests
+
+Tests requiring user presence must be marked and excluded from unattended runs:
+
+```csharp
+// Test that can run without user interaction
+[Fact]
+public async Task GetInfoAsync_Returns_AAGUID()
+{
+    await using var session = await device.CreateCtap2SessionAsync();
+    var info = await session.GetInfoAsync();
+    Assert.Equal(16, info.Aaguid.Length);
+}
+
+// Test requiring user touch - MUST be excluded from automated runs
+[Fact]
+[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+public async Task MakeCredentialAsync_CreatesPasskey()
+{
+    // This requires user touch
+}
+```
+
+Run tests excluding user presence:
+```bash
+dotnet toolchain.cs -- test --project Ctap2 --smoke --filter "Category!=RequiresUserPresence"
+```
+
+## Feature Flags
+
+The module defines firmware feature flags:
+
+```csharp
+public static readonly Feature FeatureCtap2 = new("CTAP2", 5, 0, 0);
+public static readonly Feature FeatureBioEnrollment = new("Bio Enrollment", 5, 2, 0);
+public static readonly Feature FeatureCredentialManagement = new("Credential Management", 5, 2, 0);
+public static readonly Feature FeatureHmacSecretMc = new("hmac-secret-mc", 5, 4, 0);
+public static readonly Feature FeatureAuthenticatorConfig = new("Authenticator Config", 5, 4, 0);
+public static readonly Feature FeatureCredBlob = new("credBlob", 5, 5, 0);
+public static readonly Feature FeatureEncIdentifier = new("Encrypted Identifier", 5, 7, 0);
+```
+
+Check firmware support before using features:
+```csharp
+if (!Ctap2Session.FeatureBioEnrollment.IsSupportedByFirmware(firmwareVersion))
+{
+    throw new NotSupportedException("Bio enrollment requires firmware 5.2+");
+}
+```
+
+## Common Pitfalls
+
+1. **CBOR Key Order**: CTAP2 requires canonical CBOR with sorted integer keys. Always use `CborConformanceMode.Ctap2Canonical`.
+
+2. **PIN Padding**: Client PIN commands require specific padding (64 bytes, PKCS#7 style) before encryption.
+
+3. **Protocol Reuse**: PIN/UV auth protocols are stateless with respect to the authenticator; token requests perform key agreement internally. Dispose the protocol when done.
+
+4. **User Presence**: Configure `SessionCreationOptions.UserPresencePrompt` for SDK notifications; do not infer touch from generic CBOR traffic. Hardware tests that actually require touch must still use the `RequiresUserPresence` trait.
+
+5. **Extension Order**: Extensions map keys must be in canonical order when encoding.
+
+## References
+
+- [CTAP 2.1 Specification](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html)
+- [WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/)
+- [COSE Key Registry](https://www.iana.org/assignments/cose/cose.xhtml)

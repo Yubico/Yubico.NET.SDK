@@ -2,6 +2,8 @@
 
 > Report-only snapshot. This file does not make staleness claims by itself; it lists signals for maintainer review.
 
+Paths and commit metadata below describe the historical snapshot. The former `src/Fido2/` module now lives at `src/Ctap2/`; the historical rows retain the paths that existed at their recorded commits.
+
 - Generated: `2026-07-02T21:45:18Z`
 - Active-doc boundary source: `dotnet toolchain.cs -- docs-list-active`
 - Active documentation files: `54`

@@ -22,7 +22,7 @@ flowchart LR
     App["Your .NET App<br/>(desktop / service / CLI)"]
     subgraph SDK["Yubico Yubikit .NET SDK v2"]
         direction TB
-        Apps["App modules<br/>PIV · OATH · FIDO2 · WebAuthn<br/>OpenPGP · Mgmt · YubiOTP · HSM · SD"]
+        Apps["App modules<br/>PIV · OATH · CTAP2 · WebAuthn<br/>OpenPGP · Mgmt · YubiOTP · HSM · SD"]
         Core["Core<br/>discovery · connections · APDU · SCP · crypto"]
         Apps --> Core
     end
@@ -55,7 +55,7 @@ flowchart TD
     SD["SecurityDomain"]
     Hsm["YubiHsm"]
     Otp["YubiOtp"]
-    Fido2["Fido2"]
+    Ctap2["Ctap2"]
     WebAuthn["WebAuthn"]
 
     Mgmt --> Core
@@ -65,9 +65,9 @@ flowchart TD
     SD --> Core
     Hsm --> Core
     Otp --> Core
-    Fido2 --> Core
-    WebAuthn -->|"one-way<br/>(Fido2 has no ref back)"| Fido2
-    Fido2 --> Core
+    Ctap2 --> Core
+    WebAuthn -->|"one-way<br/>(Ctap2 has no ref back)"| Ctap2
+    Ctap2 --> Core
 
     classDef hub fill:#1f6feb,color:#fff,stroke:#0b3d91,stroke-width:2px;
     classDef second fill:#8957e5,color:#fff,stroke:#4c2889;
@@ -77,8 +77,8 @@ flowchart TD
 
 **Key facts to say out loud:**
 - **Core is the only hub.** Every app module has exactly *one* project reference → Core.
-- **WebAuthn is the only 2nd-level module:** `Core ← Fido2 ← WebAuthn`. WebAuthn is a
-  higher-level client over Fido2 and must never duplicate CTAP behavior.
+- **WebAuthn is the only 2nd-level module:** `Core ← Ctap2 ← WebAuthn`. WebAuthn is a
+  higher-level client over CTAP2 and must never duplicate CTAP2 behavior.
 - App modules **do not** reference each other. They are independent verticals over Core.
 - (Not shown: CLI/test/example projects — noise for an architecture talk.)
 
@@ -101,7 +101,7 @@ flowchart TD
 
     subgraph ProtoLayer["Protocol (Core.Protocols)"]
         SCProto["ISmartCardProtocol<br/>(PIV/OATH/OpenPGP/SD/HSM)"]
-        FidoProto["IFidoHidProtocol<br/>(FIDO2 CTAPHID)"]
+        FidoProto["IFidoHidProtocol<br/>(shared FIDO CTAPHID)"]
         OtpProto["IOtpHidProtocol<br/>(YubiOTP)"]
     end
 
@@ -114,9 +114,9 @@ flowchart TD
         Scp -.wraps.- Xmit
     end
 
-    subgraph CtapLayer["FIDO2 CTAP path (beside APDU, not below it)"]
+    subgraph CtapLayer["CTAP2 path (beside APDU, not below it)"]
         CborB["CtapRequestBuilder → CBOR bytes<br/>CtapResponseParser ← CBOR bytes"]
-        FBack["IFidoBackend"]
+        FBack["ICtap2Backend"]
         HidB["HidBackend<br/>CTAPHID_CBOR (0x10) frames"]
         ScB["SmartCardBackend<br/>wraps CTAP in APDU (CLA 0x80, INS 0x10)"]
         CborB --> FBack
@@ -150,8 +150,8 @@ flowchart TD
     Pcsc --> Nat
     Hid --> Nat
 
-    %% FIDO2 path wiring — note ScB rejoins the SmartCard pipeline
-    FidoSess["FidoSession"] --> CborB
+    %% CTAP2 path wiring — note ScB rejoins the SmartCard pipeline
+    FidoSess["Ctap2Session"] --> CborB
     ScB -->|"reuses ISmartCardProtocol<br/>(same APDU pipeline)"| SCProto
     HidB --> FidoProto
 ```
@@ -165,15 +165,15 @@ flowchart TD
 - **Two-phase init pattern (memorize this):** private ctor stores connection →
   static `CreateAsync(...)` does async selection + `InitializeProtocolAsync(...)`.
 - **Deliberately flat command model:** there are **no** `SignCommand`/`VerifyPinCommand`
-  classes. Session methods build the `ApduCommand` inline. (FIDO2 is the exception — it
+  classes. Session methods build the `ApduCommand` inline. (CTAP2 is the exception — it
   builds CBOR via `CtapRequestBuilder`.)
 - **Transport split:**
   - *SmartCard-only:* PIV, OATH, OpenPGP, SecurityDomain, YubiHSM.
-  - *Backend pattern (multi-transport):* Management, Fido2, YubiOTP — an `IxxxBackend`
+  - *Backend pattern (multi-transport):* Management, CTAP2, YubiOTP — an `IxxxBackend`
     interface with a `SmartCard` impl and a `Hid` impl.
-- **FIDO2 CTAP path (the box beside APDU):** FIDO2 does **not** build APDUs at the session
+- **CTAP2 path (the box beside APDU):** CTAP2 does **not** build APDUs at the session
   layer — it builds **CBOR** via `CtapRequestBuilder` and parses replies via
-  `CtapResponseParser`. That CBOR then goes through `IFidoBackend`, which has two impls:
+  `CtapResponseParser`. That CBOR then goes through `ICtap2Backend`, which has two impls:
   - `HidBackend` — sends CTAPHID_CBOR frames (command `0x10`) over `IFidoHidProtocol`.
     This is the genuinely separate path.
   - `SmartCardBackend` — wraps the CTAP payload in a single APDU (`CLA 0x80, INS 0x10`) and
@@ -233,18 +233,18 @@ sequenceDiagram
 - **Security detail worth mentioning:** the wire buffer is zeroed in a `finally` — the SDK
   is disciplined about not leaving sensitive bytes in memory.
 
-### L3b — the FIDO2 CTAP variant (same shape, different bytes)
+### L3b — the CTAP2 variant (same shape, different bytes)
 
-Trace `FidoSession.MakeCredentialAsync`. Note it's the *same* two-transport idea, but the
+Trace `Ctap2Session.MakeCredentialAsync`. Note it's the *same* two-transport idea, but the
 payload is CBOR, not an APDU — and over SmartCard it collapses back onto the APDU pipeline.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Caller as Your code
-    participant Sess as FidoSession
+    participant Sess as Ctap2Session
     participant Build as CtapRequestBuilder
-    participant Back as IFidoBackend
+    participant Back as ICtap2Backend
     participant Parse as CtapResponseParser
     participant HW as YubiKey
 
@@ -268,9 +268,9 @@ sequenceDiagram
     Sess-->>Caller: typed credential
 ```
 
-**Teaching notes (FIDO2):**
+**Teaching notes (CTAP2):**
 - **CBOR in, CBOR out** — `CtapRequestBuilder` / `CtapResponseParser` replace the inline
-  `ApduCommand` build that every other module uses. This is *the* FIDO2 exception to the flat
+  `ApduCommand` build that every other module uses. This is *the* CTAP2 exception to the flat
   command model.
 - **Status byte convention:** the authenticator's reply starts with a single `CtapStatus`
   byte; the backend checks it (`CtapException.ThrowIfError`) then strips it before parsing.
@@ -329,7 +329,7 @@ flowchart TD
     subgraph Applet["Applet transport selection"]
         M["Management: SmartCard → HidFido → HidOtp"]
         O["YubiOTP: SmartCard → HidOtp"]
-        F["FIDO2 / WebAuthn: select HidFido if exposed,<br/>otherwise SmartCard; no contention fallback"]
+        F["CTAP2 / WebAuthn: select HidFido if exposed,<br/>otherwise SmartCard; no contention fallback"]
         S["PIV·OATH·OpenPGP·SD·HSM: SmartCard only"]
     end
 
@@ -403,9 +403,9 @@ Pre-rendered for slides and offline viewing (regenerate with the command below):
 |---|---|---|
 | L0 Context | `images/L0-context.svg` | `images/png/L0-context.png` |
 | L1 Assembly deps | `images/L1-assembly-deps.svg` | `images/png/L1-assembly-deps.png` |
-| L2 Layered stack (+ FIDO2 CTAP path) | `images/L2-layered-stack.svg` | `images/png/L2-layered-stack.png` |
+| L2 Layered stack (+ CTAP2 path) | `images/L2-layered-stack.svg` | `images/png/L2-layered-stack.png` |
 | L3 APDU sequence | `images/L3-apdu-sequence.svg` | `images/png/L3-apdu-sequence.png` |
-| L3b FIDO2 CTAP sequence | `images/L3b-fido2-ctap-sequence.svg` | `images/png/L3b-fido2-ctap-sequence.png` |
+| L3b CTAP2 sequence | `images/L3b-fido2-ctap-sequence.svg` | `images/png/L3b-fido2-ctap-sequence.png` |
 | L4 Discovery | `images/L4-discovery.svg` | `images/png/L4-discovery.png` |
 | L4 Connection | `images/L4-connection.svg` | `images/png/L4-connection.png` |
 

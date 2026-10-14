@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 

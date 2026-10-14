@@ -25,28 +25,28 @@ internal interface IFidoHidProtocol : IProtocol
     Task InitializeAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Sends a raw CTAP HID command without an SDK user-presence notification.</summary>
-    /// <param name="command">The CTAP command byte.</param>
+    /// <param name="command">The CTAPHID command byte, not a CTAP2 operation code.</param>
     /// <param name="data">The command payload.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The response data from the YubiKey.</returns>
-    Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+    Task<ReadOnlyMemory<byte>> SendCommandAsync(
         byte command,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default) =>
-        SendVendorCommandAsync(command, data, UserPresenceNotification.None, cancellationToken);
+        SendCommandAsync(command, data, UserPresenceNotification.None, cancellationToken);
 
     /// <summary>
-    /// Sends a CTAP vendor command and receives the response.
+    /// Sends a CTAPHID command (including standard and vendor commands) and receives the response.
     /// Used for Management application over HID.
     /// </summary>
-    /// <param name="command">The CTAP command byte (e.g., 0xC2 for READ_CONFIG).</param>
+    /// <param name="command">The CTAPHID command byte (e.g., 0xC2 for READ_CONFIG), not a CTAP2 operation code.</param>
     /// <param name="data">The command payload.</param>
     /// <param name="userPresenceNotification">
     ///     The non-null operation handle requested only for authoritative user-presence keep-alive status.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The response data from the YubiKey.</returns>
-    Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+    Task<ReadOnlyMemory<byte>> SendCommandAsync(
         byte command,
         ReadOnlyMemory<byte> data,
         UserPresenceNotification userPresenceNotification,

@@ -160,7 +160,7 @@ internal static class DeviceInfoReader
         CancellationToken cancellationToken)
     {
         var pagePayload = new byte[] { page };
-        var response = await protocol.SendVendorCommandAsync(
+        var response = await protocol.SendCommandAsync(
                 CtapReadConfig,
                 pagePayload,
                 UserPresenceNotification.None,

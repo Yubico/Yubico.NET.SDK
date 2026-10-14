@@ -34,7 +34,7 @@ app.Configure(config =>
             .WithDescription("Factory reset the YubiKey (requires firmware 5.6.0+).");
     });
 
-    // ── FIDO2 ────────────────────────────────────────────────────────────────
+    // ── FIDO2 ───────────────────────────────────────────────────────────────
     config.AddBranch("fido", fido =>
     {
         fido.SetDescription("FIDO2/WebAuthn credential and PIN management.");
@@ -43,7 +43,7 @@ app.Configure(config =>
             .WithDescription("Display FIDO2 application status.");
 
         fido.AddCommand<FidoResetCommand>("reset")
-            .WithDescription("Reset all FIDO2 data.");
+            .WithDescription("Reset the FIDO2 application, erasing all U2F and FIDO2 credentials.");
 
         fido.AddBranch("access", access =>
         {

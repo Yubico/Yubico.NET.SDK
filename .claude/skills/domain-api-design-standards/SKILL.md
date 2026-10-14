@@ -130,7 +130,7 @@ When auditing, check these files for existing patterns:
 | Pattern | Reference Location |
 |---------|-------------------|
 | PIV Session | `Yubico.YubiKit.Piv/src/PivSession.cs` |
-| FIDO2 Session | `Yubico.YubiKit.Fido2/src/Fido2Session.cs` |
+| CTAP2 Session | `src/Ctap2/src/Ctap2Session.cs` |
 | OATH Session | `Yubico.YubiKit.Oath/src/OathSession.cs` |
 | Management | `Yubico.YubiKit.Management/src/ManagementSession.cs` |
 | Error handling | `Yubico.YubiKit.Core/src/Exceptions/` |

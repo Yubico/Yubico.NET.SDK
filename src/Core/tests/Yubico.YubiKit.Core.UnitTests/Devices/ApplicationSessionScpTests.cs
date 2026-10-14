@@ -23,7 +23,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
 ///     Covers <c>ApplicationSession.InitializeProtocolAsync</c>'s SCP guard: SCP is only valid on a PC/SC SmartCard
-///     protocol. This is the Core contract that backs the Phase 38 FIDO2 rule (ISC-9.1) — supplying
+///     protocol. This is the Core contract that backs the Phase 38 CTAP2 rule (ISC-9.1) — supplying
 ///     <c>scpKeyParams</c> while a non-SmartCard transport (e.g. the default HID FIDO) is selected throws,
 ///     rather than silently ignoring the requested secure channel.
 /// </summary>

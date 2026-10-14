@@ -1,10 +1,14 @@
 # Yubico.YubiKit.WebAuthn
 
-This package is a W3C Web Authentication client over `Yubico.YubiKit.Fido2`. It reduces registration and
+This package is a W3C Web Authentication client over `Yubico.YubiKit.Ctap2`. It reduces registration and
 authentication to two calls, handling client data JSON, RP ID validation, and PIN/UV token acquisition on the way to
-CTAP2; every ceremony runs over an `IFidoSession` that the client owns and disposes. It requires a WebAuthn origin and
+CTAP2; every ceremony runs over an `ICtap2Session` that the client owns and disposes. It requires a WebAuthn origin and
 client options containing a public-suffix checker backed by Public Suffix List data, because RP ID validation is what stops one site from
 claiming another site's credentials.
+
+WebAuthn owns client ceremonies and origin/RP validation; `Yubico.YubiKit.Ctap2` owns direct
+authenticator operations. FIDO2 remains the authenticator application identity, and FIDO HID remains
+the transport name.
 
 > The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
 > constraints.
@@ -13,8 +17,8 @@ claiming another site's credentials.
 
 - .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
 - YubiKey 5 series, Security Key series, or YubiKey Bio series with firmware 5.0.0 or later. This module adds no
-  firmware gates of its own; [../Fido2/README.md](../Fido2/README.md) lists the per-feature minimums.
-- Transports: HID FIDO over USB by default, or SmartCard where the FIDO2 AID is exposed - NFC always, USB on 5.8.0+.
+  firmware gates of its own; [../Ctap2/README.md](../Ctap2/README.md) lists the per-feature minimums.
+- Transports: HID FIDO over USB by default, or SmartCard where the FIDO AID is exposed - NFC always, USB on 5.8.0+.
 - An origin that is a secure context: `https`, or `http` on `localhost`.
 
 ## Installation
@@ -24,7 +28,7 @@ dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json
 dotnet add package Yubico.YubiKit.WebAuthn --prerelease
 ```
 
-`Yubico.YubiKit.Core` is installed transitively, as is `Yubico.YubiKit.Fido2`.
+`Yubico.YubiKit.Core` is installed transitively, as is `Yubico.YubiKit.Ctap2`.
 
 ## Getting started
 
@@ -37,8 +41,8 @@ using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Utilities;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.WebAuthn;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
@@ -58,7 +62,7 @@ await using var client = await device.CreateWebAuthnClientAsync(origin, clientOp
 ```
 
 Later snippets assume these directives and a `device` obtained the same way. The client exposes only the two ceremonies
-and both need a touch, so there is no read-only WebAuthn call to try first; read authenticator capabilities with FIDO2 `GetInfoAsync` instead.
+and both need a touch, so there is no read-only WebAuthn call to try first; read authenticator capabilities with CTAP2 `GetInfoAsync` instead.
 
 ## Common operations
 
@@ -132,7 +136,7 @@ await using var promptingClient = await device.CreateWebAuthnClientAsync(
 
 ## User interaction
 
-Both ceremonies require a touch, and CTAP gives a client no way to suppress it for registration. Touch notification comes from the FIDO2 session, so pass your `IUserPresencePrompt` in `sessionOptions`. It is informational; cancel the ceremony token to request cancellation, not to instantly abort an admitted exchange. HID can signal `CTAPHID_CANCEL` during a keep-alive and drain a valid terminal response; SmartCard exchanges already admitted run to completion.
+Both ceremonies require a touch, and CTAP gives a client no way to suppress it for registration. Touch notification comes from the CTAP2 session, so pass your `IUserPresencePrompt` in `sessionOptions`. It is informational; cancel the ceremony token to request cancellation, not to instantly abort an admitted exchange. HID can signal `CTAPHID_CANCEL` during a keep-alive and drain a valid terminal response; SmartCard exchanges already admitted run to completion.
 
 ```csharp
 sealed class TouchPrompt : IUserPresencePrompt
@@ -157,12 +161,12 @@ User verification is separate from touch, and `UserVerification` on either optio
 
 ## Constraints
 
-- The client owns the `IFidoSession` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself.
+- The client owns the `ICtap2Session` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself.
 - A physical YubiKey admits one live connection across all of its interfaces, and one session per connection; a second session throws `ConnectionInUseException` until the first is disposed.
-- Transport is fixed when the FIDO2 session is created and is never renegotiated after a failure. Override it with `SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }`, which is also how to reach SCP.
+- Transport is fixed when the CTAP2 session is created and is never renegotiated after a failure. Override it with `SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }`, which is also how to reach SCP.
 - The RP ID must be a registrable suffix of the origin's effective domain, and public suffixes such as `com` and `co.uk` are rejected before any CTAP command. `WebAuthnClientOptions.EnterpriseRpIds` exempts only the IDs it names.
 - The client asks for nothing but a PIN, supplied as `pinBytes` or by the prompt. A ceremony that needs one and has neither fails with `NotAllowed` rather than prompting.
-- `ResidentKeyPreference.Required` consumes persistent credential slots. This package deletes nothing, and firmware gates live in the FIDO2 layer, which throws `NotSupportedException`. The experimental `previewSign` extension is reachable through `Extensions` on either options record and is not covered here.
+- `ResidentKeyPreference.Required` consumes persistent credential slots. This package deletes nothing, and firmware gates live in the CTAP2 layer, which throws `NotSupportedException`. The experimental `previewSign` extension is reachable through `Extensions` on either options record and is not covered here.
 
 ## Security notes
 
@@ -174,7 +178,7 @@ User verification is separate from touch, and `UserVerification` on either optio
 ## Related
 
 - [../Core/README.md](../Core/README.md) - device discovery, connections, and the credential contracts.
-- [../Fido2/README.md](../Fido2/README.md) - the CTAP layer this package builds on, and [FidoTool](../Fido2/examples/FidoTool/), the interactive sample; this package has none of its own.
+- [../Ctap2/README.md](../Ctap2/README.md) - the CTAP2 operations layer this package builds on, and [FidoTool](../Ctap2/examples/FidoTool/), the interactive sample; this package has none of its own.
 - [user-interaction.md](../../docs/usage/user-interaction.md) and [device-discovery.md](../../docs/usage/device-discovery.md).
 - The [WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/) specification and the [Public Suffix List](https://publicsuffix.org/).
 - [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.
@@ -185,11 +189,11 @@ Migration from the earlier v2 development contract is mechanical (there was no s
 
 ```csharp
 // Before
-new WebAuthnClient(fidoSession, origin, isPublicSuffix);
+new WebAuthnClient(session, origin, isPublicSuffix);
 
 // After
 new WebAuthnClient(
-    fidoSession,
+    ctap2Session,
     origin,
     new WebAuthnClientOptions
     {
@@ -199,3 +203,9 @@ new WebAuthnClient(
 
 If an earlier `clientOptions` instance is known to be non-null, use
 `clientOptions with { PublicSuffixChecker = isPublicSuffix }` to preserve its configured settings.
+
+The operations dependency is now `Yubico.YubiKit.Ctap2`: migrate session types to `Ctap2Session` /
+`ICtap2Session` and device factories to `CreateCtap2SessionAsync`. The public `WebAuthnClient`
+constructor parameter is named `ctap2Session`; update named arguments accordingly. `CtapCommand`,
+`CtapStatus`, and `CtapException` live directly in `Yubico.YubiKit.Ctap2`. FIDO2 application/PIN names,
+FIDO HID connection names, and protocol strings are unchanged.

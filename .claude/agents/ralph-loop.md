@@ -57,7 +57,7 @@ dotnet restore                           # FORBIDDEN
 ```bash
 # ✅ CORRECT - Handles xUnit v2/v3 automatically
 dotnet toolchain.cs test                                           # All tests
-dotnet toolchain.cs -- test --project Fido2                        # Module tests (partial match)
+dotnet toolchain.cs -- test --project Ctap2                       # Module tests (partial match)
 dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTest"   # Filter by full name
 dotnet toolchain.cs -- test --filter "Name=ExactMethodName"        # Exact method match
 dotnet toolchain.cs -- test --filter "ClassName~Integration"       # Filter by class name

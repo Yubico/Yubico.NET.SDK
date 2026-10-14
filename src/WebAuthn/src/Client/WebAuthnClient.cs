@@ -14,7 +14,7 @@
 
 using System.Buffers;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -45,7 +45,7 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
     /// <summary>
     /// Initializes a new instance of <see cref="WebAuthnClient"/>.
     /// </summary>
-    /// <param name="fidoSession">The FIDO2 session that performs CTAP2 operations (ownership transferred).</param>
+    /// <param name="ctap2Session">The CTAP2 session that performs authenticator operations (ownership transferred).</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
     /// <param name="options">
     /// Required client configuration, including the public suffix checker. Defaults remain no
@@ -53,15 +53,15 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
     /// <see cref="WebAuthnClientOptions.DefaultMaxPromptAttempts"/> prompt attempts.
     /// </param>
     public WebAuthnClient(
-        IFidoSession fidoSession,
+        ICtap2Session ctap2Session,
         WebAuthnOrigin origin,
         WebAuthnClientOptions options)
     {
-        ArgumentNullException.ThrowIfNull(fidoSession);
+        ArgumentNullException.ThrowIfNull(ctap2Session);
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _isPublicSuffix = options.PublicSuffixChecker.Invoke;
-        _backend = new WebAuthnBackend(fidoSession);
+        _backend = new WebAuthnBackend(ctap2Session);
     }
 
     /// <summary>

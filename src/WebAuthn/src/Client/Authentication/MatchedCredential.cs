@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Ctap2.Credentials;
 
 namespace Yubico.YubiKit.WebAuthn.Client.Authentication;
 

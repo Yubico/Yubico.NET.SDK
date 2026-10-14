@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 

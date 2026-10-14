@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using FluentAssertions;
-using Yubico.YubiKit.Fido2.Cose;
+using Yubico.YubiKit.Ctap2.Cose;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Cose;
 

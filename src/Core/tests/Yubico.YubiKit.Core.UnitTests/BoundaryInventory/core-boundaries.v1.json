@@ -253,7 +253,7 @@
       "path": "Protocols/Fido/Hid/IFidoHidProtocol.cs", "reviewOwner": "Core maintainers", "rationale": "",
       "evidence": ["Protocols/Fido/Hid/IFidoHidProtocol.cs:27-36 default interface overload forwards a task-returning command before task return."],
       "status": ["documented", "outstanding"],
-      "entries": ["SendVendorCommandAsync#D2946E4CFBBC#async-blocked#Default FIDO command overload invokes the extended interface overload before returning; concrete implementations and caller entry behavior require review."]
+      "entries": ["SendCommandAsync#4750FE698E28#async-blocked#Default FIDO command overload invokes the extended interface overload before returning; concrete implementations and caller entry behavior require review."]
     },
     {
       "path": "Protocols/Otp/Hid/IOtpHidProtocol.cs", "reviewOwner": "Core maintainers", "rationale": "",
@@ -262,10 +262,10 @@
       "entries": ["SendAndReceiveAsync#968B6895318F#async-blocked#Default OTP command overload invokes interface-dispatched operation on the initiating caller before task return; implementation is unresolved here."]
     },
     {
-      "path": "Sessions/RawFidoHidSession.cs", "reviewOwner": "Core maintainers", "rationale": "",
-      "evidence": ["Sessions/RawFidoHidSession.cs task-returning SendAndReceiveAsync forwards to IFidoHidProtocol before returning."],
+      "path": "Sessions/RawCtapHidSession.cs", "reviewOwner": "Core maintainers", "rationale": "",
+      "evidence": ["Sessions/RawCtapHidSession.cs task-returning SendAndReceiveAsync forwards to IFidoHidProtocol before returning."],
       "status": ["documented", "outstanding"],
-      "entries": ["SendAndReceiveAsync#2A9B44B5A931#async-blocked#Raw FIDO session dispatches to a protocol interface before returning the task; no whole-program nonblocking proof follows from its signature."]
+      "entries": ["SendAndReceiveAsync#3BFBD44CC725#async-blocked#Raw FIDO session dispatches to a protocol interface before returning the task; no whole-program nonblocking proof follows from its signature."]
     },
     {
       "path": "Sessions/RawOtpHidSession.cs", "reviewOwner": "Core maintainers", "rationale": "",

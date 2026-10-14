@@ -259,7 +259,7 @@ internal static class Program
                 else
                 {
                     phase = "session_create";
-                    await using var session = await RawFidoHidSession.CreateAsync(connection);
+                    await using var session = await RawCtapHidSession.CreateAsync(connection);
                     Progress("session_ready", lifecycle);
                     watch = Stopwatch.StartNew();
                     phase = "invocation_started";
@@ -282,7 +282,7 @@ internal static class Program
                 Progress("first_close_complete", lifecycle);
                 phase = "reopen";
                 await using (var reopened = await device.ConnectAsync<IFidoHidConnection>())
-                await using (var session = await RawFidoHidSession.CreateAsync(reopened))
+                await using (var session = await RawCtapHidSession.CreateAsync(reopened))
                 {
                     Progress("reopen_complete", lifecycle);
                     phase = "reopen_getinfo";

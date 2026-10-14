@@ -30,7 +30,7 @@
     <InternalsVisibleTo Include="Yubico.YubiKit.Core.UnitTests" />
     <InternalsVisibleTo Include="MacOSHidRouteVerification" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Tests.Shared" />
-    <InternalsVisibleTo Include="Yubico.YubiKit.Fido2" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Ctap2" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Management" />
   </ItemGroup>
 
@@ -52,7 +52,7 @@
   <!-- Applet tests that directly exercise their internal protocol-backed implementations. -->
   <ItemGroup>
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
-    <InternalsVisibleTo Include="Yubico.YubiKit.Fido2.UnitTests" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Ctap2.UnitTests" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Management.UnitTests" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Piv.UnitTests" />
     <InternalsVisibleTo Include="Yubico.YubiKit.SecurityDomain.UnitTests" />

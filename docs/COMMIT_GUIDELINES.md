@@ -10,6 +10,17 @@ This generic version removes all project-specific file extensions and build syst
 
 **Only commit files YOU created or modified in the current session.** Do not include files that were already staged by someone else.
 
+## Pre-Push and PR Gate
+
+Before pushing to GitHub or creating/updating a PR, run the root [`CLAUDE.md` Pre-Commit Checklist](../CLAUDE.md#pre-commit-checklist) against the final changes:
+
+1. Format only edited C# files with `dotnet format Yubico.YubiKit.sln --include <space-separated file paths>`.
+2. Run `dotnet toolchain.cs build` for the **full solution**, including test projects. Require **0 warnings and 0 errors**, not merely exit code 0. Use `dotnet toolchain.cs -- build --clean` when fresh compilation is needed.
+3. Run `dotnet toolchain.cs test` for unit tests and the affected integration checks allowed by [`docs/TESTING.md`](TESTING.md#hardware-authorization). Record unavailable or human-coordinated hardware checks honestly; compilation does not prove integration tests passed.
+4. Run `dotnet toolchain.cs complexity` and review the final diff and staged file list.
+
+Tests inherit `TreatWarningsAsErrors=true`. Fix nullable and xUnit analyzer diagnostics at their source; do not override that property, disable analyzers, or introduce blanket suppressions to bypass this gate. Async, cancellation, and justified bounded-cleanup patterns are in [Testing Guidelines](TESTING.md#warning-free-test-code).
+
 ## 1. Commit Message Honesty (NO Hallucinated Intent)
 
 **Do NOT invent the "why" behind a change.** If you were not explicitly given a reason for a change (e.g., "for clarity"), describe only **what** was done.

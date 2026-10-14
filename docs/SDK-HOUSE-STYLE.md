@@ -13,6 +13,15 @@ The goal is not to make every module abstract in the same way. The goal is to ma
 - Extract helpers only when they make the session method easier to read without hiding the wire behavior.
 - Do not penalize essential protocol complexity. Remove accidental complexity.
 
+## Compiler and Analyzer Hygiene
+
+- Shipping code and tests must compile without compiler or enabled analyzer warnings. Test projects inherit the repository's warnings-as-errors setting; do not weaken it or suppress diagnostics to get a green build.
+- Make nullable flow explicit with guards or typed assertions, rather than relying on indirect conditions or adding unjustified null-forgiving operators.
+- Await async test operations instead of blocking on tasks (`xUnit1031`). In xUnit v3, pass `TestContext.Current.CancellationToken` to cancellable calls and waits (`xUnit1051`); cancellation-specific tests use linked token sources.
+- Preserve the behavior under test: distinguish invocation from completion in responsiveness tests, and release native/fake barriers before teardown. Uncancelled cleanup requires a local lifetime justification and a finite timeout.
+
+See [Testing Guidelines](TESTING.md#warning-free-test-code) for examples and exceptions, and [Commit Guidelines](COMMIT_GUIDELINES.md#pre-push-and-pr-gate) for the upstream gate.
+
 ## Flat Protocol Flow
 
 Most public session methods should follow this rhythm:

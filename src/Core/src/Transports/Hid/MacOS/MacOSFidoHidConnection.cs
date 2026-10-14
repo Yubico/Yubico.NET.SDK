@@ -117,6 +117,8 @@ internal sealed unsafe class NativeHidInputBridge : IHidInputBridge
 
     public nint CreateInput(nint device, int size, Action<ReadOnlyMemory<byte>> report, Action<int> terminal)
     {
+        // Guard each shim call so Native AOT does not require macOS-only exports on Linux or Windows.
+        if (!OperatingSystem.IsMacOS()) throw new PlatformNotSupportedException();
         if (_owner != 0 || _context.IsAllocated)
         {
             throw new InvalidOperationException("This native input bridge already owns a device.");
@@ -141,11 +143,20 @@ internal sealed unsafe class NativeHidInputBridge : IHidInputBridge
         _context.Free();
         throw new InvalidOperationException("Native_HidInputCreate failed");
     }
-    public int Start(nint owner) => HidInputInterop.HidInputStart(owner);
-    public void Cancel(nint owner) => HidInputInterop.HidInputCancel(owner);
-    public int WaitShutdown(nint owner) => HidInputInterop.HidInputWaitShutdown(owner, uint.MaxValue);
+    public int Start(nint owner) => OperatingSystem.IsMacOS()
+        ? HidInputInterop.HidInputStart(owner)
+        : throw new PlatformNotSupportedException();
+    public void Cancel(nint owner)
+    {
+        if (!OperatingSystem.IsMacOS()) throw new PlatformNotSupportedException();
+        HidInputInterop.HidInputCancel(owner);
+    }
+    public int WaitShutdown(nint owner) => OperatingSystem.IsMacOS()
+        ? HidInputInterop.HidInputWaitShutdown(owner, uint.MaxValue)
+        : throw new PlatformNotSupportedException();
     public int Destroy(nint owner)
     {
+        if (!OperatingSystem.IsMacOS()) throw new PlatformNotSupportedException();
         var result = HidInputInterop.HidInputDestroy(owner);
         if (result == HidInputResult.Ok)
         {

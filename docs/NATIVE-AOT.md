@@ -23,9 +23,9 @@ The evidence is not equally deep for every platform or module:
   physical YubiKeys on macOS.
 - Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and YubiHsm are link-verified but have not
   had representative protocol operations runtime-exercised under Native AOT.
-- Recurring continuous-integration coverage publishes and runs the host on macOS Apple Silicon with
-  no hardware attached. Windows and Linux results are recorded manual evidence, not recurring
-  coverage.
+- Recurring continuous-integration coverage publishes and runs the host on macOS Apple Silicon,
+  Windows x64, and Linux x64 with no hardware attached. The corrected NativeShims 1.18.1 integration
+  passed all three runners in [PR #693's matrix run](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/38570356627).
 
 The research records preserve the environment, commands, and observations behind these claims:
 
@@ -47,14 +47,23 @@ The research records preserve the environment, commands, and observations behind
 | Platform | Runtime identifier | Analyzer-checked | All libraries link | Core discovery on hardware | Deeper hardware evidence | Recurring coverage |
 |---|---|---|---|---|---|---|
 | macOS Apple Silicon | `osx-arm64` | yes | yes | yes | Management device information, PIV session, device monitoring | publish and Core discovery entry point |
-| Windows x64 | `win-x64` | yes | yes | yes | none recorded | no |
-| Linux x64 | `linux-x64` | yes | yes | yes | none recorded | no |
+| Windows x64 | `win-x64` | yes | yes | yes | none recorded | publish and Core discovery entry point |
+| Linux x64 | `linux-x64` | yes | yes | yes | none recorded | publish and Core discovery entry point |
 
 Only macOS has device-monitoring evidence. Windows and Linux monitoring and protocol-session paths
 remain unverified under Native AOT.
 
 A separate Linux experiment also published and ran a packaged consumer. That is package-resolution
 evidence, not deeper protocol or hardware evidence.
+
+At revision `df1ec06d`, NativeShims 1.18.1 exposed a Linux AOT link regression: reachable macOS HID
+bridge calls required five `Native_HidInput*` exports that correctly do not exist in the Linux
+archive. Explicit `OperatingSystem.IsMacOS()` guards at those native call sites resolve the Linux
+link failure. The corrected host published and discovered one attached YubiKey on Linux x64 with
+.NET SDK 10.0.401 / runtime 10.0.12. On 2026-10-14, the corrected source at `2be0512f` also passed
+Native AOT publish and execution on all three hosted runners in the linked matrix run. Each runner
+reported all ten module entry types, `Found 0 YubiKey(s).`, and completion without crashing. This
+is fresh no-hardware evidence for the correction; the earlier research records predate it.
 
 ## Project configuration
 
@@ -91,8 +100,9 @@ non-packable console host. Its default mode:
 3. Succeeds with an empty device list when no YubiKey is attached.
 
 The recurring workflow [`.github/workflows/native-aot.yml`](../.github/workflows/native-aot.yml)
-publishes and runs this default mode on macOS Apple Silicon. It proves publish, link, process
-startup, and successful execution of the ordinary Core discovery entry point with no attached key.
+is configured to publish and run this default mode on macOS Apple Silicon, Windows x64, and Linux
+x64. A passing run proves publish, link, process startup, and successful execution of the ordinary
+Core discovery entry point with no attached key.
 Because discovery can continue when a transport is unavailable, the empty result does not prove
 that every native transport loaded. The workflow does not exercise hardware, device events, or
 applet sessions.
@@ -102,7 +112,7 @@ belongs to the research record. It is not run by continuous integration.
 
 ## Native dependencies
 
-Core uses `Yubico.NativeShims` for PC/SC and OpenSSL-backed ARKG operations. The package contains
+Core uses `Yubico.NativeShims` for PC/SC, macOS HID input, and OpenSSL-backed ARKG operations. The package contains
 native binaries rather than a managed assembly, so managed reference-compatibility analysis does
 not inspect it. Runtime evidence therefore matters separately:
 
@@ -112,9 +122,15 @@ not inspect it. Runtime evidence therefore matters separately:
 - The OpenSSL CMAC implementation is not selected by the default provider and has no recorded
   Native AOT runtime evidence.
 
-The stable `Yubico.NativeShims` package uses shared native libraries. A Native AOT deployment must
-include the platform-specific shim next to the executable. Static-link experiments and prerelease
-package candidates are research evidence, not part of the stable consumer contract.
+The pinned `Yubico.NativeShims` 1.18.1 package automatically links its RID-specific static archive
+when `PublishAot=true` and removes the shared shim from the publish output. Non-AOT deployments
+continue to use the shared library. Static shim linking does not make the entire application
+fully static: operating-system libraries such as Linux PC/SC remain runtime dependencies.
+
+Core must guard macOS-only shim calls with `OperatingSystem.IsMacOS()` so Native AOT eliminates
+them on Linux and Windows. This is an SDK responsibility, not a consumer linker configuration
+requirement. The macOS native bridge remains unchanged on macOS; fake-backed connection tests
+can still run on other platforms.
 
 ## Consumer deployment
 
@@ -128,9 +144,10 @@ dotnet publish MyApplication.csproj \
   -p:PublishAot=true
 ```
 
-Deploy the complete publish output, including the `Yubico.NativeShims` native library. Run the
-application from a layout that preserves the runtime's native-library resolution rules. Copying
-only the executable or managed build output is not sufficient.
+Deploy the complete publish output and install the platform's required system libraries. With
+NativeShims 1.18.1 and Native AOT, no separate `Yubico.NativeShims` shared library is required.
+For non-AOT deployments, preserve the shared shim and the runtime's native-library resolution
+layout. Copying managed build output is not a substitute for publishing.
 
 `InvariantGlobalization` is an application choice. Enable it only if the application does not need
 culture data; the SDK does not set it for consumers.
@@ -140,7 +157,6 @@ culture data; the SDK does not set it for consumers.
 The following work would strengthen support evidence without changing the current compatibility
 metadata:
 
-- Add recurring Windows x64 and Linux x64 publish-and-run jobs.
 - Run the monitoring protocol on Windows and Linux.
 - Runtime-exercise representative Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and
   YubiHsm operations under Native AOT.

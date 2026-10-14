@@ -23,9 +23,9 @@ The evidence is not equally deep for every platform or module:
   physical YubiKeys on macOS.
 - Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and YubiHsm are link-verified but have not
   had representative protocol operations runtime-exercised under Native AOT.
-- The continuous-integration workflow is configured to publish and run the host on macOS Apple
-  Silicon, Windows x64, and Linux x64 with no hardware attached. Historical manual results are
-  recorded separately; workflow configuration alone is not evidence of a successful run.
+- Recurring continuous-integration coverage publishes and runs the host on macOS Apple Silicon,
+  Windows x64, and Linux x64 with no hardware attached. The corrected NativeShims 1.18.1 integration
+  passed all three runners in [PR #693's matrix run](https://github.com/Yubico/Yubico.NET.SDK/actions/runs/38570356627).
 
 The research records preserve the environment, commands, and observations behind these claims:
 
@@ -47,8 +47,8 @@ The research records preserve the environment, commands, and observations behind
 | Platform | Runtime identifier | Analyzer-checked | All libraries link | Core discovery on hardware | Deeper hardware evidence | Recurring coverage |
 |---|---|---|---|---|---|---|
 | macOS Apple Silicon | `osx-arm64` | yes | yes | yes | Management device information, PIV session, device monitoring | publish and Core discovery entry point |
-| Windows x64 | `win-x64` | yes | historical evidence | yes | none recorded | publish and Core discovery entry point configured |
-| Linux x64 | `linux-x64` | yes | yes | yes | none recorded | publish and Core discovery entry point configured |
+| Windows x64 | `win-x64` | yes | yes | yes | none recorded | publish and Core discovery entry point |
+| Linux x64 | `linux-x64` | yes | yes | yes | none recorded | publish and Core discovery entry point |
 
 Only macOS has device-monitoring evidence. Windows and Linux monitoring and protocol-session paths
 remain unverified under Native AOT.
@@ -60,8 +60,10 @@ At revision `df1ec06d`, NativeShims 1.18.1 exposed a Linux AOT link regression: 
 bridge calls required five `Native_HidInput*` exports that correctly do not exist in the Linux
 archive. Explicit `OperatingSystem.IsMacOS()` guards at those native call sites resolve the Linux
 link failure. The corrected host published and discovered one attached YubiKey on Linux x64 with
-.NET SDK 10.0.401 / runtime 10.0.12. Windows and macOS still require fresh runner evidence for this
-correction; the earlier research records predate it.
+.NET SDK 10.0.401 / runtime 10.0.12. On 2026-10-14, the corrected source at `2be0512f` also passed
+Native AOT publish and execution on all three hosted runners in the linked matrix run. Each runner
+reported all ten module entry types, `Found 0 YubiKey(s).`, and completion without crashing. This
+is fresh no-hardware evidence for the correction; the earlier research records predate it.
 
 ## Project configuration
 
@@ -155,7 +157,6 @@ culture data; the SDK does not set it for consumers.
 The following work would strengthen support evidence without changing the current compatibility
 metadata:
 
-- Confirm successful runs of the expanded Windows x64 and Linux x64 publish-and-run jobs.
 - Run the monitoring protocol on Windows and Linux.
 - Runtime-exercise representative Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and
   YubiHsm operations under Native AOT.

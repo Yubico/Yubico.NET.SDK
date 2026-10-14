@@ -26,18 +26,39 @@ public class MacOSHidFeatureCompatibilityTests
     {
         var native = new FeatureLifetime { HoldSet = true };
         var connection = new MacOSHidFeatureReportConnection(42, native);
-        var sending = Task.Run(() => connection.SetReport([1, 2, 3]));
-        Assert.True(native.InSet.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-        var disposal = connection.DisposeAsync().AsTask();
-        var second = connection.DisposeAsync().AsTask();
-        Assert.False(disposal.IsCompleted);
-        Assert.False(second.IsCompleted);
-        Assert.DoesNotContain("close", native.Calls);
-        native.AllowSet.Set();
-        await sending.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        await Task.WhenAll(disposal, second).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        connection.Dispose();
-        Assert.Equal(new[] { "create", "open", "input", "output", "set", "close", "release" }, native.Calls);
+        var sending = Task.Run(() => connection.SetReport([1, 2, 3]), TestContext.Current.CancellationToken);
+        try
+        {
+            Assert.True(native.InSet.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+            var disposal = connection.DisposeAsync().AsTask();
+            var second = connection.DisposeAsync().AsTask();
+            Assert.False(disposal.IsCompleted);
+            Assert.False(second.IsCompleted);
+            Assert.DoesNotContain("close", native.Calls);
+            native.AllowSet.Set();
+            await sending.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            await Task.WhenAll(disposal, second).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            connection.Dispose();
+            Assert.Equal(new[] { "create", "open", "input", "output", "set", "close", "release" }, native.Calls);
+        }
+        finally
+        {
+            native.AllowSet.Set();
+            // Drain and close after releasing the native gate, even if the runner cancelled the test.
+            try
+            {
+                await sending.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            }
+            catch (OperationCanceledException) when (TestContext.Current.CancellationToken.IsCancellationRequested)
+            {
+                // Task.Run may have been cancelled before dispatch.
+            }
+            finally
+            {
+                // Await the caller before closing so a queued SetReport cannot race disposal.
+                await connection.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            }
+        }
     }
 
     [Fact]

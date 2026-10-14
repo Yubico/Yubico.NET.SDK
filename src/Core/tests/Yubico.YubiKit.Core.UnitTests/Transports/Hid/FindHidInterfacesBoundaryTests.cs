@@ -14,7 +14,7 @@ public class FindHidInterfacesBoundaryTests
             Interlocked.Increment(ref calls);
             return [];
         });
-        using var cancellation = new CancellationTokenSource();
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         cancellation.Cancel();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => finder.FindAllAsync(cancellation.Token));
@@ -44,16 +44,15 @@ public class FindHidInterfacesBoundaryTests
                 Interlocked.Exchange(ref resourceHeld, 0);
             }
         });
-        using var cancellation = new CancellationTokenSource();
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         // Use a separate caller thread so a regression that blocks before returning a task is bounded.
         var invocation = Task.Factory.StartNew(() => finder.FindAllAsync(cancellation.Token),
-            CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            TestContext.Current.CancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
         try
         {
             Assert.True(entered.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-            await ((Task)invocation).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-            var scan = invocation.Result;
+            var scan = await invocation.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
             Assert.False(scan.IsCompleted);
 
             cancellation.Cancel();
@@ -69,8 +68,9 @@ public class FindHidInterfacesBoundaryTests
         finally
         {
             release.Set();
-            await ((Task)invocation).WaitAsync(TimeSpan.FromSeconds(15));
-            await invocation.Result.WaitAsync(TimeSpan.FromSeconds(15));
+            // Drain the released worker before disposing its gates, even if the test was cancelled.
+            var scan = await invocation.WaitAsync(TimeSpan.FromSeconds(15), CancellationToken.None);
+            await scan.WaitAsync(TimeSpan.FromSeconds(15), CancellationToken.None);
         }
     }
 
@@ -105,7 +105,8 @@ public class FindHidInterfacesBoundaryTests
             release.Set();
             try
             {
-                await scan.WaitAsync(TimeSpan.FromSeconds(15));
+                // Drain the released worker before disposing its gates, even if the test was cancelled.
+                await scan.WaitAsync(TimeSpan.FromSeconds(15), CancellationToken.None);
             }
             catch (InvalidOperationException ex) when (ReferenceEquals(ex, failure))
             {

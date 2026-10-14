@@ -66,7 +66,7 @@ await using var piv = await device.CreatePivSessionAsync();
 Pass a `SessionCreationOptions` to override the transport, establish SCP, or receive touch notifications;
 see [User interaction](../../docs/usage/user-interaction.md).
 Touch notification contexts carry an `Application` and an optional `Operation` identifier. SDK-created
-contexts set `Operation` to a unique constant such as `UserPresenceOperations.Fido2.GetAssertion`, so a prompt
+contexts set `Operation` to a unique constant such as `UserPresenceOperations.Ctap2.GetAssertion`, so a prompt
 can switch on it directly. Wrap a call in `UserPresenceIntent.BeginScope("approve the transfer")` to pass the
 application's reason to the prompt as `UserPresenceContext.Intent`.
 
@@ -115,8 +115,15 @@ ApduResponse response = await raw.TransmitAndReceiveAsync(
 Console.WriteLine($"SW={response.SW:X4}, {response.Data.Length} bytes");
 ```
 
-`RawFidoHidSession` and `RawOtpHidSession` are the HID equivalents, created with
-`device.CreateRawFidoHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
+`RawCtapHidSession` and `RawOtpHidSession` are the HID equivalents, created with
+`device.CreateRawCtapHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
+
+`RawCtapHidSession` (formerly `RawFidoHidSession`) exchanges shared CTAPHID commands, not
+CTAP2 operations. FIDO HID connection types and `ConnectionType.HidFido` retain their names.
+`ApplicationIds.Fido` selects the shared FIDO applet; `ApplicationIds.FidoU2f` is the same-AID
+interoperability alias, not another applet. FIDO2 application identities remain
+`DeviceCapabilities.Fido2` and `UserPresenceApplications.Fido2`, while operation identifiers use
+`UserPresenceOperations.Ctap2` and `Ctap2.Method` values.
 
 An admitted session exchange protects its framing: cancellation is not an immediate abort or a
 rollback of a command already sent. FIDO HID can send `CTAPHID_CANCEL` during keep-alives, then
@@ -257,7 +264,7 @@ device with `Yubico.YubiKit.SecurityDomain`.
 ## Related
 
 - Application modules: [Management](../Management/README.md), [PIV](../Piv/README.md),
-  [FIDO2](../Fido2/README.md), [WebAuthn](../WebAuthn/README.md), [OATH](../Oath/README.md),
+  [CTAP2](../Ctap2/README.md), [WebAuthn](../WebAuthn/README.md), [OATH](../Oath/README.md),
   [YubiOTP](../YubiOtp/README.md), [OpenPGP](../OpenPgp/README.md),
   [Security Domain](../SecurityDomain/README.md), [YubiHSM Auth](../YubiHsm/README.md).
 - [Physical device model](../../docs/architecture/physical-device-model.md): one `IYubiKey` per key, transport selection, ownership.

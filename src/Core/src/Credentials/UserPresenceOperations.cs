@@ -16,27 +16,28 @@ namespace Yubico.YubiKit.Core.Credentials;
 
 /// <summary>Identifiers for the SDK operations that report <see cref="UserPresenceContext.Operation" />.</summary>
 /// <remarks>
-///     Operations are grouped by application. Each value is unique across all applications and has the form
-///     <c>Application.Method</c>, where <c>Method</c> is the public SDK method name without <c>Async</c>, so a
+///     Operations are grouped by SDK operation surface. Each value is unique across all groups and has the form
+///     <c>Group.Method</c>, where <c>Method</c> is the public SDK method name without <c>Async</c>, so a
 ///     prompt can switch on <see cref="UserPresenceContext.Operation" /> alone. This is an open set: future
 ///     releases may add values, so consumers should include a default branch.
+///     The group can differ from the application identifier; CTAP2 operations report the FIDO2 application.
 /// </remarks>
 public static class UserPresenceOperations
 {
-    /// <summary>Operations reported by FIDO2 sessions.</summary>
-    public static class Fido2
+    /// <summary>Operations reported by CTAP2 sessions.</summary>
+    public static class Ctap2
     {
         /// <summary>Authenticator selection.</summary>
-        public const string Selection = "Fido2.Selection";
+        public const string Selection = "Ctap2.Selection";
 
         /// <summary>FIDO application reset.</summary>
-        public const string Reset = "Fido2.Reset";
+        public const string Reset = "Ctap2.Reset";
 
         /// <summary>Credential registration.</summary>
-        public const string MakeCredential = "Fido2.MakeCredential";
+        public const string MakeCredential = "Ctap2.MakeCredential";
 
         /// <summary>Credential assertion (sign-in).</summary>
-        public const string GetAssertion = "Fido2.GetAssertion";
+        public const string GetAssertion = "Ctap2.GetAssertion";
     }
 
     /// <summary>Operations reported by PIV sessions.</summary>

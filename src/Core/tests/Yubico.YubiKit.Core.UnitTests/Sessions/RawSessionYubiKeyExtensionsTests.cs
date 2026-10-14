@@ -41,12 +41,12 @@ public class RawSessionYubiKeyExtensionsTests
     }
 
     [Fact]
-    public async Task CreateRawFidoHidSessionAsync_DisposeSession_DisposesHiddenConnection()
+    public async Task CreateRawCtapHidSessionAsync_DisposeSession_DisposesHiddenConnection()
     {
         var connection = new MultiTransportConnection(ConnectionType.HidFido);
         var yubiKey = new ConnectingYubiKey(connection);
 
-        RawFidoHidSession session = await yubiKey.CreateRawFidoHidSessionAsync(TestContext.Current.CancellationToken);
+        RawCtapHidSession session = await yubiKey.CreateRawCtapHidSessionAsync(TestContext.Current.CancellationToken);
         await session.DisposeAsync();
 
         Assert.Equal(1, connection.DisposeAsyncCount);
@@ -125,7 +125,7 @@ public class RawSessionYubiKeyExtensionsTests
         connection.Enqueue(CreateFidoInitPacket(0x01020304, 0x42, [0xAB]));
         connection.HoldNextOperation();
         var yubiKey = new ConnectingYubiKey(connection);
-        RawFidoHidSession session = await yubiKey.CreateRawFidoHidSessionAsync(cancellationToken);
+        RawCtapHidSession session = await yubiKey.CreateRawCtapHidSessionAsync(cancellationToken);
         Task<ReadOnlyMemory<byte>> exchange = session.SendAndReceiveAsync(
             0x42,
             new byte[] { 0x10 },

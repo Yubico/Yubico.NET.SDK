@@ -39,11 +39,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Piv.UnitTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Piv.IntegrationTests", "src\Piv\tests\Yubico.YubiKit.Piv.IntegrationTests\Yubico.YubiKit.Piv.IntegrationTests.csproj", "{9495B036-DB74-48C3-9063-276915E1D9F5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{51E56800-A682-637B-22A4-3BC77FC77BA1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ctap2", "Ctap2", "{51E56800-A682-637B-22A4-3BC77FC77BA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Fido2", "src\Fido2\src\Yubico.YubiKit.Fido2.csproj", "{A349BF39-72AB-4C36-91A6-D32BF5C69335}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Ctap2", "src\Ctap2\src\Yubico.YubiKit.Ctap2.csproj", "{A349BF39-72AB-4C36-91A6-D32BF5C69335}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Fido2.UnitTests", "src\Fido2\tests\Yubico.YubiKit.Fido2.UnitTests\Yubico.YubiKit.Fido2.UnitTests.csproj", "{F0197B15-101A-425D-A806-41A147DAB616}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Ctap2.UnitTests", "src\Ctap2\tests\Yubico.YubiKit.Ctap2.UnitTests\Yubico.YubiKit.Ctap2.UnitTests.csproj", "{F0197B15-101A-425D-A806-41A147DAB616}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SecurityDomain", "SecurityDomain", "{F2480220-81FA-427B-4AAF-84FFB7AA017A}"
 EndProject
@@ -95,13 +95,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{D3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HsmAuthTool", "src\YubiHsm\examples\HsmAuthTool\HsmAuthTool.csproj", "{1776B205-A42C-4EB1-BE4C-09BFAA10A277}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FidoTool", "src\Fido2\examples\FidoTool\FidoTool.csproj", "{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FidoTool", "src\Ctap2\examples\FidoTool\FidoTool.csproj", "{79B281C5-86FF-4F26-B8B5-B8A8B3D6A741}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.Fido2", "Yubico.YubiKit.Fido2", "{12C69724-0DC1-5964-411E-7268C2885289}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKit.Ctap2", "Yubico.YubiKit.Ctap2", "{12C69724-0DC1-5964-411E-7268C2885289}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{230107ED-DD6D-43C2-80E9-99784904F745}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Fido2.IntegrationTests", "src\Fido2\tests\Yubico.YubiKit.Fido2.IntegrationTests\Yubico.YubiKit.Fido2.IntegrationTests.csproj", "{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yubico.YubiKit.Ctap2.IntegrationTests", "src\Ctap2\tests\Yubico.YubiKit.Ctap2.IntegrationTests\Yubico.YubiKit.Ctap2.IntegrationTests.csproj", "{A970629C-B2A4-4BDD-9D49-F68C6F968EB7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E136893F-1AF3-4DD0-B553-618E22628355}"
 EndProject
@@ -153,7 +153,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7D0EB79F-CBCD-C6FF-F67F-61AE07FD7384}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{566DC5E9-C284-68A9-25F4-274ACA4A4804}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ctap2", "Ctap2", "{566DC5E9-C284-68A9-25F4-274ACA4A4804}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{825731E8-3327-3B99-B501-D96DB1216992}"
 EndProject

@@ -6,7 +6,7 @@ using System.Globalization;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.OpenPgp;
 using Yubico.YubiKit.Oath;
@@ -27,7 +27,7 @@ Type[] linkedModuleEntryTypes =
     typeof(YubiKeyManager),
     typeof(ManagementSession),
     typeof(PivSession),
-    typeof(FidoSession),
+    typeof(Ctap2Session),
     typeof(WebAuthnClient),
     typeof(OathSession),
     typeof(OpenPgpSession),

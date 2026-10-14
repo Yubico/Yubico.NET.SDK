@@ -29,7 +29,7 @@ public static class ApplicationIds
     private static readonly byte[] _management = [0xA0, 0x00, 0x00, 0x05, 0x27, 0x47, 0x11, 0x17];
     private static readonly byte[] _otp = [0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01, 0x01];
     private static readonly byte[] _fidoU2f = [0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01];
-    private static readonly byte[] _fido2 = [0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01];
+    private static readonly byte[] _fido = [0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01];
     private static readonly byte[] _oath = [0xA0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01];
     private static readonly byte[] _openPgp = [0xD2, 0x76, 0x00, 0x01, 0x24, 0x01];
     private static readonly byte[] _piv = [0xA0, 0x00, 0x00, 0x03, 0x08, 0x00, 0x00, 0x10, 0x00];
@@ -43,13 +43,13 @@ public static class ApplicationIds
     public static ReadOnlyMemory<byte> Otp => _otp.ToArray();
 
     /// <summary>
-    /// Gets the application identifier that selects the FIDO U2F applet. This identifier is provided for
-    /// U2F-era interoperability and is not used by the SDK's own sessions.
+    /// Gets the FIDO application identifier under its U2F-era interoperability name. This is the same
+    /// AID as <see cref="Fido" />, not a separate applet, and is not used by the SDK's own sessions.
     /// </summary>
     public static ReadOnlyMemory<byte> FidoU2f => _fidoU2f.ToArray();
 
-    /// <summary>Gets the application identifier that selects the FIDO2 applet.</summary>
-    public static ReadOnlyMemory<byte> Fido2 => _fido2.ToArray();
+    /// <summary>Gets the application identifier that selects the shared FIDO applet for CTAP1/U2F and CTAP2.</summary>
+    public static ReadOnlyMemory<byte> Fido => _fido.ToArray();
 
     /// <summary>Gets the application identifier that selects the OATH applet.</summary>
     public static ReadOnlyMemory<byte> Oath => _oath.ToArray();

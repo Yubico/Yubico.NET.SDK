@@ -15,9 +15,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
@@ -58,7 +58,7 @@ public class WebAuthnClientTests
     public async Task MakeCredential_NonResident_ReturnsValidResponse(YubiKeyTestState state)
     {
         await using var session = await state.Device
-            .CreateFidoSessionAsync();
+            .CreateCtap2SessionAsync();
 
         await NormalizePinAsync(session);
 
@@ -86,7 +86,7 @@ public class WebAuthnClientTests
     public async Task MakeCredential_ResidentKey_ReturnsCredentialWithAaguid(YubiKeyTestState state)
     {
         await using var session = await state.Device
-            .CreateFidoSessionAsync();
+            .CreateCtap2SessionAsync();
 
         await NormalizePinAsync(session);
 
@@ -109,7 +109,7 @@ public class WebAuthnClientTests
     public async Task FullCeremony_RegisterThenAuthenticate_Succeeds(YubiKeyTestState state)
     {
         await using var session = await state.Device
-            .CreateFidoSessionAsync();
+            .CreateCtap2SessionAsync();
 
         await NormalizePinAsync(session);
 
@@ -132,7 +132,7 @@ public class WebAuthnClientTests
         // --- Authentication ---
         // Need a new session since the backend took ownership
         await using var session2 = await state.Device
-            .CreateFidoSessionAsync();
+            .CreateCtap2SessionAsync();
 
         await using var authClient = CreateClient(session2);
 
@@ -169,7 +169,7 @@ public class WebAuthnClientTests
     public async Task GetAssertion_DiscoverableCredential_ReturnsUserInfo(YubiKeyTestState state)
     {
         await using var session = await state.Device
-            .CreateFidoSessionAsync();
+            .CreateCtap2SessionAsync();
 
         await NormalizePinAsync(session);
 
@@ -186,7 +186,7 @@ public class WebAuthnClientTests
 
         // Authenticate without allow list (discoverable)
         await using var session2 = await state.Device
-            .CreateFidoSessionAsync();
+            .CreateCtap2SessionAsync();
 
         await using var authClient = CreateClient(session2);
 
@@ -234,7 +234,7 @@ public class WebAuthnClientTests
         YubiKeyTestState state)
     {
         await using var session = await state.Device
-            .CreateFidoSessionAsync();
+            .CreateCtap2SessionAsync();
 
         // A PIN is deliberately set on the authenticator. Discouraged must still skip verification.
         await NormalizePinAsync(session);

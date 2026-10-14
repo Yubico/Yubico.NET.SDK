@@ -59,7 +59,7 @@ public static class ResetMenu
         AnsiConsole.MarkupLine("[red bold]║  This operation will PERMANENTLY DESTROY all data including: ║[/]");
         AnsiConsole.MarkupLine("[red bold]║                                                              ║[/]");
         AnsiConsole.MarkupLine("[red bold]║  • All PIV keys and certificates                             ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║  • All FIDO2/WebAuthn credentials                            ║[/]");
+        AnsiConsole.MarkupLine("[red bold]║  • All FIDO2/WebAuthn credentials                           ║[/]");
         AnsiConsole.MarkupLine("[red bold]║  • All OATH (TOTP/HOTP) accounts                             ║[/]");
         AnsiConsole.MarkupLine("[red bold]║  • All OpenPGP keys                                          ║[/]");
         AnsiConsole.MarkupLine("[red bold]║  • All Yubico OTP configurations                             ║[/]");

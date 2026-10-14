@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
 /// <summary>
 /// A FIDO HID connection to a YubiKey using CTAP HID protocol (64-byte packets).
-/// Used for FIDO2/U2F and Management over FIDO interface.
+/// Used for FIDO2/CTAP2, CTAP1/U2F, and Management over the FIDO interface.
 /// </summary>
 /// <remarks>
 ///     <para>

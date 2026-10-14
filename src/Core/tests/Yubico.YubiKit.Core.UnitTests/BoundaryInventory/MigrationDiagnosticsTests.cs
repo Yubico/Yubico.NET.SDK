@@ -213,7 +213,7 @@ public class MigrationDiagnosticsTests
         using var protocol = new FidoHidProtocol(connection, factory.CreateLogger<FidoHidProtocol>());
         try
         {
-            InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
+            InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendCommandAsync(
                 CtapConstants.CtapVendorFirst, secret, UserPresenceNotification.Create(
                     new FailingPrompt(), new UserPresenceContext { Basis = UserPresenceBasis.PolicyRequires, Application = "FIDO2", Scope = "example.com" }), Ct));
             Assert.Equal("prompt failed", failure.Message);
@@ -238,7 +238,7 @@ public class MigrationDiagnosticsTests
         using var protocol = new FidoHidProtocol(connection, factory.CreateLogger<FidoHidProtocol>());
         try
         {
-            InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
+            InvalidOperationException failure = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendCommandAsync(
                 CtapConstants.CtapVendorFirst, secret, UserPresenceNotification.Create(
                     new FailingPrompt(Encoding.ASCII.GetString(secret)),
                     new UserPresenceContext { Basis = UserPresenceBasis.PolicyRequires, Application = "FIDO2", Scope = "example.com" }), Ct));

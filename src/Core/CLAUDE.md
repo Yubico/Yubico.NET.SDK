@@ -370,6 +370,17 @@ HID listeners expose typed `HidDeviceRescanHint` callbacks. These hints are diag
 
 ## Session Base Class
 
+### FIDO application and CTAP vocabulary
+
+CTAP2 operation semantics live in `Yubico.YubiKit.Ctap2`; Core's FIDO HID classes, interfaces,
+namespace, and `ConnectionType.HidFido` represent the shared physical transport. Internal
+`IFidoHidProtocol.SendCommandAsync` accepts a CTAPHID command, not a CTAP2 operation code.
+`RawCtapHidSession` replaces `RawFidoHidSession` and preserves application-agnostic CTAPHID framing.
+`ApplicationIds.Fido` replaces `ApplicationIds.Fido2` and selects the shared CTAP1/U2F and CTAP2
+applet; `FidoU2f` remains an explicitly same-AID interoperability alias. Keep the FIDO2 app identity
+in `DeviceCapabilities.Fido2` (`0x200`) and `UserPresenceApplications.Fido2` (`"FIDO2"`), but use
+`UserPresenceOperations.Ctap2` (`"Ctap2.Method"`) for CTAP2 operation contexts.
+
 `ApplicationSession` centralizes shared session state:
 - `FirmwareVersion`
 - `ConnectionType`
@@ -561,5 +572,5 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 ## Related Modules
 
 - **Yubico.YubiKit.Management** - Uses Core for device info queries
-- **Yubico.YubiKit.Fido2** - Uses Core's HID and cryptography
+- **Yubico.YubiKit.Ctap2** - Uses Core's shared FIDO HID framing and cryptography for CTAP2 operations
 - **Yubico.YubiKit.Piv** - Uses Core's SmartCard protocol

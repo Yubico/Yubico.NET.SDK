@@ -26,7 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKit.WebAuthn.csproj"/>
-    <ProjectReference Include="..\..\..\Fido2\src\Yubico.YubiKit.Fido2.csproj"/>
+    <ProjectReference Include="..\..\..\Ctap2\src\Yubico.YubiKit.Ctap2.csproj"/>
     <ProjectReference Include="..\..\..\Core\src\Yubico.YubiKit.Core.csproj"/>
     <ProjectReference Include="..\..\..\Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj"/>
   </ItemGroup>

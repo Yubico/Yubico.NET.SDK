@@ -827,7 +827,7 @@ This matches the Java yubikit-android Backend pattern where Backend doesn't impl
 **Before (protocol branching):**
 ```csharp
 if (_fidoProtocol is not null)
-    result = await _fidoProtocol.SendVendorCommandAsync(0xC2, data, ct);
+    result = await _fidoProtocol.SendCommandAsync(0xC2, data, ct);
 else
     result = await _smartCardProtocol.TransmitAsync(apdu, ct);
 ```

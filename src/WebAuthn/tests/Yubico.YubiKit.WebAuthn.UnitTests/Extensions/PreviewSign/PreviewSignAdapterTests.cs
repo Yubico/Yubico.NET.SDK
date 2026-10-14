@@ -14,9 +14,9 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 using Yubico.YubiKit.WebAuthn.Preferences;

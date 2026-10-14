@@ -147,13 +147,13 @@ Do not add a separate command-object hierarchy for SmartCard applets.
 
 ## CTAP And CBOR Style
 
-FIDO2 and WebAuthn can use request builders or DTOs where CBOR structure is complex, but request construction should remain inspectable.
+CTAP2 and WebAuthn can use request builders or DTOs where CBOR structure is complex, but request construction should remain inspectable.
 
 - Prefer one canonical CTAP request-building convention.
 - Avoid hand-rolled CBOR copies when a shared pure helper already exists.
 - Keep PIN/UV auth parameter construction explicit and zero sensitive buffers.
 - Use data DTOs for request/response shape, not executor objects.
-- WebAuthn should delegate CTAP/FIDO behavior to Fido2 and avoid duplicating protocol logic.
+- WebAuthn should delegate CTAP2 behavior to Ctap2 and avoid duplicating protocol logic.
 
 ## Sensitive Data Style
 

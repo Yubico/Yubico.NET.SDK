@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
@@ -109,7 +109,7 @@ internal static class PrfAdapter
             var key = reader.ReadTextString();
             if (key == "eval")
             {
-                // Delegate to Fido2's PrfOutput decoder
+                // Delegate to CTAP2's PrfOutput decoder
                 var prfOutput = PrfOutput.Decode(reader);
                 if (prfOutput is null || !prfOutput.First.HasValue)
                 {

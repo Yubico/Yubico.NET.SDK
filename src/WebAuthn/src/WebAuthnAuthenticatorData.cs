@@ -14,7 +14,7 @@
 
 using System.Collections.ObjectModel;
 using System.Formats.Cbor;
-using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Ctap2.Credentials;
 
 namespace Yubico.YubiKit.WebAuthn;
 
@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.WebAuthn;
 /// WebAuthn authenticator data wrapper.
 /// </summary>
 /// <remarks>
-/// Wraps the Fido2-level AuthenticatorData and adds parsed extension outputs.
+/// Wraps the CTAP2-level AuthenticatorData and adds parsed extension outputs.
 /// </remarks>
 public sealed class WebAuthnAuthenticatorData
 {

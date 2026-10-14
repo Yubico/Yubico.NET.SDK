@@ -1278,7 +1278,7 @@ List<string> ValidateNativeAotContract(
         ["Yubico.YubiKit.Core.csproj"] = "YubiKeyManager",
         ["Yubico.YubiKit.Management.csproj"] = "ManagementSession",
         ["Yubico.YubiKit.Piv.csproj"] = "PivSession",
-        ["Yubico.YubiKit.Fido2.csproj"] = "FidoSession",
+        ["Yubico.YubiKit.Ctap2.csproj"] = "Ctap2Session",
         ["Yubico.YubiKit.WebAuthn.csproj"] = "WebAuthnClient",
         ["Yubico.YubiKit.Oath.csproj"] = "OathSession",
         ["Yubico.YubiKit.OpenPgp.csproj"] = "OpenPgpSession",

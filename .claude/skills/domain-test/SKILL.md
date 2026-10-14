@@ -58,7 +58,7 @@ dotnet toolchain.cs test
 
 ```bash
 dotnet toolchain.cs -- test --project Piv
-dotnet toolchain.cs -- test --project Fido2
+dotnet toolchain.cs -- test --project Ctap2
 dotnet toolchain.cs -- test --project SecurityDomain
 ```
 
@@ -191,7 +191,7 @@ For AI tools using bash with `mode="sync"`:
 
 The `--project` option uses partial, case-insensitive matching:
 - `--project Piv` matches `Yubico.YubiKit.Piv.UnitTests`
-- `--project Fido` matches `Yubico.YubiKit.Fido2.UnitTests`
+- `--project Ctap2` matches `Yubico.YubiKit.Ctap2.UnitTests`
 
 If no match is found, the script lists available projects.
 

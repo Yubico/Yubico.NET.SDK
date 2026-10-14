@@ -91,7 +91,7 @@ V1 gave you two packages — `Yubico.Core` and `Yubico.YubiKey` — and every
 applet came along whether you touched it or not. V2 splits into ten focused
 packages:
 
-`Yubico.YubiKit.Core`, `.Management`, `.Piv`, `.Fido2`, `.WebAuthn`, `.Oath`,
+`Yubico.YubiKit.Core`, `.Management`, `.Piv`, `.Ctap2`, `.WebAuthn`, `.Oath`,
 `.YubiOtp`, `.OpenPgp`, `.SecurityDomain`, `.YubiHsm`
 
 Reference the applets your application actually uses and your deployed

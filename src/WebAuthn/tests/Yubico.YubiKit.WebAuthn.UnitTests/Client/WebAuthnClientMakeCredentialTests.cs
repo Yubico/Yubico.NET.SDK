@@ -16,11 +16,11 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Security.Cryptography;
 using System.Text;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Extensions;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Extensions;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
@@ -42,7 +42,7 @@ public class WebAuthnClientMakeCredentialTests
             throw new InvalidOperationException("Failed to parse origin");
 
         // Setup default mock responses
-        var mockInfo = MockFido2Responses.CreateMockAuthenticatorInfo();
+        var mockInfo = MockCtap2Responses.CreateMockAuthenticatorInfo();
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(mockInfo);
 
@@ -69,7 +69,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -120,7 +120,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         // Act (should not throw)
         await client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -155,7 +155,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         // Act (should not throw)
         await client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -183,7 +183,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -210,7 +210,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse(expectedGuid));
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse(expectedGuid));
 
         // Act
         var response = await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -238,7 +238,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
@@ -256,7 +256,7 @@ public class WebAuthnClientMakeCredentialTests
     {
         // Arrange
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
         _mockBackend.GetPinUvTokenAsync(
             PinUvAuthMethod.Pin,
             Arg.Any<PinUvAuthTokenPermissions>(),
@@ -286,7 +286,7 @@ public class WebAuthnClientMakeCredentialTests
                     throw new CtapException(CtapStatus.PuatRequired);
                 }
 
-                return MockFido2Responses.CreateMockMakeCredentialResponse();
+                return MockCtap2Responses.CreateMockMakeCredentialResponse();
             });
 
         // Act
@@ -307,7 +307,7 @@ public class WebAuthnClientMakeCredentialTests
         // Arrange
         var tokenPermissions = new List<PinUvAuthTokenPermissions>();
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
         _mockBackend.GetPinUvTokenAsync(
             PinUvAuthMethod.Pin,
             Arg.Do<PinUvAuthTokenPermissions>(p => tokenPermissions.Add(p)),
@@ -341,7 +341,7 @@ public class WebAuthnClientMakeCredentialTests
                     throw new CtapException(CtapStatus.PuatRequired);
                 }
 
-                return MockFido2Responses.CreateMockMakeCredentialResponse();
+                return MockCtap2Responses.CreateMockMakeCredentialResponse();
             });
 
         // Act
@@ -371,7 +371,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         _ = await _client.MakeCredentialAsync(
@@ -421,7 +421,7 @@ public class WebAuthnClientMakeCredentialTests
                 callCount++;
                 return callCount == 1
                     ? throw new CtapException(CtapStatus.PuatRequired)
-                    : MockFido2Responses.CreateMockMakeCredentialResponse();
+                    : MockCtap2Responses.CreateMockMakeCredentialResponse();
             });
 
         // Act - UV is left unspecified so the PuatRequired retry path is the one taken.
@@ -451,7 +451,7 @@ public class WebAuthnClientMakeCredentialTests
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         // Act
         _ = await _client.MakeCredentialAsync(
@@ -526,7 +526,7 @@ public class WebAuthnClientMakeCredentialTests
     public async Task MakeCredential_WhenPinNeededAndNoPromptConfigured_ThrowsNotAllowed()
     {
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
                 clientPinSupported: true, uvSupported: false));
 
         var options = new RegistrationOptions
@@ -577,7 +577,7 @@ public class WebAuthnClientMakeCredentialTests
         var issued = new List<byte[]>();
 
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
 
         _mockBackend.GetPinUvTokenAsync(
             PinUvAuthMethod.Pin,
@@ -627,7 +627,7 @@ public class WebAuthnClientMakeCredentialTests
     private void ArrangePinTokenAcquisition(TestPinUvAuthProtocol protocol)
     {
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
 
         _mockBackend.GetPinUvTokenAsync(
             PinUvAuthMethod.Pin,

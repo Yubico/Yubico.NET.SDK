@@ -1,5 +1,13 @@
 # V1 to V2 Migration Documentation Changelog
 
+## 2026-10-14 - CTAP2 semantic naming
+
+- Added `ctap2-semantic-rename` to the map for the current package/namespace rename from `Yubico.YubiKit.Fido2` to `Yubico.YubiKit.Ctap2`, and the `Ctap2Session`/`ICtap2Session`, `CreateCtap2SessionAsync`, `GetCtap2InfoAsync`, and `Ctap2CredentialOptions.ForCtap2Pin` names. This documentation update does not advance `.state.yml` or claim a merged commit.
+- `CtapCommand`, `CtapStatus`, and `CtapException` move directly into the CTAP2 namespace. Internal backend/request-encoding/transport-order names follow CTAP2; shared FIDO transport names do not. `IFidoHidProtocol.SendVendorCommandAsync` becomes `SendCommandAsync` to describe shared CTAPHID dispatch.
+- Core raw FIDO HID access is named `RawCtapHidSession`/`CreateRawCtapHidSessionAsync`, not `RawCtap2HidSession`. Replace `ApplicationIds.Fido2` with `ApplicationIds.Fido` for the shared smart-card AID; `FidoU2f` is its explicit alias. `DeviceCapabilities.Fido2` and `UserPresenceApplications.Fido2` (value `FIDO2`) retain their application-level meaning.
+- Update presence-operation references to `UserPresenceOperations.Ctap2` and persisted/compared operation strings to `Ctap2.Method`. Update renamed public named arguments, including `ctap2Session` where that is the signature's new spelling; positional arguments and the PIN encoding/ownership contracts do not change.
+- Historical v1 snippets, removed factory/DI API names, commit subjects, stable map IDs, external `python-fido2`/`libfido2` names, and FIDO/CTAPHID wire identifiers retain their original spelling. The rename changes naming only, not runtime features or protocol bytes.
+
 ## 2026-06-30 - Initial baseline snapshot
 
 - Created the initial migration guide, mapping seed, and automation state for branch `yubikit` at commit `e348013685d92a6a665cd0b8bd7e8b05850fddd5`.

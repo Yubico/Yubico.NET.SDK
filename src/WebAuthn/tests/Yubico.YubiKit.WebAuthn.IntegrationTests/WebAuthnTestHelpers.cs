@@ -13,12 +13,11 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 
-using CredentialManagementClass = Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement;
+using CredentialManagementClass = Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement;
 
 namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 
@@ -29,7 +28,7 @@ internal static class WebAuthnTestHelpers
     internal const string TestOriginUrl = "https://example.com";
     internal static readonly byte[] KnownTestPin = [0x31, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37];
 
-    internal static WebAuthnClient CreateClient(FidoSession session)
+    internal static WebAuthnClient CreateClient(Ctap2Session session)
     {
         WebAuthnOrigin.TryParse(TestOriginUrl, out var origin);
 
@@ -42,7 +41,7 @@ internal static class WebAuthnTestHelpers
             });
     }
 
-    internal static async Task NormalizePinAsync(FidoSession session)
+    internal static async Task NormalizePinAsync(Ctap2Session session)
     {
         var info = await session.GetInfoAsync();
         var pinIsSet = info.Options.TryGetValue("clientPin", out var v) && v;
@@ -82,7 +81,7 @@ internal static class WebAuthnTestHelpers
         }
     }
 
-    internal static async Task<bool> SupportsPreviewSignAsync(FidoSession session)
+    internal static async Task<bool> SupportsPreviewSignAsync(Ctap2Session session)
     {
         var info = await session.GetInfoAsync();
         return info.Extensions?.Contains("previewSign") == true;
@@ -92,11 +91,11 @@ internal static class WebAuthnTestHelpers
     /// Deletes all credentials for the specified relying party.
     /// Gracefully ignores "no credentials" error.
     /// </summary>
-    /// <param name="session">The FIDO session.</param>
+    /// <param name="session">The CTAP2 session.</param>
     /// <param name="rpId">The relying party ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     internal static async Task DeleteAllCredentialsForRpAsync(
-        FidoSession session,
+        Ctap2Session session,
         string rpId,
         CancellationToken cancellationToken = default)
     {

@@ -65,7 +65,7 @@ dotnet toolchain.cs build
 ```bash
 # Partial match on project name
 dotnet toolchain.cs -- build --project Piv
-dotnet toolchain.cs -- build --project Fido2
+dotnet toolchain.cs -- build --project Ctap2
 ```
 
 ### Clean Build from Scratch
@@ -126,7 +126,7 @@ For AI tools using bash with `mode="sync"`:
 
 The `--project` option uses partial, case-insensitive matching:
 - `--project Piv` matches `Yubico.YubiKit.Piv`
-- `--project Fido` matches `Yubico.YubiKit.Fido2`
+- `--project Ctap2` matches `Yubico.YubiKit.Ctap2`
 
 If no match is found, the script lists available projects.
 

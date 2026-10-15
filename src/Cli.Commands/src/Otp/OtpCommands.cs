@@ -96,6 +96,11 @@ public sealed class OtpStaticSettings : OtpSlotSettings
     [CommandOption("--keyboard-layout <LAYOUT>")]
     [Description("Keyboard layout (default: US).")]
     public string? KeyboardLayout { get; set; }
+
+    public override ValidationResult Validate() =>
+        Length is < 1 or > OtpHelpers.MaxStaticPasswordLength
+            ? ValidationResult.Error($"--length must be between 1 and {OtpHelpers.MaxStaticPasswordLength}.")
+            : ValidationResult.Success();
 }
 
 public sealed class OtpYubiOtpSettings : OtpSlotSettings
@@ -198,8 +203,14 @@ public static class OtpHelpers
         return ParseHex(hex, name)!;
     }
 
+    /// <summary>Static password capacity: the fixed, UID and key fields of a slot (16 + 6 + 16 bytes).</summary>
+    public const int MaxStaticPasswordLength = 38;
+
     public static string GenerateStaticPassword(int length)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(length, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(length, MaxStaticPasswordLength);
+
         Span<byte> randomBytes = stackalloc byte[length];
         RandomNumberGenerator.Fill(randomBytes);
 
@@ -477,7 +488,7 @@ public sealed class OtpStaticCommand : YkCommandBase<OtpStaticSettings>
 
         if (settings.Generate)
         {
-            int length = settings.Length ?? 38;
+            int length = settings.Length ?? OtpHelpers.MaxStaticPasswordLength;
             string generated = OtpHelpers.GenerateStaticPassword(length);
             OutputHelpers.WriteKeyValue("Generated password", generated);
             scanCodes = Encoding.UTF8.GetBytes(generated);

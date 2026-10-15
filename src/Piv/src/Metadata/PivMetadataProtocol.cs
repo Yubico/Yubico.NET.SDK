@@ -434,7 +434,9 @@ internal static class PivMetadataProtocol
     /// Sets the PIN and PUK retry limits.
     /// </summary>
     /// <remarks>
-    /// Requires management key authentication. This command also resets PIN and PUK to defaults.
+    /// The session checks management key authentication here; the card also requires a verified PIN,
+    /// which the SDK cannot observe. See <see cref="IPivSession.SetPinAttemptsAsync" /> for the
+    /// credential reset this command performs.
     /// </remarks>
     internal static async Task SetPinAttemptsAsync(
         IPivBackend backend,

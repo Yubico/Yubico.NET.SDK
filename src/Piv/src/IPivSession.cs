@@ -156,8 +156,19 @@ public interface IPivSession : IApplicationSession
     Task UnblockPinAsync(ReadOnlyMemory<byte> pukUtf8, ReadOnlyMemory<byte> newPinUtf8, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Set PIN and PUK retry limits.
+    ///     Sets the PIN and PUK retry limits (Yubico SET PIN RETRIES, INS FA). Requires management key
+    ///     authentication (<see cref="AuthenticateAsync" />) and a verified PIN (<see cref="VerifyPinAsync" />);
+    ///     the card refuses the command without both.
     /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         <b>This resets both credentials.</b> The YubiKey sets the PIN back to <c>123456</c> and the PUK
+    ///         to <c>12345678</c> every time this command runs, even when the limits do not change. Follow it
+    ///         with <see cref="ChangePinAsync" /> and <see cref="ChangePukAsync" /> to set real values. The
+    ///         three commands are separate; a failure between them leaves the defaults in place.
+    ///     </para>
+    ///     <para>Mirrors yubikit/piv.py <c>PivSession.set_pin_attempts</c>.</para>
+    /// </remarks>
     /// <param name="pinAttempts">PIN retry limit (1-255).</param>
     /// <param name="pukAttempts">PUK retry limit (1-255).</param>
     /// <param name="cancellationToken">Cancellation token.</param>

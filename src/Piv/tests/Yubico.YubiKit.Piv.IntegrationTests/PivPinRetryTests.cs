@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
@@ -98,6 +99,49 @@ public class PivPinRetryTests
 
             var metadataRestored = await session.GetPinMetadataAsync();
             Assert.Equal(3, metadataRestored.RetriesRemaining);
+        }
+        finally
+        {
+            await session.ResetAsync();
+        }
+    }
+
+    /// <summary>
+    /// Audit 26e (YESDK-1634): pins what the SetPinAttemptsAsync docs say. The device refuses the
+    /// command without a verified PIN even with the management key authenticated, and when it runs it
+    /// resets the PIN and PUK to their defaults, even if the limits are unchanged.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task SetPinAttempts_RequiresPin_AndResetsPinAndPukEvenWithUnchangedLimits(YubiKeyTestState state)
+    {
+        byte[] defaultPuk = "12345678"u8.ToArray();
+        byte[] customPin = "654321"u8.ToArray();
+        byte[] customPuk = "87654321"u8.ToArray();
+
+        await using var session = await state.Device.CreatePivSessionAsync();
+        await session.ResetAsync();
+
+        try
+        {
+            var before = await session.GetPinMetadataAsync();
+            await session.ChangePinAsync(DefaultPin, customPin);
+            await session.ChangePukAsync(defaultPuk, customPuk);
+
+            // Management key only, PIN not verified in this session: the card must refuse.
+            await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));
+            var withoutPin = await Record.ExceptionAsync(
+                () => session.SetPinAttemptsAsync(before.TotalRetries, before.TotalRetries));
+            Assert.IsType<ApduException>(withoutPin);
+            await session.VerifyPinAsync(customPin); // still the custom PIN: nothing was reset
+
+            // Same limits the card already has, PIN verified: runs, and resets both credentials.
+            await session.SetPinAttemptsAsync(before.TotalRetries, before.TotalRetries);
+
+            await Assert.ThrowsAsync<InvalidPinException>(() => session.VerifyPinAsync(customPin));
+            await session.VerifyPinAsync(DefaultPin);
+            await session.ChangePukAsync(defaultPuk, customPuk); // succeeds only if the PUK is back to default
         }
         finally
         {

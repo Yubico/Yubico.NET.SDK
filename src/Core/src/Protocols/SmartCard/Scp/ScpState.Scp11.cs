@@ -32,6 +32,8 @@ internal partial class ScpState
     private const byte InsPerformSecurityOperation = 0x2A;
     private const byte InsInternalAuthenticate = 0x88;
     private const byte InsExternalAuthenticate = 0x82;
+    private const int TagEpkSdEcka = 0x5F49;
+    private const int TagReceipt = 0x86;
 
     public static async Task<ScpState> Scp11InitAsync(
         IApduProcessor processor,
@@ -113,7 +115,11 @@ internal partial class ScpState
                 throw ApduException.FromResponse(response, authenticateCommand, "SCP11 authentication failed");
 
             // Receive and process response (ephemeral SD public key and receipt)
+            // GPC v2.3 Amendment F (SCP11) v1.4 §7.1.3: ePK.SD.ECKA (5F49) followed by the receipt (86)
             using var tlvs = TlvHelper.DecodeList(response.Data.Span);
+            if (tlvs.Count < 2 || tlvs[0].Tag != TagEpkSdEcka || tlvs[1].Tag != TagReceipt)
+                throw new BadResponseException(
+                    "Malformed SCP11 authentication response: expected ePK.SD.ECKA (5F49) followed by receipt (86)");
 
             var epkSdEckaTlv = tlvs[0]; // YubiKey ephemeral SD public key
             var sdReceipt = tlvs[1].Value; // YubiKey receipt

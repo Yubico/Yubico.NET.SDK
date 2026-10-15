@@ -104,6 +104,9 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     /// <returns>The plaintext. The caller owns it.</returns>
     public byte[] Decrypt(ReadOnlySpan<byte> encrypted)
     {
+        if (encrypted.Length == 0 || encrypted.Length % BlockSize != 0)
+            throw new BadResponseException("Encrypted response data is not a whole number of AES blocks");
+
         byte[]? rentedDecrypted = null;
         Span<byte> decrypted = encrypted.Length <= StackAllocThreshold
             ? stackalloc byte[encrypted.Length]
@@ -122,8 +125,9 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
             if (decryptedBytesWritten != encrypted.Length)
                 throw new InvalidOperationException("Data decryption failed");
 
-            // Strip ISO/IEC 9797-1 Method 2 padding: trailing zeros, then one 0x80.
-            for (var i = decrypted.Length - 1; i > 0; i--)
+            // Strip ISO/IEC 9797-1 Method 2 padding: trailing zeros, then one 0x80. The 0x80 may be at
+            // index 0, which is an empty message.
+            for (var i = decrypted.Length - 1; i >= 0; i--)
                 if (decrypted[i] == PaddingByte)
                 {
                     logger?.LogTrace("Decrypted {ByteCount} bytes of response data", i);

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -114,6 +116,86 @@ public class CoreScpAuditReproTests
             useScp: true,
             encrypt: false,
             TestContext.Current.CancellationToken));
+    }
+
+    // --- N2 (no Jira key): SCP initialization and response parsing must fail with BadResponseException ---
+
+    /// <summary>
+    ///     GP Amd D §7.1.1.3: INITIALIZE UPDATE returns 10 + 3 + 8 + 8 = 29 bytes. Anything shorter is malformed.
+    /// </summary>
+    [Theory]
+    [Trait("Audit", "N2")]
+    [InlineData(0)]
+    [InlineData(28)]
+    public async Task N2_Scp03InitializeUpdateShortResponse_ThrowsBadResponse(int dataLength)
+    {
+        var raw = new FakeApduProcessor { Formatter = new ApduFormatterShort() };
+        raw.EnqueueResponse(0x90, 0x00, new byte[dataLength]);
+        using var keyParams = Scp03KeyParameters.Default;
+
+        await Assert.ThrowsAsync<BadResponseException>(() =>
+            ScpState.Scp03InitAsync(raw, keyParams, cancellationToken: TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>
+    ///     GP Amd F §7.1.3: the SCP11 authenticate response is ePK.SD.ECKA (5F49) followed by the receipt (86).
+    /// </summary>
+    [Theory]
+    [Trait("Audit", "N2")]
+    [InlineData(new byte[] { 0x86, 0x01, 0xAA })] // one TLV
+    [InlineData(new byte[] { 0x86, 0x01, 0xAA, 0x5F, 0x49, 0x01, 0xBB })] // swapped
+    [InlineData(new byte[] { 0x5F, 0x49, 0x01, 0xBB, 0x87, 0x01, 0xAA })] // wrong receipt tag
+    public async Task N2_Scp11AuthenticateMalformedTlvs_ThrowsBadResponse(byte[] responseData)
+    {
+        var raw = new FakeApduProcessor { Formatter = new ApduFormatterShort() };
+        raw.EnqueueResponse(0x90, 0x00, responseData);
+        using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        using var keyParams = new Scp11KeyParameters(
+            new KeyReference(ScpKid.SCP11b, 0x01),
+            ECPublicKey.CreateFromParameters(ecdh.PublicKey.ExportParameters()));
+
+        await Assert.ThrowsAsync<BadResponseException>(() =>
+            ScpState.Scp11InitAsync(raw, keyParams, TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>GP Amd D §6.2.7: response ciphertext is whole AES blocks, never empty.</summary>
+    [Theory]
+    [Trait("Audit", "N2")]
+    [InlineData(0)]
+    [InlineData(15)]
+    [InlineData(17)]
+    public void N2_DecryptNonBlockLength_ThrowsBadResponse(int length)
+    {
+        using var state = new ScpState(new SessionKeys(new byte[16], new byte[16], new byte[16]), new byte[16]);
+        Assert.Throws<BadResponseException>(() => state.Decrypt(new byte[length]));
+    }
+
+    /// <summary>
+    ///     ISO/IEC 9797-1 Padding Method 2 covers the whole block: 80 00..00 is an empty message
+    ///     (Python scp.py L238-242 at 4ca60f7 accepts it), while all zeros has no 0x80 and is bad padding.
+    /// </summary>
+    [Fact]
+    [Trait("Audit", "N2")]
+    public void N2_DecryptPaddingOnlyBlock_IsEmptyMessage_AndAllZerosIsBadPadding()
+    {
+        using var state = new ScpState(new SessionKeys(new byte[16], new byte[16], new byte[16]), new byte[16]);
+        _ = state.Encrypt([]); // advance the counter so Decrypt has a command to answer
+
+        Assert.Empty(state.Decrypt(EncryptBlockForResponse(state, [0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])));
+        Assert.Throws<BadResponseException>(() => state.Decrypt(EncryptBlockForResponse(state, new byte[16])));
+    }
+
+    /// <summary>Produces the ciphertext a card would send for <paramref name="plaintextBlock" /> at the current counter.</summary>
+    private static byte[] EncryptBlockForResponse(ScpState state, byte[] plaintextBlock)
+    {
+        // Mirror the card side: IV = AES-ECB(S-ENC, 0x80 || 0..0 || counter), S-ENC is all zeros here.
+        using var aes = Aes.Create();
+        aes.Key = new byte[16];
+        Span<byte> ivData = stackalloc byte[16];
+        ivData[0] = 0x80;
+        ivData[15] = 1;
+        var iv = aes.EncryptEcb(ivData, PaddingMode.None);
+        return aes.EncryptCbc(plaintextBlock, iv, PaddingMode.None);
     }
 
     private static string Head(string text) => text.Length <= 300 ? text : text[..300];

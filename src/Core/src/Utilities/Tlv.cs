@@ -229,17 +229,28 @@ public sealed class Tlv : IDisposable
             throw new ArgumentException("Indefinite length encoding (0x80) is not supported");
         }
 
-        // If the length is more than one byte, process remaining bytes.
+        // Long form (X.690 §8.1.3.5): bits 7..1 give the number of subsequent length octets, which
+        // encode an unsigned big-endian length. 0xFF is reserved. Redundant leading zero octets are
+        // permitted (Note 2), so the octet count itself is not limited, only the value.
         if (length > 0x80)
         {
-            var lengthLn = length - 0x80;
-            length = 0;
-            for (var i = 0; i < lengthLn; i++)
+            if (length == 0xFF) throw new ArgumentException("Reserved length octet 0xFF");
+
+            var lengthOctets = length - 0x80;
+            if (buffer.Length < lengthOctets) throw new ArgumentException("Insufficient data for length");
+
+            long declaredLength = 0;
+            foreach (var octet in buffer[..lengthOctets])
             {
-                length = (length << 8) | buffer[0];
-                buffer = buffer[1..];
+                declaredLength = (declaredLength << 8) | octet;
+                if (declaredLength > int.MaxValue) throw new ArgumentException("Length exceeds supported range");
             }
+
+            length = (int)declaredLength;
+            buffer = buffer[lengthOctets..];
         }
+
+        if (buffer.Length < length) throw new ArgumentException("Insufficient data for value");
 
         var value = buffer[..length];
         buffer = buffer[length..]; // Advance the buffer to the end of the value

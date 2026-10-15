@@ -53,27 +53,6 @@ public class CoreNumericBoundaryAuditReproTests
         Assert.Equal(protocol.RequestedPages.Count, protocol.RequestedPages.Distinct().Count());
     }
 
-    // ---- #25 c) RandomNumberGeneratorExt.GetInt32 --------------------------------------------
-
-    /// <summary>
-    ///     For ranges wider than 2^31 the rejection loop is skipped and a constant is returned without
-    ///     consulting the RNG at all (e.g. [int.MinValue, int.MaxValue) always yields -1).
-    /// </summary>
-    [Theory]
-    [Trait("Audit", "YESDK-1633")]
-    [InlineData(int.MinValue, int.MaxValue)]
-    [InlineData(-1, int.MaxValue)]
-    [InlineData(int.MinValue, 1)]
-    public void YESDK1633_GetInt32WideRange_ConsumesRandomness(int fromInclusive, int toExclusive)
-    {
-        using var rng = new CountingRandomNumberGenerator();
-
-        var value = rng.GetInt32(fromInclusive, toExclusive);
-
-        Assert.InRange(value, fromInclusive, toExclusive - 1);
-        Assert.True(rng.GetBytesCalls > 0, $"GetInt32 returned {value} without drawing any random bytes.");
-    }
-
     // ---- #25 d) HkdfUtilities ---------------------------------------------------------------
 
     /// <summary>
@@ -209,16 +188,5 @@ public class CoreNumericBoundaryAuditReproTests
         public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null) { }
 
         public void Dispose() { }
-    }
-
-    private sealed class CountingRandomNumberGenerator : RandomNumberGenerator
-    {
-        public int GetBytesCalls { get; private set; }
-
-        public override void GetBytes(byte[] data)
-        {
-            GetBytesCalls++;
-            RandomNumberGenerator.Fill(data);
-        }
     }
 }

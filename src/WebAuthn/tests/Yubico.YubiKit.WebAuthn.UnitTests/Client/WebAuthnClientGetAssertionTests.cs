@@ -260,8 +260,8 @@ public class WebAuthnClientGetAssertionTests
         Assert.Single(result);
         Assert.Equal(2, requests.Count);
         Assert.Null(requests[0].Options);
-        Assert.NotNull(requests[1].Options);
-        Assert.True(requests[1].Options!.TryGetValue("uv", out var uv) && uv);
+        // The token is the verification; CTAP §6.2 forbids "uv" next to pinUvAuthParam.
+        Assert.False(requests[1].Options?.ContainsKey("uv") ?? false);
         Assert.NotNull(requests[1].PinUvAuthParam);
         Assert.Equal((byte)2, requests[1].PinUvAuthProtocol.GetValueOrDefault());
     }

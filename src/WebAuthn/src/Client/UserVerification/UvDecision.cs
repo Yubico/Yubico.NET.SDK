@@ -90,13 +90,16 @@ internal static class UvDecisionLogic
             return noUv;
         }
 
-        // User verification is wanted. Pick a method: PIN first, then built-in UV.
+        // User verification is wanted. Pick a method: PIN first, then built-in UV. Either way the
+        // pinUvAuthToken carries the verification, so the "uv" option key stays absent: CTAP 2.1-2.3
+        // §6.1/§6.2 forbid "uv" together with pinUvAuthParam, and §6.1 forbids "uv" at all on an
+        // authenticator without built-in UV.
         if (clientPinConfigured && pinAvailable)
         {
             return new UvDecision(
                 UseToken: true,
                 UseUv: false,
-                UvOption: preference == UserVerificationPreference.Required ? true : (bool?)null,
+                UvOption: null,
                 Method: PinUvAuthMethod.Pin,
                 Permissions: requestedPermissions);
         }
@@ -106,7 +109,7 @@ internal static class UvDecisionLogic
             return new UvDecision(
                 UseToken: true,
                 UseUv: true,
-                UvOption: true,
+                UvOption: null,
                 Method: PinUvAuthMethod.Uv,
                 Permissions: requestedPermissions);
         }

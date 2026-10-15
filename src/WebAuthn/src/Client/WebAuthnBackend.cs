@@ -14,7 +14,6 @@
 
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Util;
 
@@ -121,8 +120,10 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
                 desc.Transports
             )).ToList(),
 
-            ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true && rk,
-            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true && uv
+            // Absent stays absent, as in GetAssertionAsync: an explicit "uv": false is still the uv
+            // option key, which CTAP §6.1 forbids next to pinUvAuthParam.
+            ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true ? rk : null,
+            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true ? uv : null
         };
 
         // Add PIN/UV auth if provided

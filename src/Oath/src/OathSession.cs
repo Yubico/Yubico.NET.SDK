@@ -218,7 +218,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
             var oathType = (OathType)(typeByte & OathConstants.MaskType);
             var credentialId = value[1..].ToArray();
 
-            var (issuer, name, period) = Credential.ParseCredentialId(credentialId, oathType);
+            if (!TryParseCredentialId(credentialId, oathType, "LIST", out var issuer, out var name, out var period))
+                continue;
 
             credentials.Add(new Credential(
                 DeviceId,
@@ -447,6 +448,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
         if (credential.OathType == OathType.Totp)
         {
+            // RFC 6238 §4.2: T = floor((now - T0) / X). Credentials read from the device are already
+            // validated; this guards a Credential built by the caller.
+            if (credential.Period <= 0)
+                throw new ArgumentException("TOTP credential period must be positive (RFC 6238 §4.1).", nameof(credential));
+
             long timeStep = ts / credential.Period;
             challenge = new byte[OathConstants.ChallengeLength];
             BinaryPrimitives.WriteInt64BigEndian(challenge, timeStep);
@@ -517,6 +523,36 @@ public sealed class OathSession : ApplicationSession, IOathSession
         };
     }
 
+    /// <summary>
+    ///     Parses a credential ID from a device response. A malformed ID (for example a TOTP period
+    ///     prefix of 0, written by another client) is logged by length and skipped, so one bad entry
+    ///     does not hide the rest of the device's credentials.
+    /// </summary>
+    private bool TryParseCredentialId(
+        byte[] credentialId,
+        OathType oathType,
+        string instruction,
+        out string? issuer,
+        out string name,
+        out int period)
+    {
+        try
+        {
+            (issuer, name, period) = Credential.ParseCredentialId(credentialId, oathType);
+            return true;
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex,
+                "Skipping credential with malformed ID (length {Length}) in {Instruction} response",
+                credentialId.Length, instruction);
+            issuer = null;
+            name = string.Empty;
+            period = 0;
+            return false;
+        }
+    }
+
     /// <inheritdoc />
     public async Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(
         long? timestamp = null,
@@ -559,7 +595,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
             // a type byte before the credential ID.
             var credentialId = nameTlv.Value.ToArray();
             var oathType = responseTlv.Tag == OathConstants.TagHotp ? OathType.Hotp : OathType.Totp;
-            var (issuer, name, period) = Credential.ParseCredentialId(credentialId, oathType);
+            if (!TryParseCredentialId(credentialId, oathType, "CALCULATE ALL", out var issuer, out var name, out var period))
+                continue;
 
             bool touchRequired = responseTlv.Tag == OathConstants.TagTouch;
             var credential = new Credential(DeviceId, credentialId, issuer, name, oathType, period, touchRequired);

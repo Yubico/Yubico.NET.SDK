@@ -63,6 +63,10 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Lists all credentials stored on the device.
     /// </summary>
+    /// <remarks>
+    ///     A credential whose ID is malformed (for example a TOTP period prefix of 0 written by another
+    ///     client; RFC 6238 §4.1 requires a positive time step) is omitted and logged at warning level.
+    /// </remarks>
     Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -89,15 +93,23 @@ public interface IOathSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Calculates a formatted OTP code for a single credential.
+    ///     Calculates a formatted OTP code for a single credential (RFC 4226 for HOTP, RFC 6238 for TOTP).
     /// </summary>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="credential" /> is TOTP with a period that is not positive.
+    /// </exception>
     Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Calculates codes for all credentials on the device.
+    ///     Calculates codes for all credentials on the device (YKOATH CALCULATE ALL).
     ///     HOTP and touch-required credentials return <c>null</c> codes.
     /// </summary>
+    /// <remarks>
+    ///     The device computes every TOTP response with the default 30-second time step; credentials with
+    ///     another period are recalculated individually. A credential whose ID is malformed is omitted
+    ///     and logged at warning level, as in <see cref="ListCredentialsAsync" />.
+    /// </remarks>
     Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null,
         CancellationToken cancellationToken = default);
 

@@ -59,7 +59,6 @@ internal class ScpProcessor(
 
         byte[]? scpCommandData = null;
         byte[]? finalCommandData = null;
-        byte[]? mac = null;
         byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
         Memory<byte> formattedApdu = default;
         var stateAdvanced = false;
@@ -108,11 +107,9 @@ internal class ScpProcessor(
             var leLength = isExtendedApdu ? 2 : 1;
             var macLength = apduToMac.Length - MacLength - leLength;
 
-            mac = State.Mac(apduToMac[..macLength]);
+            // Step 7: Compute the MAC straight into the reserved slot in the last 8 bytes
+            State.Mac(apduToMac[..macLength], macedData.Span[commandData.Length..]);
             stateAdvanced = true;
-
-            // Step 7: Fill in the MAC in the last 8 bytes
-            mac.AsSpan().CopyTo(macedData.Span[commandData.Length..]);
 
             // Step 8: Create final command with MAC filled in
             finalCommandData = macedData.Span.ToArray();
@@ -132,8 +129,14 @@ internal class ScpProcessor(
                 // regardless of whether the command data was encrypted
                 if (unmacdData.Length > 0)
                 {
-                    var decryptedData = State.Decrypt(unmacdData);
-                    return new ApduResponse(decryptedData, response.SW);
+                    try
+                    {
+                        return new ApduResponse(State.Decrypt(unmacdData), response.SW);
+                    }
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(unmacdData);
+                    }
                 }
 
                 return new ApduResponse(unmacdData, response.SW);
@@ -152,7 +155,6 @@ internal class ScpProcessor(
             CryptographicOperations.ZeroMemory(formattedApdu.Span);
             CryptographicOperations.ZeroMemory(scpCommandData.AsSpan());
             CryptographicOperations.ZeroMemory(finalCommandData.AsSpan());
-            CryptographicOperations.ZeroMemory(mac.AsSpan());
         }
     }
 

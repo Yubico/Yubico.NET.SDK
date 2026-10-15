@@ -180,13 +180,7 @@ var deviceInfo = await mgmt.GetDeviceInfoAsync(cancellationToken);
 **Use when:** Single configuration change, don't need to query device first
 
 ```csharp
-var config = new DeviceConfig
-{
-    EnabledCapabilities = new Dictionary<Transport, int>
-    {
-        { Transport.Usb, (int)DeviceCapabilities.Piv }
-    }
-};
+var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv };
 
 // Extension handles everything
 await yubiKey.SetDeviceConfigAsync(
@@ -544,13 +538,7 @@ public async Task AdvancedFiltering_ModernUsbPiv_Works(YubiKeyTestState state)
 public async Task BAD_TEST_DisableCapabilities(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedInfo) =>
     {
-        var config = new DeviceConfig
-        {
-            EnabledCapabilities = new Dictionary<Transport, int>
-            {
-                { Transport.Usb, (int)DeviceCapabilities.Otp } // Disables PIV!
-            }
-        };
+        var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Otp }; // Disables PIV!
         
         // This BREAKS all PIV tests that run after this!
         await mgmt.SetDeviceConfigAsync(config, reboot: true);
@@ -604,14 +592,7 @@ public async Task ConfigurationChange_AppliesAndRestores(YubiKeyTestState state)
     finally
     {
         // Restore original configuration
-        var restoreConfig = new DeviceConfig
-        {
-            EnabledCapabilities = new Dictionary<Transport, int>
-            {
-                { Transport.Usb, (int)originalUsb },
-                { Transport.Nfc, (int)originalNfc }
-            }
-        };
+        var restoreConfig = new DeviceConfig { UsbEnabled = originalUsb, NfcEnabled = originalNfc };
         await mgmt.SetDeviceConfigAsync(restoreConfig, reboot: true);
     }
 }
@@ -678,12 +659,9 @@ Assert.Equal(info1.SerialNumber, info2.SerialNumber); // Value comparison
 ```csharp
 var config = new DeviceConfig
 {
-    EnabledCapabilities = new Dictionary<Transport, int>
-    {
-        { Transport.Usb, (int)(DeviceCapabilities.Piv | DeviceCapabilities.Oath) }
-    },
+    UsbEnabled = DeviceCapabilities.Piv | DeviceCapabilities.Oath,
     AutoEjectTimeout = 30,
-    DeviceFlags = DeviceConfig.FlagEject,
+    DeviceFlags = DeviceFlags.TouchEject,
     ChallengeResponseTimeout = 15
 };
 

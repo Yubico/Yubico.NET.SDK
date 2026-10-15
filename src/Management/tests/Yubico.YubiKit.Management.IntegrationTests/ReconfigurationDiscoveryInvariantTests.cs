@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
@@ -142,9 +141,7 @@ public class ReconfigurationDiscoveryInvariantTests
     /// </summary>
     private static async Task ApplyConfigWithRebootAsync(int serial, DeviceCapabilities usbEnabled)
     {
-        var config = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Transport.Usb, (int)usbEnabled)
-            .Build();
+        var config = new DeviceConfig { UsbEnabled = usbEnabled };
 
         var deadline = DateTime.UtcNow + RediscoveryDeadline;
         Exception? lastFailure = null;

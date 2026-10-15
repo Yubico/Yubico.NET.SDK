@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
-
-using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
 /// <summary>
@@ -145,10 +143,7 @@ public class ManagementSessionSimpleTests
             var originalAutoEject = deviceInfo.AutoEjectTimeout;
             var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
 
-            var newConfig = DeviceConfig.CreateBuilder()
-                .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
-                .WithAutoEjectTimeout(newAutoEject)
-                .Build();
+            var newConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = newAutoEject };
 
             await mgmt.SetDeviceConfigAsync(newConfig);
 
@@ -156,10 +151,7 @@ public class ManagementSessionSimpleTests
             Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
 
             // Restore original setting
-            var restoreConfig = DeviceConfig.CreateBuilder()
-                .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
-                .WithAutoEjectTimeout(originalAutoEject)
-                .Build();
+            var restoreConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = originalAutoEject };
 
             await mgmt.SetDeviceConfigAsync(restoreConfig);
         });
@@ -177,10 +169,7 @@ public class ManagementSessionSimpleTests
         var originalAutoEject = originalInfo.AutoEjectTimeout;
         var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
 
-        var newConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Transport.Usb, (int)originalInfo.UsbEnabled)
-            .WithAutoEjectTimeout(newAutoEject)
-            .Build();
+        var newConfig = new DeviceConfig { UsbEnabled = originalInfo.UsbEnabled, AutoEjectTimeout = newAutoEject };
 
         await device.SetDeviceConfigAsync(newConfig);
 
@@ -188,10 +177,7 @@ public class ManagementSessionSimpleTests
         Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
 
         // Restore original setting
-        var restoreConfig = DeviceConfig.CreateBuilder()
-            .WithCapabilities(Transport.Usb, (int)originalInfo.UsbEnabled)
-            .WithAutoEjectTimeout(originalAutoEject)
-            .Build();
+        var restoreConfig = new DeviceConfig { UsbEnabled = originalInfo.UsbEnabled, AutoEjectTimeout = originalAutoEject };
 
         await device.SetDeviceConfigAsync(restoreConfig);
     }

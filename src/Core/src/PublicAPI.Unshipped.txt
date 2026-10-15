@@ -262,7 +262,6 @@ Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.Parameters.get -> System.Security
 Yubico.YubiKit.Core.Cryptography.RSAPublicKey
 Yubico.YubiKit.Core.Cryptography.RSAPublicKey.KeyDefinition.get -> Yubico.YubiKit.Core.Cryptography.KeyDefinition!
 Yubico.YubiKit.Core.Cryptography.RSAPublicKey.Parameters.get -> System.Security.Cryptography.RSAParameters
-Yubico.YubiKit.Core.Cryptography.RandomNumberGeneratorExt
 Yubico.YubiKit.Core.DeviceAction
 Yubico.YubiKit.Core.DeviceAction.Added = 0 -> Yubico.YubiKit.Core.DeviceAction
 Yubico.YubiKit.Core.DeviceAction.Removed = 1 -> Yubico.YubiKit.Core.DeviceAction
@@ -1025,9 +1024,6 @@ static Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.CreateFromParameters(Syste
 static Yubico.YubiKit.Core.Cryptography.RSAPrivateKey.CreateFromPkcs8(System.ReadOnlyMemory<byte> encodedKey) -> Yubico.YubiKit.Core.Cryptography.RSAPrivateKey!
 static Yubico.YubiKit.Core.Cryptography.RSAPublicKey.CreateFromParameters(System.Security.Cryptography.RSAParameters parameters) -> Yubico.YubiKit.Core.Cryptography.RSAPublicKey!
 static Yubico.YubiKit.Core.Cryptography.RSAPublicKey.CreateFromSubjectPublicKeyInfo(System.ReadOnlyMemory<byte> subjectPublicKeyInfo) -> Yubico.YubiKit.Core.Cryptography.RSAPublicKey!
-static Yubico.YubiKit.Core.Cryptography.RandomNumberGeneratorExt.Fill(this System.Security.Cryptography.RandomNumberGenerator! rng, System.Span<byte> data) -> void
-static Yubico.YubiKit.Core.Cryptography.RandomNumberGeneratorExt.GetByte(this System.Security.Cryptography.RandomNumberGenerator! rng, int fromInclusive, int toExclusive) -> byte
-static Yubico.YubiKit.Core.Cryptography.RandomNumberGeneratorExt.GetInt32(this System.Security.Cryptography.RandomNumberGenerator! rng, int fromInclusive, int toExclusive) -> int
 static Yubico.YubiKit.Core.Devices.ConnectionTypeMapper.SupportsConnectionType(Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType interfaceType, Yubico.YubiKit.Core.Devices.ConnectionType connectionType) -> bool
 static Yubico.YubiKit.Core.Devices.ConnectionTypeMapper.ToConnectionType(Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType interfaceType) -> Yubico.YubiKit.Core.Devices.ConnectionType
 static Yubico.YubiKit.Core.Devices.DeviceInfo.CreateFromTlvs(System.Collections.Generic.IReadOnlyCollection<Yubico.YubiKit.Core.Utilities.Tlv!>! tlvs, Yubico.YubiKit.Core.Devices.FirmwareVersion? defaultVersion) -> Yubico.YubiKit.Core.Devices.DeviceInfo

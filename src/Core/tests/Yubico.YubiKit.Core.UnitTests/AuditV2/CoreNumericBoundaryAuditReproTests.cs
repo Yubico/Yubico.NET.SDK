@@ -93,6 +93,29 @@ public class CoreNumericBoundaryAuditReproTests
         Assert.ThrowsAny<ArgumentException>(() => TlvHelper.DecodeList(encoded).Dispose());
     }
 
+    /// <summary>X.690 §8.1.3.5 c): the initial length octet 0xFF is reserved.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1633")]
+    public void YESDK1633_TlvReservedLengthOctetFF_Rejected()
+    {
+        byte[] encoded = [0x5A, 0xFF, .. new byte[127]];
+
+        Assert.ThrowsAny<ArgumentException>(() => Tlv.Create(encoded));
+    }
+
+    /// <summary>X.690 §8.1.3.5 Note 2: redundant leading zero length octets are valid BER.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1633")]
+    public void YESDK1633_TlvLeadingZeroLengthOctets_Accepted()
+    {
+        byte[] encoded = [0x5A, 0x85, 0x00, 0x00, 0x00, 0x00, 0x01, 0xAA];
+
+        using var tlv = Tlv.Create(encoded);
+
+        Assert.Equal(0x5A, tlv.Tag);
+        Assert.Equal(new byte[] { 0xAA }, tlv.Value.ToArray());
+    }
+
     // ---- #25 f) TlvHelper.EncodeDictionary ----------------------------------------------------
 
     /// <summary>

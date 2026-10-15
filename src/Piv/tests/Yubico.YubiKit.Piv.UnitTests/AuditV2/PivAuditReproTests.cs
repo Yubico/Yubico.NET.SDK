@@ -1,7 +1,6 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
-using System.Security.Cryptography;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.Piv.UnitTests.AuditV2;
@@ -31,7 +30,7 @@ public class PivAuditReproTests
         // Entire short APDU, including the nested 7C / 82 / 81 dynamic-authentication template.
         byte[] expected = [0x00, 0x87, (byte)PivAlgorithm.Ed25519, (byte)PivSlot.Authentication,
             (byte)(messageLength + 6), 0x7C, (byte)(messageLength + 4), 0x82, 0x00,
-            0x81, (byte)messageLength, .. message];
+            0x81, (byte)messageLength, .. message, 0x00 /* Le */];
         Assert.Equal(expected, apdu);
     }
 
@@ -49,6 +48,24 @@ public class PivAuditReproTests
         Assert.Equal(32, apdu[10]);
         Assert.Equal(new byte[30], apdu.AsSpan(11, 30).ToArray());
         Assert.Equal(new byte[] { 0xA1, 0xB2 }, apdu.AsSpan(41, 2).ToArray());
+    }
+
+    /// <summary>FIPS 186-5 §6.4.1: a 20-byte SHA-1 digest on P-256 is the integer e, left-padded to 32 bytes.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task YESDK1634_Sha1DigestOnP256IsLeftPaddedTo32Bytes()
+    {
+        var connection = CreateConnection();
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        byte[] digest = Enumerable.Range(1, 20).Select(i => (byte)i).ToArray();
+
+        _ = await session.SignOrDecryptAsync(PivSlot.Authentication, PivAlgorithm.EccP256, digest, TestContext.Current.CancellationToken);
+
+        byte[] apdu = connection.TransmittedCommands[^1];
+        Assert.Equal(0x81, apdu[9]);
+        Assert.Equal(32, apdu[10]);
+        Assert.Equal(new byte[12], apdu.AsSpan(11, 12).ToArray());
+        Assert.Equal(digest, apdu.AsSpan(23, 20).ToArray());
     }
 
     [Fact]

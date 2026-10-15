@@ -260,11 +260,16 @@ public interface IPivSession : IApplicationSession
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Operation depends on key algorithm:
-    /// - RSA: PKCS#1 v1.5 padding for both sign and decrypt
-    /// - ECDSA: Sign hash directly (caller must hash data)
-    /// - EdDSA: Sign message directly
-    /// - X25519: Not supported (use CalculateSecretAsync)
+    /// The YubiKey performs the raw private-key operation; what <paramref name="data" /> must contain
+    /// depends on the algorithm:
+    /// - RSA: the complete encoded block (PKCS#1 v1.5, OAEP or PSS), at most the modulus length. The SDK
+    ///   adds no padding; a shorter block is left-padded with zeros, a longer one throws
+    ///   <see cref="ArgumentException" />.
+    /// - ECDSA: the digest. A digest longer than the curve order uses its leftmost bytes
+    ///   (FIPS 186-5 §6.4.1); a shorter one is left-padded, which keeps its integer value.
+    /// - EdDSA (Ed25519): the message itself, passed through unchanged (RFC 8032 PureEdDSA). The SDK
+    ///   applies no length limit; the device does.
+    /// - X25519: not supported here (use CalculateSecretAsync)
     /// </para>
     /// <para>
     /// May require PIN verification or touch based on key policy.

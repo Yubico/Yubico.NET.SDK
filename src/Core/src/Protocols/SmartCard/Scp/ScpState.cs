@@ -21,19 +21,28 @@ using Yubico.YubiKit.Core.Cryptography;
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 /// <summary>
-///     Internal SCP state class for managing SCP state, handling encryption/decryption and MAC.
+///     Per-session secure messaging state for an established SCP03 or SCP11 channel: the session keys,
+///     the MAC chaining value and the encryption counter. Applies and removes C-MAC, C-DECRYPTION, R-MAC
+///     and R-ENCRYPTION (GlobalPlatform Card Spec v2.3 Amd D v1.1.2.6 §6.2). SCP11 reuses the SCP03
+///     secure messaging layer once its keys are derived (Amd F v1.4 §6).
 /// </summary>
+/// <remarks>
+///     Establish a session with <see cref="Scp03InitAsync" /> or <see cref="Scp11InitAsync" />; the
+///     partial files hold the protocol-specific handshakes. <c>macChain</c> is the initial MAC chaining
+///     value: 16 zero bytes for SCP03 (Amd D §6.2.4), the receipt for SCP11 (Amd F §6.2.1).
+/// </remarks>
 internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null) : IDisposable
 {
-    // Encryption/Padding Constants
-    private const byte PaddingByte = 0x80; // ISO/IEC 9797-1 Padding Method 2
-    private const byte IvPrefixForDecryption = 0x80; // IV generation prefix for response decryption
-    private const int RmacLength = 8; // S8 mode R-MAC, GlobalPlatform SCP03 Amd D §6.2.5
-    private const int MacLength = 8; // S8 mode C-MAC
+    private const byte PaddingByte = 0x80; // ISO/IEC 9797-1 Padding Method 2 (Amd D §6.2.6)
+    private const byte IvPrefixForDecryption = 0x80; // First ICV byte for responses; commands use 0x00 (Amd D §6.2.7)
+    private const int RmacLength = 8; // S8 mode R-MAC (Amd D §6.2.5)
+    private const int MacLength = 8; // S8 mode C-MAC (Amd D §6.2.4)
     private const int BlockSize = 16; // AES block, also the CMAC and chaining-value length
     private const int StackAllocThreshold = 512;
 
-    private int _encCounter = 1; // Counter for encryption (used for both command and response)
+    // Starts at 1 for the first command after EXTERNAL AUTHENTICATE; one counter serves both the command
+    // and its response (Amd D §6.2.6).
+    private int _encCounter = 1;
     private byte[] _macChain = macChain;
     private bool _disposed;
 
@@ -45,6 +54,10 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
         CryptographicOperations.ZeroMemory(_macChain);
     }
 
+    /// <summary>
+    ///     Returns an encryptor using the session DEK, for wrapping key material carried inside a
+    ///     command (for example PUT KEY). Zero IV, caller supplies whole blocks.
+    /// </summary>
     public DataEncryptor GetDataEncryptor() =>
         keys.Dek.IsEmpty
             ? throw new InvalidOperationException("Decryption key not initialized")

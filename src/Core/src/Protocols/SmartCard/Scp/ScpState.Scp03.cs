@@ -19,14 +19,26 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 internal partial class ScpState
 {
-    private const byte InsInitializeUpdate = 0x50;
+    private const byte InsInitializeUpdate = 0x50; // Amd D §7.1.1
 
-    // Key Derivation Constants
-    private const byte DerivationTypeCardCryptogram = 0x00; // Derivation type for card cryptogram verification
-    private const byte DerivationTypeHostCryptogram = 0x01; // Derivation type for host cryptogram generation
-    private const byte DerivationContextLength = 0x40; // Context length in bits (64 bits = 8 bytes)
-    private const int InitializeUpdateResponseLength = 29; // GP Amd D §7.1.1.3: 10 div data + 3 key info + 8 challenge + 8 cryptogram
+    // Data derivation constants (Amd D §4.1.5, Table 4-1). The session keys use 0x04/0x06/0x07, see StaticKeys.
+    private const byte DerivationTypeCardCryptogram = 0x00;
+    private const byte DerivationTypeHostCryptogram = 0x01;
+    private const byte DerivationContextLength = 0x40; // Cryptogram length in bits: 64 = 8 bytes
+    private const int InitializeUpdateResponseLength = 29; // Amd D §7.1.1.3: 10 div data + 3 key info + 8 challenge + 8 cryptogram
 
+    /// <summary>
+    ///     Runs the host side of the SCP03 INITIALIZE UPDATE step (Amd D §7.1.1): derives the session
+    ///     keys from the host and card challenges and verifies the card cryptogram.
+    /// </summary>
+    /// <returns>
+    ///     The session state, plus the host cryptogram the caller must send in EXTERNAL AUTHENTICATE
+    ///     (Amd D §7.1.2) to complete the handshake. The MAC chain starts at zero; EXTERNAL AUTHENTICATE
+    ///     is the first command MAC'd through it.
+    /// </returns>
+    /// <exception cref="BadResponseException">
+    ///     The response is shorter than 29 bytes, or the card cryptogram does not match (wrong key set).
+    /// </exception>
     public static async Task<(ScpState State, byte[] HostCryptogram)> Scp03InitAsync(
         IApduProcessor processor,
         Scp03KeyParameters keyParams,
@@ -56,6 +68,7 @@ internal partial class ScpState
         var cardChallenge = responseData[13..21];
         var cardCryptogram = responseData[21..29];
 
+        // Derivation context is host challenge || card challenge (Amd D §6.2.2.1)
         Span<byte> context = stackalloc byte[16];
         hostChallenge.AsSpan().CopyTo(context);
         cardChallenge.CopyTo(context[8..]);

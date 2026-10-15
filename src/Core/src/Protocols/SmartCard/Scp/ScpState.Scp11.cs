@@ -21,20 +21,30 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 internal partial class ScpState
 {
-    // SCP11 Constants
+    // SCP identifier parameter "i" in the 90 tag of the authenticate command (Amd F §7.6.2.3):
+    // SCP11a mutual authentication with OCE certificates, SCP11b card-only authentication,
+    // SCP11c like SCP11a with offline-scripting support.
     private const byte Scp11aTypeParam = 0x01;
     private const byte Scp11bTypeParam = 0x00;
     private const byte Scp11cTypeParam = 0x03;
-    private const byte Scp11MoreFragmentsFlag = 0x80;
-    private const byte Scp11KeyUsage = 0x3C; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION
-    private const byte Scp11KeyType = 0x88; // AES
+    private const byte Scp11MoreFragmentsFlag = 0x80; // P2 bit 8: more certificates follow (Amd F §7.5)
+    private const byte Scp11KeyUsage = 0x3C; // AUTHENTICATED | C_MAC | C_DECRYPTION | R_MAC | R_ENCRYPTION (tag 95)
+    private const byte Scp11KeyType = 0x88; // AES (tag 80)
 
-    private const byte InsPerformSecurityOperation = 0x2A;
-    private const byte InsInternalAuthenticate = 0x88;
-    private const byte InsExternalAuthenticate = 0x82;
-    private const int TagEpkSdEcka = 0x5F49;
-    private const int TagReceipt = 0x86;
+    private const byte InsPerformSecurityOperation = 0x2A; // Amd F §7.5: send the OCE certificate chain
+    private const byte InsInternalAuthenticate = 0x88; // Amd F §7.6: SCP11b
+    private const byte InsExternalAuthenticate = 0x82; // Amd F §7.6: SCP11a/c (named MUTUAL AUTHENTICATE in the spec)
+    private const int TagEpkSdEcka = 0x5F49; // Ephemeral SD public key in the authenticate response
+    private const int TagReceipt = 0x86; // Receipt: card's key-confirmation MAC, becomes the initial MAC chaining value
 
+    /// <summary>
+    ///     Runs the host side of the SCP11 handshake (Amd F §7.1.1): sends the OCE certificate chain for
+    ///     SCP11a/c, performs the ECKA key agreement with the SD, derives the session keys and verifies
+    ///     the receipt. Unlike SCP03 there is no second step; the returned state is ready for use.
+    /// </summary>
+    /// <exception cref="BadResponseException">
+    ///     The authenticate response does not carry the two expected TLVs, or the receipt does not match.
+    /// </exception>
     public static async Task<ScpState> Scp11InitAsync(
         IApduProcessor processor,
         Scp11KeyParameters keyParams,
@@ -146,10 +156,13 @@ internal partial class ScpState
         }
     }
 
+    /// <summary>
+    ///     Sends the OCE certificate chain to the SD, one PERFORM SECURITY OPERATION per certificate,
+    ///     leaf last, with P2 bit 8 set on every command except the final one (Amd F §7.5).
+    /// </summary>
     private static async Task PerformSecurityOperation(IApduProcessor processor, Scp11KeyParameters keyParams,
         CancellationToken cancellationToken)
     {
-        // GPC v2.3 Amendment F (SCP11) v1.4 §7.5
         ArgumentNullException.ThrowIfNull(keyParams.SkOceEcka);
 
         var oceRef = keyParams.OceKeyRef ?? new KeyReference(0, 0);

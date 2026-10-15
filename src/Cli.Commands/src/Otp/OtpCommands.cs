@@ -9,6 +9,7 @@ using System.Text;
 using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Output;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 using Yubico.YubiKit.YubiOtp;
 
 namespace Yubico.YubiKit.Cli.Commands.Otp;
@@ -94,7 +95,8 @@ public sealed class OtpStaticSettings : OtpSlotSettings
     public int? Length { get; set; }
 
     [CommandOption("--keyboard-layout <LAYOUT>")]
-    [Description("Keyboard layout (default: US).")]
+    [Description("Keyboard layout used to translate the password to scan codes: " +
+                 "ModHex, en_US, en_UK, de_DE, fr_FR, it_IT, es_US, sv_SE (default: ModHex, which types the same on any host).")]
     public string? KeyboardLayout { get; set; }
 
     public override ValidationResult Validate() =>
@@ -163,8 +165,6 @@ public sealed class OtpSettingsSettings : OtpSlotSettings
 
 public static class OtpHelpers
 {
-    private const string ModHexChars = "cbdefghijklnrtuv";
-
     public static Slot ParseSlot(int slot) =>
         slot switch
         {
@@ -206,21 +206,45 @@ public static class OtpHelpers
     /// <summary>Static password capacity: the fixed, UID and key fields of a slot (16 + 6 + 16 bytes).</summary>
     public const int MaxStaticPasswordLength = 38;
 
-    public static string GenerateStaticPassword(int length)
+    /// <summary>
+    ///     Parses a <c>--keyboard-layout</c> value by enum name, case-insensitively. Defaults to
+    ///     <see cref="KeyboardLayout.ModHex" />, as ykman does, because ModHex renders identically on every host.
+    /// </summary>
+    public static KeyboardLayout ParseKeyboardLayout(string? text) =>
+        string.IsNullOrWhiteSpace(text)
+            ? KeyboardLayout.ModHex
+            : Enum.TryParse(text, ignoreCase: true, out KeyboardLayout layout) && Enum.IsDefined(layout)
+                ? layout
+                : throw new ArgumentException(
+                    $"Unknown keyboard layout: {text}. Expected one of: {string.Join(", ", Enum.GetNames<KeyboardLayout>())}.");
+
+    /// <summary>
+    ///     Builds the slot configuration by translating <paramref name="password" /> to HID scan codes for
+    ///     <paramref name="layout" />. Throws <see cref="ArgumentOutOfRangeException" /> for a character the
+    ///     layout cannot type.
+    /// </summary>
+    public static StaticPasswordSlotConfiguration CreateStaticPasswordConfiguration(string password, KeyboardLayout layout) =>
+        new(password, layout);
+
+    /// <summary>
+    ///     Generates a random password from the characters <paramref name="layout" /> can type, excluding
+    ///     whitespace (ykman's default blocklist). ModHex yields the familiar 16-letter alphabet.
+    /// </summary>
+    public static string GenerateStaticPassword(int length, KeyboardLayout layout = KeyboardLayout.ModHex)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(length, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(length, MaxStaticPasswordLength);
 
-        Span<byte> randomBytes = stackalloc byte[length];
-        RandomNumberGenerator.Fill(randomBytes);
+        var alphabet = HidCodeTranslator.GetInstance(layout).SupportedCharacters
+            .Where(c => !char.IsWhiteSpace(c))
+            .ToArray();
 
         var sb = new StringBuilder(length);
-        foreach (byte b in randomBytes)
+        for (var i = 0; i < length; i++)
         {
-            sb.Append(ModHexChars[b % ModHexChars.Length]);
+            sb.Append(alphabet[RandomNumberGenerator.GetInt32(alphabet.Length)]);
         }
 
-        CryptographicOperations.ZeroMemory(randomBytes);
         return sb.ToString();
     }
 
@@ -484,14 +508,14 @@ public sealed class OtpStaticCommand : YkCommandBase<OtpStaticSettings>
         CommandContext context, OtpStaticSettings settings, YkDeviceContext deviceContext)
     {
         var slot = OtpHelpers.ParseSlot(settings.Slot);
-        byte[] scanCodes;
+        var layout = OtpHelpers.ParseKeyboardLayout(settings.KeyboardLayout);
+        string password;
 
         if (settings.Generate)
         {
             int length = settings.Length ?? OtpHelpers.MaxStaticPasswordLength;
-            string generated = OtpHelpers.GenerateStaticPassword(length);
-            OutputHelpers.WriteKeyValue("Generated password", generated);
-            scanCodes = Encoding.UTF8.GetBytes(generated);
+            password = OtpHelpers.GenerateStaticPassword(length, layout);
+            OutputHelpers.WriteKeyValue("Generated password", password);
         }
         else
         {
@@ -501,7 +525,20 @@ public sealed class OtpStaticCommand : YkCommandBase<OtpStaticSettings>
                 return ExitCode.GenericError;
             }
 
-            scanCodes = Encoding.UTF8.GetBytes(settings.Password);
+            password = settings.Password;
+        }
+
+        // The YubiKey emits HID scan codes, not characters; translate for the host's layout up front so an
+        // untypeable character is reported before any prompt or device access.
+        StaticPasswordSlotConfiguration config;
+        try
+        {
+            config = OtpHelpers.CreateStaticPasswordConfiguration(password, layout);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            OutputHelpers.WriteError($"Password contains a character the {layout} keyboard layout cannot type: {ex.Message}");
+            return ExitCode.GenericError;
         }
 
         byte[] accessCode = OtpHelpers.ParseHex(settings.AccessCode, "access-code") ?? [];
@@ -521,8 +558,6 @@ public sealed class OtpStaticCommand : YkCommandBase<OtpStaticSettings>
             await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
                 deviceContext.SessionOptions);
 
-            using var config = new StaticPasswordSlotConfiguration(scanCodes);
-
             await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode);
 
             OutputHelpers.WriteSuccess(
@@ -531,7 +566,7 @@ public sealed class OtpStaticCommand : YkCommandBase<OtpStaticSettings>
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(scanCodes);
+            config.Dispose();
             CryptographicOperations.ZeroMemory(accessCode);
         }
     }

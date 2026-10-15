@@ -13,7 +13,7 @@ For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.m
 
 ## Module Context
 
-The WebAuthn module implements the W3C Web Authentication API (Level 2/3) on top of the FIDO2 CTAP protocol. It provides:
+The WebAuthn module implements the W3C Web Authentication API (Level 3) on top of the FIDO2 CTAP protocol. It provides:
 - **High-level WebAuthn API**: `WebAuthnClient` orchestrates credential registration and authentication
 - **Extension Framework**: Pluggable CTAP v4 extensions (e.g., `previewSign`)
 - **Backend Abstraction**: `IWebAuthnBackend` (internal) routes operations through `IFidoSession`

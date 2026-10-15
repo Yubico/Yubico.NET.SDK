@@ -334,6 +334,7 @@ Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse.UnsignedExtensionOutputs
 Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement
 Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.Equals(Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement? other) -> bool
 Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.NoneAttestationStatement(System.ReadOnlyMemory<byte> rawCbor) -> void
+static Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement.Empty.get -> Yubico.YubiKit.Fido2.Credentials.NoneAttestationStatement!
 Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement
 Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.Algorithm.get -> int
 Yubico.YubiKit.Fido2.Credentials.PackedAttestationStatement.EcdaaKeyId.get -> System.ReadOnlyMemory<byte>?

@@ -1,9 +1,9 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
+using NSubstitute;
 using System.Formats.Cbor;
 using System.Text.Json;
-using NSubstitute;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
@@ -37,7 +37,8 @@ public class WebAuthnAuditReproTests
 
     private static AuthenticationOptions Authentication() => new()
     {
-        Challenge = new byte[32], RpId = "example.com",
+        Challenge = new byte[32],
+        RpId = "example.com",
         UserVerification = UserVerificationPreference.Discouraged
     };
 
@@ -131,7 +132,9 @@ public class WebAuthnAuditReproTests
         {
             _ = await backend.MakeCredentialAsync(new BackendMakeCredentialRequest
             {
-                ClientDataHash = new byte[32], Rp = Registration().Rp, User = Registration().User,
+                ClientDataHash = new byte[32],
+                Rp = Registration().Rp,
+                User = Registration().User,
                 PubKeyCredParams = [PublicKeyCredentialParameters.CreateES256()]
             }, TestContext.Current.CancellationToken);
         }
@@ -139,7 +142,8 @@ public class WebAuthnAuditReproTests
         {
             _ = await backend.GetAssertionAsync(new BackendGetAssertionRequest
             {
-                ClientDataHash = new byte[32], RpId = "example.com"
+                ClientDataHash = new byte[32],
+                RpId = "example.com"
             }, TestContext.Current.CancellationToken);
         }
 
@@ -201,6 +205,52 @@ public class WebAuthnAuditReproTests
         Assert.Equal(0, statementLength); // must not forward original signature
     }
 
+    /// <summary>
+    ///     WebAuthn L3 §5.1.3 "none": a self attestation (zero AAGUID, packed, no x5c) is left alone; any other
+    ///     preference passes the statement through; after replacement every attestation view agrees and the
+    ///     AAGUID is not zeroed (L3 change log).
+    /// </summary>
+    [Theory]
+    [Trait("Audit", "YESDK-1614")]
+    [InlineData(AttestationPreference.None, false, true, "none")] // non-self, x5c present → replaced
+    [InlineData(AttestationPreference.None, true, false, "packed")] // self attestation → kept
+    [InlineData(AttestationPreference.Direct, false, true, "packed")] // direct → kept
+    public async Task YESDK1614_NonePreferenceKeepsSelfAttestation_AndOtherPreferencesPassThrough(
+        AttestationPreference preference, bool zeroAaguid, bool includeX5c, string expectedFormat)
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+        var aaguid = zeroAaguid ? Guid.Empty : Guid.NewGuid();
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(includeX5c ? 3 : 2);
+        writer.WriteTextString("alg"); writer.WriteInt32(-7);
+        writer.WriteTextString("sig"); writer.WriteByteString([1, 2, 3]);
+        if (includeX5c)
+        {
+            writer.WriteTextString("x5c"); writer.WriteStartArray(1); writer.WriteByteString([0x30, 0x00]); writer.WriteEndArray();
+        }
+        writer.WriteEndMap();
+        var statement = writer.Encode();
+        writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+        writer.WriteInt32(1); writer.WriteTextString("packed");
+        writer.WriteInt32(2); writer.WriteByteString(MockFido2Responses.BuildAuthDataWithAttestedCredential(aaguid));
+        writer.WriteInt32(3); writer.WriteEncodedValue(statement);
+        writer.WriteEndMap();
+        backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MakeCredentialResponse.Decode(writer.Encode()));
+        await using var client = CreateClient(backend);
+
+        var response = await client.MakeCredentialAsync(Registration() with { Attestation = preference },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(expectedFormat, response.AttestationObject.Statement.Format.Value);
+        Assert.Equal(expectedFormat == "none", response.AttestationStatement is NoneAttestationStatement);
+        Assert.Equal(response.AttestationObject.RawCbor.ToArray(), response.RawAttestationObject.ToArray());
+        Assert.Equal(aaguid, response.Aaguid.Value); // never zeroed, whatever the preference
+    }
+
     [Fact]
     [Trait("Audit", "YESDK-1615")]
     public async Task YESDK1615_PreferredResidentKeyOnCapableAuthenticatorRequestsDiscoverable()
@@ -241,7 +291,9 @@ public class WebAuthnAuditReproTests
         await using var backend = new WebAuthnBackend(session);
         _ = await backend.MakeCredentialAsync(new BackendMakeCredentialRequest
         {
-            ClientDataHash = new byte[32], Rp = Registration().Rp, User = Registration().User,
+            ClientDataHash = new byte[32],
+            Rp = Registration().Rp,
+            User = Registration().User,
             PubKeyCredParams = [PublicKeyCredentialParameters.CreateES256()]
         }, TestContext.Current.CancellationToken);
 
@@ -260,7 +312,8 @@ public class WebAuthnAuditReproTests
         await using var client = CreateClient(backend);
         var result = await client.MakeCredentialAsync(Registration() with
         {
-            CrossOrigin = false, TopOrigin = "https://other.example"
+            CrossOrigin = false,
+            TopOrigin = "https://other.example"
         }, cancellationToken: TestContext.Current.CancellationToken);
         using var json = JsonDocument.Parse(result.ClientData.JsonBytes);
         Assert.False(json.RootElement.GetProperty("crossOrigin").GetBoolean());
@@ -279,7 +332,8 @@ public class WebAuthnAuditReproTests
         await using var client = CreateClient(backend);
         var matches = await client.GetAssertionAsync(Authentication() with
         {
-            CrossOrigin = false, TopOrigin = "https://other.example"
+            CrossOrigin = false,
+            TopOrigin = "https://other.example"
         }, cancellationToken: TestContext.Current.CancellationToken);
         var result = await Assert.Single(matches).SelectAsync(TestContext.Current.CancellationToken);
         using var json = JsonDocument.Parse(result.ClientData.JsonBytes);

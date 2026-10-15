@@ -364,13 +364,23 @@ public sealed partial class WebAuthnClient
         // Decode public key from COSE
         var publicKey = CoseKey.Decode(attestedCred.CredentialPublicKey);
 
-        // Use the typed attestation statement from CTAP response (already decoded)
+        // Apply the attestation conveyance preference (WebAuthn L3 §5.4.7, §5.1.3). For "none" the
+        // client replaces any statement that is not a self attestation with fmt "none" and an empty
+        // attStmt, so the RP never sees the attestation certificate chain it declined. The AAGUID is
+        // kept as the authenticator returned it (L3 dropped L2's zeroing). Indirect, Direct and
+        // Enterprise pass the authenticator's statement through.
         var webAuthnStatement = ctapResponse.AttestationStatement;
+        if (options.Attestation == Preferences.AttestationPreference.None
+            && !IsSelfAttestation(attestedCred.Aaguid, webAuthnStatement))
+        {
+            webAuthnStatement = NoneAttestationStatement.Empty;
+        }
 
         // Wrap authenticator data
         var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
 
-        // Create attestation object from decoded components
+        // Create attestation object from the (possibly replaced) statement so AttestationObject,
+        // RawAttestationObject and AttestationStatement agree.
         var attestationObject = WebAuthnAttestationObject.Create(webAuthnAuthData, webAuthnStatement);
 
         // Parse extension outputs via pipeline
@@ -396,4 +406,13 @@ public sealed partial class WebAuthnClient
             ClientExtensionResults = extensionOutputs
         };
     }
+
+    /// <summary>
+    /// WebAuthn L3 §5.1.3 ("none" branch): "If the aaguid in the attested credential data is 16 zero
+    /// bytes, fmt is "packed", and "x5c" is absent ... then self attestation is being used and no
+    /// further action is needed."
+    /// </summary>
+    private static bool IsSelfAttestation(Guid aaguid, AttestationStatement statement) =>
+        statement is PackedAttestationStatement { X5c: null or { Count: 0 } }
+        && aaguid == Guid.Empty;
 }

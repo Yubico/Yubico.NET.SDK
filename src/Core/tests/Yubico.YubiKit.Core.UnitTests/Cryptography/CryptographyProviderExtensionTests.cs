@@ -236,7 +236,7 @@ public class CryptographyProviderExtensionTests
         {
             CryptographyProviders.CmacPrimitivesCreator = _ => primitive;
 
-            Assert.Throws<NotSupportedException>(() => state.Mac([0x01, 0x02]));
+            Assert.Throws<NotSupportedException>(() => state.Mac([0x01, 0x02], new byte[8]));
             Assert.True(primitive.Disposed);
         }
         finally
@@ -247,7 +247,11 @@ public class CryptographyProviderExtensionTests
         using var freshState = new ScpState(
             new SessionKeys(new byte[16], new byte[16], new byte[16]),
             new byte[16]);
-        Assert.Equal(freshState.Mac([0x01, 0x02]), state.Mac([0x01, 0x02]));
+        var expected = new byte[8];
+        var actual = new byte[8];
+        freshState.Mac([0x01, 0x02], expected);
+        state.Mac([0x01, 0x02], actual);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
@@ -262,7 +266,7 @@ public class CryptographyProviderExtensionTests
         {
             CryptographyProviders.CmacPrimitivesCreator = _ => new ThrowingDisposeCmacPrimitives();
 
-            Assert.Throws<NotSupportedException>(() => state.Mac([0x01, 0x02]));
+            Assert.Throws<NotSupportedException>(() => state.Mac([0x01, 0x02], new byte[8]));
         }
         finally
         {
@@ -272,7 +276,11 @@ public class CryptographyProviderExtensionTests
         using var freshState = new ScpState(
             new SessionKeys(new byte[16], new byte[16], new byte[16]),
             new byte[16]);
-        Assert.Equal(freshState.Mac([0x01, 0x02]), state.Mac([0x01, 0x02]));
+        var expected = new byte[8];
+        var actual = new byte[8];
+        freshState.Mac([0x01, 0x02], expected);
+        state.Mac([0x01, 0x02], actual);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]

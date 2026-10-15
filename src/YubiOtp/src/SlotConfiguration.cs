@@ -117,9 +117,14 @@ public abstract class SlotConfiguration : IDisposable
     }
 
     /// <summary>
-    /// Enables or disables slot 2 protection (requires slot 1 touch before slot 2 activates).
+    /// Protects slot 2 against being overwritten. With this flag set on slot 1, the YubiKey refuses to
+    /// write slot 2 unless slot 2 is already configured with the same flag
+    /// (yubikit/yubiotp.py TKTFLAG.PROTECT_CFG2).
     /// </summary>
-    public SlotConfiguration ProtectSlot2(bool enable = true)
+    /// <remarks>
+    /// Not available on an <see cref="UpdateConfiguration"/>, which throws; reprogram the slot instead.
+    /// </remarks>
+    public virtual SlotConfiguration ProtectSlot2(bool enable = true)
     {
         SetTktFlag(TicketFlag.ProtectSlot2, enable);
         return this;

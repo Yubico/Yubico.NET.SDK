@@ -130,6 +130,15 @@ public sealed class UpdateConfiguration : SlotConfiguration
         return this;
     }
 
+    /// <summary>
+    /// Not supported for updates: the protect flag can only be set when a slot is programmed
+    /// (yubikit/yubiotp.py UpdateConfiguration.protect_slot2 raises ValueError).
+    /// </summary>
+    /// <exception cref="ArgumentException">Always.</exception>
+    public override SlotConfiguration ProtectSlot2(bool enable = true) =>
+        throw new ArgumentException(
+            "ProtectSlot2 cannot be changed by an update configuration; reprogram the slot.", nameof(enable));
+
     protected override ExtendedFlag GetEffectiveExtFlags() =>
         _extFlags & ExtendedFlagMasks.UpdateMask;
 

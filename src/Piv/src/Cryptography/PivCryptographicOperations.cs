@@ -74,15 +74,15 @@ internal static class PivCryptographicOperations
     {
         logger.LogDebug("PIV: Signing/decrypting with slot 0x{Slot:X2}, algorithm {Algorithm}", (byte)slot, algorithm);
 
-        // Prepare data according to algorithm key size
-        var preparedData = PrepareDataForCrypto(algorithm, data);
+        // Size the TAG 81 payload for the algorithm; the bytes are written straight into the APDU buffer below.
+        int preparedLength = PreparedDataLength(algorithm, data.Length);
 
         // Build command data: TAG 0x7C [ TAG 0x82 (response) + TAG 0x81 (challenge) ]
         // Pre-compute lengths to avoid List<byte> resizing (which can leave unzeroed copies)
 
         // Inner content: TAG 0x82 (2 bytes) + TAG 0x81 + length encoding + data
-        int dataLenEncodingSize = BerLength.EncodingSize(preparedData.Length);
-        int innerLength = 2 + 1 + dataLenEncodingSize + preparedData.Length; // 0x82,0x00 + 0x81 + len + data
+        int dataLenEncodingSize = BerLength.EncodingSize(preparedLength);
+        int innerLength = 2 + 1 + dataLenEncodingSize + preparedLength; // 0x82,0x00 + 0x81 + len + data
 
         // Template: TAG 0x7C + length encoding + inner content
         int templateLenEncodingSize = BerLength.EncodingSize(innerLength);
@@ -105,9 +105,9 @@ internal static class PivCryptographicOperations
 
             // TAG 0x81 (Challenge/data to sign/decrypt)
             commandData[offset++] = 0x81;
-            offset += BerLength.Write(commandData.AsSpan(offset), preparedData.Length);
+            offset += BerLength.Write(commandData.AsSpan(offset), preparedLength);
 
-            preparedData.CopyTo(commandData.AsSpan(offset));
+            WritePreparedData(algorithm, data.Span, commandData.AsSpan(offset, preparedLength));
 
             // INS 0x87 (AUTHENTICATE), P1 = algorithm, P2 = slot
             var command = new ApduCommand(0x00, 0x87, (byte)algorithm, (byte)slot, commandData);
@@ -151,7 +151,6 @@ internal static class PivCryptographicOperations
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(preparedData);
             CryptographicOperations.ZeroMemory(commandData);
         }
     }
@@ -391,60 +390,64 @@ internal static class PivCryptographicOperations
         }
     }
 
-    private static byte[] PrepareDataForCrypto(PivAlgorithm algorithm, ReadOnlyMemory<byte> data)
-    {
-        int expectedLength = algorithm switch
+    /// <summary>
+    ///     Number of bytes TAG 81 carries for <paramref name="algorithm" /> when the caller supplies
+    ///     <paramref name="dataLength" /> bytes. Pairs with <see cref="WritePreparedData" />.
+    /// </summary>
+    private static int PreparedDataLength(PivAlgorithm algorithm, int dataLength) =>
+        algorithm switch
         {
+            // RFC 8032 §5.1.6: PureEdDSA signs the message itself. Nothing is sized or hashed here;
+            // Ed25519ph is a different scheme, and the device imposes any length limit.
+            PivAlgorithm.Ed25519 => dataLength,
             PivAlgorithm.Rsa1024 => 128,
             PivAlgorithm.Rsa2048 => 256,
             PivAlgorithm.Rsa3072 => 384,
             PivAlgorithm.Rsa4096 => 512,
             PivAlgorithm.EccP256 => 32,
             PivAlgorithm.EccP384 => 48,
-            PivAlgorithm.Ed25519 => 32,
-            _ => data.Length // No padding needed for other algorithms
+            _ => dataLength
         };
 
-        var span = data.Span;
+    /// <summary>
+    ///     Writes the TAG 81 payload for <paramref name="algorithm" /> into <paramref name="destination" />,
+    ///     whose length is <see cref="PreparedDataLength" />. Throws before writing anything when the input
+    ///     cannot be represented without changing it.
+    /// </summary>
+    /// <exception cref="ArgumentException">An RSA block longer than the modulus.</exception>
+    private static void WritePreparedData(PivAlgorithm algorithm, ReadOnlySpan<byte> data, Span<byte> destination)
+    {
+        switch (algorithm)
+        {
+            case PivAlgorithm.Rsa1024 or PivAlgorithm.Rsa2048 or PivAlgorithm.Rsa3072 or PivAlgorithm.Rsa4096:
+                // The caller supplies the complete encoded block (PKCS#1 v1.5, OAEP or PSS). A shorter block
+                // is the same integer left-padded; a longer one cannot be, so it is an error, not a truncation.
+                if (data.Length > destination.Length)
+                    throw new ArgumentException(
+                        $"Data is {data.Length} bytes; an {algorithm} block must be at most {destination.Length} bytes. " +
+                        "Supply the complete encoded block, not the message.", nameof(data));
+                LeftPad(data, destination);
+                return;
 
-        // RSA: Pad with leading zeros if too short, truncate if too long
-        if (algorithm == PivAlgorithm.Rsa1024 || algorithm == PivAlgorithm.Rsa2048 ||
-            algorithm == PivAlgorithm.Rsa3072 || algorithm == PivAlgorithm.Rsa4096)
-        {
-            if (span.Length == expectedLength)
-            {
-                return span.ToArray();
-            }
-            else if (span.Length < expectedLength)
-            {
-                var padded = new byte[expectedLength];
-                span.CopyTo(padded.AsSpan(expectedLength - span.Length));
-                return padded;
-            }
-            else
-            {
-                // Truncate from left
-                return span.Slice(span.Length - expectedLength).ToArray();
-            }
-        }
+            case PivAlgorithm.EccP256 or PivAlgorithm.EccP384:
+                // FIPS 186-5 §6.4.1: the signature uses the leftmost min(N, outlen) bits of the digest, so a
+                // longer digest is truncated from the right and a shorter one is the integer e, left-padded.
+                if (data.Length >= destination.Length)
+                    data[..destination.Length].CopyTo(destination);
+                else
+                    LeftPad(data, destination);
+                return;
 
-        // ECC/Ed25519: Truncate or pad to expected hash length
-        if (span.Length == expectedLength)
-        {
-            return span.ToArray();
+            default:
+                data.CopyTo(destination);
+                return;
         }
-        else if (span.Length > expectedLength)
-        {
-            // Truncate to match key size
-            return span.Slice(0, expectedLength).ToArray();
-        }
-        else
-        {
-            // Pad with zeros at the end (shouldn't normally happen)
-            var padded = new byte[expectedLength];
-            span.CopyTo(padded);
-            return padded;
-        }
+    }
+
+    private static void LeftPad(ReadOnlySpan<byte> data, Span<byte> destination)
+    {
+        destination[..^data.Length].Clear();
+        data.CopyTo(destination[^data.Length..]);
     }
 
     private static byte[] ParseCryptoResponse(ReadOnlyMemory<byte> data)

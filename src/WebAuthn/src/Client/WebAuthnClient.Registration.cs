@@ -84,6 +84,21 @@ public sealed partial class WebAuthnClient
         // Get authenticator info
         var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
 
+        // Resolve the resident-key preference against the authenticator (WebAuthn L3 §5.4.6; python-fido2
+        // do_make_credential): required → rk, preferred → rk only if the authenticator can, discouraged → omit.
+        // An authenticator that cannot store discoverable credentials is skipped for "required" (L3 §5.1.3),
+        // never downgraded to a non-discoverable credential.
+        bool canResidentKey = info.Options.TryGetValue("rk", out var rkSupported) && rkSupported;
+        bool requireResidentKey = options.ResidentKey switch
+        {
+            Preferences.ResidentKeyPreference.Required when !canResidentKey => throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.NotSupported,
+                "Resident key required but the authenticator does not support discoverable credentials."),
+            Preferences.ResidentKeyPreference.Required => true,
+            Preferences.ResidentKeyPreference.Preferred => canResidentKey,
+            _ => false
+        };
+
         // Determine UV/PIN strategy
         var uvDecision = UvDecisionLogic.Decide(
             info,
@@ -117,7 +132,7 @@ public sealed partial class WebAuthnClient
                 cancellationToken).ConfigureAwait(false);
 
             // Build backend request with filtered exclude list
-            var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed);
+            var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey);
 
             // Execute MakeCredential
             MakeCredentialResponse ctapResponse;
@@ -151,7 +166,7 @@ public sealed partial class WebAuthnClient
                     pinBytes,
                     cancellationToken).ConfigureAwait(false);
 
-                request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed);
+                request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey);
                 try
                 {
                     ctapResponse = await ExecuteMakeCredentialAsync(request, cancellationToken).ConfigureAwait(false);
@@ -182,7 +197,7 @@ public sealed partial class WebAuthnClient
             }
 
             // Build WebAuthn response
-            return BuildRegistrationResponse(ctapResponse, clientData, options);
+            return BuildRegistrationResponse(ctapResponse, clientData, options, requireResidentKey);
         }
         finally
         {
@@ -285,12 +300,13 @@ public sealed partial class WebAuthnClient
         PinUvAuthTokenSession? tokenSession,
         UvDecision uvDecision,
         PublicKeyCredentialDescriptor? matchedExclude,
-        bool preflightPerformed)
+        bool preflightPerformed,
+        bool requireResidentKey)
     {
         // Map options to backend request
         var optionsDict = new Dictionary<string, bool>();
 
-        if (options.ResidentKey == Preferences.ResidentKeyPreference.Required)
+        if (requireResidentKey)
         {
             optionsDict["rk"] = true;
         }
@@ -339,7 +355,8 @@ public sealed partial class WebAuthnClient
     private RegistrationResponse BuildRegistrationResponse(
         MakeCredentialResponse ctapResponse,
         WebAuthnClientData clientData,
-        RegistrationOptions options)
+        RegistrationOptions options,
+        bool requireResidentKey)
     {
         // Extract attested credential data from AuthenticatorData
         var attestedCred = ctapResponse.AuthenticatorData.AttestedCredentialData!;
@@ -361,7 +378,7 @@ public sealed partial class WebAuthnClient
             options.Extensions,
             webAuthnAuthData,
             ctapResponse.UnsignedExtensionOutputs,
-            options);
+            requireResidentKey);
 
         return new RegistrationResponse
         {

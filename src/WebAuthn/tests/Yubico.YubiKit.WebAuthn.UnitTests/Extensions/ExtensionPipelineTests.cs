@@ -116,7 +116,7 @@ public class ExtensionPipelineTests
         };
 
         // Act
-        var result = ExtensionPipeline.ParseRegistrationOutputs(null, authData, null, options);
+        var result = ExtensionPipeline.ParseRegistrationOutputs(null, authData, null, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required);
 
         // Assert
         Assert.Null(result);
@@ -138,7 +138,7 @@ public class ExtensionPipelineTests
         };
 
         // Act
-        var result = ExtensionPipeline.ParseRegistrationOutputs(inputs, authData, null, options);
+        var result = ExtensionPipeline.ParseRegistrationOutputs(inputs, authData, null, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required);
 
         // Assert
         Assert.NotNull(result);

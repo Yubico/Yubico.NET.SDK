@@ -5,7 +5,7 @@ using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
-using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.AuditV2;
 
@@ -46,7 +46,7 @@ public class WebAuthnLargeBlobAuditReproTests
 
         // The current pipeline has no argument for the decoded 0x05 key. Keep
         // this contract test focused on the actual registration output it produces.
-        var result = ExtensionPipeline.ParseRegistrationOutputs(inputs, authData, null, options);
+        var result = ExtensionPipeline.ParseRegistrationOutputs(inputs, authData, null, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required);
         Assert.NotNull(result?.LargeBlob);
         Assert.True(result.LargeBlob.Supported);
     }

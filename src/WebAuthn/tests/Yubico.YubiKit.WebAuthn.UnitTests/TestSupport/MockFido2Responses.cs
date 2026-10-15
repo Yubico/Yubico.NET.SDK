@@ -106,13 +106,15 @@ internal static class MockFido2Responses
     public static AuthenticatorInfo CreateMockAuthenticatorInfo(
         bool clientPinSupported = false,
         bool uvSupported = false,
-        int? minPinLength = null)
+        int? minPinLength = null,
+        bool residentKeySupported = false)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
         var optionsCount = 0;
         if (clientPinSupported) optionsCount++;
         if (uvSupported) optionsCount++;
+        if (residentKeySupported) optionsCount++;
 
         var mapSize = (optionsCount > 0 ? 4 : 3) + (minPinLength.HasValue ? 1 : 0);
         writer.WriteStartMap(mapSize);
@@ -140,15 +142,22 @@ internal static class MockFido2Responses
             writer.WriteInt32(4);
             writer.WriteStartMap(optionsCount);
 
-            if (clientPinSupported)
+            // CTAP2 canonical order: shorter keys first, then bytewise ("rk", "uv", "clientPin").
+            if (residentKeySupported)
             {
-                writer.WriteTextString("clientPin");
+                writer.WriteTextString("rk");
                 writer.WriteBoolean(true);
             }
 
             if (uvSupported)
             {
                 writer.WriteTextString("uv");
+                writer.WriteBoolean(true);
+            }
+
+            if (clientPinSupported)
+            {
+                writer.WriteTextString("clientPin");
                 writer.WriteBoolean(true);
             }
 

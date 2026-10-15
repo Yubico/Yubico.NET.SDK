@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
-using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 
@@ -27,22 +26,14 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 internal static class CredPropsAdapter
 {
     /// <summary>
-    /// Derives credProps output from the residentKey option.
+    /// Derives credProps output from the effective <c>requireResidentKey</c> the client used.
     /// </summary>
-    /// <param name="residentKeyPreference">The resident key preference from registration options.</param>
+    /// <remarks>
+    /// WebAuthn L3 §10.1.3: the <c>rk</c> output is "the value of requireResidentKey that was used" in
+    /// the ceremony. The client resolves <c>preferred</c> against the authenticator's capability before
+    /// the request, so the value is always known.
+    /// </remarks>
+    /// <param name="requireResidentKey">Whether the client requested a discoverable credential.</param>
     /// <returns>The derived credProps output.</returns>
-    public static CredPropsOutput DeriveOutput(ResidentKeyPreference residentKeyPreference)
-    {
-        // Per WebAuthn spec: rk is true if residentKey was "required", false if "discouraged",
-        // and null if the client cannot determine (e.g., "preferred")
-        bool? rk = residentKeyPreference switch
-        {
-            ResidentKeyPreference.Required => true,
-            ResidentKeyPreference.Discouraged => false,
-            ResidentKeyPreference.Preferred => null, // Cannot determine without authenticator confirmation
-            _ => null
-        };
-
-        return new CredPropsOutput(rk);
-    }
+    public static CredPropsOutput DeriveOutput(bool requireResidentKey) => new(requireResidentKey);
 }

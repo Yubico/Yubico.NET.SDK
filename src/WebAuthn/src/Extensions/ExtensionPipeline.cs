@@ -151,13 +151,13 @@ internal sealed class ExtensionPipeline
     /// <param name="inputs">The original inputs (to know what was requested).</param>
     /// <param name="authData">The authenticator data with extension outputs.</param>
     /// <param name="unsignedExtensionOutputs">Top-level unsigned extension outputs map (CTAP key 8).</param>
-    /// <param name="originalOptions">The original registration options.</param>
+    /// <param name="requireResidentKey">The effective requireResidentKey the client sent (credProps reports it).</param>
     /// <returns>The parsed extension outputs, or null if no extensions were requested.</returns>
     public static RegistrationExtensionOutputs? ParseRegistrationOutputs(
         RegistrationExtensionInputs? inputs,
         WebAuthnAuthenticatorData authData,
         IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs,
-        RegistrationOptions originalOptions)
+        bool requireResidentKey)
     {
         if (inputs is null)
         {
@@ -241,10 +241,10 @@ internal sealed class ExtensionPipeline
             }
         }
 
-        // CredProps - client-derived from residentKey option
+        // CredProps - the requireResidentKey value the client used (WebAuthn L3 §10.1.3)
         if (inputs.CredProps is not null)
         {
-            credProps = CredPropsAdapter.DeriveOutput(originalOptions.ResidentKey);
+            credProps = CredPropsAdapter.DeriveOutput(requireResidentKey);
         }
 
         // PreviewSign

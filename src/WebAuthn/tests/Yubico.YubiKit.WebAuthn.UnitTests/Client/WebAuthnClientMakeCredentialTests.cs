@@ -170,6 +170,8 @@ public class WebAuthnClientMakeCredentialTests
     public async Task MakeCredential_ResidentKeyRequired_SetsRkOption()
     {
         // Arrange
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(residentKeySupported: true));
         var options = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
@@ -192,6 +194,58 @@ public class WebAuthnClientMakeCredentialTests
         Assert.NotNull(capturedRequest);
         Assert.NotNull(capturedRequest.Options);
         Assert.True(capturedRequest.Options.TryGetValue("rk", out var rk) && rk);
+    }
+
+    /// <summary>WebAuthn L3 §5.1.3: an authenticator that cannot store discoverable credentials is skipped for "required".</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1615")]
+    public async Task MakeCredential_ResidentKeyRequired_WithoutRkSupport_ThrowsNotSupportedBeforeBackendCall()
+    {
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            ResidentKey = ResidentKeyPreference.Required
+        };
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(
+            () => _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+        await _mockBackend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>WebAuthn L3 §5.4.6 "preferred": discoverable if the authenticator can, otherwise the key is omitted.</summary>
+    [Theory]
+    [Trait("Audit", "YESDK-1615")]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public async Task MakeCredential_ResidentKeyPreferred_FollowsAuthenticatorCapability(bool rkSupported, bool expectRkTrue)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(residentKeySupported: rkSupported));
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            ResidentKey = ResidentKeyPreference.Preferred
+        };
+        BackendMakeCredentialRequest? capturedRequest = null;
+        _mockBackend.MakeCredentialAsync(
+            Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
+            Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+
+        await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
+
+        Assert.NotNull(capturedRequest);
+        bool hasRkTrue = capturedRequest.Options?.TryGetValue("rk", out var rk) == true && rk;
+        Assert.Equal(expectRkTrue, hasRkTrue);
+        Assert.False(capturedRequest.Options?.ContainsKey("rk") == true && !expectRkTrue, "rk must be omitted, never false");
     }
 
     [Fact]

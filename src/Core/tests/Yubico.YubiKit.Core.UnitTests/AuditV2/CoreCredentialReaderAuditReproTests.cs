@@ -75,7 +75,34 @@ public class CoreCredentialReaderAuditReproTests
             $"First credential buffer was not cleared: {Convert.ToHexString(seeded.AsSpan(0, 8))}");
     }
 
-    private sealed class CancelOnConfirmPromptConsole(string confirmPrompt, CancellationTokenSource cts)
+    /// <summary>h) variant: the confirmation prompt write throws instead of cancelling.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public void YESDK1634_ConfirmationPromptThrows_FirstCredentialIsCleared()
+    {
+        var seeded = ArrayPool<byte>.Shared.Rent(16);
+        seeded.AsSpan().Fill(0xEE);
+        ArrayPool<byte>.Shared.Return(seeded);
+
+        var options = CredentialReaderOptions.ForPin();
+        var console = new CancelOnConfirmPromptConsole(options.ConfirmPrompt, cts: null);
+        console.Inner.EnqueueKeys("123456");
+        console.Inner.EnqueueKey(ConsoleKey.Enter);
+        var reader = new ConsoleCredentialReader(console);
+
+        Assert.Throws<IOException>(
+            () => reader.ReadCredentialWithConfirmation(options, TestContext.Current.CancellationToken));
+
+        Assert.False(
+            seeded.AsSpan(0, 16).IndexOfAnyExcept((byte)0xEE) < 0,
+            "Precondition failed: the first credential did not use the seeded pool array.");
+        Assert.True(
+            seeded.AsSpan().IndexOfAnyExcept((byte)0) < 0,
+            $"First credential buffer was not cleared: {Convert.ToHexString(seeded.AsSpan(0, 8))}");
+    }
+
+    /// <summary>Cancels the token when the confirm prompt is written, or throws IOException if no token source is given.</summary>
+    private sealed class CancelOnConfirmPromptConsole(string confirmPrompt, CancellationTokenSource? cts)
         : IConsoleInputSource
     {
         public MockConsoleInput Inner { get; } = new();
@@ -92,6 +119,11 @@ public class CoreCredentialReaderAuditReproTests
         {
             if (text == confirmPrompt)
             {
+                if (cts is null)
+                {
+                    throw new IOException("console gone");
+                }
+
                 cts.Cancel();
             }
 

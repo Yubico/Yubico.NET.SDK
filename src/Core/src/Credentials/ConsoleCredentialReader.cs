@@ -88,15 +88,21 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
 
         try
         {
-            _console.Write(options.Prompt);
-            first = ReadCredentialCore(options, cancellationToken);
+            // Same mode selection as ReadCredential: masked keystrokes on a console, line input when
+            // redirected (Console.KeyAvailable throws there). The non-interactive warning prints once.
+            var interactive = _console.IsInteractive;
+            if (!interactive)
+            {
+                WriteNonInteractiveWarning();
+            }
+
+            first = ReadEntry(options.Prompt, interactive, options, cancellationToken);
             if (first is null)
             {
                 return null;
             }
 
-            _console.Write(options.ConfirmPrompt);
-            second = ReadCredentialCore(options, cancellationToken);
+            second = ReadEntry(options.ConfirmPrompt, interactive, options, cancellationToken);
             if (second is null)
             {
                 return null;
@@ -130,11 +136,26 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         return ReadCredentialCore(options, cancellationToken);
     }
 
+    private IMemoryOwner<byte>? ReadEntry(string prompt, bool interactive, CredentialReaderOptions options, CancellationToken cancellationToken)
+    {
+        _console.Write(prompt);
+        return interactive
+            ? ReadCredentialCore(options, cancellationToken)
+            : ReadLineEntry(options);
+    }
+
+    private void WriteNonInteractiveWarning() =>
+        _console.WriteLine("Warning: Running in non-interactive mode. Input will not be masked.");
+
     private IMemoryOwner<byte>? ReadNonInteractive(CredentialReaderOptions options)
     {
-        _console.WriteLine("Warning: Running in non-interactive mode. Input will not be masked.");
+        WriteNonInteractiveWarning();
         _console.Write(options.Prompt);
+        return ReadLineEntry(options);
+    }
 
+    private IMemoryOwner<byte>? ReadLineEntry(CredentialReaderOptions options)
+    {
         string? line = _console.ReadLine();
         if (line is null)
         {

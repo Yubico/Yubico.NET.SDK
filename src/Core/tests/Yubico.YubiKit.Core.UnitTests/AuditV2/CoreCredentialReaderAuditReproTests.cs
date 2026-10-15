@@ -116,6 +116,56 @@ public class CoreCredentialReaderAuditReproTests
             $"First credential buffer was not cleared: {Convert.ToHexString(seeded.AsSpan(0, 8))}");
     }
 
+    // ---- N3 defect 2: confirmation with redirected input ------------------------------------
+
+    /// <summary>
+    ///     Confirmation must follow the reader's documented non-interactive fallback (line input) instead
+    ///     of polling Console.KeyAvailable, which throws when stdin is redirected.
+    /// </summary>
+    [Fact]
+    [Trait("Audit", "N3")]
+    public void N3_NonInteractiveConfirmation_MatchingLines_ReturnsCredential()
+    {
+        var console = new MockConsoleInput { IsInteractive = false };
+        console.EnqueueLine("123456");
+        console.EnqueueLine("123456");
+        var reader = new ConsoleCredentialReader(console);
+
+        using var result = reader.ReadCredentialWithConfirmation(CredentialReaderOptions.ForPin(), TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result);
+        Assert.Equal("123456"u8.ToArray(), result.Memory.ToArray());
+    }
+
+    [Fact]
+    [Trait("Audit", "N3")]
+    public void N3_NonInteractiveConfirmation_MismatchedLines_ReturnsNull()
+    {
+        var console = new MockConsoleInput { IsInteractive = false };
+        console.EnqueueLine("123456");
+        console.EnqueueLine("654321");
+        var reader = new ConsoleCredentialReader(console);
+
+        using var result = reader.ReadCredentialWithConfirmation(CredentialReaderOptions.ForPin(), TestContext.Current.CancellationToken);
+
+        Assert.Null(result);
+        Assert.Contains(console.Output, line => line.Contains("do not match", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    [Trait("Audit", "N3")]
+    public void N3_NonInteractiveConfirmation_PolicyViolation_ReturnsNull()
+    {
+        var console = new MockConsoleInput { IsInteractive = false };
+        console.EnqueueLine("abc");
+        console.EnqueueLine("abc");
+        var reader = new ConsoleCredentialReader(console);
+
+        using var result = reader.ReadCredentialWithConfirmation(CredentialReaderOptions.ForPin(), TestContext.Current.CancellationToken);
+
+        Assert.Null(result);
+    }
+
     /// <summary>Cancels the token when the confirm prompt is written, or throws IOException if no token source is given.</summary>
     private sealed class CancelOnConfirmPromptConsole(string confirmPrompt, CancellationTokenSource? cts)
         : IConsoleInputSource

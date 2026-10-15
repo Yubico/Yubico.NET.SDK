@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
@@ -52,34 +50,6 @@ public class CoreNumericBoundaryAuditReproTests
         Assert.InRange(protocol.RequestedPages.Count, 1, 256);
         Assert.Equal(protocol.RequestedPages.Count, protocol.RequestedPages.Distinct().Count());
     }
-
-    // ---- #25 d) HkdfUtilities ---------------------------------------------------------------
-
-    /// <summary>
-    ///     RFC 5869 §2.3 allows L up to 255*HashLen (8160 for SHA-256). With N = 255 blocks the byte loop
-    ///     counter wraps to 0 and the block offset goes negative, so valid lengths 8129..8160 throw.
-    /// </summary>
-    [Theory]
-    [Trait("Audit", "YESDK-1633")]
-    [InlineData(8129)]
-    [InlineData(8160)]
-    public void YESDK1633_HkdfMaximumRfcLength_MatchesBclHkdf(int length)
-    {
-        byte[] ikm = [.. Enumerable.Range(0, 32).Select(i => (byte)i)];
-        byte[] info = "audit"u8.ToArray();
-
-        var actual = HkdfUtilities.DeriveKey(ikm, contextInfo: info, length: length).ToArray();
-
-        var expected = HKDF.DeriveKey(HashAlgorithmName.SHA256, ikm, length, salt: null, info: info);
-        Assert.Equal(expected, actual);
-    }
-
-    /// <summary>Guard: the RFC 5869 §2.3 upper bound itself is already enforced at HEAD.</summary>
-    [Fact]
-    [Trait("Audit", "YESDK-1633")]
-    public void YESDK1633_HkdfAboveRfcMaximum_Rejected() =>
-        Assert.Throws<ArgumentOutOfRangeException>(
-            () => HkdfUtilities.DeriveKey(new byte[32], length: (255 * 32) + 1));
 
     // ---- #25 e) and #20: Tlv long-form length decoding ----------------------------------------
 

@@ -743,21 +743,34 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     command.
     /// </summary>
     /// <remarks>
-    ///     This method requires off-card entity verification. If an allowlist is not stored, any
-    ///     certificate signed by the CA can be used.
-    ///     <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
+    ///     This method requires off-card entity verification. The allowlist replaces any existing one for the
+    ///     key reference and must contain at least one serial: with an allowlist present only the listed
+    ///     certificates are accepted, without one every certificate signed by the CA is accepted
+    ///     (GlobalPlatform Card Specification v2.3 Amendment F, SCP11, v1.3 §4.3). A zero-length allowlist is
+    ///     the device's "remove" command, so an empty <paramref name="serials" /> is rejected here rather than
+    ///     silently lifting the restriction; call <see cref="ClearAllowListAsync" /> to remove an allowlist on
+    ///     purpose. There is no device-level deny-all: to stop trusting a CA, delete its key with
+    ///     <see cref="DeleteKeyAsync" />.
+    ///     <para>See GlobalPlatform Card Specification v2.3 Amendment F v1.3 §7.9 STORE DATA (Allowlist).</para>
     /// </remarks>
     /// <param name="keyReference">A reference to the key for which the allowlist will be stored.</param>
     /// <param name="serials">
-    ///     The list of certificate serial numbers (in hexadecimal string format) to be stored in the
-    ///     allowlist for the given <see cref="KeyReference" />.
+    ///     The certificate serial numbers (hexadecimal strings) to allow for the given <see cref="KeyReference" />.
+    ///     Must contain at least one entry.
     /// </param>
     /// <param name="cancellationToken"></param>
-    /// <exception cref="ArgumentException">Thrown when a serial number cannot be encoded properly.</exception>
+    /// <exception cref="ArgumentException">
+    ///     Thrown when <paramref name="serials" /> is empty, or when a serial number is not valid hexadecimal.
+    /// </exception>
     public async Task StoreAllowListAsync(KeyReference keyReference, IReadOnlyCollection<string> serials,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(serials);
+        if (serials.Count == 0)
+            throw new ArgumentException(
+                "An allowlist must contain at least one serial. Use ClearAllowListAsync to remove an allowlist.",
+                nameof(serials));
 
         _logger.LogDebug("Storing allow list (KeyReference: {KeyReference})", keyReference);
 
@@ -779,13 +792,28 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     }
 
     /// <summary>
-    ///     Clears the allow list for the given <see cref="KeyReference" />
+    ///     Removes the allow list for the given <see cref="KeyReference" />. Afterwards every certificate signed
+    ///     by the CA is accepted (GlobalPlatform Card Specification v2.3 Amendment F v1.3 §4.3).
     /// </summary>
     /// <seealso cref="StoreAllowListAsync" />
     /// <param name="keyReference">The key reference that holds the allow list</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    public Task ClearAllowListAsync(KeyReference keyReference, CancellationToken cancellationToken = default) =>
-        StoreAllowListAsync(keyReference, [], cancellationToken);
+    public async Task ClearAllowListAsync(KeyReference keyReference, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+
+        _logger.LogDebug("Clearing allow list (KeyReference: {KeyReference})", keyReference);
+
+        // Amd F §7.9: "To remove an allowlist, the allowlist TLV of the command shall have a length of zero."
+        using var kidKvnTlv = new Tlv(TagKidKvn, keyReference.AsSpan());
+        using var controlRefTlv = new Tlv(TagControlReference, kidKvnTlv.AsSpan());
+        using var emptyListTlv = new Tlv(TagSerialsAllowList, []);
+        var data = TlvHelper.EncodeList([controlRefTlv, emptyListTlv]);
+
+        await StoreDataAsync(data, cancellationToken).ConfigureAwait(false);
+
+        _logger.LogInformation("Allow list cleared (KeyReference: {KeyReference})", keyReference);
+    }
 
     /// <summary>
     ///     Stores data in the Security Domain or targeted Application on the YubiKey using the GlobalPlatform STORE DATA

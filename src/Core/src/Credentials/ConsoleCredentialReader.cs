@@ -82,38 +82,46 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        // Read first entry
-        _console.Write(options.Prompt);
-        var first = ReadCredentialCore(options, cancellationToken);
-        if (first is null)
+        IMemoryOwner<byte>? first = null;
+        IMemoryOwner<byte>? second = null;
+        var returnFirst = false;
+
+        try
         {
-            return null;
-        }
+            _console.Write(options.Prompt);
+            first = ReadCredentialCore(options, cancellationToken);
+            if (first is null)
+            {
+                return null;
+            }
 
-        // Read confirmation
-        _console.Write(options.ConfirmPrompt);
-        var second = ReadCredentialCore(options, cancellationToken);
-        if (second is null)
+            _console.Write(options.ConfirmPrompt);
+            second = ReadCredentialCore(options, cancellationToken);
+            if (second is null)
+            {
+                return null;
+            }
+
+            bool match = first.Memory.Length == second.Memory.Length &&
+                         CryptographicOperations.FixedTimeEquals(first.Memory.Span, second.Memory.Span);
+            if (!match)
+            {
+                _console.WriteLine("Credentials do not match.");
+                return null;
+            }
+
+            returnFirst = true;
+            return first;
+        }
+        finally
         {
-            first.Dispose();
-            return null;
+            // Both entries are cleared on every path except the one that hands `first` to the caller.
+            second?.Dispose();
+            if (!returnFirst)
+            {
+                first?.Dispose();
+            }
         }
-
-        // Compare using timing-safe method
-        bool match = first.Memory.Length == second.Memory.Length &&
-                     CryptographicOperations.FixedTimeEquals(first.Memory.Span, second.Memory.Span);
-
-        if (!match)
-        {
-            first.Dispose();
-            second.Dispose();
-            _console.WriteLine("Credentials do not match.");
-            return null;
-        }
-
-        // Return first, dispose second
-        second.Dispose();
-        return first;
     }
 
     private IMemoryOwner<byte>? ReadInteractive(CredentialReaderOptions options, CancellationToken cancellationToken)

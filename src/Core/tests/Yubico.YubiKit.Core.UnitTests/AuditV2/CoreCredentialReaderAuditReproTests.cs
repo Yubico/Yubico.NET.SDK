@@ -75,6 +75,21 @@ public class CoreCredentialReaderAuditReproTests
             $"First credential buffer was not cleared: {Convert.ToHexString(seeded.AsSpan(0, 8))}");
     }
 
+    /// <summary>Positive control for g): a policy-conforming redirected PIN is still accepted.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public void YESDK1634_NonInteractivePinWithinPolicy_IsAccepted()
+    {
+        var console = new MockConsoleInput { IsInteractive = false };
+        console.EnqueueLine("12345678");
+        var reader = new ConsoleCredentialReader(console);
+
+        using var result = reader.ReadCredential(CredentialReaderOptions.ForPin(), TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result);
+        Assert.Equal("12345678"u8.ToArray(), result.Memory.ToArray());
+    }
+
     /// <summary>h) variant: the confirmation prompt write throws instead of cancelling.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]

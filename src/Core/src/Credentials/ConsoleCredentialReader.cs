@@ -143,6 +143,14 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
 
         try
         {
+            // Hex mode validates in ParseHex. Text mode must apply the same policy the interactive
+            // path enforces keystroke by keystroke; reject rather than filter, so the credential the
+            // device receives is always exactly what was supplied.
+            if (!options.IsHexMode && !SatisfiesPolicy(line.AsSpan(), options))
+            {
+                return null;
+            }
+
             return ConvertToResult(line.AsSpan(), options);
         }
         finally
@@ -150,6 +158,32 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
             // Can't zero a managed string, but we minimize exposure
             line = null;
         }
+    }
+
+    private bool SatisfiesPolicy(ReadOnlySpan<char> input, CredentialReaderOptions options)
+    {
+        if (input.Length < options.MinLength)
+        {
+            _console.WriteLine($"Input too short. Minimum {options.MinLength} characters required.");
+            return false;
+        }
+
+        if (input.Length > options.MaxLength)
+        {
+            _console.WriteLine($"Input too long. Maximum {options.MaxLength} characters allowed.");
+            return false;
+        }
+
+        foreach (char c in input)
+        {
+            if (char.IsControl(c) || (options.CharacterFilter is not null && !options.CharacterFilter(c)))
+            {
+                _console.WriteLine("Input contains characters that are not allowed.");
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private IMemoryOwner<byte>? ReadCredentialCore(CredentialReaderOptions options, CancellationToken cancellationToken)

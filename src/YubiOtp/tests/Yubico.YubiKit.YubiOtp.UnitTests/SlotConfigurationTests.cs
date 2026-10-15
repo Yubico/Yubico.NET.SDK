@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
@@ -850,17 +849,17 @@ public class SlotConfigurationTests
     }
 
     [Fact]
-    public void Update_AllowUpdateFlag_MaskedOut()
+    public void Update_AllowUpdateFlag_IsWritten()
     {
         using var config = new UpdateConfiguration();
-        // AllowUpdate is set on base class, but UpdateMask excludes it
+        // ALLOW_UPDATE is in ykman's EXTFLAG update mask: clearing it via an update is how a slot is
+        // locked against further updates, so the flag must reach the device.
         config.AllowUpdate();
 
         var result = config.GetConfig();
         byte extFlags = result[ExtFlagsOffset];
 
-        // AllowUpdate should be masked out
-        Assert.Equal(0, extFlags & (byte)ExtendedFlag.AllowUpdate);
+        Assert.Equal((byte)ExtendedFlag.AllowUpdate, extFlags & (byte)ExtendedFlag.AllowUpdate);
     }
 
     [Fact]
@@ -926,7 +925,44 @@ public class SlotConfigurationTests
         config.ProtectSlot2();
         var result = config.GetConfig();
 
-        Assert.Equal((byte)TicketFlag.ProtectSlot2, result[TktFlagsOffset] & (byte)TicketFlag.ProtectSlot2);
+        // Literal, not the enum: yubikit/yubiotp.py TKTFLAG.PROTECT_CFG2 = 0x80. Bit 0x40 is chal-resp /
+        // OATH-HOTP and must stay clear on a Yubico OTP slot.
+        Assert.Equal(0x80, result[TktFlagsOffset] & 0x80);
+        Assert.Equal(0x00, result[TktFlagsOffset] & 0x40);
+    }
+
+    [Fact]
+    public void HmacSha1_ProtectSlot2Off_KeepsChallengeResponseBit()
+    {
+        using var config = new HmacSha1SlotConfiguration(new byte[20]);
+        config.ProtectSlot2(false);
+        var result = config.GetConfig();
+
+        Assert.Equal(0x40, result[TktFlagsOffset] & 0x40);
+        Assert.Equal(0x00, result[TktFlagsOffset] & 0x80);
+    }
+
+    [Fact]
+    public void Hotp_ProtectSlot2Toggle_OnlyChangesProtectBit()
+    {
+        using var config = new HotpSlotConfiguration(new byte[20]);
+        var before = config.GetConfig()[TktFlagsOffset];
+        config.ProtectSlot2();
+        var on = config.GetConfig()[TktFlagsOffset];
+        config.ProtectSlot2(false);
+        var off = config.GetConfig()[TktFlagsOffset];
+
+        Assert.Equal(0x40, before & 0x40);
+        Assert.Equal((byte)(before | 0x80), on);
+        Assert.Equal(before, off);
+    }
+
+    [Fact]
+    public void Update_ProtectSlot2_ThroughBaseReference_Throws()
+    {
+        SlotConfiguration config = new UpdateConfiguration();
+
+        Assert.Throws<ArgumentException>(() => config.ProtectSlot2());
     }
 
     [Fact]

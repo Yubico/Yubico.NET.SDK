@@ -105,7 +105,7 @@ Yubico.YubiKit.YubiOtp.SlotConfiguration.Dormant(bool enable = true) -> Yubico.Y
 Yubico.YubiKit.YubiOtp.SlotConfiguration.GetConfig(System.ReadOnlySpan<byte> accCode = default(System.ReadOnlySpan<byte>)) -> byte[]!
 Yubico.YubiKit.YubiOtp.SlotConfiguration.InvertLed(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
 Yubico.YubiKit.YubiOtp.SlotConfiguration.IsSupportedBy(Yubico.YubiKit.Core.Devices.FirmwareVersion! version) -> bool
-Yubico.YubiKit.YubiOtp.SlotConfiguration.ProtectSlot2(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
+virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.ProtectSlot2(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
 Yubico.YubiKit.YubiOtp.SlotConfiguration.SerialApiVisible(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
 Yubico.YubiKit.YubiOtp.SlotConfiguration.SerialBtnVisible(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
 Yubico.YubiKit.YubiOtp.SlotConfiguration.SerialUsbVisible(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!
@@ -142,7 +142,7 @@ Yubico.YubiKit.YubiOtp.TicketFlag.AppendTab2 = 4 -> Yubico.YubiKit.YubiOtp.Ticke
 Yubico.YubiKit.YubiOtp.TicketFlag.ChalResp = 64 -> Yubico.YubiKit.YubiOtp.TicketFlag
 Yubico.YubiKit.YubiOtp.TicketFlag.None = 0 -> Yubico.YubiKit.YubiOtp.TicketFlag
 Yubico.YubiKit.YubiOtp.TicketFlag.OathHotp = 64 -> Yubico.YubiKit.YubiOtp.TicketFlag
-Yubico.YubiKit.YubiOtp.TicketFlag.ProtectSlot2 = 64 -> Yubico.YubiKit.YubiOtp.TicketFlag
+Yubico.YubiKit.YubiOtp.TicketFlag.ProtectSlot2 = 128 -> Yubico.YubiKit.YubiOtp.TicketFlag
 Yubico.YubiKit.YubiOtp.TicketFlag.TabFirst = 1 -> Yubico.YubiKit.YubiOtp.TicketFlag
 Yubico.YubiKit.YubiOtp.TicketFlagMasks
 Yubico.YubiKit.YubiOtp.UpdateConfiguration
@@ -175,7 +175,7 @@ Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration
 Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration.RequireTouch(bool enable = true) -> Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration!
 Yubico.YubiKit.YubiOtp.YubicoOtpChallengeResponseSlotConfiguration.YubicoOtpChallengeResponseSlotConfiguration(System.ReadOnlySpan<byte> aesKey) -> void
 const Yubico.YubiKit.YubiOtp.ConfigFlagMasks.UpdateMask = Yubico.YubiKit.YubiOtp.ConfigFlag.HmacLt64 | Yubico.YubiKit.YubiOtp.ConfigFlag.ChalBtnTrig -> Yubico.YubiKit.YubiOtp.ConfigFlag
-const Yubico.YubiKit.YubiOtp.ExtendedFlagMasks.UpdateMask = Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialBtnVisible | Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialUsbVisible | Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialApiVisible | Yubico.YubiKit.YubiOtp.ExtendedFlag.UseNumericKeypad | Yubico.YubiKit.YubiOtp.ExtendedFlag.FastTrigger | Yubico.YubiKit.YubiOtp.ExtendedFlag.Dormant | Yubico.YubiKit.YubiOtp.ExtendedFlag.InvertLed -> Yubico.YubiKit.YubiOtp.ExtendedFlag
+const Yubico.YubiKit.YubiOtp.ExtendedFlagMasks.UpdateMask = Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialBtnVisible | Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialUsbVisible | Yubico.YubiKit.YubiOtp.ExtendedFlag.SerialApiVisible | Yubico.YubiKit.YubiOtp.ExtendedFlag.UseNumericKeypad | Yubico.YubiKit.YubiOtp.ExtendedFlag.FastTrigger | Yubico.YubiKit.YubiOtp.ExtendedFlag.AllowUpdate | Yubico.YubiKit.YubiOtp.ExtendedFlag.Dormant | Yubico.YubiKit.YubiOtp.ExtendedFlag.InvertLed -> Yubico.YubiKit.YubiOtp.ExtendedFlag
 const Yubico.YubiKit.YubiOtp.TicketFlagMasks.UpdateMask = Yubico.YubiKit.YubiOtp.TicketFlag.TabFirst | Yubico.YubiKit.YubiOtp.TicketFlag.AppendTab1 | Yubico.YubiKit.YubiOtp.TicketFlag.AppendTab2 | Yubico.YubiKit.YubiOtp.TicketFlag.AppendDelay1 | Yubico.YubiKit.YubiOtp.TicketFlag.AppendDelay2 | Yubico.YubiKit.YubiOtp.TicketFlag.AppendCr -> Yubico.YubiKit.YubiOtp.TicketFlag
 override Yubico.YubiKit.YubiOtp.HmacSha1SlotConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
 override Yubico.YubiKit.YubiOtp.HotpSlotConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
@@ -192,3 +192,4 @@ virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.GetEffectiveCfgFlags() -> Yubic
 virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.GetEffectiveExtFlags() -> Yubico.YubiKit.YubiOtp.ExtendedFlag
 virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.GetEffectiveTktFlags() -> Yubico.YubiKit.YubiOtp.TicketFlag
 virtual Yubico.YubiKit.YubiOtp.SlotConfiguration.MinimumFirmwareVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion!
+override Yubico.YubiKit.YubiOtp.UpdateConfiguration.ProtectSlot2(bool enable = true) -> Yubico.YubiKit.YubiOtp.SlotConfiguration!

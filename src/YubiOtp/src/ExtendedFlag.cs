@@ -32,7 +32,8 @@ public enum ExtendedFlag : byte
 }
 
 /// <summary>
-/// Defines which <see cref="ExtendedFlag"/> values are valid for update operations.
+/// Defines which <see cref="ExtendedFlag"/> values are valid for update operations
+/// (yubikit/yubiotp.py EXTFLAG.update_flags).
 /// </summary>
 public static class ExtendedFlagMasks
 {
@@ -42,6 +43,7 @@ public static class ExtendedFlagMasks
         ExtendedFlag.SerialApiVisible |
         ExtendedFlag.UseNumericKeypad |
         ExtendedFlag.FastTrigger |
+        ExtendedFlag.AllowUpdate |
         ExtendedFlag.Dormant |
         ExtendedFlag.InvertLed;
 }

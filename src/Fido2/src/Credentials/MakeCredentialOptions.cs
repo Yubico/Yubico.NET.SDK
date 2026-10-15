@@ -49,10 +49,14 @@ public sealed class MakeCredentialOptions
     public bool? ResidentKey { get; set; }
 
     /// <summary>
-    /// Gets or sets whether user presence is required.
+    /// Gets or sets the "up" option key.
     /// </summary>
     /// <remarks>
-    /// Defaults to true. Setting to false is rarely allowed by authenticators.
+    /// Defaults to omitted. Set <see langword="true"/> only when the key must be present on the wire
+    /// (CTAP 2.1+ authenticators accept it; CTAP 2.0 may not). <see langword="false"/> is rejected with
+    /// <see cref="ArgumentException"/>: CTAP 2.1-2.3 §6.1 says the value "MUST be true if present" and
+    /// false yields CTAP2_ERR_INVALID_OPTION regardless of authenticator version. For a silent probe use
+    /// getAssertion with up=false (§5 "pre-flight"), as the WebAuthn client and python-fido2 do.
     /// </remarks>
     public bool? UserPresence { get; set; }
 

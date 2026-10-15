@@ -57,7 +57,7 @@ public sealed class FidoSessionRequestEncodingTests
             ExcludeList = [new PublicKeyCredentialDescriptor(new byte[] { 0xAA, 0xBB })],
             Extensions = EncodeSingleExtension("credProtect", 2),
             ResidentKey = true,
-            UserPresence = false,
+            UserPresence = true, // false is rejected (CTAP §6.1); see the YESDK-1618 tests
             UserVerification = true,
             PinUvAuthParam = new byte[] { 0x10, 0x11, 0x12, 0x13 },
             PinUvAuthProtocol = 1,
@@ -86,7 +86,7 @@ public sealed class FidoSessionRequestEncodingTests
         Assert.Equal(6, reader.ReadInt32());
         SkipMap(reader);
         Assert.Equal(7, reader.ReadInt32());
-        AssertOptionMap(reader, ("rk", true), ("up", false), ("uv", true));
+        AssertOptionMap(reader, ("rk", true), ("up", true), ("uv", true));
         Assert.Equal(8, reader.ReadInt32());
         Assert.Equal([0x10, 0x11, 0x12, 0x13], reader.ReadByteString());
         Assert.Equal(9, reader.ReadInt32());

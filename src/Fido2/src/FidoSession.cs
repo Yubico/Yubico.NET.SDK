@@ -239,6 +239,14 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         ArgumentNullException.ThrowIfNull(rp);
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(pubKeyCredParams);
+        if (options?.UserPresence is false)
+        {
+            // CTAP 2.1-2.3 §6.1: "its value MUST be true if present. The value false will cause a
+            // CTAP2_ERR_INVALID_OPTION response regardless of authenticator version."
+            throw new ArgumentException(
+                "UserPresence cannot be false for makeCredential; use getAssertion with up=false for a silent probe.",
+                nameof(options));
+        }
 
         if (clientDataHash.Length != 32)
         {
@@ -265,16 +273,15 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
 
             _logger.LogDebug("MakeCredential for RP: {RpId}", rp.Id);
 
+            // makeCredential always collects user presence (up=false is rejected above).
             UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-                options?.UserPresence is false
-                    ? null
-                    : new UserPresenceContext
-                    {
-                        Basis = UserPresenceBasis.PolicyRequires,
-                        Application = UserPresenceApplications.Fido2,
-                        Operation = UserPresenceOperations.Fido2.MakeCredential,
-                        Scope = rp.Id
-                    });
+                new UserPresenceContext
+                {
+                    Basis = UserPresenceBasis.PolicyRequires,
+                    Application = UserPresenceApplications.Fido2,
+                    Operation = UserPresenceOperations.Fido2.MakeCredential,
+                    Scope = rp.Id
+                });
 
             response = await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken)
                 .ConfigureAwait(false);

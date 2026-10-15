@@ -14,7 +14,6 @@
 
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -26,10 +25,12 @@ public sealed class Fido2RequestAuditReproTests
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait("Audit", "YESDK-1618")]
-    public async Task YESDK1618_MakeCredentialFalseUserPresenceReturnsInvalidOption(YubiKeyTestState state) =>
+    public async Task YESDK1618_MakeCredentialFalseUserPresenceIsRejectedBeforeReachingTheKey(YubiKeyTestState state) =>
         await state.WithFidoSessionAsync(async session =>
         {
-            CtapException error = await Assert.ThrowsAsync<CtapException>(() =>
+            // Previously the key answered CTAP2_ERR_INVALID_OPTION (0x2C); the SDK now refuses first, so
+            // the request never leaves the host and no touch is requested.
+            var error = await Assert.ThrowsAsync<ArgumentException>(() =>
                 session.MakeCredentialAsync(
                     new byte[32],
                     new PublicKeyCredentialRpEntity("example.com"),
@@ -37,7 +38,6 @@ public sealed class Fido2RequestAuditReproTests
                     FidoTestData.ES256Params,
                     new MakeCredentialOptions { UserPresence = false }));
 
-            Assert.Equal(0x2C, (byte)error.Status);
-            Assert.Equal(CtapStatus.InvalidOption, error.Status);
+            Assert.Equal("options", error.ParamName);
         });
 }

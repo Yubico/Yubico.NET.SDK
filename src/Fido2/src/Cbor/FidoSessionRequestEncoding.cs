@@ -27,6 +27,11 @@ internal static class FidoSessionRequestEncoding
         IReadOnlyList<PublicKeyCredentialParameters> pubKeyCredParams,
         MakeCredentialOptions? options)
     {
+        if (options?.UserPresence is false)
+        {
+            throw new ArgumentException("makeCredential does not allow up=false (CTAP §6.1).", nameof(options));
+        }
+
         var builder = CtapRequestBuilder.Create(CtapCommand.MakeCredential)
             .WithValue(1, writer => writer.WriteByteString(clientDataHash.Span))
             .WithValue(2, rp.Encode)

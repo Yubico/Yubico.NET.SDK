@@ -184,6 +184,35 @@ public class FidoSessionTests
         Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
     }
 
+    /// <summary>Audit #10 (YESDK-1618): up=false is refused at the session boundary, before any CBOR or prompt.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1618")]
+    public async Task MakeCredentialAsync_FalseUserPresence_ThrowsBeforeSendingOrPrompting()
+    {
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00],
+            [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00]);
+        var prompt = new RecordingUserPresencePrompt();
+        await using var session = await FidoSession.CreateAsync(
+            connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt },
+            TestContext.Current.CancellationToken);
+        int transmissionsBeforeCall = connection.TransmittedCommands.Count;
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+            session.MakeCredentialAsync(
+                new byte[32],
+                new PublicKeyCredentialRpEntity("example.com"),
+                new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
+                [PublicKeyCredentialParameters.CreateES256()],
+                new MakeCredentialOptions { UserPresence = false },
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal("options", ex.ParamName);
+        Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
+        Assert.Empty(prompt.Requested);
+    }
+
     [Fact]
     public async Task MakeCredentialAsync_WithSmartCardPrompt_NotifiesRequiredRpScopeAndTimeout()
     {

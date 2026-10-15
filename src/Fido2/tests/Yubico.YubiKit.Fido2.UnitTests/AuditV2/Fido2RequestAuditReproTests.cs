@@ -21,42 +21,22 @@ namespace Yubico.YubiKit.Fido2.UnitTests.AuditV2;
 
 public sealed class Fido2RequestAuditReproTests
 {
+    /// <summary>
+    ///     CTAP 2.1-2.3 §6.1: the makeCredential "up" value "MUST be true if present" and false yields
+    ///     CTAP2_ERR_INVALID_OPTION. The SDK rejects it before anything is encoded (maintainer option 1).
+    /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1618")]
-    public void YESDK1618_MakeCredentialDoesNotEncodeFalseUserPresence()
+    public void YESDK1618_MakeCredentialRejectsFalseUserPresence()
     {
-        byte[] request = FidoSessionRequestEncoding.BuildMakeCredentialRequest(
+        var ex = Assert.Throws<ArgumentException>(() => FidoSessionRequestEncoding.BuildMakeCredentialRequest(
             new byte[32],
             new PublicKeyCredentialRpEntity("example.com"),
             new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
             [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.ES256)],
-            new MakeCredentialOptions { ResidentKey = true, UserPresence = false });
+            new MakeCredentialOptions { ResidentKey = true, UserPresence = false }));
 
-        var reader = new CborReader(request.AsMemory(1), CborConformanceMode.Ctap2Canonical);
-        int? parameters = reader.ReadStartMap();
-        bool foundOptions = false;
-        for (int i = 0; i < parameters; i++)
-        {
-            int key = reader.ReadInt32();
-            if (key != 7)
-            {
-                reader.SkipValue();
-                continue;
-            }
-
-            foundOptions = true;
-            int? optionCount = reader.ReadStartMap();
-            for (int j = 0; j < optionCount; j++)
-            {
-                string option = reader.ReadTextString();
-                bool value = reader.ReadBoolean();
-                Assert.NotEqual("up", option);
-                if (option == "rk") Assert.True(value);
-            }
-            reader.ReadEndMap();
-        }
-        reader.ReadEndMap();
-        Assert.True(foundOptions);
+        Assert.Equal("options", ex.ParamName);
     }
 
     [Fact]

@@ -66,9 +66,12 @@ public static class DeviceConfiguration
 
         try
         {
-            var config = DeviceConfig.CreateBuilder()
-                .WithCapabilities(transport, (int)capabilities)
-                .Build();
+            var config = transport switch
+            {
+                Transport.Usb => new DeviceConfig { UsbEnabled = capabilities },
+                Transport.Nfc => new DeviceConfig { NfcEnabled = capabilities },
+                _ => throw new ArgumentOutOfRangeException(nameof(transport), transport, null)
+            };
 
             await session.SetDeviceConfigAsync(
                 config,
@@ -104,19 +107,11 @@ public static class DeviceConfiguration
 
         try
         {
-            var builder = DeviceConfig.CreateBuilder();
-
-            if (autoEjectTimeout.HasValue)
+            var config = new DeviceConfig
             {
-                builder.WithAutoEjectTimeout(autoEjectTimeout.Value);
-            }
-
-            if (challengeResponseTimeout.HasValue)
-            {
-                builder.WithChallengeResponseTimeout(challengeResponseTimeout.Value);
-            }
-
-            var config = builder.Build();
+                AutoEjectTimeout = autoEjectTimeout,
+                ChallengeResponseTimeout = challengeResponseTimeout
+            };
             await session.SetDeviceConfigAsync(
                 config,
                 new SetDeviceConfigOptions { Reboot = reboot, CurrentLockCode = lockCode },
@@ -149,9 +144,7 @@ public static class DeviceConfiguration
 
         try
         {
-            var config = DeviceConfig.CreateBuilder()
-                .WithDeviceFlags((byte)flags)
-                .Build();
+            var config = new DeviceConfig { DeviceFlags = flags };
 
             await session.SetDeviceConfigAsync(
                 config,
@@ -185,9 +178,7 @@ public static class DeviceConfiguration
 
         try
         {
-            var config = DeviceConfig.CreateBuilder()
-                .WithNfcRestricted(restricted)
-                .Build();
+            var config = new DeviceConfig { NfcRestricted = restricted };
 
             await session.SetDeviceConfigAsync(
                 config,
@@ -245,7 +236,7 @@ public static class DeviceConfiguration
 
         try
         {
-            var config = DeviceConfig.CreateBuilder().Build();
+            var config = new DeviceConfig();
             await session.SetDeviceConfigAsync(
                 config,
                 new SetDeviceConfigOptions { CurrentLockCode = currentLockCode, NewLockCode = newLockCode },
@@ -282,7 +273,7 @@ public static class DeviceConfiguration
         try
         {
             zeroCode = new byte[16]; // All zeros
-            var config = DeviceConfig.CreateBuilder().Build();
+            var config = new DeviceConfig();
             await session.SetDeviceConfigAsync(
                 config,
                 new SetDeviceConfigOptions { CurrentLockCode = currentLockCode, NewLockCode = zeroCode },

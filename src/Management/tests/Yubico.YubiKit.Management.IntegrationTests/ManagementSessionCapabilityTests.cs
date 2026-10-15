@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -57,9 +56,7 @@ public class ManagementSessionCapabilityTests
             try
             {
                 // Disable OATH on USB
-                var configWithoutOath = DeviceConfig.CreateBuilder()
-                    .WithCapabilities(Transport.Usb, (int)withoutOath)
-                    .Build();
+                var configWithoutOath = new DeviceConfig { UsbEnabled = withoutOath };
 
                 await mgmt.SetDeviceConfigAsync(configWithoutOath);
 
@@ -70,9 +67,7 @@ public class ManagementSessionCapabilityTests
             finally
             {
                 // Restore original capabilities
-                var restoreConfig = DeviceConfig.CreateBuilder()
-                    .WithCapabilities(Transport.Usb, (int)originalUsbEnabled)
-                    .Build();
+                var restoreConfig = new DeviceConfig { UsbEnabled = originalUsbEnabled };
 
                 await mgmt.SetDeviceConfigAsync(restoreConfig);
 
@@ -109,9 +104,7 @@ public class ManagementSessionCapabilityTests
             try
             {
                 // Enable NFC restricted mode
-                var config = DeviceConfig.CreateBuilder()
-                    .WithNfcRestricted(true)
-                    .Build();
+                var config = new DeviceConfig { NfcRestricted = true };
 
                 await mgmt.SetDeviceConfigAsync(config);
 
@@ -125,9 +118,7 @@ public class ManagementSessionCapabilityTests
                 // Best-effort restore: set back to original value.
                 // Note: if original was false, this may not take effect without a reboot,
                 // but we send it anyway so the config is queued for next reboot.
-                var restoreConfig = DeviceConfig.CreateBuilder()
-                    .WithNfcRestricted(originalNfcRestricted)
-                    .Build();
+                var restoreConfig = new DeviceConfig { NfcRestricted = originalNfcRestricted };
 
                 await mgmt.SetDeviceConfigAsync(restoreConfig);
             }

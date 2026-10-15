@@ -4,25 +4,19 @@ Yubico.YubiKit.Management.DeviceConfig
 Yubico.YubiKit.Management.DeviceConfig.<Clone>$() -> Yubico.YubiKit.Management.DeviceConfig!
 Yubico.YubiKit.Management.DeviceConfig.AutoEjectTimeout.get -> ushort?
 Yubico.YubiKit.Management.DeviceConfig.AutoEjectTimeout.init -> void
-Yubico.YubiKit.Management.DeviceConfig.Builder
-Yubico.YubiKit.Management.DeviceConfig.Builder.Build() -> Yubico.YubiKit.Management.DeviceConfig!
-Yubico.YubiKit.Management.DeviceConfig.Builder.Builder() -> void
-Yubico.YubiKit.Management.DeviceConfig.Builder.WithAutoEjectTimeout(ushort seconds) -> Yubico.YubiKit.Management.DeviceConfig.Builder!
-Yubico.YubiKit.Management.DeviceConfig.Builder.WithCapabilities(Yubico.YubiKit.Core.Transport transport, int capabilities) -> Yubico.YubiKit.Management.DeviceConfig.Builder!
-Yubico.YubiKit.Management.DeviceConfig.Builder.WithChallengeResponseTimeout(byte seconds) -> Yubico.YubiKit.Management.DeviceConfig.Builder!
-Yubico.YubiKit.Management.DeviceConfig.Builder.WithDeviceFlags(byte flags) -> Yubico.YubiKit.Management.DeviceConfig.Builder!
-Yubico.YubiKit.Management.DeviceConfig.Builder.WithNfcRestricted(bool restricted) -> Yubico.YubiKit.Management.DeviceConfig.Builder!
 Yubico.YubiKit.Management.DeviceConfig.ChallengeResponseTimeout.get -> byte?
 Yubico.YubiKit.Management.DeviceConfig.ChallengeResponseTimeout.init -> void
 Yubico.YubiKit.Management.DeviceConfig.DeviceConfig() -> void
-Yubico.YubiKit.Management.DeviceConfig.DeviceFlags.get -> byte?
+Yubico.YubiKit.Management.DeviceConfig.DeviceFlags.get -> Yubico.YubiKit.Core.Devices.DeviceFlags?
 Yubico.YubiKit.Management.DeviceConfig.DeviceFlags.init -> void
-Yubico.YubiKit.Management.DeviceConfig.EnabledCapabilities.get -> System.Collections.Generic.IReadOnlyDictionary<Yubico.YubiKit.Core.Transport, int>!
-Yubico.YubiKit.Management.DeviceConfig.EnabledCapabilities.init -> void
+Yubico.YubiKit.Management.DeviceConfig.NfcEnabled.get -> Yubico.YubiKit.Core.Devices.DeviceCapabilities?
+Yubico.YubiKit.Management.DeviceConfig.NfcEnabled.init -> void
 Yubico.YubiKit.Management.DeviceConfig.Equals(Yubico.YubiKit.Management.DeviceConfig? other) -> bool
-Yubico.YubiKit.Management.DeviceConfig.GetEnabledCapabilities(Yubico.YubiKit.Core.Transport transport) -> int?
 Yubico.YubiKit.Management.DeviceConfig.NfcRestricted.get -> bool?
 Yubico.YubiKit.Management.DeviceConfig.NfcRestricted.init -> void
+Yubico.YubiKit.Management.DeviceConfig.UsbEnabled.get -> Yubico.YubiKit.Core.Devices.DeviceCapabilities?
+Yubico.YubiKit.Management.DeviceConfig.UsbEnabled.init -> void
+Yubico.YubiKit.Management.DeviceConfig.Validate() -> void
 Yubico.YubiKit.Management.IManagementSession
 Yubico.YubiKit.Management.IManagementSession.GetDeviceInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Devices.DeviceInfo>!
 Yubico.YubiKit.Management.IManagementSession.ResetDeviceAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
@@ -47,7 +41,6 @@ Yubico.YubiKit.Management.SetDeviceConfigOptions.SetDeviceConfigOptions() -> voi
 override Yubico.YubiKit.Management.DeviceConfig.Equals(object? obj) -> bool
 override Yubico.YubiKit.Management.DeviceConfig.GetHashCode() -> int
 override Yubico.YubiKit.Management.DeviceConfig.ToString() -> string!
-static Yubico.YubiKit.Management.DeviceConfig.CreateBuilder() -> Yubico.YubiKit.Management.DeviceConfig.Builder!
 static Yubico.YubiKit.Management.DeviceConfig.operator !=(Yubico.YubiKit.Management.DeviceConfig? left, Yubico.YubiKit.Management.DeviceConfig? right) -> bool
 static Yubico.YubiKit.Management.DeviceConfig.operator ==(Yubico.YubiKit.Management.DeviceConfig? left, Yubico.YubiKit.Management.DeviceConfig? right) -> bool
 static Yubico.YubiKit.Management.IYubiKeyExtensions.CreateManagementSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Management.ManagementSession!>!

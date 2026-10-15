@@ -28,6 +28,7 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     // Encryption/Padding Constants
     private const byte PaddingByte = 0x80; // ISO/IEC 9797-1 Padding Method 2
     private const byte IvPrefixForDecryption = 0x80; // IV generation prefix for response decryption
+    private const int RmacLength = 8; // S8 mode R-MAC, GlobalPlatform SCP03 Amd D §6.2.5
 
     private int _encCounter = 1; // Counter for encryption (used for both command and response)
     private byte[] _macChain = macChain;
@@ -189,7 +190,10 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
 
     public byte[] Unmac(ReadOnlySpan<byte> data, short sw)
     {
-        var msgLength = data.Length - 8 + 2;
+        if (data.Length < RmacLength)
+            throw new BadResponseException("Response too short to contain an R-MAC");
+
+        var msgLength = data.Length - RmacLength + 2;
         byte[]? rentedMsg = null;
         Span<byte> computedMac = stackalloc byte[16];
 
@@ -199,30 +203,17 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
                 ? stackalloc byte[msgLength]
                 : (rentedMsg = ArrayPool<byte>.Shared.Rent(msgLength)).AsSpan(0, msgLength);
 
-            data[..^8].CopyTo(msg);
-            BinaryPrimitives.WriteInt16BigEndian(msg[(data.Length - 8)..], sw);
+            data[..^RmacLength].CopyTo(msg);
+            BinaryPrimitives.WriteInt16BigEndian(msg[(data.Length - RmacLength)..], sw);
 
-            using ICmacPrimitives mac = CryptographyProviders.CmacPrimitivesCreator(
-                CmacBlockCipherAlgorithm.Aes128);
-            mac.CmacInit(keys.Srmac);
-            mac.CmacUpdate(_macChain);
-            mac.CmacUpdate(msg);
-            mac.CmacFinal(computedMac);
+            ComputeResponseMac(msg, computedMac);
 
-            var receivedMac = data[^8..];
+            var receivedMac = data[^RmacLength..];
 
-            if (CryptographicOperations.FixedTimeEquals(computedMac[..8], receivedMac))
+            if (CryptographicOperations.FixedTimeEquals(computedMac[..RmacLength], receivedMac))
                 return msg[..^2].ToArray();
 
             throw new BadResponseException("Wrong MAC");
-        }
-        catch (BadResponseException)
-        {
-            throw;
-        }
-        catch (Exception e)
-        {
-            throw new NotSupportedException("Cryptography provider does not support AESCMAC", e);
         }
         finally
         {
@@ -232,6 +223,23 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
                 CryptographicOperations.ZeroMemory(rentedMsg);
                 ArrayPool<byte>.Shared.Return(rentedMsg);
             }
+        }
+    }
+
+    private void ComputeResponseMac(ReadOnlySpan<byte> msg, Span<byte> computedMac)
+    {
+        try
+        {
+            using ICmacPrimitives mac = CryptographyProviders.CmacPrimitivesCreator(
+                CmacBlockCipherAlgorithm.Aes128);
+            mac.CmacInit(keys.Srmac);
+            mac.CmacUpdate(_macChain);
+            mac.CmacUpdate(msg);
+            mac.CmacFinal(computedMac);
+        }
+        catch (Exception e)
+        {
+            throw new NotSupportedException("Cryptography provider does not support AESCMAC", e);
         }
     }
 

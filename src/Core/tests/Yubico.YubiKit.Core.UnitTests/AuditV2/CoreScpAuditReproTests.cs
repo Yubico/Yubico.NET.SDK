@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.UnitTests.Cryptography;
@@ -41,7 +42,8 @@ public class CoreScpAuditReproTests
 
         Assert.True(
             exitCode == 0,
-            $"Child test process exited with {exitCode} (134 = SIGABRT). Output head:\n{Head(output)}");
+            $"Child test process exited with {exitCode} (fatal runtime error on Unix is 134/SIGABRT). Output head:\n{Head(output)}");
+        Assert.Contains("succeeded: 1", output, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -66,6 +68,38 @@ public class CoreScpAuditReproTests
     [InlineData(7)]
     public Task YESDK1631_SixOrSevenByteResponse_ThrowsBadResponse(int length) =>
         AssertShortResponseRejected(length);
+
+    /// <summary>
+    ///     After a short protected response, the protocol latches "recovery required": the next
+    ///     exchange is refused with the original failure and nothing is replayed to the card.
+    /// </summary>
+    [Theory]
+    [Trait("Audit", "YESDK-1631")]
+    [InlineData(1)]
+    [InlineData(7)]
+    public async Task YESDK1631_ShortResponse_RefusesNextExchangeWithoutReplay(int dataLength)
+    {
+        var connection = new FakeSmartCardConnection();
+        var response = new byte[dataLength + 2];
+        response[^2] = 0x90;
+        connection.EnqueueResponse(response);
+        var baseProtocol = new PcscProtocol(connection);
+        using var state = new ScpState(new SessionKeys(new byte[16], new byte[16], new byte[16]), new byte[16]);
+        using var wrapped = new PcscProtocolScp(baseProtocol,
+            ScpInitializer.CreateSecureProcessor(baseProtocol.GetBaseCommandProcessor(), state,
+                new FirmwareVersion(5, 7, 2), 0xC0, baseProtocol.MarkRecoveryRequired),
+            data => data.ToArray());
+
+        var failure = await Assert.ThrowsAsync<BadResponseException>(() =>
+            wrapped.TransmitAndReceiveAsync(new ApduCommand(0, 0xCA, 0, 0),
+                cancellationToken: TestContext.Current.CancellationToken));
+        var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            wrapped.TransmitAndReceiveAsync(new ApduCommand(0, 0xCB, 0, 0),
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Same(failure, refusal.InnerException);
+        Assert.Single(connection.TransmittedCommands);
+    }
 
     private static async Task AssertShortResponseRejected(int dataLength)
     {

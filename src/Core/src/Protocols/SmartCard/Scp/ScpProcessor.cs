@@ -61,6 +61,12 @@ internal class ScpProcessor(
         byte[]? finalCommandData = null;
         byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
         Memory<byte> formattedApdu = default;
+
+        // Encrypt() advances the encryption counter and Mac() advances the MAC chain, both before the
+        // command reaches the card. A failure before either leaves host and card provably in step, so
+        // the session stays usable. A failure after either (provider, transport, bad R-MAC) means the
+        // host's state moved and the card's may or may not have: no later command can be trusted to
+        // chain correctly, so the protocol must latch "recovery required" with the original failure.
         var stateAdvanced = false;
 
         try
@@ -144,6 +150,9 @@ internal class ScpProcessor(
 
             return response;
         }
+        // Includes cancellation: a token observed after Encrypt()/Mac() still leaves the counter or
+        // chain advanced. Report the original failure to the protocol so it refuses further exchanges
+        // (see PcscProtocol.MarkRecoveryRequired), then rethrow unchanged: no wrapping, no replay.
         catch (Exception ex) when (stateAdvanced)
         {
             onSecureFailure?.Invoke(ex);

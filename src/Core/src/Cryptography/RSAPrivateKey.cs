@@ -51,13 +51,18 @@ public sealed class RSAPrivateKey : PrivateKey
     /// <inheritdoc />
     public override KeyType KeyType => KeyDefinition.KeyType;
 
+    /// <exception cref="CryptographicException">
+    ///     Thrown when a component is missing or the RFC 8017 relations between <c>n, e, d, p, q, dP, dQ, qInv</c>
+    ///     do not hold.
+    /// </exception>
     private RSAPrivateKey(
         RSAParameters parameters,
         Action<RSAParameters>? parametersCopied = null)
     {
         var keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
 
-        KeyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits);
+        KeyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits); // cheap gate first: unsupported sizes never reach arithmetic
+        PrivateKeyConsistency.ThrowIfInconsistent(parameters);
         Parameters = parameters.NormalizeParameters(parametersCopied);
     }
 
@@ -142,6 +147,9 @@ public sealed class RSAPrivateKey : PrivateKey
     /// <returns>
     /// A new disposable key that owns and clears its copied private-key material.
     /// </returns>
+    /// <exception cref="CryptographicException">
+    /// A component is missing or the RFC 8017 relations between the components do not hold.
+    /// </exception>
     public static RSAPrivateKey CreateFromParameters(RSAParameters parameters) => new(parameters);
 
     // Test observation hook. The callback must not retain or mutate the copied arrays.

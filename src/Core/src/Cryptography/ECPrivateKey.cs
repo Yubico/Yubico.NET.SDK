@@ -59,6 +59,9 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// <param name="parameters">The EC parameters.</param>
         /// <param name="parametersCopied">An optional internal observation hook.</param>
         /// <exception cref="ArgumentException">Thrown when parameters do not contain D value.</exception>
+        /// <exception cref="CryptographicException">
+        ///     Thrown when <c>Q</c> is present and is not <c>d·G</c> on the curve.
+        /// </exception>
         private ECPrivateKey(
             ECParameters parameters,
             Action<ECParameters>? parametersCopied = null)
@@ -67,6 +70,8 @@ namespace Yubico.YubiKit.Core.Cryptography
             {
                 throw new ArgumentException("Parameters must contain private key data (D value)", nameof(parameters));
             }
+
+            PrivateKeyConsistency.ThrowIfPublicPointDoesNotMatch(parameters);
 
             KeyDefinition = KeyDefinitions.GetByOid(parameters.Curve.Oid);
             Parameters = parameters.DeepCopy();
@@ -140,6 +145,9 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// remains responsible for clearing sensitive arrays.
         /// </param>
         /// <returns>A new disposable key that owns and clears its copied private-key material.</returns>
+        /// <exception cref="CryptographicException">
+        ///     <paramref name="parameters"/> carries a <c>Q</c> that is not <c>d·G</c> on the curve.
+        /// </exception>
         public static ECPrivateKey CreateFromParameters(ECParameters parameters) => new(parameters);
 
         // Test observation hook. The callback must not retain or mutate the copied private value.

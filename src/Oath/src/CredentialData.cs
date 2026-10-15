@@ -158,10 +158,16 @@ public sealed class CredentialData : IDisposable
             ? int.Parse(digitsParam, System.Globalization.CultureInfo.InvariantCulture)
             : OathConstants.DefaultDigits;
 
+        // Key URI "period": the RFC 6238 §4.1 time step in seconds; it is the divisor in §4.2, so it
+        // must be positive. Only meaningful for TOTP; HOTP ignores it.
         string? periodParam = queryParams["period"];
         int period = periodParam is not null
             ? int.Parse(periodParam, System.Globalization.CultureInfo.InvariantCulture)
             : OathConstants.DefaultPeriod;
+        if (oathType == OathType.Totp && period <= 0)
+        {
+            throw new ArgumentException("TOTP 'period' must be a positive number of seconds.", nameof(uri));
+        }
 
         string? counterParam = queryParams["counter"];
         int counter = counterParam is not null

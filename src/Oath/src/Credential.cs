@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -33,7 +34,10 @@ namespace Yubico.YubiKit.Oath;
 /// </remarks>
 public sealed partial class Credential : IEquatable<Credential>, IComparable<Credential>
 {
-    [GeneratedRegex(@"^((\d+)/)?(([^:]+):)?(.+)$")]
+    // Host-side TOTP credential ID convention shared by ykman, the Android and Swift SDKs:
+    // "[period/][issuer:]name". YKOATH itself does not define the name format. ASCII digits only;
+    // \d would also match other Unicode decimal digits, which int.Parse then rejects.
+    [GeneratedRegex(@"^(([0-9]+)/)?(([^:]+):)?(.+)$")]
     private static partial Regex TotpIdPattern();
 
     /// <summary>
@@ -129,9 +133,17 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
     /// <summary>
     ///     Parses a credential ID from the OATH applet wire protocol.
     /// </summary>
+    /// <remarks>
+    ///     For TOTP the optional <c>period/</c> prefix is the RFC 6238 §4.1 time step X in seconds, the
+    ///     divisor in <c>T = (Current Unix time - T0) / X</c> (§4.2). A prefix that is not a positive
+    ///     integer is malformed. HOTP has no period and reports 0.
+    /// </remarks>
     /// <param name="credentialId">The raw credential ID bytes.</param>
     /// <param name="oathType">The OATH type (TOTP or HOTP).</param>
     /// <returns>A tuple of (issuer, name, period).</returns>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="oathType" /> is TOTP and the period prefix is zero, negative or out of range.
+    /// </exception>
     internal static (string? Issuer, string Name, int Period) ParseCredentialId(
         ReadOnlySpan<byte> credentialId,
         OathType oathType)
@@ -146,9 +158,15 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
                 string? periodStr = match.Groups[2].Success ? match.Groups[2].Value : null;
                 string? issuer = match.Groups[4].Success ? match.Groups[4].Value : null;
                 string name = match.Groups[5].Value;
-                int period = periodStr is not null
-                    ? int.Parse(periodStr, System.Globalization.CultureInfo.InvariantCulture)
-                    : OathConstants.DefaultPeriod;
+                int period = OathConstants.DefaultPeriod;
+                if (periodStr is not null
+                    && (!int.TryParse(periodStr, NumberStyles.None, CultureInfo.InvariantCulture, out period)
+                        || period <= 0))
+                {
+                    throw new ArgumentException(
+                        "TOTP credential ID has an invalid period prefix; the period must be a positive number of seconds (RFC 6238 §4.1).",
+                        nameof(credentialId));
+                }
 
                 return (issuer, name, period);
             }

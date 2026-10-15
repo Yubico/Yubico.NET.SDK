@@ -148,6 +148,19 @@ finally
 For an RSA key, `ciphertext` is the raw encrypted block; for an EC key, it is the sender's ephemeral public key and the
 result is the ECDH shared secret.
 
+### Attest a key
+
+`AttestKeyAsync` (firmware 5.2.0+) has the YubiKey sign a statement about a generated key with its attestation key
+and returns the resulting certificate. It needs the User PIN, and **it overwrites the cardholder certificate stored
+for that key**: the device writes the attestation statement into the key's certificate slot. Read the existing
+certificate with `GetCertificateAsync` first if you need it; restoring it with `PutCertificateAsync` needs the Admin
+PIN.
+
+```csharp
+await session.VerifyPinAsync(userPin, extended: false);
+X509Certificate2 attestation = await session.AttestKeyAsync(KeyRef.Sig);
+```
+
 ## User interaction
 
 This module never asks the application for a credential; pass PINs to the methods that need them. Touch is a card

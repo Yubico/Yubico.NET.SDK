@@ -365,6 +365,41 @@ public class OpenPgpSessionTests
                 Assert.True(attestCert.RawData.Length > 0);
             });
 
+    /// <summary>
+    ///     Audit 26j (YESDK-1634): pins the two facts the AttestKeyAsync docs state. GET_ATTESTATION needs
+    ///     User PIN verification (Admin alone is not enough), and the attestation statement replaces the
+    ///     cardholder certificate stored for that key.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task AttestKey_RequiresUserPin_AndReplacesCardholderCertificate(YubiKeyTestState state) =>
+        await state.WithOpenPgpSessionAsync(
+            resetBeforeUse: true,
+            action: async session =>
+            {
+                await session.VerifyAdminAsync(DefaultAdminPin);
+                await session.GenerateKeyAsync(KeyRef.Sig, EcAttributes.Create(KeyRef.Sig, CurveOid.Secp256R1));
+
+                using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+                using var stored = new CertificateRequest("CN=Audit 26j", ecdsa, HashAlgorithmName.SHA256)
+                    .CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(1));
+                await session.PutCertificateAsync(KeyRef.Sig, stored);
+
+                // Admin PIN is verified, User PIN is not: the device must refuse.
+                var withoutUserPin = await Record.ExceptionAsync(() => session.AttestKeyAsync(KeyRef.Sig));
+                Assert.IsType<ApduException>(withoutUserPin);
+                var stillStored = await session.GetCertificateAsync(KeyRef.Sig);
+                Assert.Equal(stored.RawData, stillStored!.RawData);
+
+                await session.VerifyPinAsync(DefaultUserPin);
+                var attestation = await session.AttestKeyAsync(KeyRef.Sig);
+
+                var nowStored = await session.GetCertificateAsync(KeyRef.Sig);
+                Assert.Equal(attestation.RawData, nowStored!.RawData);
+                Assert.NotEqual(stored.RawData, nowStored.RawData);
+            });
+
     // ── UIF (Touch Policy) ───────────────────────────────────────────
 
     [SkippableTheory]

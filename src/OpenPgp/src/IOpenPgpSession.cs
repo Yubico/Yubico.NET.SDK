@@ -239,8 +239,19 @@ public interface IOpenPgpSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Gets an attestation certificate for the specified key slot. Requires firmware 5.2.0+.
+    ///     Creates an attestation certificate for the key in <paramref name="keyRef" /> and returns it.
+    ///     Requires firmware 5.2.0+ and User PIN verification (<see cref="VerifyPinAsync" />).
     /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         <b>This replaces the cardholder certificate for that key.</b> The YubiKey writes the
+    ///         attestation statement into the key's cardholder certificate slot (DO 7F21) and discards
+    ///         whatever was stored there. The SDK keeps no copy: read it first with
+    ///         <see cref="GetCertificateAsync" /> if you need it, and note that putting it back with
+    ///         <see cref="PutCertificateAsync" /> needs Admin PIN verification.
+    ///     </para>
+    ///     <para>Mirrors yubikit/openpgp.py <c>OpenPgpSession.attest_key</c>.</para>
+    /// </remarks>
     /// <exception cref="NotSupportedException">
     ///     Thrown when the device firmware does not support key attestation (requires 5.2.0+).
     /// </exception>

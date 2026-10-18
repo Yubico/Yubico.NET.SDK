@@ -262,6 +262,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
                 nameof(pubKeyCredParams));
         }
 
+        FidoSessionRequestEncoding.ThrowIfDuplicateCredentialParameters(pubKeyCredParams, nameof(pubKeyCredParams));
+
         EnsureInitialized();
 
         byte[]? request = null;

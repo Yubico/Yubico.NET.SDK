@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 
@@ -31,6 +32,8 @@ internal static class FidoSessionRequestEncoding
         {
             throw new ArgumentException("makeCredential does not allow up=false (CTAP §6.1).", nameof(options));
         }
+
+        ThrowIfDuplicateCredentialParameters(pubKeyCredParams);
 
         var builder = CtapRequestBuilder.Create(CtapCommand.MakeCredential)
             .WithValue(1, writer => writer.WriteByteString(clientDataHash.Span))
@@ -100,6 +103,26 @@ internal static class FidoSessionRequestEncoding
         }
 
         return builder.Build();
+    }
+
+    /// <summary>
+    /// CTAP 2.1-2.3 §6.1 pubKeyCredParams: "The array is ordered from most preferred to least preferred
+    /// and MUST NOT include duplicate entries." The requirement is on the platform, so the SDK enforces it.
+    /// </summary>
+    internal static void ThrowIfDuplicateCredentialParameters(
+        IReadOnlyList<PublicKeyCredentialParameters> pubKeyCredParams,
+        string paramName = "pubKeyCredParams")
+    {
+        var seen = new HashSet<(string Type, CoseAlgorithmIdentifier Algorithm)>();
+        foreach (var parameter in pubKeyCredParams)
+        {
+            if (!seen.Add((parameter.Type, parameter.Algorithm)))
+            {
+                throw new ArgumentException(
+                    $"Duplicate credential parameter ({parameter.Type}, {parameter.Algorithm}); pubKeyCredParams must not include duplicate entries (CTAP §6.1).",
+                    paramName);
+            }
+        }
     }
 
     private static bool HasMakeCredentialOptions(MakeCredentialOptions? options) =>

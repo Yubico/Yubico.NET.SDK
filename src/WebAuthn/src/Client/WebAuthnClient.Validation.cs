@@ -51,6 +51,14 @@ public sealed partial class WebAuthnClient
                 "At least one public key credential parameter is required");
         }
 
+        if (options.PubKeyCredParams.Distinct().Count() != options.PubKeyCredParams.Count)
+        {
+            // CTAP 2.1-2.3 §6.1: pubKeyCredParams "MUST NOT include duplicate entries" (a platform requirement).
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "PubKeyCredParams must not contain duplicate algorithms");
+        }
+
         if (options.TopOrigin is not null && options.CrossOrigin != true)
         {
             // WebAuthn L3 §5.8.1: topOrigin "is set only if the call was made from a context that is not

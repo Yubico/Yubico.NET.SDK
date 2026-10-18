@@ -196,6 +196,26 @@ public class WebAuthnClientMakeCredentialTests
         Assert.True(capturedRequest.Options.TryGetValue("rk", out var rk) && rk);
     }
 
+    /// <summary>CTAP 2.1-2.3 §6.1: pubKeyCredParams "MUST NOT include duplicate entries"; rejected before any backend call.</summary>
+    [Fact]
+    [Trait("Audit", "N1")]
+    public async Task MakeCredential_DuplicatePubKeyCredParams_ThrowsInvalidRequestBeforeBackendCall()
+    {
+        var options = new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7), new CoseAlgorithm(-257), new CoseAlgorithm(-7)]
+        };
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(
+            () => _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
+        await _mockBackend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+    }
+
     /// <summary>WebAuthn L3 §5.1.3: an authenticator that cannot store discoverable credentials is skipped for "required".</summary>
     [Fact]
     [Trait("Audit", "YESDK-1615")]

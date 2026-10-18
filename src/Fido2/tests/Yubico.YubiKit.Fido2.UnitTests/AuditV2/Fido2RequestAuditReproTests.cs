@@ -67,16 +67,36 @@ public sealed class Fido2RequestAuditReproTests
         Assert.True(foundFalseUp);
     }
 
+    /// <summary>
+    ///     CTAP 2.1-2.3 §6.1 pubKeyCredParams: "MUST NOT include duplicate entries." The SDK rejects the list
+    ///     before anything is encoded (maintainer option 1: reject rather than deduplicate).
+    /// </summary>
     [Fact]
-    [Trait("Audit", "NEW-FIDO2-DUPLICATE-ALGORITHMS")]
-    public void NEW_MakeCredentialDoesNotEncodeDuplicateCredentialParameters()
+    [Trait("Audit", "N1")]
+    public void N1_MakeCredentialRejectsDuplicateCredentialParameters()
     {
         var algorithm = new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.ES256);
+
+        var ex = Assert.Throws<ArgumentException>(() => FidoSessionRequestEncoding.BuildMakeCredentialRequest(
+            new byte[32],
+            new PublicKeyCredentialRpEntity("example.com"),
+            new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
+            [algorithm, new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.EdDSA), algorithm],
+            null));
+
+        Assert.Equal("pubKeyCredParams", ex.ParamName);
+    }
+
+    /// <summary>Distinct entries are encoded in the caller's order (§6.1: "most preferred to least preferred").</summary>
+    [Fact]
+    [Trait("Audit", "N1")]
+    public void N1_MakeCredentialEncodesDistinctCredentialParametersInOrder()
+    {
         byte[] request = FidoSessionRequestEncoding.BuildMakeCredentialRequest(
             new byte[32],
             new PublicKeyCredentialRpEntity("example.com"),
             new PublicKeyCredentialUserEntity(new byte[] { 0x01 }, "alice", "Alice"),
-            [algorithm, algorithm],
+            [new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.RS256), new PublicKeyCredentialParameters(CoseAlgorithmIdentifier.ES256)],
             null);
 
         var reader = new CborReader(request.AsMemory(1), CborConformanceMode.Ctap2Canonical);
@@ -89,9 +109,22 @@ public sealed class Fido2RequestAuditReproTests
                 continue;
             }
 
-            Assert.Equal(1, reader.ReadStartArray());
-            reader.SkipValue();
+            Assert.Equal(2, reader.ReadStartArray());
+            var algorithms = new List<int>();
+            for (int entry = 0; entry < 2; entry++)
+            {
+                _ = reader.ReadStartMap();
+                int? alg = null;
+                while (reader.PeekState() != CborReaderState.EndMap)
+                {
+                    var key = reader.ReadTextString();
+                    if (key == "alg") alg = reader.ReadInt32(); else reader.SkipValue();
+                }
+                reader.ReadEndMap();
+                algorithms.Add(alg!.Value);
+            }
             reader.ReadEndArray();
+            Assert.Equal([(int)CoseAlgorithmIdentifier.RS256, (int)CoseAlgorithmIdentifier.ES256], algorithms);
             return;
         }
 

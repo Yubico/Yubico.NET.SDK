@@ -76,10 +76,18 @@ public sealed record class RegistrationOptions
     /// <summary>
     /// Gets a value indicating whether this is a cross-origin request.
     /// </summary>
+    /// <remarks>
+    /// The client data JSON always carries <c>crossOrigin</c>; null is serialized as <c>false</c>
+    /// (WebAuthn L3 §5.8.1.1).
+    /// </remarks>
     public bool? CrossOrigin { get; init; }
 
     /// <summary>
-    /// Gets the top-level origin for nested contexts.
+    /// Gets the top-level origin for nested (cross-origin) contexts.
     /// </summary>
+    /// <remarks>
+    /// Only valid together with <see cref="CrossOrigin"/> = true (WebAuthn L3 §5.8.1); the client rejects
+    /// the options with <see cref="WebAuthnClientErrorCode.InvalidRequest"/> otherwise.
+    /// </remarks>
     public string? TopOrigin { get; init; }
 }

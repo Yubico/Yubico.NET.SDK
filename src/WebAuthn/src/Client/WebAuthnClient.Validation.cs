@@ -50,6 +50,15 @@ public sealed partial class WebAuthnClient
                 WebAuthnClientErrorCode.InvalidRequest,
                 "At least one public key credential parameter is required");
         }
+
+        if (options.TopOrigin is not null && options.CrossOrigin != true)
+        {
+            // WebAuthn L3 §5.8.1: topOrigin "is set only if the call was made from a context that is not
+            // same-origin with its ancestors, i.e. if crossOrigin is true."
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "TopOrigin is only meaningful for a cross-origin request; set CrossOrigin = true or clear TopOrigin");
+        }
     }
 
     private static void ValidateAuthenticationOptions(AuthenticationOptions options)
@@ -66,6 +75,15 @@ public sealed partial class WebAuthnClient
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,
                 "RP ID cannot be null or empty");
+        }
+
+        if (options.TopOrigin is not null && options.CrossOrigin != true)
+        {
+            // WebAuthn L3 §5.8.1: topOrigin "is set only if the call was made from a context that is not
+            // same-origin with its ancestors, i.e. if crossOrigin is true."
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "TopOrigin is only meaningful for a cross-origin request; set CrossOrigin = true or clear TopOrigin");
         }
     }
 

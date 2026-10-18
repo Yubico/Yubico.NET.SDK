@@ -300,9 +300,59 @@ public class WebAuthnAuditReproTests
         Assert.Null(residentKey); // FidoSessionRequestEncoding writes rk:false if HasValue is true
     }
 
+    /// <summary>
+    ///     WebAuthn L3 §5.8.1: topOrigin "is set only if ... crossOrigin is true". The client refuses the
+    ///     contradictory input instead of emitting it (maintainer decision: reject, not silently drop).
+    /// </summary>
+    [Theory]
+    [Trait("Audit", "YESDK-1616")]
+    [InlineData(false)]
+    [InlineData(null)]
+    public async Task YESDK1616_SameOriginRegistrationWithTopOriginIsRejected(bool? crossOrigin)
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+        await using var client = CreateClient(backend);
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(Registration() with
+        {
+            CrossOrigin = crossOrigin,
+            TopOrigin = "https://other.example"
+        }, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
+        await backend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
+    [Trait("Audit", "YESDK-1616")]
+    [InlineData(false)]
+    [InlineData(null)]
+    public async Task YESDK1616_SameOriginAssertionWithTopOriginIsRejected(bool? crossOrigin)
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+        await using var client = CreateClient(backend);
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(Authentication() with
+        {
+            CrossOrigin = crossOrigin,
+            TopOrigin = "https://other.example"
+        }, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
+        await backend.DidNotReceive().GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     Controls for the serialization WebAuthn L3 §5.8.1.1 requires: crossOrigin is always present (false when
+    ///     unset) and topOrigin appears for a genuine cross-origin request.
+    /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1616")]
-    public async Task YESDK1616_SameOriginRegistrationOmitsTopOriginFromClientData()
+    public async Task YESDK1616_CrossOriginRegistrationCarriesTopOrigin_AndCrossOriginIsAlwaysSerialized()
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
@@ -310,35 +360,25 @@ public class WebAuthnAuditReproTests
         backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
             .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
         await using var client = CreateClient(backend);
-        var result = await client.MakeCredentialAsync(Registration() with
-        {
-            CrossOrigin = false,
-            TopOrigin = "https://other.example"
-        }, cancellationToken: TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(result.ClientData.JsonBytes);
-        Assert.False(json.RootElement.GetProperty("crossOrigin").GetBoolean());
-        Assert.False(json.RootElement.TryGetProperty("topOrigin", out _));
-    }
 
-    [Fact]
-    [Trait("Audit", "YESDK-1616")]
-    public async Task YESDK1616_SameOriginAssertionOmitsTopOriginFromClientData()
-    {
-        var backend = Substitute.For<IWebAuthnBackend>();
-        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
-        backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockGetAssertionResponse());
-        await using var client = CreateClient(backend);
-        var matches = await client.GetAssertionAsync(Authentication() with
+        var crossOrigin = await client.MakeCredentialAsync(Registration() with
         {
-            CrossOrigin = false,
+            CrossOrigin = true,
             TopOrigin = "https://other.example"
         }, cancellationToken: TestContext.Current.CancellationToken);
-        var result = await Assert.Single(matches).SelectAsync(TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(result.ClientData.JsonBytes);
-        Assert.False(json.RootElement.GetProperty("crossOrigin").GetBoolean());
-        Assert.False(json.RootElement.TryGetProperty("topOrigin", out _));
+        using (var json = JsonDocument.Parse(crossOrigin.ClientData.JsonBytes))
+        {
+            Assert.True(json.RootElement.GetProperty("crossOrigin").GetBoolean());
+            Assert.Equal("https://other.example", json.RootElement.GetProperty("topOrigin").GetString());
+        }
+
+        var sameOrigin = await client.MakeCredentialAsync(Registration(),
+            cancellationToken: TestContext.Current.CancellationToken);
+        using (var json = JsonDocument.Parse(sameOrigin.ClientData.JsonBytes))
+        {
+            Assert.False(json.RootElement.GetProperty("crossOrigin").GetBoolean());
+            Assert.False(json.RootElement.TryGetProperty("topOrigin", out _));
+        }
     }
 
     [Fact(Timeout = 5000)]

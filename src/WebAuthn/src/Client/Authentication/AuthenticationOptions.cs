@@ -69,15 +69,17 @@ public sealed record class AuthenticationOptions
     /// Gets whether this is a cross-origin request.
     /// </summary>
     /// <remarks>
-    /// When true, the client data JSON will include the crossOrigin field.
+    /// The client data JSON always carries <c>crossOrigin</c>; null is serialized as <c>false</c>
+    /// (WebAuthn L3 §5.8.1.1).
     /// </remarks>
     public bool? CrossOrigin { get; init; }
 
     /// <summary>
-    /// Gets the top-level origin for iframe scenarios.
+    /// Gets the top-level origin for iframe (cross-origin) scenarios.
     /// </summary>
     /// <remarks>
-    /// When set, the client data JSON will include the topOrigin field.
+    /// Only valid together with <see cref="CrossOrigin"/> = true (WebAuthn L3 §5.8.1); the client rejects
+    /// the options with <see cref="WebAuthnClientErrorCode.InvalidRequest"/> otherwise.
     /// </remarks>
     public string? TopOrigin { get; init; }
 

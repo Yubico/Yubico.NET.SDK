@@ -460,8 +460,8 @@ Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecretMakeCredential(Yu
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlob(Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport support = Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport.Preferred) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlobKey() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithMinPinLength() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
-Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams! signingParams) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers
 Yubico.YubiKit.Fido2.Extensions.ExtensionOutput
 Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.ExtensionIds.get -> System.Collections.Generic.IEnumerable<string!>!
@@ -517,10 +517,6 @@ Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput
 Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput.MinPinLength.get -> int
 Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput.MinPinLength.init -> void
 Yubico.YubiKit.Fido2.Extensions.MinPinLengthOutput.MinPinLengthOutput() -> void
-Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput
-Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput.PreviewSignAuthenticationInput(System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams!>! signByCredential) -> void
-Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput.SignByCredential.get -> System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams!>!
-Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput.SignByCredential.init -> void
 Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationOutput
 Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationOutput.PreviewSignAuthenticationOutput(System.ReadOnlyMemory<byte> signature) -> void
 Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationOutput.Signature.get -> System.ReadOnlyMemory<byte>

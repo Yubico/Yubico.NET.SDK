@@ -22,15 +22,15 @@ using Yubico.YubiKit.WebAuthn.Preferences;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 
 /// <summary>
-/// previewSign (Yubico draft v4 §10.2.1): generates a signing key at registration, signs with
-/// <c>signByCredential</c> at authentication. Credential selection for multi-entry maps lands with 26d.
+/// previewSign (Yubico draft v4 §10.2.1): generates a signing key at registration; at authentication
+/// signs with the <c>signByCredential</c> entry of the credential the client selected, as python-fido2's
+/// PreviewSignExtension (<c>by_creds[selected.id]</c>) and yubikit-android's SignExtension do.
 /// </summary>
 internal sealed class PreviewSignProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor
 {
     private readonly PreviewSign.PreviewSignRegistrationInput? _registration;
     private readonly UserVerificationPreference _userVerification;
     private readonly PreviewSign.PreviewSignAuthenticationInput? _authentication;
-    private readonly IReadOnlyList<PublicKeyCredentialDescriptor>? _allowCredentials;
 
     public PreviewSignProcessor(PreviewSign.PreviewSignRegistrationInput input, UserVerificationPreference userVerification)
     {
@@ -38,10 +38,59 @@ internal sealed class PreviewSignProcessor : IRegistrationExtensionProcessor, IA
         _userVerification = userVerification;
     }
 
-    public PreviewSignProcessor(PreviewSign.PreviewSignAuthenticationInput input, IReadOnlyList<PublicKeyCredentialDescriptor>? allowCredentials)
+    private PreviewSignProcessor(PreviewSign.PreviewSignAuthenticationInput input)
     {
         _authentication = input;
-        _allowCredentials = allowCredentials;
+    }
+
+    /// <summary>
+    /// Draft v4 §10.2.1 authentication: "If the size of extSign.signByCredential does not equal the size
+    /// of pkOptions.allowCredentials, return a DOMException whose name is NotSupportedError" and, for an
+    /// allowed credential without an entry, "If signInputs is undefined, return ... SyntaxError".
+    /// </summary>
+    public static PreviewSignProcessor ForAuthentication(
+        PreviewSign.PreviewSignAuthenticationInput input,
+        IReadOnlyList<PublicKeyCredentialDescriptor>? allowCredentials)
+    {
+        if (allowCredentials is null || allowCredentials.Count != input.SignByCredential.Count)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.NotSupported,
+                "previewSign signByCredential must have exactly one entry per allowCredentials entry (previewSign draft v4 §10.2.1)");
+        }
+
+        foreach (var allowed in allowCredentials)
+        {
+            if (FindEntry(input, allowed) is null)
+            {
+                throw new WebAuthnClientError(
+                    WebAuthnClientErrorCode.InvalidRequest,
+                    "previewSign signByCredential is missing an entry for an allowed credential (previewSign draft v4 §10.2.1)");
+            }
+        }
+
+        return new PreviewSignProcessor(input);
+    }
+
+    private static PreviewSign.PreviewSignSigningParams? FindEntry(
+        PreviewSign.PreviewSignAuthenticationInput input,
+        PublicKeyCredentialDescriptor credential)
+    {
+        if (input.SignByCredential.TryGetValue(credential.Id, out var exact))
+        {
+            return exact;
+        }
+
+        // The relying party may have supplied a dictionary without ByteArrayKeyComparer; match by content.
+        foreach (var (id, signingParams) in input.SignByCredential)
+        {
+            if (id.Span.SequenceEqual(credential.Id.Span))
+            {
+                return signingParams;
+            }
+        }
+
+        return null;
     }
 
     public string Name => ExtensionIdentifiers.PreviewSign;
@@ -50,8 +99,15 @@ internal sealed class PreviewSignProcessor : IRegistrationExtensionProcessor, IA
     public void PrepareInputs(ExtensionBuilder builder, PinUvAuthTokenSession? token) =>
         PreviewSignCodec.ApplyToBuilderForRegistration(builder, _registration!, _userVerification);
 
-    public void PrepareInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token) =>
-        PreviewSignCodec.ApplyToBuilderForAuthentication(builder, _authentication!, _allowCredentials);
+    // Draft v4 §10.2.1: "Let signInputs be extSign.signByCredential[chosenCredentialIdB64]". No selected
+    // credential (nothing on the key matched the allow list) means nothing to sign.
+    public void PrepareInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token)
+    {
+        if (selected is not null && FindEntry(_authentication!, selected) is { } signingParams)
+        {
+            builder.WithPreviewSign(PreviewSignCodec.ToCtap(signingParams));
+        }
+    }
 
     public ValueTask PrepareOutputsAsync(
         MakeCredentialResponse response,

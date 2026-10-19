@@ -74,84 +74,11 @@ internal static class PreviewSignCodec
     }
 
     /// <summary>
-    /// Applies previewSign input to the CTAP extension builder for authentication.
+    /// Translates one credential's WebAuthn signing parameters to the CTAP2 shape. additionalArgs are
+    /// algorithm-specific bytes and pass through unchanged.
     /// </summary>
-    /// <param name="builder">The extension builder.</param>
-    /// <param name="input">The previewSign authentication input.</param>
-    /// <param name="allowCredentials">The allow list from authentication options.</param>
-    /// <exception cref="WebAuthnClientError">
-    /// Thrown when the previewSign authentication input cannot be applied.
-    /// </exception>
-    /// <remarks>
-    /// Authentication with previewSign requires a non-empty allow list and a corresponding
-    /// <c>signByCredential</c> entry for each allowed credential.
-    /// </remarks>
-    public static void ApplyToBuilderForAuthentication(
-        ExtensionBuilder builder,
-        PreviewSign.PreviewSignAuthenticationInput input,
-        IReadOnlyList<Fido2.Credentials.PublicKeyCredentialDescriptor>? allowCredentials)
-    {
-        // Signing requires knowing which credential's generated key to use.
-        if (allowCredentials is null || allowCredentials.Count == 0)
-        {
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.InvalidRequest,
-                "previewSign authentication requires a non-empty allowCredentials list");
-        }
-
-        // Each allowed credential must have a corresponding previewSign input entry.
-        var signByCredIds = new HashSet<ReadOnlyMemory<byte>>(
-            input.SignByCredential.Keys,
-            ByteArrayKeyComparer.Instance);
-
-        foreach (var allowedCred in allowCredentials)
-        {
-            if (!signByCredIds.Contains(allowedCred.Id))
-            {
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.InvalidRequest,
-                    "previewSign signByCredential is missing entries for one or more allowCredentials");
-            }
-        }
-
-        // Multi-credential probe-selection is not implemented yet; keep the current auth path single-credential.
-        if (input.SignByCredential.Count != 1)
-        {
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.NotSupported,
-                "previewSign authentication currently supports only single-credential scope; " +
-                "multi-credential probe-selection is not implemented. " +
-                "To use previewSign now: scope signByCredential to exactly one credential " +
-                "that matches the single entry in allowCredentials.");
-        }
-
-        // Extract the single credential's params
-        var (credentialId, signingParams) = input.SignByCredential.First();
-
-        // Verify it matches the single allowCredentials entry
-        if (allowCredentials.Count != 1 || !allowCredentials[0].Id.Span.SequenceEqual(credentialId.Span))
-        {
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.InvalidRequest,
-                "previewSign signByCredential's single entry must match allowCredentials[0]");
-        }
-
-        // Translate WebAuthn SigningParams to Fido2 SigningParams. additionalArgs are
-        // algorithm-specific bytes and pass through unchanged.
-        var fido2SigningParams = new Fido2.Extensions.PreviewSignSigningParams(
-            keyHandle: signingParams.KeyHandle,
-            tbs: signingParams.Tbs,
-            additionalArgs: signingParams.AdditionalArgs);
-
-        // Translate to Fido2 authentication input (expects dictionary)
-        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, Fido2.Extensions.PreviewSignSigningParams>(
-            ByteArrayKeyComparer.Instance)
-        {
-            [credentialId] = fido2SigningParams
-        };
-        var fido2Input = new Fido2.Extensions.PreviewSignAuthenticationInput(signByCredential);
-        builder.WithPreviewSign(fido2Input);
-    }
+    public static Fido2.Extensions.PreviewSignSigningParams ToCtap(PreviewSign.PreviewSignSigningParams signingParams) =>
+        new(keyHandle: signingParams.KeyHandle, tbs: signingParams.Tbs, additionalArgs: signingParams.AdditionalArgs);
 
     /// <summary>
     /// Parses the previewSign registration output from authenticator data.

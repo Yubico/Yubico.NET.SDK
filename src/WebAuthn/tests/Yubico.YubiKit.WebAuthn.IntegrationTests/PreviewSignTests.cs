@@ -208,6 +208,85 @@ public class PreviewSignTests
     }
 
     /// <summary>
+    ///     26d on hardware: two previewSign credentials for one RP, an allow list naming both and a signByCredential
+    ///     entry for each. The client selects the credential the key answers for and sends that entry; the returned
+    ///     signature verifies against the derived key of the credential that was actually returned.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait("Audit", "YESDK-1634")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    public async Task TwoCredentialAllowList_SignsWithTheSelectedCredentialsEntry(YubiKeyTestState state)
+    {
+        await using var probeSession = await state.Device.CreateFidoSessionAsync();
+        Skip.IfNot(await SupportsPreviewSignAsync(probeSession), "YubiKey does not advertise previewSign extension");
+        await NormalizePinAsync(probeSession);
+        await probeSession.DisposeAsync();
+
+        var pin = Encoding.UTF8.GetBytes("11234567");
+        var first = await RegisterArkgAsync(state, "signer-a@example.com", pin);
+        var second = await RegisterArkgAsync(state, "signer-b@example.com", pin);
+
+        var messageA = Encoding.UTF8.GetBytes("message for credential A");
+        var messageB = Encoding.UTF8.GetBytes("message for credential B");
+        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        {
+            [first.CredentialId] = SigningParamsFor(first, messageA),
+            [second.CredentialId] = SigningParamsFor(second, messageB)
+        };
+
+        await using var session = await state.Device.CreateFidoSessionAsync();
+        await using var client = CreateClient(session);
+        var matches = await client.GetAssertionAsync(new AuthenticationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = TestRpId,
+            AllowCredentials = [new PublicKeyCredentialDescriptor(first.CredentialId), new PublicKeyCredentialDescriptor(second.CredentialId)],
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new AuthenticationExtensionInputs(PreviewSign: new PreviewSignAuthenticationInput(signByCredential))
+        }, pin);
+
+        var response = await Assert.Single(matches).SelectAsync();
+        var signature = response.ClientExtensionResults?.PreviewSign?.Signature;
+        Assert.NotNull(signature);
+        var (returned, message) = response.CredentialId.Span.SequenceEqual(first.CredentialId.Span)
+            ? (first, messageA)
+            : (second, messageB);
+        Assert.True(returned.DerivedKey.VerifySignature(message, signature.Value.Span),
+            "the previewSign signature must verify against the key of the credential the authenticator returned");
+    }
+
+    private sealed record ArkgCredential(ReadOnlyMemory<byte> CredentialId, ReadOnlyMemory<byte> KeyHandle, Fido2Extensions.PreviewSignDerivedKey DerivedKey);
+
+    private static async Task<ArkgCredential> RegisterArkgAsync(YubiKeyTestState state, string userName, byte[] pin)
+    {
+        await using var session = await state.Device.CreateFidoSessionAsync();
+        await using var client = CreateClient(session);
+        var response = await client.MakeCredentialAsync(new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), userName, userName),
+            PubKeyCredParams = [CoseAlgorithm.Es256],
+            ResidentKey = ResidentKeyPreference.Required,
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new RegistrationExtensionInputs(PreviewSign: PreviewSignRegistrationInput.GenerateKey(CoseAlgorithm.ArkgP256))
+        }, pin);
+        var generatedKey = response.ClientExtensionResults!.PreviewSign!.GeneratedKey;
+        var seedKey = Assert.IsType<Fido2.Cose.CoseArkgP256SeedKey>(generatedKey.PublicKey);
+        var derived = ConvertToFido2GeneratedKey(generatedKey.KeyHandle, seedKey)
+            .DerivePublicKey(RandomNumberGenerator.GetBytes(32), Encoding.ASCII.GetBytes("two-credential-ctx"));
+        return new ArkgCredential(response.CredentialId, generatedKey.KeyHandle, derived);
+    }
+
+    private static PreviewSignSigningParams SigningParamsFor(ArkgCredential credential, byte[] message) =>
+        new(
+            keyHandle: credential.KeyHandle,
+            tbs: SHA256.HashData(message),
+            additionalArgs: Fido2Extensions.PreviewSignCbor.EncodeAdditionalArgs(
+                Fido2Extensions.CoseSignArgs.ArkgP256(credential.DerivedKey.ArkgKeyHandle, credential.DerivedKey.Context)));
+
+    /// <summary>
     /// Helper to convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey.
     /// </summary>
     /// <remarks>

@@ -43,18 +43,23 @@ public class Fido2ExtensionAuditReproTests
         reader.ReadEndMap();
     }
 
+    /// <summary>
+    ///     The CTAP layer carries one credential's previewSign parameters (draft v4 §10.2.1 key-handle = 2, tbs = 6);
+    ///     choosing among a signByCredential map is the WebAuthn client's job after credential selection.
+    /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
-    public void YESDK1634_MultiplePreviewSignCredentialsCannotSilentlySelectFirst()
+    public void YESDK1634_PreviewSignBuilderEncodesTheGivenCredentialsParameters()
     {
-        var input = new PreviewSignAuthenticationInput(
-            new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
-            {
-                [new byte[] { 0x01 }] = new(new byte[] { 0xA1 }, new byte[] { 0xB1 }),
-                [new byte[] { 0x02 }] = new(new byte[] { 0xA2 }, new byte[] { 0xB2 })
-            });
+        var extensions = new ExtensionBuilder()
+            .WithPreviewSign(new PreviewSignSigningParams(keyHandle: new byte[] { 0xA1 }, tbs: new byte[] { 0xB1 }))
+            .Build();
 
-        // Without an allow-list/selected credential the low-level builder cannot pick safely.
-        Assert.Throws<NotSupportedException>(() => new ExtensionBuilder().WithPreviewSign(input).Build());
+        var reader = new CborReader(extensions!.Value, CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(1, reader.ReadStartMap());
+        Assert.Equal("previewSign", reader.ReadTextString());
+        Assert.Equal(2, reader.ReadStartMap());
+        Assert.Equal(2, reader.ReadInt32()); Assert.Equal(new byte[] { 0xA1 }, reader.ReadByteString());
+        Assert.Equal(6, reader.ReadInt32()); Assert.Equal(new byte[] { 0xB1 }, reader.ReadByteString());
     }
 }

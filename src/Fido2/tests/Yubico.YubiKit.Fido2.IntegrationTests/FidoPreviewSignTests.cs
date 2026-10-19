@@ -339,21 +339,16 @@ public class FidoPreviewSignTests
                 // re-running ClientPin protocol after MakeCredential resets ECDH state and
                 // appears to invalidate the firmware's previewSign verification context.
 
-                var comparer = new MemoryByteEqualityComparer();
-                var signByCredential = new Dictionary<ReadOnlyMemory<byte>, Extensions.PreviewSignSigningParams>(comparer)
-                {
-                    [credentialId] = new Extensions.PreviewSignSigningParams(
-                        keyHandle: derivedKey.DeviceKeyHandle,
-                        tbs: message,
-                        additionalArgs: Extensions.PreviewSignCbor.EncodeAdditionalArgs(
-                            Extensions.CoseSignArgs.ArkgP256(
-                                derivedKey.ArkgKeyHandle,
-                                derivedKey.Context)))
-                };
+                var signingParams = new Extensions.PreviewSignSigningParams(
+                    keyHandle: derivedKey.DeviceKeyHandle,
+                    tbs: message,
+                    additionalArgs: Extensions.PreviewSignCbor.EncodeAdditionalArgs(
+                        Extensions.CoseSignArgs.ArkgP256(
+                            derivedKey.ArkgKeyHandle,
+                            derivedKey.Context)));
 
-                var authInput = new Extensions.PreviewSignAuthenticationInput(signByCredential);
                 var authExtensions = new Extensions.ExtensionBuilder()
-                    .WithPreviewSign(authInput)
+                    .WithPreviewSign(signingParams)
                     .Build();
 
                 // Phase D root-cause fix: mirror python-fido2 reference exactly.
@@ -455,23 +450,6 @@ public class FidoPreviewSignTests
     /// <summary>
     /// Equality comparer for ReadOnlyMemory&lt;byte&gt; that compares byte sequences.
     /// </summary>
-    private sealed class MemoryByteEqualityComparer : IEqualityComparer<ReadOnlyMemory<byte>>
-    {
-        public bool Equals(ReadOnlyMemory<byte> x, ReadOnlyMemory<byte> y)
-        {
-            return x.Span.SequenceEqual(y.Span);
-        }
-
-        public int GetHashCode(ReadOnlyMemory<byte> obj)
-        {
-            var hash = new HashCode();
-            foreach (byte b in obj.Span)
-            {
-                hash.Add(b);
-            }
-            return hash.ToHashCode();
-        }
-    }
 
     /// <summary>
     /// Tests that MakeCredential with an unsupported algorithm rejects the request.
@@ -783,18 +761,11 @@ public class FidoPreviewSignTests
 
                 // Build previewSign authentication input WITHOUT additionalArgs.
                 // ARKG requires algorithm-specific bytes under key 7.
-                var comparer = new MemoryByteEqualityComparer();
-                var signByCredential = new Dictionary<ReadOnlyMemory<byte>, Extensions.PreviewSignSigningParams>(comparer)
-                {
-                    [credentialId] = new Extensions.PreviewSignSigningParams(
+                var authExtensions = new Extensions.ExtensionBuilder()
+                    .WithPreviewSign(new Extensions.PreviewSignSigningParams(
                         keyHandle: derivedKey.DeviceKeyHandle,
                         tbs: message,
-                        additionalArgs: null)  // MISSING — required for ARKG
-                };
-
-                var authInput = new Extensions.PreviewSignAuthenticationInput(signByCredential);
-                var authExtensions = new Extensions.ExtensionBuilder()
-                    .WithPreviewSign(authInput)
+                        additionalArgs: null))  // MISSING — required for ARKG
                     .Build();
 
                 var assertionOptions = new GetAssertionOptions

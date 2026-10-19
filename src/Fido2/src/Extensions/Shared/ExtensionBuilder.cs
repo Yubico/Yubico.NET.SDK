@@ -49,7 +49,7 @@ public sealed class ExtensionBuilder
     private bool _largeBlobKey;
     private bool _hmacSecretRequested;
     private PreviewSignRegistrationInput? _previewSignRegistration;
-    private PreviewSignAuthenticationInput? _previewSignAuthentication;
+    private PreviewSignSigningParams? _previewSignAuthentication;
 
     /// <summary>
     /// Adds the credProtect extension with the specified policy.
@@ -281,14 +281,19 @@ public sealed class ExtensionBuilder
     }
 
     /// <summary>
-    /// Adds previewSign extension with signing parameters for getAssertion.
+    /// Adds the previewSign extension for getAssertion: the signing parameters of the one credential
+    /// this assertion is for (Yubico previewSign draft v4 §10.2.1: key-handle, tbs, additional-args).
     /// </summary>
-    /// <param name="input">The previewSign authentication input.</param>
+    /// <remarks>
+    /// CTAP carries exactly one credential's parameters. Choosing among a relying party's per-credential
+    /// map (<c>signByCredential</c>) is the WebAuthn client's job, after it has selected the credential.
+    /// </remarks>
+    /// <param name="signingParams">The selected credential's signing parameters.</param>
     /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithPreviewSign(PreviewSignAuthenticationInput input)
+    public ExtensionBuilder WithPreviewSign(PreviewSignSigningParams signingParams)
     {
-        ArgumentNullException.ThrowIfNull(input);
-        _previewSignAuthentication = input;
+        ArgumentNullException.ThrowIfNull(signingParams);
+        _previewSignAuthentication = signingParams;
         return this;
     }
 
@@ -394,7 +399,7 @@ public sealed class ExtensionBuilder
         else if (_previewSignAuthentication is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
-            EncodePreviewSignAuthenticationInput(writer, _previewSignAuthentication);
+            EncodePreviewSignSigningParams(writer, _previewSignAuthentication);
         }
 
         writer.WriteEndMap();
@@ -409,12 +414,8 @@ public sealed class ExtensionBuilder
         CopyCborValue(reader, writer);
     }
 
-    private static void EncodePreviewSignAuthenticationInput(CborWriter writer, PreviewSignAuthenticationInput input)
+    private static void EncodePreviewSignSigningParams(CborWriter writer, PreviewSignSigningParams signingParams)
     {
-        // Extract the single credential's signing params (validated by the encoder)
-        var firstEntry = input.SignByCredential.First();
-        var signingParams = firstEntry.Value;
-
         var encodedBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
         var reader = new CborReader(encodedBytes, CborConformanceMode.Ctap2Canonical);
 

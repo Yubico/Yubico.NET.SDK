@@ -585,9 +585,9 @@ public class WebAuthnAuditReproTests
         using var guard = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
-            Yubico.YubiKit.WebAuthn.Internal.ExcludeListPreflight.FindFirstMatchAsync(
+            CredentialFilter.SelectAsync(
                 backend, "example.com", [new PublicKeyCredentialDescriptor(new byte[] { 1 }), new PublicKeyCredentialDescriptor(new byte[] { 2 })],
-                info, new byte[32], new TestPinUvAuthProtocol(), guard.Token));
+                info, new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]), guard.Token));
 
         Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
         await backend.DidNotReceive().GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
@@ -612,9 +612,9 @@ public class WebAuthnAuditReproTests
             });
         using var guard = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
-        var match = await Yubico.YubiKit.WebAuthn.Internal.ExcludeListPreflight.FindFirstMatchAsync(
+        var match = await CredentialFilter.SelectAsync(
             backend, "example.com", [new PublicKeyCredentialDescriptor(new byte[] { 1 }), new PublicKeyCredentialDescriptor(new byte[] { 2 })],
-            info, new byte[32], new TestPinUvAuthProtocol(), guard.Token);
+            info, new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]), guard.Token);
 
         Assert.Null(match);
         Assert.Equal(expectedProbes, probes);

@@ -192,7 +192,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         // Add PIN/UV auth if provided
         if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
         {
-            // Load-bearing copy: see the note in MakeCredentialAsync. ExcludeListPreflight probes
+            // Load-bearing copy: see the note in MakeCredentialAsync. CredentialFilter probes
             // several exclude-list chunks with one pinUvAuthParam, so this method must not zero
             // the caller's buffer.
             options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();

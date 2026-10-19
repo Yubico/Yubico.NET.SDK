@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 /// substituted <see cref="IFidoSession"/>.
 /// </para>
 /// <para>
-/// The reuse scenario is not hypothetical: <c>ExcludeListPreflight</c> derives one
+/// The reuse scenario is not hypothetical: <c>CredentialFilter</c> derives one
 /// <c>pinUvAuthParam</c>, hoists it above its chunk loop, and rebuilds a fresh request around the
 /// very same buffer for every chunk. Were the backend to zero the caller's buffer, every chunk
 /// after the first would authenticate with an all-zero parameter.

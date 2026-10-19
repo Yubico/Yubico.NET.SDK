@@ -265,13 +265,12 @@ public sealed partial class WebAuthnClient
 
         try
         {
-            var matchedExclude = await Internal.ExcludeListPreflight.FindFirstMatchAsync(
+            var matchedExclude = await CredentialFilter.SelectAsync(
                 _backend,
                 options.Rp.Id,
                 options.ExcludeCredentials,
                 info,
-                tokenSession.Token,
-                tokenSession.Protocol,
+                tokenSession,
                 cancellationToken).ConfigureAwait(false);
 
             // Re-mint the pinUvAuthToken between pre-flight and MakeCredential.

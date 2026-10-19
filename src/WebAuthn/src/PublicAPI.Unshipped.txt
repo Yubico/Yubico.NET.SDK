@@ -233,11 +233,11 @@ Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey!
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Algorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Algorithm.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.AttestationObject.get -> Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject?
+Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.AttestationObject.get -> Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject!
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.AttestationObject.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Deconstruct(out System.ReadOnlyMemory<byte> KeyHandle, out Yubico.YubiKit.Fido2.Cose.CoseKey! PublicKey, out Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, out Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject? AttestationObject) -> void
+Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Deconstruct(out System.ReadOnlyMemory<byte> KeyHandle, out Yubico.YubiKit.Fido2.Cose.CoseKey! PublicKey, out Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, out Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject! AttestationObject) -> void
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.GeneratedSigningKey(System.ReadOnlyMemory<byte> KeyHandle, Yubico.YubiKit.Fido2.Cose.CoseKey! PublicKey, Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject? AttestationObject) -> void
+Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.GeneratedSigningKey(System.ReadOnlyMemory<byte> KeyHandle, Yubico.YubiKit.Fido2.Cose.CoseKey! PublicKey, Yubico.YubiKit.Fido2.Cose.CoseAlgorithm Algorithm, Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject! AttestationObject) -> void
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.KeyHandle.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.KeyHandle.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.PublicKey.get -> Yubico.YubiKit.Fido2.Cose.CoseKey!

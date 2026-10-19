@@ -1,11 +1,15 @@
+using NSubstitute;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
+using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.AuditV2;
 
@@ -53,6 +57,49 @@ public class WebAuthnExtensionAuditReproTests
         reader.ReadStartMap();
         Assert.Equal("hmac-secret", reader.ReadTextString());
         Assert.Equal(CborReaderState.StartMap, reader.PeekState());
+    }
+
+    /// <summary>
+    ///     The adapter's InvalidState must reach the caller: ExtensionPipeline only swallows CborContentException, so a
+    ///     registration whose previewSign output lacks the inner attestation fails instead of returning the WebAuthn
+    ///     credential's key as the signing key.
+    /// </summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task YESDK1634_RegistrationFailsWhenPreviewSignInnerAttestationIsMissing()
+    {
+        var extensions = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        extensions.WriteStartMap(1);
+        extensions.WriteTextString("previewSign");
+        extensions.WriteStartMap(1);
+        extensions.WriteInt32(3);
+        extensions.WriteInt32(CoseAlgorithm.Es256.Value);
+        extensions.WriteEndMap();
+        extensions.WriteEndMap();
+        var authData = MockFido2Responses.BuildAuthDataWithAttestedCredential(Guid.NewGuid()).ToList();
+        authData[32] |= 0x80; // ED: extensions follow the attested credential data
+        authData.AddRange(extensions.Encode());
+
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+        backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MakeCredentialResponse.Decode(MockFido2Responses.BuildMakeCredentialResponseCbor([.. authData], "none")));
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(new RegistrationOptions
+        {
+            Challenge = new byte[32],
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(new byte[] { 1 }, "user", "User"),
+            PubKeyCredParams = [CoseAlgorithm.Es256],
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new RegistrationExtensionInputs(PreviewSign: new WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput([CoseAlgorithm.Es256]))
+        }, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
     }
 
     [Fact]

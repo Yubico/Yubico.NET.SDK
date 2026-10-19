@@ -153,9 +153,9 @@ public class PreviewSignAdapterTests
     {
         // Arrange - mock authenticator data with previewSign extension containing algorithm + flags in authData
         // and attestation object in unsignedExtensionOutputs (per Fix #6b)
-        var keyHandle = RandomNumberGenerator.GetBytes(16);
+        var innerCredentialId = RandomNumberGenerator.GetBytes(32);
         var publicKeyBytes = BuildCoseEc2PublicKey(CoseAlgorithm.Es256);
-        var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification);
+        var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, innerCredentialId);
 
         // Build authData.extensions["previewSign"] = {3: alg, 4: flags}
         var authDataExtension = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -188,11 +188,14 @@ public class PreviewSignAdapterTests
         // Act - parse registration output
         var output = PreviewSignAdapter.ParseRegistrationOutput(parsedAuthData, unsignedExtensionOutputs);
 
-        // Assert - GeneratedKey should be populated from both sources
+        // Assert - GeneratedKey comes from the inner attestation object (previewSign draft v4 §10.2.1)
         Assert.NotNull(output);
         Assert.NotNull(output.GeneratedKey);
         Assert.NotNull(output.GeneratedKey.PublicKey);
         Assert.Equal(CoseAlgorithm.Es256, output.GeneratedKey.Algorithm);
+        Assert.Equal(innerCredentialId, output.GeneratedKey.KeyHandle.ToArray());
+        Assert.NotNull(output.GeneratedKey.AttestationObject);
+        Assert.Equal(innerCredentialId, output.GeneratedKey.AttestationObject.AuthenticatorData.AttestedCredentialData!.CredentialId.ToArray());
     }
 
     [Fact(Timeout = 5000)]
@@ -406,7 +409,10 @@ public class PreviewSignAdapterTests
         return writer.Encode();
     }
 
-    private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags)
+    private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags) =>
+        BuildAttestationObject(publicKey, flags, RandomNumberGenerator.GetBytes(32));
+
+    private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags, byte[] credId)
     {
         // Build minimal CTAP-shaped inner attestation object with previewSign extension in authData.
         //
@@ -419,7 +425,6 @@ public class PreviewSignAdapterTests
         // which masked the parser bug in PreviewSignAdapter.ParseRegistrationOutput. This rewrite
         // reproduces the on-the-wire shape so the test exercises the actual decode path.
         var rpIdHash = SHA256.HashData("example.com"u8);
-        var credId = RandomNumberGenerator.GetBytes(32);
 
         // Build authData with AT flag + previewSign extension
         var authDataList = new List<byte>();

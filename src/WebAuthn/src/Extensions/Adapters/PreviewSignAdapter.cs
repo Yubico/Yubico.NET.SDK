@@ -164,13 +164,15 @@ internal static class PreviewSignAdapter
     /// otherwise null.
     /// </returns>
     /// <exception cref="WebAuthnClientError">
-    /// Thrown when the extension output is present but malformed (InvalidState).
+    /// Thrown when the extension output is present but malformed, or when the generated-key attestation
+    /// object is missing from the unsigned extension outputs (InvalidState).
     /// </exception>
     /// <remarks>
     /// Reads the algorithm from <c>authData.extensions["previewSign"]</c> and the generated signing
-    /// key attestation object from <c>unsignedExtensionOutputs["previewSign"]</c>. If unsigned
-    /// extension outputs are missing, the method builds the generated key from the response
-    /// authenticator data's attested credential data.
+    /// key attestation object from <c>unsignedExtensionOutputs["previewSign"][7]</c>. The key handle and
+    /// public key come from the attested credential data of that <em>inner</em> attestation object
+    /// (previewSign draft v4 §10.2.1); the outer WebAuthn credential is never a substitute, so a missing
+    /// unsigned output fails the parse rather than returning the wrong key.
     /// </remarks>
     public static PreviewSign.PreviewSignRegistrationOutput? ParseRegistrationOutput(
         WebAuthnAuthenticatorData authData,
@@ -191,53 +193,45 @@ internal static class PreviewSignAdapter
             ? (PreviewSign.PreviewSignFlags)flagsInt.Value
             : PreviewSign.PreviewSignFlags.RequireUserPresence;
 
-        // Try to read attestation object from unsignedExtensionOutputs["previewSign"]
-        if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) == true)
-        {
-            // Decode the CTAP-shaped inner attestation object via the Fido2 decoder. The wire
-            // payload uses integer keys ({1:fmt, 2:authData, 3:attStmt}), so WebAuthn rebuilds
-            // the attestation object from the decoded components.
-            Fido2.Extensions.PreviewSignCbor.InnerAttestationObject inner =
-                Fido2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor);
-
-            var innerAuthData = WebAuthnAuthenticatorData.Decode(inner.AuthData);
-            var format = new AttestationFormat(inner.Fmt);
-            var statement = AttestationStatement.Decode(format, inner.AttStmtRawCbor);
-            var attestationObject = WebAuthnAttestationObject.Create(innerAuthData, statement);
-
-            // Extract key handle and public key from attested credential data
-            var attestedCredData = attestationObject.AuthenticatorData.AttestedCredentialData;
-            if (attestedCredData is null)
-            {
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.InvalidState,
-                    "previewSign attestation object missing attested credential data");
-            }
-
-            var generatedKey = new PreviewSign.GeneratedSigningKey(
-                KeyHandle: attestedCredData.CredentialId,
-                PublicKey: CoseKey.Decode(attestedCredData.CredentialPublicKey),
-                Algorithm: algorithm,
-                AttestationObject: attestationObject);
-
-            return new PreviewSign.PreviewSignRegistrationOutput(generatedKey);
-        }
-
-        // Fallback: build from authData's attested credential data.
-        if (authData.AttestedCredentialData is null)
+        // previewSign draft v4 §10.2.1: "Let origAttObj be unsignedExtOutputs["previewSign"][att-obj]";
+        // keyHandle and publicKey are copied from innerAuthData.attestedCredentialData, and
+        // attestationObject is a required member of the generated key. The outer credential's key is
+        // the WebAuthn credential, not the signing key, so there is nothing to fall back to
+        // (python-fido2 extensions.py prepare_outputs and yubikit-swift PreviewSign.swift both fail here).
+        if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) != true)
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidState,
-                "previewSign output requires attested credential data");
+                "previewSign output is present in the authenticator data but the generated-key attestation object is missing from unsignedExtensionOutputs (previewSign draft v4 §10.2.1)");
         }
 
-        var fallbackKey = new PreviewSign.GeneratedSigningKey(
-            KeyHandle: authData.AttestedCredentialData.CredentialId,
-            PublicKey: CoseKey.Decode(authData.AttestedCredentialData.CredentialPublicKey),
-            Algorithm: algorithm,
-            AttestationObject: null); // No attestation object in fallback path
+        // Decode the CTAP-shaped inner attestation object via the Fido2 decoder. The wire
+        // payload uses integer keys ({1:fmt, 2:authData, 3:attStmt}), so WebAuthn rebuilds
+        // the attestation object from the decoded components.
+        Fido2.Extensions.PreviewSignCbor.InnerAttestationObject inner =
+            Fido2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor);
 
-        return new PreviewSign.PreviewSignRegistrationOutput(GeneratedKey: fallbackKey);
+        var innerAuthData = WebAuthnAuthenticatorData.Decode(inner.AuthData);
+        var format = new AttestationFormat(inner.Fmt);
+        var statement = AttestationStatement.Decode(format, inner.AttStmtRawCbor);
+        var attestationObject = WebAuthnAttestationObject.Create(innerAuthData, statement);
+
+        // Extract key handle and public key from the inner attested credential data
+        var attestedCredData = attestationObject.AuthenticatorData.AttestedCredentialData;
+        if (attestedCredData is null)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidState,
+                "previewSign attestation object missing attested credential data");
+        }
+
+        var generatedKey = new PreviewSign.GeneratedSigningKey(
+            KeyHandle: attestedCredData.CredentialId,
+            PublicKey: CoseKey.Decode(attestedCredData.CredentialPublicKey),
+            Algorithm: algorithm,
+            AttestationObject: attestationObject);
+
+        return new PreviewSign.PreviewSignRegistrationOutput(generatedKey);
     }
 
     /// <summary>

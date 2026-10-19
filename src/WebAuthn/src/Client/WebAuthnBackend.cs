@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Fido2.LargeBlobs;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Util;
 
@@ -75,6 +76,15 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         var authenticatorKey = await clientPin.GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
         var (keyAgreement, sharedSecret) = _protocol!.Encapsulate(authenticatorKey);
         return new PinUvSharedSecret(keyAgreement, sharedSecret);
+    }
+
+    /// <inheritdoc/>
+    public ILargeBlobStorage CreateLargeBlobStorage(PinUvAuthTokenSession? token)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return token is null
+            ? new LargeBlobStorage(_session)
+            : new LargeBlobStorage(_session, token.Protocol, token.Token);
     }
 
     /// <inheritdoc/>

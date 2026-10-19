@@ -39,7 +39,7 @@ namespace Yubico.YubiKit.Fido2.LargeBlobs;
 /// to read/write blobs for specific credentials.
 /// </para>
 /// </remarks>
-public sealed class LargeBlobStorage
+public sealed class LargeBlobStorage : ILargeBlobStorage
 {
     // CBOR map keys for authenticatorLargeBlobs
     private const int KeyGet = 0x01;

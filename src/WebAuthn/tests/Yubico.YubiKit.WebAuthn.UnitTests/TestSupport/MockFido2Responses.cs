@@ -24,11 +24,11 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 /// </summary>
 internal static class MockFido2Responses
 {
-    public static MakeCredentialResponse CreateMockMakeCredentialResponse(Guid? aaguid = null)
+    public static MakeCredentialResponse CreateMockMakeCredentialResponse(Guid? aaguid = null, byte[]? largeBlobKey = null)
     {
         var guid = aaguid ?? Guid.NewGuid();
         var authData = BuildAuthDataWithAttestedCredential(guid);
-        var cborBytes = BuildMakeCredentialResponseCbor(authData, "none");
+        var cborBytes = BuildMakeCredentialResponseCbor(authData, "none", largeBlobKey);
         return MakeCredentialResponse.Decode(cborBytes);
     }
 
@@ -37,7 +37,8 @@ internal static class MockFido2Responses
         int? numberOfCredentials = null,
         byte[]? signature = null,
         PublicKeyCredentialUserEntity? user = null,
-        byte[]? authDataExtensionsCbor = null)
+        byte[]? authDataExtensionsCbor = null,
+        byte[]? largeBlobKey = null)
     {
         credentialId ??= RandomNumberGenerator.GetBytes(32);
         signature ??= RandomNumberGenerator.GetBytes(64);
@@ -45,10 +46,11 @@ internal static class MockFido2Responses
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
         // credential (1) + authData (2) + signature (3) + optional user (4) + optional
-        // numberOfCredentials (5)
+        // numberOfCredentials (5) + optional largeBlobKey (7)
         var keyCount = 3;
         if (user is not null) keyCount++;
         if (numberOfCredentials is not null) keyCount++;
+        if (largeBlobKey is not null) keyCount++;
 
         writer.WriteStartMap(keyCount);
 
@@ -84,6 +86,13 @@ internal static class MockFido2Responses
         {
             writer.WriteInt32(5);
             writer.WriteInt32(numberOfCredentials.Value);
+        }
+
+        // 0x07: largeBlobKey (optional, CTAP §12.3)
+        if (largeBlobKey is not null)
+        {
+            writer.WriteInt32(7);
+            writer.WriteByteString(largeBlobKey);
         }
 
         writer.WriteEndMap();
@@ -254,11 +263,11 @@ internal static class MockFido2Responses
         return [.. data];
     }
 
-    public static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format)
+    public static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format, byte[]? largeBlobKey = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        writer.WriteStartMap(3);
+        writer.WriteStartMap(largeBlobKey is null ? 3 : 4);
 
         // 0x01: fmt
         writer.WriteInt32(1);
@@ -272,6 +281,13 @@ internal static class MockFido2Responses
         writer.WriteInt32(3);
         writer.WriteStartMap(0);
         writer.WriteEndMap();
+
+        // 0x05: largeBlobKey (optional, CTAP §12.3: in the response, not in authData extensions)
+        if (largeBlobKey is not null)
+        {
+            writer.WriteInt32(5);
+            writer.WriteByteString(largeBlobKey);
+        }
 
         writer.WriteEndMap();
 

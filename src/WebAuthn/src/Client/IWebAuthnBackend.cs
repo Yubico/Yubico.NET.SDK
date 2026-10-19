@@ -14,6 +14,7 @@
 
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Fido2.LargeBlobs;
 using Yubico.YubiKit.Fido2.Pin;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
@@ -43,6 +44,12 @@ internal interface IWebAuthnBackend : IAsyncDisposable
     /// platform key plus shared secret. The caller owns the result and disposes it to zero the secret.
     /// </summary>
     Task<PinUvSharedSecret> EncapsulateAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Per-credential large-blob storage over authenticatorLargeBlobs (CTAP §6.10). With a token (which
+    /// must carry LargeBlobWrite) the storage can write; without one it is read-only.
+    /// </summary>
+    ILargeBlobStorage CreateLargeBlobStorage(PinUvAuthTokenSession? token);
 
     /// <summary>
     /// Obtains a PIN/UV auth token with the specified permissions.

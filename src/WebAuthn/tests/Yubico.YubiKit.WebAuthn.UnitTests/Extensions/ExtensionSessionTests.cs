@@ -284,7 +284,7 @@ public class ExtensionSessionTests
             extensions: extension ? ["largeBlobKey"] : [], largeBlobsSupported: option));
 
         var cbor = RegistrationExtensionSession.Create(new RegistrationExtensionInputs(LargeBlob: new LargeBlobInput()),
-            CreateMockOptions(), requireResidentKey: false, context).PrepareInputs(token: null);
+            CreateMockOptions(), requireResidentKey: true, context).PrepareInputs(token: null); // CTAP §12.3: needs rk
 
         Assert.Equal(expectInput, cbor is not null);
     }

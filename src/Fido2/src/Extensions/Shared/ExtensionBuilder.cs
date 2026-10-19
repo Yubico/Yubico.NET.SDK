@@ -42,7 +42,6 @@ public sealed class ExtensionBuilder
     private bool _credProtectEnforcePolicy;
     private ReadOnlyMemory<byte>? _credBlob;
     private bool _getCredBlob;
-    private LargeBlobInput? _largeBlob;
     private HmacSecretInput? _hmacSecret;
     private HmacSecretInput? _hmacSecretMc;
     private bool _minPinLength;
@@ -97,24 +96,6 @@ public sealed class ExtensionBuilder
     }
 
     /// <summary>
-    /// Adds the largeBlob extension for makeCredential (<c>largeBlob: {support}</c>).
-    /// </summary>
-    /// <remarks>
-    /// YubiKeys store large blobs through the <c>largeBlobKey</c> extension (CTAP 2.1-2.3 §12.3,
-    /// <see cref="WithLargeBlobKey"/>) and the authenticatorLargeBlobs command (§6.10,
-    /// <see cref="LargeBlobs.LargeBlobStorage"/>). The direct getAssertion <c>largeBlob</c> read/write
-    /// extension of CTAP 2.2-2.3 §12.4 is not implemented: §12.4 says authenticators "MUST NOT support
-    /// both extensions", so no YubiKey can exercise it.
-    /// </remarks>
-    /// <param name="support">The required support level.</param>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithLargeBlob(LargeBlobSupport support = LargeBlobSupport.Preferred)
-    {
-        _largeBlob = new LargeBlobInput { Support = support };
-        return this;
-    }
-
-    /// <summary>
     /// Adds the largeBlobKey CTAP extension for makeCredential or getAssertion.
     /// </summary>
     /// <remarks>
@@ -124,9 +105,11 @@ public sealed class ExtensionBuilder
     /// This key is then used to encrypt/decrypt data in the large blob array.
     /// </para>
     /// <para>
-    /// This is distinct from the WebAuthn-level "largeBlob" extension which uses
-    /// "support": "required"/"preferred" semantics. Use <see cref="WithLargeBlob"/>
-    /// for the WebAuthn-level extension.
+    /// WebAuthn's <c>largeBlob</c> client extension ({support}, read, write; L3 §10.1.5) is built on this
+    /// key in the WebAuthn package together with <see cref="LargeBlobs.LargeBlobStorage"/> (§6.10); CTAP
+    /// itself carries no <c>largeBlob: {support}</c>. The direct getAssertion largeBlob read/write
+    /// extension of CTAP 2.2-2.3 §12.4 is not implemented: §12.4 says authenticators "MUST NOT support
+    /// both extensions", so no YubiKey can exercise it.
     /// </para>
     /// </remarks>
     /// <returns>This builder for chaining.</returns>
@@ -373,12 +356,6 @@ public sealed class ExtensionBuilder
             _hmacSecretMc.Encode(writer);
         }
 
-        if (_largeBlob is not null)
-        {
-            writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
-            _largeBlob.Encode(writer);
-        }
-
         if (_largeBlobKey)
         {
             writer.WriteTextString(ExtensionIdentifiers.LargeBlobKey);
@@ -487,7 +464,6 @@ public sealed class ExtensionBuilder
         return _credProtect.HasValue ||
                _credBlob.HasValue ||
                _getCredBlob ||
-               _largeBlob is not null ||
                _largeBlobKey ||
                _hmacSecret is not null ||
                _hmacSecretRequested ||
@@ -502,7 +478,6 @@ public sealed class ExtensionBuilder
         var count = 0;
         if (_credProtect.HasValue) count++;
         if (_credBlob.HasValue || _getCredBlob) count++;
-        if (_largeBlob is not null) count++;
         if (_largeBlobKey) count++;
         if (_hmacSecret is not null || _hmacSecretRequested) count++;
         if (_hmacSecretMc is not null) count++;

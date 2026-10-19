@@ -19,11 +19,11 @@ using System.Text;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -546,8 +546,8 @@ public class WebAuthnClientMakeCredentialTests
     /// correct outcome here is that it was never produced at all - there is no stranded buffer to
     /// clean up. Computing it earlier would strand it: the request never reaches
     /// <c>ExecuteMakeCredentialAsync</c>, whose finally is what clears the parameter on every
-    /// other path. LargeBlob "Required" is used as the trigger because it is a shipped
-    /// not-yet-implemented input, so this is a path real callers can reach.
+    /// other path. A largeBlob read at registration is used as the trigger: WebAuthn L3 §10.1.5
+    /// rejects it, so this is a path real callers can reach.
     /// </remarks>
     [Fact]
     public async Task MakeCredential_WhenExtensionBuildFails_NeverComputesPinUvAuthParam()
@@ -559,7 +559,7 @@ public class WebAuthnClientMakeCredentialTests
         var options = CreateUvRequiredOptions() with
         {
             Extensions = new RegistrationExtensionInputs(
-                LargeBlob: new LargeBlobInput { Support = LargeBlobSupport.Required })
+                LargeBlob: new LargeBlobInput { Read = true })
         };
 
         // Act

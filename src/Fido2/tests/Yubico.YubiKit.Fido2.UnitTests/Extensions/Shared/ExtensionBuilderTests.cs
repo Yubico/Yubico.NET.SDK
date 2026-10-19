@@ -75,26 +75,6 @@ public class ExtensionBuilderTests
     }
 
     [Fact]
-    public void Build_WithLargeBlob_EncodesCorrectly()
-    {
-        // Arrange
-        var builder = new ExtensionBuilder()
-            .WithLargeBlob(LargeBlobSupport.Required);
-
-        // Act
-        var result = builder.Build();
-
-        // Assert
-        Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("largeBlob", reader.ReadTextString());
-        reader.ReadStartMap();
-        Assert.Equal("support", reader.ReadTextString());
-        Assert.Equal("required", reader.ReadTextString());
-    }
-
-    [Fact]
     public void Build_WithMinPinLength_EncodesCorrectly()
     {
         // Arrange
@@ -283,7 +263,7 @@ public class ExtensionBuilderTests
         var builder = new ExtensionBuilder()
             .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
             .WithCredBlob(new byte[16])
-            .WithLargeBlob(LargeBlobSupport.Preferred)
+            .WithLargeBlobKey()
             .WithMinPinLength()
             .WithHmacSecret();
 
@@ -360,26 +340,6 @@ public class ExtensionBuilderTests
         reader.ReadStartMap();
         Assert.Equal("credProtect", reader.ReadTextString());
         Assert.Equal(expectedValue, reader.ReadInt32());
-    }
-
-    [Fact]
-    public void WithLargeBlob_PreferredSupport_EncodesPreferred()
-    {
-        // Arrange
-        var builder = new ExtensionBuilder()
-            .WithLargeBlob(LargeBlobSupport.Preferred);
-
-        // Act
-        var result = builder.Build();
-
-        // Assert
-        Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("largeBlob", reader.ReadTextString());
-        reader.ReadStartMap();
-        Assert.Equal("support", reader.ReadTextString());
-        Assert.Equal("preferred", reader.ReadTextString());
     }
 
     [Fact]

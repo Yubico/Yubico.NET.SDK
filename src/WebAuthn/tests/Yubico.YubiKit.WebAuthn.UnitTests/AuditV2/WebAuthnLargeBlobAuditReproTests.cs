@@ -2,9 +2,9 @@ using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
@@ -36,18 +36,18 @@ public class WebAuthnLargeBlobAuditReproTests
         var ctapResponse = MakeCredentialResponse.Decode(writer.Encode());
         Assert.Equal(32, ctapResponse.LargeBlobKey?.Length);
         var authData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
-        var inputs = new RegistrationExtensionInputs(LargeBlob: new LargeBlobInput());
+        var inputs = new RegistrationExtensionInputs(LargeBlob: new LargeBlobInput { Support = LargeBlobSupport.Preferred });
         var options = new RegistrationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
             User = new PublicKeyCredentialUserEntity(new byte[] { 1 }, "user", "User"),
             PubKeyCredParams = [CoseAlgorithm.Es256],
+            ResidentKey = ResidentKeyPreference.Required, // CTAP §12.3: largeBlobKey exists only for discoverable credentials
             Extensions = inputs
         };
 
-        // The current pipeline has no argument for the decoded 0x05 key. Keep
-        // this contract test focused on the actual registration output it produces.
+        // supported comes from CTAP response key 0x05 (CTAP §12.3), not from the authData extension map.
         var result = await RegistrationExtensionSession.Create(inputs, options, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required, TestExtensionContext.SupportingAll())
             .PrepareOutputsAsync(ctapResponse, authData, token: null, TestContext.Current.CancellationToken);
         Assert.NotNull(result?.LargeBlob);

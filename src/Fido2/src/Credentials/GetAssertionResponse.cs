@@ -193,7 +193,8 @@ public sealed class GetAssertionResponse
             user,
             numberOfCredentials,
             userSelected,
-            largeBlobKey,
+            // byte[]? → ReadOnlyMemory<byte>? converts a null array to an EMPTY memory; keep absent as null.
+            largeBlobKey is null ? null : (ReadOnlyMemory<byte>?)largeBlobKey,
             extensionOutputs);
     }
 

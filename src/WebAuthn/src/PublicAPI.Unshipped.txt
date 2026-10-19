@@ -142,12 +142,12 @@ Yubico.YubiKit.WebAuthn.Cose.Aaguid.Equals(Yubico.YubiKit.WebAuthn.Cose.Aaguid o
 Yubico.YubiKit.WebAuthn.Cose.Aaguid.Value.get -> System.Guid
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs!
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.AuthenticationExtensionInputs(Yubico.YubiKit.Fido2.Extensions.LargeBlobInput? LargeBlob = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null, bool GetCredBlob = false) -> void
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Deconstruct(out Yubico.YubiKit.Fido2.Extensions.LargeBlobInput? LargeBlob, out Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput? Prf, out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? PreviewSign, out bool GetCredBlob) -> void
+Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.AuthenticationExtensionInputs(Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? LargeBlob = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null, bool GetCredBlob = false) -> void
+Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Deconstruct(out Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? LargeBlob, out Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput? Prf, out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? PreviewSign, out bool GetCredBlob) -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Equals(Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs? other) -> bool
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.GetCredBlob.get -> bool
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.GetCredBlob.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.LargeBlob.get -> Yubico.YubiKit.Fido2.Extensions.LargeBlobInput?
+Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.LargeBlob.get -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput?
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.LargeBlob.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput?
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.PreviewSign.init -> void
@@ -289,9 +289,9 @@ Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.CredProps.get -> 
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.CredProps.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.CredProtect.get -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredProtectInput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.CredProtect.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.Deconstruct(out Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredProtectInput? CredProtect, out Yubico.YubiKit.Fido2.Extensions.CredBlobInput? CredBlob, out Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput? MinPinLength, out Yubico.YubiKit.Fido2.Extensions.LargeBlobInput? LargeBlob, out Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput? Prf, out Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredPropsInput? CredProps, out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? PreviewSign) -> void
+Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.Deconstruct(out Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredProtectInput? CredProtect, out Yubico.YubiKit.Fido2.Extensions.CredBlobInput? CredBlob, out Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput? MinPinLength, out Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? LargeBlob, out Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput? Prf, out Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredPropsInput? CredProps, out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? PreviewSign) -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.Equals(Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.LargeBlob.get -> Yubico.YubiKit.Fido2.Extensions.LargeBlobInput?
+Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.LargeBlob.get -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.LargeBlob.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.MinPinLength.get -> Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.MinPinLength.init -> void
@@ -299,7 +299,7 @@ Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.PreviewSign.get -
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.PreviewSign.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.Prf.get -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.Prf.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.RegistrationExtensionInputs(Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredProtectInput? CredProtect = null, Yubico.YubiKit.Fido2.Extensions.CredBlobInput? CredBlob = null, Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput? MinPinLength = null, Yubico.YubiKit.Fido2.Extensions.LargeBlobInput? LargeBlob = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredPropsInput? CredProps = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? PreviewSign = null) -> void
+Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.RegistrationExtensionInputs(Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredProtectInput? CredProtect = null, Yubico.YubiKit.Fido2.Extensions.CredBlobInput? CredBlob = null, Yubico.YubiKit.Fido2.Extensions.MinPinLengthInput? MinPinLength = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? LargeBlob = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredPropsInput? CredProps = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? PreviewSign = null) -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs!
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.CredBlob.get -> Yubico.YubiKit.Fido2.Extensions.CredBlobMakeCredentialOutput?
@@ -526,3 +526,22 @@ Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInputValues.PrfInputValues() -> voi
 Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInputValues.Second.get -> System.ReadOnlyMemory<byte>?
 Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInputValues.Second.init -> void
 static Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput.ComputeSalt(System.ReadOnlySpan<byte> input) -> byte[]!
+
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput!
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.Equals(Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? other) -> bool
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.LargeBlobInput() -> void
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.Read.get -> bool
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.Read.init -> void
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.Support.get -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobSupport?
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.Support.init -> void
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.Write.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.Write.init -> void
+override Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.Equals(object? obj) -> bool
+override Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.GetHashCode() -> int
+override Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.ToString() -> string!
+static Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? left, Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? right) -> bool
+static Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? left, Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? right) -> bool
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobSupport
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobSupport.Preferred = 0 -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobSupport
+Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobSupport.Required = 1 -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobSupport

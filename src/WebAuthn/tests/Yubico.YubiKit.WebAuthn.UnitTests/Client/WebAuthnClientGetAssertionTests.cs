@@ -17,11 +17,11 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -457,7 +457,8 @@ public class WebAuthnClientGetAssertionTests
 
         var options = CreateUvRequiredOptions() with
         {
-            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput())
+            // support is a registration-only input: NotSupported (WebAuthn L3 §10.1.5)
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Support = LargeBlobSupport.Preferred })
         };
 
         // Act

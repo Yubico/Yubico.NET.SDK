@@ -190,4 +190,65 @@ public class WebAuthnAuditHardwareTests
         Assert.False(withoutUv.UvFlag, "the discouraged assertion without a PIN must carry uv=0");
         Assert.NotEqual(withUv.Result, withoutUv.Result); // CredRandomWithUV ≠ CredRandomWithoutUV on this key
     }
+
+    /// <summary>
+    ///     WebAuthn L3 §10.1.5 end to end on hardware: a discoverable registration with largeBlob support: preferred
+    ///     reports supported (CTAP §12.3 key 0x05); an assertion with write stores the blob (LargeBlobWrite token,
+    ///     CTAP §6.10); an assertion with read returns it.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait("Audit", "YESDK-1613")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    public async Task YESDK1613_LargeBlobRegisterWriteRead_RoundTrips(YubiKeyTestState state)
+    {
+        await using var session = await state.Device.CreateFidoSessionAsync();
+        var info = await session.GetInfoAsync();
+        Skip.IfNot(info.Extensions.Contains("largeBlobKey") && info.Options.TryGetValue("largeBlobs", out var lb) && lb,
+            "Authenticator has no large-blob storage");
+        await NormalizePinAsync(session);
+
+        byte[] credentialId;
+        await using (var client = CreateClient(session))
+        {
+            var registration = await client.MakeCredentialAsync(new RegistrationOptions
+            {
+                Challenge = RandomNumberGenerator.GetBytes(32),
+                Rp = new PublicKeyCredentialRpEntity(TestRpId, "Audit largeBlob"),
+                User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "audit-largeblob", "Audit largeBlob"),
+                PubKeyCredParams = [CoseAlgorithm.Es256],
+                ResidentKey = ResidentKeyPreference.Required,
+                UserVerification = UserVerificationPreference.Preferred,
+                Extensions = new RegistrationExtensionInputs(LargeBlob: new LargeBlobInput { Support = LargeBlobSupport.Preferred })
+            }, KnownTestPin);
+            credentialId = registration.CredentialId.ToArray();
+            Assert.True(registration.ClientExtensionResults?.LargeBlob?.Supported);
+        }
+
+        byte[] blob = "hello from the webauthn largeBlob extension"u8.ToArray();
+        await using var assertionSession = await state.Device.CreateFidoSessionAsync();
+        await using var assertionClient = CreateClient(assertionSession);
+
+        var writeMatches = await assertionClient.GetAssertionAsync(new AuthenticationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = TestRpId,
+            AllowCredentials = [new PublicKeyCredentialDescriptor(credentialId)],
+            UserVerification = UserVerificationPreference.Preferred,
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Write = blob })
+        }, KnownTestPin);
+        var written = await Assert.Single(writeMatches).SelectAsync();
+        Assert.True(written.ClientExtensionResults?.LargeBlob?.Written);
+
+        var readMatches = await assertionClient.GetAssertionAsync(new AuthenticationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            RpId = TestRpId,
+            AllowCredentials = [new PublicKeyCredentialDescriptor(credentialId)],
+            UserVerification = UserVerificationPreference.Preferred,
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
+        }, KnownTestPin);
+        var read = await Assert.Single(readMatches).SelectAsync();
+        Assert.Equal(blob, read.ClientExtensionResults?.LargeBlob?.Blob?.ToArray());
+    }
 }

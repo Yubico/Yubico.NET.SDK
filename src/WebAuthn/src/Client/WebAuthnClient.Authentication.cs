@@ -148,8 +148,7 @@ public sealed partial class WebAuthnClient
             IReadOnlyList<PublicKeyCredentialDescriptor>? allowList = null;
             if (options.AllowCredentials is { Count: > 0 } candidates)
             {
-                selected = await ProbeCredentialsAsync(
-                    options.RpId, candidates, info, auth, decision, PinUvAuthTokenPermissions.GetAssertion | extensions.Permissions, ct)
+                selected = await ProbeCredentialsAsync(options.RpId, candidates, info, auth, decision, remintPermissions: null, ct)
                     .ConfigureAwait(false);
                 allowList = [selected ?? new PublicKeyCredentialDescriptor(DummyCredentialId, candidates[0].Type)];
             }

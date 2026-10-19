@@ -306,9 +306,12 @@ public class WebAuthnClientCeremonyFrameTests
         Assert.Equal("public-key", dummy.Type);
     }
 
-    /// <summary>With a token the probe is signed and the token is re-minted before the real assertion (5.8.0 rule).</summary>
+    /// <summary>
+    ///     With a token the probe is signed and the same token signs the assertion: measured on 5.8.0, a getAssertion
+    ///     accepts a token already used for an up:false probe (only makeCredential does not, see the registration test).
+    /// </summary>
     [Fact]
-    public async Task GetAssertion_AllowList_WithToken_SignsProbeAndRemintsBeforeAsserting()
+    public async Task GetAssertion_AllowList_WithToken_SignsProbeAndAssertionWithOneToken()
     {
         var permissions = new List<PinUvAuthTokenPermissions>();
         _backend.GetPinUvTokenAsync(
@@ -325,8 +328,8 @@ public class WebAuthnClientCeremonyFrameTests
 
         Assert.Equal(2, requests.Count);
         Assert.NotNull(requests[0].PinUvAuthParam); // probe
-        Assert.NotNull(requests[1].PinUvAuthParam); // real assertion, signed by the re-minted token
-        Assert.Equal([PinUvAuthTokenPermissions.GetAssertion, PinUvAuthTokenPermissions.GetAssertion], permissions);
+        Assert.NotNull(requests[1].PinUvAuthParam); // real assertion, same token
+        Assert.Equal([PinUvAuthTokenPermissions.GetAssertion], permissions);
     }
 
     [Fact]

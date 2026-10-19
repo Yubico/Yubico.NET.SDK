@@ -146,17 +146,29 @@ public sealed partial class WebAuthnClient
     }
 
     /// <summary>
-    /// Probes <paramref name="candidates"/> with up:false (exclude-list pre-flight, allow-list selection)
-    /// and re-mints the token afterwards. Probe failures other than "no match" are reported as
-    /// <see cref="WebAuthnClientErrorCode.Unknown"/> and never escalate verification.
+    /// Probes <paramref name="candidates"/> with up:false (exclude-list pre-flight, allow-list selection).
+    /// Probe failures other than "no match" are reported as <see cref="WebAuthnClientErrorCode.Unknown"/>
+    /// and never escalate verification.
     /// </summary>
+    /// <param name="rpId">The relying party identifier.</param>
+    /// <param name="candidates">The descriptors to probe.</param>
+    /// <param name="info">The authenticator info.</param>
+    /// <param name="auth">The ceremony's token owner.</param>
+    /// <param name="decision">The UV decision in force (its method is reused for a re-mint).</param>
+    /// <param name="remintPermissions">
+    /// When set, the token is re-minted with these permissions after the probe. Measured on YubiKey
+    /// 5.8.0: a token used for a getAssertion(up:false) probe is refused by a following makeCredential
+    /// (dc2ed141), so registration passes <c>MakeCredential</c>; the same token is accepted by a following
+    /// getAssertion, so selection passes null, as python-fido2 and yubikit-android do.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     private async Task<PublicKeyCredentialDescriptor?> ProbeCredentialsAsync(
         string rpId,
         IReadOnlyList<PublicKeyCredentialDescriptor> candidates,
         AuthenticatorInfo info,
         CeremonyAuth auth,
         UvDecision decision,
-        PinUvAuthTokenPermissions remintPermissions,
+        PinUvAuthTokenPermissions? remintPermissions,
         CancellationToken cancellationToken)
     {
         PublicKeyCredentialDescriptor? match;
@@ -174,9 +186,9 @@ public sealed partial class WebAuthnClient
                 ex);
         }
 
-        if (auth.Token is not null)
+        if (auth.Token is not null && remintPermissions is { } permissions)
         {
-            await auth.RemintAsync(decision, remintPermissions, cancellationToken).ConfigureAwait(false);
+            await auth.RemintAsync(decision, permissions, cancellationToken).ConfigureAwait(false);
         }
 
         return match;

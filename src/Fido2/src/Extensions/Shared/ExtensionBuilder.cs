@@ -41,6 +41,7 @@ public sealed class ExtensionBuilder
     private CredProtectPolicy? _credProtect;
     private bool _credProtectEnforcePolicy;
     private ReadOnlyMemory<byte>? _credBlob;
+    private bool _getCredBlob;
     private LargeBlobInput? _largeBlob;
     private LargeBlobAssertionInput? _largeBlobAssertion;
     private HmacSecretInput? _hmacSecret;
@@ -68,13 +69,32 @@ public sealed class ExtensionBuilder
     }
 
     /// <summary>
-    /// Adds the credBlob extension with data to store.
+    /// Adds the credBlob extension with data to store (authenticatorMakeCredential only).
     /// </summary>
-    /// <param name="blob">The blob data to store (max 32 bytes typically).</param>
+    /// <remarks>
+    /// CTAP 2.1-2.3 §12.2.1: the makeCredential input is a "Byte String containing the credBlob value".
+    /// To read a stored blob back at getAssertion use <see cref="WithGetCredBlob"/>; a byte string is
+    /// not the getAssertion input.
+    /// </remarks>
+    /// <param name="blob">The blob data to store (at most the authenticator's maxCredBlobLength).</param>
     /// <returns>This builder for chaining.</returns>
     public ExtensionBuilder WithCredBlob(ReadOnlyMemory<byte> blob)
     {
         _credBlob = blob;
+        return this;
+    }
+
+    /// <summary>
+    /// Requests the stored credBlob (authenticatorGetAssertion only).
+    /// </summary>
+    /// <remarks>
+    /// CTAP 2.1-2.3 §12.2.1: the platform sends <c>"credBlob": true</c> in the getAssertion extensions
+    /// when the relying party set the <c>getCredBlob</c> client input.
+    /// </remarks>
+    /// <returns>This builder for chaining.</returns>
+    public ExtensionBuilder WithGetCredBlob()
+    {
+        _getCredBlob = true;
         return this;
     }
 
@@ -304,10 +324,21 @@ public sealed class ExtensionBuilder
         // Extensions must be sorted by key for canonical CBOR
         // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "previewSign" < "prf"
 
+        if (_credBlob.HasValue && _getCredBlob)
+        {
+            throw new InvalidOperationException(
+                "WithCredBlob (makeCredential) and WithGetCredBlob (getAssertion) cannot be combined in one request.");
+        }
+
         if (_credBlob.HasValue)
         {
             writer.WriteTextString(ExtensionIdentifiers.CredBlob);
             writer.WriteByteString(_credBlob.Value.Span);
+        }
+        else if (_getCredBlob)
+        {
+            writer.WriteTextString(ExtensionIdentifiers.CredBlob);
+            writer.WriteBoolean(true);
         }
 
         if (_credProtect.HasValue)
@@ -493,6 +524,7 @@ public sealed class ExtensionBuilder
     {
         return _credProtect.HasValue ||
                _credBlob.HasValue ||
+               _getCredBlob ||
                _largeBlob is not null ||
                _largeBlobAssertion is not null ||
                _largeBlobKey ||
@@ -508,7 +540,7 @@ public sealed class ExtensionBuilder
     {
         var count = 0;
         if (_credProtect.HasValue) count++;
-        if (_credBlob.HasValue) count++;
+        if (_credBlob.HasValue || _getCredBlob) count++;
         if (_largeBlob is not null || _largeBlobAssertion is not null) count++;
         if (_largeBlobKey) count++;
         if (_hmacSecret is not null) count++;

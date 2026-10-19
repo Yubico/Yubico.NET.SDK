@@ -11,7 +11,7 @@ public class Fido2ExtensionAuditReproTests
     [Trait("Audit", "YESDK-1619")]
     public void YESDK1619_GetAssertionCredBlobUsesBooleanTrue()
     {
-        var extensions = new ExtensionBuilder().WithCredBlob(ReadOnlyMemory<byte>.Empty).Build();
+        var extensions = new ExtensionBuilder().WithGetCredBlob().Build();
         var request = FidoSessionRequestEncoding.BuildGetAssertionRequest(
             "example.com", new byte[32], new GetAssertionOptions { Extensions = extensions });
 

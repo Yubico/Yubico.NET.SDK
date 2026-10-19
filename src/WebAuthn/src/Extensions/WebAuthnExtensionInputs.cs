@@ -41,7 +41,13 @@ public sealed record class RegistrationExtensionInputs(
 /// <param name="LargeBlob">Large blob operations (read/write).</param>
 /// <param name="Prf">Pseudo-random function evaluation.</param>
 /// <param name="PreviewSign">Arbitrary data signing request (CTAP v4 draft).</param>
+/// <param name="GetCredBlob">
+/// The CTAP 2.1-2.3 §12.2.1 <c>getCredBlob</c> client input: when true the client sends
+/// <c>"credBlob": true</c> and reports the stored blob in
+/// <see cref="AuthenticationExtensionOutputs.CredBlob"/>.
+/// </param>
 public sealed record class AuthenticationExtensionInputs(
     LargeBlobInput? LargeBlob = null,
     PrfInput? Prf = null,
-    PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null);
+    PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null,
+    bool GetCredBlob = false);

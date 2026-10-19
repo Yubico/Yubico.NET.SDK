@@ -301,6 +301,30 @@ public class ExtensionBuilderTests
 
 
 
+    /// <summary>CTAP 2.1-2.3 §12.2.1: the getAssertion input is <c>"credBlob": true</c>, not a byte string.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1619")]
+    public void WithGetCredBlob_EncodesBooleanTrue()
+    {
+        var result = new ExtensionBuilder().WithGetCredBlob().Build();
+
+        Assert.NotNull(result);
+        var reader = new CborReader(result.Value, CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(1, reader.ReadStartMap());
+        Assert.Equal("credBlob", reader.ReadTextString());
+        Assert.True(reader.ReadBoolean());
+    }
+
+    /// <summary>Store (makeCredential) and retrieve (getAssertion) are different ceremonies; one request cannot carry both.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1619")]
+    public void WithCredBlob_AndWithGetCredBlob_ThrowsAtBuild()
+    {
+        var builder = new ExtensionBuilder().WithCredBlob(new byte[] { 0x01 }).WithGetCredBlob();
+
+        Assert.Throws<InvalidOperationException>(() => builder.Build());
+    }
+
     [Fact]
     public void WithCredBlob_EmptyBlob_EncodesEmptyByteString()
     {

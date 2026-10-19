@@ -114,6 +114,13 @@ internal sealed class ExtensionPipeline
         var builder = new ExtensionBuilder();
         var hasExtensions = false;
 
+        // credBlob retrieval (CTAP §12.2.1 getCredBlob → "credBlob": true)
+        if (inputs.GetCredBlob)
+        {
+            builder.WithGetCredBlob();
+            hasExtensions = true;
+        }
+
         // LargeBlob (read operations during assertion)
         if (inputs.LargeBlob is not null)
         {
@@ -293,15 +300,18 @@ internal sealed class ExtensionPipeline
         Outputs.LargeBlobAuthenticationOutput? largeBlob = null;
         Outputs.PrfAuthenticationOutput? prf = null;
 
-        // CredBlob - always check (can be present even if not explicitly requested)
-        try
+        // CredBlob - only when the RP asked for it (getCredBlob)
+        if (inputs.GetCredBlob)
         {
-            credBlob = CredBlobAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
-        }
-        catch (System.Formats.Cbor.CborContentException)
-        {
-            // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
-            credBlob = null;
+            try
+            {
+                credBlob = CredBlobAdapter.ParseAuthenticationOutput(authData.ParsedExtensions);
+            }
+            catch (System.Formats.Cbor.CborContentException)
+            {
+                // Malformed extension output: skip silently per WebAuthn spec; some authenticators return junk.
+                credBlob = null;
+            }
         }
 
         // LargeBlob

@@ -451,6 +451,7 @@ Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.Build() -> System.ReadOnlyMemor
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.Encode(System.Formats.Cbor.CborWriter! writer) -> void
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.ExtensionBuilder() -> void
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithCredBlob(System.ReadOnlyMemory<byte> blob) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithGetCredBlob() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithCredProtect(Yubico.YubiKit.Fido2.Extensions.CredProtectPolicy policy, bool enforcePolicy = false) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecret(Yubico.YubiKit.Fido2.Extensions.HmacSecretInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecret(Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlySpan<byte> sharedSecret, System.Collections.Generic.IReadOnlyDictionary<int, object?>! keyAgreement, System.ReadOnlySpan<byte> salt1, System.ReadOnlySpan<byte> salt2 = default(System.ReadOnlySpan<byte>)) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!

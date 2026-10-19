@@ -5,6 +5,7 @@ using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
@@ -139,6 +140,58 @@ public class WebAuthnExtensionAuditReproTests
 
         var parsed = WebAuthnAuthenticatorData.Decode(authData.ToArray());
         Assert.Throws<WebAuthnClientError>(() => PreviewSignAdapter.ParseRegistrationOutput(parsed, null));
+    }
+
+    /// <summary>
+    ///     End to end through the client: GetCredBlob = true sends <c>"credBlob": true</c> (CTAP §12.2.1) and the stored
+    ///     blob is reported; without the request nothing is sent and a stray credBlob output is not reported.
+    /// </summary>
+    [Theory]
+    [Trait("Audit", "YESDK-1619")]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task YESDK1619_ClientSendsCredBlobTrueOnlyWhenRequested_AndParsesOnlyThen(bool getCredBlob)
+    {
+        byte[] storedBlob = [0xC0, 0xFF, 0xEE];
+        var outputExtensions = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        outputExtensions.WriteStartMap(1);
+        outputExtensions.WriteTextString("credBlob");
+        outputExtensions.WriteByteString(storedBlob);
+        outputExtensions.WriteEndMap();
+
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+        BackendGetAssertionRequest? sent = null;
+        backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => sent = r), Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(authDataExtensionsCbor: outputExtensions.Encode()));
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
+
+        var matches = await client.GetAssertionAsync(new AuthenticationOptions
+        {
+            Challenge = new byte[32],
+            RpId = "example.com",
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new AuthenticationExtensionInputs(GetCredBlob: getCredBlob)
+        }, cancellationToken: TestContext.Current.CancellationToken);
+        var response = await Assert.Single(matches).SelectAsync(TestContext.Current.CancellationToken);
+
+        Assert.NotNull(sent);
+        if (getCredBlob)
+        {
+            var reader = new CborReader(sent.Extensions!.Value, CborConformanceMode.Ctap2Canonical);
+            Assert.Equal(1, reader.ReadStartMap());
+            Assert.Equal("credBlob", reader.ReadTextString());
+            Assert.True(reader.ReadBoolean());
+            Assert.Equal(storedBlob, response.ClientExtensionResults?.CredBlob?.Blob.ToArray());
+        }
+        else
+        {
+            Assert.Null(sent.Extensions);
+            Assert.Null(response.ClientExtensionResults?.CredBlob);
+        }
     }
 
     [Fact]

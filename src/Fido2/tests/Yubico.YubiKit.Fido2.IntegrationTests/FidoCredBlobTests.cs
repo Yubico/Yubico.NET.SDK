@@ -128,7 +128,7 @@ public class FidoCredBlobTests
 
                 // Request credBlob retrieval during assertion
                 var assertExtensions = new ExtensionBuilder()
-                    .WithCredBlob(ReadOnlyMemory<byte>.Empty)
+                    .WithGetCredBlob()
                     .Build();
 
                 var assertionResult = await session.GetAssertionAsync(

@@ -142,9 +142,11 @@ Yubico.YubiKit.WebAuthn.Cose.Aaguid.Equals(Yubico.YubiKit.WebAuthn.Cose.Aaguid o
 Yubico.YubiKit.WebAuthn.Cose.Aaguid.Value.get -> System.Guid
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs!
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.AuthenticationExtensionInputs(Yubico.YubiKit.Fido2.Extensions.LargeBlobInput? LargeBlob = null, Yubico.YubiKit.Fido2.Extensions.PrfInput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null) -> void
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Deconstruct(out Yubico.YubiKit.Fido2.Extensions.LargeBlobInput? LargeBlob, out Yubico.YubiKit.Fido2.Extensions.PrfInput? Prf, out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? PreviewSign) -> void
+Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.AuthenticationExtensionInputs(Yubico.YubiKit.Fido2.Extensions.LargeBlobInput? LargeBlob = null, Yubico.YubiKit.Fido2.Extensions.PrfInput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null, bool GetCredBlob = false) -> void
+Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Deconstruct(out Yubico.YubiKit.Fido2.Extensions.LargeBlobInput? LargeBlob, out Yubico.YubiKit.Fido2.Extensions.PrfInput? Prf, out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? PreviewSign, out bool GetCredBlob) -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Equals(Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs? other) -> bool
+Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.GetCredBlob.get -> bool
+Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.GetCredBlob.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.LargeBlob.get -> Yubico.YubiKit.Fido2.Extensions.LargeBlobInput?
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.LargeBlob.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput?

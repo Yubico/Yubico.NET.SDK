@@ -44,7 +44,7 @@ public sealed partial class WebAuthnClient
     /// <returns>The registration response with credential details.</returns>
     /// <exception cref="WebAuthnClientError">Thrown on validation or operation failure.</exception>
     public async Task<RegistrationResponse> MakeCredentialAsync(
-        RegistrationOptions options,
+        PublicKeyCredentialCreationOptions options,
         ReadOnlyMemory<byte>? pinBytes = null,
         CancellationToken cancellationToken = default)
     {
@@ -71,7 +71,7 @@ public sealed partial class WebAuthnClient
     /// excludeList pre-flight, and CTAP execution.
     /// </summary>
     private async Task<RegistrationResponse> MakeCredentialCoreAsync(
-        RegistrationOptions options,
+        PublicKeyCredentialCreationOptions options,
         ReadOnlyMemory<byte>? callerPinBytes,
         CancellationToken cancellationToken)
     {
@@ -160,7 +160,7 @@ public sealed partial class WebAuthnClient
     }
 
     private static BackendMakeCredentialRequest BuildMakeCredentialRequest(
-        RegistrationOptions options,
+        PublicKeyCredentialCreationOptions options,
         WebAuthnClientData clientData,
         CeremonyAuth auth,
         UvDecision decision,
@@ -193,7 +193,7 @@ public sealed partial class WebAuthnClient
     private static async Task<RegistrationResponse> BuildRegistrationResponseAsync(
         MakeCredentialResponse ctapResponse,
         WebAuthnClientData clientData,
-        RegistrationOptions options,
+        PublicKeyCredentialCreationOptions options,
         RegistrationExtensionSession extensions,
         PinUvAuthTokenSession? tokenSession,
         CancellationToken cancellationToken)

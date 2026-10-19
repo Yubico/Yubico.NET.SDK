@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <content>Request validation and the mapping from CTAP statuses to WebAuthn errors.</content>
 public sealed partial class WebAuthnClient
 {
-    private static void ValidateRegistrationOptions(RegistrationOptions options)
+    private static void ValidateRegistrationOptions(PublicKeyCredentialCreationOptions options)
     {
         if (options.Challenge.Length == 0)
         {
@@ -78,7 +78,7 @@ public sealed partial class WebAuthnClient
         }
     }
 
-    private static void ValidateAuthenticationOptions(AuthenticationOptions options)
+    private static void ValidateAuthenticationOptions(PublicKeyCredentialRequestOptions options)
     {
         if (options.Challenge.Length == 0)
         {

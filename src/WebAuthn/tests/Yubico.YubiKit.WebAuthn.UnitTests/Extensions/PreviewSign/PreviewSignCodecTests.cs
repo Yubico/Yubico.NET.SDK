@@ -36,7 +36,7 @@ public class PreviewSignCodecTests
         var input = new WebAuthnPreviewSign.PreviewSignRegistrationInput(
             algorithms: [CoseAlgorithm.Es256, CoseAlgorithm.EdDsa]);
 
-        var optionsUvRequired = new RegistrationOptions
+        var optionsUvRequired = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),

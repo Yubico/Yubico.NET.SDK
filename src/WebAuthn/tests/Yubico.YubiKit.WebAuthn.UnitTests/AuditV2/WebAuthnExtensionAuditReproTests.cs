@@ -114,7 +114,7 @@ public class WebAuthnExtensionAuditReproTests
         await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
 
-        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(new RegistrationOptions
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
         {
             Challenge = new byte[32],
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -193,7 +193,7 @@ public class WebAuthnExtensionAuditReproTests
         await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
 
-        var matches = await client.GetAssertionAsync(new AuthenticationOptions
+        var matches = await client.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
             Challenge = new byte[32],
             RpId = "example.com",

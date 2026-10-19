@@ -37,7 +37,7 @@ public class WebAuthnLargeBlobAuditReproTests
         Assert.Equal(32, ctapResponse.LargeBlobKey?.Length);
         var authData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
         var inputs = new RegistrationExtensionInputs(LargeBlob: new LargeBlobInput { Support = LargeBlobSupport.Preferred });
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),

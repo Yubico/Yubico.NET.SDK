@@ -65,7 +65,7 @@ and both need a touch, so there is no read-only WebAuthn call to try first; read
 ### Register a credential
 
 ```csharp
-var registrationOptions = new RegistrationOptions
+var registrationOptions = new PublicKeyCredentialCreationOptions
 {
     Challenge = RandomNumberGenerator.GetBytes(32),
     Rp = new PublicKeyCredentialRpEntity("example.com", "Example Corp"),
@@ -90,7 +90,7 @@ finally
 ### Authenticate with an allow list
 
 ```csharp
-var authenticationOptions = new AuthenticationOptions
+var authenticationOptions = new PublicKeyCredentialRequestOptions
 {
     Challenge = RandomNumberGenerator.GetBytes(32),
     RpId = "example.com",

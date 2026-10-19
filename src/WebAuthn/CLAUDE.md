@@ -44,10 +44,10 @@ src/
 │   ├── Validation/
 │   │   └── RpIdValidator.cs
 │   ├── Registration/             # Registration options and responses
-│   │   ├── RegistrationOptions.cs
+│   │   ├── PublicKeyCredentialCreationOptions.cs
 │   │   └── RegistrationResponse.cs
 │   └── Authentication/           # Authentication options and responses
-│       ├── AuthenticationOptions.cs
+│       ├── PublicKeyCredentialRequestOptions.cs
 │       ├── AuthenticationResponse.cs
 │       ├── CredentialMatcher.cs
 │       └── MatchedCredential.cs
@@ -118,7 +118,7 @@ await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
     });
 
 // Registration
-var createOptions = new RegistrationOptions
+var createOptions = new PublicKeyCredentialCreationOptions
 {
     Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
     User = new PublicKeyCredentialUserEntity(userId, "user@example.com", "User"),
@@ -131,7 +131,7 @@ var createOptions = new RegistrationOptions
 var credential = await client.MakeCredentialAsync(createOptions, pinBytes: null);
 
 // Authentication
-var requestOptions = new AuthenticationOptions
+var requestOptions = new PublicKeyCredentialRequestOptions
 {
     Challenge = challenge,
     RpId = "example.com",

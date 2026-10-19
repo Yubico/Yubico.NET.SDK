@@ -171,7 +171,7 @@ public class CredentialPromptRetryTests
         return backend;
     }
 
-    private static RegistrationOptions CreateOptions() => new()
+    private static PublicKeyCredentialCreationOptions CreateOptions() => new()
     {
         Challenge = RandomNumberGenerator.GetBytes(32),
         Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),

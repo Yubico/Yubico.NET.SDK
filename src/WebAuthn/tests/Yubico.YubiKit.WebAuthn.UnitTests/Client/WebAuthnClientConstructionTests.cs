@@ -46,7 +46,7 @@ public class WebAuthnClientConstructionTests
             ParseOrigin("https://example.com"),
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -116,7 +116,7 @@ public class WebAuthnClientConstructionTests
             ParseOrigin("https://login.example.com"),
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "com"
@@ -147,14 +147,14 @@ public class WebAuthnClientConstructionTests
             ParseOrigin("https://login.example.com"),
             clientOptions);
 
-        var registrationOptions = new RegistrationOptions
+        var registrationOptions = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("com", "Public suffix"),
             User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
             PubKeyCredParams = [CoseAlgorithm.Es256]
         };
-        var authenticationOptions = new AuthenticationOptions
+        var authenticationOptions = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "com"
@@ -201,7 +201,7 @@ public class WebAuthnClientConstructionTests
                 EnterpriseRpIds = new HashSet<string> { "partner.test" }
             });
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("partner.test", "Partner"),

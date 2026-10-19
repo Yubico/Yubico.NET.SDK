@@ -56,7 +56,7 @@ public class WebAuthnClientGetAssertionTests
         // Arrange
         var challenge = RandomNumberGenerator.GetBytes(32);
         var credentialId = RandomNumberGenerator.GetBytes(32);
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = challenge,
             RpId = "example.com"
@@ -81,7 +81,7 @@ public class WebAuthnClientGetAssertionTests
     public async Task GetAssertion_RpIdMismatch_ThrowsInvalidRequest()
     {
         // Arrange
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "evil.com"
@@ -99,7 +99,7 @@ public class WebAuthnClientGetAssertionTests
     {
         // Arrange
         var credentialId = RandomNumberGenerator.GetBytes(32);
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com",
@@ -130,7 +130,7 @@ public class WebAuthnClientGetAssertionTests
         var cred2 = RandomNumberGenerator.GetBytes(32);
         var cred3 = RandomNumberGenerator.GetBytes(32);
 
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com",
@@ -162,7 +162,7 @@ public class WebAuthnClientGetAssertionTests
     {
         // Arrange
         var credentialId = RandomNumberGenerator.GetBytes(32);
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com"
@@ -196,7 +196,7 @@ public class WebAuthnClientGetAssertionTests
         // Arrange
         var credentialId = RandomNumberGenerator.GetBytes(32);
         var signature = RandomNumberGenerator.GetBytes(64);
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com"
@@ -231,7 +231,7 @@ public class WebAuthnClientGetAssertionTests
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
 
         var credentialId = RandomNumberGenerator.GetBytes(32);
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com"
@@ -280,7 +280,7 @@ public class WebAuthnClientGetAssertionTests
             Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
 
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com"
@@ -308,7 +308,7 @@ public class WebAuthnClientGetAssertionTests
     public async Task GetAssertion_EmptyAllowList_OnAuthenticatorWithoutDiscoverable_ReturnsEmpty()
     {
         // Arrange
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com",
@@ -525,7 +525,7 @@ public class WebAuthnClientGetAssertionTests
             Arg.Any<ReadOnlyMemory<byte>?>(),
             Arg.Any<CancellationToken>());
 
-    private static AuthenticationOptions CreateUvRequiredOptions() => new()
+    private static PublicKeyCredentialRequestOptions CreateUvRequiredOptions() => new()
     {
         Challenge = RandomNumberGenerator.GetBytes(32),
         RpId = "example.com",

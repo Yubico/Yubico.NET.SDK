@@ -19,9 +19,11 @@ using Yubico.YubiKit.WebAuthn.Preferences;
 namespace Yubico.YubiKit.WebAuthn.Client.Registration;
 
 /// <summary>
-/// Options for WebAuthn credential registration (MakeCredential).
+/// The relying party's options for a registration ceremony: WebAuthn L3 §5.4
+/// <c>PublicKeyCredentialCreationOptions</c>, the dictionary passed to <c>navigator.credentials.create()</c>.
+/// Consumed by <see cref="WebAuthnClient.MakeCredentialAsync"/>, which returns a <see cref="RegistrationResponse"/>.
 /// </summary>
-public sealed record class RegistrationOptions
+public sealed record class PublicKeyCredentialCreationOptions
 {
     /// <summary>
     /// Gets the challenge bytes (provided by relying party).

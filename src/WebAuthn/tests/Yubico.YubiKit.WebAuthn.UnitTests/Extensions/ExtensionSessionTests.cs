@@ -28,7 +28,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions;
 
 public class ExtensionSessionTests
 {
-    internal static RegistrationOptions CreateMockOptions() =>
+    internal static PublicKeyCredentialCreationOptions CreateMockOptions() =>
         new()
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
@@ -109,7 +109,7 @@ public class ExtensionSessionTests
     {
         // Arrange
         var authData = CreateMockAuthenticatorData();
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = new byte[32],
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -131,7 +131,7 @@ public class ExtensionSessionTests
         // Arrange
         var inputs = new RegistrationExtensionInputs(CredProps: new CredPropsInput());
         var authData = CreateMockAuthenticatorData();
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = new byte[32],
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),

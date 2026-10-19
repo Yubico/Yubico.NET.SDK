@@ -48,7 +48,7 @@ internal sealed class RegistrationExtensionSession : IDisposable
     /// <param name="context">GetInfo, PIN/UV protocol and backend for this ceremony.</param>
     public static RegistrationExtensionSession Create(
         RegistrationExtensionInputs? inputs,
-        RegistrationOptions options,
+        PublicKeyCredentialCreationOptions options,
         bool requireResidentKey,
         ExtensionContext context)
     {

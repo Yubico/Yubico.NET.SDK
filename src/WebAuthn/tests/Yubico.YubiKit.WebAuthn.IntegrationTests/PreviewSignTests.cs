@@ -47,7 +47,7 @@ public class PreviewSignTests
 
         await using var client = CreateClient(session);
 
-        var regOptions = new RegistrationOptions
+        var regOptions = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),
@@ -109,7 +109,7 @@ public class PreviewSignTests
 
         await using var regClient = CreateClient(session1);
 
-        var regOptions = new RegistrationOptions
+        var regOptions = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),
@@ -175,7 +175,7 @@ public class PreviewSignTests
                         derivedKey.Context)))
         };
 
-        var authOptions = new AuthenticationOptions
+        var authOptions = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,
@@ -237,7 +237,7 @@ public class PreviewSignTests
 
         await using var session = await state.Device.CreateFidoSessionAsync();
         await using var client = CreateClient(session);
-        var matches = await client.GetAssertionAsync(new AuthenticationOptions
+        var matches = await client.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,
@@ -262,7 +262,7 @@ public class PreviewSignTests
     {
         await using var session = await state.Device.CreateFidoSessionAsync();
         await using var client = CreateClient(session);
-        var response = await client.MakeCredentialAsync(new RegistrationOptions
+        var response = await client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),

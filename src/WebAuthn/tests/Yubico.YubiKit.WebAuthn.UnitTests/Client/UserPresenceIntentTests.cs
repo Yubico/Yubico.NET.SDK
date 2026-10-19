@@ -80,7 +80,7 @@ public sealed class UserPresenceIntentTests
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
     }
 
-    private static RegistrationOptions CreateRegistration() => new()
+    private static PublicKeyCredentialCreationOptions CreateRegistration() => new()
     {
         Challenge = RandomNumberGenerator.GetBytes(32),
         Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),

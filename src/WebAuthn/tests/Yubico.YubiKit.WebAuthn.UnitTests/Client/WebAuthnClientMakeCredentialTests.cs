@@ -57,7 +57,7 @@ public class WebAuthnClientMakeCredentialTests
     {
         // Arrange
         var challenge = RandomNumberGenerator.GetBytes(32);
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = challenge,
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -84,7 +84,7 @@ public class WebAuthnClientMakeCredentialTests
     public async Task MakeCredential_RpIdMismatch_ThrowsInvalidRequest()
     {
         // Arrange
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("evil.com", "Evil"),
@@ -109,7 +109,7 @@ public class WebAuthnClientMakeCredentialTests
             origin!,
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -144,7 +144,7 @@ public class WebAuthnClientMakeCredentialTests
                 EnterpriseRpIds = new HashSet<string> { "partner.test" }
             });
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("partner.test", "Partner"),
@@ -172,7 +172,7 @@ public class WebAuthnClientMakeCredentialTests
         // Arrange
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(residentKeySupported: true));
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -201,7 +201,7 @@ public class WebAuthnClientMakeCredentialTests
     [Trait("Audit", "N1")]
     public async Task MakeCredential_DuplicatePubKeyCredParams_ThrowsInvalidRequestBeforeBackendCall()
     {
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -221,7 +221,7 @@ public class WebAuthnClientMakeCredentialTests
     [Trait("Audit", "YESDK-1615")]
     public async Task MakeCredential_ResidentKeyRequired_WithoutRkSupport_ThrowsNotSupportedBeforeBackendCall()
     {
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -246,7 +246,7 @@ public class WebAuthnClientMakeCredentialTests
     {
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(residentKeySupported: rkSupported));
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -272,7 +272,7 @@ public class WebAuthnClientMakeCredentialTests
     public async Task MakeCredential_ResponsePopulatesAaguidAndPublicKey()
     {
         // Arrange
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -299,7 +299,7 @@ public class WebAuthnClientMakeCredentialTests
     {
         // Arrange
         var excludeCredential = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -339,7 +339,7 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -394,7 +394,7 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Any<CancellationToken>())
             .Throws(new CtapException(CtapStatus.NoCredentials));
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -582,7 +582,7 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Any<CancellationToken>())
             .Returns<MakeCredentialResponse>(_ => throw new CtapException(CtapStatus.OperationDenied));
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -603,7 +603,7 @@ public class WebAuthnClientMakeCredentialTests
             .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
                 clientPinSupported: true, uvSupported: false));
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -718,7 +718,7 @@ public class WebAuthnClientMakeCredentialTests
     /// an authentication tag of its own - does not run and the tag count stays attributable to the
     /// request builder alone.
     /// </summary>
-    private static RegistrationOptions CreateUvRequiredOptions() => new()
+    private static PublicKeyCredentialCreationOptions CreateUvRequiredOptions() => new()
     {
         Challenge = RandomNumberGenerator.GetBytes(32),
         Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -727,7 +727,7 @@ public class WebAuthnClientMakeCredentialTests
         UserVerification = UserVerificationPreference.Required
     };
 
-    private static RegistrationOptions CreateExcludeListOptions(
+    private static PublicKeyCredentialCreationOptions CreateExcludeListOptions(
         UserVerificationPreference userVerification = UserVerificationPreference.Preferred) => new()
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
@@ -738,6 +738,6 @@ public class WebAuthnClientMakeCredentialTests
             UserVerification = userVerification
         };
 
-    private static RegistrationOptions CreateExcludeListUvRequiredOptions() =>
+    private static PublicKeyCredentialCreationOptions CreateExcludeListUvRequiredOptions() =>
         CreateExcludeListOptions(UserVerificationPreference.Required);
 }

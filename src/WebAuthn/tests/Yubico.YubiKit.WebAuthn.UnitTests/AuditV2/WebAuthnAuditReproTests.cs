@@ -28,7 +28,7 @@ public class WebAuthnAuditReproTests
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
     }
 
-    private static RegistrationOptions Registration() => new()
+    private static PublicKeyCredentialCreationOptions Registration() => new()
     {
         Challenge = new byte[32],
         Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -37,7 +37,7 @@ public class WebAuthnAuditReproTests
         UserVerification = UserVerificationPreference.Discouraged
     };
 
-    private static AuthenticationOptions Authentication() => new()
+    private static PublicKeyCredentialRequestOptions Authentication() => new()
     {
         Challenge = new byte[32],
         RpId = "example.com",

@@ -30,7 +30,7 @@ public class WebAuthnAuditHardwareTests
         byte[] credentialId;
         await using (var client = CreateClient(session))
         {
-            var registration = await client.MakeCredentialAsync(new RegistrationOptions
+            var registration = await client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
             {
                 Challenge = RandomNumberGenerator.GetBytes(32),
                 Rp = new PublicKeyCredentialRpEntity(TestRpId, "Audit PRF"),
@@ -49,7 +49,7 @@ public class WebAuthnAuditHardwareTests
         byte[]? previous = null;
         for (var i = 0; i < 2; i++)
         {
-            var matches = await assertionClient.GetAssertionAsync(new AuthenticationOptions
+            var matches = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions
             {
                 Challenge = RandomNumberGenerator.GetBytes(32),
                 RpId = TestRpId,
@@ -70,7 +70,7 @@ public class WebAuthnAuditHardwareTests
         }
     }
 
-    private static RegistrationOptions PrfRegistration(string userName, PrfInput? prf = null) => new()
+    private static PublicKeyCredentialCreationOptions PrfRegistration(string userName, PrfInput? prf = null) => new()
     {
         Challenge = RandomNumberGenerator.GetBytes(32),
         Rp = new PublicKeyCredentialRpEntity(TestRpId, "Audit PRF"),
@@ -109,7 +109,7 @@ public class WebAuthnAuditHardwareTests
 
         await using var assertionSession = await state.Device.CreateFidoSessionAsync();
         await using var assertionClient = CreateClient(assertionSession);
-        var byCredential = await assertionClient.GetAssertionAsync(new AuthenticationOptions
+        var byCredential = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,
@@ -127,7 +127,7 @@ public class WebAuthnAuditHardwareTests
         var selectedResponse = await Assert.Single(byCredential).SelectAsync();
         Assert.Equal(held, selectedResponse.CredentialId.ToArray());
 
-        var plain = await assertionClient.GetAssertionAsync(new AuthenticationOptions
+        var plain = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,
@@ -171,7 +171,7 @@ public class WebAuthnAuditHardwareTests
 
         async Task<(byte[] Result, bool UvFlag)> AssertAsync(UserVerificationPreference uv, ReadOnlyMemory<byte>? pin)
         {
-            var matches = await assertionClient.GetAssertionAsync(new AuthenticationOptions
+            var matches = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions
             {
                 Challenge = RandomNumberGenerator.GetBytes(32),
                 RpId = TestRpId,
@@ -211,7 +211,7 @@ public class WebAuthnAuditHardwareTests
         byte[] credentialId;
         await using (var client = CreateClient(session))
         {
-            var registration = await client.MakeCredentialAsync(new RegistrationOptions
+            var registration = await client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
             {
                 Challenge = RandomNumberGenerator.GetBytes(32),
                 Rp = new PublicKeyCredentialRpEntity(TestRpId, "Audit largeBlob"),
@@ -229,7 +229,7 @@ public class WebAuthnAuditHardwareTests
         await using var assertionSession = await state.Device.CreateFidoSessionAsync();
         await using var assertionClient = CreateClient(assertionSession);
 
-        var writeMatches = await assertionClient.GetAssertionAsync(new AuthenticationOptions
+        var writeMatches = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,
@@ -240,7 +240,7 @@ public class WebAuthnAuditHardwareTests
         var written = await Assert.Single(writeMatches).SelectAsync();
         Assert.True(written.ClientExtensionResults?.LargeBlob?.Written);
 
-        var readMatches = await assertionClient.GetAssertionAsync(new AuthenticationOptions
+        var readMatches = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,

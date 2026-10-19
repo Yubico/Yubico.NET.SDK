@@ -46,7 +46,7 @@ public sealed partial class WebAuthnClient
     /// </para>
     /// </remarks>
     public async Task<IReadOnlyList<MatchedCredential>> GetAssertionAsync(
-        AuthenticationOptions options,
+        PublicKeyCredentialRequestOptions options,
         ReadOnlyMemory<byte>? pinBytes = null,
         CancellationToken cancellationToken = default)
     {
@@ -75,7 +75,7 @@ public sealed partial class WebAuthnClient
     /// credential matching, and CTAP execution.
     /// </summary>
     private async Task<IReadOnlyList<MatchedCredential>> GetAssertionCoreAsync(
-        AuthenticationOptions options,
+        PublicKeyCredentialRequestOptions options,
         ReadOnlyMemory<byte>? callerPinBytes,
         CancellationToken cancellationToken)
     {
@@ -164,7 +164,7 @@ public sealed partial class WebAuthnClient
     private static readonly byte[] DummyCredentialId = [0x00];
 
     private static BackendGetAssertionRequest BuildGetAssertionRequest(
-        AuthenticationOptions options,
+        PublicKeyCredentialRequestOptions options,
         WebAuthnClientData clientData,
         CeremonyAuth auth,
         UvDecision decision,

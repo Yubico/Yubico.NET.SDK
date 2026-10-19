@@ -18,9 +18,11 @@ using Yubico.YubiKit.WebAuthn.Preferences;
 namespace Yubico.YubiKit.WebAuthn.Client.Authentication;
 
 /// <summary>
-/// Options for WebAuthn authentication (GetAssertion) operations.
+/// The relying party's options for an authentication ceremony: WebAuthn L3 §5.5
+/// <c>PublicKeyCredentialRequestOptions</c>, the dictionary passed to <c>navigator.credentials.get()</c>.
+/// Consumed by <see cref="WebAuthnClient.GetAssertionAsync"/>, which returns the matching credentials.
 /// </summary>
-public sealed record class AuthenticationOptions
+public sealed record class PublicKeyCredentialRequestOptions
 {
     /// <summary>
     /// Gets the cryptographic challenge from the relying party.

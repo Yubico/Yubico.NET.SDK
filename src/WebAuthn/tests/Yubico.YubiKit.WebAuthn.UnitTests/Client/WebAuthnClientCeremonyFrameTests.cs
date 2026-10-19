@@ -57,7 +57,7 @@ public class WebAuthnClientCeremonyFrameTests
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
     }
 
-    private static RegistrationOptions Registration(UserVerificationPreference uv = UserVerificationPreference.Preferred) => new()
+    private static PublicKeyCredentialCreationOptions Registration(UserVerificationPreference uv = UserVerificationPreference.Preferred) => new()
     {
         Challenge = RandomNumberGenerator.GetBytes(32),
         Rp = new PublicKeyCredentialRpEntity(RpId, "Example"),
@@ -66,7 +66,7 @@ public class WebAuthnClientCeremonyFrameTests
         UserVerification = uv
     };
 
-    private static AuthenticationOptions Authentication(UserVerificationPreference uv = UserVerificationPreference.Preferred) => new()
+    private static PublicKeyCredentialRequestOptions Authentication(UserVerificationPreference uv = UserVerificationPreference.Preferred) => new()
     {
         Challenge = RandomNumberGenerator.GetBytes(32),
         RpId = RpId,
@@ -250,7 +250,7 @@ public class WebAuthnClientCeremonyFrameTests
 
     private static readonly byte[] DummyCredentialId = [0x00]; // python-fido2 client/__init__.py L1012-1017: id=b"\0"
 
-    private static AuthenticationOptions WithAllowList(params PublicKeyCredentialDescriptor[] allowList) =>
+    private static PublicKeyCredentialRequestOptions WithAllowList(params PublicKeyCredentialDescriptor[] allowList) =>
         Authentication(UserVerificationPreference.Discouraged) with { AllowCredentials = allowList };
 
     private void ArrangeNoTokenAuthenticator() =>

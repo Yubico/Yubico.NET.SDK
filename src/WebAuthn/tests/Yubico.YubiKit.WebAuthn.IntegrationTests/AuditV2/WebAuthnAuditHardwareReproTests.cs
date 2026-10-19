@@ -38,7 +38,7 @@ public class WebAuthnAuditHardwareReproTests
         await using var client = CreateClient(session);
 
         var started = Stopwatch.StartNew();
-        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(new RegistrationOptions
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example"),
@@ -72,7 +72,7 @@ public class WebAuthnAuditHardwareReproTests
         ReadOnlyMemory<byte> credentialId;
         await using (var client = CreateClient(registrationSession))
         {
-            var registration = await client.MakeCredentialAsync(new RegistrationOptions
+            var registration = await client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
             {
                 Challenge = RandomNumberGenerator.GetBytes(32),
                 Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example"),
@@ -88,7 +88,7 @@ public class WebAuthnAuditHardwareReproTests
 
         await using var assertionSession = await state.Device.CreateFidoSessionAsync();
         await using var assertionClient = CreateClient(assertionSession);
-        var matches = await assertionClient.GetAssertionAsync(new AuthenticationOptions
+        var matches = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,
@@ -110,7 +110,7 @@ public class WebAuthnAuditHardwareReproTests
         await using var session = await state.Device.CreateFidoSessionAsync();
         await NormalizePinAsync(session);
         await using var client = CreateClient(session);
-        var registration = await client.MakeCredentialAsync(new RegistrationOptions
+        var registration = await client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example"),

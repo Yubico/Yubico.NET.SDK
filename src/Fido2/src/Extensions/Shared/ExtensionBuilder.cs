@@ -44,7 +44,7 @@ public sealed class ExtensionBuilder
     private bool _getCredBlob;
     private LargeBlobInput? _largeBlob;
     private HmacSecretInput? _hmacSecret;
-    private bool _hmacSecretMc;
+    private HmacSecretInput? _hmacSecretMc;
     private bool _minPinLength;
     private bool _largeBlobKey;
     private bool _hmacSecretRequested;
@@ -173,7 +173,16 @@ public sealed class ExtensionBuilder
         ReadOnlySpan<byte> sharedSecret,
         IReadOnlyDictionary<int, object?> keyAgreement,
         ReadOnlySpan<byte> salt1,
-        ReadOnlySpan<byte> salt2 = default)
+        ReadOnlySpan<byte> salt2 = default) =>
+        WithHmacSecret(BuildHmacSecretInput(protocol, sharedSecret, keyAgreement, salt1, salt2));
+
+    /// <summary>CTAP §12.7: saltEnc = encrypt(sharedSecret, salt1 || salt2), saltAuth = authenticate(sharedSecret, saltEnc).</summary>
+    private static HmacSecretInput BuildHmacSecretInput(
+        IPinUvAuthProtocol protocol,
+        ReadOnlySpan<byte> sharedSecret,
+        IReadOnlyDictionary<int, object?> keyAgreement,
+        ReadOnlySpan<byte> salt1,
+        ReadOnlySpan<byte> salt2)
     {
         ArgumentNullException.ThrowIfNull(protocol);
         ArgumentNullException.ThrowIfNull(keyAgreement);
@@ -207,30 +216,45 @@ public sealed class ExtensionBuilder
         // Compute auth tag
         var saltAuth = protocol.Authenticate(sharedSecret, saltEnc);
 
-        _hmacSecret = new HmacSecretInput
+        return new HmacSecretInput
         {
             KeyAgreement = keyAgreement,
             SaltEnc = saltEnc,
             SaltAuth = saltAuth,
             PinUvAuthProtocol = protocol.Version
         };
+    }
 
+    /// <summary>
+    /// Adds the hmac-secret-mc extension (CTAP 2.2-2.3 §12.8): evaluate hmac-secret during
+    /// authenticatorMakeCredential.
+    /// </summary>
+    /// <remarks>
+    /// §12.8: "This extension input is the same as the hmac secret extension's getAssertion input" and
+    /// "the hmac-secret extension MUST also be present with the value of "hmac-secret" set to true", so
+    /// this method also emits <c>"hmac-secret": true</c>. Advertised by YubiKey 5.8 and later.
+    /// </remarks>
+    /// <param name="input">The encrypted and authenticated salts, as for getAssertion.</param>
+    /// <returns>This builder for chaining.</returns>
+    public ExtensionBuilder WithHmacSecretMakeCredential(HmacSecretInput input)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        _hmacSecretMc = input;
+        _hmacSecretRequested = true;
         return this;
     }
 
     /// <summary>
-    /// Adds the hmac-secret-mc extension for makeCredential.
+    /// Adds the hmac-secret-mc extension (CTAP 2.2-2.3 §12.8), encrypting the salts under the shared
+    /// secret exactly as <see cref="WithHmacSecret(IPinUvAuthProtocol, ReadOnlySpan{byte}, IReadOnlyDictionary{int, object?}, ReadOnlySpan{byte}, ReadOnlySpan{byte})"/> does.
     /// </summary>
-    /// <remarks>
-    /// This extension allows retrieving hmac-secret output during credential creation.
-    /// Requires firmware 5.4+.
-    /// </remarks>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithHmacSecretMakeCredential()
-    {
-        _hmacSecretMc = true;
-        return this;
-    }
+    public ExtensionBuilder WithHmacSecretMakeCredential(
+        IPinUvAuthProtocol protocol,
+        ReadOnlySpan<byte> sharedSecret,
+        IReadOnlyDictionary<int, object?> keyAgreement,
+        ReadOnlySpan<byte> salt1,
+        ReadOnlySpan<byte> salt2 = default) =>
+        WithHmacSecretMakeCredential(BuildHmacSecretInput(protocol, sharedSecret, keyAgreement, salt1, salt2));
 
     /// <summary>
     /// Adds the minPinLength extension.
@@ -338,10 +362,10 @@ public sealed class ExtensionBuilder
             writer.WriteBoolean(true);
         }
 
-        if (_hmacSecretMc)
+        if (_hmacSecretMc is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.HmacSecretMakeCredential);
-            writer.WriteBoolean(true);
+            _hmacSecretMc.Encode(writer);
         }
 
         if (_largeBlob is not null)
@@ -466,7 +490,7 @@ public sealed class ExtensionBuilder
                _largeBlobKey ||
                _hmacSecret is not null ||
                _hmacSecretRequested ||
-               _hmacSecretMc ||
+               _hmacSecretMc is not null ||
                _minPinLength ||
                _previewSignRegistration is not null ||
                _previewSignAuthentication is not null;
@@ -480,7 +504,7 @@ public sealed class ExtensionBuilder
         if (_largeBlob is not null) count++;
         if (_largeBlobKey) count++;
         if (_hmacSecret is not null || _hmacSecretRequested) count++;
-        if (_hmacSecretMc) count++;
+        if (_hmacSecretMc is not null) count++;
         if (_minPinLength) count++;
         if (_previewSignRegistration is not null || _previewSignAuthentication is not null) count++;
         return count;

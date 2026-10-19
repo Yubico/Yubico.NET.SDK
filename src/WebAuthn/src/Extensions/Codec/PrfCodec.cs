@@ -42,7 +42,9 @@ internal static class PrfCodec
         }
 
         var reader = new CborReader(rawValue, CborConformanceMode.Lax);
-        return new PrfRegistrationOutput(reader.ReadBoolean());
+        // Only a CBOR true enables; anything else (false, or a value of another type) reports disabled.
+        bool enabled = reader.PeekState() == CborReaderState.Boolean && reader.ReadBoolean();
+        return new PrfRegistrationOutput(enabled);
     }
 
     /// <summary>

@@ -24,10 +24,17 @@ public sealed record class PrfEvaluationResults(
     ReadOnlyMemory<byte>? Second = null);
 
 /// <summary>
-/// Output from the PRF extension during registration.
+/// Output from the PRF extension during registration (WebAuthn L3 §10.1.4).
 /// </summary>
-/// <param name="Enabled">Whether PRF is enabled for this credential.</param>
-public sealed record class PrfRegistrationOutput(bool Enabled);
+/// <param name="Enabled">
+/// "true if, and only if, the PRF is available for use with the created credential": the authenticator's
+/// <c>hmac-secret</c> boolean, false when absent or not a boolean.
+/// </param>
+/// <param name="Results">
+/// The evaluation results when <c>eval</c> was given and the authenticator evaluated it at creation time
+/// through CTAP 2.2-2.3 §12.8 <c>hmac-secret-mc</c>; otherwise null ("Outputs may not be available during registration").
+/// </param>
+public sealed record class PrfRegistrationOutput(bool Enabled, PrfEvaluationResults? Results = null);
 
 /// <summary>
 /// Output from the PRF extension during authentication.

@@ -141,22 +141,30 @@ public class ExtensionBuilderTests
         Assert.Throws<InvalidOperationException>(() => builder.Build());
     }
 
+    /// <summary>
+    /// CTAP 2.2-2.3 §12.8: hmac-secret-mc carries "the same as the hmac secret extension's getAssertion input" and
+    /// "the hmac-secret extension MUST also be present with the value of "hmac-secret" set to true".
+    /// </summary>
     [Fact]
-    public void Build_WithHmacSecretMc_EncodesCorrectly()
+    public void Build_WithHmacSecretMakeCredential_EncodesHmacSecretTrueAndTheInputMap()
     {
-        // Arrange
-        var builder = new ExtensionBuilder()
-            .WithHmacSecretMakeCredential();
+        var result = new ExtensionBuilder()
+            .WithHmacSecretMakeCredential(new HmacSecretInput
+            {
+                KeyAgreement = new Dictionary<int, object?> { [1] = 2 },
+                SaltEnc = new byte[48],
+                SaltAuth = new byte[16],
+                PinUvAuthProtocol = 2
+            })
+            .Build();
 
-        // Act
-        var result = builder.Build();
-
-        // Assert
         Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("hmac-secret-mc", reader.ReadTextString());
+        var reader = new CborReader(result.Value, CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(2, reader.ReadStartMap());
+        Assert.Equal("hmac-secret", reader.ReadTextString());
         Assert.True(reader.ReadBoolean());
+        Assert.Equal("hmac-secret-mc", reader.ReadTextString());
+        Assert.Equal(4, reader.ReadStartMap());
     }
 
     [Fact]

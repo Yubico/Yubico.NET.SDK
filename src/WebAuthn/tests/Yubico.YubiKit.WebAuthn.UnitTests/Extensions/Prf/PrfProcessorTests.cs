@@ -241,4 +241,176 @@ public class PrfProcessorTests
         Assert.NotNull(result);
         Assert.Null(result.Prf);
     }
+
+    // ---- 26a: L3 §10.1.4 validation of evalByCredential ----
+
+    /// <summary>L3 §10.1.4 registration: "If evalByCredential is present, return a DOMException whose name is NotSupportedError".</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public void Registration_EvalByCredential_IsNotSupported()
+    {
+        var context = Context("hmac-secret");
+        var input = new PrfInput { EvalByCredential = new Dictionary<string, PrfInputValues> { ["AQ"] = new() { First = PrfEvalFirst } } };
+
+        var error = Assert.Throws<WebAuthnClientError>(() => RegistrationExtensionSession.Create(
+            new RegistrationExtensionInputs(Prf: input), ExtensionSessionTests.CreateMockOptions(), requireResidentKey: false, context));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+    }
+
+    /// <summary>L3 §10.1.4: "If evalByCredential is not empty but allowCredentials is empty, return ... NotSupportedError".</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public void Authentication_EvalByCredentialWithoutAllowList_IsNotSupported()
+    {
+        var context = Context("hmac-secret");
+        var input = new PrfInput { EvalByCredential = new Dictionary<string, PrfInputValues> { ["AQ"] = new() { First = PrfEvalFirst } } };
+
+        var error = Assert.Throws<WebAuthnClientError>(() => AuthenticationExtensionSession.Create(
+            new AuthenticationExtensionInputs(Prf: input), allowCredentials: null, context));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+    }
+
+    /// <summary>
+    ///     L3 §10.1.4: "If any key in evalByCredential is the empty string, or is not a valid base64url encoding, or does
+    ///     not equal the id of some element of allowCredentials ... return a DOMException whose name is SyntaxError".
+    /// </summary>
+    [Theory]
+    [Trait("Audit", "YESDK-1634")]
+    [InlineData("")]
+    [InlineData("!!")]
+    [InlineData("AQID")] // valid base64url, but 0x010203 is not in the allow list
+    public void Authentication_EvalByCredentialKeyNotAnAllowedCredential_IsInvalidRequest(string key)
+    {
+        var context = Context("hmac-secret");
+        var input = new PrfInput { EvalByCredential = new Dictionary<string, PrfInputValues> { [key] = new() { First = PrfEvalFirst } } };
+
+        var error = Assert.Throws<WebAuthnClientError>(() => AuthenticationExtensionSession.Create(
+            new AuthenticationExtensionInputs(Prf: input), [new PublicKeyCredentialDescriptor(new byte[] { 0x01 })], context));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
+    }
+
+    /// <summary>L3 §10.1.4: "If ev is null and eval is present, then let ev be the value of eval."</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task Authentication_NoEntryForTheSelectedCredential_FallsBackToEval()
+    {
+        var context = Context("hmac-secret");
+        var listed = new PublicKeyCredentialDescriptor(new byte[] { 0x01 });
+        var selected = new PublicKeyCredentialDescriptor(new byte[] { 0x02 });
+        var input = new PrfInput
+        {
+            First = PrfEvalFirst,
+            EvalByCredential = new Dictionary<string, PrfInputValues> { ["AQ"] = new() { First = "listed"u8.ToArray() } }
+        };
+        var session = AuthenticationExtensionSession.Create(new AuthenticationExtensionInputs(Prf: input), [listed, selected], context);
+
+        await session.PrepareAsync(TestContext.Current.CancellationToken);
+        var cbor = session.PrepareInputs(selected, token: null);
+
+        var saltEnc = (byte[])ReadHmacSecretInput(cbor!.Value)[SaltEncKey]!;
+        Assert.Equal(Salt1, _protocol.Decrypt(SharedSecretV2, saltEnc));
+    }
+
+    // ---- 26b: enabled and registration-time evaluation ----
+
+    /// <summary>L3 §10.1.4: enabled "If not present, set enabled to false" — the output is present, not null.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task Registration_NoHmacSecretOutput_ReportsEnabledFalse()
+    {
+        var context = Context("hmac-secret");
+        var session = RegistrationExtensionSession.Create(
+            new RegistrationExtensionInputs(Prf: new PrfInput()), ExtensionSessionTests.CreateMockOptions(), requireResidentKey: false, context);
+        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData());
+
+        var result = await session.PrepareOutputsAsync(
+            MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result?.Prf);
+        Assert.False(result.Prf.Enabled);
+    }
+
+    /// <summary>A non-boolean hmac-secret output reports disabled, never enabled, and does not fail the registration.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task Registration_NonBooleanHmacSecretOutput_ReportsEnabledFalse()
+    {
+        var context = Context("hmac-secret");
+        var session = RegistrationExtensionSession.Create(
+            new RegistrationExtensionInputs(Prf: new PrfInput()), ExtensionSessionTests.CreateMockOptions(), requireResidentKey: false, context);
+        var outputs = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        outputs.WriteStartMap(1);
+        outputs.WriteTextString("hmac-secret");
+        outputs.WriteInt32(1);
+        outputs.WriteEndMap();
+        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData(outputs.Encode()));
+
+        var result = await session.PrepareOutputsAsync(
+            MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result?.Prf);
+        Assert.False(result.Prf.Enabled);
+    }
+
+    /// <summary>
+    ///     CTAP 2.2-2.3 §12.8 hmac-secret-mc: with eval at registration on an authenticator that advertises it, send
+    ///     "hmac-secret": true plus "hmac-secret-mc" with the getAssertion input map, and decrypt the result
+    ///     (python-fido2 extensions.py L287-324, yubikit-android HmacSecretExtension L133-175).
+    /// </summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task Registration_EvalOnAuthenticatorWithHmacSecretMc_SendsBothAndDecryptsResults()
+    {
+        var context = Context("hmac-secret", "hmac-secret-mc");
+        var session = RegistrationExtensionSession.Create(
+            new RegistrationExtensionInputs(Prf: new PrfInput { First = PrfEvalFirst, Second = PrfEvalSecond }),
+            ExtensionSessionTests.CreateMockOptions(), requireResidentKey: false, context);
+
+        await session.PrepareAsync(TestContext.Current.CancellationToken);
+        var cbor = session.PrepareInputs(token: null);
+
+        var reader = new CborReader(cbor!.Value, CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(2, reader.ReadStartMap());
+        Assert.Equal("hmac-secret", reader.ReadTextString());
+        Assert.True(reader.ReadBoolean());
+        Assert.Equal("hmac-secret-mc", reader.ReadTextString());
+        Assert.Equal(4, reader.ReadStartMap());
+
+        var outputs = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        outputs.WriteStartMap(2);
+        outputs.WriteTextString("hmac-secret"); outputs.WriteBoolean(true);
+        outputs.WriteTextString("hmac-secret-mc"); outputs.WriteByteString(OutputEncV2Two);
+        outputs.WriteEndMap();
+        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData(outputs.Encode()));
+        var result = await session.PrepareOutputsAsync(
+            MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result?.Prf);
+        Assert.True(result.Prf.Enabled);
+        Assert.Equal(Output1, result.Prf.Results?.First.ToArray());
+        Assert.Equal(Output2, result.Prf.Results?.Second?.ToArray());
+    }
+
+    /// <summary>Without hmac-secret-mc support, eval at registration sends only hmac-secret: true (L3: "a future extension ... permits").</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task Registration_EvalWithoutHmacSecretMc_SendsOnlyHmacSecretTrue()
+    {
+        var context = Context("hmac-secret");
+        var session = RegistrationExtensionSession.Create(
+            new RegistrationExtensionInputs(Prf: new PrfInput { First = PrfEvalFirst }),
+            ExtensionSessionTests.CreateMockOptions(), requireResidentKey: false, context);
+
+        await session.PrepareAsync(TestContext.Current.CancellationToken);
+        var cbor = session.PrepareInputs(token: null);
+
+        var reader = new CborReader(cbor!.Value, CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(1, reader.ReadStartMap());
+        Assert.Equal("hmac-secret", reader.ReadTextString());
+        Assert.True(reader.ReadBoolean());
+        await _backend.DidNotReceive().EncapsulateAsync(Arg.Any<CancellationToken>());
+    }
 }

@@ -226,11 +226,13 @@ Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Second.get -> Sy
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Second.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput!
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Deconstruct(out bool Enabled) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Deconstruct(out bool Enabled, out Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults? Results) -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Enabled.get -> bool
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Enabled.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Equals(Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.PrfRegistrationOutput(bool Enabled) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.PrfRegistrationOutput(bool Enabled, Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults? Results = null) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Results.get -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults?
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Results.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey!
 Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Algorithm.get -> Yubico.YubiKit.Fido2.Cose.CoseAlgorithm

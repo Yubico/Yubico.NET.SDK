@@ -73,7 +73,7 @@ internal sealed class AuthenticationExtensionSession
 
     /// <summary>
     /// Derives the client extension outputs for one assertion, or null when the relying party requested
-    /// no extensions. A <see cref="CborContentException"/> from one extension drops that extension's output only.
+    /// no extensions. A malformed or wrong-typed output from one extension drops that extension's output only.
     /// </summary>
     public async ValueTask<AuthenticationExtensionOutputs?> PrepareOutputsAsync(
         GetAssertionResponse response,
@@ -93,9 +93,11 @@ internal sealed class AuthenticationExtensionSession
             {
                 await processor.PrepareOutputsAsync(response, authData, token, outputs, cancellationToken).ConfigureAwait(false);
             }
-            catch (CborContentException)
+            catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
             {
-                // Malformed extension output: skip this extension (WebAuthn L3 §9.4); some authenticators return junk.
+                // Malformed or wrong-typed extension output: skip this extension only (WebAuthn L3 §9.4
+                // "ignore any extension output it ... cannot process"). System.Formats.Cbor reports bad
+                // encodings as CborContentException and a wrong major type as InvalidOperationException.
             }
         }
 

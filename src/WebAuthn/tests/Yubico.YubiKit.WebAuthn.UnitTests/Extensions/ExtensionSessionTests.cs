@@ -206,6 +206,31 @@ public class ExtensionSessionTests
         return WebAuthnAuthenticatorData.Decode(data.ToArray());
     }
 
+    /// <summary>WebAuthn L3 §9.4: output the client cannot process is ignored; only that extension is dropped.</summary>
+    [Fact]
+    public async Task PrepareOutputs_WrongTypedExtensionOutput_DropsOnlyThatExtension()
+    {
+        var extensions = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        extensions.WriteStartMap(2);
+        extensions.WriteTextString("credBlob");
+        extensions.WriteBoolean(true); // valid makeCredential output
+        extensions.WriteTextString("credProtect");
+        extensions.WriteTextString("junk"); // must be an integer
+        extensions.WriteEndMap();
+        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData(extensions.Encode()));
+        var inputs = new RegistrationExtensionInputs(
+            CredProtect: new CredProtectInput(CredProtectPolicy.UserVerificationOptional),
+            CredBlob: new CredBlobInput { Blob = new byte[] { 0x01 } });
+
+        var result = await RegistrationExtensionSession.Create(inputs, CreateMockOptions(), requireResidentKey: false)
+            .PrepareOutputsAsync(MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result);
+        Assert.Null(result.CredProtect);
+        Assert.NotNull(result.CredBlob);
+        Assert.True(result.CredBlob.Stored);
+    }
+
     /// <summary>Requested but client-only extensions (credProps) produce no CTAP input.</summary>
     [Fact]
     public void PrepareInputs_OnlyClientSideExtensions_ReturnsNull()

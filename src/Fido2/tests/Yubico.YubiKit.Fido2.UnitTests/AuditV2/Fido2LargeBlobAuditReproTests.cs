@@ -2,7 +2,6 @@ using NSubstitute;
 using System.Buffers.Binary;
 using System.Formats.Cbor;
 using System.IO.Compression;
-using System.Reflection;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.LargeBlobs;
@@ -131,17 +130,17 @@ public class Fido2LargeBlobAuditReproTests
     [Trait("Audit", "YESDK-1624")]
     public void YESDK1624_DecryptedTemporaryPlaintextIsCleared()
     {
-        // Probe the private parser using its real, currently owned plaintext buffer.
-        // This is an implementation hygiene regression probe, not a public API contract.
-        var method = typeof(LargeBlobEntry).GetMethod("ParseDecryptedBlob", BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.NotNull(method);
-        var parser = method.CreateDelegate<ParseBlob>();
-        byte[] plaintext = new byte[] { 0xa1, 0x40, 0x43, 1, 2, 3 }; // {h'': h'010203'}
-        Assert.Equal(new byte[] { 1, 2, 3 }, parser(plaintext));
-        Assert.All(plaintext, b => Assert.Equal(0, b));
-    }
+        // Every SDK-owned temporary (the AES-GCM output and the inflate buffer) is zeroed before TryDecrypt returns;
+        // the caller receives a fresh copy it owns.
+        var entry = LargeBlobEntry.Encrypt(Key, Blob);
+        var temporaries = new List<byte[]>();
 
-    private delegate byte[]? ParseBlob(ReadOnlySpan<byte> plaintext);
+        var result = entry.TryDecrypt(Key, temporaries.Add);
+
+        Assert.Equal(Blob, result);
+        Assert.NotEmpty(temporaries);
+        Assert.All(temporaries, buffer => Assert.All(buffer, b => Assert.Equal(0, b)));
+    }
 
     // Equivalent to python-fido2 blob.py _compress, _lb_ad, _lb_pack, write_blob_array.
     private static byte[] BuildSpecArray(byte[] key, byte[] blob)

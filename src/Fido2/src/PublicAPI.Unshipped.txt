@@ -607,15 +607,10 @@ Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.Serialize() -> byte[]!
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.WithEntry(Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry! entry) -> Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray!
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.WithoutEntry(int index) -> Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray!
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry
-Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.EncryptedData.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.EncryptedData.init -> void
-Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.LargeBlobEntry() -> void
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.TryDecrypt(System.ReadOnlySpan<byte> largeBlobKey) -> byte[]?
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.DeleteBlobAsync(System.ReadOnlyMemory<byte> largeBlobKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.GetBlobAsync(System.ReadOnlyMemory<byte> largeBlobKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]?>!
-Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.LargeBlobStorage(Yubico.YubiKit.Fido2.IFidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlyMemory<byte> pinUvAuthToken, int maxFragmentLength = 1024) -> void
-Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.LargeBlobStorage(Yubico.YubiKit.Fido2.IFidoSession! session, int maxFragmentLength = 1024) -> void
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.ReadLargeBlobArrayAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray!>!
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.SetBlobAsync(System.ReadOnlyMemory<byte> largeBlobKey, System.ReadOnlyMemory<byte> data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.WriteLargeBlobArrayAsync(Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray! array, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
@@ -949,3 +944,11 @@ virtual Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.PrintMembers(System.Text.St
 ~override Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.ToString() -> string
 
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecret() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.LargeBlobEntry(System.ReadOnlyMemory<byte> ciphertext, System.ReadOnlyMemory<byte> nonce, long originalSize) -> void
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.Ciphertext.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.Nonce.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.OriginalSize.get -> long
+const Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobEntry.MaxOriginalSize = 1048576 -> long
+static Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobArray.HasValidHash(System.ReadOnlyMemory<byte> data) -> bool
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.LargeBlobStorage(Yubico.YubiKit.Fido2.IFidoSession! session) -> void
+Yubico.YubiKit.Fido2.LargeBlobs.LargeBlobStorage.LargeBlobStorage(Yubico.YubiKit.Fido2.IFidoSession! session, Yubico.YubiKit.Fido2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlyMemory<byte> pinUvAuthToken) -> void

@@ -1,7 +1,7 @@
+using System.Buffers.Binary;
 using System.Formats.Cbor;
 using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Buffers.Binary;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
@@ -47,8 +47,7 @@ public class Fido2LargeBlobAuditReproTests
                         FidoTestData.PinUtf8, PinUvAuthTokenPermissions.LargeBlobWrite);
                     try
                     {
-                        var storage = new LargeBlobStorage(session, clientPin.Protocol, writeToken,
-                            (info.MaxMsgSize ?? 1024) - 64);
+                        var storage = new LargeBlobStorage(session, clientPin.Protocol, writeToken);
                         await storage.SetBlobAsync(response.LargeBlobKey.Value, "audit-interop"u8.ToArray());
                         // Read the raw serialized array, independently of SDK deserialization.
                         var request = new CborWriter();
@@ -99,6 +98,12 @@ public class Fido2LargeBlobAuditReproTests
                             }
                         }
                         Assert.True(matched);
+
+                        // Cross-client step: hand the largeBlobKey to python-fido2 (LargeBlobs.get_blob) when asked.
+                        if (Environment.GetEnvironmentVariable("AUDIT_LARGE_BLOB_KEY_OUT") is { Length: > 0 } keyOut)
+                        {
+                            await File.WriteAllTextAsync(keyOut, Convert.ToHexString(response.LargeBlobKey.Value.Span));
+                        }
                     }
                     finally { CryptographicOperations.ZeroMemory(writeToken); }
                 }
@@ -121,9 +126,7 @@ public class Fido2LargeBlobAuditReproTests
             byte[] key = Convert.FromHexString(keyHex ?? "");
             try
             {
-                var info = await session.GetInfoAsync();
-                byte[]? blob = await new LargeBlobStorage(session, (info.MaxMsgSize ?? 1024) - 64)
-                    .GetBlobAsync(key);
+                byte[]? blob = await new LargeBlobStorage(session).GetBlobAsync(key);
                 Assert.Equal("python-fido2-audit-interop"u8.ToArray(), blob);
             }
             finally { CryptographicOperations.ZeroMemory(key); }

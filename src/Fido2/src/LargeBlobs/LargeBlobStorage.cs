@@ -58,51 +58,56 @@ public sealed class LargeBlobStorage
     private readonly IFidoSession _session;
     private readonly IPinUvAuthProtocol? _protocol;
     private readonly ReadOnlyMemory<byte> _pinUvAuthToken;
-    private readonly int _maxFragmentLength;
 
-    // Existing alpha constructors intentionally distinguish read-only and authenticated read/write use.
-#pragma warning disable RS0026
-    /// <summary>
-    /// Initializes a new instance for read-only operations.
-    /// </summary>
-    /// <param name="session">The FIDO session to use for communication.</param>
-    /// <param name="maxFragmentLength">Maximum bytes to read/write per request.</param>
-    /// <remarks>
-    /// Use this constructor when only reading large blobs.
-    /// Writing requires PIN/UV authentication.
-    /// </remarks>
-    public LargeBlobStorage(IFidoSession session, int maxFragmentLength = 1024)
+    private const int DefaultMaxMsgSize = 1024;   // CTAP §6.4: "If this member is absent, a default value of 1024 is assumed"
+    private const int FragmentOverhead = 64;       // CTAP §6.10.2: maxFragmentLength = maxMsgSize − 64
+
+    private int? _maxFragmentLength;
+    private int? _maxSerializedLargeBlobArray;
+
+    /// <summary>Creates read-only storage. Fragment sizes come from the authenticator's GetInfo.</summary>
+    /// <param name="session">The CTAP2 session.</param>
+    public LargeBlobStorage(IFidoSession session)
     {
         ArgumentNullException.ThrowIfNull(session);
         _session = session;
-        _maxFragmentLength = maxFragmentLength > 0
-            ? maxFragmentLength
-            : throw new ArgumentOutOfRangeException(nameof(maxFragmentLength));
     }
 
-    /// <summary>
-    /// Initializes a new instance for read and write operations.
-    /// </summary>
-    /// <param name="session">The FIDO session to use for communication.</param>
-    /// <param name="protocol">The PIN/UV auth protocol to use for writes.</param>
-    /// <param name="pinUvAuthToken">The PIN/UV auth token with LargeBlobWrite permission.</param>
-    /// <param name="maxFragmentLength">Maximum bytes to read/write per request.</param>
-    /// <remarks>
-    /// The PIN/UV auth token must have the
-    /// <see cref="PinUvAuthTokenPermissions.LargeBlobWrite"/> permission.
-    /// </remarks>
+    /// <summary>Creates read/write storage; writes need a PIN/UV token with the LargeBlobWrite permission.</summary>
+    /// <param name="session">The CTAP2 session.</param>
+    /// <param name="protocol">The PIN/UV auth protocol the token was minted with.</param>
+    /// <param name="pinUvAuthToken">A PIN/UV auth token carrying LargeBlobWrite (CTAP §6.10.2).</param>
     public LargeBlobStorage(
         IFidoSession session,
         IPinUvAuthProtocol protocol,
-        ReadOnlyMemory<byte> pinUvAuthToken,
-        int maxFragmentLength = 1024)
-        : this(session, maxFragmentLength)
+        ReadOnlyMemory<byte> pinUvAuthToken)
+        : this(session)
     {
         ArgumentNullException.ThrowIfNull(protocol);
         _protocol = protocol;
         _pinUvAuthToken = pinUvAuthToken;
     }
-#pragma warning restore RS0026
+
+    /// <summary>
+    /// CTAP §6.10.2: "maxFragmentLength = maxMsgSize − 64" with GetInfo's maxMsgSize (default 1024, §6.4),
+    /// as python-fido2 blob.py L110 does. Read once per instance.
+    /// </summary>
+    private async ValueTask<int> GetMaxFragmentLengthAsync(CancellationToken cancellationToken)
+    {
+        if (_maxFragmentLength is null)
+        {
+            await LoadLimitsAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return _maxFragmentLength!.Value;
+    }
+
+    private async Task LoadLimitsAsync(CancellationToken cancellationToken)
+    {
+        var info = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+        _maxFragmentLength = (info?.MaxMsgSize ?? DefaultMaxMsgSize) - FragmentOverhead;
+        _maxSerializedLargeBlobArray = info?.MaxSerializedLargeBlobArray;
+    }
 
     /// <summary>
     /// Reads the entire large blob array from the authenticator.
@@ -114,7 +119,10 @@ public sealed class LargeBlobStorage
     {
         var data = await ReadRawBlobAsync(cancellationToken).ConfigureAwait(false);
 
-        if (data.Length == 0)
+        // CTAP §6.10.2: if the stored bytes are shorter than 17 or the trailing hash does not match,
+        // "the platform MUST treat the large-blob array as the initial large-blob array", i.e. empty
+        // (python-fido2 blob.py L131-133). Malformed CBOR behind a valid hash is still an error.
+        if (!LargeBlobArray.HasValidHash(data))
         {
             return LargeBlobArray.CreateEmpty();
         }
@@ -143,6 +151,20 @@ public sealed class LargeBlobStorage
         }
 
         var serialized = array.Serialize();
+
+        // CTAP §6.10.2: "Platforms MUST NOT attempt to write a serialized large-blob array that exceeds the
+        // maxSerializedLargeBlobArray reported by the authenticator in the authenticatorGetInfo response."
+        if (_maxSerializedLargeBlobArray is null)
+        {
+            await LoadLimitsAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        if (_maxSerializedLargeBlobArray is { } max && serialized.Length > max)
+        {
+            throw new InvalidOperationException(
+                $"Serialized large-blob array is {serialized.Length} bytes; the authenticator accepts at most {max} (maxSerializedLargeBlobArray, CTAP §6.10.2).");
+        }
+
         await WriteRawBlobAsync(serialized, cancellationToken).ConfigureAwait(false);
     }
 
@@ -270,12 +292,13 @@ public sealed class LargeBlobStorage
     /// </summary>
     private async Task<byte[]> ReadRawBlobAsync(CancellationToken cancellationToken)
     {
+        var maxFragmentLength = await GetMaxFragmentLengthAsync(cancellationToken).ConfigureAwait(false);
         using var result = new MemoryStream();
         var offset = 0;
 
         while (true)
         {
-            var fragment = await ReadFragmentAsync(offset, _maxFragmentLength, cancellationToken)
+            var fragment = await ReadFragmentAsync(offset, maxFragmentLength, cancellationToken)
                 .ConfigureAwait(false);
 
             if (fragment.Length == 0)
@@ -287,7 +310,7 @@ public sealed class LargeBlobStorage
             offset += fragment.Length;
 
             // If we got less than requested, we're done
-            if (fragment.Length < _maxFragmentLength)
+            if (fragment.Length < maxFragmentLength)
             {
                 break;
             }
@@ -338,13 +361,14 @@ public sealed class LargeBlobStorage
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken)
     {
+        var maxFragmentLength = await GetMaxFragmentLengthAsync(cancellationToken).ConfigureAwait(false);
         var totalLength = data.Length;
         var offset = 0;
 
         while (offset < totalLength)
         {
             var remaining = totalLength - offset;
-            var fragmentLength = Math.Min(remaining, _maxFragmentLength);
+            var fragmentLength = Math.Min(remaining, maxFragmentLength);
             var fragment = data.Slice(offset, fragmentLength);
 
             await WriteFragmentAsync(fragment, offset, totalLength, cancellationToken)

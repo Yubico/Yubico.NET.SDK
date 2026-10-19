@@ -49,7 +49,9 @@
  *   --embed-symbols                Embed PDB in .nupkg instead of a separate .snupkg (for the static alpha feed)
  *   --dry-run                      Show what would be published without publishing
  *   --clean                        Run dotnet clean before build
- *   --filter <expression>          Test filter expression (e.g., "FullyQualifiedName~MyTest")
+ *   --filter <expression>          Test filter expression (e.g., "FullyQualifiedName~MyTest").
+ *                                  "A&B" = all terms, "A|B" = any term (alternatives of one kind);
+ *                                  mixing & and | is rejected for xUnit v3 projects.
  *   --project <name>               Build/test specific project only (partial match)
  *   --integration                  Include integration tests (requires --project, unit tests only by default)
  *   --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
@@ -65,6 +67,13 @@
  *   dotnet toolchain.cs docs-qa
  *   dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTestClass"
  *   dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
+ *   dotnet toolchain.cs -- test --project WebAuthn.UnitTests --filter "FullyQualifiedName~YESDK1619|FullyQualifiedName~YESDK1613"
+ *
+ * RUNNING A UNIT PROJECT BY HAND:
+ *   Use `dotnet run --project <proj>` or the built apphost (`bin/.../Yubico.YubiKit.X.UnitTests`),
+ *   not `dotnet <proj>.dll`: Core's boundary-inventory and PC/SC-isolation probes re-launch the
+ *   test host and resolve repo-relative paths from the entry assembly; under `dotnet X.dll` they
+ *   mis-resolve and fail spuriously.
  *   dotnet toolchain.cs -- resilience --fast
  *   dotnet toolchain.cs -- benchmark --benchmark-args "--list flat"
  *   dotnet toolchain.cs -- test --integration --project Piv --smoke   (quick integration smoke test)
@@ -790,6 +799,12 @@ List<(string Project, bool Passed, string? Error, bool Skipped)> RunTestProjects
             results.Add((projectName, true, null, false));
             PrintColored($"✓ {projectName} - All tests passed", ConsoleColor.Green);
         }
+        catch (ArgumentException ex)
+        {
+            // A bad --filter is a usage error, not a test failure: say what was wrong.
+            results.Add((projectName, false, ex.Message, false));
+            PrintColored($"✗ {projectName} - {ex.Message}", ConsoleColor.Red);
+        }
         catch (Exception ex)
         {
             results.Add((projectName, false, ex.Message, false));
@@ -943,19 +958,22 @@ void PrintTestSummary(List<(string Project, bool Passed, string? Error, bool Ski
     var passedCount = results.Count(r => r.Passed && !r.Skipped);
     var failedCount = results.Count(r => !r.Passed);
 
+    // These count test PROJECTS. The per-test totals are in each runner's own summary above
+    // ("total:/failed:" for xUnit v3, "Total tests:/Passed:" for VSTest), which this line used to mimic.
     Console.WriteLine(separator);
+    Console.Write("Test projects: ");
     Console.ForegroundColor = passedCount > 0 ? ConsoleColor.Green : ConsoleColor.Gray;
-    Console.Write($"Passed: {passedCount}");
+    Console.Write($"{passedCount} passed");
     Console.ResetColor();
-    Console.Write(" | ");
+    Console.Write(", ");
     Console.ForegroundColor = failedCount > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
-    Console.Write($"Failed: {failedCount}");
+    Console.Write($"{failedCount} failed");
     Console.ResetColor();
-    Console.Write(" | ");
+    Console.Write(", ");
     Console.ForegroundColor = skippedCount > 0 ? ConsoleColor.Yellow : ConsoleColor.Gray;
-    Console.Write($"Skipped: {skippedCount}");
+    Console.Write($"{skippedCount} without matching tests");
     Console.ResetColor();
-    Console.WriteLine($" | Total: {results.Count}");
+    Console.WriteLine($" ({results.Count} total)");
     Console.WriteLine(separator);
 }
 
@@ -1063,8 +1081,35 @@ static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPa
 // Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments.
 // Supports: FullyQualifiedName~X, Method~X, Category!=X, Category=X, and '&' compounds.
 // Returns (filter args string, whether any positive/inclusion filters are present).
+// Translates a VSTest-style --filter expression to xUnit v3 Microsoft.Testing.Platform options.
+//
+// Supported shapes: `A&B&C` (every term must match) and `A|B|C` (any term matches). MTP has no
+// grouping operator, so an expression that mixes `&` and `|` is rejected with a clear message
+// instead of silently matching the wrong set. Repeated options of one kind are ORed by xUnit
+// (`--filter-method X --filter-method Y`), which is what `|` maps onto; `&` maps onto options of
+// different kinds, or onto a single `--filter-method` with both wildcards when both terms are
+// method patterns (xUnit ANDs distinct option kinds, so two method terms cannot be ANDed).
 static (string Args, bool HasPositiveFilters, string[] PositiveArgs) TranslateToMtpFilter(string vstestFilter)
 {
+    if (vstestFilter.Contains('|'))
+    {
+        if (vstestFilter.Contains('&'))
+            throw new ArgumentException(
+                "--filter cannot mix '|' and '&' for xUnit v3 projects: use either \"A|B\" (any) or \"A&B\" (all).");
+
+        var alternatives = vstestFilter.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var translated = alternatives.Select(TranslateToMtpFilter).ToArray();
+        var kinds = translated.SelectMany(t => t.PositiveArgs.Where(a => a.StartsWith("--filter", StringComparison.Ordinal))).Distinct().ToArray();
+        if (kinds.Length > 1)
+            throw new ArgumentException(
+                $"--filter '|' alternatives must be of one kind for xUnit v3 projects (got {string.Join(", ", kinds)}); e.g. \"FullyQualifiedName~A|FullyQualifiedName~B\".");
+
+        return (
+            string.Join(" ", translated.Select(t => t.Args)),
+            translated.Any(t => t.HasPositiveFilters),
+            [.. translated.SelectMany(t => t.PositiveArgs)]);
+    }
+
     var parts = vstestFilter.Split('&');
     var mtpArgs = new List<string>();
     var positiveArgs = new List<string>();

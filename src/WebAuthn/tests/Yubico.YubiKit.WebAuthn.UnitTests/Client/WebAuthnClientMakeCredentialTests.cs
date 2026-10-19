@@ -376,7 +376,7 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     [Fact]
-    public async Task MakeCredential_PuatRequired_WithExcludeList_RetriesWithGetAssertionPermissionForPreflight()
+    public async Task MakeCredential_PuatRequired_WithExcludeList_ProbesOnceAndRemintsOnlyAfterTheProbe()
     {
         // Arrange
         var tokenPermissions = new List<PinUvAuthTokenPermissions>();
@@ -421,17 +421,15 @@ public class WebAuthnClientMakeCredentialTests
         // Act
         await _client.MakeCredentialAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
 
-        // Assert
-        Assert.Equal(4, tokenPermissions.Count);
+        // Assert: the pre-flight runs once per ceremony (its answer does not change with UV); the first
+        // attempt mints MC|GA for the probe then re-mints MC-only, the escalated attempt mints MC|GA
+        // again under required UV and reuses the probe result.
         Assert.Equal(
-            PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
-            tokenPermissions[0]);
-        Assert.Equal(PinUvAuthTokenPermissions.MakeCredential, tokenPermissions[1]);
-        Assert.Equal(
-            PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
-            tokenPermissions[2]);
-        Assert.Equal(PinUvAuthTokenPermissions.MakeCredential, tokenPermissions[3]);
-        await _mockBackend.Received(2).GetAssertionAsync(
+            [PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
+             PinUvAuthTokenPermissions.MakeCredential,
+             PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion],
+            tokenPermissions);
+        await _mockBackend.Received(1).GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>());
     }
@@ -505,7 +503,7 @@ public class WebAuthnClientMakeCredentialTests
             TestContext.Current.CancellationToken);
 
         // Assert
-        AssertEveryIssuedTokenZeroed(issued, expectedCount: 4);
+        AssertEveryIssuedTokenZeroed(issued, expectedCount: 3);
     }
 
     /// <summary>
@@ -538,39 +536,27 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     /// <summary>
-    /// A ceremony that fails while building extension CBOR must not leave a live PIN/UV auth
-    /// parameter behind.
+    /// Invalid extension input is rejected when the extension session is created, before any PIN/UV token
+    /// is minted or any auth parameter computed (a largeBlob read at registration: WebAuthn L3 §10.1.5).
     /// </summary>
-    /// <remarks>
-    /// The parameter is computed after everything in the request builder that can throw, so the
-    /// correct outcome here is that it was never produced at all - there is no stranded buffer to
-    /// clean up. Computing it earlier would strand it: the request never reaches
-    /// <c>ExecuteMakeCredentialAsync</c>, whose finally is what clears the parameter on every
-    /// other path. A largeBlob read at registration is used as the trigger: WebAuthn L3 §10.1.5
-    /// rejects it, so this is a path real callers can reach.
-    /// </remarks>
     [Fact]
-    public async Task MakeCredential_WhenExtensionBuildFails_NeverComputesPinUvAuthParam()
+    public async Task MakeCredential_InvalidExtensionInput_IsRejectedBeforeAnyTokenIsMinted()
     {
-        // Arrange
         var protocol = new TestPinUvAuthProtocol();
         ArrangePinTokenAcquisition(protocol);
-
         var options = CreateUvRequiredOptions() with
         {
-            Extensions = new RegistrationExtensionInputs(
-                LargeBlob: new LargeBlobInput { Read = true })
+            Extensions = new RegistrationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
         };
 
-        // Act
         var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.MakeCredentialAsync(
-            options,
-            "123456"u8.ToArray(),
-            TestContext.Current.CancellationToken));
+            options, "123456"u8.ToArray(), TestContext.Current.CancellationToken));
 
-        // Assert
         Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
         Assert.Empty(protocol.IssuedAuthTags);
+        await _mockBackend.DidNotReceive().GetPinUvTokenAsync(
+            Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(), Arg.Any<string?>(),
+            Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

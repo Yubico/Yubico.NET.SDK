@@ -109,6 +109,7 @@ public sealed partial class WebAuthnClient
         bool hasPreviewSign = options.Extensions?.PreviewSign is not null;
 
         using var auth = new CeremonyAuth(this, options.Rp.Id, callerPinBytes);
+        IReadOnlyList<PublicKeyCredentialDescriptor>? probedExcludeList = null;
 
         var (ctapResponse, extensions) = await RunWithUvEscalationAsync(
             info, options.UserVerification, permissions, auth, hasPreviewSign, AttemptAsync, cancellationToken)
@@ -144,13 +145,18 @@ public sealed partial class WebAuthnClient
             // Exclude-list pre-flight (yubikit-android Ctap2Client.filterCreds): with a token, probe the
             // list and send only the match so the authenticator never sees more than it can process.
             // Without a token the caller's list goes through unchanged and the authenticator enforces it.
+            // The probe's answer does not change across a UV escalation, so it runs once per ceremony.
             var excludeList = options.ExcludeCredentials;
-            if (excludeList is { Count: > 0 } && auth.Token is not null)
+            if (probedExcludeList is not null)
+            {
+                excludeList = probedExcludeList;
+            }
+            else if (excludeList is { Count: > 0 } && auth.Token is not null)
             {
                 var matched = await ProbeCredentialsAsync(
                     options.Rp.Id, excludeList, info, auth, decision, PinUvAuthTokenPermissions.MakeCredential, ct)
                     .ConfigureAwait(false);
-                excludeList = matched is null ? [] : [matched];
+                excludeList = probedExcludeList = matched is null ? [] : [matched];
             }
 
             var request = BuildMakeCredentialRequest(options, clientData, auth, decision, excludeList, requireResidentKey, extensions);

@@ -83,8 +83,8 @@ public class FidoHidProtocolTests
             .Select(i => (byte)i)
             .ToArray();
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload),
-            CreateContinuationPacket(0x01020304, sequence: 1, responsePayload.AsSpan(CtapConstants.InitDataSize)));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload),
+            CreateContinuationPacket(TestChannelId, sequence: 1, responsePayload.AsSpan(CtapConstants.InitDataSize)));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
@@ -100,7 +100,7 @@ public class FidoHidProtocolTests
             .Select(i => (byte)i)
             .ToArray();
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload),
             CreateContinuationPacket(0x05060708, sequence: 0, responsePayload.AsSpan(CtapConstants.InitDataSize)));
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -131,7 +131,7 @@ public class FidoHidProtocolTests
         var connection = new FakeFidoHidConnection();
         var protocol = new FidoHidProtocol(connection);
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidPing, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidPing, [0xAA]));
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             protocol.SendVendorCommandAsync(
@@ -151,7 +151,7 @@ public class FidoHidProtocolTests
     {
         var connection = new FakeFidoHidConnection();
         var protocol = new FidoHidProtocol(connection);
-        connection.QueueResponsePackets(CreateInitPacket(0x01020304, command, [0xAA]));
+        connection.QueueResponsePackets(CreateInitPacket(TestChannelId, command, [0xAA]));
 
         ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
             command,
@@ -167,7 +167,7 @@ public class FidoHidProtocolTests
         var connection = new FakeFidoHidConnection();
         var protocol = new FidoHidProtocol(connection);
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidError, [0x06]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidError, [0x06]));
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             protocol.SendVendorCommandAsync(
@@ -184,7 +184,7 @@ public class FidoHidProtocolTests
     {
         var connection = new FakeFidoHidConnection();
         var protocol = new FidoHidProtocol(connection);
-        connection.QueueResponsePackets(CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xA5]));
+        connection.QueueResponsePackets(CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xA5]));
         var refused = false;
         connection.OnResponseDequeued = _ =>
         {
@@ -257,9 +257,9 @@ public class FidoHidProtocolTests
         var prompt = new RecordingUserPresencePrompt();
         var context = CreateUserPresenceContext();
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0x00]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0x00]));
 
         ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -295,7 +295,7 @@ public class FidoHidProtocolTests
         var connection = new FakeFidoHidConnection();
         var protocol = new FidoHidProtocol(connection);
 
-        var packet = CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]);
+        var packet = CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]);
         connection.QueueResponsePackets(packet[..CtapConstants.InitHeaderSize]);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -313,9 +313,9 @@ public class FidoHidProtocolTests
         var responsePayload = Enumerable.Range(0, CtapConstants.InitDataSize + 1)
             .Select(i => (byte)i)
             .ToArray();
-        var continuation = CreateContinuationPacket(0x01020304, sequence: 0, responsePayload.AsSpan(CtapConstants.InitDataSize));
+        var continuation = CreateContinuationPacket(TestChannelId, sequence: 0, responsePayload.AsSpan(CtapConstants.InitDataSize));
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload),
             continuation[..CtapConstants.ContinuationHeaderSize]);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -332,7 +332,7 @@ public class FidoHidProtocolTests
 
         connection.QueueResponsePackets(
             CreateInitPacket(0x05060708, CtapConstants.CtapHidKeepAlive, [0x01]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
@@ -350,8 +350,8 @@ public class FidoHidProtocolTests
             .Select(i => (byte)i)
             .ToArray();
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload),
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidPing, responsePayload.AsSpan(CtapConstants.InitDataSize)));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidPing, responsePayload.AsSpan(CtapConstants.InitDataSize)));
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             protocol.SendVendorCommandAsync(CtapConstants.CtapVendorFirst, ReadOnlyMemory<byte>.Empty, cancellationToken: TestContext.Current.CancellationToken));
@@ -369,8 +369,8 @@ public class FidoHidProtocolTests
             .Select(i => (byte)i)
             .ToArray();
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload),
-            CreateContinuationPacket(0x01020304, sequence: 0, responsePayload.AsSpan(CtapConstants.InitDataSize)));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload),
+            CreateContinuationPacket(TestChannelId, sequence: 0, responsePayload.AsSpan(CtapConstants.InitDataSize)));
 
         var response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -387,8 +387,8 @@ public class FidoHidProtocolTests
         var protocol = new FidoHidProtocol(connection);
 
         connection.QueueResponsePackets(
-            CreateContinuationPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [0xAA]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xBB]));
+            CreateContinuationPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [0xAA]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xBB]));
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -406,7 +406,7 @@ public class FidoHidProtocolTests
         await protocol.InitializeAsync(TestContext.Current.CancellationToken);
         connection.ClearCapturedPackets();
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
         byte[] callerPayload = Enumerable.Range(1, CtapConstants.InitDataSize + 2)
             .Select(value => (byte)value)
             .ToArray();
@@ -469,8 +469,8 @@ public class FidoHidProtocolTests
             .Select(value => (byte)value)
             .ToArray();
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload),
-            CreateContinuationPacket(0x01020304, sequence: 1, responsePayload.AsSpan(CtapConstants.InitDataSize)));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload),
+            CreateContinuationPacket(TestChannelId, sequence: 1, responsePayload.AsSpan(CtapConstants.InitDataSize)));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -495,7 +495,7 @@ public class FidoHidProtocolTests
         });
         byte[] responsePayload = [0xAA, 0xBB, 0xCC];
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, responsePayload));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload));
 
         ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -518,10 +518,10 @@ public class FidoHidProtocolTests
         var prompt = new RecordingUserPresencePrompt();
         connection.QueueResponsePackets(
             CreateInitPacket(
-                0x01020304,
+                TestChannelId,
                 CtapConstants.CtapHidKeepAlive,
                 zeroLength ? ReadOnlySpan<byte>.Empty : [0x01]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
 
         ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -541,8 +541,8 @@ public class FidoHidProtocolTests
         var protocol = new FidoHidProtocol(connection);
         var prompt = new RecordingUserPresencePrompt();
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
 
         ReadOnlyMemory<byte> response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -583,8 +583,8 @@ public class FidoHidProtocolTests
         // CTAP2_ERR_KEEPALIVE_CANCEL (0x2D).
         connection.QueueResponsePackets([
             .. Enumerable.Range(0, keepAliveCount).Select(_ =>
-                CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded])),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0x2D])
+                CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded])),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0x2D])
         ]);
 
         // Abandon the moment the authenticator says it is waiting for a touch.
@@ -611,7 +611,7 @@ public class FidoHidProtocolTests
         // left the channel busy and the next exchange failed until the key was re-plugged.
         connection.OnResponseDequeued = null;
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
 
         var afterCancel = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -630,8 +630,8 @@ public class FidoHidProtocolTests
         var expected = new InvalidOperationException("prompt failed");
         var prompt = new RecordingUserPresencePrompt(expected);
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0x2D]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0x2D]));
 
         Exception actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             protocol.SendVendorCommandAsync(
@@ -651,7 +651,7 @@ public class FidoHidProtocolTests
         Assert.Empty(prompt.Resolved);
 
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
 
         ReadOnlyMemory<byte> afterFailure = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -672,8 +672,8 @@ public class FidoHidProtocolTests
         var promptFailure = new ArgumentException($"prompt failed with {marker}");
         var prompt = new RecordingUserPresencePrompt(promptFailure);
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidInit, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidInit, [0xAA]));
 
         InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             protocol.SendVendorCommandAsync(
@@ -709,9 +709,9 @@ public class FidoHidProtocolTests
         racedPayload.AsSpan().Fill(0x5A);
 
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, racedPayload),
-            CreateContinuationPacket(0x01020304, sequence: 0, racedPayload.AsSpan(CtapConstants.InitDataSize)));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, racedPayload),
+            CreateContinuationPacket(TestChannelId, sequence: 0, racedPayload.AsSpan(CtapConstants.InitDataSize)));
 
         connection.OnResponseDequeued = packet =>
         {
@@ -729,7 +729,7 @@ public class FidoHidProtocolTests
         // than the tail of the abandoned one.
         connection.OnResponseDequeued = null;
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
 
         var afterCancel = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -833,8 +833,8 @@ public class FidoHidProtocolTests
         var protocol = new FidoHidProtocol(connection);
 
         connection.QueueResponsePackets(
-            CreateInitPacket(0x01020304, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
-            CreateInitPacket(0x01020304, CtapConstants.CtapVendorFirst, [0xAA]));
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
 
         var response = await protocol.SendVendorCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -993,7 +993,7 @@ public class FidoHidProtocolTests
 
             var payload = new byte[17];
             _lastInitRequest.AsSpan(CtapConstants.InitHeaderSize, CtapConstants.NonceSize).CopyTo(payload);
-            BinaryPrimitives.WriteUInt32BigEndian(payload.AsSpan(8), 0x01020304);
+            BinaryPrimitives.WriteUInt32BigEndian(payload.AsSpan(8), TestChannelId);
             payload[12] = 2;
             payload[13] = 5;
             payload[14] = 8;

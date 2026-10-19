@@ -458,8 +458,6 @@ Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecret(Yubico.YubiKit.F
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecretMakeCredential() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlob(Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport support = Yubico.YubiKit.Fido2.Extensions.LargeBlobSupport.Preferred) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlobKey() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
-Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlobRead() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
-Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlobWrite(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithMinPinLength() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
@@ -493,14 +491,6 @@ Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput
 Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput.HmacSecretOutput() -> void
 Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput.Output.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Fido2.Extensions.HmacSecretOutput.Output.init -> void
-Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput
-Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Encode() -> byte[]!
-Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Encode(System.Formats.Cbor.CborWriter! writer) -> void
-Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.LargeBlobAssertionInput() -> void
-Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Read.get -> bool
-Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Read.init -> void
-Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Write.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Fido2.Extensions.LargeBlobAssertionInput.Write.init -> void
 Yubico.YubiKit.Fido2.Extensions.LargeBlobInput
 Yubico.YubiKit.Fido2.Extensions.LargeBlobInput.Encode() -> byte[]!
 Yubico.YubiKit.Fido2.Extensions.LargeBlobInput.Encode(System.Formats.Cbor.CborWriter! writer) -> void

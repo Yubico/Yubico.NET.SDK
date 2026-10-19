@@ -176,7 +176,7 @@ The SDK uses the **ExtensionBuilder** fluent pattern for all WebAuthn/CTAP exten
 | hmac-secret | `.WithHmacSecret()` | CTAP2 symmetric secret derivation | 5.2+ |
 | hmac-secret-mc | `.WithHmacSecretMakeCredential()` | hmac-secret during MakeCredential | 5.4+ |
 | credBlob | `.WithCredBlob()` | Per-credential blob storage | 5.5+ |
-| largeBlob | `.WithLargeBlobKey()` | Large blob storage key | 5.5+ |
+| largeBlob | `.WithLargeBlob()` / `.WithLargeBlobKey()` | Large blob support (makeCredential) and the storage key (§12.3); blobs are read/written with `LargeBlobStorage` (§6.10). The direct §12.4 getAssertion read/write extension is not implemented (no YubiKey supports it) | 5.5+ |
 | minPinLength | `.WithMinPinLength()` | Require minimum PIN length | 5.4+ |
 | previewSign | `.WithPreviewSign(...)` | Delegated signing with a generated signing key | YubiKey FW with previewSign support |
 | prf | `.WithPrf()` | WebAuthn PRF extension (wraps hmac-secret) | 5.2+ |

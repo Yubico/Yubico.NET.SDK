@@ -43,7 +43,6 @@ public sealed class ExtensionBuilder
     private ReadOnlyMemory<byte>? _credBlob;
     private bool _getCredBlob;
     private LargeBlobInput? _largeBlob;
-    private LargeBlobAssertionInput? _largeBlobAssertion;
     private HmacSecretInput? _hmacSecret;
     private bool _hmacSecretMc;
     private bool _minPinLength;
@@ -99,34 +98,20 @@ public sealed class ExtensionBuilder
     }
 
     /// <summary>
-    /// Adds the largeBlob extension for makeCredential.
+    /// Adds the largeBlob extension for makeCredential (<c>largeBlob: {support}</c>).
     /// </summary>
+    /// <remarks>
+    /// YubiKeys store large blobs through the <c>largeBlobKey</c> extension (CTAP 2.1-2.3 §12.3,
+    /// <see cref="WithLargeBlobKey"/>) and the authenticatorLargeBlobs command (§6.10,
+    /// <see cref="LargeBlobs.LargeBlobStorage"/>). The direct getAssertion <c>largeBlob</c> read/write
+    /// extension of CTAP 2.2-2.3 §12.4 is not implemented: §12.4 says authenticators "MUST NOT support
+    /// both extensions", so no YubiKey can exercise it.
+    /// </remarks>
     /// <param name="support">The required support level.</param>
     /// <returns>This builder for chaining.</returns>
     public ExtensionBuilder WithLargeBlob(LargeBlobSupport support = LargeBlobSupport.Preferred)
     {
         _largeBlob = new LargeBlobInput { Support = support };
-        return this;
-    }
-
-    /// <summary>
-    /// Adds the largeBlob extension for getAssertion with read.
-    /// </summary>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithLargeBlobRead()
-    {
-        _largeBlobAssertion = new LargeBlobAssertionInput { Read = true };
-        return this;
-    }
-
-    /// <summary>
-    /// Adds the largeBlob extension for getAssertion with write.
-    /// </summary>
-    /// <param name="data">The data to write.</param>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithLargeBlobWrite(ReadOnlyMemory<byte> data)
-    {
-        _largeBlobAssertion = new LargeBlobAssertionInput { Write = data };
         return this;
     }
 
@@ -359,14 +344,7 @@ public sealed class ExtensionBuilder
             writer.WriteBoolean(true);
         }
 
-        if (_largeBlobAssertion is not null)
-        {
-            // Assertion input takes precedence over makeCredential input;
-            // both use the same "largeBlob" key, so only one may be written.
-            writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
-            _largeBlobAssertion.Encode(writer);
-        }
-        else if (_largeBlob is not null)
+        if (_largeBlob is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
             _largeBlob.Encode(writer);
@@ -526,7 +504,6 @@ public sealed class ExtensionBuilder
                _credBlob.HasValue ||
                _getCredBlob ||
                _largeBlob is not null ||
-               _largeBlobAssertion is not null ||
                _largeBlobKey ||
                _hmacSecret is not null ||
                _hmacSecretMc ||
@@ -541,7 +518,7 @@ public sealed class ExtensionBuilder
         var count = 0;
         if (_credProtect.HasValue) count++;
         if (_credBlob.HasValue || _getCredBlob) count++;
-        if (_largeBlob is not null || _largeBlobAssertion is not null) count++;
+        if (_largeBlob is not null) count++;
         if (_largeBlobKey) count++;
         if (_hmacSecret is not null) count++;
         if (_hmacSecretMc) count++;

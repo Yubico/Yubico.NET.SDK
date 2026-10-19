@@ -1,11 +1,10 @@
+using NSubstitute;
 using System.Buffers.Binary;
 using System.Formats.Cbor;
 using System.IO.Compression;
 using System.Reflection;
 using System.Security.Cryptography;
-using NSubstitute;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.Fido2.LargeBlobs;
 
 namespace Yubico.YubiKit.Fido2.UnitTests.AuditV2;
@@ -14,21 +13,6 @@ public class Fido2LargeBlobAuditReproTests
 {
     private static readonly byte[] Key = Enumerable.Range(0, 32).Select(i => (byte)i).ToArray();
     private static readonly byte[] Blob = "interop-large-blob"u8.ToArray();
-
-    [Fact]
-    [Trait("Audit", "YESDK-1611")]
-    public void YESDK1611_DirectWriteCarriesOriginalSize()
-    {
-        // CTAP 2.3 §12.4: write and originalSize must occur together, without read.
-        var input = new LargeBlobAssertionInput { Write = Blob };
-        var reader = new CborReader(input.Encode());
-        Assert.Equal(2, reader.ReadStartMap());
-        Assert.Equal("write", reader.ReadTextString());
-        Assert.Equal(Blob, reader.ReadByteString());
-        Assert.Equal("originalSize", reader.ReadTextString());
-        Assert.Equal(Blob.Length, reader.ReadInt32());
-        reader.ReadEndMap();
-    }
 
     [Fact]
     [Trait("Audit", "YESDK-1612")]

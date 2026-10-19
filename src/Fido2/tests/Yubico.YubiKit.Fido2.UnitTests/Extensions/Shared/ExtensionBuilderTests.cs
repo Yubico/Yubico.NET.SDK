@@ -95,26 +95,6 @@ public class ExtensionBuilderTests
     }
 
     [Fact]
-    public void Build_WithLargeBlobRead_EncodesCorrectly()
-    {
-        // Arrange
-        var builder = new ExtensionBuilder()
-            .WithLargeBlobRead();
-
-        // Act
-        var result = builder.Build();
-
-        // Assert
-        Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("largeBlob", reader.ReadTextString());
-        reader.ReadStartMap();
-        Assert.Equal("read", reader.ReadTextString());
-        Assert.True(reader.ReadBoolean());
-    }
-
-    [Fact]
     public void Build_WithMinPinLength_EncodesCorrectly()
     {
         // Arrange

@@ -54,8 +54,19 @@ public sealed partial class WebAuthnClient
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        return await MakeCredentialCoreAsync(options, pinBytes, cancellationToken)
-            .ConfigureAwait(false);
+        // Validate before the timer starts (WebAuthn L3 §5.1.3 orders the checks before lifetimeTimer).
+        ValidateRegistrationOptions(options);
+        RpIdValidator.EnsureValid(options.Rp.Id, _origin, _options.EnterpriseRpIds, _isPublicSuffix);
+
+        using var deadline = CeremonyDeadline.Start(options.Timeout, cancellationToken);
+        try
+        {
+            return await MakeCredentialCoreAsync(options, pinBytes, deadline.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException ex) when (deadline.Expired)
+        {
+            throw CeremonyTimedOut(options.Timeout, ex);
+        }
     }
 
     /// <summary>
@@ -67,12 +78,6 @@ public sealed partial class WebAuthnClient
         ReadOnlyMemory<byte>? callerPinBytes,
         CancellationToken cancellationToken)
     {
-        // Validate options
-        ValidateRegistrationOptions(options);
-
-        // Validate RP ID against origin
-        RpIdValidator.EnsureValid(options.Rp.Id, _origin, _options.EnterpriseRpIds, _isPublicSuffix);
-
         // Build client data
         var clientData = WebAuthnClientData.Create(
             type: "webauthn.create",

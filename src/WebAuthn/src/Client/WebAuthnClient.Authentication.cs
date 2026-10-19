@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Buffers;
-using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
@@ -57,8 +56,21 @@ public sealed partial class WebAuthnClient
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(options);
 
-        return await GetAssertionCoreAsync(options, pinBytes, cancellationToken)
-            .ConfigureAwait(false);
+        // Validate before the timer starts (WebAuthn L3 §5.1.4 orders the checks before lifetimeTimer).
+        ValidateAuthenticationOptions(options);
+        RpIdValidator.EnsureValid(options.RpId, _origin, _options.EnterpriseRpIds, _isPublicSuffix);
+
+        // The deadline covers everything up to the returned matches. MatchedCredential.SelectAsync does
+        // no further authenticator work (its response is already computed), so nothing is left to bound.
+        using var deadline = CeremonyDeadline.Start(options.Timeout, cancellationToken);
+        try
+        {
+            return await GetAssertionCoreAsync(options, pinBytes, deadline.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException ex) when (deadline.Expired)
+        {
+            throw CeremonyTimedOut(options.Timeout, ex);
+        }
     }
 
     /// <summary>
@@ -70,12 +82,6 @@ public sealed partial class WebAuthnClient
         ReadOnlyMemory<byte>? callerPinBytes,
         CancellationToken cancellationToken)
     {
-        // Validate options
-        ValidateAuthenticationOptions(options);
-
-        // Validate RP ID against origin
-        RpIdValidator.EnsureValid(options.RpId, _origin, _options.EnterpriseRpIds, _isPublicSuffix);
-
         // Build client data
         var clientData = WebAuthnClientData.Create(
             type: "webauthn.get",

@@ -57,11 +57,21 @@ public sealed record class AuthenticationOptions
     public UserVerificationPreference UserVerification { get; init; } = UserVerificationPreference.Preferred;
 
     /// <summary>
-    /// Gets the timeout for this authentication operation.
+    /// Gets the timeout for the authentication ceremony.
     /// </summary>
     /// <remarks>
-    /// If null, no timeout is enforced. The timeout applies to the entire operation,
-    /// including user interaction.
+    /// <para>
+    /// The WebAuthn L3 §5.1.4 <c>lifetimeTimer</c>. When set, the client cancels the pending authenticator
+    /// request (FIDO HID: <c>CTAPHID_CANCEL</c> at the next keep-alive), the PIN prompt and the exclude-list
+    /// pre-flight, and the call fails with <see cref="WebAuthnClientErrorCode.NotAllowed"/>. The deadline is a
+    /// signal: a PC/SC exchange already in flight runs to its answer first.
+    /// </para>
+    /// <para>
+    /// <c>null</c> starts no timer (differs from the 300 s default L3 §15.1 recommends; matches python-fido2).
+    /// Values are not clamped to the L3 range. A non-positive value is rejected with
+    /// <see cref="WebAuthnClientErrorCode.InvalidRequest"/>. Cancelling the caller's token still surfaces as
+    /// <see cref="OperationCanceledException"/>.
+    /// </para>
     /// </remarks>
     public TimeSpan? Timeout { get; init; }
 

@@ -64,8 +64,22 @@ public sealed record class RegistrationOptions
     public AttestationPreference Attestation { get; init; } = AttestationPreference.None;
 
     /// <summary>
-    /// Gets the timeout for the operation.
+    /// Gets the timeout for the registration ceremony.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The WebAuthn L3 §5.1.3 <c>lifetimeTimer</c>. When set, the client cancels the pending authenticator
+    /// request (FIDO HID: <c>CTAPHID_CANCEL</c> at the next keep-alive), the PIN prompt and the exclude-list
+    /// pre-flight, and the call fails with <see cref="WebAuthnClientErrorCode.NotAllowed"/>. The deadline is a
+    /// signal: a PC/SC exchange already in flight runs to its answer first.
+    /// </para>
+    /// <para>
+    /// <c>null</c> starts no timer (differs from the 300 s default L3 §15.1 recommends; matches python-fido2).
+    /// Values are not clamped to the L3 range. A non-positive value is rejected with
+    /// <see cref="WebAuthnClientErrorCode.InvalidRequest"/>. Cancelling the caller's token still surfaces as
+    /// <see cref="OperationCanceledException"/>.
+    /// </para>
+    /// </remarks>
     public TimeSpan? Timeout { get; init; }
 
     /// <summary>

@@ -740,6 +740,91 @@ public class FidoHidProtocolTests
         Assert.Equal(0xAA, afterCancel.Span[0]);
     }
 
+    /// <summary>
+    /// A touch that lands as the caller abandons produces a real CTAP success instead of
+    /// CTAP2_ERR_KEEPALIVE_CANCEL. CTAP 2.3 §11.2.9.1.5 says a cancelled request "will reply with"
+    /// 0x2D; it never says to discard a success. The authenticator did the work, so the answer is
+    /// returned (python-fido2 hid/__init__.py _do_call behaves the same).
+    /// </summary>
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    [Trait("Audit", "YESDK-1617")]
+    public async Task SendVendorCommandAsync_CborAbandonedDuringKeepAlive_LateCtapSuccessIsReturned()
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        using var cts = new CancellationTokenSource();
+
+        connection.QueueResponsePackets(
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidCbor, [CtapConstants.CtapStatusSuccess, 0xA0]));
+        connection.OnResponseDequeued = packet =>
+        {
+            if (IsCommand(packet, CtapConstants.CtapHidKeepAlive))
+                cts.Cancel();
+        };
+
+        var response = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapHidCbor,
+            ReadOnlyMemory<byte>.Empty,
+            cancellationToken: cts.Token);
+
+        Assert.Equal(new byte[] { CtapConstants.CtapStatusSuccess, 0xA0 }, response.ToArray());
+        Assert.Equal(
+            1,
+            connection.SentPacketSnapshots.Count(packet => IsCommand(packet, CtapConstants.CtapHidCancel)));
+
+        connection.OnResponseDequeued = null;
+        connection.QueueResponsePackets(
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidCbor, [CtapErrNoCredentials]));
+        var afterCancel = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapHidCbor,
+            ReadOnlyMemory<byte>.Empty,
+            cancellationToken: TestContext.Current.CancellationToken);
+        Assert.Equal(CtapErrNoCredentials, afterCancel.Span[0]);
+    }
+
+    /// <summary>Only a CTAP success survives the cancel; the 0x2D acknowledgement and any other status still cancel.</summary>
+    [Theory]
+    [InlineData(CtapErrKeepAliveCancel)]
+    [InlineData(CtapErrNoCredentials)]
+    [Trait("Category", "RuntimeResilience")]
+    [Trait("Audit", "YESDK-1617")]
+    public async Task SendVendorCommandAsync_CborAbandonedDuringKeepAlive_NonSuccessStillCancels(byte status)
+    {
+        var connection = new FakeFidoHidConnection();
+        var protocol = new FidoHidProtocol(connection);
+        using var cts = new CancellationTokenSource();
+
+        connection.QueueResponsePackets(
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidCbor, [status]));
+        connection.OnResponseDequeued = packet =>
+        {
+            if (IsCommand(packet, CtapConstants.CtapHidKeepAlive))
+                cts.Cancel();
+        };
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            protocol.SendVendorCommandAsync(
+                CtapConstants.CtapHidCbor,
+                ReadOnlyMemory<byte>.Empty,
+                cancellationToken: cts.Token));
+
+        Assert.Equal(
+            1,
+            connection.SentPacketSnapshots.Count(packet => IsCommand(packet, CtapConstants.CtapHidCancel)));
+
+        connection.OnResponseDequeued = null;
+        connection.QueueResponsePackets(
+            CreateInitPacket(TestChannelId, CtapConstants.CtapHidCbor, [CtapConstants.CtapStatusSuccess]));
+        var afterCancel = await protocol.SendVendorCommandAsync(
+            CtapConstants.CtapHidCbor,
+            ReadOnlyMemory<byte>.Empty,
+            cancellationToken: TestContext.Current.CancellationToken);
+        Assert.Equal(CtapConstants.CtapStatusSuccess, afterCancel.Span[0]);
+    }
+
     [Fact]
     [Trait("Category", "RuntimeResilience")]
     public async Task SendVendorCommandAsync_NotAbandoned_DoesNotSendCtapHidCancel()
@@ -764,6 +849,9 @@ public class FidoHidProtocolTests
 
     /// <summary>CTAP HID keep-alive status byte meaning a touch is awaited.</summary>
     private const byte KeepAliveUpNeeded = 0x02;
+    private const byte CtapErrKeepAliveCancel = 0x2D; // CTAP2_ERR_KEEPALIVE_CANCEL
+    private const byte CtapErrNoCredentials = 0x27;   // CTAP2_ERR_NO_CREDENTIALS
+    private const uint TestChannelId = 0x01020304;
 
     private static UserPresenceContext CreateUserPresenceContext() => new()
     {

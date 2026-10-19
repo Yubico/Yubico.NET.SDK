@@ -1,6 +1,7 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
+using System.Diagnostics;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Fido2;
@@ -17,6 +18,45 @@ namespace Yubico.YubiKit.WebAuthn.IntegrationTests.AuditV2;
 
 public class WebAuthnAuditHardwareReproTests
 {
+    /// <summary>
+    ///     WebAuthn L3 §5.1.3 lifetimeTimer on real hardware. DO NOT TOUCH the key: the registration must
+    ///     time out while the authenticator waits for user presence. The deadline is a signal acted on at the
+    ///     next keep-alive (CTAP 2.3 §11.2.9.1.7: at least every 100 ms), so the call returns shortly after
+    ///     the deadline, and the session stays usable because CTAPHID_CANCEL was sent and drained.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait("Audit", "YESDK-1617")]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    public async Task YESDK1617_TimeoutWithoutTouchReturnsNotAllowedAndSessionStaysUsable(YubiKeyTestState state)
+    {
+        var deadline = TimeSpan.FromSeconds(5);
+        var keepAliveAndCancelSlack = TimeSpan.FromSeconds(2);
+
+        await using var session = await state.Device.CreateFidoSessionAsync();
+        await NormalizePinAsync(session);
+        await using var client = CreateClient(session);
+
+        var started = Stopwatch.StartNew();
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(new RegistrationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "audit", "Audit"),
+            PubKeyCredParams = [CoseAlgorithm.Es256],
+            UserVerification = UserVerificationPreference.Preferred,
+            Timeout = deadline
+        }, KnownTestPin));
+        started.Stop();
+
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
+        Assert.InRange(started.Elapsed, deadline, deadline + keepAliveAndCancelSlack);
+
+        // The channel is clean: an exchange that needs no touch succeeds on the same session.
+        var info = await session.GetInfoAsync();
+        Assert.NotEmpty(info.Versions);
+    }
+
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait("Audit", "YESDK-1615")]

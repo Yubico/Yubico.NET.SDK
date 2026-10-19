@@ -2,8 +2,10 @@
 // Licensed under the Apache License, Version 2.0 (the "License").
 
 using NSubstitute;
+using System.Buffers;
 using System.Formats.Cbor;
 using System.Text.Json;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
@@ -381,9 +383,26 @@ public class WebAuthnAuditReproTests
         }
     }
 
-    [Fact(Timeout = 5000)]
-    [Trait("Audit", "YESDK-1617")]
-    public async Task YESDK1617_RegistrationTimeoutCancelsPendingAuthenticator()
+    // WebAuthn L3 §5.1.3 lifetimeTimer tests. The guard is the test's own safety net: it must never be
+    // the one that cancels, otherwise the SDK did not honour the deadline.
+    private static readonly TimeSpan DeadlineThatExpires = TimeSpan.FromMilliseconds(50);
+    private static readonly TimeSpan DeadlineThatDoesNotExpire = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan TestGuard = TimeSpan.FromSeconds(1);
+
+    private sealed class HangingPrompt : ICredentialPrompt
+    {
+        public TaskCompletionSource Requested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public CancellationToken ObservedToken { get; private set; }
+
+        public ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(CredentialPromptContext context, CancellationToken cancellationToken)
+        {
+            ObservedToken = cancellationToken;
+            Requested.TrySetResult();
+            return new ValueTask<IMemoryOwner<byte>?>(new TaskCompletionSource<IMemoryOwner<byte>?>().Task);
+        }
+    }
+
+    private static (IWebAuthnBackend Backend, TaskCompletionSource Entered) HangingMakeCredentialBackend()
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
@@ -396,12 +415,28 @@ public class WebAuthnAuditReproTests
                 await Task.Delay(Timeout.InfiniteTimeSpan, call.Arg<CancellationToken>());
                 return MockFido2Responses.CreateMockMakeCredentialResponse();
             });
+        return (backend, entered);
+    }
+
+    /// <summary>
+    ///     WebAuthn L3 §5.1.3: "If lifetimeTimer expires ... invoke the authenticatorCancel operation ... Throw a
+    ///     "NotAllowedError" DOMException." The backend's token is cancelled by the deadline, not by the caller.
+    /// </summary>
+    [Fact(Timeout = 5000)]
+    [Trait("Audit", "YESDK-1617")]
+    public async Task YESDK1617_RegistrationTimeoutCancelsPendingAuthenticator()
+    {
+        var (backend, entered) = HangingMakeCredentialBackend();
         await using var client = CreateClient(backend);
-        using var guard = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-        var operation = client.MakeCredentialAsync(Registration() with { Timeout = TimeSpan.FromMilliseconds(50) },
+        using var guard = new CancellationTokenSource(TestGuard);
+
+        var operation = client.MakeCredentialAsync(Registration() with { Timeout = DeadlineThatExpires },
             cancellationToken: guard.Token);
         await entered.Task;
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => operation);
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => operation);
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
+        Assert.IsAssignableFrom<OperationCanceledException>(error.InnerException);
         Assert.False(guard.IsCancellationRequested, "the ceremony deadline, not the test guard, must cancel");
     }
 
@@ -421,12 +456,116 @@ public class WebAuthnAuditReproTests
                 return MockFido2Responses.CreateMockGetAssertionResponse();
             });
         await using var client = CreateClient(backend);
-        using var guard = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-        var operation = client.GetAssertionAsync(Authentication() with { Timeout = TimeSpan.FromMilliseconds(50) },
+        using var guard = new CancellationTokenSource(TestGuard);
+
+        var operation = client.GetAssertionAsync(Authentication() with { Timeout = DeadlineThatExpires },
             cancellationToken: guard.Token);
         await entered.Task;
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => operation);
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => operation);
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
         Assert.False(guard.IsCancellationRequested, "the ceremony deadline, not the test guard, must cancel");
+    }
+
+    /// <summary>Caller cancellation is unchanged: OperationCanceledException, never a WebAuthnClientError.</summary>
+    [Fact(Timeout = 5000)]
+    [Trait("Audit", "YESDK-1617")]
+    public async Task YESDK1617_CallerCancellationStillSurfacesAsOperationCanceled()
+    {
+        var (backend, entered) = HangingMakeCredentialBackend();
+        await using var client = CreateClient(backend);
+        using var caller = new CancellationTokenSource();
+
+        var operation = client.MakeCredentialAsync(Registration() with { Timeout = DeadlineThatDoesNotExpire },
+            cancellationToken: caller.Token);
+        await entered.Task;
+        caller.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => operation);
+    }
+
+    /// <summary>A null Timeout starts no timer (python-fido2 parity; differs from the L3 §15.1 300 s default).</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1617")]
+    public async Task YESDK1617_NullTimeoutStartsNoDeadline()
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+        CancellationToken observed = default;
+        backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Do<CancellationToken>(token => observed = token))
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+        await using var client = CreateClient(backend);
+
+        var response = await client.MakeCredentialAsync(Registration(), cancellationToken: CancellationToken.None);
+
+        Assert.NotNull(response);
+        Assert.False(observed.CanBeCanceled, "no linked token source may be created when Timeout is null");
+    }
+
+    /// <summary>An unexpired deadline does not disturb a successful ceremony.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1617")]
+    public async Task YESDK1617_UnexpiredTimeoutReturnsNormally()
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+        backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+        await using var client = CreateClient(backend);
+
+        var response = await client.MakeCredentialAsync(Registration() with { Timeout = DeadlineThatDoesNotExpire },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(response);
+    }
+
+    /// <summary>No clamping (maintainer decision): a non-positive Timeout is a malformed request.</summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [Trait("Audit", "YESDK-1617")]
+    public async Task YESDK1617_NonpositiveTimeoutIsRejected(int milliseconds)
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+        await using var client = CreateClient(backend);
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(
+            Authentication() with { Timeout = TimeSpan.FromMilliseconds(milliseconds) },
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
+        await backend.DidNotReceive().GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>The timer covers user interaction too: a PIN prompt still waiting at the deadline is cancelled.</summary>
+    [Fact(Timeout = 5000)]
+    [Trait("Audit", "YESDK-1617")]
+    public async Task YESDK1617_TimeoutCancelsPendingPinPrompt()
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+        backend.GetPinRetriesAsync(Arg.Any<CancellationToken>()).Returns(8);
+        var prompt = new HangingPrompt();
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
+            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com", CredentialPrompt = prompt });
+        using var guard = new CancellationTokenSource(TestGuard);
+
+        var operation = client.MakeCredentialAsync(
+            Registration() with { Timeout = DeadlineThatExpires, UserVerification = UserVerificationPreference.Required },
+            cancellationToken: guard.Token);
+        await prompt.Requested.Task;
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => operation);
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
+        Assert.True(prompt.ObservedToken.IsCancellationRequested, "the prompt must see the deadline on its own token");
+        Assert.False(guard.IsCancellationRequested, "the ceremony deadline, not the test guard, must cancel");
+        await backend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
     }
 
     /// <summary>

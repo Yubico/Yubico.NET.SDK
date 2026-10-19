@@ -134,7 +134,9 @@ protocol. A PC/SC or SCP exchange observes the caller token only at admission: i
 afterwards, the admitted exchange still runs to completion and returns its response or failure rather
 than `OperationCanceledException`. During a FIDO HID keep-alive, the caller
 token can signal `CTAPHID_CANCEL`; the protocol waits for a terminal response and drains its frames
-before reporting cancellation when that response is valid. During an OTP HID touch wait, the caller
+before reporting cancellation when that response is valid. A CTAP success (`0x00`) that arrives after
+the cancel is returned rather than discarded: the authenticator completed the work, and CTAP 2.3
+§11.2.9.1.5 only promises `CTAP2_ERR_KEEPALIVE_CANCEL` for a request that was actually cancelled. During an OTP HID touch wait, the caller
 token can trigger a dummy-report reset;
 reuse requires that reset to succeed. Neither signal rolls back work already sent. A failed partial
 APDU exchange or failed OTP reset requires disposing and reopening the connection. The guard resets

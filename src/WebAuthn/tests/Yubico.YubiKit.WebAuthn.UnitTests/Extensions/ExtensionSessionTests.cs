@@ -20,11 +20,13 @@ using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions;
 
-public class ExtensionPipelineTests
+public class ExtensionSessionTests
 {
     private static RegistrationOptions CreateMockOptions() =>
         new()
@@ -36,21 +38,21 @@ public class ExtensionPipelineTests
         };
 
     [Fact]
-    public void BuildRegistrationExtensionsCbor_NoExtensions_ReturnsNull()
+    public void PrepareInputs_NoExtensions_ReturnsNull()
     {
         // Arrange - No extensions
         RegistrationExtensionInputs? inputs = null;
         var options = CreateMockOptions();
 
         // Act
-        var result = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);
+        var result = RegistrationExtensionSession.Create(inputs, options, requireResidentKey: false).PrepareInputs(token: null);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void BuildRegistrationExtensionsCbor_WithCredProtect_ProducesCborWithCredProtectKey()
+    public void PrepareInputs_WithCredProtect_ProducesCborWithCredProtectKey()
     {
         // Arrange
         var inputs = new RegistrationExtensionInputs(
@@ -58,7 +60,7 @@ public class ExtensionPipelineTests
         var options = CreateMockOptions();
 
         // Act
-        var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);
+        var cborBytes = RegistrationExtensionSession.Create(inputs, options, requireResidentKey: false).PrepareInputs(token: null);
 
         // Assert
         Assert.NotNull(cborBytes);
@@ -77,7 +79,7 @@ public class ExtensionPipelineTests
     }
 
     [Fact]
-    public void BuildRegistrationExtensionsCbor_WithCredBlob_ProducesCborWithBlob()
+    public void PrepareInputs_WithCredBlob_ProducesCborWithBlob()
     {
         // Arrange
         var blobData = new byte[] { 0x01, 0x02, 0x03, 0x04 };
@@ -86,7 +88,7 @@ public class ExtensionPipelineTests
         var options = CreateMockOptions();
 
         // Act
-        var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);
+        var cborBytes = RegistrationExtensionSession.Create(inputs, options, requireResidentKey: false).PrepareInputs(token: null);
 
         // Assert
         Assert.NotNull(cborBytes);
@@ -103,7 +105,7 @@ public class ExtensionPipelineTests
     }
 
     [Fact]
-    public void ParseRegistrationOutputs_NoInputs_ReturnsNull()
+    public async Task PrepareOutputs_NoInputs_ReturnsNull()
     {
         // Arrange
         var authData = CreateMockAuthenticatorData();
@@ -116,14 +118,15 @@ public class ExtensionPipelineTests
         };
 
         // Act
-        var result = ExtensionPipeline.ParseRegistrationOutputs(null, authData, null, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required);
+        var result = await RegistrationExtensionSession.Create(null, options, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required)
+            .PrepareOutputsAsync(MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void ParseRegistrationOutputs_CredPropsRequested_DerivesFromResidentKeyOption()
+    public async Task PrepareOutputs_CredPropsRequested_ReportsEffectiveRequireResidentKey()
     {
         // Arrange
         var inputs = new RegistrationExtensionInputs(CredProps: new CredPropsInput());
@@ -138,7 +141,8 @@ public class ExtensionPipelineTests
         };
 
         // Act
-        var result = ExtensionPipeline.ParseRegistrationOutputs(inputs, authData, null, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required);
+        var result = await RegistrationExtensionSession.Create(inputs, options, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required)
+            .PrepareOutputsAsync(MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -147,7 +151,7 @@ public class ExtensionPipelineTests
     }
 
     [Fact(Timeout = 5000)]
-    public void BuildRegistrationExtensionsCbor_PreviewSignWithMultipleStandardExtensions_ProducesCtap2CanonicalOrder()
+    public void PrepareInputs_PreviewSignWithMultipleStandardExtensions_ProducesCtap2CanonicalOrder()
     {
         // Arrange - combine previewSign with standard extensions that have different lengths
         var inputs = new RegistrationExtensionInputs(
@@ -159,7 +163,7 @@ public class ExtensionPipelineTests
 
 
         // Act
-        var cborBytes = ExtensionPipeline.BuildRegistrationExtensionsCbor(inputs, options);
+        var cborBytes = RegistrationExtensionSession.Create(inputs, options, requireResidentKey: false).PrepareInputs(token: null);
 
         // Assert - Verify CBOR doesn't throw when encoding (canonical mode validates order)
         Assert.NotNull(cborBytes);
@@ -200,5 +204,25 @@ public class ExtensionPipelineTests
         data.AddRange(new byte[4]);
 
         return WebAuthnAuthenticatorData.Decode(data.ToArray());
+    }
+
+    /// <summary>Requested but client-only extensions (credProps) produce no CTAP input.</summary>
+    [Fact]
+    public void PrepareInputs_OnlyClientSideExtensions_ReturnsNull()
+    {
+        var inputs = new RegistrationExtensionInputs(CredProps: new CredPropsInput());
+
+        var cbor = RegistrationExtensionSession.Create(inputs, CreateMockOptions(), requireResidentKey: true).PrepareInputs(token: null);
+
+        Assert.Null(cbor);
+    }
+
+    /// <summary>Permissions are the union over processors; today no processor needs any (R3 wires them).</summary>
+    [Fact]
+    public void Permissions_NoProcessorNeedsAny_IsNone()
+    {
+        var session = AuthenticationExtensionSession.Create(new AuthenticationExtensionInputs(GetCredBlob: true), allowCredentials: null);
+
+        Assert.Equal(Yubico.YubiKit.Fido2.Pin.PinUvAuthTokenPermissions.None, session.Permissions);
     }
 }

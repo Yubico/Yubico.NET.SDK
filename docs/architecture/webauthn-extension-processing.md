@@ -24,6 +24,44 @@ A CTAP2 codec encodes one extension's wire shape and knows nothing about ceremon
 processor decides *what* to send and *when*, and may call the authenticator (key agreement, large-blob
 reads and writes) to do so.
 
+## Where code belongs
+
+> `Yubico.YubiKit.Fido2` (CTAP2) contains only what has a representation on the CTAP wire or in the
+> CTAP specification. `Yubico.YubiKit.WebAuthn` contains everything that exists because a *client*
+> sits between a relying party and an authenticator.
+
+Test for any piece of code: *would a non-WebAuthn CTAP client (ykman, a CLI, a test harness) need this
+exactly as written?* Yes: Fido2. No: WebAuthn. This is the split python-fido2 draws between
+`fido2/ctap2` and `fido2/client`, and yubikit-android between `fido/ctap` and `fido/client`.
+
+| Concern | Layer | Why |
+| --- | --- | --- |
+| `FidoSession` commands, CBOR request/response codecs, `CtapStatus`, `AuthenticatorInfo` | Fido2 | CTAP §6 verbatim |
+| Validation of CTAP invariants on request construction (`up=false` at makeCredential, duplicate `pubKeyCredParams`) | Fido2; WebAuthn adds a typed error on top | the MUST is on whoever builds the CTAP message |
+| `ExtensionBuilder` and the per-extension wire codecs (`hmac-secret` §12.5 map, `credProtect`, `credBlob`, `largeBlobKey`, `minPinLength`, `previewSign` CBOR) | Fido2 | wire shapes |
+| hmac-secret salt encryption and authentication (`WithHmacSecret(protocol, sharedSecret, keyAgreement, salt1, salt2)`) | Fido2 | CTAP §12.5 defines it; a raw CTAP client needs it |
+| `ClientPin` key agreement and token minting, PIN/UV protocols, `LargeBlobStorage` (§6.10 array, compression, entry encryption) | Fido2 | CTAP §6.5, §6.10 |
+| WebAuthn PRF: salt derivation `SHA-256("WebAuthn PRF" ‖ 0x00 ‖ input)`, `evalByCredential`, `enabled`/`results` | WebAuthn (`PrfProcessor`) | WebAuthn L3 §10.1.4; CTAP has no "prf" |
+| `largeBlob: {support}`, `read`/`write` client inputs, `supported`/`blob`/`written` outputs, "store after the assertion with largeBlobKey" | WebAuthn (`LargeBlobProcessor`) | WebAuthn L3 §10.1.5; CTAP has only `largeBlobKey` + `authenticatorLargeBlobs` |
+| `credProps` | WebAuthn | client-derived, L3 §10.1.3 |
+| previewSign `signByCredential[selected]`, inner attestation handling, flags from the UV preference | WebAuthn (`PreviewSignProcessor`) | the draft's "client extension processing" |
+| Credential selection, exclude pre-flight, dummy descriptor | WebAuthn (`CredentialFilter`) | python-fido2 keeps `_filter_creds` in `client/` |
+| UV decision, permissions union, PIN prompting, token lifetime, PUAT retry | WebAuthn | client policy |
+| Options and response records, client data, RP ID validation, origin | WebAuthn | L3 §5 |
+
+Consequences:
+
+- `IWebAuthnBackend` is the only door from WebAuthn into Fido2. Processors never hold an
+  `IFidoSession`; the backend exposes what they need (PIN/UV protocol, key agreement, large-blob storage).
+- `FidoSession` stays a complete, standalone CTAP2 client. The WebAuthn package consumes it and never
+  adds WebAuthn-flavoured parameters to it.
+- Three WebAuthn concepts currently live in Fido2 and move out as their findings are fixed: the `"prf"`
+  identifier with `WithPrf(...)`, `PrfInput`/`PrfInputValues`/`PrfOutput` (#1, 26a, 26b); the
+  `signByCredential` dictionary `PreviewSignAuthenticationInput` (26d; Fido2 keeps
+  `WithPreviewSign(PreviewSignSigningParams)`); the `largeBlob: {support}` encoding of `LargeBlobInput`
+  (largeBlob group). Nothing new added to Fido2 says "WebAuthn"; nothing new in WebAuthn re-encodes CBOR
+  Fido2 already encodes.
+
 ## Why inputs cannot be built up front
 
 Several extensions need facts that only exist part-way through a ceremony:
@@ -51,14 +89,14 @@ Yubico.YubiKit.WebAuthn.Extensions
     │     string Name
     │     PinUvAuthTokenPermissions Permissions
     │     void PrepareInputs(ExtensionBuilder builder, PinUvAuthTokenSession? token)
-    │     ValueTask PrepareOutputsAsync(MakeCredentialResponse response, PinUvAuthTokenSession? token,
-    │                                   RegistrationExtensionOutputs.Builder outputs, CancellationToken ct)
+    │     ValueTask PrepareOutputsAsync(MakeCredentialResponse response, WebAuthnAuthenticatorData authData,
+    │                                   PinUvAuthTokenSession? token, RegistrationExtensionOutputsBuilder outputs, CancellationToken ct)
     ├── IAuthenticationExtensionProcessor
     │     string Name
     │     PinUvAuthTokenPermissions Permissions
     │     void PrepareInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token)
-    │     ValueTask PrepareOutputsAsync(GetAssertionResponse response, PinUvAuthTokenSession? token,
-    │                                   AuthenticationExtensionOutputs.Builder outputs, CancellationToken ct)
+    │     ValueTask PrepareOutputsAsync(GetAssertionResponse response, WebAuthnAuthenticatorData authData,
+    │                                   PinUvAuthTokenSession? token, AuthenticationExtensionOutputsBuilder outputs, CancellationToken ct)
     ├── RegistrationExtensionSession     one per ceremony attempt; owns the processors for the requested inputs
     ├── AuthenticationExtensionSession   same, for assertions
     └── Processors/                      one sealed class per extension (CredProtect, CredBlob, MinPinLength,
@@ -77,8 +115,10 @@ Rules:
   (`UvDecisionLogic.Decide(..., requestedPermissions: ceremony | session.Permissions)`), as
   python-fido2 (`permissions |= ext.permissions`) and yubikit-android (`permissions |= processor.getPermissions()`) do.
 - `PrepareInputs` writes into the CTAP2 `ExtensionBuilder`; it never encodes CBOR itself.
-- `PrepareOutputsAsync` fills the typed output record through a small internal builder. Outputs are
-  typed records, not dictionaries.
+- `PrepareOutputsAsync` receives the CTAP response and its authenticator data decoded once by the
+  session, and fills the typed output record through a small internal builder. Outputs are typed
+  records, not dictionaries. A `CborContentException` from one extension's output drops that
+  extension's result only (WebAuthn L3 §9.4 tolerance for malformed authenticator output).
 - Processors are **single-use**. A PUAT retry creates a fresh session, so encrypted salts and key
   agreements are re-derived against the new token.
 - `ExtensionContext.Protocol` is available without a token: CTAP 2.0 `hmac-secret` works without a PUAT.

@@ -5,6 +5,7 @@ using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.AuditV2;
@@ -13,7 +14,7 @@ public class WebAuthnLargeBlobAuditReproTests
 {
     [Fact]
     [Trait("Audit", "YESDK-1613")]
-    public void YESDK1613_LargeBlobKeyFromCtapResponseReportsSupported()
+    public async Task YESDK1613_LargeBlobKeyFromCtapResponseReportsSupported()
     {
         // A successful CTAP makeCredential returns largeBlobKey in response member 0x05,
         // not in the signed authenticator-data extension map.
@@ -46,7 +47,8 @@ public class WebAuthnLargeBlobAuditReproTests
 
         // The current pipeline has no argument for the decoded 0x05 key. Keep
         // this contract test focused on the actual registration output it produces.
-        var result = ExtensionPipeline.ParseRegistrationOutputs(inputs, authData, null, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required);
+        var result = await RegistrationExtensionSession.Create(inputs, options, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required)
+            .PrepareOutputsAsync(ctapResponse, authData, token: null, TestContext.Current.CancellationToken);
         Assert.NotNull(result?.LargeBlob);
         Assert.True(result.LargeBlob.Supported);
     }

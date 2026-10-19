@@ -15,12 +15,12 @@
 using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2.Extensions;
 
-namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
+namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
 /// Adapter for the credBlob extension.
 /// </summary>
-internal static class CredBlobAdapter
+internal static class CredBlobCodec
 {
     /// <summary>
     /// Applies credBlob input to the CTAP extension builder.

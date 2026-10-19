@@ -25,7 +25,7 @@ using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Client.Validation;
 using Yubico.YubiKit.WebAuthn.Cose;
-using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 using Yubico.YubiKit.WebAuthn.Util;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
@@ -137,7 +137,8 @@ public sealed partial class WebAuthnClient
                 cancellationToken).ConfigureAwait(false);
 
             // Build backend request with filtered exclude list
-            var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey);
+            var extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey);
+            var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey, extensions);
 
             // Execute MakeCredential
             MakeCredentialResponse ctapResponse;
@@ -171,7 +172,9 @@ public sealed partial class WebAuthnClient
                     pinBytes,
                     cancellationToken).ConfigureAwait(false);
 
-                request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey);
+                // A fresh attempt gets fresh processors (single-use per attempt).
+                extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey);
+                request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey, extensions);
                 try
                 {
                     ctapResponse = await ExecuteMakeCredentialAsync(request, cancellationToken).ConfigureAwait(false);
@@ -201,8 +204,9 @@ public sealed partial class WebAuthnClient
                 throw MapCtapStatusToWebAuthnError(ex);
             }
 
-            // Build WebAuthn response
-            return BuildRegistrationResponse(ctapResponse, clientData, options, requireResidentKey);
+            // Build WebAuthn response while the token is still live (extension outputs may need it)
+            return await BuildRegistrationResponseAsync(ctapResponse, clientData, options, extensions, tokenSession, cancellationToken)
+                .ConfigureAwait(false);
         }
         finally
         {
@@ -305,7 +309,8 @@ public sealed partial class WebAuthnClient
         UvDecision uvDecision,
         PublicKeyCredentialDescriptor? matchedExclude,
         bool preflightPerformed,
-        bool requireResidentKey)
+        bool requireResidentKey,
+        RegistrationExtensionSession extensions)
     {
         // Map options to backend request
         var optionsDict = new Dictionary<string, bool>();
@@ -321,7 +326,7 @@ public sealed partial class WebAuthnClient
         }
 
         // Build extensions CBOR via pipeline
-        var extensionsCbor = ExtensionPipeline.BuildRegistrationExtensionsCbor(options.Extensions, options);
+        var extensionsCbor = extensions.PrepareInputs(tokenSession);
 
         // Use filtered exclude list only after pre-flight actually ran. Without pre-flight, preserve
         // the caller's original exclude list so authenticators still enforce it.
@@ -356,11 +361,13 @@ public sealed partial class WebAuthnClient
         };
     }
 
-    private RegistrationResponse BuildRegistrationResponse(
+    private static async Task<RegistrationResponse> BuildRegistrationResponseAsync(
         MakeCredentialResponse ctapResponse,
         WebAuthnClientData clientData,
         RegistrationOptions options,
-        bool requireResidentKey)
+        RegistrationExtensionSession extensions,
+        PinUvAuthTokenSession? tokenSession,
+        CancellationToken cancellationToken)
     {
         // Extract attested credential data from AuthenticatorData
         var attestedCred = ctapResponse.AuthenticatorData.AttestedCredentialData!;
@@ -388,11 +395,8 @@ public sealed partial class WebAuthnClient
         var attestationObject = WebAuthnAttestationObject.Create(webAuthnAuthData, webAuthnStatement);
 
         // Parse extension outputs via pipeline
-        var extensionOutputs = ExtensionPipeline.ParseRegistrationOutputs(
-            options.Extensions,
-            webAuthnAuthData,
-            ctapResponse.UnsignedExtensionOutputs,
-            requireResidentKey);
+        var extensionOutputs = await extensions.PrepareOutputsAsync(ctapResponse, webAuthnAuthData, tokenSession, cancellationToken)
+            .ConfigureAwait(false);
 
         return new RegistrationResponse
         {

@@ -16,11 +16,10 @@ using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Attestation;
-using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
-namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
+namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
 /// Adapter for the <c>previewSign</c> WebAuthn extension.
@@ -36,7 +35,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 /// translates extension outputs back into WebAuthn-level previewSign outputs.
 /// </para>
 /// </remarks>
-internal static class PreviewSignAdapter
+internal static class PreviewSignCodec
 {
     private const string ExtensionId = "previewSign";
 
@@ -45,7 +44,7 @@ internal static class PreviewSignAdapter
     /// </summary>
     /// <param name="builder">The extension builder.</param>
     /// <param name="input">The previewSign registration input.</param>
-    /// <param name="options">The original registration options (used for UV preference).</param>
+    /// <param name="userVerification">The WebAuthn user verification preference (drives the previewSign flags).</param>
     /// <exception cref="WebAuthnClientError">
     /// Thrown when the previewSign registration input cannot be applied.
     /// </exception>
@@ -59,10 +58,10 @@ internal static class PreviewSignAdapter
     public static void ApplyToBuilderForRegistration(
         ExtensionBuilder builder,
         PreviewSign.PreviewSignRegistrationInput input,
-        RegistrationOptions options)
+        UserVerificationPreference userVerification)
     {
         // Derive flags from the WebAuthn user verification preference.
-        byte resolvedFlags = options.UserVerification == UserVerificationPreference.Required
+        byte resolvedFlags = userVerification == UserVerificationPreference.Required
             ? (byte)PreviewSignFlags.RequireUserVerification
             : (byte)PreviewSignFlags.RequireUserPresence;
 

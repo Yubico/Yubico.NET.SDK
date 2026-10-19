@@ -18,16 +18,16 @@ using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
-using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
+using Yubico.YubiKit.WebAuthn.Extensions.Codec;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using WebAuthnPreviewSign = Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 
 /// <summary>
-/// Tests for PreviewSignAdapter - validates extension input/output wire-up per Phase 8 spec.
+/// Tests for PreviewSignCodec - validates extension input/output wire-up per Phase 8 spec.
 /// </summary>
-public class PreviewSignAdapterTests
+public class PreviewSignCodecTests
 {
     [Fact(Timeout = 5000)]
     public void PreviewSign_Registration_DerivesFlagsFromUserVerificationPreference()
@@ -52,11 +52,11 @@ public class PreviewSignAdapterTests
 
         // Act - apply to builder and build
         var builderUvRequired = new ExtensionBuilder();
-        PreviewSignAdapter.ApplyToBuilderForRegistration(builderUvRequired, input, optionsUvRequired);
+        PreviewSignCodec.ApplyToBuilderForRegistration(builderUvRequired, input, optionsUvRequired.UserVerification);
         var cborUvRequired = builderUvRequired.Build();
 
         var builderUvNotRequired = new ExtensionBuilder();
-        PreviewSignAdapter.ApplyToBuilderForRegistration(builderUvNotRequired, input, optionsUvNotRequired);
+        PreviewSignCodec.ApplyToBuilderForRegistration(builderUvNotRequired, input, optionsUvNotRequired.UserVerification);
         var cborUvNotRequired = builderUvNotRequired.Build();
 
         // Assert - UV=Required → flags=0b101, otherwise → flags=0b001
@@ -102,7 +102,7 @@ public class PreviewSignAdapterTests
 
         // Act & Assert - empty allowCredentials should throw InvalidRequest
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials: null));
+            PreviewSignCodec.ApplyToBuilderForAuthentication(builder, input, allowCredentials: null));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("non-empty allowCredentials", ex.Message);
@@ -110,7 +110,7 @@ public class PreviewSignAdapterTests
         // Also test empty list (not just null)
         builder = new ExtensionBuilder();
         ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials: []));
+            PreviewSignCodec.ApplyToBuilderForAuthentication(builder, input, allowCredentials: []));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("non-empty allowCredentials", ex.Message);
@@ -142,7 +142,7 @@ public class PreviewSignAdapterTests
 
         // Act & Assert - missing signByCredential entry should throw InvalidRequest
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials));
+            PreviewSignCodec.ApplyToBuilderForAuthentication(builder, input, allowCredentials));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("missing entries", ex.Message);
@@ -186,7 +186,7 @@ public class PreviewSignAdapterTests
         };
 
         // Act - parse registration output
-        var output = PreviewSignAdapter.ParseRegistrationOutput(parsedAuthData, unsignedExtensionOutputs);
+        var output = PreviewSignCodec.ParseRegistrationOutput(parsedAuthData, unsignedExtensionOutputs);
 
         // Assert - GeneratedKey comes from the inner attestation object (previewSign draft v4 §10.2.1)
         Assert.NotNull(output);
@@ -219,7 +219,7 @@ public class PreviewSignAdapterTests
         var parsedAuthData = WebAuthnAuthenticatorData.Decode(authData);
 
         // Act - parse authentication output
-        var output = PreviewSignAdapter.ParseAuthenticationOutput(parsedAuthData);
+        var output = PreviewSignCodec.ParseAuthenticationOutput(parsedAuthData);
 
         // Assert - Signature should match fixture bytes
         Assert.NotNull(output);
@@ -249,7 +249,7 @@ public class PreviewSignAdapterTests
 
         // Act - apply to builder and build
         var builder = new ExtensionBuilder();
-        PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials);
+        PreviewSignCodec.ApplyToBuilderForAuthentication(builder, input, allowCredentials);
         var extensionsMap = builder.Build();
 
         // Assert - extensions map contains previewSign with flat params map
@@ -300,7 +300,7 @@ public class PreviewSignAdapterTests
         };
 
         var builder = new ExtensionBuilder();
-        PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials);
+        PreviewSignCodec.ApplyToBuilderForAuthentication(builder, input, allowCredentials);
         var extensionsMap = builder.Build();
 
         Assert.NotNull(extensionsMap);
@@ -343,7 +343,7 @@ public class PreviewSignAdapterTests
 
         // Act & Assert
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials));
+            PreviewSignCodec.ApplyToBuilderForAuthentication(builder, input, allowCredentials));
 
         Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
         Assert.Contains("single-credential scope", ex.Message);
@@ -372,7 +372,7 @@ public class PreviewSignAdapterTests
 
         // Act & Assert - validation catches missing credA in signByCredential first
         var ex = Assert.Throws<WebAuthnClientError>(() =>
-            PreviewSignAdapter.ApplyToBuilderForAuthentication(builder, input, allowCredentials));
+            PreviewSignCodec.ApplyToBuilderForAuthentication(builder, input, allowCredentials));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
         Assert.Contains("missing entries", ex.Message);
@@ -422,7 +422,7 @@ public class PreviewSignAdapterTests
         // ({"fmt","authData","attStmt"}). The legacy SDK decoded it that way (Yubico.NET.SDK-Legacy
         // Fido2/PreviewSignExtension.cs:144-147 and 249-282) and that matches what firmware emits.
         // An earlier version of this test produced a WebAuthn-shaped (text-keyed) attestation object,
-        // which masked the parser bug in PreviewSignAdapter.ParseRegistrationOutput. This rewrite
+        // which masked the parser bug in PreviewSignCodec.ParseRegistrationOutput. This rewrite
         // reproduces the on-the-wire shape so the test exercises the actual decode path.
         var rpIdHash = SHA256.HashData("example.com"u8);
 

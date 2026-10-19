@@ -19,7 +19,7 @@ using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Client.Validation;
-using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 using Yubico.YubiKit.WebAuthn.Util;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
@@ -115,7 +115,8 @@ public sealed partial class WebAuthnClient
                 cancellationToken).ConfigureAwait(false);
 
             // Build backend request
-            var request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision);
+            var extensions = AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials);
+            var request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision, extensions);
 
             // Match credentials (handles allow-list probing and discoverable enumeration)
             IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> matches;
@@ -141,7 +142,9 @@ public sealed partial class WebAuthnClient
                     pinBytes,
                     cancellationToken).ConfigureAwait(false);
 
-                request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision);
+                // A fresh attempt gets fresh processors (single-use per attempt).
+                extensions = AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials);
+                request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision, extensions);
                 try
                 {
                     matches = await MatchCredentialsAsync(request, cancellationToken).ConfigureAwait(false);
@@ -162,17 +165,18 @@ public sealed partial class WebAuthnClient
                 throw MapCtapStatusToWebAuthnError(ex);
             }
 
-            // Wrap each match into a MatchedCredential with deferred SelectAsync
+            // Build every response now, while the token is live (extension outputs may need it);
+            // MatchedCredential.SelectAsync then does no further authenticator work.
             var results = new List<MatchedCredential>();
 
             foreach (var (credId, user, response) in matches)
             {
-                var matchedCred = new MatchedCredential(
+                var authenticationResponse = await BuildAuthenticationResponseAsync(
+                    response, clientData, extensions, tokenSession, cancellationToken).ConfigureAwait(false);
+                results.Add(new MatchedCredential(
                     id: credId,
                     user: user,
-                    responseFactory: _ => Task.FromResult(BuildAuthenticationResponse(response, clientData, options)));
-
-                results.Add(matchedCred);
+                    responseFactory: _ => Task.FromResult(authenticationResponse)));
             }
 
             return results;
@@ -214,7 +218,8 @@ public sealed partial class WebAuthnClient
         AuthenticationOptions options,
         WebAuthnClientData clientData,
         PinUvAuthTokenSession? tokenSession,
-        UvDecision uvDecision)
+        UvDecision uvDecision,
+        AuthenticationExtensionSession extensions)
     {
         // Map options to backend request
         var optionsDict = new Dictionary<string, bool>();
@@ -236,10 +241,8 @@ public sealed partial class WebAuthnClient
                 .ToList();
         }
 
-        // Build extensions CBOR via pipeline
-        var extensionsCbor = ExtensionPipeline.BuildAuthenticationExtensionsCbor(
-            options.Extensions,
-            options.AllowCredentials);
+        // Extension inputs; credential selection (R4) will supply `selected`
+        var extensionsCbor = extensions.PrepareInputs(selected: null, tokenSession);
 
         ReadOnlyMemory<byte>? pinUvAuthParam = null;
         byte? pinUvAuthProtocol = null;
@@ -262,10 +265,12 @@ public sealed partial class WebAuthnClient
         };
     }
 
-    private static AuthenticationResponse BuildAuthenticationResponse(
+    private static async Task<AuthenticationResponse> BuildAuthenticationResponseAsync(
         GetAssertionResponse ctapResponse,
         WebAuthnClientData clientData,
-        AuthenticationOptions options)
+        AuthenticationExtensionSession extensions,
+        PinUvAuthTokenSession? tokenSession,
+        CancellationToken cancellationToken)
     {
         // Wrap authenticator data
         var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
@@ -277,9 +282,8 @@ public sealed partial class WebAuthnClient
         var user = ctapResponse.User;
 
         // Parse extension outputs via pipeline
-        var extensionOutputs = ExtensionPipeline.ParseAuthenticationOutputs(
-            options.Extensions,
-            webAuthnAuthData);
+        var extensionOutputs = await extensions.PrepareOutputsAsync(ctapResponse, webAuthnAuthData, tokenSession, cancellationToken)
+            .ConfigureAwait(false);
 
         return new AuthenticationResponse
         {

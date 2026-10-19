@@ -1,0 +1,104 @@
+// Copyright Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System.Formats.Cbor;
+using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
+
+namespace Yubico.YubiKit.WebAuthn.Extensions.Processing;
+
+/// <summary>
+/// The extension processors for one authentication attempt. See <see cref="RegistrationExtensionSession"/>.
+/// </summary>
+internal sealed class AuthenticationExtensionSession
+{
+    private readonly IReadOnlyList<IAuthenticationExtensionProcessor> _processors;
+    private readonly bool _requested;
+
+    private AuthenticationExtensionSession(IReadOnlyList<IAuthenticationExtensionProcessor> processors, bool requested)
+    {
+        _processors = processors;
+        _requested = requested;
+    }
+
+    /// <summary>Creates the session for the extensions the relying party asked for.</summary>
+    /// <param name="inputs">The relying party's extension inputs, or null.</param>
+    /// <param name="allowCredentials">The relying party's allow list; per-credential inputs are validated against it.</param>
+    public static AuthenticationExtensionSession Create(
+        AuthenticationExtensionInputs? inputs,
+        IReadOnlyList<PublicKeyCredentialDescriptor>? allowCredentials)
+    {
+        if (inputs is null)
+        {
+            return new AuthenticationExtensionSession([], requested: false);
+        }
+
+        var processors = new List<IAuthenticationExtensionProcessor>();
+        if (inputs.GetCredBlob) processors.Add(new CredBlobProcessor(input: null));
+        if (inputs.LargeBlob is not null) processors.Add(new LargeBlobProcessor(inputs.LargeBlob));
+        if (inputs.Prf is not null) processors.Add(new PrfProcessor(inputs.Prf, allowCredentials));
+        if (inputs.PreviewSign is not null) processors.Add(new PreviewSignProcessor(inputs.PreviewSign, allowCredentials));
+        return new AuthenticationExtensionSession(processors, requested: true);
+    }
+
+    /// <summary>The union of the processors' token permissions.</summary>
+    public PinUvAuthTokenPermissions Permissions =>
+        _processors.Aggregate(PinUvAuthTokenPermissions.None, (acc, p) => acc | p.Permissions);
+
+    /// <summary>Builds the CTAP2 extensions map, or null when no processor adds an input.</summary>
+    public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token)
+    {
+        var builder = new ExtensionBuilder();
+        foreach (var processor in _processors)
+        {
+            processor.PrepareInputs(builder, selected, token);
+        }
+
+        return builder.Build();
+    }
+
+    /// <summary>
+    /// Derives the client extension outputs for one assertion, or null when the relying party requested
+    /// no extensions. A <see cref="CborContentException"/> from one extension drops that extension's output only.
+    /// </summary>
+    public async ValueTask<AuthenticationExtensionOutputs?> PrepareOutputsAsync(
+        GetAssertionResponse response,
+        WebAuthnAuthenticatorData authData,
+        PinUvAuthTokenSession? token,
+        CancellationToken cancellationToken)
+    {
+        if (!_requested)
+        {
+            return null;
+        }
+
+        var outputs = new AuthenticationExtensionOutputsBuilder();
+        foreach (var processor in _processors)
+        {
+            try
+            {
+                await processor.PrepareOutputsAsync(response, authData, token, outputs, cancellationToken).ConfigureAwait(false);
+            }
+            catch (CborContentException)
+            {
+                // Malformed extension output: skip this extension (WebAuthn L3 §9.4); some authenticators return junk.
+            }
+        }
+
+        return outputs.Build();
+    }
+}

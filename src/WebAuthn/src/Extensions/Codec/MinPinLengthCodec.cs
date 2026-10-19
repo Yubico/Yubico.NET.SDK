@@ -14,43 +14,34 @@
 
 using System.Formats.Cbor;
 using Yubico.YubiKit.Fido2.Extensions;
-using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
-using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
-namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
+namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
-/// Adapter for the credProtect extension.
+/// Adapter for the minPinLength extension.
 /// </summary>
-internal static class CredProtectAdapter
+internal static class MinPinLengthCodec
 {
     /// <summary>
-    /// Applies credProtect input to the CTAP extension builder.
+    /// Applies minPinLength input to the CTAP extension builder.
     /// </summary>
-    public static void ApplyToBuilder(ExtensionBuilder builder, CredProtectInput input)
+    public static void ApplyToBuilder(ExtensionBuilder builder)
     {
-        builder.WithCredProtect(input.Policy, input.EnforceCredentialProtectionPolicy);
+        builder.WithMinPinLength();
     }
 
     /// <summary>
-    /// Parses credProtect output from authenticator data extensions.
+    /// Parses minPinLength output from authenticator data extensions.
     /// </summary>
-    public static CredProtectOutput? ParseRegistrationOutput(
+    public static MinPinLengthOutput? ParseOutput(
         IReadOnlyDictionary<string, ReadOnlyMemory<byte>> extensions)
     {
-        if (!extensions.TryGetValue(ExtensionIdentifiers.CredProtect, out var rawValue))
+        if (!extensions.TryGetValue(ExtensionIdentifiers.MinPinLength, out var rawValue))
         {
             return null;
         }
 
         var reader = new CborReader(rawValue, CborConformanceMode.Lax);
-        var policyValue = reader.ReadInt32();
-
-        if (policyValue is < 1 or > 3)
-        {
-            return null;
-        }
-
-        return new CredProtectOutput((CredProtectPolicy)policyValue);
+        return MinPinLengthOutput.Decode(reader);
     }
 }

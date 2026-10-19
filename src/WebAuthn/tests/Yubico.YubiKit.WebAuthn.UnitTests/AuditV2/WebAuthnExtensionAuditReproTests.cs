@@ -8,7 +8,8 @@ using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
-using Yubico.YubiKit.WebAuthn.Extensions.Adapters;
+using Yubico.YubiKit.WebAuthn.Extensions.Codec;
+using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -21,7 +22,7 @@ public class WebAuthnExtensionAuditReproTests
     public void YESDK1609_AuthenticationPrfUsesEncryptedHmacSecretNotLiteralPrf()
     {
         var inputs = new AuthenticationExtensionInputs(Prf: new PrfInput { First = new byte[] { 0xAA } });
-        var extensions = ExtensionPipeline.BuildAuthenticationExtensionsCbor(inputs, null);
+        var extensions = AuthenticationExtensionSession.Create(inputs, allowCredentials: null).PrepareInputs(selected: null, token: null);
         Assert.NotNull(extensions);
         var reader = new CborReader(extensions.Value, CborConformanceMode.Ctap2Canonical);
         Assert.Equal(1, reader.ReadStartMap());
@@ -33,7 +34,7 @@ public class WebAuthnExtensionAuditReproTests
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1634_PrFRegistrationFalseOutputIsNotEnabled()
     {
-        var output = PrfAdapter.ParseRegistrationOutput(
+        var output = PrfCodec.ParseRegistrationOutput(
             new Dictionary<string, ReadOnlyMemory<byte>> { ["prf"] = new byte[] { 0xF4 } });
         Assert.NotNull(output);
         Assert.False(output.Enabled);
@@ -51,8 +52,8 @@ public class WebAuthnExtensionAuditReproTests
                 ["AQ"] = new() { First = new byte[] { 0xBB } }
             }
         };
-        var extensions = ExtensionPipeline.BuildAuthenticationExtensionsCbor(
-            new AuthenticationExtensionInputs(Prf: input), [new PublicKeyCredentialDescriptor(id)]);
+        var extensions = AuthenticationExtensionSession.Create(
+            new AuthenticationExtensionInputs(Prf: input), [new PublicKeyCredentialDescriptor(id)]).PrepareInputs(selected: null, token: null);
         Assert.NotNull(extensions);
         var reader = new CborReader(extensions.Value, CborConformanceMode.Ctap2Canonical);
         reader.ReadStartMap();
@@ -139,7 +140,7 @@ public class WebAuthnExtensionAuditReproTests
         authData.AddRange(extensions.Encode());
 
         var parsed = WebAuthnAuthenticatorData.Decode(authData.ToArray());
-        Assert.Throws<WebAuthnClientError>(() => PreviewSignAdapter.ParseRegistrationOutput(parsed, null));
+        Assert.Throws<WebAuthnClientError>(() => PreviewSignCodec.ParseRegistrationOutput(parsed, null));
     }
 
     /// <summary>

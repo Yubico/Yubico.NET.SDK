@@ -17,12 +17,12 @@ using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
-namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
+namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
 /// Adapter for the PRF (Pseudo-Random Function) extension.
 /// </summary>
-internal static class PrfAdapter
+internal static class PrfCodec
 {
     /// <summary>
     /// Applies PRF input to the CTAP extension builder for registration.

@@ -15,12 +15,12 @@
 using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
-namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
+namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
 /// Adapter for the largeBlob extension.
 /// </summary>
-internal static class LargeBlobAdapter
+internal static class LargeBlobCodec
 {
     /// <summary>
     /// Applies largeBlob input to the CTAP extension builder for registration.

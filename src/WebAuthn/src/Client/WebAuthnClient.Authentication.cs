@@ -119,26 +119,43 @@ public sealed partial class WebAuthnClient
             AuthenticationExtensionSession Extensions)> AttemptAsync(UvDecision decision, CancellationToken ct)
         {
             var extensions = AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context);
-            var request = BuildGetAssertionRequest(options, clientData, auth, decision, extensions);
+
+            // Allow-list selection (WebAuthn L3 §5.1.4 via python-fido2 do_get_assertion L980-1023 and
+            // yubikit-android Ctap2Client L663-689): find the credential with an up:false probe, then
+            // assert with exactly that descriptor so per-credential extension inputs can name it. When
+            // nothing matched, a dummy descriptor still goes to the authenticator: user presence is
+            // requested either way, so "credential absent" is not observable without a gesture.
+            PublicKeyCredentialDescriptor? selected = null;
+            IReadOnlyList<PublicKeyCredentialDescriptor>? allowList = null;
+            if (options.AllowCredentials is { Count: > 0 } candidates)
+            {
+                selected = await ProbeCredentialsAsync(
+                    options.RpId, candidates, info, auth, decision, PinUvAuthTokenPermissions.GetAssertion | extensions.Permissions, ct)
+                    .ConfigureAwait(false);
+                allowList = [selected ?? new PublicKeyCredentialDescriptor(DummyCredentialId, candidates[0].Type)];
+            }
+
+            var request = BuildGetAssertionRequest(options, clientData, auth, decision, extensions, selected, allowList);
             var matches = await CredentialMatcher.MatchAsync(_backend, request, ct).ConfigureAwait(false);
             return (matches, extensions);
         }
     }
+
+    // python-fido2 client/__init__.py L1012-1017: "We still need to send a dummy value if there was an
+    // allow_list but no matches were found" (id = b"\0").
+    private static readonly byte[] DummyCredentialId = [0x00];
 
     private static BackendGetAssertionRequest BuildGetAssertionRequest(
         AuthenticationOptions options,
         WebAuthnClientData clientData,
         CeremonyAuth auth,
         UvDecision decision,
-        AuthenticationExtensionSession extensions)
+        AuthenticationExtensionSession extensions,
+        PublicKeyCredentialDescriptor? selected,
+        IReadOnlyList<PublicKeyCredentialDescriptor>? allowList)
     {
-        IReadOnlyList<PublicKeyCredentialDescriptor>? allowList = options.AllowCredentials is { Count: > 0 } allowCredentials
-            ? allowCredentials.Select(desc => new PublicKeyCredentialDescriptor(desc.Id, desc.Type, desc.Transports)).ToList()
-            : null;
-
         // Extension inputs first: an input that cannot be built must fail before any pinUvAuthParam exists.
-        // Credential selection (R4) will supply `selected`.
-        var extensionsCbor = extensions.PrepareInputs(selected: null, auth.Token);
+        var extensionsCbor = extensions.PrepareInputs(selected, auth.Token);
         var (pinUvAuthParam, pinUvAuthProtocol) = auth.SignClientData(clientData.Hash.Span);
 
         return new BackendGetAssertionRequest

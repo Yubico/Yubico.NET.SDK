@@ -245,4 +245,99 @@ public class WebAuthnClientCeremonyFrameTests
         Assert.Null(sent.PinUvAuthProtocol);
         Assert.Null(sent.Options);
     }
+
+    // ---- Allow-list credential selection (extension-processing R4) ----
+
+    private static readonly byte[] DummyCredentialId = [0x00]; // python-fido2 client/__init__.py L1012-1017: id=b"\0"
+
+    private static AuthenticationOptions WithAllowList(params PublicKeyCredentialDescriptor[] allowList) =>
+        Authentication(UserVerificationPreference.Discouraged) with { AllowCredentials = allowList };
+
+    private void ArrangeNoTokenAuthenticator() =>
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo()); // no clientPin: ceremony runs without a token
+
+    /// <summary>
+    ///     python-fido2 do_get_assertion L980-1023 / yubikit-android Ctap2Client L663-689: with an allow list the
+    ///     client first finds the credential with an up:false probe, then asserts with exactly that one descriptor.
+    /// </summary>
+    [Fact]
+    public async Task GetAssertion_AllowList_ProbesWithUpFalse_ThenSendsOnlyTheSelectedDescriptor()
+    {
+        ArrangeNoTokenAuthenticator();
+        var absent = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
+        var present = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
+        var requests = new List<BackendGetAssertionRequest>();
+        _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(requests.Add), Arg.Any<CancellationToken>())
+            .Returns(call => call.Arg<BackendGetAssertionRequest>().AllowList!.Any(d => d.Id.Span.SequenceEqual(present.Id.Span))
+                ? MockFido2Responses.CreateMockGetAssertionResponse(present.Id.ToArray())
+                : throw new CtapException(CtapStatus.NoCredentials));
+
+        var matches = await _client.GetAssertionAsync(WithAllowList(absent, present), pinBytes: null, TestContext.Current.CancellationToken);
+
+        Assert.Equal(present.Id.ToArray(), Assert.Single(matches).Id.ToArray());
+        var real = requests[^1];
+        Assert.Null(real.Options); // up is never sent as false on the real request
+        Assert.Equal([present], real.AllowList);
+        var probes = requests[..^1];
+        Assert.NotEmpty(probes);
+        Assert.All(probes, probe => Assert.False(probe.Options!["up"]));
+        Assert.Equal(2, probes.Sum(probe => probe.AllowList!.Count)); // every candidate was probed once
+    }
+
+    /// <summary>Nothing matched: a dummy descriptor still goes to the authenticator so user presence is requested
+    /// and the relying party cannot learn "credential absent" without a gesture; the result is empty as before.</summary>
+    [Fact]
+    public async Task GetAssertion_AllowList_NothingMatches_SendsDummyDescriptorAndReturnsEmpty()
+    {
+        ArrangeNoTokenAuthenticator();
+        var requests = new List<BackendGetAssertionRequest>();
+        _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(requests.Add), Arg.Any<CancellationToken>())
+            .Throws(new CtapException(CtapStatus.NoCredentials));
+
+        var matches = await _client.GetAssertionAsync(
+            WithAllowList(new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32))), pinBytes: null, TestContext.Current.CancellationToken);
+
+        Assert.Empty(matches);
+        var real = requests[^1];
+        Assert.Null(real.Options);
+        var dummy = Assert.Single(real.AllowList!);
+        Assert.Equal(DummyCredentialId, dummy.Id.ToArray());
+        Assert.Equal("public-key", dummy.Type);
+    }
+
+    /// <summary>With a token the probe is signed and the token is re-minted before the real assertion (5.8.0 rule).</summary>
+    [Fact]
+    public async Task GetAssertion_AllowList_WithToken_SignsProbeAndRemintsBeforeAsserting()
+    {
+        var permissions = new List<PinUvAuthTokenPermissions>();
+        _backend.GetPinUvTokenAsync(
+                PinUvAuthMethod.Pin, Arg.Do<PinUvAuthTokenPermissions>(permissions.Add), RpId,
+                Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), (byte[])TokenBytes.Clone()));
+        var credential = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
+        var requests = new List<BackendGetAssertionRequest>();
+        _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(requests.Add), Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credential.Id.ToArray()));
+
+        await _client.GetAssertionAsync(
+            Authentication(UserVerificationPreference.Required) with { AllowCredentials = [credential] }, Pin, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, requests.Count);
+        Assert.NotNull(requests[0].PinUvAuthParam); // probe
+        Assert.NotNull(requests[1].PinUvAuthParam); // real assertion, signed by the re-minted token
+        Assert.Equal([PinUvAuthTokenPermissions.GetAssertion, PinUvAuthTokenPermissions.GetAssertion], permissions);
+    }
+
+    [Fact]
+    public async Task GetAssertion_NoAllowList_DoesNotProbe()
+    {
+        ArrangeNoTokenAuthenticator();
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse());
+
+        await _client.GetAssertionAsync(Authentication(UserVerificationPreference.Discouraged), pinBytes: null, TestContext.Current.CancellationToken);
+
+        await _backend.Received(1).GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+    }
 }

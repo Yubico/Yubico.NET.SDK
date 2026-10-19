@@ -14,7 +14,6 @@
 
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
@@ -32,6 +31,18 @@ internal interface IWebAuthnBackend : IAsyncDisposable
     /// Gets cached authenticator info (does not require user presence).
     /// </summary>
     Task<AuthenticatorInfo> GetCachedInfoAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The PIN/UV auth protocol this backend speaks with the authenticator. Available before and without
+    /// a token: extensions such as hmac-secret need it for key agreement even when no PIN is involved.
+    /// </summary>
+    IPinUvAuthProtocol Protocol { get; }
+
+    /// <summary>
+    /// Performs CTAP key agreement (§6.5.5.4 getKeyAgreement, then §6.5.6 encapsulate) and returns the
+    /// platform key plus shared secret. The caller owns the result and disposes it to zero the secret.
+    /// </summary>
+    Task<PinUvSharedSecret> EncapsulateAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Obtains a PIN/UV auth token with the specified permissions.

@@ -37,14 +37,20 @@ internal sealed class RegistrationExtensionSession
         _requested = requested;
     }
 
-    /// <summary>Creates the session for the extensions the relying party asked for.</summary>
+    /// <summary>
+    /// Creates the session for the extensions the relying party asked for and the authenticator
+    /// advertises. An extension GetInfo does not list produces no input and no output (WebAuthn L3 §9.4;
+    /// python-fido2 <c>is_supported</c>). credProps is client-side and always honoured.
+    /// </summary>
     /// <param name="inputs">The relying party's extension inputs, or null.</param>
     /// <param name="options">The registration options (previewSign derives its flags from the UV preference).</param>
     /// <param name="requireResidentKey">The effective requireResidentKey the client resolved (credProps reports it).</param>
+    /// <param name="context">GetInfo, PIN/UV protocol and backend for this ceremony.</param>
     public static RegistrationExtensionSession Create(
         RegistrationExtensionInputs? inputs,
         RegistrationOptions options,
-        bool requireResidentKey)
+        bool requireResidentKey,
+        ExtensionContext context)
     {
         if (inputs is null)
         {
@@ -52,13 +58,13 @@ internal sealed class RegistrationExtensionSession
         }
 
         var processors = new List<IRegistrationExtensionProcessor>();
-        if (inputs.CredProtect is not null) processors.Add(new CredProtectProcessor(inputs.CredProtect));
-        if (inputs.CredBlob is not null) processors.Add(new CredBlobProcessor(inputs.CredBlob));
-        if (inputs.MinPinLength is not null) processors.Add(new MinPinLengthProcessor());
-        if (inputs.LargeBlob is not null) processors.Add(new LargeBlobProcessor(inputs.LargeBlob));
-        if (inputs.Prf is not null) processors.Add(new PrfProcessor(inputs.Prf, allowCredentials: null));
+        if (inputs.CredProtect is not null && context.Supports(ExtensionIdentifiers.CredProtect)) processors.Add(new CredProtectProcessor(inputs.CredProtect));
+        if (inputs.CredBlob is not null && context.Supports(ExtensionIdentifiers.CredBlob)) processors.Add(new CredBlobProcessor(inputs.CredBlob));
+        if (inputs.MinPinLength is not null && context.Supports(ExtensionIdentifiers.MinPinLength)) processors.Add(new MinPinLengthProcessor());
+        if (inputs.LargeBlob is not null && LargeBlobProcessor.IsSupported(context)) processors.Add(new LargeBlobProcessor(inputs.LargeBlob));
+        if (inputs.Prf is not null && context.Supports(ExtensionIdentifiers.HmacSecret)) processors.Add(new PrfProcessor(inputs.Prf, allowCredentials: null));
         if (inputs.CredProps is not null) processors.Add(new CredPropsProcessor(requireResidentKey));
-        if (inputs.PreviewSign is not null) processors.Add(new PreviewSignProcessor(inputs.PreviewSign, options.UserVerification));
+        if (inputs.PreviewSign is not null && context.Supports(ExtensionIdentifiers.PreviewSign)) processors.Add(new PreviewSignProcessor(inputs.PreviewSign, options.UserVerification));
         return new RegistrationExtensionSession(processors, requested: true);
     }
 

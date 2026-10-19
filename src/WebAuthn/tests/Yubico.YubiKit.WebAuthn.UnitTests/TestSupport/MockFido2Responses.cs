@@ -105,18 +105,29 @@ internal static class MockFido2Responses
         return authData;
     }
 
+    /// <summary>The GetInfo "extensions" list the mock advertises unless a test overrides it.</summary>
+    public static readonly string[] DefaultExtensions = ["hmac-secret"];
+
+    /// <summary>Every extension the processors know, for tests that exercise them all.</summary>
+    public static readonly string[] AllKnownExtensions =
+        ["credProtect", "credBlob", "hmac-secret", "largeBlobKey", "minPinLength", "previewSign"];
+
     public static AuthenticatorInfo CreateMockAuthenticatorInfo(
         bool clientPinSupported = false,
         bool uvSupported = false,
         int? minPinLength = null,
-        bool residentKeySupported = false)
+        bool residentKeySupported = false,
+        IReadOnlyList<string>? extensions = null,
+        bool largeBlobsSupported = false)
     {
+        extensions ??= DefaultExtensions;
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
         var optionsCount = 0;
         if (clientPinSupported) optionsCount++;
         if (uvSupported) optionsCount++;
         if (residentKeySupported) optionsCount++;
+        if (largeBlobsSupported) optionsCount++;
 
         var mapSize = (optionsCount > 0 ? 4 : 3) + (minPinLength.HasValue ? 1 : 0);
         writer.WriteStartMap(mapSize);
@@ -130,8 +141,11 @@ internal static class MockFido2Responses
 
         // 0x02: extensions
         writer.WriteInt32(2);
-        writer.WriteStartArray(1);
-        writer.WriteTextString("hmac-secret");
+        writer.WriteStartArray(extensions.Count);
+        foreach (var extension in extensions)
+        {
+            writer.WriteTextString(extension);
+        }
         writer.WriteEndArray();
 
         // 0x03: aaguid
@@ -144,7 +158,7 @@ internal static class MockFido2Responses
             writer.WriteInt32(4);
             writer.WriteStartMap(optionsCount);
 
-            // CTAP2 canonical order: shorter keys first, then bytewise ("rk", "uv", "clientPin").
+            // CTAP2 canonical order: shorter keys first, then bytewise ("rk", "uv", "clientPin", "largeBlobs").
             if (residentKeySupported)
             {
                 writer.WriteTextString("rk");
@@ -160,6 +174,12 @@ internal static class MockFido2Responses
             if (clientPinSupported)
             {
                 writer.WriteTextString("clientPin");
+                writer.WriteBoolean(true);
+            }
+
+            if (largeBlobsSupported)
+            {
+                writer.WriteTextString("largeBlobs");
                 writer.WriteBoolean(true);
             }
 

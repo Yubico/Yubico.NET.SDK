@@ -35,12 +35,17 @@ internal sealed class AuthenticationExtensionSession
         _requested = requested;
     }
 
-    /// <summary>Creates the session for the extensions the relying party asked for.</summary>
+    /// <summary>
+    /// Creates the session for the extensions the relying party asked for and the authenticator
+    /// advertises; see <see cref="RegistrationExtensionSession.Create"/>.
+    /// </summary>
     /// <param name="inputs">The relying party's extension inputs, or null.</param>
     /// <param name="allowCredentials">The relying party's allow list; per-credential inputs are validated against it.</param>
+    /// <param name="context">GetInfo, PIN/UV protocol and backend for this ceremony.</param>
     public static AuthenticationExtensionSession Create(
         AuthenticationExtensionInputs? inputs,
-        IReadOnlyList<PublicKeyCredentialDescriptor>? allowCredentials)
+        IReadOnlyList<PublicKeyCredentialDescriptor>? allowCredentials,
+        ExtensionContext context)
     {
         if (inputs is null)
         {
@@ -48,10 +53,10 @@ internal sealed class AuthenticationExtensionSession
         }
 
         var processors = new List<IAuthenticationExtensionProcessor>();
-        if (inputs.GetCredBlob) processors.Add(new CredBlobProcessor(input: null));
-        if (inputs.LargeBlob is not null) processors.Add(new LargeBlobProcessor(inputs.LargeBlob));
-        if (inputs.Prf is not null) processors.Add(new PrfProcessor(inputs.Prf, allowCredentials));
-        if (inputs.PreviewSign is not null) processors.Add(new PreviewSignProcessor(inputs.PreviewSign, allowCredentials));
+        if (inputs.GetCredBlob && context.Supports(ExtensionIdentifiers.CredBlob)) processors.Add(new CredBlobProcessor(input: null));
+        if (inputs.LargeBlob is not null && LargeBlobProcessor.IsSupported(context)) processors.Add(new LargeBlobProcessor(inputs.LargeBlob));
+        if (inputs.Prf is not null && context.Supports(ExtensionIdentifiers.HmacSecret)) processors.Add(new PrfProcessor(inputs.Prf, allowCredentials));
+        if (inputs.PreviewSign is not null && context.Supports(ExtensionIdentifiers.PreviewSign)) processors.Add(new PreviewSignProcessor(inputs.PreviewSign, allowCredentials));
         return new AuthenticationExtensionSession(processors, requested: true);
     }
 

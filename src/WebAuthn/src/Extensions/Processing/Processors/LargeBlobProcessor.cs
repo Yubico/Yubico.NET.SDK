@@ -27,6 +27,10 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 internal sealed class LargeBlobProcessor(LargeBlobInput input) : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor
 {
     public string Name => ExtensionIdentifiers.LargeBlobKey;
+
+    /// <summary>python-fido2 LargeBlobExtension.is_supported: the largeBlobKey extension plus the largeBlobs option.</summary>
+    public static bool IsSupported(ExtensionContext context) =>
+        context.Supports(ExtensionIdentifiers.LargeBlobKey) && context.OptionEnabled("largeBlobs");
     public PinUvAuthTokenPermissions Permissions => PinUvAuthTokenPermissions.None;
 
     public void PrepareInputs(ExtensionBuilder builder, PinUvAuthTokenSession? token) =>

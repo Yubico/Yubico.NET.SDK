@@ -22,7 +22,7 @@ public class WebAuthnExtensionAuditReproTests
     public void YESDK1609_AuthenticationPrfUsesEncryptedHmacSecretNotLiteralPrf()
     {
         var inputs = new AuthenticationExtensionInputs(Prf: new PrfInput { First = new byte[] { 0xAA } });
-        var extensions = AuthenticationExtensionSession.Create(inputs, allowCredentials: null).PrepareInputs(selected: null, token: null);
+        var extensions = AuthenticationExtensionSession.Create(inputs, allowCredentials: null, TestExtensionContext.SupportingAll()).PrepareInputs(selected: null, token: null);
         Assert.NotNull(extensions);
         var reader = new CborReader(extensions.Value, CborConformanceMode.Ctap2Canonical);
         Assert.Equal(1, reader.ReadStartMap());
@@ -53,7 +53,7 @@ public class WebAuthnExtensionAuditReproTests
             }
         };
         var extensions = AuthenticationExtensionSession.Create(
-            new AuthenticationExtensionInputs(Prf: input), [new PublicKeyCredentialDescriptor(id)]).PrepareInputs(selected: null, token: null);
+            new AuthenticationExtensionInputs(Prf: input), [new PublicKeyCredentialDescriptor(id)], TestExtensionContext.SupportingAll()).PrepareInputs(selected: null, token: null);
         Assert.NotNull(extensions);
         var reader = new CborReader(extensions.Value, CborConformanceMode.Ctap2Canonical);
         reader.ReadStartMap();
@@ -84,7 +84,7 @@ public class WebAuthnExtensionAuditReproTests
 
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(extensions: MockFido2Responses.AllKnownExtensions));
         backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
             .Returns(MakeCredentialResponse.Decode(MockFido2Responses.BuildMakeCredentialResponseCbor([.. authData], "none")));
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
@@ -162,7 +162,7 @@ public class WebAuthnExtensionAuditReproTests
 
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(extensions: MockFido2Responses.AllKnownExtensions));
         BackendGetAssertionRequest? sent = null;
         backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => sent = r), Arg.Any<CancellationToken>())
             .Returns(MockFido2Responses.CreateMockGetAssertionResponse(authDataExtensionsCbor: outputExtensions.Encode()));

@@ -42,6 +42,54 @@ public class WebAuthnBackendTests
 {
     private readonly IFidoSession _session = Substitute.For<IFidoSession>();
 
+    private const int ClientPinResponseKeyAgreement = 0x01; // CTAP §6.5.5 authenticatorClientPIN response key 1
+    private const int SharedSecretLengthV2 = 64;             // PIN/UV protocol 2: HMAC key (32) || AES key (32)
+
+    /// <summary>
+    ///     CTAP §6.5.5.4 getKeyAgreement + §6.5.6 encapsulate: the backend asks the authenticator for its
+    ///     COSE key, derives the shared secret with the protocol's own ephemeral key, and the secret is
+    ///     zeroed on dispose. The authenticator here is a real P-256 key so the ECDH actually runs.
+    /// </summary>
+    [Fact]
+    public async Task EncapsulateAsync_DerivesSharedSecretFromAuthenticatorKeyAgreement_AndZeroesOnDispose()
+    {
+        using var authenticatorKey = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        var authenticatorPublic = authenticatorKey.ExportParameters(includePrivateParameters: false);
+        var response = new System.Formats.Cbor.CborWriter(System.Formats.Cbor.CborConformanceMode.Ctap2Canonical);
+        response.WriteStartMap(1);
+        response.WriteInt32(ClientPinResponseKeyAgreement);
+        response.WriteStartMap(5);
+        response.WriteInt32(1); response.WriteInt32(2);     // kty: EC2
+        response.WriteInt32(3); response.WriteInt32(-25);   // alg: ECDH-ES+HKDF-256
+        response.WriteInt32(-1); response.WriteInt32(1);    // crv: P-256
+        response.WriteInt32(-2); response.WriteByteString(authenticatorPublic.Q.X!);
+        response.WriteInt32(-3); response.WriteByteString(authenticatorPublic.Q.Y!);
+        response.WriteEndMap();
+        response.WriteEndMap();
+        _session.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(new ReadOnlyMemory<byte>(response.Encode()));
+
+        await using var backend = new WebAuthnBackend(_session);
+        var secret = await backend.EncapsulateAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, secret.KeyAgreement[1]);                 // the platform key sent back is EC2
+        Assert.Equal(SharedSecretLengthV2, secret.SharedSecret.Length);
+        Assert.Contains(secret.SharedSecret.ToArray(), b => b != 0);
+        var copy = secret.SharedSecret.ToArray();
+        secret.Dispose();
+        Assert.Throws<ObjectDisposedException>(() => secret.SharedSecret);
+        Assert.NotEqual(copy, new byte[copy.Length]); // the copy proves the secret existed; the owner is zeroed
+    }
+
+    /// <summary>The protocol is reachable without a token, as hmac-secret on CTAP 2.0 requires.</summary>
+    [Fact]
+    public async Task Protocol_IsAvailableWithoutAToken()
+    {
+        await using var backend = new WebAuthnBackend(_session);
+
+        Assert.Equal(2, backend.Protocol.Version);
+    }
+
     [Fact]
     public async Task GetAssertionAsync_DoesNotZeroTheCallersPinUvAuthParam()
     {

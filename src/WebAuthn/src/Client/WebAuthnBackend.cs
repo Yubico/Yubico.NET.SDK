@@ -55,6 +55,29 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
     }
 
     /// <inheritdoc/>
+    public IPinUvAuthProtocol Protocol
+    {
+        get
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            EnsureProtocolInitialized();
+            return _protocol!;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<PinUvSharedSecret> EncapsulateAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        EnsureProtocolInitialized();
+        var clientPin = new ClientPin(_session, _protocol!);
+        var authenticatorKey = await clientPin.GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
+        var (keyAgreement, sharedSecret) = _protocol!.Encapsulate(authenticatorKey);
+        return new PinUvSharedSecret(keyAgreement, sharedSecret);
+    }
+
+    /// <inheritdoc/>
     public async Task<int?> GetPinRetriesAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);

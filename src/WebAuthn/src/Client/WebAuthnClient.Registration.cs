@@ -104,12 +104,17 @@ public sealed partial class WebAuthnClient
             _ => false
         };
 
+        // Extension processors for this attempt; their permissions join the token request
+        // (python-fido2 do_make_credential L787-795, yubikit-android Ctap2Client L484).
+        var context = new ExtensionContext(info, _backend.Protocol, _backend);
+        var extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context);
+
         // Determine UV/PIN strategy
         var uvDecision = UvDecisionLogic.Decide(
             info,
             options.UserVerification,
             pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
-            requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion);
+            requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion | extensions.Permissions);
 
         // Acquire PIN/UV token with retry on PinAuthInvalid
         PinUvAuthTokenSession? tokenSession = null;
@@ -137,7 +142,6 @@ public sealed partial class WebAuthnClient
                 cancellationToken).ConfigureAwait(false);
 
             // Build backend request with filtered exclude list
-            var extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey);
             var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey, extensions);
 
             // Execute MakeCredential
@@ -155,7 +159,7 @@ public sealed partial class WebAuthnClient
                     info,
                     Preferences.UserVerificationPreference.Required,
                     pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
-                    requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion);
+                    requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion | extensions.Permissions);
 
                 (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
                     uvDecision,
@@ -173,7 +177,7 @@ public sealed partial class WebAuthnClient
                     cancellationToken).ConfigureAwait(false);
 
                 // A fresh attempt gets fresh processors (single-use per attempt).
-                extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey);
+                extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context);
                 request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey, extensions);
                 try
                 {

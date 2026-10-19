@@ -7,6 +7,7 @@ using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.AuditV2;
 
@@ -47,7 +48,7 @@ public class WebAuthnLargeBlobAuditReproTests
 
         // The current pipeline has no argument for the decoded 0x05 key. Keep
         // this contract test focused on the actual registration output it produces.
-        var result = await RegistrationExtensionSession.Create(inputs, options, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required)
+        var result = await RegistrationExtensionSession.Create(inputs, options, requireResidentKey: options.ResidentKey == ResidentKeyPreference.Required, TestExtensionContext.SupportingAll())
             .PrepareOutputsAsync(ctapResponse, authData, token: null, TestContext.Current.CancellationToken);
         Assert.NotNull(result?.LargeBlob);
         Assert.True(result.LargeBlob.Supported);

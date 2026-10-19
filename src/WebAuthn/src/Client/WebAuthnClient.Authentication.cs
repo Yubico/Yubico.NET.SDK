@@ -93,12 +93,17 @@ public sealed partial class WebAuthnClient
         // Get authenticator info
         var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
 
+        // Extension processors for this attempt; their permissions join the token request
+        // (python-fido2 do_get_assertion L961-967, yubikit-android Ctap2Client L652-655).
+        var context = new ExtensionContext(info, _backend.Protocol, _backend);
+        var extensions = AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context);
+
         // Determine UV/PIN strategy
         var uvDecision = UvDecisionLogic.Decide(
             info,
             options.UserVerification,
             pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
-            requestedPermissions: PinUvAuthTokenPermissions.GetAssertion);
+            requestedPermissions: PinUvAuthTokenPermissions.GetAssertion | extensions.Permissions);
 
         // Acquire PIN/UV token with retry on PinAuthInvalid
         PinUvAuthTokenSession? tokenSession = null;
@@ -115,7 +120,6 @@ public sealed partial class WebAuthnClient
                 cancellationToken).ConfigureAwait(false);
 
             // Build backend request
-            var extensions = AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials);
             var request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision, extensions);
 
             // Match credentials (handles allow-list probing and discoverable enumeration)
@@ -133,7 +137,7 @@ public sealed partial class WebAuthnClient
                     info,
                     Preferences.UserVerificationPreference.Required,
                     pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
-                    requestedPermissions: PinUvAuthTokenPermissions.GetAssertion);
+                    requestedPermissions: PinUvAuthTokenPermissions.GetAssertion | extensions.Permissions);
 
                 (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
                     uvDecision,
@@ -143,7 +147,7 @@ public sealed partial class WebAuthnClient
                     cancellationToken).ConfigureAwait(false);
 
                 // A fresh attempt gets fresh processors (single-use per attempt).
-                extensions = AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials);
+                extensions = AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context);
                 request = BuildGetAssertionRequest(options, clientData, tokenSession, uvDecision, extensions);
                 try
                 {

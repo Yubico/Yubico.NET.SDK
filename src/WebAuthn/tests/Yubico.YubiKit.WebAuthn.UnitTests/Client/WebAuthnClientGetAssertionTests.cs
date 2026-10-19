@@ -478,7 +478,8 @@ public class WebAuthnClientGetAssertionTests
     private void ArrangePinTokenAcquisition(TestPinUvAuthProtocol protocol)
     {
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+                clientPinSupported: true, extensions: MockFido2Responses.AllKnownExtensions, largeBlobsSupported: true));
 
         _mockBackend.GetPinUvTokenAsync(
             PinUvAuthMethod.Pin,

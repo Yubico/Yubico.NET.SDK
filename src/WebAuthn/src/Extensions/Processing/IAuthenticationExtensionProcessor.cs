@@ -35,6 +35,12 @@ internal interface IAuthenticationExtensionProcessor
     /// <summary>PIN/UV auth token permissions this extension needs, folded into the ceremony's token request.</summary>
     PinUvAuthTokenPermissions Permissions { get; }
 
+    /// <summary>
+    /// Performs any authenticator round trip the inputs depend on (key agreement for hmac-secret). Called
+    /// once per attempt, after the token exists and before <c>PrepareInputs</c>. Default: nothing.
+    /// </summary>
+    ValueTask PrepareAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
+
     /// <summary>Adds this extension's authenticator input to the CTAP2 builder.</summary>
     /// <param name="builder">The CTAP2 extension builder for the getAssertion request.</param>
     /// <param name="selected">

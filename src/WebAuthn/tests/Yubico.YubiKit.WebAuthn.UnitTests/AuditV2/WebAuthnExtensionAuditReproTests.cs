@@ -3,12 +3,13 @@ using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Codec;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
@@ -17,12 +18,27 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.AuditV2;
 
 public class WebAuthnExtensionAuditReproTests
 {
+    private static ExtensionContext PrfContext()
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.EncapsulateAsync(Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvSharedSecret(new Dictionary<int, object?> { [1] = 2 }, new byte[64]));
+        return new ExtensionContext(
+            MockFido2Responses.CreateMockAuthenticatorInfo(extensions: MockFido2Responses.AllKnownExtensions),
+            new PinUvAuthProtocolV2(), backend);
+    }
+
+    /// <summary>WebAuthn L3 §10.1.4 over CTAP §12.7: the PRF request is an encrypted hmac-secret map, never a literal "prf" key.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1609")]
-    public void YESDK1609_AuthenticationPrfUsesEncryptedHmacSecretNotLiteralPrf()
+    public async Task YESDK1609_AuthenticationPrfUsesEncryptedHmacSecretNotLiteralPrf()
     {
         var inputs = new AuthenticationExtensionInputs(Prf: new PrfInput { First = new byte[] { 0xAA } });
-        var extensions = AuthenticationExtensionSession.Create(inputs, allowCredentials: null, TestExtensionContext.SupportingAll()).PrepareInputs(selected: null, token: null);
+        using var session = AuthenticationExtensionSession.Create(inputs, allowCredentials: null, PrfContext());
+        await session.PrepareAsync(TestContext.Current.CancellationToken);
+
+        var extensions = session.PrepareInputs(selected: null, token: null);
+
         Assert.NotNull(extensions);
         var reader = new CborReader(extensions.Value, CborConformanceMode.Ctap2Canonical);
         Assert.Equal(1, reader.ReadStartMap());
@@ -30,19 +46,21 @@ public class WebAuthnExtensionAuditReproTests
         Assert.Equal(CborReaderState.StartMap, reader.PeekState());
     }
 
+    /// <summary>L3 §10.1.4: enabled is the hmac-secret boolean output; false stays false.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1634_PrFRegistrationFalseOutputIsNotEnabled()
     {
         var output = PrfCodec.ParseRegistrationOutput(
-            new Dictionary<string, ReadOnlyMemory<byte>> { ["prf"] = new byte[] { 0xF4 } });
+            new Dictionary<string, ReadOnlyMemory<byte>> { ["hmac-secret"] = new byte[] { 0xF4 } });
         Assert.NotNull(output);
         Assert.False(output.Enabled);
     }
 
+    /// <summary>L3 §10.1.4: evalByCredential keyed on the selected credential is what gets sent.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
-    public void YESDK1634_PrFOnlyCredentialMapIsSelectedForMatchingAllowCredential()
+    public async Task YESDK1634_PrFOnlyCredentialMapIsSelectedForMatchingAllowCredential()
     {
         byte[] id = [0x01];
         var input = new PrfInput
@@ -52,8 +70,13 @@ public class WebAuthnExtensionAuditReproTests
                 ["AQ"] = new() { First = new byte[] { 0xBB } }
             }
         };
-        var extensions = AuthenticationExtensionSession.Create(
-            new AuthenticationExtensionInputs(Prf: input), [new PublicKeyCredentialDescriptor(id)], TestExtensionContext.SupportingAll()).PrepareInputs(selected: null, token: null);
+        var selected = new PublicKeyCredentialDescriptor(id);
+        using var session = AuthenticationExtensionSession.Create(
+            new AuthenticationExtensionInputs(Prf: input), [selected], PrfContext());
+        await session.PrepareAsync(TestContext.Current.CancellationToken);
+
+        var extensions = session.PrepareInputs(selected, token: null);
+
         Assert.NotNull(extensions);
         var reader = new CborReader(extensions.Value, CborConformanceMode.Ctap2Canonical);
         reader.ReadStartMap();

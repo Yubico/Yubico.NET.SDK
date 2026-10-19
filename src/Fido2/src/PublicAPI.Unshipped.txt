@@ -461,8 +461,6 @@ Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithLargeBlobKey() -> Yubico.Yu
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithMinPinLength() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Fido2.Extensions.PreviewSignAuthenticationInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Fido2.Extensions.PreviewSignRegistrationInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
-Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPrf() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
-Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithPrf(Yubico.YubiKit.Fido2.Extensions.PrfInput! input) -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers
 Yubico.YubiKit.Fido2.Extensions.ExtensionOutput
 Yubico.YubiKit.Fido2.Extensions.ExtensionOutput.ExtensionIds.get -> System.Collections.Generic.IEnumerable<string!>!
@@ -583,28 +581,6 @@ Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.KeyHandle.init -> void
 Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.PreviewSignSigningParams(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> tbs, System.ReadOnlyMemory<byte>? additionalArgs = null) -> void
 Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.Tbs.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Fido2.Extensions.PreviewSignSigningParams.Tbs.init -> void
-Yubico.YubiKit.Fido2.Extensions.PrfInput
-Yubico.YubiKit.Fido2.Extensions.PrfInput.EvalByCredential.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Yubico.YubiKit.Fido2.Extensions.PrfInputValues!>?
-Yubico.YubiKit.Fido2.Extensions.PrfInput.EvalByCredential.init -> void
-Yubico.YubiKit.Fido2.Extensions.PrfInput.First.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Fido2.Extensions.PrfInput.First.init -> void
-Yubico.YubiKit.Fido2.Extensions.PrfInput.PrfInput() -> void
-Yubico.YubiKit.Fido2.Extensions.PrfInput.Second.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Fido2.Extensions.PrfInput.Second.init -> void
-Yubico.YubiKit.Fido2.Extensions.PrfInputValues
-Yubico.YubiKit.Fido2.Extensions.PrfInputValues.First.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Fido2.Extensions.PrfInputValues.First.init -> void
-Yubico.YubiKit.Fido2.Extensions.PrfInputValues.PrfInputValues() -> void
-Yubico.YubiKit.Fido2.Extensions.PrfInputValues.Second.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Fido2.Extensions.PrfInputValues.Second.init -> void
-Yubico.YubiKit.Fido2.Extensions.PrfOutput
-Yubico.YubiKit.Fido2.Extensions.PrfOutput.Enabled.get -> bool
-Yubico.YubiKit.Fido2.Extensions.PrfOutput.Enabled.init -> void
-Yubico.YubiKit.Fido2.Extensions.PrfOutput.First.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Fido2.Extensions.PrfOutput.First.init -> void
-Yubico.YubiKit.Fido2.Extensions.PrfOutput.PrfOutput() -> void
-Yubico.YubiKit.Fido2.Extensions.PrfOutput.Second.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Fido2.Extensions.PrfOutput.Second.init -> void
 Yubico.YubiKit.Fido2.FidoSession
 Yubico.YubiKit.Fido2.FidoSession.GetAssertionAsync(string! rpId, System.ReadOnlyMemory<byte> clientDataHash, Yubico.YubiKit.Fido2.Credentials.GetAssertionOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.Credentials.GetAssertionResponse!>!
 Yubico.YubiKit.Fido2.FidoSession.GetInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.AuthenticatorInfo!>!
@@ -744,7 +720,6 @@ const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.LargeBlob = "largeBlo
 const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.LargeBlobKey = "largeBlobKey" -> string!
 const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.MinPinLength = "minPinLength" -> string!
 const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.PreviewSign = "previewSign" -> string!
-const Yubico.YubiKit.Fido2.Extensions.ExtensionIdentifiers.Prf = "prf" -> string!
 const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.ChangePin = 4 -> int
 const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.GetKeyAgreement = 2 -> int
 const Yubico.YubiKit.Fido2.Pin.ClientPinSubCommand.GetPinToken = 5 -> int
@@ -931,9 +906,6 @@ static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.EncodeRegistrationInput(Y
 static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.operator !=(Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject left, Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject right) -> bool
 static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.operator ==(Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject left, Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject right) -> bool
 static Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.TryExtractGeneratedKey(Yubico.YubiKit.Fido2.Credentials.MakeCredentialResponse! response, out Yubico.YubiKit.Fido2.Extensions.PreviewSignGeneratedKey? generatedKey) -> bool
-static Yubico.YubiKit.Fido2.Extensions.PrfInput.ComputeSalt(System.ReadOnlySpan<byte> input) -> byte[]!
-static Yubico.YubiKit.Fido2.Extensions.PrfOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Fido2.Extensions.PrfOutput?
-static Yubico.YubiKit.Fido2.Extensions.PrfOutput.FromHmacSecretOutput(System.ReadOnlySpan<byte> decryptedOutput, bool hasTwoOutputs = false) -> Yubico.YubiKit.Fido2.Extensions.PrfOutput!
 static Yubico.YubiKit.Fido2.FidoSession.CreateAsync(Yubico.YubiKit.Core.Abstractions.IConnection! connection, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.FidoSession!>!
 static Yubico.YubiKit.Fido2.IYubiKeyExtensions.CreateFidoSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.FidoSession!>!
 static Yubico.YubiKit.Fido2.IYubiKeyExtensions.GetFidoInfoAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Fido2.AuthenticatorInfo!>!
@@ -978,3 +950,5 @@ virtual Yubico.YubiKit.Fido2.Extensions.CoseSignArgs.PrintMembers(System.Text.St
 ~override Yubico.YubiKit.Fido2.Credentials.AttestationFormat.Equals(object obj) -> bool
 ~override Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.Equals(object obj) -> bool
 ~override Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor.InnerAttestationObject.ToString() -> string
+
+Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder.WithHmacSecret() -> Yubico.YubiKit.Fido2.Extensions.ExtensionBuilder!

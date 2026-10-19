@@ -173,13 +173,12 @@ The SDK uses the **ExtensionBuilder** fluent pattern for all WebAuthn/CTAP exten
 | Extension | Builder Method | Description | YubiKey FW |
 |-----------|---------------|-------------|------------|
 | credProtect | `.WithCredProtect()` | Credential protection level | 5.2+ |
-| hmac-secret | `.WithHmacSecret()` | CTAP2 symmetric secret derivation | 5.2+ |
+| hmac-secret | `.WithHmacSecret()` (makeCredential: `true`) / `.WithHmacSecret(...)` (getAssertion: encrypted salts) | CTAP2 symmetric secret derivation; WebAuthn's prf extension is built on it in the WebAuthn package | 5.2+ |
 | hmac-secret-mc | `.WithHmacSecretMakeCredential()` | hmac-secret during MakeCredential | 5.4+ |
 | credBlob | `.WithCredBlob()` | Per-credential blob storage | 5.5+ |
 | largeBlob | `.WithLargeBlob()` / `.WithLargeBlobKey()` | Large blob support (makeCredential) and the storage key (§12.3); blobs are read/written with `LargeBlobStorage` (§6.10). The direct §12.4 getAssertion read/write extension is not implemented (no YubiKey supports it) | 5.5+ |
 | minPinLength | `.WithMinPinLength()` | Require minimum PIN length | 5.4+ |
 | previewSign | `.WithPreviewSign(...)` | Delegated signing with a generated signing key | YubiKey FW with previewSign support |
-| prf | `.WithPrf()` | WebAuthn PRF extension (wraps hmac-secret) | 5.2+ |
 
 > **Note:** The `previewSign` extension is a first-class Fido2 extension via `WithPreviewSign(PreviewSignRegistrationInput)` and `WithPreviewSign(PreviewSignAuthenticationInput)`. The generic signing API is algorithm-agile: `tbs` and optional `additionalArgs` are algorithm-specific bytes and are encoded unchanged. **WARNING -- EXPERIMENTAL --** Public ARKG helpers remain available as experimental conveniences; they are not ready for production use and must not be treated as production cryptographic guidance. Convert them to raw `additionalArgs` with `PreviewSignCbor.EncodeAdditionalArgs(...)`. WebAuthn provides a high-level adapter (`Yubico.YubiKit.WebAuthn.Extensions.PreviewSign`) for Client API consumers; both layers share the canonical encoder in Fido2.
 
@@ -198,40 +197,20 @@ var options = new MakeCredentialOptions
     ResidentKey = true
 };
 
-// For GetAssertion with PRF
-var prfExtensions = new ExtensionBuilder()
-    .WithPrf(new PrfInput { First = salt1, Second = salt2 })
+// For GetAssertion: encrypted salts under the shared secret from key agreement
+var assertionExtensions = new ExtensionBuilder()
+    .WithHmacSecret(protocol, sharedSecret, keyAgreement, salt1, salt2)
     .Build();
 ```
 
-#### hmac-secret vs PRF Extension
+#### hmac-secret vs WebAuthn PRF
 
-These extensions serve similar purposes but operate at different protocol levels:
-
-| Aspect | hmac-secret (CTAP2) | PRF (WebAuthn) |
-|--------|---------------------|----------------|
-| Protocol | CTAP2 native | WebAuthn wrapper |
-| Salt encoding | Raw bytes | Base64url encoded |
-| Output | Raw HMAC bytes | eval/evalByCredential |
-| Use case | Direct authenticator access | Browser/WebAuthn API |
-
-**When to use which:**
-- Use **hmac-secret** when building CTAP2-level tools or when you need direct authenticator interaction
-- Use **PRF** when implementing WebAuthn APIs or browser-compatible flows
-
-```csharp
-// CTAP2 hmac-secret (direct)
-var hmacExtensions = new ExtensionBuilder()
-    .WithHmacSecret(hmacSecretInput)
-    .Build();
-
-// WebAuthn PRF (browser-compatible)
-var prfExtensions = new ExtensionBuilder()
-    .WithPrf(new PrfInput { First = salt1, Second = salt2 })
-    .Build();
-```
-
-Internally, PRF extension serializes using hmac-secret wire format but presents the WebAuthn PRF input/output model.
+`hmac-secret` is the CTAP2 extension (§12.7) and lives here. WebAuthn's `prf` extension (L3 §10.1.4) is a
+*client* extension built on top of it: the WebAuthn package hashes the relying party's inputs into salts
+(`SHA-256("WebAuthn PRF" || 0x00 || input)`), performs key agreement, encrypts and authenticates the salts
+with `WithHmacSecret(...)`, and decrypts the result. There is no `"prf"` key on the CTAP wire, so this
+package has no PRF types; see `Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput` and
+docs/architecture/webauthn-extension-processing.md ("Where code belongs").
 
 ### Credential Management
 

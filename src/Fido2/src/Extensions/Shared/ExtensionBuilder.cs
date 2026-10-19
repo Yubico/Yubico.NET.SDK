@@ -47,8 +47,7 @@ public sealed class ExtensionBuilder
     private bool _hmacSecretMc;
     private bool _minPinLength;
     private bool _largeBlobKey;
-    private bool _prf;
-    private PrfInput? _prfInput;
+    private bool _hmacSecretRequested;
     private PreviewSignRegistrationInput? _previewSignRegistration;
     private PreviewSignAuthenticationInput? _previewSignAuthentication;
 
@@ -134,6 +133,17 @@ public sealed class ExtensionBuilder
     public ExtensionBuilder WithLargeBlobKey()
     {
         _largeBlobKey = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Requests hmac-secret at authenticatorMakeCredential: CTAP 2.1-2.3 §12.7 <c>"hmac-secret": true</c>.
+    /// WebAuthn's prf extension (L3 §10.1.4) sends this at registration.
+    /// </summary>
+    /// <returns>This builder for chaining.</returns>
+    public ExtensionBuilder WithHmacSecret()
+    {
+        _hmacSecretRequested = true;
         return this;
     }
 
@@ -232,28 +242,7 @@ public sealed class ExtensionBuilder
         return this;
     }
 
-    /// <summary>
-    /// Indicates PRF extension support request for makeCredential.
-    /// </summary>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithPrf()
-    {
-        _prf = true;
-        return this;
-    }
 
-    /// <summary>
-    /// Adds PRF extension with evaluation inputs for getAssertion.
-    /// </summary>
-    /// <param name="input">The PRF input parameters.</param>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithPrf(PrfInput input)
-    {
-        ArgumentNullException.ThrowIfNull(input);
-        _prf = true;
-        _prfInput = input;
-        return this;
-    }
 
     /// <summary>
     /// Adds previewSign extension with key generation parameters for makeCredential.
@@ -307,7 +296,7 @@ public sealed class ExtensionBuilder
         writer.WriteStartMap(count);
 
         // Extensions must be sorted by key for canonical CBOR
-        // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "previewSign" < "prf"
+        // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "previewSign"
 
         if (_credBlob.HasValue && _getCredBlob)
         {
@@ -332,10 +321,21 @@ public sealed class ExtensionBuilder
             writer.WriteInt32((int)_credProtect.Value);
         }
 
+        if (_hmacSecret is not null && _hmacSecretRequested)
+        {
+            throw new InvalidOperationException(
+                "WithHmacSecret() (makeCredential: \"hmac-secret\": true) and WithHmacSecret(input) (getAssertion map) cannot be combined in one request.");
+        }
+
         if (_hmacSecret is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.HmacSecret);
             _hmacSecret.Encode(writer);
+        }
+        else if (_hmacSecretRequested)
+        {
+            writer.WriteTextString(ExtensionIdentifiers.HmacSecret);
+            writer.WriteBoolean(true);
         }
 
         if (_hmacSecretMc)
@@ -373,47 +373,6 @@ public sealed class ExtensionBuilder
             EncodePreviewSignAuthenticationInput(writer, _previewSignAuthentication);
         }
 
-        if (_prf)
-        {
-            writer.WriteTextString(ExtensionIdentifiers.Prf);
-            if (_prfInput is not null)
-            {
-                EncodePrfInput(writer, _prfInput);
-            }
-            else
-            {
-                // For makeCredential, just indicate support request
-                writer.WriteStartMap(0);
-                writer.WriteEndMap();
-            }
-        }
-
-        writer.WriteEndMap();
-    }
-
-    private static void EncodePrfInput(CborWriter writer, PrfInput input)
-    {
-        writer.WriteStartMap(1);
-        writer.WriteTextString("eval");
-
-        var evalCount = 1;
-        if (input.Second.HasValue) evalCount++;
-
-        writer.WriteStartMap(evalCount);
-
-        if (input.First.HasValue)
-        {
-            writer.WriteTextString("first");
-            writer.WriteByteString(input.First.Value.Span);
-        }
-
-        if (input.Second.HasValue)
-        {
-            writer.WriteTextString("second");
-            writer.WriteByteString(input.Second.Value.Span);
-        }
-
-        writer.WriteEndMap();
         writer.WriteEndMap();
     }
 
@@ -506,9 +465,9 @@ public sealed class ExtensionBuilder
                _largeBlob is not null ||
                _largeBlobKey ||
                _hmacSecret is not null ||
+               _hmacSecretRequested ||
                _hmacSecretMc ||
                _minPinLength ||
-               _prf ||
                _previewSignRegistration is not null ||
                _previewSignAuthentication is not null;
     }
@@ -520,10 +479,9 @@ public sealed class ExtensionBuilder
         if (_credBlob.HasValue || _getCredBlob) count++;
         if (_largeBlob is not null) count++;
         if (_largeBlobKey) count++;
-        if (_hmacSecret is not null) count++;
+        if (_hmacSecret is not null || _hmacSecretRequested) count++;
         if (_hmacSecretMc) count++;
         if (_minPinLength) count++;
-        if (_prf) count++;
         if (_previewSignRegistration is not null || _previewSignAuthentication is not null) count++;
         return count;
     }

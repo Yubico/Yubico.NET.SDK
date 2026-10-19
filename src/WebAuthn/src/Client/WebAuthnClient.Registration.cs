@@ -115,13 +115,31 @@ public sealed partial class WebAuthnClient
             .ConfigureAwait(false);
 
         // Outputs are prepared outside the escalation scope, while the token is still live.
-        return await BuildRegistrationResponseAsync(ctapResponse, clientData, options, extensions, auth.Token, cancellationToken)
-            .ConfigureAwait(false);
+        using (extensions)
+        {
+            return await BuildRegistrationResponseAsync(ctapResponse, clientData, options, extensions, auth.Token, cancellationToken)
+                .ConfigureAwait(false);
+        }
 
         async Task<(MakeCredentialResponse Response, RegistrationExtensionSession Extensions)> AttemptAsync(
             UvDecision decision, CancellationToken ct)
         {
             var extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context);
+            try
+            {
+                return await AttemptWithAsync(extensions, decision, ct).ConfigureAwait(false);
+            }
+            catch
+            {
+                extensions.Dispose();
+                throw;
+            }
+        }
+
+        async Task<(MakeCredentialResponse Response, RegistrationExtensionSession Extensions)> AttemptWithAsync(
+            RegistrationExtensionSession extensions, UvDecision decision, CancellationToken ct)
+        {
+            await extensions.PrepareAsync(ct).ConfigureAwait(false);
 
             // Exclude-list pre-flight (yubikit-android Ctap2Client.filterCreds): with a token, probe the
             // list and send only the match so the authenticator never sees more than it can process.

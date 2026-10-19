@@ -28,7 +28,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions;
 
 public class ExtensionSessionTests
 {
-    private static RegistrationOptions CreateMockOptions() =>
+    internal static RegistrationOptions CreateMockOptions() =>
         new()
         {
             Challenge = RandomNumberGenerator.GetBytes(32),

@@ -31,7 +31,7 @@ public sealed record class RegistrationExtensionInputs(
     CredBlobInput? CredBlob = null,
     MinPinLengthInput? MinPinLength = null,
     LargeBlobInput? LargeBlob = null,
-    PrfInput? Prf = null,
+    Inputs.PrfInput? Prf = null,
     Inputs.CredPropsInput? CredProps = null,
     PreviewSign.PreviewSignRegistrationInput? PreviewSign = null);
 
@@ -48,6 +48,6 @@ public sealed record class RegistrationExtensionInputs(
 /// </param>
 public sealed record class AuthenticationExtensionInputs(
     LargeBlobInput? LargeBlob = null,
-    PrfInput? Prf = null,
+    Inputs.PrfInput? Prf = null,
     PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null,
     bool GetCredBlob = false);

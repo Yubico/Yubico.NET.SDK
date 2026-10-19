@@ -105,20 +105,39 @@ public sealed partial class WebAuthnClient
 
         // Build every response now, outside the escalation scope and while the token is live (extension
         // outputs may need it); MatchedCredential.SelectAsync then does no further authenticator work.
-        var results = new List<MatchedCredential>(matches.Count);
-        foreach (var (credentialId, user, response) in matches)
+        using (extensions)
         {
-            var authenticationResponse = await BuildAuthenticationResponseAsync(
-                response, clientData, extensions, auth.Token, cancellationToken).ConfigureAwait(false);
-            results.Add(new MatchedCredential(credentialId, user, _ => Task.FromResult(authenticationResponse)));
-        }
+            var results = new List<MatchedCredential>(matches.Count);
+            foreach (var (credentialId, user, response) in matches)
+            {
+                var authenticationResponse = await BuildAuthenticationResponseAsync(
+                    response, clientData, extensions, auth.Token, cancellationToken).ConfigureAwait(false);
+                results.Add(new MatchedCredential(credentialId, user, _ => Task.FromResult(authenticationResponse)));
+            }
 
-        return results;
+            return results;
+        }
 
         async Task<(IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> Matches,
             AuthenticationExtensionSession Extensions)> AttemptAsync(UvDecision decision, CancellationToken ct)
         {
             var extensions = AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context);
+            try
+            {
+                return await AttemptWithAsync(extensions, decision, ct).ConfigureAwait(false);
+            }
+            catch
+            {
+                extensions.Dispose();
+                throw;
+            }
+        }
+
+        async Task<(IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> Matches,
+            AuthenticationExtensionSession Extensions)> AttemptWithAsync(
+            AuthenticationExtensionSession extensions, UvDecision decision, CancellationToken ct)
+        {
+            await extensions.PrepareAsync(ct).ConfigureAwait(false);
 
             // Allow-list selection (WebAuthn L3 §5.1.4 via python-fido2 do_get_assertion L980-1023 and
             // yubikit-android Ctap2Client L663-689): find the credential with an up:false probe, then

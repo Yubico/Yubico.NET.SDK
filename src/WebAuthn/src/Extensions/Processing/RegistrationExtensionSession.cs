@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing;
 /// The extension processors for one registration attempt. Created after GetInfo, consulted for the
 /// token permissions, asked for inputs once the token exists and for outputs once the response is in.
 /// </summary>
-internal sealed class RegistrationExtensionSession
+internal sealed class RegistrationExtensionSession : IDisposable
 {
     private readonly IReadOnlyList<IRegistrationExtensionProcessor> _processors;
     private readonly bool _requested;
@@ -62,7 +62,7 @@ internal sealed class RegistrationExtensionSession
         if (inputs.CredBlob is not null && context.Supports(ExtensionIdentifiers.CredBlob)) processors.Add(new CredBlobProcessor(inputs.CredBlob));
         if (inputs.MinPinLength is not null && context.Supports(ExtensionIdentifiers.MinPinLength)) processors.Add(new MinPinLengthProcessor());
         if (inputs.LargeBlob is not null && LargeBlobProcessor.IsSupported(context)) processors.Add(new LargeBlobProcessor(inputs.LargeBlob));
-        if (inputs.Prf is not null && context.Supports(ExtensionIdentifiers.HmacSecret)) processors.Add(new PrfProcessor(inputs.Prf, allowCredentials: null));
+        if (inputs.Prf is not null && context.Supports(ExtensionIdentifiers.HmacSecret)) processors.Add(new PrfProcessor(inputs.Prf, context));
         if (inputs.CredProps is not null) processors.Add(new CredPropsProcessor(requireResidentKey));
         if (inputs.PreviewSign is not null && context.Supports(ExtensionIdentifiers.PreviewSign)) processors.Add(new PreviewSignProcessor(inputs.PreviewSign, options.UserVerification));
         return new RegistrationExtensionSession(processors, requested: true);
@@ -71,6 +71,15 @@ internal sealed class RegistrationExtensionSession
     /// <summary>The union of the processors' token permissions.</summary>
     public PinUvAuthTokenPermissions Permissions =>
         _processors.Aggregate(PinUvAuthTokenPermissions.None, (acc, p) => acc | p.Permissions);
+
+    /// <summary>Runs every processor's authenticator-dependent preparation (key agreement etc.).</summary>
+    public async ValueTask PrepareAsync(CancellationToken cancellationToken)
+    {
+        foreach (var processor in _processors)
+        {
+            await processor.PrepareAsync(cancellationToken).ConfigureAwait(false);
+        }
+    }
 
     /// <summary>Builds the CTAP2 extensions map, or null when no processor adds an input.</summary>
     public ReadOnlyMemory<byte>? PrepareInputs(PinUvAuthTokenSession? token)
@@ -115,5 +124,14 @@ internal sealed class RegistrationExtensionSession
         }
 
         return outputs.Build();
+    }
+
+    /// <summary>Releases per-attempt secrets held by processors (shared secrets).</summary>
+    public void Dispose()
+    {
+        foreach (var processor in _processors)
+        {
+            (processor as IDisposable)?.Dispose();
+        }
     }
 }

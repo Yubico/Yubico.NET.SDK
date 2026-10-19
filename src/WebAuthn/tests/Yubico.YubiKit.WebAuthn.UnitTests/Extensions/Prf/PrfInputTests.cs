@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 
-namespace Yubico.YubiKit.Fido2.UnitTests.Extensions;
+namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.Prf;
 
 public class PrfInputTests
 {

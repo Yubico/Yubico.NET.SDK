@@ -112,24 +112,33 @@ public class ExtensionBuilderTests
         Assert.True(reader.ReadBoolean());
     }
 
+    /// <summary>CTAP 2.1-2.3 §12.7 makeCredential input: "hmac-secret": true (the WebAuthn prf registration request).</summary>
     [Fact]
-    public void Build_WithPrf_EncodesCorrectly()
+    public void Build_WithHmacSecretRequested_EncodesBooleanTrue()
     {
-        // Arrange
-        var builder = new ExtensionBuilder()
-            .WithPrf();
+        var result = new ExtensionBuilder().WithHmacSecret().Build();
 
-        // Act
-        var result = builder.Build();
-
-        // Assert
         Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("prf", reader.ReadTextString());
-        // Empty map for makeCredential
-        var mapCount = reader.ReadStartMap();
-        Assert.Equal(0, mapCount);
+        var reader = new CborReader(result.Value, CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(1, reader.ReadStartMap());
+        Assert.Equal("hmac-secret", reader.ReadTextString());
+        Assert.True(reader.ReadBoolean());
+    }
+
+    [Fact]
+    public void Build_WithHmacSecretRequested_AndGetAssertionInput_ThrowsAtBuild()
+    {
+        var builder = new ExtensionBuilder()
+            .WithHmacSecret()
+            .WithHmacSecret(new HmacSecretInput
+            {
+                KeyAgreement = new Dictionary<int, object?> { [1] = 2 },
+                SaltEnc = new byte[48],
+                SaltAuth = new byte[16],
+                PinUvAuthProtocol = 2
+            });
+
+        Assert.Throws<InvalidOperationException>(() => builder.Build());
     }
 
     [Fact]
@@ -268,7 +277,7 @@ public class ExtensionBuilderTests
             .WithCredBlob(new byte[16])
             .WithLargeBlob(LargeBlobSupport.Preferred)
             .WithMinPinLength()
-            .WithPrf();
+            .WithHmacSecret();
 
         var result = builder.Build();
 

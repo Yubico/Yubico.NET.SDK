@@ -33,56 +33,14 @@ public class Fido2ExtensionAuditReproTests
     [Trait("Audit", "YESDK-1609")]
     public void YESDK1609_RegistrationPrfRequestsHmacSecret()
     {
-        var extensions = new ExtensionBuilder().WithPrf().Build();
+        // The CTAP layer has no "prf": WebAuthn's PRF processor asks for hmac-secret at registration.
+        var extensions = new ExtensionBuilder().WithHmacSecret().Build();
         Assert.NotNull(extensions);
         var reader = new CborReader(extensions.Value, CborConformanceMode.Ctap2Canonical);
         Assert.Equal(1, reader.ReadStartMap());
         Assert.Equal("hmac-secret", reader.ReadTextString());
         Assert.True(reader.ReadBoolean());
         reader.ReadEndMap();
-    }
-
-    [Fact]
-    [Trait("Audit", "YESDK-1634")]
-    public void YESDK1634_CredentialSpecificPrfOverridesGlobalInput()
-    {
-        byte[] credentialId = [0x01, 0x02];
-        string encodedId = Convert.ToBase64String(credentialId).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-        var input = new PrfInput
-        {
-            First = new byte[] { 0xAA },
-            EvalByCredential = new Dictionary<string, PrfInputValues>
-            {
-                [encodedId] = new() { First = new byte[] { 0xBB } }
-            }
-        };
-
-        // No credential selection is exposed at this boundary. A sole mapped
-        // credential must at least affect the request rather than being silently dropped.
-        var extensions = new ExtensionBuilder().WithPrf(input).Build();
-        var globalOnly = new ExtensionBuilder().WithPrf(new PrfInput { First = input.First }).Build();
-        Assert.NotNull(extensions);
-        Assert.NotNull(globalOnly);
-        Assert.NotEqual(globalOnly.Value.ToArray(), extensions.Value.ToArray());
-    }
-
-    [Fact]
-    [Trait("Audit", "YESDK-1634")]
-    public void YESDK1634_OnlyCredentialSpecificPrfEncodesWithoutFailure()
-    {
-        var input = new PrfInput
-        {
-            EvalByCredential = new Dictionary<string, PrfInputValues>
-            {
-                ["AQ"] = new() { First = new byte[] { 0xBB } }
-            }
-        };
-        var extensions = new ExtensionBuilder().WithPrf(input).Build();
-        Assert.NotNull(extensions);
-        var reader = new CborReader(extensions.Value, CborConformanceMode.Ctap2Canonical);
-        Assert.Equal(1, reader.ReadStartMap());
-        Assert.Equal("hmac-secret", reader.ReadTextString());
-        Assert.Equal(CborReaderState.StartMap, reader.PeekState());
     }
 
     [Fact]

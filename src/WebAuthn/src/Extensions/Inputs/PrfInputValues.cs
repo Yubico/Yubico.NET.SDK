@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKit.Fido2.Extensions;
+namespace Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 
 /// <summary>
 /// Per-credential PRF input values.

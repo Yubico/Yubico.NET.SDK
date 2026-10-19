@@ -13,118 +13,73 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
-using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
-/// Adapter for the PRF (Pseudo-Random Function) extension.
+/// Pure translation between the WebAuthn prf extension (L3 §10.1.4) and the CTAP hmac-secret
+/// extension (CTAP 2.1-2.3 §12.7) it is built on. Salt derivation lives on
+/// <see cref="Inputs.PrfInput.ComputeSalt"/>; the encrypted request map is produced by the CTAP2
+/// <see cref="ExtensionBuilder.WithHmacSecret(IPinUvAuthProtocol, ReadOnlySpan{byte}, IReadOnlyDictionary{int, object?}, ReadOnlySpan{byte}, ReadOnlySpan{byte})"/>.
 /// </summary>
 internal static class PrfCodec
 {
-    /// <summary>
-    /// Applies PRF input to the CTAP extension builder for registration.
-    /// </summary>
-    public static void ApplyToBuilderForRegistration(ExtensionBuilder builder, PrfInput input)
-    {
-        // For registration, just signal PRF support request
-        builder.WithPrf();
-    }
+    /// <summary>CTAP §12.7: each PRF output is a 32-byte HMAC-SHA-256 value.</summary>
+    public const int OutputLength = 32;
 
     /// <summary>
-    /// Applies PRF input to the CTAP extension builder for authentication.
+    /// L3 §10.1.4 registration: "Set enabled to the value of hmac-secret in the authenticator extensions
+    /// output. If not present, set enabled to false."
     /// </summary>
-    public static void ApplyToBuilderForAuthentication(
-        ExtensionBuilder builder,
-        PrfInput input,
-        IReadOnlyList<PublicKeyCredentialDescriptor>? allowCredentials)
+    public static PrfRegistrationOutput ParseRegistrationOutput(IReadOnlyDictionary<string, ReadOnlyMemory<byte>> extensions)
     {
-        // If evalByCredential is set and there are allowed credentials, apply filtering
-        if (input.EvalByCredential is not null && allowCredentials is not null && allowCredentials.Count > 0)
+        if (!extensions.TryGetValue(ExtensionIdentifiers.HmacSecret, out var rawValue))
         {
-            // CTAP only supports a single salt pair per request
-            // Select the first matching credential from evalByCredential that's in the allow list
-            if (input.EvalByCredential.Count > 1)
-            {
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.NotSupported,
-                    "PRF evalByCredential with multiple entries is not supported; CTAP supports only a single salt pair per request. Use 'First/Second' instead.");
-            }
-
-            // Use the provided prfInput directly (caller has already filtered/selected)
-            builder.WithPrf(input);
-        }
-        else if (input.First is not null)
-        {
-            // Use direct First/Second evaluation
-            builder.WithPrf(input);
-        }
-        else
-        {
-            // No eval specified, just signal support
-            builder.WithPrf();
-        }
-    }
-
-    /// <summary>
-    /// Parses PRF output from registration.
-    /// </summary>
-    public static PrfRegistrationOutput? ParseRegistrationOutput(
-        IReadOnlyDictionary<string, ReadOnlyMemory<byte>> extensions)
-    {
-        if (!extensions.TryGetValue(ExtensionIdentifiers.Prf, out var rawValue))
-        {
-            return null;
+            return new PrfRegistrationOutput(Enabled: false);
         }
 
-        // For registration, presence of the extension indicates it's enabled
-        return new PrfRegistrationOutput(Enabled: true);
-    }
-
-    /// <summary>
-    /// Parses PRF output from authentication.
-    /// </summary>
-    public static PrfAuthenticationOutput? ParseAuthenticationOutput(
-        IReadOnlyDictionary<string, ReadOnlyMemory<byte>> extensions)
-    {
-        if (!extensions.TryGetValue(ExtensionIdentifiers.Prf, out var rawValue))
-        {
-            return null;
-        }
-
-        // Parse the PRF results map
         var reader = new CborReader(rawValue, CborConformanceMode.Lax);
-        var mapLength = reader.ReadStartMap();
+        return new PrfRegistrationOutput(reader.ReadBoolean());
+    }
 
-        if (mapLength is null or 0)
+    /// <summary>
+    /// Decrypts a CTAP §12.7 hmac-secret getAssertion output (AES-256-CBC under the shared secret, no
+    /// padding) and splits it into one or two 32-byte PRF results. Returns null when the plaintext is
+    /// not exactly one or two outputs long: the result is omitted rather than the assertion failed
+    /// (WebAuthn L3 §9.4; yubikit-android HmacSecretExtension does the same).
+    /// </summary>
+    public static PrfEvaluationResults? DecryptResults(
+        IPinUvAuthProtocol protocol,
+        ReadOnlySpan<byte> sharedSecret,
+        ReadOnlyMemory<byte> hmacSecretOutput)
+    {
+        byte[] plaintext;
+        try
+        {
+            plaintext = protocol.Decrypt(sharedSecret, hmacSecretOutput.Span);
+        }
+        catch (Exception ex) when (ex is ArgumentException or System.Security.Cryptography.CryptographicException)
         {
             return null;
         }
 
-        // Look for "eval" key with results
-        for (var i = 0; i < mapLength; i++)
+        try
         {
-            var key = reader.ReadTextString();
-            if (key == "eval")
+            return plaintext.Length switch
             {
-                // Delegate to Fido2's PrfOutput decoder
-                var prfOutput = PrfOutput.Decode(reader);
-                if (prfOutput is null || !prfOutput.First.HasValue)
-                {
-                    return null;
-                }
-
-                var results = new PrfEvaluationResults(prfOutput.First.Value, prfOutput.Second);
-                return new PrfAuthenticationOutput(results);
-            }
-            else
-            {
-                reader.SkipValue();
-            }
+                OutputLength => new PrfEvaluationResults(plaintext[..OutputLength].ToArray()),
+                2 * OutputLength => new PrfEvaluationResults(
+                    plaintext[..OutputLength].ToArray(),
+                    plaintext[OutputLength..].ToArray()),
+                _ => null
+            };
         }
-
-        return null;
+        finally
+        {
+            System.Security.Cryptography.CryptographicOperations.ZeroMemory(plaintext);
+        }
     }
 }

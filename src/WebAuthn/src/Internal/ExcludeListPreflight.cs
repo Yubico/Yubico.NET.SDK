@@ -91,8 +91,18 @@ internal static class ExcludeListPreflight
             return null;
         }
 
-        // MaxCredentialCountInList defaults to 1 if not present (Java line 880-881)
+        // MaxCredentialCountInList defaults to 1 if not present (Java line 880-881).
+        // CTAP 2.1-2.3 §6.4: "MUST be greater than zero if present." A non-positive value would make the
+        // chunk empty: the loop would never advance, or an empty allowList probe could succeed against a
+        // discoverable credential and the registration would go ahead with no exclude list. Refuse it
+        // instead of clamping so faulty firmware stays visible (maintainer decision).
         int maxCreds = info.MaxCredentialCountInList ?? 1;
+        if (maxCreds <= 0)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.NotSupported,
+                $"Authenticator reported maxCredentialCountInList = {maxCreds}; CTAP §6.4 requires a value greater than zero, so the exclude list cannot be checked.");
+        }
 
         // Dummy client data hash: 32 zero bytes (Java line 883-884)
         byte[] dummyClientDataHash = new byte[32];

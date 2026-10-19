@@ -429,11 +429,37 @@ public class WebAuthnAuditReproTests
         Assert.False(guard.IsCancellationRequested, "the ceremony deadline, not the test guard, must cancel");
     }
 
+    /// <summary>
+    ///     CTAP 2.1-2.3 §6.4 maxCredentialCountInList: "MUST be greater than zero if present." A non-positive
+    ///     value is refused with a typed error before any probe is sent (maintainer decision: no clamping).
+    /// </summary>
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    [Trait("Audit", "YESDK-1634")]
-    public async Task YESDK1634_NonpositiveGetInfoListLimitStillProbesAllCredentials(int maxCount)
+    [Trait("Audit", "YESDK-1633")]
+    public async Task YESDK1633_NonpositiveGetInfoListLimitIsRefusedBeforeAnyProbe(int maxCount)
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        var info = new AuthenticatorInfo { MaxCredentialCountInList = maxCount };
+        backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns<GetAssertionResponse>(_ => throw new CtapException(CtapStatus.NoCredentials));
+        using var guard = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+            Yubico.YubiKit.WebAuthn.Internal.ExcludeListPreflight.FindFirstMatchAsync(
+                backend, "example.com", [new PublicKeyCredentialDescriptor(new byte[] { 1 }), new PublicKeyCredentialDescriptor(new byte[] { 2 })],
+                info, new byte[32], new TestPinUvAuthProtocol(), guard.Token));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+        await backend.DidNotReceive().GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>Control: an absent limit probes one credential at a time; a positive limit chunks by it.</summary>
+    [Theory]
+    [InlineData(null, 2)]
+    [InlineData(8, 1)]
+    [Trait("Audit", "YESDK-1633")]
+    public async Task YESDK1633_PositiveOrAbsentGetInfoListLimitChunksTheExcludeList(int? maxCount, int expectedProbes)
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         var info = new AuthenticatorInfo { MaxCredentialCountInList = maxCount };
@@ -441,16 +467,17 @@ public class WebAuthnAuditReproTests
         backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
             .Returns<GetAssertionResponse>(call =>
             {
-                var request = call.Arg<BackendGetAssertionRequest>();
-                Assert.NotEmpty(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(request.AllowList));
+                Assert.NotEmpty(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(call.Arg<BackendGetAssertionRequest>().AllowList));
                 probes++;
                 throw new CtapException(CtapStatus.NoCredentials);
             });
         using var guard = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+
         var match = await Yubico.YubiKit.WebAuthn.Internal.ExcludeListPreflight.FindFirstMatchAsync(
             backend, "example.com", [new PublicKeyCredentialDescriptor(new byte[] { 1 }), new PublicKeyCredentialDescriptor(new byte[] { 2 })],
             info, new byte[32], new TestPinUvAuthProtocol(), guard.Token);
+
         Assert.Null(match);
-        Assert.Equal(2, probes);
+        Assert.Equal(expectedProbes, probes);
     }
 }

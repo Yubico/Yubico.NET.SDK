@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Attestation;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -26,7 +24,6 @@ using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Client.Validation;
 using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
-using Yubico.YubiKit.WebAuthn.Util;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -104,252 +101,62 @@ public sealed partial class WebAuthnClient
             _ => false
         };
 
-        // Extension processors for this attempt; their permissions join the token request
+        // Extension processors are created per attempt; their permissions join the token request
         // (python-fido2 do_make_credential L787-795, yubikit-android Ctap2Client L484).
         var context = new ExtensionContext(info, _backend.Protocol, _backend);
-        var extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context);
+        var permissions = MakeCredentialCeremonyPermissions
+            | RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context).Permissions;
+        bool hasPreviewSign = options.Extensions?.PreviewSign is not null;
 
-        // Determine UV/PIN strategy
-        var uvDecision = UvDecisionLogic.Decide(
-            info,
-            options.UserVerification,
-            pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
-            requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion | extensions.Permissions);
+        using var auth = new CeremonyAuth(this, options.Rp.Id, callerPinBytes);
 
-        // Acquire PIN/UV token with retry on PinAuthInvalid
-        PinUvAuthTokenSession? tokenSession = null;
-        IMemoryOwner<byte>? pinOwner = null;
-        ReadOnlyMemory<byte>? pinBytes = callerPinBytes;
+        var (ctapResponse, extensions) = await RunWithUvEscalationAsync(
+            info, options.UserVerification, permissions, auth, hasPreviewSign, AttemptAsync, cancellationToken)
+            .ConfigureAwait(false);
 
-        try
+        // Outputs are prepared outside the escalation scope, while the token is still live.
+        return await BuildRegistrationResponseAsync(ctapResponse, clientData, options, extensions, auth.Token, cancellationToken)
+            .ConfigureAwait(false);
+
+        async Task<(MakeCredentialResponse Response, RegistrationExtensionSession Extensions)> AttemptAsync(
+            UvDecision decision, CancellationToken ct)
         {
-            (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
-                uvDecision,
-                options.Rp.Id,
-                pinOwner,
-                pinBytes,
-                cancellationToken).ConfigureAwait(false);
+            var extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context);
 
-            // Pre-flight excludeList when non-empty (mirroring yubikit-android Ctap2Client.filterCreds)
-            PublicKeyCredentialDescriptor? matchedExclude = null;
-            bool preflightPerformed;
-            (matchedExclude, tokenSession, preflightPerformed) = await PreflightExcludeListAndRemintAsync(
-                options,
-                info,
-                uvDecision,
-                tokenSession,
-                pinBytes,
-                cancellationToken).ConfigureAwait(false);
-
-            // Build backend request with filtered exclude list
-            var request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey, extensions);
-
-            // Execute MakeCredential
-            MakeCredentialResponse ctapResponse;
-            try
+            // Exclude-list pre-flight (yubikit-android Ctap2Client.filterCreds): with a token, probe the
+            // list and send only the match so the authenticator never sees more than it can process.
+            // Without a token the caller's list goes through unchanged and the authenticator enforces it.
+            var excludeList = options.ExcludeCredentials;
+            if (excludeList is { Count: > 0 } && auth.Token is not null)
             {
-                ctapResponse = await ExecuteMakeCredentialAsync(request, cancellationToken).ConfigureAwait(false);
-            }
-            catch (CtapException ex) when (ShouldRetryWithRequiredUv(ex, options.UserVerification))
-            {
-                tokenSession?.Dispose();
-                tokenSession = null;
-
-                uvDecision = UvDecisionLogic.Decide(
-                    info,
-                    Preferences.UserVerificationPreference.Required,
-                    pinAvailable: callerPinBytes is not null || _options.CredentialPrompt is not null,
-                    requestedPermissions: PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion | extensions.Permissions);
-
-                (tokenSession, pinOwner, pinBytes) = await AcquireTokenForDecisionAsync(
-                    uvDecision,
-                    options.Rp.Id,
-                    pinOwner,
-                    pinBytes,
-                    cancellationToken).ConfigureAwait(false);
-
-                (matchedExclude, tokenSession, preflightPerformed) = await PreflightExcludeListAndRemintAsync(
-                    options,
-                    info,
-                    uvDecision,
-                    tokenSession,
-                    pinBytes,
-                    cancellationToken).ConfigureAwait(false);
-
-                // A fresh attempt gets fresh processors (single-use per attempt).
-                extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context);
-                request = BuildMakeCredentialRequest(options, clientData, tokenSession, uvDecision, matchedExclude, preflightPerformed, requireResidentKey, extensions);
-                try
-                {
-                    ctapResponse = await ExecuteMakeCredentialAsync(request, cancellationToken).ConfigureAwait(false);
-                }
-                catch (CtapException retryEx)
-                {
-                    throw MapMakeCredentialCtapException(retryEx, options.Extensions?.PreviewSign is not null);
-                }
-            }
-            catch (CtapException ex) when (ex.Status == CtapStatus.CredentialExcluded)
-            {
-                // WebAuthn L2 §5.1.3 step 3: when the authenticator returns
-                // CredentialExcluded, the client surfaces an InvalidStateError.
-                throw new WebAuthnClientError(
-                    WebAuthnClientErrorCode.InvalidState,
-                    "A credential matching the exclude list already exists on this authenticator.",
-                    ex);
-            }
-            catch (CtapException ex) when (options.Extensions?.PreviewSign is not null)
-            {
-                throw Extensions.PreviewSign.PreviewSignErrors.MapCtapError(ex);
-            }
-            catch (CtapException ex)
-            {
-                // Map remaining CTAP statuses to typed WebAuthn errors per CLAUDE.md:
-                // "never expose raw CTAP status codes to high-level API consumers".
-                throw MapCtapStatusToWebAuthnError(ex);
+                var matched = await ProbeCredentialsAsync(
+                    options.Rp.Id, excludeList, info, auth, decision, PinUvAuthTokenPermissions.MakeCredential, ct)
+                    .ConfigureAwait(false);
+                excludeList = matched is null ? [] : [matched];
             }
 
-            // Build WebAuthn response while the token is still live (extension outputs may need it)
-            return await BuildRegistrationResponseAsync(ctapResponse, clientData, options, extensions, tokenSession, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        finally
-        {
-            tokenSession?.Dispose();
-
-            if (pinOwner is not null)
-            {
-                ZeroAndDispose(pinOwner);
-            }
+            var request = BuildMakeCredentialRequest(options, clientData, auth, decision, excludeList, requireResidentKey, extensions);
+            var response = await _backend.MakeCredentialAsync(request, ct).ConfigureAwait(false);
+            return (response, extensions);
         }
     }
 
-    private static WebAuthnClientError MapMakeCredentialCtapException(
-        CtapException ex,
-        bool hasPreviewSign)
-    {
-        if (ex.Status == CtapStatus.CredentialExcluded)
-        {
-            return new WebAuthnClientError(
-                WebAuthnClientErrorCode.InvalidState,
-                "A credential matching the exclude list already exists on this authenticator.",
-                ex);
-        }
-
-        return hasPreviewSign
-            ? Extensions.PreviewSign.PreviewSignErrors.MapCtapError(ex)
-            : MapCtapStatusToWebAuthnError(ex);
-    }
-
-    private async Task<MakeCredentialResponse> ExecuteMakeCredentialAsync(
-        BackendMakeCredentialRequest request,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            return await _backend.MakeCredentialAsync(request, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        finally
-        {
-            SensitiveMemory.Zero(request.PinUvAuthParam);
-        }
-    }
-
-    private async Task<(
-        PublicKeyCredentialDescriptor? MatchedExclude,
-        PinUvAuthTokenSession? TokenSession,
-        bool PreflightPerformed)> PreflightExcludeListAndRemintAsync(
-        RegistrationOptions options,
-        AuthenticatorInfo info,
-        UvDecision uvDecision,
-        PinUvAuthTokenSession? tokenSession,
-        ReadOnlyMemory<byte>? pinBytes,
-        CancellationToken cancellationToken)
-    {
-        if (options.ExcludeCredentials is null || options.ExcludeCredentials.Count == 0 || tokenSession is null)
-        {
-            return (null, tokenSession, false);
-        }
-
-        try
-        {
-            var matchedExclude = await CredentialFilter.SelectAsync(
-                _backend,
-                options.Rp.Id,
-                options.ExcludeCredentials,
-                info,
-                tokenSession,
-                cancellationToken).ConfigureAwait(false);
-
-            // Re-mint the pinUvAuthToken between pre-flight and MakeCredential.
-            // CTAP 2.1 §6.5.5.7: authenticators MAY consume permissions on use. On
-            // YubiKey 5.8.0, the pre-flight's GetAssertion(up=false) consumes the
-            // GetAssertion permission and the same token can no longer authorize a
-            // subsequent MakeCredential; the device returns PinAuthInvalid.
-            tokenSession.Dispose();
-            tokenSession = await AcquirePinUvTokenAsync(
-                uvDecision.Method!.Value,
-                PinUvAuthTokenPermissions.MakeCredential,
-                options.Rp.Id,
-                pinBytes,
-                cancellationToken).ConfigureAwait(false);
-
-            return (matchedExclude, tokenSession, true);
-        }
-        catch (CtapException preflightEx)
-        {
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.Unknown,
-                $"Pre-flight excludeList probe failed (device returned {preflightEx.Status}). " +
-                "This authenticator may not support silent excludeList probing.",
-                preflightEx);
-        }
-    }
-
-    private BackendMakeCredentialRequest BuildMakeCredentialRequest(
+    private static BackendMakeCredentialRequest BuildMakeCredentialRequest(
         RegistrationOptions options,
         WebAuthnClientData clientData,
-        PinUvAuthTokenSession? tokenSession,
-        UvDecision uvDecision,
-        PublicKeyCredentialDescriptor? matchedExclude,
-        bool preflightPerformed,
+        CeremonyAuth auth,
+        UvDecision decision,
+        IReadOnlyList<PublicKeyCredentialDescriptor>? excludeList,
         bool requireResidentKey,
         RegistrationExtensionSession extensions)
     {
-        // Map options to backend request
-        var optionsDict = new Dictionary<string, bool>();
-
-        if (requireResidentKey)
-        {
-            optionsDict["rk"] = true;
-        }
-
-        if (uvDecision.UvOption is not null)
-        {
-            optionsDict["uv"] = uvDecision.UvOption.Value;
-        }
-
-        // Build extensions CBOR via pipeline
-        var extensionsCbor = extensions.PrepareInputs(tokenSession);
-
-        // Use filtered exclude list only after pre-flight actually ran. Without pre-flight, preserve
-        // the caller's original exclude list so authenticators still enforce it.
-        IReadOnlyList<PublicKeyCredentialDescriptor>? excludeList = preflightPerformed
-            ? matchedExclude is not null ? new[] { matchedExclude } : Array.Empty<PublicKeyCredentialDescriptor>()
-            : options.ExcludeCredentials;
-
         var pubKeyCredParams = options.PubKeyCredParams
             .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
             .ToList();
 
-        ReadOnlyMemory<byte>? pinUvAuthParam = null;
-        byte? pinUvAuthProtocol = null;
-
-        if (tokenSession is not null)
-        {
-            pinUvAuthProtocol = (byte)tokenSession.Protocol.Version;
-            pinUvAuthParam = tokenSession.Protocol.Authenticate(tokenSession.Token.Span, clientData.Hash.Span);
-        }
+        // Extension inputs first: an input that cannot be built must fail before any pinUvAuthParam exists.
+        var extensionsCbor = extensions.PrepareInputs(auth.Token);
+        var (pinUvAuthParam, pinUvAuthProtocol) = auth.SignClientData(clientData.Hash.Span);
 
         return new BackendMakeCredentialRequest
         {
@@ -359,7 +166,7 @@ public sealed partial class WebAuthnClient
             PubKeyCredParams = pubKeyCredParams,
             ExcludeList = excludeList,
             Extensions = extensionsCbor,
-            Options = optionsDict.Count > 0 ? optionsDict : null,
+            Options = CtapOptions(decision, requireResidentKey),
             PinUvAuthParam = pinUvAuthParam,
             PinUvAuthProtocol = pinUvAuthProtocol
         };

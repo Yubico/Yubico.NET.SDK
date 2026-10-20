@@ -134,8 +134,9 @@ dotnet toolchain.cs clean build
 | `Context.cs` | `ToolchainContext`: repository root, parsed options, discovered projects |
 | `Discovery.cs` | Project and active-documentation discovery, `--project` matching |
 | `Output.cs` | Console helpers, test summary, generated `--help` |
-| `Process.cs` | `Dotnet` and `Bash` process helpers |
-| `Results.cs` | `ProjectResult`/`Outcome`, `TestCounts`, and the shared pass/fail gates |
+| `Process.cs` | `Exec`, `Dotnet` and `Bash`: every process the toolchain starts, with its output saved per step |
+| `RunLog.cs` | Run logs under `artifacts/toolchain/`, target/project bookkeeping, the RESULT block and `result.json` |
+| `Results.cs` | `ProjectResult`/`Outcome`, `TestCounts`, `FailedTest` (parses failing tests from runner output), and the shared pass/fail gates |
 | `TargetRegistry.cs` | Registers Bullseye targets and records them for `--help` |
 | `BuildTargets.cs` | `clean`, `restore`, `build`, `test-infrastructure-qa`, `native-aot-contract-qa` |
 | `TestTargets.cs` | `test`, `resilience`, `--filter` translation for xUnit v2/v3 |
@@ -172,6 +173,64 @@ clean  (standalone — must be specified explicitly)
 - **CRAP report**: `artifacts/crap/crap.json` (when `--json` is passed)
 - **Complexity report**: wherever `--complexity-args "--json <path>"` points
 - **Local NuGet feed**: `artifacts/nuget-feed/`
+- **Run logs**: `artifacts/toolchain/runs/<time>-<targets>/`, newest at `artifacts/toolchain/latest/`
+
+## Reading the Output
+
+The toolchain is mostly driven by AI agents and CI, so its output is built to be read without guessing.
+
+**Every run ends with a RESULT block.** Read that, not the lines above it:
+
+```text
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Management.UnitTests)
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       1.8s  1 test project(s) failed
+Projects: 0 passed, 1 failed, 0 with no tests executed; tests: 90 executed, 3 failed, 0 skipped
+Failed: Management.UnitTests (test) - 3 test(s) failed
+  - Yubico.YubiKit.Management.UnitTests.ZZProbeTests.ZZ_Fails_Equal: Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   2
+  output: artifacts/toolchain/runs/20261020-170419-512-test/01-test-Management.UnitTests.log
+Next: dotnet toolchain.cs -- test --project Management.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Management.UnitTests.ZZProbeTests.ZZ_Fails_Equal"
+Run log: artifacts/toolchain/runs/20261020-170419-512-test/run.log (result.json and step logs beside it; newest run: artifacts/toolchain/latest/)
+============================================================
+```
+
+- The exit code is `0` only for `RESULT: PASSED`. Usage errors (an unknown target) exit `2`.
+- `Next:` re-runs only the tests that failed.
+- A project where nothing executed is reported as `○ NO-TESTS` and fails the `test` target. This covers a filter that matched nothing and a run where every test was skipped (for example, no matching YubiKey).
+- `--project` that matches nothing fails and lists the valid names.
+- Expected failures (failed tests or gates, usage errors, a failing command) print their message without a stack trace. A stack trace means a bug in the toolchain itself.
+
+**While running**, each status line starts with a fixed marker:
+
+| Marker | Meaning |
+|---|---|
+| `▶ RUN <command>` | A process starts. `output: <log>` follows when its output goes to a step log |
+| `✓ PASS` | A project passed, with its test counts |
+| `✗ FAIL` | A project failed, with the reason |
+| `○ NO-TESTS` | A project executed no test |
+| `! WARN` | A problem that did not stop the run |
+
+Build and test output is not shown on the console. Only compiler and MSBuild error lines are shown, plus the last 30 lines when a command fails without one. `--verbose` streams everything. Report-style output (`crap`, `complexity`, `benchmark`, the docs scripts) is always shown. Project names omit the `Yubico.YubiKit.` prefix. Colours are off when output is redirected or `NO_COLOR` is set.
+
+## Run Logs
+
+Every run that executes a target is saved, so diagnostics can be read after the fact:
+
+```text
+artifacts/toolchain/
+├── latest -> runs/20261020-170419-512-test     (symlink; latest.txt names it where symlinks are unavailable)
+└── runs/
+    └── 20261020-170419-512-test/
+        ├── run.log                           all console output, with the command, git commit and runtime
+        ├── 01-test-Management.UnitTests.log  the full output of each build/test/pack step
+        └── result.json                       the RESULT block as JSON (targets, projects, failed tests, next)
+```
+
+- Only the 5 newest runs are kept. Older ones are deleted when a new run starts.
+- `--help`, `--list-targets` and usage errors are not saved.
+- `clean` deletes everything in `artifacts/` except `artifacts/toolchain/`.
+- `artifacts/` is gitignored.
 
 ## Analyzers and Formatting
 

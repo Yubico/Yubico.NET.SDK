@@ -98,13 +98,13 @@ The `--filter` option supports various patterns:
 
 ### Reading the result — two traps
 
-**Judge a run by the per-project `total:` line, never the closing summary.** That last line —
-`Passed: 1 | Failed: 0 | Skipped: 1 | Total: 2` — counts **projects**, not tests. Grepping for
-`Passed:` will report success for a run that executed nothing:
+**Judge a run by the RESULT block at the end of the output, and by the exit code.**
+`RESULT: PASSED` (exit code 0) or `RESULT: FAILED`, then `tests: N executed, N failed, N skipped`.
+A project that executed nothing (filter matched nothing, or every test skipped) is `○ NO-TESTS`
+and fails the target, so a green result always means tests ran:
 
 ```bash
-dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~MyThing" \
-  | grep -E "total:|failed:"
+dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~MyThing" 2>&1 | tail -15
 ```
 
 **`Method~` is not a VSTest property.** Unit projects run xUnit v3 / Microsoft Testing Platform;
@@ -172,14 +172,16 @@ The build script automatically discovers:
 | Output | Location |
 |--------|----------|
 | Coverage reports | `artifacts/coverage/**/coverage.cobertura.xml` |
+| Run logs (5 newest) | `artifacts/toolchain/runs/<time>-<targets>/`, newest at `artifacts/toolchain/latest/` |
 
 ## Test Output
 
-The build script provides:
-- Colored output (✓ green for pass, ✗ red for fail)
-- Per-project test results
-- Summary table with totals
-- Better error messages than default test runner
+- Test runner output is **not** printed; each project's full output is saved to a step log
+  (`output: <path>` under its `▶ RUN` line). Pass `--verbose` to stream it.
+- Each project ends with `✓ PASS (N executed, N skipped)`, `✗ FAIL (reason)` or `○ NO-TESTS (reason)`.
+- The RESULT block lists each failing test (`- Namespace.Class.Method: message`) and a `Next:` command
+  that re-runs only those tests. `result.json` beside `run.log` holds the same data as JSON.
+- To look at an earlier run: `artifacts/toolchain/latest/run.log`, or `ls artifacts/toolchain/runs`.
 
 ## Test Execution Time
 
@@ -193,18 +195,18 @@ The `--project` option uses partial, case-insensitive matching:
 - `--project Piv` matches `Yubico.YubiKit.Piv.UnitTests`
 - `--project Fido` matches `Yubico.YubiKit.Fido2.UnitTests`
 
-If no match is found, the script lists available projects.
+If no match is found, the target fails and lists the available project names.
 
 ## Troubleshooting
 
 ### Test Failures
 
 ```bash
-# Run with project filter to see details
-dotnet toolchain.cs -- test --project <project>
+# Run the Next: command from the RESULT block; it re-runs only the failing tests
+dotnet toolchain.cs -- test --project <project> --filter "FullyQualifiedName~Namespace.Class.Method"
 
-# Run specific failing test
-dotnet toolchain.cs -- test --filter "Name=FailingTestMethod"
+# Need the full runner output (stack traces)? Read the step log named in the RESULT block, or:
+dotnet toolchain.cs -- test --project <project> --verbose
 ```
 
 ### Build Required First
@@ -218,9 +220,9 @@ dotnet toolchain.cs test
 ## Verification
 
 Tests completed successfully when:
-- [ ] Exit code is 0
-- [ ] All tests pass (green ✓)
-- [ ] No unexpected warnings or errors
+- [ ] Exit code is 0 and the output ends with `RESULT: PASSED`
+- [ ] `tests: N executed` is the count you expected (not 0)
+- [ ] No unexpected `! WARN` lines
 
 ## Related Skills
 

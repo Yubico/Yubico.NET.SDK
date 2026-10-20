@@ -148,6 +148,8 @@ dotnet toolchain.cs -- test --project Piv --filter "FullyQualifiedName~Sign"
 dotnet toolchain.cs -- pack --include-docs
 ```
 
+Read the **RESULT block** at the end of every run (and the exit code), not the runner lines above it. It lists each project once, the failing tests with their messages, a `Next:` command that re-runs only those, the warning count, and the run log. Every run is saved under `artifacts/toolchain/` (5 newest); `dotnet toolchain.cs -- last` reprints the newest RESULT block, e.g. after a timeout. `dotnet toolchain.cs` with no target only prints usage.
+
 ## Architecture
 
 **House style:** `docs/SDK-HOUSE-STYLE.md` is the v2 architectural style guide. Load it before module consolidation, refactoring, or protocol-flow work. It defines flat protocol flow, minimal helper depth, plain `ApduCommand`/DTO usage, and the rule against operation-specific command classes like `AuthenticateCommand`, `PutKeyCommand`, and `GetDataCommand`.
@@ -613,7 +615,7 @@ Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL
 ## Pre-Commit Checklist
 
 1. ✅ `git status` — only your files staged
-2. ✅ Build warning-free: `dotnet toolchain.cs build` (full solution, including unit and integration test compilation; **0 warnings, 0 errors**). Tests inherit `TreatWarningsAsErrors=true` from `Directory.Build.props`; do not override it. Use `dotnet toolchain.cs -- build --clean` when a fresh compilation is needed to rule out stale/incremental diagnostics.
+2. ✅ Build warning-free: `dotnet toolchain.cs build` (full solution, including unit and integration test compilation; **0 warnings, 0 errors**). Tests inherit `TreatWarningsAsErrors=true` from `Directory.Build.props`; do not override it. Use `dotnet toolchain.cs -- build --clean` (cleans, then rebuilds with `--no-incremental`) when a fresh compilation is needed to rule out stale/incremental diagnostics. The RESULT block must show `Warnings: 0`.
 3. ✅ Tests pass: `dotnet toolchain.cs test`
 4. ✅ Formatted — use `dotnet format` freely to apply style, whitespace, and analyzer fixes. Always scope it with `--include` to only your edited files; never format the whole solution:
     ```

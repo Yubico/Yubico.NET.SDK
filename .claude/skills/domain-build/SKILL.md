@@ -111,7 +111,8 @@ dotnet toolchain.cs -- --help
   saved to a step log (`output: <path>` under the `▶ RUN` line). Pass `--verbose` to stream it.
 - The run ends with a RESULT block: `RESULT: PASSED` (exit code 0) or `RESULT: FAILED`, each target
   with its error, `Warnings: N` (distinct warnings per step, by code, with the step log), and the
-  path of the run log. Read that block, not the lines above it.
+  path of the run log. Read that block, not the lines above it. `dotnet toolchain.cs -- last` reprints it.
+- `build --clean` cleans and rebuilds from scratch (`--no-incremental`), scoped to `--project` matches.
 
 ## The `--` Separator
 
@@ -145,9 +146,8 @@ If no match is found, the target fails and lists the available project names.
 
 ```bash
 # The RESULT block names the failing command and its log; the error lines are printed above it.
-# Clean (also runs dotnet clean with --clean) and rebuild:
-dotnet toolchain.cs -- clean --clean
-dotnet toolchain.cs build
+# Rebuild from scratch to rule out stale incremental output:
+dotnet toolchain.cs -- build --clean
 ```
 
 ### Package Issues

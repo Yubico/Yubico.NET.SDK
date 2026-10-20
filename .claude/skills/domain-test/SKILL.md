@@ -37,7 +37,7 @@ dotnet toolchain.cs test [options]
 |--------|-------------|--------------|
 | `test` | Run unit tests with summary output | build |
 | `coverage` | Run tests with code coverage | build |
-| `default` | Run tests and publish | test, publish |
+| `default` | Run tests and publish (only when named; a bare `dotnet toolchain.cs` just prints usage) | test, publish |
 
 ## Key Options
 
@@ -181,7 +181,8 @@ The build script automatically discovers:
 - Each project ends with `✓ PASS (N executed, N skipped)`, `✗ FAIL (reason)` or `○ NO-TESTS (reason)`.
 - The RESULT block lists each failing test (`- Namespace.Class.Method: message`) and a `Next:` command
   that re-runs only those tests. `result.json` beside `run.log` holds the same data as JSON.
-- To look at an earlier run: `artifacts/toolchain/latest/run.log`, or `ls artifacts/toolchain/runs`.
+- Run cut short (timeout) or new session? `dotnet toolchain.cs -- last` reprints the newest RESULT block;
+  the first output line of every run names its log. Earlier runs: `ls artifacts/toolchain/runs`.
 
 ## Test Execution Time
 

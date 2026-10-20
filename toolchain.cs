@@ -11,6 +11,7 @@
 #:include scripts/toolchain/Results.cs
 #:include scripts/toolchain/TargetRegistry.cs
 #:include scripts/toolchain/RunLog.cs
+#:include scripts/toolchain/Usage.cs
 #:include scripts/toolchain/BuildTargets.cs
 #:include scripts/toolchain/TestTargets.cs
 #:include scripts/toolchain/CoverageTargets.cs
@@ -55,7 +56,9 @@ BenchmarkTargets.Register(ctx);
 DocsTargets.Register(ctx);
 TargetRegistry.Describe("docs-list-active", "Print the exact active documentation set used by docs-qa (only as the sole argument)");
 PackageTargets.Register(ctx);
-TargetRegistry.Define("default", "Run tests and publish", ["test", "publish"]);
+TargetRegistry.Define("default", "Run tests and publish to the local feed (adds a NuGet source; run only when named)", ["test", "publish"]);
+
+TargetRegistry.Describe("last", "Reprint the RESULT block of the newest saved run, without running anything (only as the sole argument)");
 
 if (args.Contains("--help") || args.Contains("-h"))
 {
@@ -63,8 +66,26 @@ if (args.Contains("--help") || args.Contains("-h"))
     return 0;
 }
 
+if (args.Length == 1 && args[0] == "last")
+    return RunLog.PrintLast(ctx.RepoRoot);
+
 var bullseyeArgs = parsedArgs.ForBullseye();
-RunLog.Start(ctx.RepoRoot, args, [.. bullseyeArgs.Where(a => !a.StartsWith('-'))], parsedArgs.Has(Options.Verbose));
+var requestedTargets = bullseyeArgs.Where(a => !a.StartsWith('-')).ToArray();
+var listing = bullseyeArgs.Any(Usage.ListingOptions.Contains);
+
+// Bare `dotnet toolchain.cs` used to run `default` (test + publish, which edits nuget.config). Asking
+// for a target explicitly keeps an exploratory run free of side effects.
+if (requestedTargets.Length == 0 && !listing)
+{
+    PrintUsage();
+    return 0;
+}
+
+RunLog.Start(ctx.RepoRoot, args, requestedTargets, parsedArgs.Has(Options.Verbose));
+
+var usageError = Usage.Validate(args, [.. TargetRegistry.All.Select(t => t.Name)]);
+if (usageError is not null)
+    return RunLog.Finish(usageError);
 
 // Bullseye colours its own lines even when output is redirected; agents and CI logs read plain text.
 if ((Console.IsOutputRedirected || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR"))) &&
@@ -73,12 +94,13 @@ if ((Console.IsOutputRedirected || !string.IsNullOrEmpty(Environment.GetEnvironm
     bullseyeArgs = [.. bullseyeArgs, "--no-color"];
 }
 
-// Expected failures (failed tests or gates, bad usage, a failing command whose output is already above)
-// print their message alone. Anything else is a toolchain bug and keeps its stack trace.
-string? usageError = null;
+// When targets run, the toolchain reports progress and the RESULT block summarises the run, so
+// Bullseye's own progress lines and summary table would only repeat it. Listings keep its output.
+var bullseyeOutput = listing ? Console.Out : TextWriter.Null;
 try
 {
-    await Bullseye.Targets.RunTargetsWithoutExitingAsync(bullseyeArgs, messageOnly: ex => ex is ToolchainException);
+    await Bullseye.Targets.RunTargetsWithoutExitingAsync(
+        bullseyeArgs, messageOnly: ex => ex is ToolchainException, outputWriter: bullseyeOutput);
 }
 catch (Bullseye.InvalidUsageException ex)
 {
@@ -86,7 +108,7 @@ catch (Bullseye.InvalidUsageException ex)
 }
 catch (Bullseye.TargetFailedException)
 {
-    // Bullseye has already reported the failing target; the RESULT block below summarises the run.
+    // The failing target was reported when it failed; the RESULT block below summarises the run.
 }
 
 return RunLog.Finish(usageError);

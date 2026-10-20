@@ -26,6 +26,7 @@ static class RunLog
 {
     const int KeptRuns = 5;
     const int NextFilterTestLimit = 5;
+    const string ResultFile = "result.txt";
 
     static readonly Regex s_ansi = new(@"\x1b\[[0-9;]*m", RegexOptions.Compiled);
     static readonly object s_lock = new();
@@ -90,7 +91,14 @@ static class RunLog
     /// <summary>Runs one target's action and records how it ended.</summary>
     public static void RunTarget(string name, Action action)
     {
-        EnsureRunDirectory();
+        if (EnsureRunDirectory())
+        {
+            // First thing on screen, so a run cut short (a shell timeout) can still be found afterwards.
+            Console.WriteLine($"▶ toolchain: {string.Join(" ", s_requestedTargets)}  (log: {Display(Path.Combine(s_runDir!, "run.log"))})");
+            WarnIfAnotherRunIsActive();
+        }
+
+        Console.WriteLine($"\n▶ target: {name}");
         s_currentTarget = name;
         var stopwatch = Stopwatch.StartNew();
         try
@@ -101,6 +109,13 @@ static class RunLog
         catch (Exception ex)
         {
             lock (s_lock) s_targets.Add(new TargetRun(name, false, stopwatch.Elapsed, ex.Message));
+
+            // Expected failures are summed up by their message; anything else is a toolchain bug and
+            // needs its stack trace.
+            if (ex is ToolchainException)
+                PrintColored($"✗ {name}: {ex.Message}", ConsoleColor.Red);
+            else
+                PrintColored($"✗ {name}: toolchain error (please report): {ex}", ConsoleColor.Red);
             throw;
         }
         finally
@@ -124,6 +139,15 @@ static class RunLog
         if (s_runDir is null)
             return usageError is null ? 0 : 2;
 
+        try
+        {
+            if (File.Exists(ActiveRunMarker) && File.ReadAllText(ActiveRunMarker).StartsWith($"{Environment.ProcessId}\t", StringComparison.Ordinal))
+                File.Delete(ActiveRunMarker);
+        }
+        catch (IOException)
+        {
+        }
+
         var succeeded = usageError is null && s_targets.Count > 0 && s_targets.All(t => t.Succeeded);
         PrintResult(succeeded);
         WriteResultJson(succeeded);
@@ -140,55 +164,102 @@ static class RunLog
 
     static void PrintResult(bool succeeded)
     {
-        var separator = new string('=', 60);
-        var projects = s_projects.Select(p => p.Result).ToArray();
+        var lines = BuildResult(succeeded);
 
-        Console.WriteLine($"\n{separator}");
-        PrintColored($"RESULT: {(succeeded ? "PASSED" : "FAILED")}  ({s_command})", succeeded ? ConsoleColor.Green : ConsoleColor.Red);
+        // The RESULT block is the run's one summary: print it, and keep a copy for `last`.
+        Console.WriteLine();
+        Console.WriteLine(lines[^1]);
+        PrintColored(lines[0], succeeded ? ConsoleColor.Green : ConsoleColor.Red);
+        foreach (var line in lines.Skip(1))
+            Console.WriteLine(line);
 
-        var nameWidth = s_targets.Max(t => t.Name.Length) + 2;
+        File.WriteAllLines(Path.Combine(s_runDir!, ResultFile), lines);
+    }
+
+    static List<string> BuildResult(bool succeeded)
+    {
+        var lines = new List<string>
+        {
+            $"RESULT: {(succeeded ? "PASSED" : "FAILED")}  ({s_command})",
+            "Targets:",
+        };
+
+        var targetWidth = s_targets.Max(t => t.Name.Length) + 2;
         foreach (var target in s_targets)
         {
-            var marker = target.Succeeded ? "✓" : "✗";
             var error = target.Error is null ? "" : $"  {target.Error}";
-            Console.WriteLine($"  {marker} {target.Name.PadRight(nameWidth)}{target.Duration.TotalSeconds,6:F1}s{error}");
+            lines.Add($"  {(target.Succeeded ? "✓" : "✗")} {target.Name.PadRight(targetWidth)}{target.Duration.TotalSeconds,6:F1}s{error}");
         }
 
+        // Every project once, with what went wrong nested under it.
+        var markerWidth = new[] { PassMarker, FailMarker, NoTestsMarker }.Max(m => m.Length) + 2;
+        foreach (var group in s_projects.GroupBy(p => p.Target))
+        {
+            lines.Add($"Projects ({group.Key}):");
+            var nameWidth = group.Max(p => p.Result.Project.Length) + 2;
+            foreach (var (_, project) in group)
+            {
+                var marker = project.Outcome switch
+                {
+                    Outcome.Passed => PassMarker,
+                    Outcome.Failed => FailMarker,
+                    _ => NoTestsMarker,
+                };
+                lines.Add($"  {marker.PadRight(markerWidth)}{project.Project.PadRight(nameWidth)}{project.Reason}".TrimEnd());
+                if (project.Outcome != Outcome.Failed)
+                    continue;
+
+                foreach (var test in project.FailedTests)
+                    lines.Add($"      - {test.Name}: {test.Message}");
+                if (project.LogPath is not null)
+                    lines.Add($"      output: {Display(project.LogPath)}");
+            }
+        }
+
+        var projects = s_projects.Select(p => p.Result).ToArray();
         if (projects.Length > 0)
         {
             var counted = projects.Where(p => p.Counts is not null).Select(p => p.Counts!).ToArray();
             var tests = counted.Length == 0
                 ? ""
                 : $"; tests: {counted.Sum(c => c.Executed)} executed, {counted.Sum(c => c.Failed)} failed, {counted.Sum(c => c.Skipped)} skipped";
-            Console.WriteLine(
-                $"Projects: {projects.Count(p => p.Outcome == Outcome.Passed)} passed, " +
+            lines.Add(
+                $"Totals: projects: {projects.Count(p => p.Outcome == Outcome.Passed)} passed, " +
                 $"{projects.Count(p => p.Outcome == Outcome.Failed)} failed, " +
                 $"{projects.Count(p => p.Outcome == Outcome.NoTestsExecuted)} with no tests executed{tests}");
         }
 
         // Warnings never fail a run, and the console only shows error lines, so count them here.
-        Console.WriteLine($"Warnings: {s_warnings.Sum(w => w.Codes.Count)}");
+        lines.Add($"Warnings: {s_warnings.Sum(w => w.Codes.Count)}");
         foreach (var step in s_warnings)
         {
             var codes = string.Join(", ", step.Codes.GroupBy(c => c).OrderByDescending(g => g.Count()).Select(g => g.Count() == 1 ? g.Key : $"{g.Key} x{g.Count()}"));
             var where = step.LogPath is null ? "" : $"  output: {Display(step.LogPath)}";
-            Console.WriteLine($"  {step.Step}: {step.Codes.Count} ({codes}){where}");
+            lines.Add($"  {step.Step}: {step.Codes.Count} ({codes}){where}");
         }
 
-        foreach (var (target, project) in s_projects.Where(p => p.Result.Outcome == Outcome.Failed))
+        lines.AddRange(NextSteps().Select(next => $"Next: {next}"));
+        lines.Add($"Run log: {Display(Path.Combine(s_runDir!, "run.log"))} (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)");
+        lines.Add(new string('=', 60));
+        return lines;
+    }
+
+    /// <summary>Prints the RESULT block of the newest saved run, for `dotnet toolchain.cs -- last`.</summary>
+    public static int PrintLast(string repoRoot)
+    {
+        var latest = Path.Combine(ToolchainDir(repoRoot), "latest.txt");
+        var runDir = File.Exists(latest) ? Path.Combine(repoRoot, File.ReadAllText(latest).Trim()) : null;
+        var result = runDir is null ? null : Path.Combine(runDir, ResultFile);
+        if (result is null || !File.Exists(result))
         {
-            Console.WriteLine($"Failed: {project.Project} ({target}) - {project.Reason}");
-            foreach (var test in project.FailedTests)
-                Console.WriteLine($"  - {test.Name}: {test.Message}");
-            if (project.LogPath is not null)
-                Console.WriteLine($"  output: {Display(project.LogPath)}");
+            Console.WriteLine("No saved run with a RESULT block yet (runs are saved under artifacts/toolchain/runs/).");
+            return 1;
         }
 
-        foreach (var next in NextSteps())
-            Console.WriteLine($"Next: {next}");
-
-        Console.WriteLine($"Run log: {Display(Path.Combine(s_runDir!, "run.log"))} (result.json and step logs beside it; newest run: artifacts/toolchain/latest/)");
-        Console.WriteLine(separator);
+        Console.WriteLine($"Newest saved run: {ProjectDiscovery.RepoRelative(repoRoot, runDir!)} (finished {File.GetLastWriteTime(result):yyyy-MM-dd HH:mm:ss})");
+        foreach (var line in File.ReadAllLines(result))
+            Console.WriteLine(line);
+        return 0;
     }
 
     // A re-run command narrowed to what failed, so the next attempt is fast and its output small.
@@ -255,11 +326,12 @@ static class RunLog
             result.ToJsonString(new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
     }
 
-    static void EnsureRunDirectory()
+    /// <summary>Creates the run directory on first use; true when this call created it.</summary>
+    static bool EnsureRunDirectory()
     {
         lock (s_lock)
         {
-            if (s_runDir is not null) return;
+            if (s_runDir is not null) return false;
 
             var runsDir = Path.Combine(ToolchainDir(s_repoRoot), "runs");
             Directory.CreateDirectory(runsDir);
@@ -284,6 +356,42 @@ static class RunLog
             s_runDir = runDir;
 
             PointLatestAt(runDir);
+            return true;
+        }
+    }
+
+    static string ActiveRunMarker => Path.Combine(ToolchainDir(s_repoRoot), "active-run.txt");
+
+    // Two runs in one checkout (parallel agents) build into the same bin/obj folders and can fail in
+    // confusing ways. Say so up front; the marker names the other run's process and log.
+    static void WarnIfAnotherRunIsActive()
+    {
+        try
+        {
+            if (File.Exists(ActiveRunMarker))
+            {
+                var parts = File.ReadAllText(ActiveRunMarker).Split('\t', 2);
+                if (int.TryParse(parts[0], out var pid) && pid != Environment.ProcessId && IsRunning(pid))
+                    PrintWarn($"Another toolchain run is active in this checkout (process {pid}, {(parts.Length > 1 ? parts[1].Trim() : "unknown log")}); parallel builds can collide");
+            }
+
+            File.WriteAllText(ActiveRunMarker, $"{Environment.ProcessId}\t{Display(Path.Combine(s_runDir!, "run.log"))}");
+        }
+        catch (IOException)
+        {
+        }
+    }
+
+    static bool IsRunning(int pid)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(pid);
+            return !process.HasExited;
+        }
+        catch (ArgumentException)
+        {
+            return false;
         }
     }
 

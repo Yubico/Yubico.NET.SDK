@@ -7,7 +7,7 @@ static class BuildTargets
 {
     public static void Register(ToolchainContext ctx)
     {
-        TargetRegistry.Define("clean", "Remove the artifacts directory (--clean also runs dotnet clean)", () =>
+        TargetRegistry.Define("clean", "Empty artifacts/ except the run logs in artifacts/toolchain (--clean also runs dotnet clean)", () =>
         {
             PrintHeader("Cleaning");
 
@@ -62,20 +62,30 @@ static class BuildTargets
                 $"{string.Join(", ", discovery.ExcludedProjects)}");
         });
 
-        TargetRegistry.Define("build", "Build the solution, or the --project matches", ["test-infrastructure-qa", "native-aot-contract-qa"], () =>
+        TargetRegistry.Define("build", "Build the solution, or the --project matches (--clean: from scratch)", ["test-infrastructure-qa", "native-aot-contract-qa"], () =>
         {
             PrintHeader("Building");
 
+            // --clean rebuilds from scratch, so diagnostics cannot come from stale incremental output.
+            var rebuild = ctx.ShouldClean ? " --no-incremental" : "";
+
             if (string.IsNullOrEmpty(ctx.ProjectFilter))
             {
-                Dotnet.Run($"build {Conventions.SolutionFile} -c {Conventions.Configuration}", "build");
-                PrintInfo($"Built {Conventions.SolutionFile} in {Conventions.Configuration} configuration");
+                if (ctx.ShouldClean)
+                    Dotnet.Run($"clean {Conventions.SolutionFile} -c {Conventions.Configuration}", "clean");
+
+                Dotnet.Run($"build {Conventions.SolutionFile} -c {Conventions.Configuration}{rebuild}", "build");
+                PrintInfo($"Built {Conventions.SolutionFile} in {Conventions.Configuration} configuration{(ctx.ShouldClean ? " from scratch" : "")}");
                 return;
             }
 
             var matchingProjects = ProjectDiscovery.MatchProjects(ctx.BuildableProjects, ctx.ProjectFilter, "buildable");
             foreach (var project in matchingProjects)
-                Dotnet.Run($"build {project} -c {Conventions.Configuration}", $"build-{ProjectDiscovery.ShortName(project)}");
+            {
+                if (ctx.ShouldClean)
+                    Dotnet.Run($"clean {project} -c {Conventions.Configuration}", $"clean-{ProjectDiscovery.ShortName(project)}");
+                Dotnet.Run($"build {project} -c {Conventions.Configuration}{rebuild}", $"build-{ProjectDiscovery.ShortName(project)}");
+            }
 
             PrintInfo($"Built {matchingProjects.Length} project(s) matching '{ctx.ProjectFilter}': {string.Join(", ", matchingProjects.Select(ProjectDiscovery.ShortName))}");
         });

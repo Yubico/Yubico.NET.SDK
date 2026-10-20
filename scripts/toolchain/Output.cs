@@ -63,44 +63,33 @@ static class Output
         _ => ConsoleColor.Yellow,
     };
 
-    public static void PrintTestSummary(IReadOnlyList<ProjectResult> results, string label)
+    /// <summary>What a bare `dotnet toolchain.cs` prints: how to run a target, and the targets.</summary>
+    public static void PrintUsage()
     {
-        var separator = new string('=', 60);
-        Console.WriteLine($"\n{separator}");
-        Console.WriteLine($"{label} SUMMARY");
-        Console.WriteLine(separator);
+        Console.WriteLine("""
+            Yubico.YubiKit toolchain. Name a target to run it:
 
-        var nameWidth = results.Count == 0 ? 0 : results.Max(r => r.Project.Length) + 2;
-        var markerWidth = new[] { PassMarker, FailMarker, NoTestsMarker }.Max(m => m.Length) + 2;
-        foreach (var (project, outcome, reason) in results)
+              dotnet toolchain.cs <target>
+              dotnet toolchain.cs -- <target> [options]   (the -- is required before --options)
+
+            TARGETS:
+            """);
+        PrintTargets();
+        Console.WriteLine("""
+
+            Common: dotnet toolchain.cs build | dotnet toolchain.cs -- test --project Piv
+            Every run ends with a RESULT block and is saved under artifacts/toolchain/ (`last` reprints it).
+            Options, filter syntax and how to read the output: dotnet toolchain.cs -- --help
+            """);
+    }
+
+    static void PrintTargets()
+    {
+        var nameWidth = TargetRegistry.All.Max(t => t.Name.Length) + 2;
+        foreach (var target in TargetRegistry.All)
         {
-            var detail = string.IsNullOrEmpty(reason) ? "" : $"  {reason}";
-            PrintColored($"  {Marker(outcome).PadRight(markerWidth)}{project.PadRight(nameWidth)}{detail}".TrimEnd(), Colour(outcome));
-            if (outcome == Outcome.Failed && reason?.Contains("Test Run Aborted") == true)
-                Console.WriteLine("    (Test run aborted - check for initialization errors)");
-        }
-
-        var skippedCount = results.Count(r => r.Outcome == Outcome.NoTestsExecuted);
-        var passedCount = results.Count(r => r.Outcome == Outcome.Passed);
-        var failedCount = results.Count(r => r.Outcome == Outcome.Failed);
-
-        // These count test PROJECTS. The per-test totals are in each runner's own summary above
-        // ("total:/failed:" for xUnit v3, "Total tests:/Passed:" for VSTest), which this line used to mimic.
-        Console.WriteLine(separator);
-        Console.Write("Test projects: ");
-        WriteCount($"{passedCount} passed", passedCount > 0 ? ConsoleColor.Green : ConsoleColor.Gray);
-        Console.Write(", ");
-        WriteCount($"{failedCount} failed", failedCount > 0 ? ConsoleColor.Red : ConsoleColor.Gray);
-        Console.Write(", ");
-        WriteCount($"{skippedCount} with no tests executed", skippedCount > 0 ? ConsoleColor.Yellow : ConsoleColor.Gray);
-        Console.WriteLine($" ({results.Count} total)");
-        Console.WriteLine(separator);
-
-        static void WriteCount(string text, ConsoleColor color)
-        {
-            Console.ForegroundColor = color;
-            Console.Write(text);
-            Console.ResetColor();
+            var dependsOn = target.DependsOn.Length > 0 ? $" (runs first: {string.Join(", ", target.DependsOn)})" : "";
+            Console.WriteLine($"  {target.Name.PadRight(nameWidth)}{target.Description}{dependsOn}");
         }
     }
 
@@ -122,15 +111,12 @@ static class Output
                dotnet toolchain.cs -- --help
                dotnet toolchain.cs -- build --project Piv
 
+             With no target the script prints a short usage summary; it does not run `default`.
+
             TARGETS:
             """);
 
-        var nameWidth = TargetRegistry.All.Max(t => t.Name.Length) + 2;
-        foreach (var target in TargetRegistry.All)
-        {
-            var dependsOn = target.DependsOn.Length > 0 ? $" (runs first: {string.Join(", ", target.DependsOn)})" : "";
-            Console.WriteLine($"  {target.Name.PadRight(nameWidth)}{target.Description}{dependsOn}");
-        }
+        PrintTargets();
 
         Console.WriteLine("\nOPTIONS:");
         var optionRows = Options.All
@@ -183,13 +169,16 @@ static class Output
 
             READING THE OUTPUT (AI agents and CI):
               The run ends with a RESULT block. Read it, not the lines above it:
-                RESULT: PASSED | FAILED   the outcome; the exit code is 0 only for PASSED
-                ✓/✗ <target>              each target that ran, with its error
-                Projects: ...; tests: ... project and per-test totals
+                RESULT: PASSED | FAILED   the outcome; the exit code is 0 only for PASSED (2: usage error)
+                Targets:                  each target that ran, its duration and its error
+                Projects (<target>):      each project once: ✓ PASS / ✗ FAIL / ○ NO-TESTS and why;
+                                          under a failure, its failing tests with messages and its log
+                Totals: ...               project and per-test totals
                 Warnings: <n>             compiler/MSBuild warnings per step, by code (not shown above)
-                Failed: <project>         each failing project, its failing tests and messages
                 Next: <command>           re-runs only what failed
                 Run log: <path>           where everything is saved
+              The first line of a run names its log, so a run cut short (a timeout) can still be read.
+              `dotnet toolchain.cs -- last` reprints the newest RESULT block without running anything.
               While running, lines start with fixed markers: "▶ RUN" (a command starts, with
               "output: <log>" for its full output), "✓ PASS", "✗ FAIL", "○ NO-TESTS" (nothing executed:
               the filter matched nothing or every test was skipped; this fails the test target),

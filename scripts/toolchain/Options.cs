@@ -17,7 +17,7 @@ static class Options
     public static readonly ToolchainOption IncludeDocs = new("--include-docs", null, "Include XML documentation in packages");
     public static readonly ToolchainOption EmbedSymbols = new("--embed-symbols", null, "Embed PDB in .nupkg instead of a separate .snupkg (for the static alpha feed)");
     public static readonly ToolchainOption DryRun = new("--dry-run", null, "Show what would be published without publishing");
-    public static readonly ToolchainOption Clean = new("--clean", null, "Run dotnet clean as part of the clean target");
+    public static readonly ToolchainOption Clean = new("--clean", null, "With build: clean, then rebuild from scratch. With clean: also run dotnet clean");
     public static readonly ToolchainOption Filter = new("--filter", "<expression>", "Test filter, e.g. \"FullyQualifiedName~MyTest\" (see FILTER SYNTAX)");
     public static readonly ToolchainOption Project = new("--project", "<name>", "Build/test only projects whose name contains <name>");
     public static readonly ToolchainOption Integration = new("--integration", null, "Include integration tests (requires --project)");

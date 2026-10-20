@@ -63,7 +63,6 @@ static class CoverageTargets
                 }
             }
 
-            PrintTestSummary(results, "COVERAGE");
 
             var coverageFiles = Directory.GetFiles(coverageResultsDir, "coverage.cobertura.xml", SearchOption.AllDirectories);
             if (coverageFiles.Length > 0)

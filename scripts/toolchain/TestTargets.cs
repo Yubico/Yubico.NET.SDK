@@ -22,7 +22,6 @@ static class TestTargets
 
             var projectsToTest = ProjectDiscovery.MatchTestProjects(ctx.TestProjects, ctx.ProjectFilter);
             var results = RunTestProjects(ctx.TestFilter, projectsToTest);
-            PrintTestSummary(results, "TEST");
             Gates.EnsureTestsRan(results, "test");
         });
 
@@ -39,7 +38,6 @@ static class TestTargets
             var results = RunTestProjects(Traits.And(ctx.TestFilter, Traits.Is(Traits.RuntimeResilience)), projectsToTest);
             stopwatch.Stop();
 
-            PrintTestSummary(results, "RUNTIME RESILIENCE");
             PrintInfo($"Evidence: Core unit tests with {Traits.Is(Traits.RuntimeResilience)}");
             PrintInfo($"Elapsed: {stopwatch.Elapsed.TotalSeconds:F1}s");
             Gates.EnsureTestsRan(results, "runtime resilience test");
@@ -109,7 +107,12 @@ static class TestTargets
         // A run where every test was skipped (typically [SkippableTheory] + no matching YubiKey) exits 0.
         // That is not a pass: report it like a filter that matched nothing.
         if (counts is { Executed: 0, Skipped: > 0 })
-            return new ProjectResult(projectName, Outcome.NoTestsExecuted, $"all {counts.Skipped} tests skipped");
+        {
+            var hint = projectName.EndsWith(".IntegrationTests", StringComparison.Ordinal)
+                ? "; these tests need a YubiKey: is one with the required firmware/capabilities connected?"
+                : "";
+            return new ProjectResult(projectName, Outcome.NoTestsExecuted, $"all {counts.Skipped} tests skipped{hint}");
+        }
 
         return new ProjectResult(projectName, Outcome.Passed, counts is null ? null : $"{counts.Executed} executed, {counts.Skipped} skipped");
     }

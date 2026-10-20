@@ -25,12 +25,13 @@ static class Options
     public static readonly ToolchainOption Fast = new("--fast", null, "Required fast mode for resilience gates");
     public static readonly ToolchainOption BenchmarkArgs = new("--benchmark-args", "<args>", "Arguments passed to BenchmarkDotNet");
     public static readonly ToolchainOption CrapArgs = new("--crap-args", "<args>", "Arguments passed to crap.cs (e.g. \"--module Piv --top 50\")");
+    public static readonly ToolchainOption Verbose = new("--verbose", null, "Stream all build/test output to the console (it is always saved in the run log)");
     public static readonly ToolchainOption ComplexityArgs = new("--complexity-args", "<args>", "Arguments passed to complexity.cs (e.g. \"--module Piv\")");
 
     public static readonly ToolchainOption[] All =
     [
         PackageVersion, NugetFeedName, NugetFeedPath, NugetFeedUrl, NugetApiKey, IncludeDocs, EmbedSymbols,
-        DryRun, Clean, Filter, Project, Integration, Smoke, Fast, BenchmarkArgs, CrapArgs, ComplexityArgs
+        DryRun, Clean, Filter, Project, Integration, Smoke, Fast, Verbose, BenchmarkArgs, CrapArgs, ComplexityArgs
     ];
 }
 

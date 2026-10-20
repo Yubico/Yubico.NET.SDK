@@ -19,7 +19,7 @@ static class TargetRegistry
     public static void Define(string name, string description, string[] dependsOn, Action action)
     {
         s_targets.Add(new TargetInfo(name, description, dependsOn));
-        Bullseye.Targets.Target(name, description, dependsOn, action);
+        Bullseye.Targets.Target(name, description, dependsOn, () => RunLog.RunTarget(name, action));
     }
 
     public static void Define(string name, string description, string[] dependsOn)

@@ -49,53 +49,69 @@ static class TestTargets
     static List<ProjectResult> RunTestProjects(string? testFilter, IEnumerable<TestProject> projects)
     {
         var results = new List<ProjectResult>();
-
         foreach (var project in projects)
         {
-            var projectName = ProjectDiscovery.ShortName(project.Path);
-            PrintProjectHeader("Testing", projectName);
-
-            try
-            {
-                var command = BuildTestCommand(project, testFilter);
-                if (command is null)
-                {
-                    results.Add(new ProjectResult(projectName, Outcome.NoTestsExecuted, "no test matches --filter"));
-                    PrintOutcome(Outcome.NoTestsExecuted, "no test matches --filter");
-                    continue;
-                }
-
-                var counts = Dotnet.RunTests(command);
-
-                // A run where every test was skipped (typically [SkippableTheory] + no matching YubiKey) exits 0.
-                // That is not a pass: report it like a filter that matched nothing.
-                if (counts is { Executed: 0, Skipped: > 0 })
-                {
-                    var reason = $"all {counts.Skipped} tests skipped";
-                    results.Add(new ProjectResult(projectName, Outcome.NoTestsExecuted, reason));
-                    PrintOutcome(Outcome.NoTestsExecuted, reason);
-                    continue;
-                }
-
-                var passed = counts is null ? null : $"{counts.Executed} executed, {counts.Skipped} skipped";
-                results.Add(new ProjectResult(projectName, Outcome.Passed, passed));
-                PrintOutcome(Outcome.Passed, passed);
-            }
-            catch (ArgumentException ex)
-            {
-                // A bad --filter is a usage error, not a test failure: say what was wrong.
-                results.Add(new ProjectResult(projectName, Outcome.Failed, ex.Message));
-                PrintOutcome(Outcome.Failed, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                var reason = $"tests failed: {ex.Message}";
-                results.Add(new ProjectResult(projectName, Outcome.Failed, reason));
-                PrintOutcome(Outcome.Failed, reason);
-            }
+            var result = RunTestProject(testFilter, project);
+            RunLog.Record(result);
+            results.Add(result);
         }
 
         return results;
+    }
+
+    static ProjectResult RunTestProject(string? testFilter, TestProject project)
+    {
+        var projectName = ProjectDiscovery.ShortName(project.Path);
+        PrintProjectHeader("Testing", projectName);
+
+        string? command;
+        try
+        {
+            command = BuildTestCommand(project, testFilter);
+        }
+        catch (Exception ex) when (ex is ArgumentException or ToolchainException)
+        {
+            // A bad --filter, or test discovery that failed: say what was wrong.
+            PrintOutcome(Outcome.Failed, ex.Message);
+            return new ProjectResult(projectName, Outcome.Failed, ex.Message);
+        }
+
+        if (command is null)
+        {
+            PrintOutcome(Outcome.NoTestsExecuted, "no test matches --filter");
+            return new ProjectResult(projectName, Outcome.NoTestsExecuted, "no test matches --filter");
+        }
+
+        var run = Exec.Run("dotnet", command, Exec.Display.ErrorsOnly, $"test-{projectName}");
+        var counts = TestCounts.Parse(run.Output);
+        var failedTests = FailedTest.Parse(run.Output);
+        var result = Classify(projectName, run.ExitCode, counts, failedTests) with
+        {
+            Counts = counts,
+            FailedTests = failedTests,
+            LogPath = run.LogPath,
+        };
+
+        PrintOutcome(result.Outcome, result.Reason);
+        return result;
+    }
+
+    static ProjectResult Classify(string projectName, int exitCode, TestCounts? counts, IReadOnlyList<FailedTest> failedTests)
+    {
+        if (exitCode != 0)
+        {
+            var reason = failedTests.Count > 0 || counts is { Failed: > 0 }
+                ? $"{Math.Max(failedTests.Count, counts?.Failed ?? 0)} test(s) failed"
+                : $"test run exited with code {exitCode} before reporting results (build error or crash; see output)";
+            return new ProjectResult(projectName, Outcome.Failed, reason);
+        }
+
+        // A run where every test was skipped (typically [SkippableTheory] + no matching YubiKey) exits 0.
+        // That is not a pass: report it like a filter that matched nothing.
+        if (counts is { Executed: 0, Skipped: > 0 })
+            return new ProjectResult(projectName, Outcome.NoTestsExecuted, $"all {counts.Skipped} tests skipped");
+
+        return new ProjectResult(projectName, Outcome.Passed, counts is null ? null : $"{counts.Executed} executed, {counts.Skipped} skipped");
     }
 
     /// <summary>

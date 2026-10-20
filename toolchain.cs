@@ -1,7 +1,6 @@
 #!/usr/bin/env dotnet run
 
 #:package Bullseye
-#:package SimpleExec
 
 #:include scripts/toolchain/Conventions.cs
 #:include scripts/toolchain/Options.cs
@@ -11,6 +10,7 @@
 #:include scripts/toolchain/Process.cs
 #:include scripts/toolchain/Results.cs
 #:include scripts/toolchain/TargetRegistry.cs
+#:include scripts/toolchain/RunLog.cs
 #:include scripts/toolchain/BuildTargets.cs
 #:include scripts/toolchain/TestTargets.cs
 #:include scripts/toolchain/CoverageTargets.cs
@@ -45,7 +45,7 @@ var ctx = ToolchainContext.FromArgs(parsedArgs);
 if (args.Length == 1 && string.Equals(args[0], "docs-list-active", StringComparison.OrdinalIgnoreCase))
 {
     PrintActiveDocumentationFiles(ctx.ActiveDocumentationFiles);
-    return;
+    return 0;
 }
 
 BuildTargets.Register(ctx);
@@ -60,10 +60,11 @@ TargetRegistry.Define("default", "Run tests and publish", ["test", "publish"]);
 if (args.Contains("--help") || args.Contains("-h"))
 {
     PrintHelp(ctx);
-    return;
+    return 0;
 }
 
 var bullseyeArgs = parsedArgs.ForBullseye();
+RunLog.Start(ctx.RepoRoot, args, [.. bullseyeArgs.Where(a => !a.StartsWith('-'))], parsedArgs.Has(Options.Verbose));
 
 // Bullseye colours its own lines even when output is redirected; agents and CI logs read plain text.
 if ((Console.IsOutputRedirected || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR"))) &&
@@ -72,8 +73,20 @@ if ((Console.IsOutputRedirected || !string.IsNullOrEmpty(Environment.GetEnvironm
     bullseyeArgs = [.. bullseyeArgs, "--no-color"];
 }
 
-// Expected failures (failed tests or gates, bad usage, a failing dotnet command whose output is already
-// above) print their message alone. Anything else is a toolchain bug and keeps its stack trace.
-await Bullseye.Targets.RunTargetsAndExitAsync(
-    bullseyeArgs,
-    messageOnly: ex => ex is ToolchainException or SimpleExec.ExitCodeException);
+// Expected failures (failed tests or gates, bad usage, a failing command whose output is already above)
+// print their message alone. Anything else is a toolchain bug and keeps its stack trace.
+string? usageError = null;
+try
+{
+    await Bullseye.Targets.RunTargetsWithoutExitingAsync(bullseyeArgs, messageOnly: ex => ex is ToolchainException);
+}
+catch (Bullseye.InvalidUsageException ex)
+{
+    usageError = ex.Message;
+}
+catch (Bullseye.TargetFailedException)
+{
+    // Bullseye has already reported the failing target; the RESULT block below summarises the run.
+}
+
+return RunLog.Finish(usageError);

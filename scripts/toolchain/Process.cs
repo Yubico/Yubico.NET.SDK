@@ -2,63 +2,125 @@
 
 using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
 using static Output;
 
-/// <summary>Every way the toolchain starts a dotnet process. Each one announces its command with "▶ RUN".</summary>
-static class Dotnet
-{
-    /// <summary>
-    /// Runs `dotnet {arguments}` with live output; throws on a non-zero exit code. Values in
-    /// <c>secrets</c> (API keys) are masked in the announced command line.
-    /// </summary>
-    public static void Run(string arguments, string workingDirectory = "", params string?[] secrets)
-    {
-        var shown = secrets.Where(s => !string.IsNullOrEmpty(s)).Aggregate(arguments, (text, secret) => text.Replace(secret!, "***"));
-        PrintRun($"dotnet {shown}");
-        SimpleExec.Command.Run("dotnet", arguments, workingDirectory, noEcho: true);
-    }
+/// <summary>What a finished process printed, and where its full output was saved.</summary>
+sealed record ProcessResult(int ExitCode, string Output, string? LogPath);
 
-    /// <summary>
-    /// Runs `dotnet {arguments}` with live output and returns the test counts from the runner's own summary,
-    /// or null when no summary was recognised. Throws like <see cref="Run"/> on a non-zero exit code.
-    /// </summary>
-    public static TestCounts? RunTests(string arguments)
+/// <summary>
+/// Every process the toolchain starts goes through here, so each one is announced with "▶ RUN", its
+/// output reaches the run log, and in the default (non --verbose) mode only the lines that matter
+/// reach the console. The full output of a step is always in its own log file.
+/// </summary>
+static class Exec
+{
+    // MSBuild/compiler diagnostics ("file(1,2): error CS0029: ..." and "error MSB1009: ...").
+    static readonly Regex s_errorLine = new(@"(:\s*error\s+\w+\d*:|^\s*error\s+\w+\d*:)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    const int TailLinesOnFailure = 30;
+
+    /// <summary>Show the whole output live (reports such as crap/complexity), or only error lines.</summary>
+    public enum Display { Stream, ErrorsOnly }
+
+    public static ProcessResult Run(
+        string fileName,
+        string arguments,
+        Display display,
+        string? stepName = null,
+        string workingDirectory = "",
+        params string?[] secrets)
     {
-        PrintRun($"dotnet {arguments}");
-        var startInfo = new ProcessStartInfo("dotnet", arguments)
+        var shown = Mask($"{fileName} {arguments}", secrets);
+        var logPath = stepName is null ? null : RunLog.StepLogPath(stepName);
+        PrintRun(shown);
+        if (logPath is not null && display == Display.ErrorsOnly && !RunLog.Verbose)
+            Console.WriteLine($"  output: {RunLog.Display(logPath)}");
+
+        var startInfo = new ProcessStartInfo(fileName, arguments)
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            UseShellExecute = false
+            UseShellExecute = false,
+            WorkingDirectory = workingDirectory,
         };
 
         var output = new StringBuilder();
-        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start dotnet process");
-        process.OutputDataReceived += (_, e) =>
+        var shownErrors = new HashSet<string>(StringComparer.Ordinal);
+        using var log = logPath is null ? null : new StreamWriter(logPath, append: false) { AutoFlush = true };
+        log?.WriteLine($"$ {shown}");
+        var stream = display == Display.Stream || RunLog.Verbose;
+
+        void OnLine(string? line, bool isError)
         {
-            if (e.Data is null) return;
-            Console.WriteLine(e.Data);
-            lock (output) output.AppendLine(e.Data);
-        };
-        process.ErrorDataReceived += (_, e) =>
-        {
-            if (e.Data is null) return;
-            Console.Error.WriteLine(e.Data);
-        };
+            if (line is null) return;
+            lock (output)
+            {
+                output.AppendLine(line);
+                log?.WriteLine(line);
+                if (stream)
+                    (isError ? Console.Error : Console.Out).WriteLine(line);
+                else if (s_errorLine.IsMatch(line) && shownErrors.Add(line.Trim()))
+                    Console.WriteLine($"  {line.Trim()}"); // MSBuild repeats each error in its summary
+            }
+        }
+
+        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Failed to start {fileName}");
+        process.OutputDataReceived += (_, e) => OnLine(e.Data, isError: false);
+        process.ErrorDataReceived += (_, e) => OnLine(e.Data, isError: true);
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
         process.WaitForExit();
 
-        if (process.ExitCode != 0)
-            throw new ToolchainException($"dotnet exited with code {process.ExitCode}");
-
-        return TestCounts.Parse(output.ToString());
+        return new ProcessResult(process.ExitCode, output.ToString(), logPath);
     }
+
+    /// <summary>Like <see cref="Run"/>, but a non-zero exit code fails the target.</summary>
+    public static ProcessResult RunOrFail(
+        string fileName,
+        string arguments,
+        Display display,
+        string? stepName = null,
+        string workingDirectory = "",
+        params string?[] secrets)
+    {
+        var result = Run(fileName, arguments, display, stepName, workingDirectory, secrets);
+        if (result.ExitCode == 0)
+            return result;
+
+        // Without --verbose the console saw only error lines. When there were none (a crash, a failed
+        // restore, a script error) show the end of the output, which is where the cause usually is.
+        if (display == Display.ErrorsOnly && !RunLog.Verbose && !s_errorLine.IsMatch(result.Output))
+        {
+            Console.WriteLine($"  last {TailLinesOnFailure} lines:");
+            foreach (var line in result.Output.Split('\n').Select(l => l.TrimEnd('\r')).Where(l => l.Length > 0).TakeLast(TailLinesOnFailure))
+                Console.WriteLine($"  | {line}");
+        }
+
+        var where = result.LogPath is null ? "" : $"; full output: {RunLog.Display(result.LogPath)}";
+        throw new ToolchainException($"`{Mask($"{fileName} {arguments}", secrets)}` exited with code {result.ExitCode}{where}");
+    }
+
+    static string Mask(string text, string?[] secrets) =>
+        secrets.Where(s => !string.IsNullOrEmpty(s)).Aggregate(text, (current, secret) => current.Replace(secret!, "***"));
+}
+
+/// <summary>Shorthands for the dotnet commands the targets run.</summary>
+static class Dotnet
+{
+    /// <summary>Runs `dotnet {arguments}`, showing only error lines unless --verbose; fails on a non-zero exit.</summary>
+    public static ProcessResult Run(string arguments, string stepName, params string?[] secrets) =>
+        Exec.RunOrFail("dotnet", arguments, Exec.Display.ErrorsOnly, stepName, secrets: secrets);
+
+    /// <summary>Runs `dotnet {arguments}` with its output shown live (the output is the result, e.g. a report).</summary>
+    public static ProcessResult Stream(string arguments, string workingDirectory = "") =>
+        Exec.RunOrFail("dotnet", arguments, Exec.Display.Stream, workingDirectory: workingDirectory);
 
     /// <summary>Runs `dotnet` silently and returns its exit code and combined stdout + stderr.</summary>
     public static (int ExitCode, string Output) Capture(IReadOnlyList<string> arguments)
     {
         PrintRun($"dotnet {string.Join(" ", arguments.Select(a => a.Contains(' ') ? $"\"{a}\"" : a))} (output captured)");
+
         var startInfo = new ProcessStartInfo("dotnet")
         {
             RedirectStandardOutput = true,
@@ -88,7 +150,6 @@ static class Bash
         if (!File.Exists(script))
             throw new ToolchainException($"Missing {script}");
 
-        PrintRun($"bash {relativePath}");
-        SimpleExec.Command.Run("bash", $"\"{script}\"", workingDirectory: repoRoot, noEcho: true);
+        Exec.RunOrFail("bash", $"\"{relativePath}\"", Exec.Display.Stream, workingDirectory: repoRoot);
     }
 }

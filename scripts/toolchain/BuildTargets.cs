@@ -11,15 +11,24 @@ static class BuildTargets
         {
             PrintHeader("Cleaning");
 
+            // artifacts/toolchain holds the run logs, including this run's, so it survives a clean.
             if (Directory.Exists(ctx.ArtifactsDir))
             {
-                Directory.Delete(ctx.ArtifactsDir, recursive: true);
-                PrintInfo($"Deleted {ctx.ArtifactsDir}");
+                var toolchainDir = RunLog.ToolchainDir(ctx.RepoRoot);
+                foreach (var entry in Directory.EnumerateFileSystemEntries(ctx.ArtifactsDir).Where(e => e != toolchainDir))
+                {
+                    if (Directory.Exists(entry))
+                        Directory.Delete(entry, recursive: true);
+                    else
+                        File.Delete(entry);
+                }
+
+                PrintInfo($"Deleted the contents of {ctx.ArtifactsDir} except the run logs in artifacts/toolchain");
             }
 
             if (ctx.ShouldClean)
             {
-                Dotnet.Run($"clean {Conventions.SolutionFile} -c {Conventions.Configuration}");
+                Dotnet.Run($"clean {Conventions.SolutionFile} -c {Conventions.Configuration}", "clean");
                 PrintInfo("Cleaned solution");
             }
         });
@@ -27,7 +36,7 @@ static class BuildTargets
         TargetRegistry.Define("restore", "Restore NuGet dependencies", () =>
         {
             PrintHeader("Restoring dependencies");
-            Dotnet.Run($"restore {Conventions.SolutionFile}");
+            Dotnet.Run($"restore {Conventions.SolutionFile}", "restore");
             PrintInfo("Dependencies restored");
         });
 
@@ -59,14 +68,14 @@ static class BuildTargets
 
             if (string.IsNullOrEmpty(ctx.ProjectFilter))
             {
-                Dotnet.Run($"build {Conventions.SolutionFile} -c {Conventions.Configuration}");
+                Dotnet.Run($"build {Conventions.SolutionFile} -c {Conventions.Configuration}", "build");
                 PrintInfo($"Built {Conventions.SolutionFile} in {Conventions.Configuration} configuration");
                 return;
             }
 
             var matchingProjects = ProjectDiscovery.MatchProjects(ctx.BuildableProjects, ctx.ProjectFilter, "buildable");
             foreach (var project in matchingProjects)
-                Dotnet.Run($"build {project} -c {Conventions.Configuration}");
+                Dotnet.Run($"build {project} -c {Conventions.Configuration}", $"build-{ProjectDiscovery.ShortName(project)}");
 
             PrintInfo($"Built {matchingProjects.Length} project(s) matching '{ctx.ProjectFilter}': {string.Join(", ", matchingProjects.Select(ProjectDiscovery.ShortName))}");
         });

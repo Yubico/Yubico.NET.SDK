@@ -180,6 +180,27 @@ static class Output
               To run a unit project by hand, use `dotnet run --project <proj>` or its apphost, not
               `dotnet <proj>.dll`: Core's probes re-launch the test host from the entry assembly and fail
               spuriously under `dotnet X.dll`.
+
+            READING THE OUTPUT (AI agents and CI):
+              The run ends with a RESULT block. Read it, not the lines above it:
+                RESULT: PASSED | FAILED   the outcome; the exit code is 0 only for PASSED
+                ✓/✗ <target>              each target that ran, with its error
+                Projects: ...; tests: ... project and per-test totals
+                Failed: <project>         each failing project, its failing tests and messages
+                Next: <command>           re-runs only what failed
+                Run log: <path>           where everything is saved
+              While running, lines start with fixed markers: "▶ RUN" (a command starts, with
+              "output: <log>" for its full output), "✓ PASS", "✗ FAIL", "○ NO-TESTS" (nothing executed:
+              the filter matched nothing or every test was skipped; this fails the test target),
+              "! WARN".
+              Build and test output is not shown (only error lines); use --verbose to stream it.
+              Project names omit the Yubico.YubiKit. prefix.
+
+            RUN LOGS:
+              Every run that executes a target is saved under artifacts/toolchain/runs/<time>-<targets>/:
+              run.log (all console output), one log per build/test step, and result.json (the RESULT
+              block as JSON). artifacts/toolchain/latest/ is the newest run (latest.txt names it where
+              symlinks are unavailable). The 5 newest runs are kept; `clean` does not remove them.
             """);
 
         PrintColored($"Discovered {ctx.PackableProjects.Length} packable projects:", ConsoleColor.Cyan);

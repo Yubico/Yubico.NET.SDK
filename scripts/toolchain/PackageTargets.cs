@@ -25,7 +25,7 @@ static class PackageTargets
 
             foreach (var project in ctx.PackableProjects)
             {
-                Dotnet.Run($"pack {project} -c {Conventions.Configuration} {noBuildArg} -o {ctx.PackagesDir} {versionArg} {docsArg} {symbolsArg}");
+                Dotnet.Run($"pack {project} -c {Conventions.Configuration} {noBuildArg} -o {ctx.PackagesDir} {versionArg} {docsArg} {symbolsArg}", $"pack-{ProjectDiscovery.ShortName(project)}");
                 PrintInfo($"Packed {ProjectDiscovery.ShortName(project)}");
             }
 
@@ -49,7 +49,7 @@ static class PackageTargets
                 return;
             }
 
-            Dotnet.Run($"nuget add source {ctx.NugetFeedPath} -n {ctx.NugetFeedName}");
+            Dotnet.Run($"nuget add source {ctx.NugetFeedPath} -n {ctx.NugetFeedName}", "nuget-add-source");
             PrintInfo($"Added NuGet source: {ctx.NugetFeedName}");
         });
 
@@ -60,7 +60,7 @@ static class PackageTargets
             var packages = Directory.GetFiles(ctx.PackagesDir, "*.nupkg");
             PublishPackages(packages, ctx.DryRun, ctx.NugetFeedName, package =>
             {
-                Dotnet.Run($"nuget push {package} -s {ctx.NugetFeedName} --skip-duplicate");
+                Dotnet.Run($"nuget push {package} -s {ctx.NugetFeedName} --skip-duplicate", $"push-{Path.GetFileNameWithoutExtension(package)}");
             });
         });
 
@@ -80,7 +80,7 @@ static class PackageTargets
 
             PublishPackages(packages, ctx.DryRun, ctx.NugetFeedUrl, package =>
             {
-                Dotnet.Run($"nuget push {package} -s {ctx.NugetFeedUrl} --api-key {ctx.NugetApiKey} --skip-duplicate", secrets: ctx.NugetApiKey);
+                Dotnet.Run($"nuget push {package} -s {ctx.NugetFeedUrl} --api-key {ctx.NugetApiKey} --skip-duplicate", $"push-{Path.GetFileNameWithoutExtension(package)}", ctx.NugetApiKey);
             });
         });
     }

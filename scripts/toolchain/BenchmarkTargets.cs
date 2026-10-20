@@ -16,7 +16,7 @@ static class BenchmarkTargets
                 "Yubico.YubiKit.PerformanceBenchmarks",
                 "Yubico.YubiKit.PerformanceBenchmarks.csproj");
 
-            Dotnet.Run($"run --project \"{benchmarkProject}\" -c {Conventions.Configuration} -- {ctx.BenchmarkArgs}");
+            Dotnet.Stream($"run --project \"{benchmarkProject}\" -c {Conventions.Configuration} -- {ctx.BenchmarkArgs}");
         });
     }
 }

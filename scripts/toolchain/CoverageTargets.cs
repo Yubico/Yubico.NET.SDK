@@ -34,7 +34,7 @@ static class CoverageTargets
                 ctx.ProjectFilter);
 
             if (projectsToCover.Any(p => p.UsesTestingPlatformRunner))
-                Dotnet.Run("tool restore");
+                Dotnet.Run("tool restore", "tool-restore");
 
             var results = new List<ProjectResult>();
 
@@ -48,15 +48,17 @@ static class CoverageTargets
                     if (project.UsesTestingPlatformRunner)
                         CollectMtpCoverage(ctx, project.Path, Path.GetFileNameWithoutExtension(project.Path), coverageResultsDir);
                     else
-                        Dotnet.Run($"test {project.Path} -c {Conventions.Configuration} --settings {Conventions.CoverletRunsettings} --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
+                        Dotnet.Run($"test {project.Path} -c {Conventions.Configuration} --settings {Conventions.CoverletRunsettings} --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}", $"coverage-{projectName}");
 
                     results.Add(new ProjectResult(projectName, Outcome.Passed, "coverage collected"));
+                    RunLog.Record(results[^1]);
                     PrintOutcome(Outcome.Passed, "coverage collected");
                 }
                 catch (Exception ex)
                 {
                     var reason = $"coverage collection failed: {ex.Message}";
                     results.Add(new ProjectResult(projectName, Outcome.Failed, reason));
+                    RunLog.Record(results[^1]);
                     PrintOutcome(Outcome.Failed, reason);
                 }
             }
@@ -88,7 +90,7 @@ static class CoverageTargets
                 throw new ToolchainException(
                     "No coverage results found in artifacts/coverage. Run `dotnet toolchain.cs coverage` first.");
 
-            Dotnet.Run($"crap.cs {ctx.CrapArgs}".TrimEnd(), ctx.RepoRoot);
+            Dotnet.Stream($"crap.cs {ctx.CrapArgs}".TrimEnd(), ctx.RepoRoot);
         });
 
         TargetRegistry.Define("complexity", "Flag complex methods in your uncommitted changes (source only, no coverage)", () =>
@@ -97,7 +99,7 @@ static class CoverageTargets
             // --complexity-args, complexity.cs checks your uncommitted changes against HEAD; this is
             // the soft pre-commit gate described in CLAUDE.md.
             PrintHeader("Checking method complexity");
-            Dotnet.Run($"complexity.cs {ctx.ComplexityArgs}".TrimEnd(), ctx.RepoRoot);
+            Dotnet.Stream($"complexity.cs {ctx.ComplexityArgs}".TrimEnd(), ctx.RepoRoot);
         });
     }
 
@@ -117,7 +119,7 @@ static class CoverageTargets
         // These binaries exist only to be executed once for coverage and are never shipped or
         // attested, so real paths here cost nothing. The packages published by the `pack` target
         // build separately and keep deterministic paths.
-        Dotnet.Run($"build {projectPath} -c {Conventions.Configuration} -p:DeterministicSourcePaths=false");
+        Dotnet.Run($"build {projectPath} -c {Conventions.Configuration} -p:DeterministicSourcePaths=false", $"coverage-build-{ProjectDiscovery.ShortName(projectPath)}");
 
         var projectDir = Path.GetDirectoryName(Path.Combine(ctx.RepoRoot, projectPath))!;
         var outputDir = Path.Combine(projectDir, "bin", Conventions.Configuration, Conventions.TestTargetFramework);
@@ -141,7 +143,7 @@ static class CoverageTargets
         coverletArgs.Append($" --output \"{outputFile}\"");
         coverletArgs.Append(TranslateRunsettingsToCoverletArgs(ctx));
 
-        Dotnet.Run(coverletArgs.ToString());
+        Dotnet.Run(coverletArgs.ToString(), $"coverage-{ProjectDiscovery.ShortName(projectPath)}");
 
         // An instrumentation failure does not fail coverlet: it writes a well-formed cobertura
         // report containing "<sources />" and "<packages />" and exits 0. Every downstream

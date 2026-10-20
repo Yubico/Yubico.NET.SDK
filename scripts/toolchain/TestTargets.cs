@@ -2,14 +2,13 @@
 
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using static Bullseye.Targets;
 using static Output;
 
 static class TestTargets
 {
     public static void Register(ToolchainContext ctx)
     {
-        Target("test", DependsOn("test-infrastructure-qa"), () =>
+        TargetRegistry.Define("test", "Run unit tests (plus integration tests with --integration) and summarise per project", ["test-infrastructure-qa"], () =>
         {
             // --integration requires --project to prevent accidentally running all integration tests
             if (ctx.IncludeIntegration && string.IsNullOrEmpty(ctx.ProjectFilter))
@@ -23,124 +22,69 @@ static class TestTargets
 
             PrintHeader(ctx.IncludeIntegration ? "Running unit + integration tests" : "Running unit tests");
 
-            var projectsToTest = ProjectDiscovery.FilterToProject(ctx.TestProjectInfos, ctx.ProjectFilter);
+            var projectsToTest = ProjectDiscovery.MatchTestProjects(ctx.TestProjects, ctx.ProjectFilter);
             if (projectsToTest is null)
                 return;
 
-            var results = RunTestProjects(ctx, ctx.TestFilter, projectsToTest);
+            var results = RunTestProjects(ctx.TestFilter, projectsToTest);
             PrintTestSummary(results, "TEST");
-
-            var failCount = results.Count(r => !r.Passed);
-            if (failCount > 0)
-                throw new InvalidOperationException($"{failCount} test project(s) failed");
-
-            if (results.Count > 0 && results.All(r => r.Skipped))
-                throw new InvalidOperationException("No tests were executed (no matching tests, or every test was skipped)");
+            Gates.EnsureTestsRan(results, "test");
         });
 
-        Target("resilience", () =>
+        TargetRegistry.Define("resilience", "Run the fast no-hardware runtime resilience gates (requires --fast)", () =>
         {
             PrintHeader("Running fast runtime resilience gates");
 
             if (!ctx.FastMode)
-            {
                 throw new InvalidOperationException("The resilience target currently requires --fast; only fast no-hardware mode is implemented.");
-            }
 
-            var resilienceFilter = string.IsNullOrEmpty(ctx.TestFilter)
-                ? "Category=RuntimeResilience"
-                : $"{ctx.TestFilter}&Category=RuntimeResilience";
-
-            var projectsToTest = ProjectDiscovery.FilterToProject(ctx.TestProjectInfos, "Core");
+            var projectsToTest = ProjectDiscovery.MatchTestProjects(ctx.TestProjects, "Core");
             if (projectsToTest is null)
                 return;
 
             var stopwatch = Stopwatch.StartNew();
-            var results = RunTestProjects(ctx, resilienceFilter, projectsToTest);
+            var results = RunTestProjects(Traits.And(ctx.TestFilter, Traits.Is(Traits.RuntimeResilience)), projectsToTest);
             stopwatch.Stop();
 
             PrintTestSummary(results, "RUNTIME RESILIENCE");
-            PrintInfo("Evidence: Core unit tests with Category=RuntimeResilience");
+            PrintInfo($"Evidence: Core unit tests with {Traits.Is(Traits.RuntimeResilience)}");
             PrintInfo($"Elapsed: {stopwatch.Elapsed.TotalSeconds:F1}s");
-
-            var failCount = results.Count(r => !r.Passed);
-            if (failCount > 0)
-                throw new InvalidOperationException($"{failCount} runtime resilience test project(s) failed");
-
-            if (results.Count > 0 && results.All(r => r.Skipped))
-                throw new InvalidOperationException("No runtime resilience tests matched the specified filter");
+            Gates.EnsureTestsRan(results, "runtime resilience test");
         });
     }
 
-    static List<(string Project, bool Passed, string? Error, bool Skipped)> RunTestProjects(
-        ToolchainContext ctx,
-        string? testFilter,
-        IEnumerable<(string ProjectPath, bool UsesTestingPlatformRunner)> projects)
+    static List<ProjectResult> RunTestProjects(string? testFilter, IEnumerable<TestProject> projects)
     {
-        var results = new List<(string Project, bool Passed, string? Error, bool Skipped)>();
+        var results = new List<ProjectResult>();
 
-        foreach (var (projectPath, usesTestingPlatformRunner) in projects)
+        foreach (var project in projects)
         {
-            var projectName = Path.GetFileNameWithoutExtension(projectPath);
+            var projectName = Path.GetFileNameWithoutExtension(project.Path);
             PrintProjectHeader("Testing", projectName);
 
             try
             {
-                string command;
-                if (usesTestingPlatformRunner)
+                var command = BuildTestCommand(project, testFilter);
+                if (command is null)
                 {
-                    // xUnit v3 MTP runner uses native filter options (--filter-method, --filter-trait, etc.)
-                    // not VSTest's --filter syntax
-                    command = $"run --project {projectPath} -c {ctx.Configuration}";
-                    if (!string.IsNullOrEmpty(testFilter))
-                    {
-                        var (mtpFilter, hasPositiveFilters, positiveMtpFilterArgs) = TranslateToMtpFilter(testFilter);
-                        // Preflight only the inclusion filter. Exclusions still apply to the real run.
-                        if (hasPositiveFilters && !MtpFilterHasMatches(ctx, projectPath, positiveMtpFilterArgs))
-                        {
-                            results.Add((projectName, true, "No matching tests", true));
-                            PrintColored($"○ {projectName} - No matching tests", ConsoleColor.Yellow);
-                            continue;
-                        }
-
-                        command += $" -- {mtpFilter}";
-                    }
-                }
-                else
-                {
-                    // xUnit v2 runs under VSTest, which takes --filter directly.
-                    command = $"test {projectPath} -c {ctx.Configuration} --logger \"console;verbosity=normal\"";
-                    if (!string.IsNullOrEmpty(testFilter))
-                    {
-                        var vsTestFilter = TranslateToVsTestFilter(testFilter);
-
-                        // Same preflight the MTP path gets. Without it a filter matching nothing makes
-                        // VSTest print "No test matches..." and still exit 0, which this method would
-                        // report as "All tests passed" — a green result from a run that never happened.
-                        if (!VsTestFilterHasMatches(ctx, projectPath, vsTestFilter))
-                        {
-                            results.Add((projectName, true, "No matching tests", true));
-                            PrintColored($"○ {projectName} - No matching tests", ConsoleColor.Yellow);
-                            continue;
-                        }
-
-                        command += $" --filter \"{vsTestFilter}\"";
-                    }
+                    results.Add(new ProjectResult(projectName, Outcome.NoTestsExecuted, "No matching tests"));
+                    PrintColored($"○ {projectName} - No matching tests", ConsoleColor.Yellow);
+                    continue;
                 }
 
-                var counts = DotnetProcess.RunTestAndReadCounts(command);
+                var counts = Dotnet.RunTests(command);
 
                 // A run where every test was skipped (typically [SkippableTheory] + no matching YubiKey) exits 0.
-                // That is not a pass: report it as skipped, like a filter that matched nothing.
+                // That is not a pass: report it like a filter that matched nothing.
                 if (counts is { Executed: 0, Skipped: > 0 })
                 {
                     var reason = $"all {counts.Skipped} tests skipped";
-                    results.Add((projectName, true, reason, true));
+                    results.Add(new ProjectResult(projectName, Outcome.NoTestsExecuted, reason));
                     PrintColored($"○ {projectName} - No tests executed ({reason})", ConsoleColor.Yellow);
                     continue;
                 }
 
-                results.Add((projectName, true, null, false));
+                results.Add(new ProjectResult(projectName, Outcome.Passed));
                 PrintColored(
                     counts is null
                         ? $"✓ {projectName} - All tests passed"
@@ -150,17 +94,55 @@ static class TestTargets
             catch (ArgumentException ex)
             {
                 // A bad --filter is a usage error, not a test failure: say what was wrong.
-                results.Add((projectName, false, ex.Message, false));
+                results.Add(new ProjectResult(projectName, Outcome.Failed, ex.Message));
                 PrintColored($"✗ {projectName} - {ex.Message}", ConsoleColor.Red);
             }
             catch (Exception ex)
             {
-                results.Add((projectName, false, ex.Message, false));
+                results.Add(new ProjectResult(projectName, Outcome.Failed, ex.Message));
                 PrintColored($"✗ {projectName} - Tests failed", ConsoleColor.Red);
             }
         }
 
         return results;
+    }
+
+    /// <summary>
+    /// The dotnet arguments that run <paramref name="project"/> with <paramref name="testFilter"/> translated
+    /// for its runner, or null when the filter selects no test in it (checked by discovery, without running).
+    /// </summary>
+    static string? BuildTestCommand(TestProject project, string? testFilter)
+    {
+        if (project.UsesTestingPlatformRunner)
+        {
+            // xUnit v3 MTP runner uses native filter options (--filter-method, --filter-trait, etc.)
+            // not VSTest's --filter syntax
+            var command = $"run --project {project.Path} -c {Conventions.Configuration}";
+            if (string.IsNullOrEmpty(testFilter))
+                return command;
+
+            var (mtpFilter, hasPositiveFilters, positiveMtpFilterArgs) = TranslateToMtpFilter(testFilter);
+            // Preflight only the inclusion filter. Exclusions still apply to the real run.
+            if (hasPositiveFilters && !MtpFilterHasMatches(project.Path, positiveMtpFilterArgs))
+                return null;
+
+            return $"{command} -- {mtpFilter}";
+        }
+
+        // xUnit v2 runs under VSTest, which takes --filter directly.
+        var vsTestCommand = $"test {project.Path} -c {Conventions.Configuration} --logger \"console;verbosity=normal\"";
+        if (string.IsNullOrEmpty(testFilter))
+            return vsTestCommand;
+
+        var vsTestFilter = TranslateToVsTestFilter(testFilter);
+
+        // Same preflight the MTP path gets. Without it a filter matching nothing makes
+        // VSTest print "No test matches..." and still exit 0, which would be reported
+        // as "All tests passed" — a green result from a run that never happened.
+        if (!VsTestFilterHasMatches(project.Path, vsTestFilter))
+            return null;
+
+        return $"{vsTestCommand} --filter \"{vsTestFilter}\"";
     }
 
     // Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments.
@@ -277,90 +259,29 @@ static class TestTargets
     static string TranslateToVsTestFilter(string vstestFilter) =>
         Regex.Replace(vstestFilter, @"\b(Method|Name)\s*~", "FullyQualifiedName~");
 
-    // True when the filter selects at least one test in the project.
-    //
-    // Discovery-only, so it never runs a ceremony or touches hardware.
-    static bool VsTestFilterHasMatches(ToolchainContext ctx, string projectPath, string vsTestFilter)
-    {
-        var (exitCode, output) = DotnetProcess.RunAndCapture(
-        [
-            "test", projectPath, "-c", ctx.Configuration, "--list-tests", "--filter", vsTestFilter
-        ]);
-
-        // VSTest 18.x reports zero discovery matches with this text and still exits 0.
-        if (output.Contains("No test matches the given testcase filter", StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        if (exitCode != 0)
-            throw new InvalidOperationException($"Failed to list tests for {projectPath}: {output}");
-
-        return true;
-    }
-
-    static bool MtpFilterHasMatches(ToolchainContext ctx, string projectPath, string[] positiveMtpFilterArgs)
-    {
-        var args = new List<string>
-        {
-            "run",
-            "--project",
+    static bool VsTestFilterHasMatches(string projectPath, string vsTestFilter) =>
+        FilterHasMatches(
             projectPath,
-            "-c",
-            ctx.Configuration,
-            "--",
-            "--list-tests"
-        };
-        args.AddRange(positiveMtpFilterArgs);
+            ["test", projectPath, "-c", Conventions.Configuration, "--list-tests", "--filter", vsTestFilter],
+            RunnerMarkers.VsTestNoMatches);
 
-        var (exitCode, output) = DotnetProcess.RunAndCapture(args);
-        // xUnit v3 MTP 3.0.0 reports zero discovery matches with this summary text.
-        if (output.Contains("found 0 test(s)", StringComparison.OrdinalIgnoreCase))
+    static bool MtpFilterHasMatches(string projectPath, string[] positiveMtpFilterArgs) =>
+        FilterHasMatches(
+            projectPath,
+            ["run", "--project", projectPath, "-c", Conventions.Configuration, "--", "--list-tests", .. positiveMtpFilterArgs],
+            RunnerMarkers.MtpNoMatches);
+
+    // True when the filter selects at least one test in the project. Discovery-only, so it never runs a
+    // ceremony or touches hardware. Both runners exit 0 when nothing matches, so the marker text decides.
+    static bool FilterHasMatches(string projectPath, IReadOnlyList<string> listTestsArguments, string noMatchesMarker)
+    {
+        var (exitCode, output) = Dotnet.Capture(listTestsArguments);
+        if (output.Contains(noMatchesMarker, StringComparison.OrdinalIgnoreCase))
             return false;
 
         if (exitCode != 0)
             throw new InvalidOperationException($"Failed to list tests for {projectPath}: {output}");
 
         return true;
-    }
-}
-
-/// <summary>Per-test totals from a runner summary. Executed is passed + failed.</summary>
-sealed record TestCounts(int Executed, int Skipped)
-{
-    // VSTest: "Passed!  - Failed:     0, Passed:    83, Skipped:    12, Total:    95, Duration: ..."
-    static readonly Regex s_vsTest = new(
-        @"Failed:\s*(?<failed>\d+),\s*Passed:\s*(?<passed>\d+),\s*Skipped:\s*(?<skipped>\d+),\s*Total:\s*(?<total>\d+)",
-        RegexOptions.Compiled);
-
-    // VSTest console logger at verbosity=normal: "Total tests: 95" then indented "Passed: 83" / "Failed: 0" / "Skipped: 12"
-    // (a zero line is omitted). Microsoft.Testing.Platform (xUnit v3): "total:", "failed:", "succeeded:", "skipped:" lines.
-    static readonly Regex s_lines = new(
-        @"^\s*(?<key>Total tests|total|Passed|Failed|Skipped|failed|succeeded|skipped):\s*(?<value>\d+)\s*$",
-        RegexOptions.Compiled | RegexOptions.Multiline);
-
-    public static TestCounts? Parse(string output)
-    {
-        var vsTest = s_vsTest.Matches(output).LastOrDefault();
-        if (vsTest is not null)
-        {
-            return new TestCounts(
-                int.Parse(vsTest.Groups["failed"].Value) + int.Parse(vsTest.Groups["passed"].Value),
-                int.Parse(vsTest.Groups["skipped"].Value));
-        }
-
-        var lines = s_lines.Matches(output)
-            .GroupBy(m => m.Groups["key"].Value, StringComparer.Ordinal)
-            .ToDictionary(g => g.Key, g => int.Parse(g.Last().Groups["value"].Value), StringComparer.Ordinal);
-        if (lines.ContainsKey("Total tests") || lines.ContainsKey("total"))
-        {
-            lines.TryGetValue("Passed", out var passed);
-            lines.TryGetValue("succeeded", out var succeeded);
-            lines.TryGetValue("Failed", out var failedUpper);
-            lines.TryGetValue("failed", out var failedLower);
-            lines.TryGetValue("Skipped", out var skippedUpper);
-            lines.TryGetValue("skipped", out var skippedLower);
-            return new TestCounts(passed + succeeded + failedUpper + failedLower, skippedUpper + skippedLower);
-        }
-
-        return null;
     }
 }

@@ -3,11 +3,18 @@
 using System.Diagnostics;
 using System.Text;
 
-static class DotnetProcess
+/// <summary>Every way the toolchain starts a dotnet process.</summary>
+static class Dotnet
 {
-    // Runs `dotnet {arguments}` with live output and returns the test counts from the runner's own summary,
-    // or null when no summary was recognised. Throws like Run on a non-zero exit code.
-    public static TestCounts? RunTestAndReadCounts(string arguments)
+    /// <summary>Runs `dotnet {arguments}` with live output; throws on a non-zero exit code.</summary>
+    public static void Run(string arguments, string workingDirectory = "") =>
+        SimpleExec.Command.Run("dotnet", arguments, workingDirectory);
+
+    /// <summary>
+    /// Runs `dotnet {arguments}` with live output and returns the test counts from the runner's own summary,
+    /// or null when no summary was recognised. Throws like <see cref="Run"/> on a non-zero exit code.
+    /// </summary>
+    public static TestCounts? RunTests(string arguments)
     {
         var startInfo = new ProcessStartInfo("dotnet", arguments)
         {
@@ -39,7 +46,8 @@ static class DotnetProcess
         return TestCounts.Parse(output.ToString());
     }
 
-    public static (int ExitCode, string Output) RunAndCapture(IReadOnlyList<string> arguments)
+    /// <summary>Runs `dotnet` silently and returns its exit code and combined stdout + stderr.</summary>
+    public static (int ExitCode, string Output) Capture(IReadOnlyList<string> arguments)
     {
         var startInfo = new ProcessStartInfo("dotnet")
         {
@@ -58,5 +66,18 @@ static class DotnetProcess
         process.WaitForExit();
 
         return (process.ExitCode, stdout.GetAwaiter().GetResult() + stderr.GetAwaiter().GetResult());
+    }
+}
+
+static class Bash
+{
+    /// <summary>Runs a repo script with bash from the repo root; fails clearly when the script is missing.</summary>
+    public static void RunScript(string repoRoot, string relativePath)
+    {
+        var script = Path.Combine(repoRoot, relativePath);
+        if (!File.Exists(script))
+            throw new InvalidOperationException($"Missing {script}");
+
+        SimpleExec.Command.Run("bash", $"\"{script}\"", workingDirectory: repoRoot);
     }
 }

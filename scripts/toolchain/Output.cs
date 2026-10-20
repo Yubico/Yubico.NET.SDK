@@ -18,159 +18,147 @@ static class Output
         Console.ResetColor();
     }
 
-    public static void PrintProjectList(string[] projects)
+    public static void PrintProjectList(IEnumerable<string> projects)
     {
         foreach (var p in projects)
             Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(p)}");
     }
 
-    public static void PrintNoProjectsFound(string filter, string[] available)
-    {
-        PrintColored($"⚠ No projects match '{filter}'", ConsoleColor.Yellow);
-        Console.WriteLine("Available projects:");
-        PrintProjectList(available);
-    }
-
     public static void PrintProjectHeader(string label, string projectName) =>
         Console.WriteLine($"\n=== {label}: {projectName} ===");
 
-    public static void PrintTestSummary(List<(string Project, bool Passed, string? Error, bool Skipped)> results, string label)
+    public static void PrintTestSummary(IReadOnlyList<ProjectResult> results, string label)
     {
         var separator = new string('=', 60);
         Console.WriteLine($"\n{separator}");
         Console.WriteLine($"{label} SUMMARY");
         Console.WriteLine(separator);
 
-        foreach (var (project, passed, error, skipped) in results)
+        foreach (var (project, outcome, reason) in results)
         {
-            if (skipped)
+            switch (outcome)
             {
-                PrintColored($"  ○ {project} ({error ?? "no matching tests"})", ConsoleColor.Yellow);
-            }
-            else if (passed)
-            {
-                PrintColored($"  ✓ {project}", ConsoleColor.Green);
-            }
-            else
-            {
-                PrintColored($"  ✗ {project}", ConsoleColor.Red);
-                if (!string.IsNullOrEmpty(error) && error.Contains("Test Run Aborted"))
-                    Console.WriteLine("    (Test run aborted - check for initialization errors)");
+                case Outcome.NoTestsExecuted:
+                    PrintColored($"  ○ {project} ({reason ?? "no matching tests"})", ConsoleColor.Yellow);
+                    break;
+                case Outcome.Passed:
+                    PrintColored($"  ✓ {project}", ConsoleColor.Green);
+                    break;
+                default:
+                    PrintColored($"  ✗ {project}", ConsoleColor.Red);
+                    if (!string.IsNullOrEmpty(reason) && reason.Contains("Test Run Aborted"))
+                        Console.WriteLine("    (Test run aborted - check for initialization errors)");
+                    break;
             }
         }
 
-        var skippedCount = results.Count(r => r.Skipped);
-        var passedCount = results.Count(r => r.Passed && !r.Skipped);
-        var failedCount = results.Count(r => !r.Passed);
+        var skippedCount = results.Count(r => r.Outcome == Outcome.NoTestsExecuted);
+        var passedCount = results.Count(r => r.Outcome == Outcome.Passed);
+        var failedCount = results.Count(r => r.Outcome == Outcome.Failed);
 
         // These count test PROJECTS. The per-test totals are in each runner's own summary above
         // ("total:/failed:" for xUnit v3, "Total tests:/Passed:" for VSTest), which this line used to mimic.
         Console.WriteLine(separator);
         Console.Write("Test projects: ");
-        Console.ForegroundColor = passedCount > 0 ? ConsoleColor.Green : ConsoleColor.Gray;
-        Console.Write($"{passedCount} passed");
-        Console.ResetColor();
+        WriteCount($"{passedCount} passed", passedCount > 0 ? ConsoleColor.Green : ConsoleColor.Gray);
         Console.Write(", ");
-        Console.ForegroundColor = failedCount > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
-        Console.Write($"{failedCount} failed");
-        Console.ResetColor();
+        WriteCount($"{failedCount} failed", failedCount > 0 ? ConsoleColor.Red : ConsoleColor.Gray);
         Console.Write(", ");
-        Console.ForegroundColor = skippedCount > 0 ? ConsoleColor.Yellow : ConsoleColor.Gray;
-        Console.Write($"{skippedCount} with no tests executed");
-        Console.ResetColor();
+        WriteCount($"{skippedCount} with no tests executed", skippedCount > 0 ? ConsoleColor.Yellow : ConsoleColor.Gray);
         Console.WriteLine($" ({results.Count} total)");
         Console.WriteLine(separator);
+
+        static void WriteCount(string text, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.Write(text);
+            Console.ResetColor();
+        }
     }
 
-    public static void PrintHelp(string[] packableProjects, string[] testProjects)
+    public static void PrintHelp(ToolchainContext ctx)
     {
-        Console.WriteLine(@"
-Yubico.YubiKit Toolchain Script
-================================
+        Console.WriteLine("""
 
-.NET 10 build automation script using Bullseye task runner.
+            Yubico.YubiKit Toolchain Script
+            ================================
 
-USAGE:
-  dotnet toolchain.cs [target]
-  dotnet toolchain.cs -- [target] [options]   (required before script long options)
+            .NET 10 build automation script using Bullseye task runner.
 
- NOTE: The -- separator passes arguments to the script instead of dotnet.
-       It is required before every script long option, including --project:
-   dotnet toolchain.cs -- --help
-   dotnet toolchain.cs -- build --project Piv
+            USAGE:
+              dotnet toolchain.cs [target]
+              dotnet toolchain.cs -- [target] [options]   (required before script long options)
 
-TARGETS:
-  clean          - Remove artifacts directory
-  restore        - Restore NuGet dependencies
-  build          - Build the solution (restores only if needed)
-  test           - Run unit tests with summary output
-  resilience     - Run fast no-hardware runtime resilience gates
-  test-infrastructure-qa - Validate hardware-test declaration invariants
-  benchmark      - Run performance benchmarks (manual, not CI)
-  docs-qa        - Validate active documentation hygiene
-  docs-list-active - Print the exact active documentation set used by docs-qa
-  docs-inventory - Generate report-only active documentation inventory
-  docs-architecture - Validate architecture diagram evidence map + image freshness
-  coverage       - Run tests with code coverage
-  crap           - Rank methods by CRAP score from collected coverage (requires: coverage)
-  complexity     - Flag complex methods in your uncommitted changes (source only, no coverage)
-  pack           - Create NuGet packages
-  setup-feed     - Configure local NuGet feed
-  publish        - Publish packages to local feed
-  publish-remote - Push packages to a remote NuGet feed (e.g. GitHub Packages)
-  default        - Run tests and publish
+             NOTE: The -- separator passes arguments to the script instead of dotnet.
+                   It is required before every script long option, including --project:
+               dotnet toolchain.cs -- --help
+               dotnet toolchain.cs -- build --project Piv
 
-OPTIONS:
-  --package-version <version>    Override NuGet package version
-  --nuget-feed-name <name>       NuGet feed name (default: Yubico.YubiKit-LocalNuGet)
-  --nuget-feed-path <path>       NuGet feed path (default: artifacts/nuget-feed)
-  --nuget-feed-url <url>         Remote NuGet feed URL (required for publish-remote)
-  --nuget-api-key <key>          API key for remote NuGet feed (required for publish-remote)
-  --include-docs                 Include XML documentation in packages
-  --dry-run                      Show what would be published without publishing
-  --clean                        Run dotnet clean before build
-  --filter <expression>          Test filter expression (e.g., ""FullyQualifiedName~MyTest"")
-  --project <name>               Build/test specific project only (partial match)
-  --integration                  Include integration tests (requires --project)
-  --smoke                        Smoke test mode: skip Slow and RequiresUserPresence tests
-  --fast                         Required fast mode for resilience gates
-  --benchmark-args <args>         Arguments passed to BenchmarkDotNet
-  --crap-args <args>             Arguments passed to crap.cs (e.g. ""--module Piv --top 50"")
-  --complexity-args <args>       Arguments passed to complexity.cs (e.g. ""--module Piv"")
-  -h, --help                     Show this help message
+            TARGETS:
+            """);
 
-EXAMPLES:
-  dotnet toolchain.cs build
-  dotnet toolchain.cs -- build --project Piv
-  dotnet toolchain.cs test
-  dotnet toolchain.cs docs-qa
-  dotnet toolchain.cs -- docs-inventory
-  dotnet toolchain.cs -- test --filter ""FullyQualifiedName~MyTestClass""
-  dotnet toolchain.cs -- test --project Piv --filter ""Method~Sign""
-  dotnet toolchain.cs -- resilience --fast
-  dotnet toolchain.cs -- benchmark --benchmark-args ""--list flat""
-  dotnet toolchain.cs -- test --integration --project Piv --smoke
-  dotnet toolchain.cs coverage
-  dotnet toolchain.cs complexity
-  dotnet toolchain.cs -- complexity --complexity-args ""--module Piv""
-  dotnet toolchain.cs -- publish --package-version 1.0.0-preview.1
-  dotnet toolchain.cs -- publish-remote --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key $TOKEN
-  dotnet toolchain.cs -- publish-remote --dry-run --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key fake
-  dotnet toolchain.cs -- --help
+        var nameWidth = TargetRegistry.All.Max(t => t.Name.Length) + 2;
+        foreach (var target in TargetRegistry.All)
+        {
+            var dependsOn = target.DependsOn.Length > 0 ? $" (runs first: {string.Join(", ", target.DependsOn)})" : "";
+            Console.WriteLine($"  {target.Name.PadRight(nameWidth)}{target.Description}{dependsOn}");
+        }
 
-FILTER SYNTAX (for --filter):
-  FullyQualifiedName~MyClass     Tests containing 'MyClass' in full name
-  Name=MyTestMethod              Exact test method name
-  ClassName~Integration          Classes containing 'Integration'
-  Name!=SkipMe                   Exclude tests named 'SkipMe'
-  Category=Unit                  Tests with [Trait(""Category"", ""Unit"")]
-");
+        Console.WriteLine("\nOPTIONS:");
+        var optionRows = Options.All
+            .Select(o => (Usage: o.Value is null ? o.Name : $"{o.Name} {o.Value}", o.Description))
+            .Append((Usage: "-h, --help", Description: "Show this help message"))
+            .ToArray();
+        var usageWidth = optionRows.Max(r => r.Usage.Length) + 2;
+        foreach (var (usage, description) in optionRows)
+            Console.WriteLine($"  {usage.PadRight(usageWidth)}{description}");
 
-        PrintColored($"Discovered {packableProjects.Length} packable projects:", ConsoleColor.Cyan);
-        PrintProjectList(packableProjects);
+        Console.WriteLine("""
 
-        PrintColored($"\nDiscovered {testProjects.Length} test projects:", ConsoleColor.Cyan);
-        PrintProjectList(testProjects);
+            EXAMPLES:
+              dotnet toolchain.cs build
+              dotnet toolchain.cs -- build --project Piv
+              dotnet toolchain.cs test
+              dotnet toolchain.cs -- test --project Piv --filter "Method~Sign"
+              dotnet toolchain.cs -- test --project WebAuthn.UnitTests --filter "FullyQualifiedName~YESDK1619|FullyQualifiedName~YESDK1613"
+              dotnet toolchain.cs -- test --integration --project Piv --smoke
+              dotnet toolchain.cs -- resilience --fast
+              dotnet toolchain.cs docs-qa
+              dotnet toolchain.cs coverage
+              dotnet toolchain.cs -- complexity --complexity-args "--module Piv"
+              dotnet toolchain.cs -- benchmark --benchmark-args "--list flat"
+              dotnet toolchain.cs -- publish --package-version 1.0.0-preview.1
+              dotnet toolchain.cs -- publish-remote --dry-run --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json --nuget-api-key fake
+
+            FILTER SYNTAX (for --filter):
+              FullyQualifiedName~MyClass     Tests containing 'MyClass' in full name
+              Method~Sign                    Test methods containing 'Sign'
+              Name=MyTestMethod              Exact test method name
+              ClassName~Integration          Classes containing 'Integration'
+              Category=Slow                  Tests with [Trait("Category", "Slow")]
+              Category!=RequiresHardware     Exclude tests with that trait
+              A&B                            All terms must match
+              A|B                            Any term matches (alternatives of one kind; xUnit v3
+                                             projects reject mixing & and |)
+
+              Categories: RequiresHardware, RequiresUserPresence, Slow, Integration, RuntimeResilience.
+              AI agents: always exclude RequiresUserPresence (cannot insert, remove or touch a device).
+
+            TEST RUNNERS:
+              The script detects each test project's runner: xUnit v3 projects (UseMicrosoftTestingPlatformRunner)
+              run with `dotnet run` and xUnit v3 filter options, xUnit v2 projects with `dotnet test --filter`.
+              --filter is translated for both, so always test through this script, not `dotnet test`.
+
+              To run a unit project by hand, use `dotnet run --project <proj>` or its apphost, not
+              `dotnet <proj>.dll`: Core's probes re-launch the test host from the entry assembly and fail
+              spuriously under `dotnet X.dll`.
+            """);
+
+        PrintColored($"Discovered {ctx.PackableProjects.Length} packable projects:", ConsoleColor.Cyan);
+        PrintProjectList(ctx.PackableProjects);
+
+        PrintColored($"\nDiscovered {ctx.TestProjects.Length} test projects:", ConsoleColor.Cyan);
+        PrintProjectList(ctx.TestProjects.Select(p => p.Path));
 
         Console.WriteLine("\nSee TOOLCHAIN.md for full documentation.");
     }

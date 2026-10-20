@@ -129,10 +129,14 @@ dotnet toolchain.cs clean build
 
 | File | Contents |
 |---|---|
-| `Context.cs` | `ToolchainContext`: repository root, parsed options, discovered projects, and the option list Bullseye must not see |
+| `Conventions.cs` | Constants: solution, configuration, artifact paths, trait names, runner marker strings |
+| `Options.cs` | The single option table: parsing, the arguments hidden from Bullseye, and `--help` all read it |
+| `Context.cs` | `ToolchainContext`: repository root, parsed options, discovered projects |
 | `Discovery.cs` | Project and active-documentation discovery, `--project` matching |
-| `Output.cs` | Console helpers, test summary, `--help` text |
-| `Process.cs` | `dotnet` process helpers that capture output or test counts |
+| `Output.cs` | Console helpers, test summary, generated `--help` |
+| `Process.cs` | `Dotnet` and `Bash` process helpers |
+| `Results.cs` | `ProjectResult`/`Outcome`, `TestCounts`, and the shared pass/fail gates |
+| `TargetRegistry.cs` | Registers Bullseye targets and records them for `--help` |
 | `BuildTargets.cs` | `clean`, `restore`, `build`, `test-infrastructure-qa`, `native-aot-contract-qa` |
 | `TestTargets.cs` | `test`, `resilience`, `--filter` translation for xUnit v2/v3 |
 | `CoverageTargets.cs` | `coverage`, `crap`, `complexity` |
@@ -140,7 +144,11 @@ dotnet toolchain.cs clean build
 | `DocsTargets.cs` | `docs-qa`, `docs-inventory`, `docs-architecture` |
 | `PackageTargets.cs` | `pack`, `setup-feed`, `publish`, `publish-remote` |
 
-Every target stays in one process so Bullseye can resolve dependencies across areas (`pack` depends on `build`). To add a target, register it in the matching `*Targets.cs` file. A new option must be parsed in `ToolchainContext.FromArgs` and listed in that class's option lists, or Bullseye will reject it as an unknown target. A new file needs its own `#:include` line in `toolchain.cs`.
+Every target stays in one process so Bullseye can resolve dependencies across areas (`pack` depends on `build`).
+
+- **New target:** call `TargetRegistry.Define(name, description, …)` in the matching `*Targets.cs` file. The description appears in `--help` and `--list-targets`.
+- **New option:** add it to the table in `Options.cs` and read it in `ToolchainContext.FromArgs`. It is then hidden from Bullseye and listed in `--help` automatically.
+- **New file:** add its `#:include` line to `toolchain.cs`.
 
 ## Target Dependencies
 

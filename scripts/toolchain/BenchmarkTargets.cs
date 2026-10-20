@@ -1,14 +1,12 @@
 // Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md.
 
-using static Bullseye.Targets;
-using static SimpleExec.Command;
 using static Output;
 
 static class BenchmarkTargets
 {
     public static void Register(ToolchainContext ctx)
     {
-        Target("benchmark", () =>
+        TargetRegistry.Define("benchmark", "Run performance benchmarks (manual, not CI)", () =>
         {
             PrintHeader("Running performance benchmarks");
 
@@ -18,7 +16,7 @@ static class BenchmarkTargets
                 "Yubico.YubiKit.PerformanceBenchmarks",
                 "Yubico.YubiKit.PerformanceBenchmarks.csproj");
 
-            Run("dotnet", $"run --project \"{benchmarkProject}\" -c {ctx.Configuration} -- {ctx.BenchmarkArgs}");
+            Dotnet.Run($"run --project \"{benchmarkProject}\" -c {Conventions.Configuration} -- {ctx.BenchmarkArgs}");
         });
     }
 }

@@ -1,6 +1,5 @@
 // Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md.
 
-using static Bullseye.Targets;
 using static SimpleExec.Command;
 using static Output;
 
@@ -8,7 +7,7 @@ static class PackageTargets
 {
     public static void Register(ToolchainContext ctx)
     {
-        Target("pack", DependsOn("build"), () =>
+        TargetRegistry.Define("pack", "Create NuGet packages in artifacts/packages", ["build"], () =>
         {
             PrintHeader("Creating NuGet packages");
 
@@ -28,7 +27,7 @@ static class PackageTargets
             foreach (var project in ctx.PackableProjects)
             {
                 Console.WriteLine($"\nPacking: {Path.GetFileNameWithoutExtension(project)}");
-                Run("dotnet", $"pack {project} -c {ctx.Configuration} {noBuildArg} -o {ctx.PackagesDir} {versionArg} {docsArg} {symbolsArg}");
+                Dotnet.Run($"pack {project} -c {Conventions.Configuration} {noBuildArg} -o {ctx.PackagesDir} {versionArg} {docsArg} {symbolsArg}");
                 PrintInfo($"Packed {Path.GetFileNameWithoutExtension(project)}");
             }
 
@@ -36,7 +35,7 @@ static class PackageTargets
             PrintInfo($"Created {packages.Length} package(s) in {ctx.PackagesDir}");
         });
 
-        Target("setup-feed", async () =>
+        TargetRegistry.Define("setup-feed", "Register the local NuGet feed as a package source", async () =>
         {
             PrintHeader("Setting up local NuGet feed");
 
@@ -48,7 +47,7 @@ static class PackageTargets
 
                 if (!result.StandardOutput.Contains(ctx.NugetFeedName))
                 {
-                    Run("dotnet", $"nuget add source {ctx.NugetFeedPath} -n {ctx.NugetFeedName}");
+                    Dotnet.Run($"nuget add source {ctx.NugetFeedPath} -n {ctx.NugetFeedName}");
                     PrintInfo($"Added NuGet source: {ctx.NugetFeedName}");
                 }
                 else
@@ -59,23 +58,23 @@ static class PackageTargets
             catch (Exception ex)
             {
                 PrintColored($"Warning: Could not list NuGet sources ({ex.Message}), attempting to add anyway...", ConsoleColor.Yellow);
-                Run("dotnet", $"nuget add source {ctx.NugetFeedPath} -n {ctx.NugetFeedName}");
+                Dotnet.Run($"nuget add source {ctx.NugetFeedPath} -n {ctx.NugetFeedName}");
                 PrintInfo($"Added NuGet source: {ctx.NugetFeedName}");
             }
         });
 
-        Target("publish", DependsOn("pack", "setup-feed"), () =>
+        TargetRegistry.Define("publish", "Push packages to the local feed", ["pack", "setup-feed"], () =>
         {
             PrintHeader(ctx.DryRun ? "Dry run - packages to publish" : "Publishing packages");
 
             var packages = Directory.GetFiles(ctx.PackagesDir, "*.nupkg");
             PublishPackages(packages, ctx.DryRun, ctx.NugetFeedName, package =>
             {
-                Run("dotnet", $"nuget push {package} -s {ctx.NugetFeedName} --skip-duplicate");
+                Dotnet.Run($"nuget push {package} -s {ctx.NugetFeedName} --skip-duplicate");
             });
         });
 
-        Target("publish-remote", () =>
+        TargetRegistry.Define("publish-remote", "Push packages to a remote NuGet feed (e.g. GitHub Packages)", () =>
         {
             PrintHeader(ctx.DryRun ? "Dry run - remote packages to publish" : "Publishing packages to remote feed");
 
@@ -91,7 +90,7 @@ static class PackageTargets
 
             PublishPackages(packages, ctx.DryRun, ctx.NugetFeedUrl, package =>
             {
-                Run("dotnet", $"nuget push {package} -s {ctx.NugetFeedUrl} --api-key {ctx.NugetApiKey} --skip-duplicate");
+                Dotnet.Run($"nuget push {package} -s {ctx.NugetFeedUrl} --api-key {ctx.NugetApiKey} --skip-duplicate");
             });
         });
     }

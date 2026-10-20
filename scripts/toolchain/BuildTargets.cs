@@ -1,15 +1,13 @@
 // Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md.
 
 using System.Xml.Linq;
-using static Bullseye.Targets;
-using static SimpleExec.Command;
 using static Output;
 
 static class BuildTargets
 {
     public static void Register(ToolchainContext ctx)
     {
-        Target("clean", () =>
+        TargetRegistry.Define("clean", "Remove the artifacts directory (--clean also runs dotnet clean)", () =>
         {
             PrintHeader("Cleaning");
 
@@ -21,53 +19,31 @@ static class BuildTargets
 
             if (ctx.ShouldClean)
             {
-                Run("dotnet", $"clean {ctx.SolutionFile} -c {ctx.Configuration}");
+                Dotnet.Run($"clean {Conventions.SolutionFile} -c {Conventions.Configuration}");
                 PrintInfo("Cleaned solution");
             }
         });
 
-        Target("restore", () =>
+        TargetRegistry.Define("restore", "Restore NuGet dependencies", () =>
         {
             PrintHeader("Restoring dependencies");
-            Run("dotnet", $"restore {ctx.SolutionFile}");
+            Dotnet.Run($"restore {Conventions.SolutionFile}");
             PrintInfo("Dependencies restored");
         });
 
-        Target("test-infrastructure-qa", () =>
+        TargetRegistry.Define("test-infrastructure-qa", "Validate hardware-test declarations ([WithYubiKey] needs [SkippableTheory])", () =>
         {
             PrintHeader("Validating hardware-test declarations");
-
-            var failures = ValidateHardwareTestDeclarations(ctx, ctx.IntegrationTestProjects);
-            if (failures.Count > 0)
-            {
-                foreach (var failure in failures)
-                {
-                    PrintColored($"  ✗ {failure}", ConsoleColor.Red);
-                }
-
-                throw new InvalidOperationException(
-                    $"Hardware-test declaration validation failed with {failures.Count} issue(s)");
-            }
-
+            Gates.FailIfAny(ValidateHardwareTestDeclarations(ctx, ctx.IntegrationTestProjects), "Hardware-test declaration validation");
             PrintInfo("All [WithYubiKey] tests use [SkippableTheory] and declare the required package");
         });
 
-        Target("native-aot-contract-qa", () =>
+        TargetRegistry.Define("native-aot-contract-qa", "Validate that every SDK library is covered by the Native AOT verification host", () =>
         {
             PrintHeader("Validating Native AOT support contract");
 
             var discovery = DiscoverNativeAotProjects(ctx);
-            var failures = ValidateNativeAotContract(ctx, discovery);
-            if (failures.Count > 0)
-            {
-                foreach (var failure in failures)
-                {
-                    PrintColored($"  ✗ {failure}", ConsoleColor.Red);
-                }
-
-                throw new InvalidOperationException(
-                    $"Native AOT support contract validation failed with {failures.Count} issue(s)");
-            }
+            Gates.FailIfAny(ValidateNativeAotContract(ctx, discovery), "Native AOT support contract validation");
 
             PrintInfo(
                 $"All {discovery.SdkProjects.Length} supported SDK libraries opt in, are referenced by the " +
@@ -77,36 +53,28 @@ static class BuildTargets
                 $"{string.Join(", ", discovery.ExcludedProjects)}");
         });
 
-        Target("build", DependsOn("test-infrastructure-qa", "native-aot-contract-qa"), () =>
+        TargetRegistry.Define("build", "Build the solution, or the --project matches", ["test-infrastructure-qa", "native-aot-contract-qa"], () =>
         {
             PrintHeader("Building");
 
-            if (!string.IsNullOrEmpty(ctx.ProjectFilter))
+            if (string.IsNullOrEmpty(ctx.ProjectFilter))
             {
-                var matchingProjects = ctx.BuildableProjects
-                    .Where(p => Path.GetFileNameWithoutExtension(p)
-                        .Contains(ctx.ProjectFilter, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-                if (matchingProjects.Count == 0)
-                {
-                    PrintNoProjectsFound(ctx.ProjectFilter, ctx.BuildableProjects);
-                    return;
-                }
-
-                foreach (var project in matchingProjects)
-                {
-                    Console.WriteLine($"Building: {Path.GetFileNameWithoutExtension(project)}");
-                    Run("dotnet", $"build {project} -c {ctx.Configuration}");
-                }
-
-                PrintInfo($"Built {matchingProjects.Count} project(s) matching '{ctx.ProjectFilter}'");
+                Dotnet.Run($"build {Conventions.SolutionFile} -c {Conventions.Configuration}");
+                PrintInfo($"Built {Conventions.SolutionFile} in {Conventions.Configuration} configuration");
+                return;
             }
-            else
+
+            var matchingProjects = ProjectDiscovery.MatchProjects(ctx.BuildableProjects, ctx.ProjectFilter, "No projects match");
+            if (matchingProjects is null)
+                return;
+
+            foreach (var project in matchingProjects)
             {
-                Run("dotnet", $"build {ctx.SolutionFile} -c {ctx.Configuration}");
-                PrintInfo($"Built {ctx.SolutionFile} in {ctx.Configuration} configuration");
+                Console.WriteLine($"Building: {Path.GetFileNameWithoutExtension(project)}");
+                Dotnet.Run($"build {project} -c {Conventions.Configuration}");
             }
+
+            PrintInfo($"Built {matchingProjects.Length} project(s) matching '{ctx.ProjectFilter}'");
         });
     }
 
@@ -132,7 +100,7 @@ static class BuildTargets
         // would reject it.
         var candidates = Directory
             .GetFiles(Path.Combine(ctx.RepoRoot, "src"), "*.csproj", SearchOption.AllDirectories)
-            .Select(path => Path.GetRelativePath(ctx.RepoRoot, path).Replace(Path.DirectorySeparatorChar, '/'))
+            .Select(path => ProjectDiscovery.RepoRelative(ctx.RepoRoot, path))
             .Where(path => path.Count(character => character == '/') == 3 &&
                            path.StartsWith("src/", StringComparison.Ordinal) &&
                            path.Contains("/src/", StringComparison.Ordinal))
@@ -208,7 +176,7 @@ static class BuildTargets
             .Select(include => Path.GetFullPath(Path.Combine(
                 verificationDirectory,
                 include.Value.Replace('\\', Path.DirectorySeparatorChar))))
-            .Select(fullPath => Path.GetRelativePath(ctx.RepoRoot, fullPath).Replace(Path.DirectorySeparatorChar, '/'))
+            .Select(fullPath => ProjectDiscovery.RepoRelative(ctx.RepoRoot, fullPath))
             .Where(path => path.StartsWith("src/", StringComparison.Ordinal))
             .ToHashSet(StringComparer.Ordinal);
 
@@ -329,16 +297,7 @@ static class BuildTargets
                         continue;
                     }
 
-                    if (plainTheoryLine > 0 && hasWithYubiKey)
-                    {
-                        failures.Add(
-                            $"{Path.GetRelativePath(ctx.RepoRoot, sourceFile)}:{plainTheoryLine}: [WithYubiKey] must use [SkippableTheory], not [Theory]");
-                    }
-                    else if (hasWithYubiKey && !hasSkippableTheory)
-                    {
-                        failures.Add(
-                            $"{Path.GetRelativePath(ctx.RepoRoot, sourceFile)}:{withYubiKeyLine}: [WithYubiKey] requires [SkippableTheory]");
-                    }
+                    ReportDeclaration();
 
                     plainTheoryLine = 0;
                     withYubiKeyLine = 0;
@@ -346,15 +305,16 @@ static class BuildTargets
                     hasSkippableTheory = false;
                 }
 
-                if (plainTheoryLine > 0 && hasWithYubiKey)
+                ReportDeclaration();
+
+                // Checks the attributes collected for one member.
+                void ReportDeclaration()
                 {
-                    failures.Add(
-                        $"{Path.GetRelativePath(ctx.RepoRoot, sourceFile)}:{plainTheoryLine}: [WithYubiKey] must use [SkippableTheory], not [Theory]");
-                }
-                else if (hasWithYubiKey && !hasSkippableTheory)
-                {
-                    failures.Add(
-                        $"{Path.GetRelativePath(ctx.RepoRoot, sourceFile)}:{withYubiKeyLine}: [WithYubiKey] requires [SkippableTheory]");
+                    var location = ProjectDiscovery.RepoRelative(ctx.RepoRoot, sourceFile);
+                    if (plainTheoryLine > 0 && hasWithYubiKey)
+                        failures.Add($"{location}:{plainTheoryLine}: [WithYubiKey] must use [SkippableTheory], not [Theory]");
+                    else if (hasWithYubiKey && !hasSkippableTheory)
+                        failures.Add($"{location}:{withYubiKeyLine}: [WithYubiKey] requires [SkippableTheory]");
                 }
             }
         }

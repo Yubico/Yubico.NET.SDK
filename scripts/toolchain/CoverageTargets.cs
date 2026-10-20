@@ -2,15 +2,13 @@
 
 using System.Text;
 using System.Xml.Linq;
-using static Bullseye.Targets;
-using static SimpleExec.Command;
 using static Output;
 
 static class CoverageTargets
 {
     public static void Register(ToolchainContext ctx)
     {
-        Target("coverage", () =>
+        TargetRegistry.Define("coverage", "Run unit tests with code coverage (artifacts/coverage)", () =>
         {
             PrintHeader("Running tests with coverage");
 
@@ -28,40 +26,38 @@ static class CoverageTargets
             // coverlet is also required for CRAP analysis: it is the only one of these that writes a
             // per-method `complexity` attribute into the Cobertura XML, which ReportGenerator's risk
             // hotspots and any CRAP tooling read. See docs/TESTING.md.
-            var coverageResultsDir = Path.Combine(ctx.ArtifactsDir, "coverage");
+            var coverageResultsDir = Conventions.CoverageDir(ctx.RepoRoot);
             Directory.CreateDirectory(coverageResultsDir);
 
-            var projectsToCover = ProjectDiscovery.FilterToProject(
-                ctx.UnitTestProjects
-                    .Select(p => (ProjectPath: p, UsesTestingPlatformRunner: ProjectDiscovery.UsesMicrosoftTestingPlatformRunner(ctx.RepoRoot, p)))
-                    .ToArray(),
+            var projectsToCover = ProjectDiscovery.MatchTestProjects(
+                ProjectDiscovery.ToTestProjects(ctx.RepoRoot, ctx.UnitTestProjects),
                 ctx.ProjectFilter);
             if (projectsToCover is null)
                 return;
 
             if (projectsToCover.Any(p => p.UsesTestingPlatformRunner))
-                Run("dotnet", "tool restore");
+                Dotnet.Run("tool restore");
 
-            var results = new List<(string Project, bool Passed, string? Error, bool Skipped)>();
+            var results = new List<ProjectResult>();
 
-            foreach (var (project, usesTestingPlatformRunner) in projectsToCover)
+            foreach (var project in projectsToCover)
             {
-                var projectName = Path.GetFileNameWithoutExtension(project);
+                var projectName = Path.GetFileNameWithoutExtension(project.Path);
                 PrintProjectHeader("Coverage", projectName);
 
                 try
                 {
-                    if (usesTestingPlatformRunner)
-                        CollectMtpCoverage(ctx, project, projectName, coverageResultsDir);
+                    if (project.UsesTestingPlatformRunner)
+                        CollectMtpCoverage(ctx, project.Path, projectName, coverageResultsDir);
                     else
-                        Run("dotnet", $"test {project} -c {ctx.Configuration} --settings coverlet.runsettings.xml --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
+                        Dotnet.Run($"test {project.Path} -c {Conventions.Configuration} --settings {Conventions.CoverletRunsettings} --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
 
-                    results.Add((projectName, true, null, false));
+                    results.Add(new ProjectResult(projectName, Outcome.Passed));
                     PrintColored($"✓ {projectName} - Coverage collected", ConsoleColor.Green);
                 }
                 catch (Exception ex)
                 {
-                    results.Add((projectName, false, ex.Message, false));
+                    results.Add(new ProjectResult(projectName, Outcome.Failed, ex.Message));
                     PrintColored($"✗ {projectName} - Coverage collection failed", ConsoleColor.Red);
                 }
             }
@@ -78,33 +74,31 @@ static class CoverageTargets
 
             PrintInfo($"Coverage results saved to {coverageResultsDir}");
 
-            var failCount = results.Count(r => !r.Passed);
-            if (failCount > 0)
-                throw new InvalidOperationException($"{failCount} test project(s) failed during coverage collection");
+            Gates.EnsureTestsRan(results, "coverage test", requireExecution: false);
         });
 
-        Target("crap", () =>
+        TargetRegistry.Define("crap", "Rank methods by CRAP score from collected coverage (run coverage first)", () =>
         {
             // The analysis itself lives in crap.cs so it stays independently runnable and
             // self-checkable; this target exists because CRAP consumes the reports that the
             // coverage target produces, so it belongs on the same discovery surface.
             PrintHeader("Computing CRAP scores");
 
-            var coverageResultsDir = Path.Combine(ctx.ArtifactsDir, "coverage");
+            var coverageResultsDir = Conventions.CoverageDir(ctx.RepoRoot);
             if (!Directory.Exists(coverageResultsDir))
                 throw new InvalidOperationException(
                     "No coverage results found. Run 'dotnet toolchain.cs coverage' first.");
 
-            Run("dotnet", $"crap.cs {ctx.CrapArgs}".TrimEnd(), workingDirectory: ctx.RepoRoot);
+            Dotnet.Run($"crap.cs {ctx.CrapArgs}".TrimEnd(), ctx.RepoRoot);
         });
 
-        Target("complexity", () =>
+        TargetRegistry.Define("complexity", "Flag complex methods in your uncommitted changes (source only, no coverage)", () =>
         {
             // Source-only, so unlike crap it needs neither a build nor a coverage run. With no
             // --complexity-args, complexity.cs checks your uncommitted changes against HEAD; this is
             // the soft pre-commit gate described in CLAUDE.md.
             PrintHeader("Checking method complexity");
-            Run("dotnet", $"complexity.cs {ctx.ComplexityArgs}".TrimEnd(), workingDirectory: ctx.RepoRoot);
+            Dotnet.Run($"complexity.cs {ctx.ComplexityArgs}".TrimEnd(), ctx.RepoRoot);
         });
     }
 
@@ -124,10 +118,10 @@ static class CoverageTargets
         // These binaries exist only to be executed once for coverage and are never shipped or
         // attested, so real paths here cost nothing. The packages published by the `pack` target
         // build separately and keep deterministic paths.
-        Run("dotnet", $"build {projectPath} -c {ctx.Configuration} -p:DeterministicSourcePaths=false");
+        Dotnet.Run($"build {projectPath} -c {Conventions.Configuration} -p:DeterministicSourcePaths=false");
 
         var projectDir = Path.GetDirectoryName(Path.Combine(ctx.RepoRoot, projectPath))!;
-        var outputDir = Path.Combine(projectDir, "bin", ctx.Configuration, ToolchainContext.TestTargetFramework);
+        var outputDir = Path.Combine(projectDir, "bin", Conventions.Configuration, Conventions.TestTargetFramework);
         // Windows appends .exe to the apphost; Linux and macOS do not.
         var testExecutable = Path.Combine(outputDir, projectName);
         if (!File.Exists(testExecutable) && File.Exists(testExecutable + ".exe"))
@@ -148,7 +142,7 @@ static class CoverageTargets
         coverletArgs.Append($" --output \"{outputFile}\"");
         coverletArgs.Append(TranslateRunsettingsToCoverletArgs(ctx));
 
-        Run("dotnet", coverletArgs.ToString());
+        Dotnet.Run(coverletArgs.ToString());
 
         // An instrumentation failure does not fail coverlet: it writes a well-formed cobertura
         // report containing "<sources />" and "<packages />" and exits 0. Every downstream
@@ -172,7 +166,7 @@ static class CoverageTargets
     // cannot drift apart.
     static string TranslateRunsettingsToCoverletArgs(ToolchainContext ctx)
     {
-        var settingsPath = Path.Combine(ctx.RepoRoot, "coverlet.runsettings.xml");
+        var settingsPath = Path.Combine(ctx.RepoRoot, Conventions.CoverletRunsettings);
         if (!File.Exists(settingsPath))
             throw new FileNotFoundException(
                 $"coverlet.runsettings.xml not found at {settingsPath}; it defines the coverage filters.",

@@ -3,6 +3,9 @@
 using System.Text.RegularExpressions;
 using static Output;
 
+/// <summary>A test project path and which runner it uses (xUnit v3 on MTP, or xUnit v2 on VSTest).</summary>
+sealed record TestProject(string Path, bool UsesTestingPlatformRunner);
+
 static class ProjectDiscovery
 {
     public static string[] DiscoverProjects(string repoRoot, string subdirectory, string nameFilter, string? additionalFilter = null) =>
@@ -24,13 +27,18 @@ static class ProjectDiscovery
             RegexOptions.IgnoreCase);
     }
 
-    public static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPath)
-    {
-        var fullPath = Path.Combine(repoRoot, projectPath);
-        return File.ReadAllText(fullPath).Contains(
-            "<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>",
-            StringComparison.OrdinalIgnoreCase);
-    }
+    public static TestProject[] ToTestProjects(string repoRoot, IEnumerable<string> projectPaths) =>
+        projectPaths
+            .Select(p => new TestProject(p, UsesMicrosoftTestingPlatformRunner(repoRoot, p)))
+            .ToArray();
+
+    static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPath) =>
+        File.ReadAllText(Path.Combine(repoRoot, projectPath))
+            .Contains(Conventions.MtpRunnerOptIn, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Repo-relative path with forward slashes, e.g. "src/Piv/src/Yubico.YubiKit.Piv.csproj".</summary>
+    public static string RepoRelative(string repoRoot, string path) =>
+        Path.GetRelativePath(repoRoot, path).Replace(Path.DirectorySeparatorChar, '/');
 
     public static string[] DiscoverActiveDocumentationFiles(string repoRoot)
     {
@@ -67,19 +75,18 @@ static class ProjectDiscovery
 
     static bool IsArchivedOrPlanningDoc(string relativePath)
     {
+        string[] excludedPrefixes =
+            ["docs/archive/", "docs/completed/", "docs/plans/", "docs/research/", "docs/reviews/", "docs/specs/", "docs/templates/"];
+
         var normalized = relativePath.Replace(Path.DirectorySeparatorChar, '/');
-        return normalized.StartsWith("docs/archive/", StringComparison.OrdinalIgnoreCase) ||
-               normalized.StartsWith("docs/completed/", StringComparison.OrdinalIgnoreCase) ||
-               normalized.StartsWith("docs/plans/", StringComparison.OrdinalIgnoreCase) ||
-               normalized.StartsWith("docs/research/", StringComparison.OrdinalIgnoreCase) ||
-               normalized.StartsWith("docs/reviews/", StringComparison.OrdinalIgnoreCase) ||
-               normalized.StartsWith("docs/specs/", StringComparison.OrdinalIgnoreCase) ||
-               normalized.StartsWith("docs/templates/", StringComparison.OrdinalIgnoreCase);
+        return excludedPrefixes.Any(prefix => normalized.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
     }
 
-    // Shared helper: filter a flat array of project paths by name, warn+list on miss.
-    // Returns null when nothing matched and the caller should return early.
-    public static string[]? FilterProjectPaths(string[] projectPaths, string? filter, string noMatchMessage)
+    /// <summary>
+    /// The projects whose file name contains <paramref name="filter"/> (all of them when there is no filter).
+    /// Returns null, after listing the available projects, when nothing matched.
+    /// </summary>
+    public static string[]? MatchProjects(string[] projectPaths, string? filter, string noMatchMessage)
     {
         if (string.IsNullOrEmpty(filter)) return projectPaths;
 
@@ -95,16 +102,13 @@ static class ProjectDiscovery
         return null;
     }
 
-    // Returns null when no projects matched and an error was already printed (caller should return early).
-    public static List<(string ProjectPath, bool UsesTestingPlatformRunner)>? FilterToProject(
-        (string ProjectPath, bool UsesTestingPlatformRunner)[] projectInfos,
-        string? filter)
+    /// <inheritdoc cref="MatchProjects(string[], string?, string)"/>
+    public static TestProject[]? MatchTestProjects(TestProject[] projects, string? filter)
     {
-        var paths = projectInfos.Select(p => p.ProjectPath).ToArray();
-        var matched = FilterProjectPaths(paths, filter, "No test projects match");
+        var matched = MatchProjects([.. projects.Select(p => p.Path)], filter, "No test projects match");
         if (matched is null) return null;
 
         var matchedSet = new HashSet<string>(matched, StringComparer.Ordinal);
-        return [.. projectInfos.Where(p => matchedSet.Contains(p.ProjectPath))];
+        return [.. projects.Where(p => matchedSet.Contains(p.Path))];
     }
 }

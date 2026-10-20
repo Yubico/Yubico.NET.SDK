@@ -1,66 +1,42 @@
 // Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md.
 
 using System.Text.RegularExpressions;
-using static Bullseye.Targets;
-using static SimpleExec.Command;
 using static Output;
 
 static class DocsTargets
 {
     public static void Register(ToolchainContext ctx)
     {
-        Target("docs-qa", () =>
+        TargetRegistry.Define("docs-qa", "Validate active documentation hygiene and package readmes", () =>
         {
             PrintHeader("Validating active documentation");
 
             var failures = ValidateActiveDocumentation(ctx, ctx.ActiveDocumentationFiles);
             failures.AddRange(ValidatePackageReadmes(ctx, ctx.PackableProjects));
 
-            if (failures.Count > 0)
-            {
-                PrintColored($"Found {failures.Count} documentation issue(s):", ConsoleColor.Red);
-                foreach (var failure in failures)
-                    Console.WriteLine($"  - {failure}");
-
-                throw new InvalidOperationException($"{failures.Count} documentation issue(s) found");
-            }
+            Gates.FailIfAny(failures, "Documentation validation");
 
             PrintInfo($"Validated {ctx.ActiveDocumentationFiles.Length} active documentation file(s)");
             PrintInfo($"Validated {ctx.PackableProjects.Length} package readme(s)");
         });
 
-        Target("docs-inventory", () =>
+        TargetRegistry.Define("docs-inventory", "Generate the report-only active documentation inventory (requires Bash)", () =>
         {
             PrintHeader("Generating active documentation inventory");
 
-            var inventoryBuilder = Path.Combine(ctx.RepoRoot, "scripts", "docs", "build-docs-inventory.sh");
-            if (!File.Exists(inventoryBuilder))
-                throw new InvalidOperationException($"Missing {inventoryBuilder}");
-
-            Run("bash", $"\"{inventoryBuilder}\"", workingDirectory: ctx.RepoRoot);
+            Bash.RunScript(ctx.RepoRoot, "scripts/docs/build-docs-inventory.sh");
             PrintInfo("Active documentation inventory generated");
         });
 
-        Target("docs-architecture", () =>
+        TargetRegistry.Define("docs-architecture", "Validate the architecture diagram evidence map and image freshness (requires Bash)", () =>
         {
             PrintHeader("Validating architecture diagrams (evidence map + image freshness)");
 
             // 1. Diagram-to-source evidence map resolves (types/projects/edges present).
             // 2. Rendered images exist and are fresh vs their source Mermaid blocks.
             // Both scripts are bash 3.2-portable and exit non-zero on any drift.
-            var mapChecker = Path.Combine(ctx.RepoRoot, "scripts", "architecture", "check-architecture-map.sh");
-            var imageChecker = Path.Combine(ctx.RepoRoot, "scripts", "architecture", "check-architecture-images.sh");
-
-            if (!File.Exists(mapChecker))
-                throw new InvalidOperationException($"Missing {mapChecker}");
-            if (!File.Exists(imageChecker))
-                throw new InvalidOperationException($"Missing {imageChecker}");
-
-            // Resolve evidence map (fails loudly if a mapped type/project/edge drifted).
-            Run("bash", $"\"{mapChecker}\"", workingDirectory: ctx.RepoRoot);
-
-            // Verify image presence + freshness (source-block hash vs manifest).
-            Run("bash", $"\"{imageChecker}\"", workingDirectory: ctx.RepoRoot);
+            Bash.RunScript(ctx.RepoRoot, "scripts/architecture/check-architecture-map.sh");
+            Bash.RunScript(ctx.RepoRoot, "scripts/architecture/check-architecture-images.sh");
 
             PrintInfo("Architecture diagrams validated (map resolves; images present and fresh)");
         });
@@ -108,7 +84,7 @@ static class DocsTargets
             var packageId = Path.GetFileNameWithoutExtension(projectPath);
             var projectDir = Path.GetDirectoryName(Path.Combine(ctx.RepoRoot, projectPath))!;
             var readmePath = Path.Combine(Path.GetDirectoryName(projectDir)!, "PACKAGE_README.md");
-            var relativePath = Path.GetRelativePath(ctx.RepoRoot, readmePath).Replace('\\', '/');
+            var relativePath = ProjectDiscovery.RepoRelative(ctx.RepoRoot, readmePath);
 
             if (!File.Exists(readmePath))
             {
@@ -148,7 +124,7 @@ static class DocsTargets
         // evaluated value, so this is the only reading that cannot drift from it if the property is ever
         // moved behind a Condition, overridden in Directory.Build.targets, or passed on the command line.
         // Evaluating one project is enough: the property is defined once, repo-wide.
-        var (exitCode, output) = DotnetProcess.RunAndCapture(
+        var (exitCode, output) = Dotnet.Capture(
         [
             "msbuild", Path.Combine(ctx.RepoRoot, anyPackableProjectPath),
             "-getProperty:YubiKitDocsBranch",

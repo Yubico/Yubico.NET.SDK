@@ -137,8 +137,8 @@ var configuration = "Release";
 var packageVersion = GetArgument("--package-version");
 var nugetFeedName = GetArgument("--nuget-feed-name") ?? "Yubico.YubiKit-LocalNuGet";
 var nugetFeedPath = GetArgument("--nuget-feed-path") ?? Path.Combine(repoRoot, "artifacts", "nuget-feed");
-var nugetFeedUrl  = GetArgument("--nuget-feed-url");
-var nugetApiKey   = GetArgument("--nuget-api-key") ?? Environment.GetEnvironmentVariable("NUGET_API_KEY");
+var nugetFeedUrl = GetArgument("--nuget-feed-url");
+var nugetApiKey = GetArgument("--nuget-api-key") ?? Environment.GetEnvironmentVariable("NUGET_API_KEY");
 var includeDocs = HasFlag("--include-docs");
 var embedSymbols = HasFlag("--embed-symbols");
 var dryRun = HasFlag("--dry-run");
@@ -169,7 +169,7 @@ var integrationTestProjects = DiscoverProjects("tests", ".IntegrationTests", Pro
 var activeDocumentationFiles = DiscoverActiveDocumentationFiles();
 
 var testProjects = includeIntegration
-    ? [..unitTestProjects, ..integrationTestProjects]
+    ? [.. unitTestProjects, .. integrationTestProjects]
     : unitTestProjects;
 
 var testProjectInfos = testProjects
@@ -312,7 +312,7 @@ Target("test", DependsOn("test-infrastructure-qa"), () =>
         throw new InvalidOperationException($"{failCount} test project(s) failed");
 
     if (results.Count > 0 && results.All(r => r.Skipped))
-        throw new InvalidOperationException("No tests matched the specified filter");
+        throw new InvalidOperationException("No tests were executed (no matching tests, or every test was skipped)");
 });
 
 Target("coverage", () =>
@@ -738,7 +738,7 @@ List<(string ProjectPath, bool UsesTestingPlatformRunner)>? FilterToProject(
     if (matched is null) return null;
 
     var matchedSet = new HashSet<string>(matched, StringComparer.Ordinal);
-    return [..projectInfos.Where(p => matchedSet.Contains(p.ProjectPath))];
+    return [.. projectInfos.Where(p => matchedSet.Contains(p.ProjectPath))];
 }
 
 List<(string Project, bool Passed, string? Error, bool Skipped)> RunTestProjects(
@@ -795,9 +795,24 @@ List<(string Project, bool Passed, string? Error, bool Skipped)> RunTestProjects
                 }
             }
 
-            Run("dotnet", command);
+            var counts = RunDotnetTestAndReadCounts(command);
+
+            // A run where every test was skipped (typically [SkippableTheory] + no matching YubiKey) exits 0.
+            // That is not a pass: report it as skipped, like a filter that matched nothing.
+            if (counts is { Executed: 0, Skipped: > 0 })
+            {
+                var reason = $"all {counts.Skipped} tests skipped";
+                results.Add((projectName, true, reason, true));
+                PrintColored($"○ {projectName} - No tests executed ({reason})", ConsoleColor.Yellow);
+                continue;
+            }
+
             results.Add((projectName, true, null, false));
-            PrintColored($"✓ {projectName} - All tests passed", ConsoleColor.Green);
+            PrintColored(
+                counts is null
+                    ? $"✓ {projectName} - All tests passed"
+                    : $"✓ {projectName} - All tests passed ({counts.Executed} executed, {counts.Skipped} skipped)",
+                ConsoleColor.Green);
         }
         catch (ArgumentException ex)
         {
@@ -940,7 +955,7 @@ void PrintTestSummary(List<(string Project, bool Passed, string? Error, bool Ski
     {
         if (skipped)
         {
-            PrintColored($"  ○ {project} (no matching tests)", ConsoleColor.Yellow);
+            PrintColored($"  ○ {project} ({error ?? "no matching tests"})", ConsoleColor.Yellow);
         }
         else if (passed)
         {
@@ -971,7 +986,7 @@ void PrintTestSummary(List<(string Project, bool Passed, string? Error, bool Ski
     Console.ResetColor();
     Console.Write(", ");
     Console.ForegroundColor = skippedCount > 0 ? ConsoleColor.Yellow : ConsoleColor.Gray;
-    Console.Write($"{skippedCount} without matching tests");
+    Console.Write($"{skippedCount} with no tests executed");
     Console.ResetColor();
     Console.WriteLine($" ({results.Count} total)");
     Console.WriteLine(separator);
@@ -1176,7 +1191,7 @@ static (string Args, bool HasPositiveFilters, string[] PositiveArgs) TranslateTo
         }
     }
 
-    return (string.Join(" ", mtpArgs), hasPositiveFilters, [..positiveArgs]);
+    return (string.Join(" ", mtpArgs), hasPositiveFilters, [.. positiveArgs]);
 }
 
 // Normalises a --filter expression for VSTest (xUnit v2, the integration projects).
@@ -1235,6 +1250,40 @@ bool MtpFilterHasMatches(string projectPath, string[] positiveMtpFilterArgs)
         throw new InvalidOperationException($"Failed to list tests for {projectPath}: {output}");
 
     return true;
+}
+
+// Runs `dotnet {arguments}` with live output and returns the test counts from the runner's own summary,
+// or null when no summary was recognised. Throws like Run on a non-zero exit code.
+static TestCounts? RunDotnetTestAndReadCounts(string arguments)
+{
+    var startInfo = new ProcessStartInfo("dotnet", arguments)
+    {
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false
+    };
+
+    var output = new StringBuilder();
+    using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start dotnet process");
+    process.OutputDataReceived += (_, e) =>
+    {
+        if (e.Data is null) return;
+        Console.WriteLine(e.Data);
+        lock (output) output.AppendLine(e.Data);
+    };
+    process.ErrorDataReceived += (_, e) =>
+    {
+        if (e.Data is null) return;
+        Console.Error.WriteLine(e.Data);
+    };
+    process.BeginOutputReadLine();
+    process.BeginErrorReadLine();
+    process.WaitForExit();
+
+    if (process.ExitCode != 0)
+        throw new InvalidOperationException($"dotnet {arguments} exited with code {process.ExitCode}");
+
+    return TestCounts.Parse(output.ToString());
 }
 
 static (int ExitCode, string Output) RunDotnetAndCapture(IReadOnlyList<string> arguments)
@@ -1555,7 +1604,7 @@ string[] DiscoverActiveDocumentationFiles()
 
 string[] GetMarkdownFilesUnder(params string[] pathParts)
 {
-    var path = Path.Combine([repoRoot, ..pathParts]);
+    var path = Path.Combine([repoRoot, .. pathParts]);
     return Directory.Exists(path)
         ? Directory.GetFiles(path, "*.md", SearchOption.AllDirectories)
         : [];
@@ -1871,5 +1920,47 @@ string[] FilterBullseyeArgs(string[] args, string[] optionsWithValues, string[] 
         filtered.Add(arg);
     }
 
-    return [..filtered];
+    return [.. filtered];
+}
+
+/// <summary>Per-test totals from a runner summary. Executed is passed + failed.</summary>
+sealed record TestCounts(int Executed, int Skipped)
+{
+    // VSTest: "Passed!  - Failed:     0, Passed:    83, Skipped:    12, Total:    95, Duration: ..."
+    static readonly Regex s_vsTest = new(
+        @"Failed:\s*(?<failed>\d+),\s*Passed:\s*(?<passed>\d+),\s*Skipped:\s*(?<skipped>\d+),\s*Total:\s*(?<total>\d+)",
+        RegexOptions.Compiled);
+
+    // VSTest console logger at verbosity=normal: "Total tests: 95" then indented "Passed: 83" / "Failed: 0" / "Skipped: 12"
+    // (a zero line is omitted). Microsoft.Testing.Platform (xUnit v3): "total:", "failed:", "succeeded:", "skipped:" lines.
+    static readonly Regex s_lines = new(
+        @"^\s*(?<key>Total tests|total|Passed|Failed|Skipped|failed|succeeded|skipped):\s*(?<value>\d+)\s*$",
+        RegexOptions.Compiled | RegexOptions.Multiline);
+
+    public static TestCounts? Parse(string output)
+    {
+        var vsTest = s_vsTest.Matches(output).LastOrDefault();
+        if (vsTest is not null)
+        {
+            return new TestCounts(
+                int.Parse(vsTest.Groups["failed"].Value) + int.Parse(vsTest.Groups["passed"].Value),
+                int.Parse(vsTest.Groups["skipped"].Value));
+        }
+
+        var lines = s_lines.Matches(output)
+            .GroupBy(m => m.Groups["key"].Value, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => int.Parse(g.Last().Groups["value"].Value), StringComparer.Ordinal);
+        if (lines.ContainsKey("Total tests") || lines.ContainsKey("total"))
+        {
+            lines.TryGetValue("Passed", out var passed);
+            lines.TryGetValue("succeeded", out var succeeded);
+            lines.TryGetValue("Failed", out var failedUpper);
+            lines.TryGetValue("failed", out var failedLower);
+            lines.TryGetValue("Skipped", out var skippedUpper);
+            lines.TryGetValue("skipped", out var skippedLower);
+            return new TestCounts(passed + succeeded + failedUpper + failedLower, skippedUpper + skippedLower);
+        }
+
+        return null;
+    }
 }

@@ -32,8 +32,6 @@ static class CoverageTargets
             var projectsToCover = ProjectDiscovery.MatchTestProjects(
                 ProjectDiscovery.ToTestProjects(ctx.RepoRoot, ctx.UnitTestProjects),
                 ctx.ProjectFilter);
-            if (projectsToCover is null)
-                return;
 
             if (projectsToCover.Any(p => p.UsesTestingPlatformRunner))
                 Dotnet.Run("tool restore");
@@ -42,23 +40,24 @@ static class CoverageTargets
 
             foreach (var project in projectsToCover)
             {
-                var projectName = Path.GetFileNameWithoutExtension(project.Path);
+                var projectName = ProjectDiscovery.ShortName(project.Path);
                 PrintProjectHeader("Coverage", projectName);
 
                 try
                 {
                     if (project.UsesTestingPlatformRunner)
-                        CollectMtpCoverage(ctx, project.Path, projectName, coverageResultsDir);
+                        CollectMtpCoverage(ctx, project.Path, Path.GetFileNameWithoutExtension(project.Path), coverageResultsDir);
                     else
                         Dotnet.Run($"test {project.Path} -c {Conventions.Configuration} --settings {Conventions.CoverletRunsettings} --collect:\"XPlat Code Coverage\" --results-directory {coverageResultsDir}");
 
-                    results.Add(new ProjectResult(projectName, Outcome.Passed));
-                    PrintColored($"✓ {projectName} - Coverage collected", ConsoleColor.Green);
+                    results.Add(new ProjectResult(projectName, Outcome.Passed, "coverage collected"));
+                    PrintOutcome(Outcome.Passed, "coverage collected");
                 }
                 catch (Exception ex)
                 {
-                    results.Add(new ProjectResult(projectName, Outcome.Failed, ex.Message));
-                    PrintColored($"✗ {projectName} - Coverage collection failed", ConsoleColor.Red);
+                    var reason = $"coverage collection failed: {ex.Message}";
+                    results.Add(new ProjectResult(projectName, Outcome.Failed, reason));
+                    PrintOutcome(Outcome.Failed, reason);
                 }
             }
 
@@ -67,9 +66,9 @@ static class CoverageTargets
             var coverageFiles = Directory.GetFiles(coverageResultsDir, "coverage.cobertura.xml", SearchOption.AllDirectories);
             if (coverageFiles.Length > 0)
             {
-                PrintColored("\nCoverage reports generated:", ConsoleColor.Cyan);
+                Console.WriteLine("\nCoverage reports generated:");
                 foreach (var file in coverageFiles)
-                    Console.WriteLine($"  {file}");
+                    Console.WriteLine($"  {ProjectDiscovery.RepoRelative(ctx.RepoRoot, file)}");
             }
 
             PrintInfo($"Coverage results saved to {coverageResultsDir}");
@@ -86,8 +85,8 @@ static class CoverageTargets
 
             var coverageResultsDir = Conventions.CoverageDir(ctx.RepoRoot);
             if (!Directory.Exists(coverageResultsDir))
-                throw new InvalidOperationException(
-                    "No coverage results found. Run 'dotnet toolchain.cs coverage' first.");
+                throw new ToolchainException(
+                    "No coverage results found in artifacts/coverage. Run `dotnet toolchain.cs coverage` first.");
 
             Dotnet.Run($"crap.cs {ctx.CrapArgs}".TrimEnd(), ctx.RepoRoot);
         });

@@ -8,12 +8,34 @@ static class Output
             Console.WriteLine(file.Replace(Path.DirectorySeparatorChar, '/'));
     }
 
+    // Every status line starts with one of these fixed markers, so a reader (or grep) can classify a
+    // line without colour: "▶ RUN" a command is starting, "✓ PASS" / "✗ FAIL" / "○ NO-TESTS" a project's
+    // outcome, "! WARN" something that did not stop the run, and a bare "✓" a completed step.
+    public const string RunMarker = "▶ RUN";
+    public const string PassMarker = "✓ PASS";
+    public const string FailMarker = "✗ FAIL";
+    public const string NoTestsMarker = "○ NO-TESTS";
+    public const string WarnMarker = "! WARN";
+
+    static readonly bool s_noColor = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR"));
+
     public static void PrintInfo(string message) => Console.WriteLine($"✓ {message}");
     public static void PrintHeader(string message) => Console.WriteLine($"\n=== {message} ===\n");
+    public static void PrintRun(string command) => Console.WriteLine($"{RunMarker} {command}");
+    public static void PrintWarn(string message) => PrintColored($"{WarnMarker} {message}", ConsoleColor.Yellow);
+
+    /// <summary>A project's outcome, inside the section that already names the project.</summary>
+    public static void PrintOutcome(Outcome outcome, string? detail)
+    {
+        var suffix = string.IsNullOrEmpty(detail) ? "" : $" ({detail})";
+        PrintColored($"{Marker(outcome)}{suffix}", Colour(outcome));
+    }
 
     public static void PrintColored(string message, ConsoleColor color)
     {
-        Console.ForegroundColor = color;
+        // Console colours are dropped automatically when output is redirected; NO_COLOR also turns them off.
+        if (!s_noColor)
+            Console.ForegroundColor = color;
         Console.WriteLine(message);
         Console.ResetColor();
     }
@@ -21,11 +43,25 @@ static class Output
     public static void PrintProjectList(IEnumerable<string> projects)
     {
         foreach (var p in projects)
-            Console.WriteLine($"  - {Path.GetFileNameWithoutExtension(p)}");
+            Console.WriteLine($"  - {ProjectDiscovery.ShortName(p)}");
     }
 
     public static void PrintProjectHeader(string label, string projectName) =>
         Console.WriteLine($"\n=== {label}: {projectName} ===");
+
+    static string Marker(Outcome outcome) => outcome switch
+    {
+        Outcome.Passed => PassMarker,
+        Outcome.Failed => FailMarker,
+        _ => NoTestsMarker,
+    };
+
+    static ConsoleColor Colour(Outcome outcome) => outcome switch
+    {
+        Outcome.Passed => ConsoleColor.Green,
+        Outcome.Failed => ConsoleColor.Red,
+        _ => ConsoleColor.Yellow,
+    };
 
     public static void PrintTestSummary(IReadOnlyList<ProjectResult> results, string label)
     {
@@ -34,22 +70,14 @@ static class Output
         Console.WriteLine($"{label} SUMMARY");
         Console.WriteLine(separator);
 
+        var nameWidth = results.Count == 0 ? 0 : results.Max(r => r.Project.Length) + 2;
+        var markerWidth = new[] { PassMarker, FailMarker, NoTestsMarker }.Max(m => m.Length) + 2;
         foreach (var (project, outcome, reason) in results)
         {
-            switch (outcome)
-            {
-                case Outcome.NoTestsExecuted:
-                    PrintColored($"  ○ {project} ({reason ?? "no matching tests"})", ConsoleColor.Yellow);
-                    break;
-                case Outcome.Passed:
-                    PrintColored($"  ✓ {project}", ConsoleColor.Green);
-                    break;
-                default:
-                    PrintColored($"  ✗ {project}", ConsoleColor.Red);
-                    if (!string.IsNullOrEmpty(reason) && reason.Contains("Test Run Aborted"))
-                        Console.WriteLine("    (Test run aborted - check for initialization errors)");
-                    break;
-            }
+            var detail = string.IsNullOrEmpty(reason) ? "" : $"  {reason}";
+            PrintColored($"  {Marker(outcome).PadRight(markerWidth)}{project.PadRight(nameWidth)}{detail}".TrimEnd(), Colour(outcome));
+            if (outcome == Outcome.Failed && reason?.Contains("Test Run Aborted") == true)
+                Console.WriteLine("    (Test run aborted - check for initialization errors)");
         }
 
         var skippedCount = results.Count(r => r.Outcome == Outcome.NoTestsExecuted);

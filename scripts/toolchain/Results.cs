@@ -3,6 +3,12 @@
 using System.Text.RegularExpressions;
 using static Output;
 
+/// <summary>
+/// An expected failure: bad usage, a failed gate, failed tests. Reported as its message alone; any other
+/// exception is a toolchain bug and keeps its stack trace.
+/// </summary>
+sealed class ToolchainException(string message) : Exception(message);
+
 enum Outcome
 {
     Passed,
@@ -26,7 +32,7 @@ static class Gates
         foreach (var failure in failures)
             PrintColored($"  ✗ {failure}", ConsoleColor.Red);
 
-        throw new InvalidOperationException($"{check} failed with {failures.Count} issue(s)");
+        throw new ToolchainException($"{check} failed with {failures.Count} issue(s)");
     }
 
     /// <summary>
@@ -37,10 +43,10 @@ static class Gates
     {
         var failCount = results.Count(r => r.Outcome == Outcome.Failed);
         if (failCount > 0)
-            throw new InvalidOperationException($"{failCount} {kind} project(s) failed");
+            throw new ToolchainException($"{failCount} {kind} project(s) failed");
 
         if (requireExecution && results.Count > 0 && results.All(r => r.Outcome == Outcome.NoTestsExecuted))
-            throw new InvalidOperationException($"No {kind}s were executed (no matching tests, or every test was skipped)");
+            throw new ToolchainException($"No {kind}s were executed (no matching tests, or every test was skipped)");
     }
 }
 

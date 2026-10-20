@@ -13,19 +13,14 @@ static class TestTargets
             // --integration requires --project to prevent accidentally running all integration tests
             if (ctx.IncludeIntegration && string.IsNullOrEmpty(ctx.ProjectFilter))
             {
-                PrintColored("Error: --integration requires --project to specify which module to test.", ConsoleColor.Red);
-                Console.WriteLine("Example: dotnet toolchain.cs -- test --integration --project Piv");
-                Console.WriteLine("\nAvailable integration test projects:");
-                PrintProjectList(ctx.IntegrationTestProjects);
-                throw new InvalidOperationException("--integration requires --project");
+                throw new ToolchainException(
+                    "--integration requires --project, e.g. `dotnet toolchain.cs -- test --integration --project Piv`. " +
+                    $"Integration test projects: {string.Join(", ", ctx.IntegrationTestProjects.Select(ProjectDiscovery.ShortName))}");
             }
 
             PrintHeader(ctx.IncludeIntegration ? "Running unit + integration tests" : "Running unit tests");
 
             var projectsToTest = ProjectDiscovery.MatchTestProjects(ctx.TestProjects, ctx.ProjectFilter);
-            if (projectsToTest is null)
-                return;
-
             var results = RunTestProjects(ctx.TestFilter, projectsToTest);
             PrintTestSummary(results, "TEST");
             Gates.EnsureTestsRan(results, "test");
@@ -36,11 +31,9 @@ static class TestTargets
             PrintHeader("Running fast runtime resilience gates");
 
             if (!ctx.FastMode)
-                throw new InvalidOperationException("The resilience target currently requires --fast; only fast no-hardware mode is implemented.");
+                throw new ToolchainException("The resilience target requires --fast (only the fast no-hardware mode exists): `dotnet toolchain.cs -- resilience --fast`");
 
             var projectsToTest = ProjectDiscovery.MatchTestProjects(ctx.TestProjects, "Core");
-            if (projectsToTest is null)
-                return;
 
             var stopwatch = Stopwatch.StartNew();
             var results = RunTestProjects(Traits.And(ctx.TestFilter, Traits.Is(Traits.RuntimeResilience)), projectsToTest);
@@ -59,7 +52,7 @@ static class TestTargets
 
         foreach (var project in projects)
         {
-            var projectName = Path.GetFileNameWithoutExtension(project.Path);
+            var projectName = ProjectDiscovery.ShortName(project.Path);
             PrintProjectHeader("Testing", projectName);
 
             try
@@ -67,8 +60,8 @@ static class TestTargets
                 var command = BuildTestCommand(project, testFilter);
                 if (command is null)
                 {
-                    results.Add(new ProjectResult(projectName, Outcome.NoTestsExecuted, "No matching tests"));
-                    PrintColored($"○ {projectName} - No matching tests", ConsoleColor.Yellow);
+                    results.Add(new ProjectResult(projectName, Outcome.NoTestsExecuted, "no test matches --filter"));
+                    PrintOutcome(Outcome.NoTestsExecuted, "no test matches --filter");
                     continue;
                 }
 
@@ -80,27 +73,25 @@ static class TestTargets
                 {
                     var reason = $"all {counts.Skipped} tests skipped";
                     results.Add(new ProjectResult(projectName, Outcome.NoTestsExecuted, reason));
-                    PrintColored($"○ {projectName} - No tests executed ({reason})", ConsoleColor.Yellow);
+                    PrintOutcome(Outcome.NoTestsExecuted, reason);
                     continue;
                 }
 
-                results.Add(new ProjectResult(projectName, Outcome.Passed));
-                PrintColored(
-                    counts is null
-                        ? $"✓ {projectName} - All tests passed"
-                        : $"✓ {projectName} - All tests passed ({counts.Executed} executed, {counts.Skipped} skipped)",
-                    ConsoleColor.Green);
+                var passed = counts is null ? null : $"{counts.Executed} executed, {counts.Skipped} skipped";
+                results.Add(new ProjectResult(projectName, Outcome.Passed, passed));
+                PrintOutcome(Outcome.Passed, passed);
             }
             catch (ArgumentException ex)
             {
                 // A bad --filter is a usage error, not a test failure: say what was wrong.
                 results.Add(new ProjectResult(projectName, Outcome.Failed, ex.Message));
-                PrintColored($"✗ {projectName} - {ex.Message}", ConsoleColor.Red);
+                PrintOutcome(Outcome.Failed, ex.Message);
             }
             catch (Exception ex)
             {
-                results.Add(new ProjectResult(projectName, Outcome.Failed, ex.Message));
-                PrintColored($"✗ {projectName} - Tests failed", ConsoleColor.Red);
+                var reason = $"tests failed: {ex.Message}";
+                results.Add(new ProjectResult(projectName, Outcome.Failed, reason));
+                PrintOutcome(Outcome.Failed, reason);
             }
         }
 
@@ -280,7 +271,7 @@ static class TestTargets
             return false;
 
         if (exitCode != 0)
-            throw new InvalidOperationException($"Failed to list tests for {projectPath}: {output}");
+            throw new ToolchainException($"Listing tests failed (exit code {exitCode}):\n{output}");
 
         return true;
     }

@@ -2,13 +2,21 @@
 
 using System.Diagnostics;
 using System.Text;
+using static Output;
 
-/// <summary>Every way the toolchain starts a dotnet process.</summary>
+/// <summary>Every way the toolchain starts a dotnet process. Each one announces its command with "▶ RUN".</summary>
 static class Dotnet
 {
-    /// <summary>Runs `dotnet {arguments}` with live output; throws on a non-zero exit code.</summary>
-    public static void Run(string arguments, string workingDirectory = "") =>
-        SimpleExec.Command.Run("dotnet", arguments, workingDirectory);
+    /// <summary>
+    /// Runs `dotnet {arguments}` with live output; throws on a non-zero exit code. Values in
+    /// <c>secrets</c> (API keys) are masked in the announced command line.
+    /// </summary>
+    public static void Run(string arguments, string workingDirectory = "", params string?[] secrets)
+    {
+        var shown = secrets.Where(s => !string.IsNullOrEmpty(s)).Aggregate(arguments, (text, secret) => text.Replace(secret!, "***"));
+        PrintRun($"dotnet {shown}");
+        SimpleExec.Command.Run("dotnet", arguments, workingDirectory, noEcho: true);
+    }
 
     /// <summary>
     /// Runs `dotnet {arguments}` with live output and returns the test counts from the runner's own summary,
@@ -16,6 +24,7 @@ static class Dotnet
     /// </summary>
     public static TestCounts? RunTests(string arguments)
     {
+        PrintRun($"dotnet {arguments}");
         var startInfo = new ProcessStartInfo("dotnet", arguments)
         {
             RedirectStandardOutput = true,
@@ -41,7 +50,7 @@ static class Dotnet
         process.WaitForExit();
 
         if (process.ExitCode != 0)
-            throw new InvalidOperationException($"dotnet {arguments} exited with code {process.ExitCode}");
+            throw new ToolchainException($"dotnet exited with code {process.ExitCode}");
 
         return TestCounts.Parse(output.ToString());
     }
@@ -49,6 +58,7 @@ static class Dotnet
     /// <summary>Runs `dotnet` silently and returns its exit code and combined stdout + stderr.</summary>
     public static (int ExitCode, string Output) Capture(IReadOnlyList<string> arguments)
     {
+        PrintRun($"dotnet {string.Join(" ", arguments.Select(a => a.Contains(' ') ? $"\"{a}\"" : a))} (output captured)");
         var startInfo = new ProcessStartInfo("dotnet")
         {
             RedirectStandardOutput = true,
@@ -76,8 +86,9 @@ static class Bash
     {
         var script = Path.Combine(repoRoot, relativePath);
         if (!File.Exists(script))
-            throw new InvalidOperationException($"Missing {script}");
+            throw new ToolchainException($"Missing {script}");
 
-        SimpleExec.Command.Run("bash", $"\"{script}\"", workingDirectory: repoRoot);
+        PrintRun($"bash {relativePath}");
+        SimpleExec.Command.Run("bash", $"\"{script}\"", workingDirectory: repoRoot, noEcho: true);
     }
 }

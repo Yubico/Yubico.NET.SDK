@@ -63,4 +63,17 @@ if (args.Contains("--help") || args.Contains("-h"))
     return;
 }
 
-await Bullseye.Targets.RunTargetsAndExitAsync(parsedArgs.ForBullseye());
+var bullseyeArgs = parsedArgs.ForBullseye();
+
+// Bullseye colours its own lines even when output is redirected; agents and CI logs read plain text.
+if ((Console.IsOutputRedirected || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR"))) &&
+    !bullseyeArgs.Contains("--no-color"))
+{
+    bullseyeArgs = [.. bullseyeArgs, "--no-color"];
+}
+
+// Expected failures (failed tests or gates, bad usage, a failing dotnet command whose output is already
+// above) print their message alone. Anything else is a toolchain bug and keeps its stack trace.
+await Bullseye.Targets.RunTargetsAndExitAsync(
+    bullseyeArgs,
+    messageOnly: ex => ex is ToolchainException or SimpleExec.ExitCodeException);

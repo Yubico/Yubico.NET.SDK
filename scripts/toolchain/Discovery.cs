@@ -1,7 +1,6 @@
 // Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md.
 
 using System.Text.RegularExpressions;
-using static Output;
 
 /// <summary>A test project path and which runner it uses (xUnit v3 on MTP, or xUnit v2 on VSTest).</summary>
 sealed record TestProject(string Path, bool UsesTestingPlatformRunner);
@@ -35,6 +34,15 @@ static class ProjectDiscovery
     static bool UsesMicrosoftTestingPlatformRunner(string repoRoot, string projectPath) =>
         File.ReadAllText(Path.Combine(repoRoot, projectPath))
             .Contains(Conventions.MtpRunnerOptIn, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>"src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj" -> "Piv.UnitTests".</summary>
+    public static string ShortName(string projectPath)
+    {
+        var name = Path.GetFileNameWithoutExtension(projectPath);
+        return name.StartsWith(Conventions.ProjectPrefix, StringComparison.Ordinal) && name.Length > Conventions.ProjectPrefix.Length
+            ? name[Conventions.ProjectPrefix.Length..]
+            : name;
+    }
 
     /// <summary>Repo-relative path with forward slashes, e.g. "src/Piv/src/Yubico.YubiKit.Piv.csproj".</summary>
     public static string RepoRelative(string repoRoot, string path) =>
@@ -84,9 +92,10 @@ static class ProjectDiscovery
 
     /// <summary>
     /// The projects whose file name contains <paramref name="filter"/> (all of them when there is no filter).
-    /// Returns null, after listing the available projects, when nothing matched.
+    /// A filter that matches nothing fails the target and lists the valid names: silently doing nothing
+    /// would read as success.
     /// </summary>
-    public static string[]? MatchProjects(string[] projectPaths, string? filter, string noMatchMessage)
+    public static string[] MatchProjects(string[] projectPaths, string? filter, string kind)
     {
         if (string.IsNullOrEmpty(filter)) return projectPaths;
 
@@ -96,17 +105,14 @@ static class ProjectDiscovery
 
         if (matched.Length > 0) return matched;
 
-        PrintColored($"⚠ {noMatchMessage} '{filter}'", ConsoleColor.Yellow);
-        Console.WriteLine("Available projects:");
-        PrintProjectList(projectPaths);
-        return null;
+        throw new ToolchainException(
+            $"No {kind} project matches --project '{filter}'. Available: {string.Join(", ", projectPaths.Select(ShortName))}");
     }
 
     /// <inheritdoc cref="MatchProjects(string[], string?, string)"/>
-    public static TestProject[]? MatchTestProjects(TestProject[] projects, string? filter)
+    public static TestProject[] MatchTestProjects(TestProject[] projects, string? filter)
     {
-        var matched = MatchProjects([.. projects.Select(p => p.Path)], filter, "No test projects match");
-        if (matched is null) return null;
+        var matched = MatchProjects([.. projects.Select(p => p.Path)], filter, "test");
 
         var matchedSet = new HashSet<string>(matched, StringComparer.Ordinal);
         return [.. projects.Where(p => matchedSet.Contains(p.Path))];

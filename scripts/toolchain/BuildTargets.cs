@@ -64,17 +64,11 @@ static class BuildTargets
                 return;
             }
 
-            var matchingProjects = ProjectDiscovery.MatchProjects(ctx.BuildableProjects, ctx.ProjectFilter, "No projects match");
-            if (matchingProjects is null)
-                return;
-
+            var matchingProjects = ProjectDiscovery.MatchProjects(ctx.BuildableProjects, ctx.ProjectFilter, "buildable");
             foreach (var project in matchingProjects)
-            {
-                Console.WriteLine($"Building: {Path.GetFileNameWithoutExtension(project)}");
                 Dotnet.Run($"build {project} -c {Conventions.Configuration}");
-            }
 
-            PrintInfo($"Built {matchingProjects.Length} project(s) matching '{ctx.ProjectFilter}'");
+            PrintInfo($"Built {matchingProjects.Length} project(s) matching '{ctx.ProjectFilter}': {string.Join(", ", matchingProjects.Select(ProjectDiscovery.ShortName))}");
         });
     }
 

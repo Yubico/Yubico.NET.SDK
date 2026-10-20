@@ -22,12 +22,6 @@ static class TargetRegistry
         Bullseye.Targets.Target(name, description, dependsOn, action);
     }
 
-    public static void Define(string name, string description, Func<Task> action)
-    {
-        s_targets.Add(new TargetInfo(name, description, []));
-        Bullseye.Targets.Target(name, description, action);
-    }
-
     public static void Define(string name, string description, string[] dependsOn)
     {
         s_targets.Add(new TargetInfo(name, description, dependsOn));

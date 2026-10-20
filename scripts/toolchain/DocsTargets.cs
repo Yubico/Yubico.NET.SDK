@@ -132,7 +132,7 @@ static class DocsTargets
             "-nologo"
         ]);
         if (exitCode != 0)
-            throw new InvalidOperationException($"MSBuild evaluation of {anyPackableProjectPath} failed; cannot read YubiKitDocsBranch:\n{output}");
+            throw new ToolchainException($"MSBuild evaluation of {anyPackableProjectPath} failed; cannot read YubiKitDocsBranch:\n{output}");
 
         using var json = System.Text.Json.JsonDocument.Parse(output);
         var properties = json.RootElement.GetProperty("Properties");
@@ -140,12 +140,12 @@ static class DocsTargets
         var projectUrl = properties.GetProperty("PackageProjectUrl").GetString()?.Trim();
 
         if (string.IsNullOrEmpty(branch))
-            throw new InvalidOperationException("YubiKitDocsBranch evaluates to empty; package readme links cannot be checked against it");
+            throw new ToolchainException("YubiKitDocsBranch evaluates to empty; package readme links cannot be checked against it");
 
         // The same property must have produced the project URL nuget.org shows, or the two can disagree.
         var expectedProjectUrl = $"https://github.com/Yubico/Yubico.NET.SDK/tree/{branch}";
         if (projectUrl != expectedProjectUrl)
-            throw new InvalidOperationException($"PackageProjectUrl evaluates to '{projectUrl}' but YubiKitDocsBranch is '{branch}'; expected '{expectedProjectUrl}'. Derive PackageProjectUrl from the property.");
+            throw new ToolchainException($"PackageProjectUrl evaluates to '{projectUrl}' but YubiKitDocsBranch is '{branch}'; expected '{expectedProjectUrl}'. Derive PackageProjectUrl from the property.");
 
         return branch;
     }

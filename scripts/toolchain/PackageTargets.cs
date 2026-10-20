@@ -1,6 +1,5 @@
 // Part of toolchain.cs, pulled in through #:include. See TOOLCHAIN.md.
 
-using static SimpleExec.Command;
 using static Output;
 
 static class PackageTargets
@@ -26,41 +25,32 @@ static class PackageTargets
 
             foreach (var project in ctx.PackableProjects)
             {
-                Console.WriteLine($"\nPacking: {Path.GetFileNameWithoutExtension(project)}");
                 Dotnet.Run($"pack {project} -c {Conventions.Configuration} {noBuildArg} -o {ctx.PackagesDir} {versionArg} {docsArg} {symbolsArg}");
-                PrintInfo($"Packed {Path.GetFileNameWithoutExtension(project)}");
+                PrintInfo($"Packed {ProjectDiscovery.ShortName(project)}");
             }
 
             var packages = Directory.GetFiles(ctx.PackagesDir, "*.nupkg");
             PrintInfo($"Created {packages.Length} package(s) in {ctx.PackagesDir}");
         });
 
-        TargetRegistry.Define("setup-feed", "Register the local NuGet feed as a package source", async () =>
+        TargetRegistry.Define("setup-feed", "Register the local NuGet feed as a package source", () =>
         {
             PrintHeader("Setting up local NuGet feed");
 
             Directory.CreateDirectory(ctx.NugetFeedPath);
 
-            try
-            {
-                var result = await ReadAsync("dotnet", "nuget list source");
+            var (exitCode, sources) = Dotnet.Capture(["nuget", "list", "source"]);
+            if (exitCode != 0)
+                PrintWarn($"Could not list NuGet sources (exit code {exitCode}); adding the source anyway");
 
-                if (!result.StandardOutput.Contains(ctx.NugetFeedName))
-                {
-                    Dotnet.Run($"nuget add source {ctx.NugetFeedPath} -n {ctx.NugetFeedName}");
-                    PrintInfo($"Added NuGet source: {ctx.NugetFeedName}");
-                }
-                else
-                {
-                    PrintInfo($"NuGet source already exists: {ctx.NugetFeedName}");
-                }
-            }
-            catch (Exception ex)
+            if (exitCode == 0 && sources.Contains(ctx.NugetFeedName))
             {
-                PrintColored($"Warning: Could not list NuGet sources ({ex.Message}), attempting to add anyway...", ConsoleColor.Yellow);
-                Dotnet.Run($"nuget add source {ctx.NugetFeedPath} -n {ctx.NugetFeedName}");
-                PrintInfo($"Added NuGet source: {ctx.NugetFeedName}");
+                PrintInfo($"NuGet source already exists: {ctx.NugetFeedName}");
+                return;
             }
+
+            Dotnet.Run($"nuget add source {ctx.NugetFeedPath} -n {ctx.NugetFeedName}");
+            PrintInfo($"Added NuGet source: {ctx.NugetFeedName}");
         });
 
         TargetRegistry.Define("publish", "Push packages to the local feed", ["pack", "setup-feed"], () =>
@@ -79,18 +69,18 @@ static class PackageTargets
             PrintHeader(ctx.DryRun ? "Dry run - remote packages to publish" : "Publishing packages to remote feed");
 
             if (string.IsNullOrEmpty(ctx.NugetFeedUrl))
-                throw new InvalidOperationException("--nuget-feed-url is required for publish-remote");
+                throw new ToolchainException("publish-remote requires --nuget-feed-url <url>");
             if (string.IsNullOrEmpty(ctx.NugetApiKey))
-                throw new InvalidOperationException("NUGET_API_KEY env var or --nuget-api-key argument is required for publish-remote");
+                throw new ToolchainException("publish-remote requires --nuget-api-key <key> or the NUGET_API_KEY environment variable");
 
             var packages = Directory.GetFiles(ctx.PackagesDir, "*.nupkg");
 
             if (packages.Length == 0)
-                throw new InvalidOperationException($"No packages found in {ctx.PackagesDir}. Run 'pack' first.");
+                throw new ToolchainException("No packages found in artifacts/packages. Run `dotnet toolchain.cs pack` first.");
 
             PublishPackages(packages, ctx.DryRun, ctx.NugetFeedUrl, package =>
             {
-                Dotnet.Run($"nuget push {package} -s {ctx.NugetFeedUrl} --api-key {ctx.NugetApiKey} --skip-duplicate");
+                Dotnet.Run($"nuget push {package} -s {ctx.NugetFeedUrl} --api-key {ctx.NugetApiKey} --skip-duplicate", secrets: ctx.NugetApiKey);
             });
         });
     }

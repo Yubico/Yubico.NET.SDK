@@ -25,7 +25,6 @@ Yubico.YubiKit.Core.Abstractions.IYubiKey.SerialNumber.get -> int?
 Yubico.YubiKit.Core.Abstractions.IYubiKey.SupportsConnection(Yubico.YubiKit.Core.Devices.ConnectionType connectionType) -> bool
 Yubico.YubiKit.Core.BadResponseException
 Yubico.YubiKit.Core.BadResponseException.BadResponseException(string! message) -> void
-Yubico.YubiKit.Core.CoreCompatSwitches
 Yubico.YubiKit.Core.Credentials.ConsoleCredentialReader
 Yubico.YubiKit.Core.Credentials.ConsoleCredentialReader.ConsoleCredentialReader() -> void
 Yubico.YubiKit.Core.Credentials.ConsoleCredentialReader.ReadCredential(Yubico.YubiKit.Core.Credentials.CredentialReaderOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Buffers.IMemoryOwner<byte>?
@@ -795,7 +794,6 @@ abstract Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.<Clone>$()
 abstract Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.Dispose() -> void
 abstract Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Start() -> void
 abstract Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Stop() -> void
-const Yubico.YubiKit.Core.CoreCompatSwitches.OpenSmartCardHandlesExclusively = "OpenSmartCardHandlesExclusively" -> string!
 const Yubico.YubiKit.Core.Cryptography.Oids.AES128Cbc = "2.16.840.1.101.3.4.1.2" -> string!
 const Yubico.YubiKit.Core.Cryptography.Oids.AES192Cbc = "2.16.840.1.101.3.4.1.22" -> string!
 const Yubico.YubiKit.Core.Cryptography.Oids.AES256Cbc = "2.16.840.1.101.3.4.1.42" -> string!
@@ -1266,6 +1264,6 @@ Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing.ExclusiveWithSharedFal
 Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing.Exclusive = 1 -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
 Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing.Shared = 2 -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
 Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.SmartCardConnectionFactory(Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing sharing) -> void
-static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.ResolveDefaultSharing() -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
 Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.IsExclusive.get -> bool
-const Yubico.YubiKit.Core.CoreCompatSwitches.OpenSmartCardHandlesShared = "OpenSmartCardHandlesShared" -> string!
+static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.DefaultSharing.get -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
+static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.DefaultSharing.set -> void

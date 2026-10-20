@@ -80,6 +80,44 @@ public class SmartCardSharingTests
         Assert.False(connection.IsExclusive);
     }
 
+    [Fact]
+    public async Task DefaultSharing_IsUsedByFactoriesWithoutAnExplicitMode()
+    {
+        var previous = SmartCardConnectionFactory.DefaultSharing;
+        try
+        {
+            SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.Shared;
+            var api = new ControlledSCardConnectionApi();
+
+            await using var connection = await ConnectAsync(api);
+
+            Assert.Equal([SCARD_SHARE.SHARED], api.ConnectShareModes);
+        }
+        finally
+        {
+            SmartCardConnectionFactory.DefaultSharing = previous;
+        }
+    }
+
+    [Fact]
+    public async Task ExplicitSharing_OverridesDefaultSharing()
+    {
+        var previous = SmartCardConnectionFactory.DefaultSharing;
+        try
+        {
+            SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.Shared;
+            var api = new ControlledSCardConnectionApi();
+
+            await using var connection = await ConnectAsync(api, SmartCardSharing.Exclusive);
+
+            Assert.Equal([SCARD_SHARE.EXCLUSIVE], api.ConnectShareModes);
+        }
+        finally
+        {
+            SmartCardConnectionFactory.DefaultSharing = previous;
+        }
+    }
+
     /// <summary>Power the card off on release so PIN=ONCE state cannot outlive the session.</summary>
     [Fact]
     public async Task Release_PowersTheCardOff()

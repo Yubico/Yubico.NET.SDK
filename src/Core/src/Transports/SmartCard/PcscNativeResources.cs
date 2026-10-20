@@ -55,32 +55,20 @@ internal sealed class PcscNativeResources
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new SCardException("ExceptionMessages.SCardCantEstablish", result);
 
-        // Exclusive first, shared when another client already holds the card. Exclusive access keeps
-        // card-wide security state (the PIV PIN, SP 800-73-5 §2.4.2) out of other local processes' reach
-        // while this connection is open.
-        SCardCardHandle cardHandle;
-        SCARD_PROTOCOL activeProtocol;
-        if (_sharing is SmartCardSharing.ExclusiveWithSharedFallback or SmartCardSharing.Exclusive)
+        // See SmartCardSharing for why the handle is exclusive by default.
+        var shareMode = _sharing == SmartCardSharing.Shared ? SCARD_SHARE.SHARED : SCARD_SHARE.EXCLUSIVE;
+        result = _api.Connect(context, _readerName, shareMode, SCARD_PROTOCOL.Tx, out var cardHandle, out var activeProtocol);
+        if (result == ErrorCode.SCARD_E_SHARING_VIOLATION && shareMode == SCARD_SHARE.EXCLUSIVE)
         {
-            result = _api.Connect(context, _readerName, SCARD_SHARE.EXCLUSIVE, SCARD_PROTOCOL.Tx, out cardHandle, out activeProtocol);
-            if (result == ErrorCode.SCARD_S_SUCCESS)
-            {
-                IsExclusive = true;
-            }
-            else if (result == ErrorCode.SCARD_E_SHARING_VIOLATION && _sharing == SmartCardSharing.Exclusive)
+            if (_sharing == SmartCardSharing.Exclusive)
             {
                 throw new Devices.ConnectionInUseException(
                     $"Another smart card client holds reader '{_readerName}' and SmartCardSharing.Exclusive does not fall back to shared access.",
                     new SCardException("SCARD_E_SHARING_VIOLATION", result));
             }
-            else if (result == ErrorCode.SCARD_E_SHARING_VIOLATION)
-            {
-                result = _api.Connect(context, _readerName, SCARD_SHARE.SHARED, SCARD_PROTOCOL.Tx, out cardHandle, out activeProtocol);
-            }
-        }
-        else
-        {
-            result = _api.Connect(context, _readerName, SCARD_SHARE.SHARED, SCARD_PROTOCOL.Tx, out cardHandle, out activeProtocol);
+
+            shareMode = SCARD_SHARE.SHARED;
+            result = _api.Connect(context, _readerName, shareMode, SCARD_PROTOCOL.Tx, out cardHandle, out activeProtocol);
         }
 
         _cardHandle = cardHandle;
@@ -95,6 +83,7 @@ internal sealed class PcscNativeResources
         }
 
         _protocol = activeProtocol;
+        IsExclusive = shareMode == SCARD_SHARE.EXCLUSIVE;
     }
 
     public int Transmit(ReadOnlySpan<byte> command, Span<byte> response)
@@ -126,8 +115,7 @@ internal sealed class PcscNativeResources
             uint result;
             try
             {
-                // Power the card off so card-wide security state (a verified PIV PIN, SP 800-73-5 §2.4.2)
-                // cannot outlive this connection.
+                // Power the card off so card-wide security state cannot outlive this connection (see SmartCardSharing).
                 result = _api.Disconnect(cardHandle, SCARD_DISPOSITION.UNPOWER_CARD);
             }
             catch (Exception ex)

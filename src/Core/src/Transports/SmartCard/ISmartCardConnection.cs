@@ -21,9 +21,8 @@ public interface ISmartCardConnection : IConnection
     Transport Transport { get; }
 
     /// <summary>
-    ///     True when this connection holds the card exclusively (SCARD_SHARE_EXCLUSIVE). When false, other local
-    ///     processes can open the same card and use card-wide security state such as a verified PIV PIN
-    ///     (see <see cref="SmartCardSharing"/>). Custom implementations that do not model sharing report false.
+    ///     True when this connection holds the card exclusively; see <see cref="SmartCardSharing" /> for what a
+    ///     shared handle means. Custom implementations that do not model sharing report false.
     /// </summary>
     bool IsExclusive => false;
 

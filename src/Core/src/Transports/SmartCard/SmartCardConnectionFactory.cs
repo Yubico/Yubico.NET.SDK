@@ -44,15 +44,35 @@ internal interface IRegisteredSmartCardConnectionFactory
 /// </remarks>
 public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IRegisteredSmartCardConnectionFactory
 {
+    private static readonly Lock s_defaultSharingLock = new();
     private readonly ISCardConnectionApi _api;
     private readonly SmartCardSharing _sharing;
 
     /// <summary>
-    ///     Creates a factory that uses the configured <see cref="YubiKitLogging" /> logger factory and the
-    ///     process-wide sharing mode (<see cref="ResolveDefaultSharing"/>).
+    ///     The <see cref="SmartCardSharing" /> used by factories created without an explicit mode, including the
+    ///     one behind <see cref="Devices.YubiKeyManager" />. Set it once at start-up, before any device is opened.
+    ///     Defaults to <see cref="SmartCardSharing.ExclusiveWithSharedFallback" />.
+    /// </summary>
+    public static SmartCardSharing DefaultSharing
+    {
+        get
+        {
+            lock (s_defaultSharingLock)
+                return field;
+        }
+        set
+        {
+            lock (s_defaultSharingLock)
+                field = value;
+        }
+    } = SmartCardSharing.ExclusiveWithSharedFallback;
+
+    /// <summary>
+    ///     Creates a factory that uses the configured <see cref="YubiKitLogging" /> logger factory and
+    ///     <see cref="DefaultSharing" />.
     /// </summary>
     public SmartCardConnectionFactory()
-        : this(new NativeSCardConnectionApi(), ResolveDefaultSharing())
+        : this(new NativeSCardConnectionApi(), DefaultSharing)
     {
     }
 
@@ -63,7 +83,7 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     }
 
     internal SmartCardConnectionFactory(ISCardConnectionApi api)
-        : this(api, ResolveDefaultSharing())
+        : this(api, DefaultSharing)
     {
     }
 
@@ -71,20 +91,6 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     {
         _api = api;
         _sharing = sharing;
-    }
-
-    /// <summary>
-    ///     The sharing mode used when none is given: exclusive with shared fallback, unless
-    ///     <see cref="CoreCompatSwitches.OpenSmartCardHandlesExclusively"/> (strict exclusive) or
-    ///     <see cref="CoreCompatSwitches.OpenSmartCardHandlesShared"/> (shared only) is set.
-    /// </summary>
-    public static SmartCardSharing ResolveDefaultSharing()
-    {
-        if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesShared, out var shared) && shared)
-            return SmartCardSharing.Shared;
-        if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out var exclusive) && exclusive)
-            return SmartCardSharing.Exclusive;
-        return SmartCardSharing.ExclusiveWithSharedFallback;
     }
 
     public async Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice,

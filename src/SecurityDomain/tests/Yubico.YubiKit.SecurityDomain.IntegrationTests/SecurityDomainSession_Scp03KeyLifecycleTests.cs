@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 /// <summary>
 ///     Integration tests for SCP03 key lifecycle operations: import, delete, and replace (rotate).
 /// </summary>
-public class SecurityDomainSession_Scp03KeyLifecycleTests
+public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateRestoringTests
 {
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
 
@@ -37,6 +37,8 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutKeyAsync_ThenDeleteKeyAsync_ImportsAndRemovesKey(YubiKeyTestState state)
     {
+        Track(state);
+
         var ct = CancellationTokenSource.Token;
 
         try
@@ -141,6 +143,8 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutKeyAsync_WithReplaceKvn_RotatesKey(YubiKeyTestState state)
     {
+        Track(state);
+
         var ct = CancellationTokenSource.Token;
 
         try

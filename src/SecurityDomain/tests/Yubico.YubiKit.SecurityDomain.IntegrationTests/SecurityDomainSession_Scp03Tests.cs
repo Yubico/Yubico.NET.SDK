@@ -10,7 +10,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 /// <summary>
 ///     Integration coverage for establishing a Security Domain session using SCP03.
 /// </summary>
-public class SecurityDomainSession_Scp03Tests
+public class SecurityDomainSession_Scp03Tests : SecurityDomainStateRestoringTests
 {
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
 
@@ -67,6 +67,8 @@ public class SecurityDomainSession_Scp03Tests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
     public async Task PutKeyAsync_WithStaticKeys_ImportsAndAuthenticates(YubiKeyTestState state)
     {
+        Track(state);
+
         try
         {
             // Custom key set (non-default) for testing

@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 ///     Negative integration tests verifying security boundary enforcement.
 ///     These tests confirm that authentication fails when using incorrect or blocked keys.
 /// </summary>
-public class SecurityDomainSession_NegativeTests
+public class SecurityDomainSession_NegativeTests : SecurityDomainStateRestoringTests
 {
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
 
@@ -38,6 +38,8 @@ public class SecurityDomainSession_NegativeTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
     public async Task Scp11b_WithWrongPublicKey_FailsAuthentication(YubiKeyTestState state)
     {
+        Track(state);
+
         var ct = CancellationTokenSource.Token;
         var keyReference = new KeyReference(ScpKid.SCP11b, 0x03);
 

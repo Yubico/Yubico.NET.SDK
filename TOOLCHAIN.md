@@ -4,7 +4,7 @@ This project uses a .NET 10 C# script for build automation with Bullseye task ru
 
 ## Prerequisites
 
-- .NET 10 SDK, 10.0.300 or newer (pinned by `global.json`; the metric scripts use the `#:include` directive)
+- .NET 10 SDK, 10.0.300 or newer (pinned by `global.json`; `toolchain.cs` and the metric scripts use the `#:include` directive)
 - Bash for `docs-inventory` and `docs-architecture` (macOS/Linux, Git Bash, or WSL)
 
 ## Usage
@@ -122,6 +122,25 @@ dotnet toolchain.cs -- publish --dry-run
 # Full clean build (delete artifacts, then build)
 dotnet toolchain.cs clean build
 ```
+
+## Script Layout
+
+`toolchain.cs` is the only entry point. It parses the options, registers every target, and hands over to Bullseye; the targets themselves live in `scripts/toolchain/` and are pulled in with `#:include`:
+
+| File | Contents |
+|---|---|
+| `Context.cs` | `ToolchainContext`: repository root, parsed options, discovered projects, and the option list Bullseye must not see |
+| `Discovery.cs` | Project and active-documentation discovery, `--project` matching |
+| `Output.cs` | Console helpers, test summary, `--help` text |
+| `Process.cs` | `dotnet` process helpers that capture output or test counts |
+| `BuildTargets.cs` | `clean`, `restore`, `build`, `test-infrastructure-qa`, `native-aot-contract-qa` |
+| `TestTargets.cs` | `test`, `resilience`, `--filter` translation for xUnit v2/v3 |
+| `CoverageTargets.cs` | `coverage`, `crap`, `complexity` |
+| `BenchmarkTargets.cs` | `benchmark` |
+| `DocsTargets.cs` | `docs-qa`, `docs-inventory`, `docs-architecture` |
+| `PackageTargets.cs` | `pack`, `setup-feed`, `publish`, `publish-remote` |
+
+Every target stays in one process so Bullseye can resolve dependencies across areas (`pack` depends on `build`). To add a target, register it in the matching `*Targets.cs` file. A new option must be parsed in `ToolchainContext.FromArgs` and listed in that class's option lists, or Bullseye will reject it as an unknown target. A new file needs its own `#:include` line in `toolchain.cs`.
 
 ## Target Dependencies
 

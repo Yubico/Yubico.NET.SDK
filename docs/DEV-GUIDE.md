@@ -1,14 +1,18 @@
 # Developer Guide
 
+## Branches
+
+v2 (this SDK) lives only on `yubikit` and `yubikit-*` branches. `develop` (the repository's default branch) and `main` hold the legacy v1 SDK and share no git history with `yubikit`. Base v2 branches and PRs on `yubikit`, or on the `yubikit-*` branch the work belongs to, and always pass that base explicitly: tools that use the default branch would pick `develop`, and GitHub closes a v2 PR retargeted there. v2 is expected to move to `main` in the future.
+
 ## Stacked PR Workflow
 
 - Use GitHub stacked PRs (`gh stack`) for multi-step work that lands in layers.
 - Unrelated work must start a **new stack**. Do not mix unrelated concerns into an existing stack or PR.
 - Keep every PR focused and independently reviewable: one purpose per PR, minimal diff, clear review boundary.
 
-Minimal flow:
+Minimal flow (always pass `--base`; without it `gh stack` targets the repository default `develop`, which shares no history with `yubikit`, and GitHub closes a v2 PR moved there):
 ```bash
-gh stack init          # bases on current branch by default
+gh stack init --base yubikit <branch>   # v2 work; v1 work uses --base develop
 gh stack add <branch>
 gh stack submit
 gh stack rebase && gh stack push && gh stack submit

@@ -9,7 +9,7 @@ description: Use when implementation is complete and tests pass - guides merge, 
 
 - All implementation tasks are complete
 - Tests are passing
-- Ready to integrate work into main branch
+- Ready to integrate work into its base branch (`yubikit` for v2)
 - Need to decide: merge locally, create PR, keep as-is, or discard
 
 ## Overview
@@ -46,12 +46,17 @@ Stop. Don't proceed to Step 2.
 
 ### Step 2: Determine Base Branch
 
+v2 work (this rewrite) branches from `yubikit` or a `yubikit-*` branch; v1 work from `develop`. The two
+lines share no history, so git tells them apart (full check: the `stack` skill, step 1):
+
 ```bash
-# Try common base branches
-git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
+git fetch -q origin
+git merge-base HEAD origin/yubikit >/dev/null 2>&1 && echo "v2: base is yubikit (or the yubikit-* branch it was cut from)" \
+  || { git merge-base HEAD origin/develop >/dev/null 2>&1 && echo "v1: base is develop"; }
 ```
 
-Or ask: "This branch split from main - is that correct?"
+Never merge or target v2 work into `develop` or `main`. Ask only if the branch was cut from a `yubikit-*`
+branch and you cannot tell which one.
 
 ### Step 3: Present Options
 

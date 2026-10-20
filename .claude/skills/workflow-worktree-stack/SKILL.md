@@ -29,7 +29,7 @@ Combines `git worktree` (parallel filesystem isolation per layer) with `gh stack
 ```
 repo/
 ├── .git/                          ← shared object store (all worktrees share this)
-├── <main-clone>/                  ← trunk / develop (read-mostly)
+├── <main-clone>/                  ← trunk: yubikit (v2) or develop (v1) (read-mostly)
 ├── feature-infra/                 ← stack layer 1  (PR #N)
 ├── feature-api/                   ← stack layer 2  (PR #N+1, base = layer 1)
 └── feature-ui/                    ← stack layer 3  (PR #N+2, base = layer 2)
@@ -42,8 +42,9 @@ All worktrees share `.git` — commits, refs, and objects are immediately availa
 ### 1. Set up trunk worktree (if not already)
 
 ```bash
-# You're already in the main clone — this is your "trunk" tree
-git branch --show-current   # should be develop or your base
+# You're already in the main clone — this is your "trunk" tree.
+# Detect the trunk (v2: yubikit, v1: develop) as in the `stack` skill, step 1.
+git branch --show-current   # should be the trunk or your base
 ```
 
 ### 2. Create a worktree for each layer
@@ -67,14 +68,14 @@ From **any** worktree in the chain, initialise the stack with all branches:
 
 ```bash
 cd ../feature-infra
-gh stack init feature-infra feature-api feature-ui
+gh stack init --base "$TRUNK" feature-infra feature-api feature-ui   # never let it default to develop on v2
 ```
 
 Or init the bottom layer and add the rest:
 
 ```bash
 cd ../feature-infra
-gh stack init feature-infra
+gh stack init --base "$TRUNK" feature-infra
 gh stack add feature-api   # must be run from the top of the current stack
 gh stack add feature-ui
 ```
@@ -170,9 +171,9 @@ git branch -d feature-infra feature-api feature-ui
 
 **❌ Branching all layers off trunk**
 ```bash
-# Wrong — all three branch off develop, no dependency chain
-git worktree add ../feature-api -b feature-api develop
-git worktree add ../feature-ui  -b feature-ui  develop
+# Wrong — all three branch off the trunk, no dependency chain
+git worktree add ../feature-api -b feature-api yubikit
+git worktree add ../feature-ui  -b feature-ui  yubikit
 ```
 **✅ Branch each layer off its parent:**
 ```bash

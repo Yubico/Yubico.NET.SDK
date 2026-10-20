@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for AI agents working in this repository. Yubico.NET.SDK (YubiKit) is a .NET 10 / C# 14 SDK for YubiKey devices. The 2.0 rewrite lives on `develop` and `main`; the source-of-truth root is the `yubikit` branch.
+Guidance for AI agents working in this repository. Yubico.NET.SDK (YubiKit) is a .NET 10 / C# 14 SDK for YubiKey devices. The 2.0 rewrite (v2) lives only on the `yubikit` branch and `yubikit-*` branches; `develop` and `main` hold the legacy v1 SDK (see Git Workflow).
 
 **IMPORTANT:** When working under a subproject (`src/Piv/`, `src/Fido2/`, `src/SecurityDomain/`, etc.) you MUST also read that subproject's `CLAUDE.md` if present. Subproject files contain module-specific patterns, test harness wiring, and protocol context that overrides nothing here but extends it.
 
@@ -593,16 +593,17 @@ If you answered "no" to any of these, don't write the test.
 
 ## Git Workflow
 
-- Base branch for PRs: **`yubikit`** (the source-of-truth root; not `develop` or `main`). CI triggers on `yubikit` and `yubikit-applets` — confirm the active branch before assuming a base.
+- **Branch lines.** v2 (this rewrite) lives only on **`yubikit`** (the source-of-truth root) and **`yubikit-*`** branches such as `yubikit-applets`. `develop` (v1 development, and the repository's default branch) and `main` (v1 releases) hold the legacy v1 SDK and share **no git history** with `yubikit`. v2 is expected to move to `main` in the future; until it does, v2 work never targets `develop` or `main`.
+- Base branch for v2 PRs: **`yubikit`**, or the `yubikit-*` branch the work was cut from. Check rather than assume: `git merge-base HEAD origin/yubikit` succeeds only on v2 history (the `stack` skill, step 1, has the full check). Tools that default to the repository's default branch (`gh pr create`, `gh stack`) pick `develop`, so always pass the base explicitly. A v2 PR retargeted to `develop` is closed by GitHub and cannot be reopened. CI (`build.yml`) runs on pushes and PRs to `yubikit*` and `yubikit/**` branches only, so a PR against `develop` would also get no v2 checks.
 - Only commit files YOU created or modified in the current session
 - Stage explicitly with `git add path/to/file` — NEVER `git add .` or `git add -A`
 - Use GitHub stacked PRs (`gh stack`) for multi-layer work. Put unrelated work in a **separate stack**; do not piggyback unrelated changes into an existing stack/PR.
 - Keep each stack layer and PR narrow and independently reviewable (one concern per PR, no mixed unrelated diffs).
 - Before pushing or submitting a PR, finish the Pre-Commit Checklist on the final changes. A successful build with warnings is not a passing gate; do not disable analyzers or warnings-as-errors to push.
 
-Minimal stack flow:
+Minimal stack flow (always pass `--base`: the default is `develop`, and a v2 PR moved there is closed for good. See the `stack` skill, step 1):
 ```bash
-gh stack init          # bases on current branch by default
+gh stack init --base yubikit <branch>   # v2; v1 work uses --base develop
 gh stack add <branch>
 gh stack submit
 gh stack rebase && gh stack push && gh stack submit

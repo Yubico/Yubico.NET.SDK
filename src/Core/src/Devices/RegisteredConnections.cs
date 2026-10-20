@@ -37,6 +37,7 @@ internal sealed class RegisteredSmartCardConnection(
     public ConnectionType Type => inner.Type;
 
     public Transport Transport => inner.Transport;
+    public bool IsExclusive => inner.IsExclusive;
 
     public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
         ReadOnlyMemory<byte> command,

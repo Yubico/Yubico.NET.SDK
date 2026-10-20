@@ -21,8 +21,19 @@ namespace Yubico.YubiKit.Core;
 public static class CoreCompatSwitches
 {
     /// <summary>
-    ///     If set to true, Yubico.Core will attempt to open smart card handles exclusively. False will open shared.
-    ///     Default is false / shared.
+    ///     If set to true, smart card handles are opened exclusively with no shared fallback
+    ///     (<see cref="Transports.SmartCard.SmartCardSharing.Exclusive"/>). The default is exclusive with a shared
+    ///     fallback, as ykman does. Ignored when a <see cref="Transports.SmartCard.SmartCardConnectionFactory"/>
+    ///     is constructed with an explicit sharing mode.
     /// </summary>
     public const string OpenSmartCardHandlesExclusively = nameof(OpenSmartCardHandlesExclusively);
+
+    /// <summary>
+    ///     If set to true, smart card handles are opened shared and the exclusive attempt is skipped
+    ///     (<see cref="Transports.SmartCard.SmartCardSharing.Shared"/>): the equivalent of ykman's
+    ///     <c>YKMAN_NO_EXLUSIVE</c>, for applications that must coexist with other smart-card users and accept
+    ///     that the card-wide PIN state is reachable from other handles. Ignored when a factory is constructed
+    ///     with an explicit sharing mode.
+    /// </summary>
+    public const string OpenSmartCardHandlesShared = nameof(OpenSmartCardHandlesShared);
 }

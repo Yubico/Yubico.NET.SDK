@@ -45,16 +45,46 @@ internal interface IRegisteredSmartCardConnectionFactory
 public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IRegisteredSmartCardConnectionFactory
 {
     private readonly ISCardConnectionApi _api;
+    private readonly SmartCardSharing _sharing;
 
-    /// <summary>Creates a factory that uses the configured <see cref="YubiKitLogging" /> logger factory.</summary>
+    /// <summary>
+    ///     Creates a factory that uses the configured <see cref="YubiKitLogging" /> logger factory and the
+    ///     process-wide sharing mode (<see cref="ResolveDefaultSharing"/>).
+    /// </summary>
     public SmartCardConnectionFactory()
-        : this(new NativeSCardConnectionApi())
+        : this(new NativeSCardConnectionApi(), ResolveDefaultSharing())
+    {
+    }
+
+    /// <summary>Creates a factory that opens card handles with <paramref name="sharing"/>.</summary>
+    public SmartCardConnectionFactory(SmartCardSharing sharing)
+        : this(new NativeSCardConnectionApi(), sharing)
     {
     }
 
     internal SmartCardConnectionFactory(ISCardConnectionApi api)
+        : this(api, ResolveDefaultSharing())
+    {
+    }
+
+    internal SmartCardConnectionFactory(ISCardConnectionApi api, SmartCardSharing sharing)
     {
         _api = api;
+        _sharing = sharing;
+    }
+
+    /// <summary>
+    ///     The sharing mode used when none is given: exclusive with shared fallback (ykman's default), unless
+    ///     <see cref="CoreCompatSwitches.OpenSmartCardHandlesExclusively"/> (strict exclusive) or
+    ///     <see cref="CoreCompatSwitches.OpenSmartCardHandlesShared"/> (shared only) is set.
+    /// </summary>
+    public static SmartCardSharing ResolveDefaultSharing()
+    {
+        if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesShared, out var shared) && shared)
+            return SmartCardSharing.Shared;
+        if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out var exclusive) && exclusive)
+            return SmartCardSharing.Exclusive;
+        return SmartCardSharing.ExclusiveWithSharedFallback;
     }
 
     public async Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice,
@@ -62,7 +92,8 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     {
         var connection = new UsbSmartCardConnection(
             smartCardDevice,
-            api: _api);
+            api: _api,
+            sharing: _sharing);
 
         await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
         return connection;
@@ -79,6 +110,7 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
             connection = new UsbSmartCardConnection(
                 smartCardDevice,
                 api: _api,
+                sharing: _sharing,
                 released: registration.Dispose,
                 unrecovered: failure => DeviceConnectionRegistry.MarkUnrecovered(registration, failure));
         }

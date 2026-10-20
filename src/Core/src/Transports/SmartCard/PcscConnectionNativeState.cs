@@ -41,16 +41,20 @@ internal sealed class PcscConnectionNativeState
     private int _workerThreadId;
     private int _nativeReleaseProven = 1;
 
+    /// <summary>True when the native handle was opened with SCARD_SHARE_EXCLUSIVE.</summary>
+    public bool IsExclusive => _resources.IsExclusive;
+
     public PcscConnectionNativeState(
         string readerName,
         ISCardConnectionApi api,
+        SmartCardSharing sharing = SmartCardSharing.ExclusiveWithSharedFallback,
         Action? released = null,
         Action<Exception>? unrecovered = null,
         Action<Thread>? startWorker = null,
         Action? workerLoopStarting = null)
     {
         _readerName = readerName;
-        _resources = new PcscNativeResources(readerName, api);
+        _resources = new PcscNativeResources(readerName, api, sharing);
         _released = released;
         _unrecovered = unrecovered;
         _startWorker = startWorker ?? (static worker => worker.Start());

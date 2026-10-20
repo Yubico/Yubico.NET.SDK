@@ -1261,3 +1261,11 @@ virtual Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.PrintMember
 virtual Yubico.YubiKit.Core.Sessions.ApplicationSession.Dispose(bool disposing) -> void
 virtual Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAsyncCore() -> System.Threading.Tasks.ValueTask
 virtual Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.Dispose(bool disposing) -> void
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing.ExclusiveWithSharedFallback = 0 -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing.Exclusive = 1 -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing.Shared = 2 -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
+Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.SmartCardConnectionFactory(Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing sharing) -> void
+static Yubico.YubiKit.Core.Transports.SmartCard.SmartCardConnectionFactory.ResolveDefaultSharing() -> Yubico.YubiKit.Core.Transports.SmartCard.SmartCardSharing
+Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection.IsExclusive.get -> bool
+const Yubico.YubiKit.Core.CoreCompatSwitches.OpenSmartCardHandlesShared = "OpenSmartCardHandlesShared" -> string!

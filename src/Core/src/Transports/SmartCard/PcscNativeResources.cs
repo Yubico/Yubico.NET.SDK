@@ -36,11 +36,17 @@ internal sealed class PcscNativeResources
     private SCardCardHandle CardHandle => _cardHandle
         ?? throw new InvalidOperationException("The smart-card connection is not initialized.");
 
-    public PcscNativeResources(string readerName, ISCardConnectionApi api)
+    private readonly SmartCardSharing _sharing;
+
+    public PcscNativeResources(string readerName, ISCardConnectionApi api, SmartCardSharing sharing = SmartCardSharing.ExclusiveWithSharedFallback)
     {
         _readerName = readerName;
         _api = api;
+        _sharing = sharing;
     }
+
+    /// <summary>True when the handle was opened with SCARD_SHARE_EXCLUSIVE.</summary>
+    public bool IsExclusive { get; private set; }
 
     public void Open()
     {
@@ -49,17 +55,34 @@ internal sealed class PcscNativeResources
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new SCardException("ExceptionMessages.SCardCantEstablish", result);
 
-        var shareMode = SCARD_SHARE.SHARED;
-        if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out var enabled) && enabled)
-            shareMode = SCARD_SHARE.EXCLUSIVE;
+        // ykman (pcsc/__init__.py L133-144): exclusive first, shared when another client holds the card.
+        // Exclusive access keeps card-wide security state (the PIV PIN, SP 800-73-5 §2.4.2) out of other
+        // local processes' reach while this connection is open.
+        SCardCardHandle cardHandle;
+        SCARD_PROTOCOL activeProtocol;
+        if (_sharing is SmartCardSharing.ExclusiveWithSharedFallback or SmartCardSharing.Exclusive)
+        {
+            result = _api.Connect(context, _readerName, SCARD_SHARE.EXCLUSIVE, SCARD_PROTOCOL.Tx, out cardHandle, out activeProtocol);
+            if (result == ErrorCode.SCARD_S_SUCCESS)
+            {
+                IsExclusive = true;
+            }
+            else if (result == ErrorCode.SCARD_E_SHARING_VIOLATION && _sharing == SmartCardSharing.Exclusive)
+            {
+                throw new Devices.ConnectionInUseException(
+                    $"Another smart card client holds reader '{_readerName}' and SmartCardSharing.Exclusive does not fall back to shared access.",
+                    new SCardException("SCARD_E_SHARING_VIOLATION", result));
+            }
+            else if (result == ErrorCode.SCARD_E_SHARING_VIOLATION)
+            {
+                result = _api.Connect(context, _readerName, SCARD_SHARE.SHARED, SCARD_PROTOCOL.Tx, out cardHandle, out activeProtocol);
+            }
+        }
+        else
+        {
+            result = _api.Connect(context, _readerName, SCARD_SHARE.SHARED, SCARD_PROTOCOL.Tx, out cardHandle, out activeProtocol);
+        }
 
-        result = _api.Connect(
-            context,
-            _readerName,
-            shareMode,
-            SCARD_PROTOCOL.Tx,
-            out var cardHandle,
-            out var activeProtocol);
         _cardHandle = cardHandle;
         if (result != ErrorCode.SCARD_S_SUCCESS)
         {
@@ -103,7 +126,9 @@ internal sealed class PcscNativeResources
             uint result;
             try
             {
-                result = _api.Disconnect(cardHandle, SCARD_DISPOSITION.LEAVE_CARD);
+                // pyscard's default disposition (PCSCCardConnection.py L154-155): power the card off so card-wide
+                // security state (a verified PIV PIN, SP 800-73-5 §2.4.2) cannot outlive this connection.
+                result = _api.Disconnect(cardHandle, SCARD_DISPOSITION.UNPOWER_CARD);
             }
             catch (Exception ex)
             {

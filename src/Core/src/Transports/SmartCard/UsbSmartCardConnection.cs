@@ -25,26 +25,33 @@ internal class UsbSmartCardConnection : ISmartCardConnection
     private const int MaxExtendedApduResponseSize = 65536 + 2;
     private readonly IPcscDevice _smartCardDevice;
     private readonly ILogger<UsbSmartCardConnection> _logger;
+    private readonly SmartCardSharing _sharing;
     private readonly PcscConnectionNativeState _nativeState;
 
     internal UsbSmartCardConnection(
         IPcscDevice smartCardDevice,
         ISCardConnectionApi? api = null,
+        SmartCardSharing sharing = SmartCardSharing.ExclusiveWithSharedFallback,
         Action? released = null,
         Action<Exception>? unrecovered = null,
         Action<Thread>? startWorker = null,
         Action? workerLoopStarting = null)
     {
         _smartCardDevice = smartCardDevice;
+        _sharing = sharing;
         _logger = YubiKitLogging.CreateLogger<UsbSmartCardConnection>();
         _nativeState = new PcscConnectionNativeState(
             smartCardDevice.ReaderName,
             api ?? new NativeSCardConnectionApi(),
+            sharing,
             released,
             unrecovered,
             startWorker,
             workerLoopStarting);
     }
+
+    /// <inheritdoc />
+    public bool IsExclusive => _nativeState.IsExclusive;
 
     ~UsbSmartCardConnection()
     {
@@ -76,6 +83,13 @@ internal class UsbSmartCardConnection : ISmartCardConnection
         {
             _logger.LogDebug("Initializing smart card connection to reader {ReaderName}", _smartCardDevice.ReaderName);
             await _nativeState.OpenAsync(cancellationToken).ConfigureAwait(false);
+            if (_sharing == SmartCardSharing.ExclusiveWithSharedFallback && !IsExclusive)
+            {
+                _logger.LogWarning(
+                    "Failed to get exclusive access to reader {ReaderName}; using a shared connection. Card-wide security state is reachable from other smart card clients.",
+                    _smartCardDevice.ReaderName);
+            }
+
             _logger.LogDebug("Smart card connection initialized to reader {ReaderName}", _smartCardDevice.ReaderName);
         }
         catch (Exception initializationFailure)

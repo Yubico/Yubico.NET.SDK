@@ -6,9 +6,9 @@
 - Unrelated work must start a **new stack**. Do not mix unrelated concerns into an existing stack or PR.
 - Keep every PR focused and independently reviewable: one purpose per PR, minimal diff, clear review boundary.
 
-Minimal flow:
+Minimal flow (always pass `--base`; without it `gh stack` targets the repository default `develop`, which shares no history with `yubikit`, and GitHub closes a v2 PR moved there):
 ```bash
-gh stack init          # bases on current branch by default
+gh stack init --base yubikit <branch>   # v2 work; v1 work uses --base develop
 gh stack add <branch>
 gh stack submit
 gh stack rebase && gh stack push && gh stack submit

@@ -600,9 +600,9 @@ If you answered "no" to any of these, don't write the test.
 - Keep each stack layer and PR narrow and independently reviewable (one concern per PR, no mixed unrelated diffs).
 - Before pushing or submitting a PR, finish the Pre-Commit Checklist on the final changes. A successful build with warnings is not a passing gate; do not disable analyzers or warnings-as-errors to push.
 
-Minimal stack flow:
+Minimal stack flow (always pass `--base`: the default is `develop`, and a v2 PR moved there is closed for good. See the `stack` skill, step 1):
 ```bash
-gh stack init          # bases on current branch by default
+gh stack init --base yubikit <branch>   # v2; v1 work uses --base develop
 gh stack add <branch>
 gh stack submit
 gh stack rebase && gh stack push && gh stack submit

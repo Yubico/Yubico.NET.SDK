@@ -110,7 +110,8 @@ dotnet toolchain.cs -- --help
 - Build output is **not** printed. Compiler/MSBuild `error` lines are shown, and the full output is
   saved to a step log (`output: <path>` under the `▶ RUN` line). Pass `--verbose` to stream it.
 - The run ends with a RESULT block: `RESULT: PASSED` (exit code 0) or `RESULT: FAILED`, each target
-  with its error, and the path of the run log. Read that block, not the lines above it.
+  with its error, `Warnings: N` (distinct warnings per step, by code, with the step log), and the
+  path of the run log. Read that block, not the lines above it.
 
 ## The `--` Separator
 
@@ -164,7 +165,7 @@ dotnet toolchain.cs pack
 
 Build completed successfully when:
 - [ ] Exit code is 0 and the output ends with `RESULT: PASSED`
-- [ ] No warnings in the build step log (or only expected warnings)
+- [ ] `Warnings: 0` in the RESULT block (or only expected warnings)
 
 ## Related Skills
 

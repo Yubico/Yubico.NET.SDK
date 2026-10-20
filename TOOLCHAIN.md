@@ -187,6 +187,7 @@ RESULT: FAILED  (dotnet toolchain.cs -- test --project Management.UnitTests)
   ✓ test-infrastructure-qa     0.0s
   ✗ test                       1.8s  1 test project(s) failed
 Projects: 0 passed, 1 failed, 0 with no tests executed; tests: 90 executed, 3 failed, 0 skipped
+Warnings: 0
 Failed: Management.UnitTests (test) - 3 test(s) failed
   - Yubico.YubiKit.Management.UnitTests.ZZProbeTests.ZZ_Fails_Equal: Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   2
   output: artifacts/toolchain/runs/20261020-170419-512-test/01-test-Management.UnitTests.log
@@ -197,6 +198,7 @@ Run log: artifacts/toolchain/runs/20261020-170419-512-test/run.log (result.json 
 
 - The exit code is `0` only for `RESULT: PASSED`. Usage errors (an unknown target) exit `2`.
 - `Next:` re-runs only the tests that failed.
+- `Warnings:` counts distinct compiler and MSBuild warnings, with a line per step giving the codes and the step log, e.g. `build-Management: 3 (CS1030 x2, CS0168)`. Warnings are not shown while running and never fail a run on their own. In this repository most compiler warnings are already errors (`TreatWarningsAsErrors`), so the count mainly catches NuGet/MSBuild warnings.
 - A project where nothing executed is reported as `○ NO-TESTS` and fails the `test` target. This covers a filter that matched nothing and a run where every test was skipped (for example, no matching YubiKey).
 - `--project` that matches nothing fails and lists the valid names.
 - Expected failures (failed tests or gates, usage errors, a failing command) print their message without a stack trace. A stack trace means a bug in the toolchain itself.
@@ -224,7 +226,7 @@ artifacts/toolchain/
     └── 20261020-170419-512-test/
         ├── run.log                           all console output, with the command, git commit and runtime
         ├── 01-test-Management.UnitTests.log  the full output of each build/test/pack step
-        └── result.json                       the RESULT block as JSON (targets, projects, failed tests, next)
+        └── result.json                       the RESULT block as JSON (targets, projects, failed tests, warnings, next)
 ```
 
 - Only the 5 newest runs are kept. Older ones are deleted when a new run starts.

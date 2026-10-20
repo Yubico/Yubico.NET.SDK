@@ -186,6 +186,7 @@ static class Output
                 RESULT: PASSED | FAILED   the outcome; the exit code is 0 only for PASSED
                 ✓/✗ <target>              each target that ran, with its error
                 Projects: ...; tests: ... project and per-test totals
+                Warnings: <n>             compiler/MSBuild warnings per step, by code (not shown above)
                 Failed: <project>         each failing project, its failing tests and messages
                 Next: <command>           re-runs only what failed
                 Run log: <path>           where everything is saved

@@ -9,6 +9,9 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using static Output;
 
+/// <summary>The distinct compiler/MSBuild warnings one step produced, by code.</summary>
+sealed record StepWarnings(string Step, IReadOnlyList<string> Codes, string? LogPath);
+
 /// <summary>A target that ran, and how it ended.</summary>
 sealed record TargetRun(string Name, bool Succeeded, TimeSpan Duration, string? Error);
 
@@ -28,6 +31,7 @@ static class RunLog
     static readonly object s_lock = new();
     static readonly List<TargetRun> s_targets = [];
     static readonly List<(string Target, ProjectResult Result)> s_projects = [];
+    static readonly List<StepWarnings> s_warnings = [];
     static readonly StringBuilder s_pending = new();
 
     static string s_repoRoot = "";
@@ -76,6 +80,11 @@ static class RunLog
     public static void Record(ProjectResult result)
     {
         lock (s_lock) s_projects.Add((s_currentTarget ?? "", result));
+    }
+
+    public static void RecordWarnings(string step, IReadOnlyList<string> codes, string? logPath)
+    {
+        lock (s_lock) s_warnings.Add(new StepWarnings(step, codes, logPath));
     }
 
     /// <summary>Runs one target's action and records how it ended.</summary>
@@ -157,6 +166,15 @@ static class RunLog
                 $"{projects.Count(p => p.Outcome == Outcome.NoTestsExecuted)} with no tests executed{tests}");
         }
 
+        // Warnings never fail a run, and the console only shows error lines, so count them here.
+        Console.WriteLine($"Warnings: {s_warnings.Sum(w => w.Codes.Count)}");
+        foreach (var step in s_warnings)
+        {
+            var codes = string.Join(", ", step.Codes.GroupBy(c => c).OrderByDescending(g => g.Count()).Select(g => g.Count() == 1 ? g.Key : $"{g.Key} x{g.Count()}"));
+            var where = step.LogPath is null ? "" : $"  output: {Display(step.LogPath)}";
+            Console.WriteLine($"  {step.Step}: {step.Codes.Count} ({codes}){where}");
+        }
+
         foreach (var (target, project) in s_projects.Where(p => p.Result.Outcome == Outcome.Failed))
         {
             Console.WriteLine($"Failed: {project.Project} ({target}) - {project.Reason}");
@@ -220,6 +238,14 @@ static class RunLog
                 ["skipped"] = p.Result.Counts?.Skipped,
                 ["failedTests"] = Array(p.Result.FailedTests.Select(t => (JsonNode)new JsonObject { ["name"] = t.Name, ["message"] = t.Message })),
                 ["log"] = p.Result.LogPath is null ? null : Display(p.Result.LogPath),
+            })),
+            ["warningCount"] = s_warnings.Sum(w => w.Codes.Count),
+            ["warnings"] = Array(s_warnings.Select(w => (JsonNode)new JsonObject
+            {
+                ["step"] = w.Step,
+                ["count"] = w.Codes.Count,
+                ["codes"] = Array(w.Codes.Select(c => (JsonNode)JsonValue.Create(c))),
+                ["log"] = w.LogPath is null ? null : Display(w.LogPath),
             })),
             ["next"] = Array(NextSteps().Select(n => (JsonNode)JsonValue.Create(n))),
         };

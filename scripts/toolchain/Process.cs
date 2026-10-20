@@ -18,6 +18,9 @@ static class Exec
     // MSBuild/compiler diagnostics ("file(1,2): error CS0029: ..." and "error MSB1009: ...").
     static readonly Regex s_errorLine = new(@"(:\s*error\s+\w+\d*:|^\s*error\s+\w+\d*:)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+    // "file(1,2): warning CS0168: ... [project.csproj]"; the code is captured for the summary.
+    static readonly Regex s_warningLine = new(@"(?:^|:)\s*warning\s+(?<code>[A-Za-z]+\d+)\s*:", RegexOptions.Compiled);
+
     const int TailLinesOnFailure = 30;
 
     /// <summary>Show the whole output live (reports such as crap/complexity), or only error lines.</summary>
@@ -47,6 +50,7 @@ static class Exec
 
         var output = new StringBuilder();
         var shownErrors = new HashSet<string>(StringComparer.Ordinal);
+        var warnings = new Dictionary<string, string>(StringComparer.Ordinal); // line -> code; MSBuild repeats each in its summary
         using var log = logPath is null ? null : new StreamWriter(logPath, append: false) { AutoFlush = true };
         log?.WriteLine($"$ {shown}");
         var stream = display == Display.Stream || RunLog.Verbose;
@@ -58,6 +62,9 @@ static class Exec
             {
                 output.AppendLine(line);
                 log?.WriteLine(line);
+                var warning = s_warningLine.Match(line);
+                if (warning.Success)
+                    warnings.TryAdd(line.Trim(), warning.Groups["code"].Value);
                 if (stream)
                     (isError ? Console.Error : Console.Out).WriteLine(line);
                 else if (s_errorLine.IsMatch(line) && shownErrors.Add(line.Trim()))
@@ -71,6 +78,9 @@ static class Exec
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
         process.WaitForExit();
+
+        if (stepName is not null && warnings.Count > 0)
+            RunLog.RecordWarnings(stepName, [.. warnings.Values], logPath);
 
         return new ProcessResult(process.ExitCode, output.ToString(), logPath);
     }

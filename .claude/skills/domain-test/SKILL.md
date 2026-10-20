@@ -222,7 +222,7 @@ dotnet toolchain.cs test
 Tests completed successfully when:
 - [ ] Exit code is 0 and the output ends with `RESULT: PASSED`
 - [ ] `tests: N executed` is the count you expected (not 0)
-- [ ] No unexpected `! WARN` lines
+- [ ] `Warnings: 0` in the RESULT block and no unexpected `! WARN` lines
 
 ## Related Skills
 

@@ -51,23 +51,15 @@ Platform; the integration projects run xUnit v2 under VSTest, where only `FullyQ
 `FullyQualifiedName~` for those projects so one syntax works on both runners. `FullyQualifiedName~`
 is the precise form if you would rather be explicit.
 
-**A zero-match filter fails the target.** VSTest prints `No test matches the given testcase filter`
-and still exits `0`, so an unguarded run reports `✓ All tests passed` having executed nothing. The
-toolchain preflights both runners and fails with `No tests matched the specified filter` instead.
+**A run that executes nothing fails.** VSTest prints `No test matches the given testcase filter`
+and still exits `0`, and a run where every test is skipped (no matching YubiKey) exits `0` too. The
+toolchain preflights both runners and reports such a project as `○ NO-TESTS`, which fails the
+`test` target.
 
-**The closing summary counts projects, not tests.** This line:
-
-```
-Passed: 1 | Failed: 0 | Skipped: 1 | Total: 2
-```
-
-means two *projects*. Grepping for `Passed:` will read green off a run of zero tests. Assert on the
-per-project figure instead:
-
-```bash
-dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~FidoHidProtocol" \
-  | grep -E "total:|failed:"
-```
+**Read the RESULT block at the end.** It states `PASSED` or `FAILED`, the per-test totals
+(`tests: N executed, N failed, N skipped`), each failing test with its message, and a `Next:`
+command that re-runs only those tests. The full output is saved under `artifacts/toolchain/`. See
+"Reading the Output" in [TOOLCHAIN.md](../TOOLCHAIN.md).
 
 ## Integration Test Strategy
 

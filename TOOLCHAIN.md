@@ -4,7 +4,7 @@ This project uses a .NET 10 C# script for build automation with Bullseye task ru
 
 ## Prerequisites
 
-- .NET 10 SDK, 10.0.300 or newer (pinned by `global.json`; the metric scripts use the `#:include` directive)
+- .NET 10 SDK, 10.0.300 or newer (pinned by `global.json`; `toolchain.cs` and the metric scripts use the `#:include` directive)
 - Bash for `docs-inventory` and `docs-architecture` (macOS/Linux, Git Bash, or WSL)
 
 ## Usage
@@ -35,39 +35,21 @@ dotnet toolchain.cs -- build --project Piv --clean
 
 **Rule:** Use `dotnet toolchain.cs -- <target> <script-long-options>` for any script `--option`. Target-only commands may omit the separator.
 
-### Available Targets
+### Targets and Options
 
-- **clean** - Remove artifacts directory (and optionally run `dotnet clean`); must be specified explicitly
-- **restore** - Restore NuGet dependencies
-- **build** - Build the solution (depends on: restore)
-- **test** - Run unit tests with nice summary output (depends on: restore, build)
-- **docs-qa** - Validate active documentation hygiene
-- **docs-list-active** - Print the exact active documentation set used by `docs-qa`
-- **docs-inventory** - Generate the report-only active documentation inventory
-- **docs-architecture** - Validate architecture diagram evidence map and rendered-image freshness
-- **coverage** - Run tests with code coverage collection (depends on: restore, build)
-- **crap** - Compute CRAP scores from collected coverage (requires: coverage)
-- **complexity** - Flag complex methods in your uncommitted changes; source only, no build or coverage needed
-- **pack** - Create NuGet packages (depends on: restore, build)
-- **setup-feed** - Configure local NuGet feed
-- **publish** - Publish packages to local feed (depends on: pack, setup-feed)
-- **default** - Run tests and publish (depends on: test, publish)
+The script generates its own lists from the code that runs, so they are always current:
 
-### Options
+```bash
+dotnet toolchain.cs                    # no target: short usage and the target list (runs nothing)
+dotnet toolchain.cs -- --help          # targets, options, filter syntax, how to read the output
+dotnet toolchain.cs -- --list-tree     # targets and what each one runs first
+```
 
-- `--package-version <version>` - Override package version (e.g., `1.2.3-preview.1`)
-- `--nuget-feed-name <name>` - NuGet feed name (default: `Yubico.YubiKit-LocalNuGet`)
-- `--nuget-feed-path <path>` - NuGet feed directory (default: `artifacts/nuget-feed`)
-- `--include-docs` - Include XML documentation in packages
-- `--dry-run` - Show what would be published without actually publishing
-- `--clean` - Run `dotnet clean` before build
-- `--filter <expression>` - Test filter expression (e.g., `"FullyQualifiedName~MyTest"`)
-- `--project <name>` - Build/test specific project only (partial match, e.g., `Piv`; requires the preceding `--` separator)
-- `--integration` - Include integration tests (requires `--project`)
-- `--smoke` - Smoke test mode: skip `Slow` and `RequiresUserPresence` tests (fast integration runs)
-- `--crap-args <args>` - Arguments passed to `crap.cs`
-- `--complexity-args <args>` - Arguments passed to `complexity.cs`
-- `-h, --help` - Show help message (use `dotnet toolchain.cs -- --help`)
+Two behaviours worth knowing:
+
+- With no target the script prints usage and exits; it does **not** run `default` (test + publish, which adds a NuGet source). Name `default` explicitly to run it.
+- `--clean` with `build` cleans and rebuilds from scratch (`--no-incremental`), only the `--project` matches when one is given. Use it to rule out stale incremental diagnostics. With `clean` it also runs `dotnet clean`.
+- Typos get a suggestion (`tset` → "Did you mean 'test'?") and exit code `2`, as does an option missing its value.
 
 ### Examples
 
@@ -123,20 +105,38 @@ dotnet toolchain.cs -- publish --dry-run
 dotnet toolchain.cs clean build
 ```
 
+## Script Layout
+
+`toolchain.cs` is the only entry point. It parses the options, registers every target, and hands over to Bullseye; the targets themselves live in `scripts/toolchain/` and are pulled in with `#:include`:
+
+| File | Contents |
+|---|---|
+| `Conventions.cs` | Constants: solution, configuration, artifact paths, trait names, runner marker strings |
+| `Options.cs` | The single option table: parsing, the arguments hidden from Bullseye, and `--help` all read it |
+| `Context.cs` | `ToolchainContext`: repository root, parsed options, discovered projects |
+| `Discovery.cs` | Project and active-documentation discovery, `--project` matching |
+| `Output.cs` | Console helpers, test summary, generated `--help` |
+| `Process.cs` | `Exec`, `Dotnet` and `Bash`: every process the toolchain starts, with its output saved per step |
+| `RunLog.cs` | Run logs under `artifacts/toolchain/`, target/project bookkeeping, the RESULT block and `result.json` |
+| `Results.cs` | `ProjectResult`/`Outcome`, `TestCounts`, `FailedTest` (parses failing tests from runner output), and the shared pass/fail gates |
+| `TargetRegistry.cs` | Registers Bullseye targets and records them for `--help` |
+| `Usage.cs` | Validates targets and options before anything runs; suggests the closest name for a typo |
+| `BuildTargets.cs` | `clean`, `restore`, `build`, `test-infrastructure-qa`, `native-aot-contract-qa` |
+| `TestTargets.cs` | `test`, `resilience`, `--filter` translation for xUnit v2/v3 |
+| `CoverageTargets.cs` | `coverage`, `crap`, `complexity` |
+| `BenchmarkTargets.cs` | `benchmark` |
+| `DocsTargets.cs` | `docs-qa`, `docs-inventory`, `docs-architecture` |
+| `PackageTargets.cs` | `pack`, `setup-feed`, `publish`, `publish-remote` |
+
+Every target stays in one process so Bullseye can resolve dependencies across areas (`pack` depends on `build`).
+
+- **New target:** call `TargetRegistry.Define(name, description, …)` in the matching `*Targets.cs` file. The description appears in `--help` and `--list-targets`.
+- **New option:** add it to the table in `Options.cs` and read it in `ToolchainContext.FromArgs`. It is then hidden from Bullseye and listed in `--help` automatically.
+- **New file:** add its `#:include` line to `toolchain.cs`.
+
 ## Target Dependencies
 
-```
-default
-├── test
-│   └── build
-│       └── restore
-└── publish
-    ├── pack
-    │   └── build (shared)
-    └── setup-feed
-
-clean  (standalone — must be specified explicitly)
-```
+`dotnet toolchain.cs -- --list-tree` prints them. `clean` and `default` only run when named.
 
 ## Output
 
@@ -145,6 +145,75 @@ clean  (standalone — must be specified explicitly)
 - **CRAP report**: `artifacts/crap/crap.json` (when `--json` is passed)
 - **Complexity report**: wherever `--complexity-args "--json <path>"` points
 - **Local NuGet feed**: `artifacts/nuget-feed/`
+- **Run logs**: `artifacts/toolchain/runs/<time>-<targets>/`, newest at `artifacts/toolchain/latest/`
+
+## Reading the Output
+
+The toolchain is mostly driven by AI agents and CI, so its output is built to be read without guessing.
+
+**Every run ends with a RESULT block.** Read that, not the lines above it:
+
+```text
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Management.UnitTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       1.9s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Management.UnitTests  2 test(s) failed
+      - Yubico.YubiKit.Management.UnitTests.ZZProbeTests.ZZ_Fails_Equal: Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   2
+      - Yubico.YubiKit.Management.UnitTests.ZZProbeTests.ZZ_Throws: System.InvalidOperationException : boom
+      output: artifacts/toolchain/runs/20261020-174154-059-test/01-test-Management.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 89 executed, 2 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Management.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Management.UnitTests.ZZProbeTests.ZZ_Fails_Equal|FullyQualifiedName~Yubico.YubiKit.Management.UnitTests.ZZProbeTests.ZZ_Throws"
+Run log: artifacts/toolchain/runs/20261020-174154-059-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================
+```
+
+- It is the only summary: each project appears once, with its failing tests and log nested under it.
+- The exit code is `0` only for `RESULT: PASSED`. Usage errors (an unknown target or option) exit `2`.
+- The first line of every run names its log (`▶ toolchain: test  (log: …/run.log)`), so a run cut short by a timeout can still be read. `dotnet toolchain.cs -- last` reprints the newest RESULT block without running anything.
+- `Next:` re-runs only the tests that failed.
+- `Warnings:` counts distinct compiler and MSBuild warnings, with a line per step giving the codes and the step log, e.g. `build-Management: 3 (CS1030 x2, CS0168)`. Warnings are not shown while running and never fail a run on their own. In this repository most compiler warnings are already errors (`TreatWarningsAsErrors`), so the count mainly catches NuGet/MSBuild warnings.
+- A project where nothing executed is reported as `○ NO-TESTS` and fails the `test` target. This covers a filter that matched nothing and a run where every test was skipped. For integration projects the reason asks whether a suitable YubiKey is connected.
+- `--project` that matches nothing fails and lists the valid names.
+- Expected failures (failed tests or gates, usage errors, a failing command) print their message without a stack trace. A stack trace means a bug in the toolchain itself.
+
+**While running**, each status line starts with a fixed marker:
+
+| Marker | Meaning |
+|---|---|
+| `▶ target: <name>` | A target starts |
+| `▶ RUN <command>` | A process starts. `output: <log>` follows when its output goes to a step log |
+| `✓ PASS` | A project passed, with its test counts |
+| `✗ FAIL` | A project failed, with the reason |
+| `○ NO-TESTS` | A project executed no test |
+| `! WARN` | A problem that did not stop the run |
+
+Build and test output is not shown on the console. Only compiler and MSBuild error lines are shown, plus the last 30 lines when a command fails without one. `--verbose` streams everything. Report-style output (`crap`, `complexity`, `benchmark`, the docs scripts) is always shown. Project names omit the `Yubico.YubiKit.` prefix. Colours are off when output is redirected or `NO_COLOR` is set.
+
+## Run Logs
+
+Every run that executes a target is saved, so diagnostics can be read after the fact:
+
+```text
+artifacts/toolchain/
+├── latest -> runs/20261020-170419-512-test     (symlink; latest.txt names it where symlinks are unavailable)
+└── runs/
+    └── 20261020-170419-512-test/
+        ├── run.log                           all console output, with the command, git commit and runtime
+        ├── 01-test-Management.UnitTests.log  the full output of each build/test/pack step
+        ├── result.txt                        the RESULT block as printed (`last` shows it)
+        └── result.json                       the RESULT block as JSON (targets, projects, failed tests, warnings, next)
+```
+
+- Only the 5 newest runs are kept. Older ones are deleted when a new run starts.
+- `--help`, `--list-targets` and usage errors are not saved.
+- `clean` deletes everything in `artifacts/` except `artifacts/toolchain/`.
+- `result.txt` beside `run.log` is the RESULT block as printed; `dotnet toolchain.cs -- last` shows the newest one.
+- While a run is active, `artifacts/toolchain/active-run.txt` names its process and log. A second run in the same checkout (parallel agents) prints `! WARN` because their builds can collide.
+- `artifacts/` is gitignored.
 
 ## Analyzers and Formatting
 
@@ -398,18 +467,9 @@ When writing scripts or automation that runs tests:
 2. **Never assume** `dotnet test` will work for all projects
 3. **Use `--project`** to filter to specific projects: `dotnet toolchain.cs -- test --project Fido2`
 4. **Combine `--project` with `--filter`** for targeted test runs: `dotnet toolchain.cs -- test --project Fido2 --filter "Method~Sign"`
-5. **Read the per-project `total:` line, not the final summary line.** The closing
-   `Passed: 1 | Failed: 0 | Skipped: 1 | Total: 2` counts **projects**, not tests. Grepping for
-   `Passed:` therefore reads green off a run that executed nothing. Assert on the per-project
-   `total:` / `Total tests:` figure instead:
-
-   ```bash
-   dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~FidoHidProtocol" \
-     | grep -E "total:|failed:"
-   ```
-
-   A zero-match filter now fails the target outright, but the project-vs-test counting still
-   catches people out when a filter matches fewer tests than intended.
+5. **Read the RESULT block and the exit code**, not runner lines. `RESULT: PASSED` (exit code 0)
+   means every target passed and every test project executed tests. See "Reading the Output" above.
+   After a timeout or in a later session, `dotnet toolchain.cs -- last` reprints the newest RESULT block.
 6. **Add `--smoke` to any unattended hardware run.** It skips `Slow` and `RequiresUserPresence`,
    so a missing human cannot leave a ceremony parked and wedge the key. Be aware it can thin
    coverage sharply — on WebAuthn it reduces the integration lane to a single SmartCard test, so

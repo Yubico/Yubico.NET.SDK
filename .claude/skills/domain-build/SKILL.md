@@ -103,6 +103,16 @@ dotnet toolchain.cs -- --help
 |--------|----------|
 | Packages | `artifacts/packages/*.nupkg` |
 | Local NuGet feed | `artifacts/nuget-feed/` |
+| Run logs (5 newest) | `artifacts/toolchain/runs/<time>-<targets>/`, newest at `artifacts/toolchain/latest/` |
+
+## Reading the Output
+
+- Build output is **not** printed. Compiler/MSBuild `error` lines are shown, and the full output is
+  saved to a step log (`output: <path>` under the `▶ RUN` line). Pass `--verbose` to stream it.
+- The run ends with a RESULT block: `RESULT: PASSED` (exit code 0) or `RESULT: FAILED`, each target
+  with its error, `Warnings: N` (distinct warnings per step, by code, with the step log), and the
+  path of the run log. Read that block, not the lines above it. `dotnet toolchain.cs -- last` reprints it.
+- `build --clean` cleans and rebuilds from scratch (`--no-incremental`), scoped to `--project` matches.
 
 ## The `--` Separator
 
@@ -128,15 +138,15 @@ The `--project` option uses partial, case-insensitive matching:
 - `--project Piv` matches `Yubico.YubiKit.Piv`
 - `--project Fido` matches `Yubico.YubiKit.Fido2`
 
-If no match is found, the script lists available projects.
+If no match is found, the target fails and lists the available project names.
 
 ## Troubleshooting
 
 ### Build Failures
 
 ```bash
-# Clean and rebuild
-dotnet toolchain.cs clean
+# The RESULT block names the failing command and its log; the error lines are printed above it.
+# Rebuild from scratch to rule out stale incremental output:
 dotnet toolchain.cs -- build --clean
 ```
 
@@ -154,9 +164,8 @@ dotnet toolchain.cs pack
 ## Verification
 
 Build completed successfully when:
-- [ ] Exit code is 0
-- [ ] No build errors in output
-- [ ] No warnings (or only expected warnings)
+- [ ] Exit code is 0 and the output ends with `RESULT: PASSED`
+- [ ] `Warnings: 0` in the RESULT block (or only expected warnings)
 
 ## Related Skills
 

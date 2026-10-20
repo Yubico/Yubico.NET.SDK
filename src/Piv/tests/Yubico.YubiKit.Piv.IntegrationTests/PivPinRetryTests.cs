@@ -107,7 +107,7 @@ public class PivPinRetryTests
     }
 
     /// <summary>
-    /// Audit 26e (YESDK-1634): pins what the SetPinAttemptsAsync docs say. The device refuses the
+    /// Pins what the SetPinAttemptsAsync docs say. The device refuses the
     /// command without a verified PIN even with the management key authenticated, and when it runs it
     /// resets the PIN and PUK to their defaults, even if the limits are unchanged.
     /// </summary>

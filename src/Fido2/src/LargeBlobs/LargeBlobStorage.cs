@@ -89,8 +89,8 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     }
 
     /// <summary>
-    /// CTAP §6.10.2: "maxFragmentLength = maxMsgSize − 64" with GetInfo's maxMsgSize (default 1024, §6.4),
-    /// as python-fido2 blob.py L110 does. Read once per instance.
+    /// CTAP §6.10.2: "maxFragmentLength = maxMsgSize − 64" with GetInfo's maxMsgSize (default 1024, §6.4).
+    /// Read once per instance.
     /// </summary>
     private async ValueTask<int> GetMaxFragmentLengthAsync(CancellationToken cancellationToken)
     {
@@ -120,8 +120,8 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         var data = await ReadRawBlobAsync(cancellationToken).ConfigureAwait(false);
 
         // CTAP §6.10.2: if the stored bytes are shorter than 17 or the trailing hash does not match,
-        // "the platform MUST treat the large-blob array as the initial large-blob array", i.e. empty
-        // (python-fido2 blob.py L131-133). Malformed CBOR behind a valid hash is still an error.
+        // "the platform MUST treat the large-blob array as the initial large-blob array", i.e. empty.
+        // Malformed CBOR behind a valid hash is still an error.
         if (!LargeBlobArray.HasValidHash(data))
         {
             return LargeBlobArray.CreateEmpty();

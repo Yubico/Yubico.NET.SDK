@@ -144,8 +144,8 @@ public class FidoCredBlobTests
 
                 Assert.NotNull(assertionResult);
 
-                // Verify we got the blob back (audit YESDK-1619: asserted unconditionally so a
-                // silently dropped extension cannot pass).
+                // Verify we got the blob back. Asserted unconditionally so a silently dropped
+                // extension cannot pass.
                 Assert.True(assertionResult.ExtensionOutputs.HasValue, "getAssertion returned no extension outputs");
                 var assertExtOutput = ExtensionOutput.DecodeWithRawData(assertionResult.ExtensionOutputs!.Value);
                 Assert.True(assertExtOutput.TryGetCredBlob(out var retrievedBlob), "credBlob output missing");

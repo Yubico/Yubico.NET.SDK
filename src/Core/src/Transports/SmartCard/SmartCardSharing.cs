@@ -26,14 +26,14 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
 /// (<c>SCARD_UNPOWER_CARD</c>) closes it after the session.
 /// </para>
 /// <para>
-/// The default, <see cref="ExclusiveWithSharedFallback"/>, is what ykman does (exclusive first, shared
-/// when another client already holds the card). The fallback is logged and visible through
-/// <see cref="ISmartCardConnection.IsExclusive"/>, because in shared mode the PIN window is open again.
+/// The default, <see cref="ExclusiveWithSharedFallback"/>, opens exclusively and falls back to shared
+/// access when another client already holds the card. In shared mode the window is open again, so the
+/// fallback is logged and reported through <see cref="ISmartCardConnection.IsExclusive"/>.
 /// </para>
 /// </remarks>
 public enum SmartCardSharing
 {
-    /// <summary>Open exclusively; if another client holds the card, open shared instead (ykman default).</summary>
+    /// <summary>Open exclusively; if another client holds the card, open shared instead.</summary>
     ExclusiveWithSharedFallback,
 
     /// <summary>Open exclusively or fail with <see cref="Devices.ConnectionInUseException"/>.</summary>

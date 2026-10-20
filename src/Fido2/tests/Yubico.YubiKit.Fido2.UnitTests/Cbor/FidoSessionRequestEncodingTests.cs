@@ -57,7 +57,7 @@ public sealed class FidoSessionRequestEncodingTests
             ExcludeList = [new PublicKeyCredentialDescriptor(new byte[] { 0xAA, 0xBB })],
             Extensions = EncodeSingleExtension("credProtect", 2),
             ResidentKey = true,
-            UserPresence = true, // false is rejected (CTAP §6.1); see the YESDK-1618 tests
+            UserPresence = true, // false is rejected (CTAP §6.1); see FidoSessionTests
             UserVerification = true,
             PinUvAuthParam = new byte[] { 0x10, 0x11, 0x12, 0x13 },
             PinUvAuthProtocol = 1,

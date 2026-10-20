@@ -22,7 +22,7 @@ using Yubico.YubiKit.WebAuthn.Preferences;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
-/// Adapter for the <c>previewSign</c> WebAuthn extension.
+/// Translation between the WebAuthn <c>previewSign</c> extension and its CTAP encoding.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -31,8 +31,8 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 /// algorithm-specific signing inputs.
 /// </para>
 /// <para>
-/// This adapter translates WebAuthn-level previewSign inputs to the Fido2 extension encoder and
-/// translates extension outputs back into WebAuthn-level previewSign outputs.
+/// WebAuthn-level previewSign inputs are translated to the Fido2 extension encoder, and extension
+/// outputs are translated back into WebAuthn-level previewSign outputs.
 /// </para>
 /// </remarks>
 internal static class PreviewSignCodec
@@ -50,7 +50,7 @@ internal static class PreviewSignCodec
     /// </exception>
     /// <remarks>
     /// <para>
-    /// The adapter derives the previewSign signing policy from the WebAuthn user verification
+    /// The previewSign signing policy is derived from the WebAuthn user verification
     /// preference: required user verification maps to <see cref="PreviewSignFlags.RequireUserVerification"/>;
     /// other values map to <see cref="PreviewSignFlags.RequireUserPresence"/>.
     /// </para>
@@ -122,8 +122,7 @@ internal static class PreviewSignCodec
         // previewSign draft v4 §10.2.1: "Let origAttObj be unsignedExtOutputs["previewSign"][att-obj]";
         // keyHandle and publicKey are copied from innerAuthData.attestedCredentialData, and
         // attestationObject is a required member of the generated key. The outer credential's key is
-        // the WebAuthn credential, not the signing key, so there is nothing to fall back to
-        // (python-fido2 extensions.py prepare_outputs and yubikit-swift PreviewSign.swift both fail here).
+        // the WebAuthn credential, not the signing key, so there is nothing to fall back to.
         if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) != true)
         {
             throw new WebAuthnClientError(

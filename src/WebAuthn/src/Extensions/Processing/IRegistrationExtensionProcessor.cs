@@ -20,9 +20,8 @@ using Yubico.YubiKit.WebAuthn.Client;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Processing;
 
 /// <summary>
-/// Client-side processing of one extension for one registration attempt
-/// (docs/architecture/webauthn-extension-processing.md). The counterpart of python-fido2's
-/// <c>RegistrationExtensionProcessor</c> and yubikit-android's <c>Extension.RegistrationProcessor</c>.
+/// Client-side processing of one extension for one registration attempt: contributes to the
+/// authenticator request and interprets the authenticator's response for that extension.
 /// </summary>
 /// <remarks>
 /// Instances are single-use: a PIN/UV token retry creates a fresh session and fresh processors, so any

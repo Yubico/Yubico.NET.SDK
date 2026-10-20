@@ -51,7 +51,7 @@ internal static class PrfCodec
     /// Decrypts a CTAP §12.7 hmac-secret getAssertion output (AES-256-CBC under the shared secret, no
     /// padding) and splits it into one or two 32-byte PRF results. Returns null when the plaintext is
     /// not exactly one or two outputs long: the result is omitted rather than the assertion failed
-    /// (WebAuthn L3 §9.4; yubikit-android HmacSecretExtension does the same).
+    /// (WebAuthn L3 §9.4).
     /// </summary>
     public static PrfEvaluationResults? DecryptResults(
         IPinUvAuthProtocol protocol,

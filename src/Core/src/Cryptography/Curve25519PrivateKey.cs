@@ -114,10 +114,8 @@ public sealed class Curve25519PrivateKey : PrivateKey
     /// <remarks>
     /// This method accepts version 0 PKCS#8 <c>PrivateKeyInfo</c>. RFC 5958 version value 1
     /// <c>OneAsymmetricKey</c>, which may carry a <c>publicKey</c> field, is valid but unsupported:
-    /// this type holds no public value and has no way to check one against the private key (.NET
-    /// provides no Ed25519/X25519 primitives), so unlike <see cref="ECPrivateKey"/> and
-    /// <see cref="RSAPrivateKey"/>, which verify their public components, it refuses to carry one.
-    /// Read the public key from the device after import.
+    /// this type holds no public value, because a supplied one cannot be checked against the private key
+    /// (.NET provides no Ed25519/X25519 primitives). Read the public key from the device after import.
     /// </remarks>
     public static Curve25519PrivateKey CreateFromPkcs8(ReadOnlyMemory<byte> pkcs8EncodedKey)
     {

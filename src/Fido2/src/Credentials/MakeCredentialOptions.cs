@@ -56,7 +56,7 @@ public sealed class MakeCredentialOptions
     /// (CTAP 2.1+ authenticators accept it; CTAP 2.0 may not). <see langword="false"/> is rejected with
     /// <see cref="ArgumentException"/>: CTAP 2.1-2.3 §6.1 says the value "MUST be true if present" and
     /// false yields CTAP2_ERR_INVALID_OPTION regardless of authenticator version. For a silent probe use
-    /// getAssertion with up=false (§5 "pre-flight"), as the WebAuthn client and python-fido2 do.
+    /// getAssertion with up=false (§5 "pre-flight"), as the WebAuthn client does.
     /// </remarks>
     public bool? UserPresence { get; set; }
 

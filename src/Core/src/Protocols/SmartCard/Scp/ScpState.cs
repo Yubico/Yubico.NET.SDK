@@ -239,8 +239,8 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
 
     /// <summary>
     ///     Writes CMAC(<paramref name="key" />, <paramref name="chain" /> || <paramref name="data" />) to
-    ///     <paramref name="destination" />. Provider failures surface as
-    ///     <see cref="NotSupportedException" />; nothing else is relabelled.
+    ///     <paramref name="destination" />. Only provider failures are wrapped, as
+    ///     <see cref="NotSupportedException" />; other exceptions propagate unchanged.
     /// </summary>
     private static void ComputeCmac(
         ReadOnlySpan<byte> key, ReadOnlySpan<byte> chain, ReadOnlySpan<byte> data, Span<byte> destination)

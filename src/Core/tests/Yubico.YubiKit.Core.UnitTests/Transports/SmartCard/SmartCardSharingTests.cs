@@ -20,12 +20,12 @@ using Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
 namespace Yubico.YubiKit.Core.UnitTests.Transports.SmartCard;
 
 /// <summary>
-///     How a PC/SC handle is opened and released (YESDK-1630, #22). The PIV PIN security status is card-wide
+///     How a PC/SC handle is opened and released. The PIV PIN security status is card-wide
 ///     (NIST SP 800-73-5 Part 2 §2.4.2), so a shared handle opened by another local process can use a PIN=ONCE
 ///     slot during and after an SDK session unless the SDK holds the card exclusively and powers it off on
-///     release. Defaults follow ykman (pcsc/__init__.py L133-144: exclusive, shared fallback) and pyscard
-///     (PCSCCardConnection.py L154-155: SCARD_UNPOWER_CARD on disconnect).
+///     release. Default: exclusive with shared fallback, SCARD_UNPOWER_CARD on disconnect.
 /// </summary>
+[Trait("Audit", "YESDK-1630")]
 public class SmartCardSharingTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -47,7 +47,7 @@ public class SmartCardSharingTests
         Assert.True(connection.IsExclusive);
     }
 
-    /// <summary>ykman: "Try an exclusive connection ... Failed to get exclusive CCID access ... Try a shared connection".</summary>
+    /// <summary>Another client already holds the card: the exclusive attempt fails and a shared one follows.</summary>
     [Fact]
     public async Task Default_FallsBackToSharedWhenAnotherClientHoldsTheCard()
     {
@@ -80,7 +80,7 @@ public class SmartCardSharingTests
         Assert.False(connection.IsExclusive);
     }
 
-    /// <summary>pyscard default disposition: power the card off so PIN=ONCE state cannot outlive the session.</summary>
+    /// <summary>Power the card off on release so PIN=ONCE state cannot outlive the session.</summary>
     [Fact]
     public async Task Release_PowersTheCardOff()
     {

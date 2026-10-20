@@ -25,9 +25,7 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// <remarks>
 ///     <para>
 ///         References: RFC 8017 §3.1 (λ(n)), §3.2 (private key representation and e·d ≡ 1 mod λ(n)),
-///         Appendix A.1.2 (CRT components); SEC 1 v2 §3.2.2 / FIPS 186-5 §6.2.1 (Q = d·G). The unit tests
-///         check both validators against the RFC 7517 Appendix A.2 RSA key and the RFC 6979 Appendix
-///         A.2.5/A.2.6 EC keys, each loaded as given and with single components disturbed.
+///         Appendix A.1.2 (CRT components); SEC 1 v2 §3.2.2 / FIPS 186-5 §6.2.1 (Q = d·G).
 ///     </para>
 ///     <para>
 ///         <see cref="Curve25519PrivateKey" /> needs no counterpart here: it holds no public value and the
@@ -77,9 +75,9 @@ internal static class PrivateKeyConsistency
     ///     <c>e·d ≡ 1 (mod lcm(p−1, q−1))</c>.
     /// </summary>
     /// <remarks>
-    ///     Uses <see cref="BigInteger" />, which is neither constant-time nor zeroable; the private
-    ///     values already exist in managed arrays supplied by the caller, and the alternative is importing
-    ///     them into the platform RSA implementation. Accepted trade for an import-time check.
+    ///     Uses <see cref="BigInteger" />, which is neither constant-time nor zeroable. The private values
+    ///     already exist in the caller-supplied managed arrays, so this adds no exposure the import does not
+    ///     already have.
     /// </remarks>
     /// <exception cref="CryptographicException">A component is missing or a relation does not hold.</exception>
     public static void ThrowIfInconsistent(in RSAParameters parameters)

@@ -171,8 +171,8 @@ public class CoreScpAuditReproTests
     }
 
     /// <summary>
-    ///     ISO/IEC 9797-1 Padding Method 2 covers the whole block: 80 00..00 is an empty message
-    ///     (Python scp.py L238-242 at 4ca60f7 accepts it), while all zeros has no 0x80 and is bad padding.
+    ///     ISO/IEC 9797-1 Padding Method 2 covers the whole block: 80 00..00 is an empty message,
+    ///     while all zeros has no 0x80 and is bad padding.
     /// </summary>
     [Fact]
     [Trait("Audit", "N2")]

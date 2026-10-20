@@ -62,7 +62,7 @@ public sealed partial class WebAuthnClient
 
         /// <summary>
         /// Replaces the token with a fresh one. CTAP 2.1 §6.5.5.7 lets an authenticator consume
-        /// permissions on use; YubiKey 5.8.0 refuses the next command after an up:false probe.
+        /// permissions on use, so a token spent on an up:false probe may be refused by the next command.
         /// </summary>
         public async Task RemintAsync(UvDecision decision, PinUvAuthTokenPermissions permissions, CancellationToken cancellationToken)
         {
@@ -156,10 +156,10 @@ public sealed partial class WebAuthnClient
     /// <param name="auth">The ceremony's token owner.</param>
     /// <param name="decision">The UV decision in force (its method is reused for a re-mint).</param>
     /// <param name="remintPermissions">
-    /// When set, the token is re-minted with these permissions after the probe. Measured on YubiKey
-    /// 5.8.0: a token used for a getAssertion(up:false) probe is refused by a following makeCredential
-    /// (dc2ed141), so registration passes <c>MakeCredential</c>; the same token is accepted by a following
-    /// getAssertion, so selection passes null, as python-fido2 and yubikit-android do.
+    /// When set, the token is re-minted with these permissions after the probe. Authenticators may refuse
+    /// to reuse a token consumed by a getAssertion(up:false) probe for a following makeCredential, so
+    /// registration passes <c>MakeCredential</c>; a following getAssertion accepts the same token, so
+    /// selection passes null.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     private async Task<PublicKeyCredentialDescriptor?> ProbeCredentialsAsync(

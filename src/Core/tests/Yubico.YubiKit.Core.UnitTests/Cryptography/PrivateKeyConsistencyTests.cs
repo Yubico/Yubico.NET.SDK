@@ -19,7 +19,7 @@ using Yubico.YubiKit.Core.Cryptography;
 namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 
 /// <summary>
-///     Audit #27 (YESDK-1635): public and private components must belong together on every creation
+///     Public and private components must belong together on every creation
 ///     path, not only PKCS#8. RFC 8017 §3.1-3.2 and Appendix A.1.2 for RSA; Q = d·G for EC.
 /// </summary>
 public class PrivateKeyConsistencyTests

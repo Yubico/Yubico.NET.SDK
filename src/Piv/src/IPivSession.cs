@@ -167,7 +167,6 @@ public interface IPivSession : IApplicationSession
     ///         with <see cref="ChangePinAsync" /> and <see cref="ChangePukAsync" /> to set real values. The
     ///         three commands are separate; a failure between them leaves the defaults in place.
     ///     </para>
-    ///     <para>Mirrors yubikit/piv.py <c>PivSession.set_pin_attempts</c>.</para>
     /// </remarks>
     /// <param name="pinAttempts">PIN retry limit (1-255).</param>
     /// <param name="pukAttempts">PUK retry limit (1-255).</param>

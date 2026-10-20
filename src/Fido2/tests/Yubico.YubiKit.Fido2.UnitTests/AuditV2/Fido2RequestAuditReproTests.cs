@@ -23,7 +23,7 @@ public sealed class Fido2RequestAuditReproTests
 {
     /// <summary>
     ///     CTAP 2.1-2.3 §6.1: the makeCredential "up" value "MUST be true if present" and false yields
-    ///     CTAP2_ERR_INVALID_OPTION. The SDK rejects it before anything is encoded (maintainer option 1).
+    ///     CTAP2_ERR_INVALID_OPTION. The SDK rejects it before anything is encoded.
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1618")]
@@ -69,7 +69,7 @@ public sealed class Fido2RequestAuditReproTests
 
     /// <summary>
     ///     CTAP 2.1-2.3 §6.1 pubKeyCredParams: "MUST NOT include duplicate entries." The SDK rejects the list
-    ///     before anything is encoded (maintainer option 1: reject rather than deduplicate).
+    ///     before anything is encoded: rejected rather than deduplicated.
     /// </summary>
     [Fact]
     [Trait("Audit", "N1")]

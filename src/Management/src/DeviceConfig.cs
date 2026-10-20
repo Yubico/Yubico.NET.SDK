@@ -42,7 +42,7 @@ namespace Yubico.YubiKit.Management;
 /// </remarks>
 public sealed record DeviceConfig
 {
-    // Management SET DEVICE CONFIG TLV tags (yubikit/management.py)
+    // Management SET DEVICE CONFIG TLV tags
     private const int TagUsbEnabled = 0x03;
     private const int TagAutoEjectTimeout = 0x06;
     private const int TagChallengeResponseTimeout = 0x07;
@@ -114,7 +114,7 @@ public sealed record DeviceConfig
             throw new InvalidOperationException("At least one USB capability must be enabled.");
     }
 
-    /// <summary>Serializes to wire format: a one-byte length followed by the TLVs, in ykman's order.</summary>
+    /// <summary>Serializes to wire format: a one-byte length followed by the TLVs in a fixed order (reboot and unlock first), not sorted by tag.</summary>
     internal Memory<byte> GetBytes(SetDeviceConfigOptions? options = null)
     {
         Validate();

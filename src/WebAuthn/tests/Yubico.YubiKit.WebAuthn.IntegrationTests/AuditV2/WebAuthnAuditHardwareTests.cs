@@ -142,11 +142,10 @@ public class WebAuthnAuditHardwareTests
     }
 
     /// <summary>
-    ///     Measured 2026-10-19 on YubiKey 5 NFC 5.8.0-beta (serial 103): the same PRF input evaluated with and
-    ///     without user verification gives DIFFERENT outputs, i.e. the key keeps CTAP §12.7's CredRandomWithUV and
-    ///     CredRandomWithoutUV apart. The client does not implement the WebAuthn L3 §10.1.4 UV override (maintainer
-    ///     decision: parity with python-fido2 and yubikit-android), so relying parties must send
-    ///     userVerification: required for stable PRF output on a PIN-protected key. This test keeps that fact in the suite.
+    ///     The same PRF input evaluated with and without user verification gives different outputs: the key keeps
+    ///     CTAP §12.7's CredRandomWithUV and CredRandomWithoutUV apart. The client does not apply the WebAuthn L3
+    ///     §10.1.4 UV override, so relying parties must send userVerification: required for stable PRF output on a
+    ///     PIN-protected key. Pins that behaviour so a future UV override is a deliberate change.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]

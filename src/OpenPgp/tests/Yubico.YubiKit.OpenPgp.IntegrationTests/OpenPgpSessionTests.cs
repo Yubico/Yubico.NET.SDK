@@ -366,7 +366,7 @@ public class OpenPgpSessionTests
             });
 
     /// <summary>
-    ///     Audit 26j (YESDK-1634): pins the two facts the AttestKeyAsync docs state. GET_ATTESTATION needs
+    ///     Pins the two facts the AttestKeyAsync docs state. GET_ATTESTATION needs
     ///     User PIN verification (Admin alone is not enough), and the attestation statement replaces the
     ///     cardholder certificate stored for that key.
     /// </summary>

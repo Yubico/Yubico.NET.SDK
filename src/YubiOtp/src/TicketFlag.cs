@@ -30,19 +30,18 @@ public enum TicketFlag : byte
 
     /// <summary>
     ///     OATH-HOTP mode. Shares bit 0x40 with <see cref="ChalResp" />; the configuration flags decide
-    ///     which mode the slot is in (yubikit/yubiotp.py TKTFLAG.OATH_HOTP).
+    ///     which mode the slot is in.
     /// </summary>
     OathHotp = 0x40,
 
     /// <summary>
-    ///     Challenge-response mode. Shares bit 0x40 with <see cref="OathHotp" /> (yubikit/yubiotp.py
-    ///     TKTFLAG.CHAL_RESP).
+    ///     Challenge-response mode. Shares bit 0x40 with <see cref="OathHotp" />.
     /// </summary>
     ChalResp = 0x40,
 
     /// <summary>
     ///     Set on slot 1: the YubiKey refuses to write slot 2 unless slot 2 is already configured with
-    ///     this flag too (yubikit/yubiotp.py TKTFLAG.PROTECT_CFG2). Not part of the update mask.
+    ///     this flag too. Not part of the update mask.
     /// </summary>
     ProtectSlot2 = 0x80
 }

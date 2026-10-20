@@ -17,7 +17,7 @@ The SDK uses three names for three layers. Type names follow the layer they belo
 | Term | Means | Where it lives |
 | --- | --- | --- |
 | **FIDO** | The umbrella (WebAuthn + CTAP) and the HID transport (CTAPHID framing, `FidoHidProtocol`) | `Yubico.YubiKit.Core` |
-| **CTAP2** | The authenticator protocol: commands, CBOR codecs, `ExtensionBuilder`, PIN/UV protocols, `ClientPin`, `LargeBlobStorage` | `Yubico.YubiKit.Fido2` (today's `FidoSession` is the CTAP2 session) |
+| **CTAP2** | The authenticator protocol: commands, CBOR codecs, `ExtensionBuilder`, PIN/UV protocols, `ClientPin`, `LargeBlobStorage` | `Yubico.YubiKit.Fido2` (`FidoSession` is the CTAP2 session) |
 | **WebAuthn** | The client: ceremonies, RP-facing options and responses, extension *processing* | `Yubico.YubiKit.WebAuthn` |
 
 A CTAP2 codec encodes one extension's wire shape and knows nothing about ceremonies. A WebAuthn
@@ -55,12 +55,11 @@ Consequences:
   `IFidoSession`; the backend exposes what they need (PIN/UV protocol, key agreement, large-blob storage).
 - `FidoSession` stays a complete, standalone CTAP2 client. The WebAuthn package consumes it and never
   adds WebAuthn-flavoured parameters to it.
-- Three WebAuthn concepts currently live in Fido2 and move out as their findings are fixed: the `"prf"`
-  identifier with `WithPrf(...)`, `PrfInput`/`PrfInputValues`/`PrfOutput` (#1, 26a, 26b); the
-  `signByCredential` dictionary `PreviewSignAuthenticationInput` (26d; Fido2 keeps
-  `WithPreviewSign(PreviewSignSigningParams)`); the `largeBlob: {support}` encoding of `LargeBlobInput`
-  (largeBlob group). Nothing new added to Fido2 says "WebAuthn"; nothing new in WebAuthn re-encodes CBOR
-  Fido2 already encodes.
+- Fido2 carries no WebAuthn vocabulary. The `"prf"` identifier and `PrfInput`/`PrfOutput`, the
+  `signByCredential` dictionary, and the `largeBlob: {support, read, write}` client inputs are WebAuthn
+  types; Fido2 exposes their CTAP counterparts (`hmac-secret`, `WithPreviewSign(PreviewSignSigningParams)`,
+  `largeBlobKey` + `LargeBlobStorage`). Nothing added to Fido2 says "WebAuthn"; nothing in WebAuthn
+  re-encodes CBOR Fido2 already encodes.
 
 ## Why inputs cannot be built up front
 
@@ -74,9 +73,10 @@ Several extensions need facts that only exist part-way through a ceremony:
 | `largeBlob` (WebAuthn read/write) | the `largeBlobKey` from the assertion | the PIN/UV token with `LargeBlobWrite` permission for `authenticatorLargeBlobs` |
 | `credProps` | the effective `requireResidentKey` the client resolved against GetInfo | — |
 
-A pipeline that encodes everything before the first device call (the pre-port `ExtensionPipeline`)
-cannot express any row of this table. Audit findings #1, 26a, 26b, 26d and the largeBlob group
-(#12-#16) are all instances of that one limitation.
+A design that encodes every extension input before the first authenticator call cannot express any
+row of this table: it has no shared secret, no selected credential, no `largeBlobKey` and no resolved
+`requireResidentKey` yet. That is why extension handling is split into per-attempt processors with
+separate input and output phases.
 
 ## Types
 
@@ -128,7 +128,7 @@ Rules:
 ### Registration (`WebAuthnClient.MakeCredentialAsync`)
 
 1. Validate options; build client data; `GetInfo` (cached).
-2. Resolve `requireResidentKey` against GetInfo (#7).
+2. Resolve `requireResidentKey` against GetInfo.
 3. `session = RegistrationExtensionSession.Create(options.Extensions, context)`.
 4. Decide UV; obtain the token with `MakeCredential | session.Permissions`.
 5. Exclude-list pre-flight through `CredentialFilter` (probe with `up: false`; a match raises
@@ -144,8 +144,8 @@ Rules:
 3. Decide UV; obtain the token with `GetAssertion | session.Permissions`.
 4. **Selection.** If `allowCredentials` is non-empty, `CredentialFilter.SelectAsync` probes it in
    chunks of `maxCredentialCountInList` with `up: false` and returns the first credential the
-   authenticator recognises, or null. This always runs when an allow list is present (sibling parity;
-   one extra round trip without a touch).
+   authenticator recognises, or null. This always runs when an allow list is present; it costs one
+   extra round trip and no touch.
 5. `session.PrepareInputs(builder, selected, token)` → extensions CBOR.
 6. `authenticatorGetAssertion` with `allowList = [selected]`. If nothing matched, a **dummy descriptor**
    (`id = 0x00`, the first entry's type) is sent so user presence is still requested; the
@@ -162,7 +162,7 @@ Rules:
 The one implementation of python-fido2's `_filter_creds` / yubikit-android's `Utils.filterCreds`:
 
 - drops descriptors longer than `maxCredentialIdLength` (CTAP 2.1-2.3 §6.4);
-- refuses a non-positive `maxCredentialCountInList` (§6.4 "MUST be greater than zero"; 25g);
+- refuses a non-positive `maxCredentialCountInList` (§6.4 "MUST be greater than zero");
 - probes chunks with `up: false` and the ceremony's `pinUvAuthParam` over a 32-byte zero client-data hash;
 - on `CTAP2_ERR_REQUEST_TOO_LARGE` with a chunk larger than one, shrinks the chunk and retries;
 - on `CTAP2_ERR_NO_CREDENTIALS` advances to the next chunk; any other status propagates.
@@ -194,6 +194,6 @@ object; this SDK prepares them eagerly so the token's lifetime ends when the pub
 
 ## Non-goals
 
-- The direct CTAP 2.2-2.3 §12.4 `largeBlob` getAssertion extension (removed in #3; no YubiKey supports it).
+- The direct CTAP 2.2-2.3 §12.4 `largeBlob` getAssertion extension. §12.4 makes it mutually exclusive with `largeBlobKey`, which is what YubiKeys implement.
 - Credential selection UI. `SelectAsync` on `MatchedCredential` is the caller's choice among already
   computed assertions; it does not drive authenticator selection.

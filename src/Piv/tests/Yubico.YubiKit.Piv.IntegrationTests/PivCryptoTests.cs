@@ -100,6 +100,7 @@ public class PivCryptoTests
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
+    [Trait("Audit", "YESDK-1632")]
     public async Task SignOrDecryptAsync_Ed25519_ProducesSignature(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -124,9 +125,9 @@ public class PivCryptoTests
         Assert.Equal(KeyDefinitions.Ed25519.LengthInBytes, curve25519Key.PublicPoint.Length);
 
         // .NET has no Ed25519 verifier, so use determinism (RFC 8032 §8.2) to show the message reaches
-        // the key unchanged (audit #24, YESDK-1632): a message and its zero-padded form, and two long
-        // messages sharing their first 32 bytes, must produce different signatures. The previous code
-        // padded/truncated to 32 bytes and produced identical ones.
+        // the key unchanged: a message and its zero-padded form, and two long messages sharing their
+        // first 32 bytes, must produce different signatures. A client that padded or truncated the
+        // message to 32 bytes would produce identical ones.
         byte[] paddedTo32 = new byte[32];
         dataToSign.CopyTo(paddedTo32, 0);
         var paddedSignature = await session.SignOrDecryptAsync(PivSlot.Signature, PivAlgorithm.Ed25519, paddedTo32);

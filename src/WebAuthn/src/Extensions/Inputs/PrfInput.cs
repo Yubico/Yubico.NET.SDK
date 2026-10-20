@@ -31,11 +31,10 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 /// </para>
 /// <para>
 /// <b>Stable output needs user verification.</b> CTAP hmac-secret keeps two PRFs per credential, one for
-/// verified and one for unverified assertions (CTAP 2.1-2.3 §12.7), and YubiKeys do return different
-/// values for the same input depending on the <c>uv</c> flag (measured on 5.8.0). This client does not
-/// override the relying party's <c>UserVerification</c> for PRF (parity with python-fido2 and
-/// yubikit-android; WebAuthn L3 §10.1.4 asks for the verified PRF). Send
-/// <c>UserVerification = Required</c> whenever the PRF output must be the same across ceremonies.
+/// verified and one for unverified assertions (CTAP 2.1-2.3 §12.7), so the same input yields a different
+/// output depending on the <c>uv</c> flag. The client does not override the relying party's
+/// <c>UserVerification</c> for PRF. Send <c>UserVerification = Required</c> whenever the PRF output must
+/// be the same across ceremonies.
 /// </para>
 /// </remarks>
 public sealed class PrfInput

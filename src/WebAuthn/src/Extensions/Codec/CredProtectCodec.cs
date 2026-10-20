@@ -20,7 +20,7 @@ using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
-/// Adapter for the credProtect extension.
+/// Translation between the WebAuthn credProtect extension inputs and outputs and their CTAP encoding.
 /// </summary>
 internal static class CredProtectCodec
 {

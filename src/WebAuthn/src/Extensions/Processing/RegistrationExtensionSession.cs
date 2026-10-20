@@ -39,8 +39,8 @@ internal sealed class RegistrationExtensionSession : IDisposable
 
     /// <summary>
     /// Creates the session for the extensions the relying party asked for and the authenticator
-    /// advertises. An extension GetInfo does not list produces no input and no output (WebAuthn L3 §9.4;
-    /// python-fido2 <c>is_supported</c>). credProps is client-side and always honoured.
+    /// advertises. An extension GetInfo does not list produces no input and no output (WebAuthn L3 §9.4).
+    /// credProps is client-side and always honoured.
     /// </summary>
     /// <param name="inputs">The relying party's extension inputs, or null.</param>
     /// <param name="options">The registration options (previewSign derives its flags from the UV preference).</param>

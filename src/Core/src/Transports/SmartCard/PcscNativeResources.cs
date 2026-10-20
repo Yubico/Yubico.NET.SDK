@@ -55,9 +55,9 @@ internal sealed class PcscNativeResources
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new SCardException("ExceptionMessages.SCardCantEstablish", result);
 
-        // ykman (pcsc/__init__.py L133-144): exclusive first, shared when another client holds the card.
-        // Exclusive access keeps card-wide security state (the PIV PIN, SP 800-73-5 §2.4.2) out of other
-        // local processes' reach while this connection is open.
+        // Exclusive first, shared when another client already holds the card. Exclusive access keeps
+        // card-wide security state (the PIV PIN, SP 800-73-5 §2.4.2) out of other local processes' reach
+        // while this connection is open.
         SCardCardHandle cardHandle;
         SCARD_PROTOCOL activeProtocol;
         if (_sharing is SmartCardSharing.ExclusiveWithSharedFallback or SmartCardSharing.Exclusive)
@@ -126,8 +126,8 @@ internal sealed class PcscNativeResources
             uint result;
             try
             {
-                // pyscard's default disposition (PCSCCardConnection.py L154-155): power the card off so card-wide
-                // security state (a verified PIV PIN, SP 800-73-5 §2.4.2) cannot outlive this connection.
+                // Power the card off so card-wide security state (a verified PIV PIN, SP 800-73-5 §2.4.2)
+                // cannot outlive this connection.
                 result = _api.Disconnect(cardHandle, SCARD_DISPOSITION.UNPOWER_CARD);
             }
             catch (Exception ex)

@@ -200,16 +200,10 @@ public class PreviewSignCodecTests
 
     private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags, byte[] credId)
     {
-        // Build minimal CTAP-shaped inner attestation object with previewSign extension in authData.
-        //
-        // IMPORTANT (regression-test for hardware bug observed on YK 5.8.0-beta):
-        // The previewSign unsigned-extension-output wraps an inner attestation object whose keys
-        // are CTAP-style INTEGERS ({1:fmt, 2:authData, 3:attStmt}), NOT WebAuthn-style text strings
-        // ({"fmt","authData","attStmt"}). The legacy SDK decoded it that way (Yubico.NET.SDK-Legacy
-        // Fido2/PreviewSignExtension.cs:144-147 and 249-282) and that matches what firmware emits.
-        // An earlier version of this test produced a WebAuthn-shaped (text-keyed) attestation object,
-        // which masked the parser bug in PreviewSignCodec.ParseRegistrationOutput. This rewrite
-        // reproduces the on-the-wire shape so the test exercises the actual decode path.
+        // Build a minimal inner attestation object with the previewSign extension in authData, in the
+        // on-the-wire shape: the previewSign unsigned-extension-output wraps an attestation object whose
+        // keys are CTAP-style integers ({1: fmt, 2: authData, 3: attStmt}), not WebAuthn-style text
+        // strings ({"fmt", "authData", "attStmt"}). A text-keyed fixture would not exercise the decoder.
         var rpIdHash = SHA256.HashData("example.com"u8);
 
         // Build authData with AT flag + previewSign extension

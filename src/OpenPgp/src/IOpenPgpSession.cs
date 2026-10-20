@@ -250,7 +250,6 @@ public interface IOpenPgpSession : IApplicationSession
     ///         <see cref="GetCertificateAsync" /> if you need it, and note that putting it back with
     ///         <see cref="PutCertificateAsync" /> needs Admin PIN verification.
     ///     </para>
-    ///     <para>Mirrors yubikit/openpgp.py <c>OpenPgpSession.attest_key</c>.</para>
     /// </remarks>
     /// <exception cref="NotSupportedException">
     ///     Thrown when the device firmware does not support key attestation (requires 5.2.0+).

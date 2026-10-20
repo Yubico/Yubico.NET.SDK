@@ -23,8 +23,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 
 /// <summary>
 /// previewSign (Yubico draft v4 §10.2.1): generates a signing key at registration; at authentication
-/// signs with the <c>signByCredential</c> entry of the credential the client selected, as python-fido2's
-/// PreviewSignExtension (<c>by_creds[selected.id]</c>) and yubikit-android's SignExtension do.
+/// signs with the <c>signByCredential</c> entry of the credential the client selected.
 /// </summary>
 internal sealed class PreviewSignProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor
 {

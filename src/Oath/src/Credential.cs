@@ -34,8 +34,8 @@ namespace Yubico.YubiKit.Oath;
 /// </remarks>
 public sealed partial class Credential : IEquatable<Credential>, IComparable<Credential>
 {
-    // Host-side TOTP credential ID convention shared by ykman, the Android and Swift SDKs:
-    // "[period/][issuer:]name". YKOATH itself does not define the name format. ASCII digits only;
+    // Yubico's host-side TOTP credential ID convention, "[period/][issuer:]name", so credentials
+    // interoperate with Yubico Authenticator. YKOATH itself does not define the name format. ASCII digits only;
     // \d would also match other Unicode decimal digits, which int.Parse then rejects.
     [GeneratedRegex(@"^(([0-9]+)/)?(([^:]+):)?(.+)$")]
     private static partial Regex TotpIdPattern();

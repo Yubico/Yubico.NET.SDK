@@ -357,8 +357,7 @@ public class PrfProcessorTests
 
     /// <summary>
     ///     CTAP 2.2-2.3 §12.8 hmac-secret-mc: with eval at registration on an authenticator that advertises it, send
-    ///     "hmac-secret": true plus "hmac-secret-mc" with the getAssertion input map, and decrypt the result
-    ///     (python-fido2 extensions.py L287-324, yubikit-android HmacSecretExtension L133-175).
+    ///     "hmac-secret": true plus "hmac-secret-mc" with the getAssertion input map, and decrypt the result.
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]

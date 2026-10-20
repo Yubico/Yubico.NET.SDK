@@ -23,9 +23,9 @@ using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 
 /// <summary>
-/// WebAuthn largeBlob (L3 §10.1.5) over CTAP largeBlobKey (§12.3) and authenticatorLargeBlobs (§6.10),
-/// as python-fido2's and yubikit-android's <c>LargeBlobExtension</c>: registration asks for the key when
-/// the credential is discoverable and reports <c>supported</c> from response key 0x05; authentication
+/// WebAuthn largeBlob (L3 §10.1.5) over CTAP largeBlobKey (§12.3) and authenticatorLargeBlobs (§6.10).
+/// Registration asks for the key when the credential is discoverable and reports <c>supported</c> from
+/// response key 0x05; authentication
 /// reads or writes the blob stored under the asserted credential's key.
 /// </summary>
 internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor
@@ -41,7 +41,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
         _requestKey = requestKey;
     }
 
-    /// <summary>CTAP §12.3: the largeBlobKey extension plus the largeBlobs option (python-fido2 LargeBlobExtension.is_supported).</summary>
+    /// <summary>CTAP §12.3: supported when the authenticator advertises both the largeBlobKey extension and the largeBlobs option.</summary>
     public static bool IsSupported(ExtensionContext context) =>
         context.Supports(ExtensionIdentifiers.LargeBlobKey) && context.OptionEnabled("largeBlobs");
 
@@ -89,7 +89,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
 
     public string Name => ExtensionIdentifiers.LargeBlobKey;
 
-    /// <summary>CTAP §6.10.2: writing the array needs a token with the LargeBlobWrite permission (python-fido2 L467).</summary>
+    /// <summary>CTAP §6.10.2: writing the array needs a token with the LargeBlobWrite permission.</summary>
     public PinUvAuthTokenPermissions Permissions =>
         _input.Write is not null ? PinUvAuthTokenPermissions.LargeBlobWrite : PinUvAuthTokenPermissions.None;
 
@@ -132,7 +132,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
 
         if (_input.Read)
         {
-            // L3 §10.1.5: "set blob to the result" (python-fido2 L448-455).
+            // L3 §10.1.5: "set blob to the result".
             var storage = _context.Backend.CreateLargeBlobStorage(token: null);
             var blob = await storage.GetBlobAsync(largeBlobKey, cancellationToken).ConfigureAwait(false);
             outputs.LargeBlob = new LargeBlobAuthenticationOutput(Blob: blob);

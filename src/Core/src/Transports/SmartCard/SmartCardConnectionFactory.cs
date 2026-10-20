@@ -74,7 +74,7 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     }
 
     /// <summary>
-    ///     The sharing mode used when none is given: exclusive with shared fallback (ykman's default), unless
+    ///     The sharing mode used when none is given: exclusive with shared fallback, unless
     ///     <see cref="CoreCompatSwitches.OpenSmartCardHandlesExclusively"/> (strict exclusive) or
     ///     <see cref="CoreCompatSwitches.OpenSmartCardHandlesShared"/> (shared only) is set.
     /// </summary>

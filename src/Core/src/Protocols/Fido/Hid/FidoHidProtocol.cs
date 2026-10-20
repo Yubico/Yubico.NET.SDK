@@ -302,8 +302,7 @@ internal class FidoHidProtocol(
                 // CTAP 2.3 §11.2.9.1.5: a cancelled request "will reply with the error
                 // CTAP2_ERR_KEEPALIVE_CANCEL". A touch that raced the cancel yields a real success
                 // instead; the authenticator has done the work (a credential may now exist), and the
-                // spec never says to discard it, so it is returned. python-fido2 (hid/__init__.py
-                // _do_call) likewise keeps reading after CANCEL and returns whatever arrives.
+                // spec never says to discard it, so it is returned.
                 if (cancelRequested && !IsCtapSuccess(expectedCommand, responseData))
                     callerToken.ThrowIfCancellationRequested();
 

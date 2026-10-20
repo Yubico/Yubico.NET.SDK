@@ -131,8 +131,7 @@ public sealed class UpdateConfiguration : SlotConfiguration
     }
 
     /// <summary>
-    /// Not supported for updates: the protect flag can only be set when a slot is programmed
-    /// (yubikit/yubiotp.py UpdateConfiguration.protect_slot2 raises ValueError).
+    /// Not supported for updates: the protect flag can only be set when a slot is programmed.
     /// </summary>
     /// <exception cref="ArgumentException">Always.</exception>
     public override SlotConfiguration ProtectSlot2(bool enable = true) =>

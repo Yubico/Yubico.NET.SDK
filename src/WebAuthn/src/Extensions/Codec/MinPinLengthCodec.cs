@@ -18,7 +18,7 @@ using Yubico.YubiKit.Fido2.Extensions;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
-/// Adapter for the minPinLength extension.
+/// Translation between the WebAuthn minPinLength extension inputs and outputs and their CTAP encoding.
 /// </summary>
 internal static class MinPinLengthCodec
 {

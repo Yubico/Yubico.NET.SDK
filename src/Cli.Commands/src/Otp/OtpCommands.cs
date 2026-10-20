@@ -208,7 +208,7 @@ public static class OtpHelpers
 
     /// <summary>
     ///     Parses a <c>--keyboard-layout</c> value by enum name, case-insensitively. Defaults to
-    ///     <see cref="KeyboardLayout.ModHex" />, as ykman does, because ModHex renders identically on every host.
+    ///     <see cref="KeyboardLayout.ModHex" />, because ModHex renders identically on every host.
     /// </summary>
     public static KeyboardLayout ParseKeyboardLayout(string? text) =>
         string.IsNullOrWhiteSpace(text)
@@ -228,7 +228,7 @@ public static class OtpHelpers
 
     /// <summary>
     ///     Generates a random password from the characters <paramref name="layout" /> can type, excluding
-    ///     whitespace (ykman's default blocklist). ModHex yields the familiar 16-letter alphabet.
+    ///     whitespace. ModHex yields the familiar 16-letter alphabet.
     /// </summary>
     public static string GenerateStaticPassword(int length, KeyboardLayout layout = KeyboardLayout.ModHex)
     {

@@ -21,8 +21,8 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <remarks>
 /// The deadline is a signal, not a hard stop: the transport decides when it can act on it (FIDO HID
 /// sends <c>CTAPHID_CANCEL</c> at the next keep-alive; PC/SC exchanges run to their answer). A
-/// <c>null</c> timeout starts no timer (python-fido2 parity; WebAuthn L3 §15.1 recommends a 300 s
-/// default instead). Values are not clamped to the L3 range.
+/// <c>null</c> timeout starts no timer; the 300 s default WebAuthn L3 §15.1 recommends is not applied.
+/// Values are not clamped to the L3 range.
 /// </remarks>
 internal sealed class CeremonyDeadline : IDisposable
 {

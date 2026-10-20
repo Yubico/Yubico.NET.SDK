@@ -26,17 +26,16 @@ using Yubico.YubiKit.WebAuthn.Util;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 
 /// <summary>
-/// WebAuthn prf (L3 §10.1.4) over CTAP hmac-secret (§12.7) and hmac-secret-mc (§12.8), as python-fido2's
-/// and yubikit-android's <c>HmacSecretExtension</c>: registration asks for <c>hmac-secret: true</c> (plus a
-/// creation-time evaluation when the authenticator advertises hmac-secret-mc) and reports <c>enabled</c>;
+/// WebAuthn prf (L3 §10.1.4) over CTAP hmac-secret (§12.7) and hmac-secret-mc (§12.8). Registration asks
+/// for <c>hmac-secret: true</c> (plus a creation-time evaluation when the authenticator advertises
+/// hmac-secret-mc) and reports <c>enabled</c>;
 /// authentication hashes the relying party's inputs into salts, performs one key agreement, sends the
 /// salts encrypted and authenticated under the shared secret, and decrypts the result with it.
 /// </summary>
 /// <remarks>
-/// User verification is not overridden for PRF (maintainer decision: parity with python-fido2 and
-/// yubikit-android, which do not implement the L3 §10.1.4 "overrides the UserVerificationRequirement"
-/// sentence either). Relying parties that need stable PRF output across ceremonies should request
-/// <c>userVerification: required</c>, since CTAP keeps separate PRFs for verified and unverified use.
+/// The relying party's <c>UserVerification</c> is not overridden for PRF. CTAP keeps separate PRFs for
+/// verified and unverified use, so relying parties that need stable PRF output across ceremonies must
+/// request <c>userVerification: required</c>.
 /// </remarks>
 internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor, IDisposable
 {
@@ -65,7 +64,7 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
         }
 
         // L3 §10.1.4: evaluation at creation needs "a future extension to [FIDO-CTAP]"; CTAP 2.2 §12.8
-        // hmac-secret-mc is that extension (python-fido2 extensions.py L287-309).
+        // hmac-secret-mc is that extension.
         bool evaluateAtCreation = input.First is not null && context.Supports(ExtensionIdentifiers.HmacSecretMakeCredential);
         return new PrfProcessor(input, context, registration: true, evaluateAtCreation);
     }
@@ -131,7 +130,7 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
         ? _evaluateAtCreation
         : _input.First is not null || _input.EvalByCredential is { Count: > 0 };
 
-    /// <summary>One key agreement per attempt when salts will be sent (python-fido2 extensions.py L300-301, L342-343).</summary>
+    /// <summary>One key agreement per attempt, performed only when salts will be sent.</summary>
     public async ValueTask PrepareAsync(CancellationToken cancellationToken)
     {
         if (NeedsSharedSecret && _sharedSecret is null)

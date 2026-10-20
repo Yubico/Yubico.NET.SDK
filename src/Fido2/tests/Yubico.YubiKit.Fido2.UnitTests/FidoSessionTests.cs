@@ -184,7 +184,7 @@ public class FidoSessionTests
         Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
     }
 
-    /// <summary>Audit #10 (YESDK-1618): up=false is refused at the session boundary, before any CBOR or prompt.</summary>
+    /// <summary>up=false is refused at the session boundary, before any CBOR or prompt.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1618")]
     public async Task MakeCredentialAsync_FalseUserPresence_ThrowsBeforeSendingOrPrompting()

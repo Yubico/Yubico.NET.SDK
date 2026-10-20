@@ -108,8 +108,8 @@ public sealed class ExtensionBuilder
     /// WebAuthn's <c>largeBlob</c> client extension ({support}, read, write; L3 §10.1.5) is built on this
     /// key in the WebAuthn package together with <see cref="LargeBlobs.LargeBlobStorage"/> (§6.10); CTAP
     /// itself carries no <c>largeBlob: {support}</c>. The direct getAssertion largeBlob read/write
-    /// extension of CTAP 2.2-2.3 §12.4 is not implemented: §12.4 says authenticators "MUST NOT support
-    /// both extensions", so no YubiKey can exercise it.
+    /// extension of CTAP 2.2-2.3 §12.4 is a mutually exclusive alternative to largeBlobKey (§12.4:
+    /// authenticators "MUST NOT support both extensions") and is not offered by this builder.
     /// </para>
     /// </remarks>
     /// <returns>This builder for chaining.</returns>

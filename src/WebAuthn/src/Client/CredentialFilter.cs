@@ -24,9 +24,8 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The one implementation of python-fido2's <c>_filter_creds</c> and yubikit-android's
-/// <c>Utils.filterCreds</c>, used for the registration exclude-list pre-flight and for allow-list
-/// selection before an assertion (see docs/architecture/webauthn-extension-processing.md).
+/// Used for the registration exclude-list pre-flight and for allow-list selection before an assertion,
+/// so that both ceremonies make the same decision from the same probe.
 /// </para>
 /// <para>
 /// Descriptors are probed with <c>authenticatorGetAssertion</c>, <c>up: false</c> and a zero client
@@ -50,7 +49,7 @@ internal static class CredentialFilter
     /// <param name="info">The authenticator info (<c>maxCredentialCountInList</c>, <c>maxCredentialIdLength</c>).</param>
     /// <param name="token">
     /// The PIN/UV auth token for the ceremony, or null when the ceremony has none; the probe then
-    /// carries no <c>pinUvAuthParam</c>, as in python-fido2.
+    /// carries no <c>pinUvAuthParam</c>.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     public static async Task<PublicKeyCredentialDescriptor?> SelectAsync(
@@ -72,7 +71,7 @@ internal static class CredentialFilter
         }
 
         // CTAP 2.1-2.3 §6.4 maxCredentialIdLength: an id longer than the authenticator can produce
-        // cannot match, and sending it risks CTAP2_ERR_REQUEST_TOO_LARGE (python-fido2 _filter_creds).
+        // cannot match, and sending it risks CTAP2_ERR_REQUEST_TOO_LARGE.
         IReadOnlyList<PublicKeyCredentialDescriptor> remaining = info.MaxCredentialIdLength is { } maxIdLength
             ? candidates.Where(descriptor => descriptor.Id.Length <= maxIdLength).ToList()
             : candidates;
@@ -84,7 +83,7 @@ internal static class CredentialFilter
         // CTAP 2.1-2.3 §6.4: maxCredentialCountInList "MUST be greater than zero if present." A
         // non-positive value would make the chunk empty: the loop would never advance, or an empty
         // allowList probe could succeed against a discoverable credential. Refuse it instead of
-        // clamping so faulty firmware stays visible (maintainer decision, 25g).
+        // clamping so faulty firmware stays visible.
         int maxCreds = info.MaxCredentialCountInList ?? 1;
         if (maxCreds <= 0)
         {

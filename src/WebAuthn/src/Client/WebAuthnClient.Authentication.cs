@@ -90,8 +90,7 @@ public sealed partial class WebAuthnClient
         // Get authenticator info
         var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
 
-        // Extension processors are created per attempt; their permissions join the token request
-        // (python-fido2 do_get_assertion L961-967, yubikit-android Ctap2Client L652-655).
+        // Extension processors are created per attempt; their permissions join the token request.
         var context = new ExtensionContext(info, _backend.Protocol, _backend);
         var permissions = PinUvAuthTokenPermissions.GetAssertion
             | AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context).Permissions;
@@ -139,8 +138,7 @@ public sealed partial class WebAuthnClient
         {
             await extensions.PrepareAsync(ct).ConfigureAwait(false);
 
-            // Allow-list selection (WebAuthn L3 §5.1.4 via python-fido2 do_get_assertion L980-1023 and
-            // yubikit-android Ctap2Client L663-689): find the credential with an up:false probe, then
+            // Allow-list selection (WebAuthn L3 §5.1.4): find the credential with an up:false probe, then
             // assert with exactly that descriptor so per-credential extension inputs can name it. When
             // nothing matched, a dummy descriptor still goes to the authenticator: user presence is
             // requested either way, so "credential absent" is not observable without a gesture.
@@ -159,8 +157,9 @@ public sealed partial class WebAuthnClient
         }
     }
 
-    // python-fido2 client/__init__.py L1012-1017: "We still need to send a dummy value if there was an
-    // allow_list but no matches were found" (id = b"\0").
+    // Sent when the relying party gave an allow list and nothing in it matched: the authenticator still
+    // asks for user presence and answers CTAP2_ERR_NO_CREDENTIALS, so the ceremony takes the same time
+    // and gives the same prompt as a real attempt.
     private static readonly byte[] DummyCredentialId = [0x00];
 
     private static BackendGetAssertionRequest BuildGetAssertionRequest(

@@ -258,8 +258,8 @@ public class WebAuthnClientCeremonyFrameTests
             .Returns(MockFido2Responses.CreateMockAuthenticatorInfo()); // no clientPin: ceremony runs without a token
 
     /// <summary>
-    ///     python-fido2 do_get_assertion L980-1023 / yubikit-android Ctap2Client L663-689: with an allow list the
-    ///     client first finds the credential with an up:false probe, then asserts with exactly that one descriptor.
+    ///     With an allow list the client first finds the credential with an up:false probe, then asserts with
+    ///     exactly that one descriptor.
     /// </summary>
     [Fact]
     public async Task GetAssertion_AllowList_ProbesWithUpFalse_ThenSendsOnlyTheSelectedDescriptor()
@@ -307,8 +307,8 @@ public class WebAuthnClientCeremonyFrameTests
     }
 
     /// <summary>
-    ///     With a token the probe is signed and the same token signs the assertion: measured on 5.8.0, a getAssertion
-    ///     accepts a token already used for an up:false probe (only makeCredential does not, see the registration test).
+    ///     With a token the probe is signed and the same token signs the assertion: a getAssertion accepts a token
+    ///     already used for an up:false probe (only makeCredential does not, see the registration test).
     /// </summary>
     [Fact]
     public async Task GetAssertion_AllowList_WithToken_SignsProbeAndAssertionWithOneToken()

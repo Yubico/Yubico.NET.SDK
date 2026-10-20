@@ -76,7 +76,7 @@ public sealed record class PublicKeyCredentialCreationOptions
     /// signal: a PC/SC exchange already in flight runs to its answer first.
     /// </para>
     /// <para>
-    /// <c>null</c> starts no timer (differs from the 300 s default L3 §15.1 recommends; matches python-fido2).
+    /// <c>null</c> starts no timer; L3 §15.1 recommends a 300 s default, which this client does not apply.
     /// Values are not clamped to the L3 range. A non-positive value is rejected with
     /// <see cref="WebAuthnClientErrorCode.InvalidRequest"/>. Cancelling the caller's token still surfaces as
     /// <see cref="OperationCanceledException"/>.

@@ -86,8 +86,8 @@ public sealed partial class WebAuthnClient
         // Get authenticator info
         var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
 
-        // Resolve the resident-key preference against the authenticator (WebAuthn L3 §5.4.6; python-fido2
-        // do_make_credential): required → rk, preferred → rk only if the authenticator can, discouraged → omit.
+        // Resolve the resident-key preference against the authenticator (WebAuthn L3 §5.4.6):
+        // required → rk, preferred → rk only if the authenticator can, discouraged → omit.
         // An authenticator that cannot store discoverable credentials is skipped for "required" (L3 §5.1.3),
         // never downgraded to a non-discoverable credential.
         bool canResidentKey = info.Options.TryGetValue("rk", out var rkSupported) && rkSupported;
@@ -101,8 +101,7 @@ public sealed partial class WebAuthnClient
             _ => false
         };
 
-        // Extension processors are created per attempt; their permissions join the token request
-        // (python-fido2 do_make_credential L787-795, yubikit-android Ctap2Client L484).
+        // Extension processors are created per attempt; their permissions join the token request.
         var context = new ExtensionContext(info, _backend.Protocol, _backend);
         var permissions = MakeCredentialCeremonyPermissions
             | RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context).Permissions;
@@ -142,7 +141,7 @@ public sealed partial class WebAuthnClient
         {
             await extensions.PrepareAsync(ct).ConfigureAwait(false);
 
-            // Exclude-list pre-flight (yubikit-android Ctap2Client.filterCreds): with a token, probe the
+            // Exclude-list pre-flight: with a token, probe the
             // list and send only the match so the authenticator never sees more than it can process.
             // Without a token the caller's list goes through unchanged and the authenticator enforces it.
             // The probe's answer does not change across a UV escalation, so it runs once per ceremony.
@@ -213,7 +212,7 @@ public sealed partial class WebAuthnClient
         // Apply the attestation conveyance preference (WebAuthn L3 §5.4.7, §5.1.3). For "none" the
         // client replaces any statement that is not a self attestation with fmt "none" and an empty
         // attStmt, so the RP never sees the attestation certificate chain it declined. The AAGUID is
-        // kept as the authenticator returned it (L3 dropped L2's zeroing). Indirect, Direct and
+        // kept as the authenticator returned it, as L3 specifies. Indirect, Direct and
         // Enterprise pass the authenticator's statement through.
         var webAuthnStatement = ctapResponse.AttestationStatement;
         if (options.Attestation == Preferences.AttestationPreference.None

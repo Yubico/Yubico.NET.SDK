@@ -304,7 +304,7 @@ public class WebAuthnAuditReproTests
 
     /// <summary>
     ///     WebAuthn L3 §5.8.1: topOrigin "is set only if ... crossOrigin is true". The client refuses the
-    ///     contradictory input instead of emitting it (maintainer decision: reject, not silently drop).
+    ///     contradictory input instead of emitting it: rejected, not silently dropped.
     /// </summary>
     [Theory]
     [Trait("Audit", "YESDK-1616")]
@@ -484,7 +484,7 @@ public class WebAuthnAuditReproTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => operation);
     }
 
-    /// <summary>A null Timeout starts no timer (python-fido2 parity; differs from the L3 §15.1 300 s default).</summary>
+    /// <summary>A null Timeout starts no timer; the L3 §15.1 300 s default is not applied.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1617")]
     public async Task YESDK1617_NullTimeoutStartsNoDeadline()
@@ -521,7 +521,7 @@ public class WebAuthnAuditReproTests
         Assert.NotNull(response);
     }
 
-    /// <summary>No clamping (maintainer decision): a non-positive Timeout is a malformed request.</summary>
+    /// <summary>No clamping: a non-positive Timeout is a malformed request.</summary>
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
@@ -570,7 +570,7 @@ public class WebAuthnAuditReproTests
 
     /// <summary>
     ///     CTAP 2.1-2.3 §6.4 maxCredentialCountInList: "MUST be greater than zero if present." A non-positive
-    ///     value is refused with a typed error before any probe is sent (maintainer decision: no clamping).
+    ///     value is refused with a typed error before any probe is sent, not clamped.
     /// </summary>
     [Theory]
     [InlineData(0)]

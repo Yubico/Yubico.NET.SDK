@@ -36,8 +36,8 @@ namespace Yubico.YubiKit.Fido2.LargeBlobs;
 /// </para>
 /// <para>
 /// Unknown map elements are kept as raw CBOR so an entry written by another client survives a rewrite
-/// unchanged (§6.10.3: a conforming map "MAY include unknown elements"). This is the format python-fido2
-/// (blob.py <c>_lb_pack</c>/<c>_lb_unpack</c>) and every spec-conformant client use.
+/// unchanged (§6.10.3: a conforming map "MAY include unknown elements"), so entries interoperate with
+/// other WebAuthn clients sharing the same authenticator.
 /// </para>
 /// </remarks>
 public sealed class LargeBlobEntry

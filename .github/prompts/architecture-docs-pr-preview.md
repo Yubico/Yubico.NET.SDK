@@ -30,7 +30,7 @@ Read:
    evidence intersects the change set.
 2. For each affected diagram, look at which mapped symbols/projects/paths changed
    (`architecture-symbols.txt`, `changed-files.txt`) and summarize the likely diagram impact
-   in plain language (e.g. "L2/L3b: a FIDO2 backend type changed; the backend split box may
+   in plain language (e.g. "L2/L3b: a CTAP2 backend type changed; the backend split box may
    need updating").
 3. If `affected-diagrams.txt` is empty, say clearly that no mapped architecture evidence
    changed, so no diagram update appears necessary. Do not manufacture impact.

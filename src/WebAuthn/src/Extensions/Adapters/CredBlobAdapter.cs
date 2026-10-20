@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
-using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.Ctap2.Extensions;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions.Adapters;
 

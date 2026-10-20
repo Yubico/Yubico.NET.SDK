@@ -49,7 +49,7 @@ public class RawSessionConstructionFailureTests
     }
 
     [Fact]
-    public async Task CreateRawFidoHidSession_WhenProtocolLoggerConstructionThrows_ReleasesClaimWithoutDisposingConnection()
+    public async Task CreateRawCtapHidSession_WhenProtocolLoggerConstructionThrows_ReleasesClaimWithoutDisposingConnection()
     {
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var failure = new InvalidOperationException("Scripted FIDO protocol logger failure.");
@@ -58,11 +58,11 @@ public class RawSessionConstructionFailureTests
         using (YubiKitLogging.UseTemporary(new ThrowOnSecondLoggerFactory(failure)))
         {
             InvalidOperationException actual = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => RawFidoHidSession.CreateAsync(connection, cancellationToken));
+                () => RawCtapHidSession.CreateAsync(connection, cancellationToken));
             Assert.Same(failure, actual);
         }
 
-        await using (RawFidoHidSession second = await RawFidoHidSession.CreateAsync(connection, cancellationToken))
+        await using (RawCtapHidSession second = await RawCtapHidSession.CreateAsync(connection, cancellationToken))
             Assert.NotNull(second);
         Assert.Equal(0, connection.DisposeCount);
     }

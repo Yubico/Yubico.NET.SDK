@@ -15,16 +15,16 @@
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using static Yubico.YubiKit.WebAuthn.IntegrationTests.WebAuthnTestHelpers;
-using CredentialManagementClass = Yubico.YubiKit.Fido2.CredentialManagement.CredentialManagement;
+using CredentialManagementClass = Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement;
 
 namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 
@@ -77,7 +77,7 @@ public class WebAuthnExcludeListStressTests
     public async Task CreateCredential_WithLargeExcludeList_RejectsExcludedCredential(YubiKeyTestState state)
     {
         // Note: WebAuthnClient.DisposeAsync cascades to dispose its backend, which
-        // disposes the underlying FidoSession. Don't share a single session between
+        // disposes the underlying Ctap2Session. Don't share a single session between
         // the client (which owns disposal) and post-test cleanup. Use one session
         // for the test body, a fresh one for cleanup.
         var createdCredentialIds = new List<ReadOnlyMemory<byte>>();
@@ -91,7 +91,7 @@ public class WebAuthnExcludeListStressTests
             // on the first MakeCredential call.
             int remainingCapacity;
             {
-                await using var setupSession = await state.Device.CreateFidoSessionAsync();
+                await using var setupSession = await state.Device.CreateCtap2SessionAsync();
 
                 await NormalizePinAsync(setupSession);
 
@@ -140,7 +140,7 @@ public class WebAuthnExcludeListStressTests
             // BODY SESSION: fresh session for the WebAuthnClient. The client
             // owns its disposal and will dispose this session when it disposes.
             {
-                await using var session = await state.Device.CreateFidoSessionAsync();
+                await using var session = await state.Device.CreateCtap2SessionAsync();
                 await using var client = CreateClient(session);
 
                 // Create CredentialCount resident credentials
@@ -210,7 +210,7 @@ public class WebAuthnExcludeListStressTests
             // disposed transitively when WebAuthnClient.DisposeAsync runs.
             try
             {
-                await using var cleanupSession = await state.Device.CreateFidoSessionAsync();
+                await using var cleanupSession = await state.Device.CreateCtap2SessionAsync();
                 await DeleteAllCredentialsForRpAsync(cleanupSession, TestRpId);
             }
             catch

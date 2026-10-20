@@ -14,8 +14,8 @@
 
 using NSubstitute;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -29,7 +29,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 /// The backend copies the caller's parameter into the CTAP options object and zeroes that copy
 /// once the command returns. Both halves of that contract matter, and neither is observable
 /// through <see cref="IWebAuthnBackend"/>, so these tests drive the concrete backend over a
-/// substituted <see cref="IFidoSession"/>.
+/// substituted <see cref="ICtap2Session"/>.
 /// </para>
 /// <para>
 /// The reuse scenario is not hypothetical: <c>ExcludeListPreflight</c> derives one
@@ -40,7 +40,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 /// </remarks>
 public class WebAuthnBackendTests
 {
-    private readonly IFidoSession _session = Substitute.For<IFidoSession>();
+    private readonly ICtap2Session _session = Substitute.For<ICtap2Session>();
 
     [Fact]
     public async Task GetAssertionAsync_DoesNotZeroTheCallersPinUvAuthParam()
@@ -177,7 +177,7 @@ public class WebAuthnBackendTests
                 var options = call.Arg<GetAssertionOptions>();
                 sent.OptionsPerCall.Add(options);
                 sent.ParamPerCall.Add(SnapshotParam(options.PinUvAuthParam));
-                return MockFido2Responses.CreateMockGetAssertionResponse();
+                return MockCtap2Responses.CreateMockGetAssertionResponse();
             });
 
         return sent;
@@ -199,7 +199,7 @@ public class WebAuthnBackendTests
                 var options = call.Arg<MakeCredentialOptions>();
                 sent.OptionsPerCall.Add(options);
                 sent.ParamPerCall.Add(SnapshotParam(options.PinUvAuthParam));
-                return MockFido2Responses.CreateMockMakeCredentialResponse();
+                return MockCtap2Responses.CreateMockMakeCredentialResponse();
             });
 
         return sent;

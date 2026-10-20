@@ -189,7 +189,7 @@ the deliberate tradeoff for never abandoning a stateful exchange halfway through
 | Overlapping exchanges throw; sequential calls and post-failure reuse succeed | `ExchangeGuardTests`, `PcscProtocolConcurrencyTests`, `FidoHidProtocolConcurrencyTests`, `OtpHidProtocolConcurrencyTests` |
 | Disposal refuses new operations and drains an admitted exchange before protocol/SCP/connection teardown | `ExchangeGuardTests`, `RawSessionYubiKeyExtensionsTests`, `PcscProtocolScpTests` |
 | SmartCard cancellation after admission returns the drained response; a borrowed connection is reused after the drain | `RawSmartCardNativeBoundaryTests` |
-| Idle FIDO HID disposal skips the terminal wake; active disposal wakes and drains without disposing a borrowed connection | `FidoHidProtocolTests`, `FidoSessionHidCrossLayerTests` |
+| Idle FIDO HID disposal skips the terminal wake; active disposal wakes and drains without disposing a borrowed connection | `FidoHidProtocolTests`, `Ctap2SessionHidCrossLayerTests` |
 | Held connection and PC/SC sharing failures do not trigger another transport | `SessionTransportTests`, applet `IYubiKeyExtensionsTransportTests` |
 | A refused second ownership attempt does not damage the active PIV session | `PivSessionContentionTests` |
 | Distinct physical keys remain independent | `PivMultiKeyContentionTests` |

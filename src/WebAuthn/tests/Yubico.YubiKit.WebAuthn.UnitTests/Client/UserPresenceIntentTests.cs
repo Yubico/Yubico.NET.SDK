@@ -19,17 +19,16 @@ using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
 /// <summary>
-///     Runs a real <see cref="FidoSession" /> under the WebAuthn client, so the intent has to cross every layer between
+///     Runs a real <see cref="Ctap2Session" /> under the WebAuthn client, so the intent has to cross every layer between
 ///     the application's call and the user-presence prompt.
 /// </summary>
 public sealed class UserPresenceIntentTests
@@ -48,7 +47,7 @@ public sealed class UserPresenceIntentTests
 
         UserPresenceContext requested = Assert.Single(prompt.Requested);
         Assert.Equal("register your work passkey", requested.Intent);
-        Assert.Equal(UserPresenceOperations.Fido2.MakeCredential, requested.Operation);
+        Assert.Equal(UserPresenceOperations.Ctap2.MakeCredential, requested.Operation);
         Assert.Equal("example.com", requested.Scope);
     }
 
@@ -63,12 +62,12 @@ public sealed class UserPresenceIntentTests
 
         UserPresenceContext requested = Assert.Single(prompt.Requested);
         Assert.Null(requested.Intent);
-        Assert.Equal(UserPresenceOperations.Fido2.MakeCredential, requested.Operation);
+        Assert.Equal(UserPresenceOperations.Ctap2.MakeCredential, requested.Operation);
     }
 
     private static async Task<WebAuthnClient> CreateClientAsync(IUserPresencePrompt prompt)
     {
-        FidoSession session = await FidoSession.CreateAsync(
+        Ctap2Session session = await Ctap2Session.CreateAsync(
             new CtapSmartCardConnection(),
             new SessionCreationOptions { UserPresencePrompt = prompt },
             TestContext.Current.CancellationToken);

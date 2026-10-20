@@ -15,7 +15,7 @@
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.WebAuthn.Client;
 
 namespace Yubico.YubiKit.WebAuthn;
@@ -38,20 +38,20 @@ public static class IYubiKeyExtensions
         /// configures the session rather than the client.
         /// </param>
         /// <param name="sessionOptions">
-        /// Optional settings for the underlying FIDO2 session (SCP key parameters, protocol
+        /// Optional settings for the underlying CTAP2 session (SCP key parameters, protocol
         /// configuration, preferred transport, firmware override). When no preferred connection is
-        /// specified, the FIDO2 default order applies (<see cref="ConnectionType.HidFido"/>, then
+        /// specified, the CTAP2 default order applies (<see cref="ConnectionType.HidFido"/>, then
         /// <see cref="ConnectionType.SmartCard"/>). To use SCP on a device that also exposes HID FIDO,
         /// set <see cref="SessionCreationOptions.PreferredConnectionType"/> to
         /// <see cref="ConnectionType.SmartCard"/>.
         /// </param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-        /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying FIDO2 session.</returns>
+        /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying CTAP2 session.</returns>
         /// <remarks>
         /// The public suffix checker should be backed by Public Suffix List data. RP ID validation
         /// rejects public suffixes such as <c>com</c> and <c>co.uk</c> before any CTAP operation runs.
         /// This method adds no independent session-creation logic; <paramref name="sessionOptions"/> is
-        /// validated and applied by the underlying FIDO2 <c>CreateFidoSessionAsync</c>, while
+        /// validated and applied by the underlying CTAP2 <c>CreateCtap2SessionAsync</c>, while
         /// <paramref name="clientOptions"/> is forwarded to the returned <see cref="WebAuthnClient"/>.
         /// </remarks>
         public async Task<WebAuthnClient> CreateWebAuthnClientAsync(
@@ -65,16 +65,16 @@ public static class IYubiKeyExtensions
             // Force the runtime guard before session creation can open a device connection.
             _ = clientOptions.PublicSuffixChecker;
 
-            var fidoSession = await yubiKey.CreateFidoSessionAsync(sessionOptions, cancellationToken)
+            var ctap2Session = await yubiKey.CreateCtap2SessionAsync(sessionOptions, cancellationToken)
                 .ConfigureAwait(false);
 
             try
             {
-                return new WebAuthnClient(fidoSession, origin, clientOptions);
+                return new WebAuthnClient(ctap2Session, origin, clientOptions);
             }
             catch
             {
-                await fidoSession.DisposeAsync().ConfigureAwait(false);
+                await ctap2Session.DisposeAsync().ConfigureAwait(false);
                 throw;
             }
         }

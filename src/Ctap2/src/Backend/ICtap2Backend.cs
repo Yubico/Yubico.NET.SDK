@@ -1,0 +1,45 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Yubico.YubiKit.Core.Credentials;
+
+namespace Yubico.YubiKit.Ctap2.Backend;
+
+/// <summary>
+/// Abstraction for FIDO transport backends (SmartCard CCID or FIDO HID).
+/// </summary>
+/// <remarks>
+/// This allows Ctap2Session to be transport-agnostic while supporting both
+/// SmartCard (CCID) and FIDO HID (CTAPHID) communication.
+/// </remarks>
+internal interface ICtap2Backend
+{
+    /// <summary>
+    /// Performs transport-specific initialization needed before CTAP commands.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task InitializeAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sends a CTAP CBOR command and receives the response.
+    /// </summary>
+    /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>
+    /// <param name="userPresenceNotification">The non-null notification handle for this operation.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The response data (status byte has already been validated).</returns>
+    Task<ReadOnlyMemory<byte>> SendCborAsync(
+        ReadOnlyMemory<byte> request,
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken = default);
+}

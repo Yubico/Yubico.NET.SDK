@@ -1,0 +1,220 @@
+# Yubico.YubiKit.Ctap2
+
+The FIDO application on a YubiKey is a CTAP 2.1/2.3 authenticator. This package speaks CTAP2 directly: read
+capabilities, create and assert credentials, manage the PIN, and drive the credential, biometric, large-blob,
+and config sub-systems. `Yubico.YubiKit.WebAuthn` builds the WebAuthn client API on top of it.
+
+> The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+> constraints.
+
+## Requirements
+
+- .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
+- YubiKey 5 series, Security Key series, or YubiKey Bio series with firmware 5.0.0 or later.
+- Transports: HID FIDO over USB, or SmartCard (CCID) where the FIDO AID is exposed - NFC always, USB on 5.8.0+.
+
+| Feature | Minimum firmware |
+|---------|------------------|
+| CTAP2 (CTAP2) | 5.0.0 |
+| Credential management, fingerprint bio enrollment | 5.2.0 |
+| Authenticator config, hmac-secret-mc extension | 5.4.0 |
+| credBlob extension | 5.5.0 |
+| CTAP2 over USB SmartCard | 5.8.0 |
+
+## Installation
+
+```bash
+dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
+dotnet add package Yubico.YubiKit.Ctap2 --prerelease
+```
+
+`Yubico.YubiKit.Core` is installed transitively.
+
+## Getting started
+
+```csharp
+using System.Security.Cryptography;
+using System.Text;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Extensions;
+using Yubico.YubiKit.Ctap2.Pin;
+
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+await using var session = await device.CreateCtap2SessionAsync();
+
+var info = await session.GetInfoAsync();
+Console.WriteLine($"CTAP versions: {string.Join(", ", info.Versions)}");
+```
+
+Later snippets assume these directives and a `device` obtained the same way. `GetInfoAsync` needs no touch and no PIN;
+`info.Options`, `info.Extensions`, and `info.Aaguid` describe the rest. For a single read, the one-shot `device.GetCtap2InfoAsync()` opens and closes a session for you.
+
+## Common operations
+
+### Protocol names
+
+FIDO is the authenticator/application identity; its SmartCard AID is shared by U2F and CTAP2.
+CTAPHID is the shared USB HID framing transport, so Core connection and protocol types retain
+their `Fido` names and low-level access remains `RawCtapHidSession`. This package exposes CTAP2
+operations through `Ctap2Session`; it does not rename wire identifiers such as `FIDO_2_1` or
+`fido-u2f`. WebAuthn is the higher-level client/ceremony API built on CTAP2. PIN prompts therefore
+still say **FIDO2 PIN**, while operation identifiers use names such as `Ctap2.MakeCredential`.
+
+### Create a credential
+
+This asks for a touch and nothing else; `UserVerification` and credProtect need a PIN token, so they appear in the PIN flow below.
+
+```csharp
+byte[] clientDataHash = SHA256.HashData(Encoding.UTF8.GetBytes("""{"challenge":"replace-me"}"""));
+var rp = new PublicKeyCredentialRpEntity("example.com", "Example Corp");
+var user = new PublicKeyCredentialUserEntity(
+    RandomNumberGenerator.GetBytes(32), "user@example.com", "Example User");
+
+var response = await session.MakeCredentialAsync(
+    clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()],
+    new MakeCredentialOptions { ResidentKey = true });
+ReadOnlyMemory<byte> credentialId = response.AuthenticatorData.AttestedCredentialData!.CredentialId;
+```
+
+### Get an assertion
+
+```csharp
+var assertion = await session.GetAssertionAsync("example.com", clientDataHash, new GetAssertionOptions());
+Console.WriteLine($"Signature: {Convert.ToHexString(assertion.Signature.Span)}");
+```
+
+Leave `AllowList` unset to search discoverable credentials; if `NumberOfCredentials` exceeds one, call `GetNextAssertionAsync`.
+
+Credential-management enumeration returns `RelyingPartyEnumerationResult` or `CredentialEnumerationResult`.
+Read the owned, read-only `RelyingParties` or `Credentials` collection and use `ReportedTotal` when the
+authenticator supplied a total in its first response; an empty credential result has a null total.
+Dispose credential results after use because each `StoredCredentialInfo` owns a complete response clone that
+can contain a large-blob key:
+
+```csharp
+using var credentialResult = await credentialManagement.EnumerateCredentialsAsync(rpIdHash);
+foreach (StoredCredentialInfo credential in credentialResult.Credentials)
+{
+    Console.WriteLine(Convert.ToHexString(credential.CredentialId.Id.Span));
+}
+```
+
+`StoredCredentialInfo.RawData` preserves the byte-exact response, including unknown fields, while
+`LargeBlobKey` is a view into that owned clone. Both properties reject access after disposal, and previously
+captured views observe the clone being cleared. Ordinary decoded fields remain usable because they are
+independent copies. Direct `StoredCredentialInfo.Decode` callers must dispose the returned value too. The
+decoder borrows and never clears its input, and the transport response contract is unchanged; disposal only
+clears the model's private clone and is not an end-to-end response cleanup guarantee.
+
+### Verify the user with a PIN
+
+A verified ceremony carries a PIN token: acquire one for the permission you need, authenticate the same
+`clientDataHash` you send, and set both `PinUvAuthParam` and `PinUvAuthProtocol`. Setting `UserVerification` alone is rejected. `ClientPin` also has `SetPinAsync`, `ChangePinAsync`, and `GetPinRetriesAsync`.
+
+`GetPinRetriesAsync` and `GetUvRetriesAsync` return `PinRetryStatus` and
+`UserVerificationRetryStatus`; read `RetriesRemaining` and `PowerCycleRequired` from those results.
+
+```csharp
+byte[] pin = Encoding.UTF8.GetBytes("123456");
+byte[]? pinToken = null;
+try
+{
+    using var protocol = new PinUvAuthProtocolV2();
+    using var clientPin = new ClientPin(session, protocol);
+    pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+        pin, PinUvAuthTokenPermissions.MakeCredential, "example.com");
+    var options = new MakeCredentialOptions
+    {
+        ResidentKey = true,
+        Extensions = new ExtensionBuilder().WithCredProtect(CredProtectPolicy.UserVerificationRequired).Build()
+    };
+    options.WithPinUvAuth(protocol.Authenticate(pinToken, clientDataHash), protocol.Version);
+    options.WithUserVerification(true);
+    await session.MakeCredentialAsync(
+        clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(pin);
+    CryptographicOperations.ZeroMemory(pinToken);
+}
+```
+
+The assertion side is the same shape with a `GetAssertion` token:
+
+```csharp
+// Inside the same try block: a token is bound to its permission, so acquire a fresh one.
+CryptographicOperations.ZeroMemory(pinToken);
+pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+    pin, PinUvAuthTokenPermissions.GetAssertion, "example.com");
+var assertionOptions = new GetAssertionOptions();
+assertionOptions.WithPinUvAuth(protocol.Authenticate(pinToken, clientDataHash), protocol.Version);
+assertionOptions.WithUserVerification(true);
+var verified = await session.GetAssertionAsync("example.com", clientDataHash, assertionOptions);
+```
+
+`CredentialManagement`, `FingerprintBioEnrollment`, `LargeBlobStorage`, and `AuthenticatorConfig` are built the same way: session, protocol, and a token with the matching permission.
+
+## User interaction
+
+`MakeCredentialAsync`, `GetAssertionAsync`, `SelectionAsync`, and `ResetAsync` require a touch; `GetInfoAsync`
+and the `ClientPin` commands are silent. Pass a `cancellationToken` to request cancellation;
+it does not instantly stop an admitted device exchange or undo a command already sent. On HID,
+the SDK sends `CTAPHID_CANCEL` when it observes cancellation during a keep-alive, then waits
+for and drains a valid terminal response before reporting cancellation. On SmartCard, admitted
+exchanges run to completion.
+
+```csharp
+sealed class TouchPrompt : IUserPresencePrompt
+{
+    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
+        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
+}
+```
+
+```csharp
+await using var promptingSession = await device.CreateCtap2SessionAsync(
+    new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
+```
+
+The prompt shows the indication and returns without waiting. Over HID the request carries `UserPresenceBasis.DeviceWaiting` on the first keep-alive; SmartCard has no in-flight signal, so MakeCredential and GetAssertion report `PolicyRequires` before the command.
+
+## Constraints
+
+- The default transport is HID FIDO, falling back to SmartCard; `SessionCreationOptions.PreferredConnectionType`
+  forces one. `ConnectionType.HidOtp` throws `ArgumentException`, an unexposed one `NotSupportedException`.
+- SCP runs only over SmartCard. `ScpKeyParameters` without an explicit preference selects SmartCard; pairing
+  them with `ConnectionType.HidFido` throws `NotSupportedException` during initialization.
+- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection;
+  a second session throws `ConnectionInUseException` until the first is disposed.
+- Sessions from `device.CreateCtap2SessionAsync()` own the connection they opened; `Ctap2Session.CreateAsync`
+  borrows yours and you dispose it. Use `await using` for both; there is no finalizer backstop.
+- `ResetAsync` erases every credential and the PIN, irreversibly, and is refused unless it arrives within five
+  seconds of insertion. Firmware gates throw `NotSupportedException`.
+
+## Security notes
+
+- PINs and PIN tokens are borrowed buffers; zero yours with `CryptographicOperations.ZeroMemory` in a `finally`.
+- `ClientPin` zeroes what it derives internally and `PinUvAuthProtocolV2` zeroes the raw ECDH output.
+- Never log PINs, PIN tokens, or secret-derived extension outputs such as hmac-secret and PRF results.
+
+## Example
+
+The interactive FidoTool sample lives at src/Ctap2/examples/FidoTool/.
+
+```bash
+dotnet run --project src/Ctap2/examples/FidoTool/FidoTool.csproj
+```
+
+## Related
+
+- [../Core/README.md](../Core/README.md) - device discovery, connections, and session creation.
+- [../WebAuthn/README.md](../WebAuthn/README.md) - the higher-level WebAuthn client built on this module.
+- [user-interaction.md](../../docs/usage/user-interaction.md) and [device-discovery.md](../../docs/usage/device-discovery.md).
+- The [CTAP 2.1](https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html) and [WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/) specifications.
+- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.

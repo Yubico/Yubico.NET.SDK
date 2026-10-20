@@ -55,7 +55,7 @@ static class ModuleAggregator
     /// </summary>
     static readonly string[] AppletOrder =
     [
-        "Management", "Piv", "Fido2", "WebAuthn", "Oath", "YubiOtp", "OpenPgp", "SecurityDomain", "YubiHsm",
+        "Management", "Piv", "Ctap2", "WebAuthn", "Oath", "YubiOtp", "OpenPgp", "SecurityDomain", "YubiHsm",
     ];
 
     /// <summary>

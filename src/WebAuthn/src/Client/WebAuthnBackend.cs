@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Util;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
 /// <summary>
-/// Concrete implementation of IWebAuthnBackend that wraps IFidoSession.
+/// Concrete implementation of IWebAuthnBackend that wraps ICtap2Session.
 /// </summary>
 /// <remarks>
-/// This adapter owns the FidoSession lifetime and manages the PinUvAuthProtocolV2 instance.
+/// This adapter owns the Ctap2Session lifetime and manages the PinUvAuthProtocolV2 instance.
 /// </remarks>
 internal sealed class WebAuthnBackend : IWebAuthnBackend
 {
-    private readonly IFidoSession _session;
+    private readonly ICtap2Session _session;
     private PinUvAuthProtocolV2? _protocol;
     private AuthenticatorInfo? _cachedInfo;
     private bool _disposed;
@@ -36,8 +35,8 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
     /// <summary>
     /// Initializes a new instance of <see cref="WebAuthnBackend"/>.
     /// </summary>
-    /// <param name="session">The FIDO session (ownership transferred to this backend).</param>
-    public WebAuthnBackend(IFidoSession session)
+    /// <param name="session">The CTAP2 session (ownership transferred to this backend).</param>
+    public WebAuthnBackend(ICtap2Session session)
     {
         _session = session ?? throw new ArgumentNullException(nameof(session));
     }

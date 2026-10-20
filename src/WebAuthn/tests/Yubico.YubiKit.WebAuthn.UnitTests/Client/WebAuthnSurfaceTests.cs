@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System.Reflection;
-using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.WebAuthn.Client;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
@@ -32,12 +32,12 @@ public class WebAuthnSurfaceTests
         ?? throw new InvalidOperationException($"Expected type {fullName} to exist.");
 
     [Fact]
-    public void WebAuthnClient_ExposesExactlyOnePublicConstructor_TakingAFidoSession()
+    public void WebAuthnClient_ExposesExactlyOnePublicConstructor_TakingACtap2Session()
     {
         var constructor = Assert.Single(
             typeof(WebAuthnClient).GetConstructors(BindingFlags.Public | BindingFlags.Instance));
 
-        Assert.Equal(typeof(IFidoSession), constructor.GetParameters()[0].ParameterType);
+        Assert.Equal(typeof(ICtap2Session), constructor.GetParameters()[0].ParameterType);
     }
 
     [Fact]

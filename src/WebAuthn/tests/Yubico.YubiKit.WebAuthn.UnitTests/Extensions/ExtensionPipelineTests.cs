@@ -14,9 +14,9 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Extensions;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
@@ -82,7 +82,7 @@ public class ExtensionPipelineTests
         // Arrange
         var blobData = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         var inputs = new RegistrationExtensionInputs(
-            CredBlob: new Fido2.Extensions.CredBlobInput { Blob = blobData });
+            CredBlob: new Ctap2.Extensions.CredBlobInput { Blob = blobData });
         var options = CreateMockOptions();
 
         // Act
@@ -152,7 +152,7 @@ public class ExtensionPipelineTests
         // Arrange - combine previewSign with standard extensions that have different lengths
         var inputs = new RegistrationExtensionInputs(
             CredProtect: new CredProtectInput(CredProtectPolicy.UserVerificationRequired), // length 11
-            CredBlob: new Fido2.Extensions.CredBlobInput { Blob = new byte[] { 0x01, 0x02 } }, // length 8
+            CredBlob: new Ctap2.Extensions.CredBlobInput { Blob = new byte[] { 0x01, 0x02 } }, // length 8
             PreviewSign: new WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput(
                 algorithms: new[] { CoseAlgorithm.Es256 })); // length 11
         var options = CreateMockOptions();

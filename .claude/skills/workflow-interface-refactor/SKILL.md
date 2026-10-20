@@ -102,33 +102,33 @@ Track failure count: should decrease with each fix batch.
 
 ## Example: Concrete → Interface Refactor
 
-**Scenario:** Refactor `AuthenticatorConfig` from `FidoSession` to `IFidoSession`
+**Scenario:** Refactor `AuthenticatorConfig` from `Ctap2Session` to `ICtap2Session`
 
 **Step 1: Audit**
 ```bash
 grep -r "new AuthenticatorConfig" tests/ --include="*.cs"
-# Found: AuthenticatorConfigTests.cs creates with FidoSession mock
+# Found: AuthenticatorConfigTests.cs creates with Ctap2Session mock
 ```
 
 **Step 2: Find mock pattern**
 ```csharp
 // Current: Mocking sealed class (NSubstitute can't do this easily)
-var session = Substitute.For<FidoSession>(...); // ❌ Fails - sealed class
+var session = Substitute.For<Ctap2Session>(...); // ❌ Fails - sealed class
 ```
 
 **Step 3: Update production code**
 ```csharp
 // Before
-public class AuthenticatorConfig(FidoSession session, ...)
+public class AuthenticatorConfig(Ctap2Session session, ...)
 
 // After
-public class AuthenticatorConfig(IFidoSession session, ...)
+public class AuthenticatorConfig(ICtap2Session session, ...)
 ```
 
 **Step 4: Update test mocks**
 ```csharp
 // After
-var session = Substitute.For<IFidoSession>(); // ✅ Works - interface
+var session = Substitute.For<ICtap2Session>(); // ✅ Works - interface
 session.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
     .Returns(mockResponse);
 ```

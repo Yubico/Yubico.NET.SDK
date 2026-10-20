@@ -136,8 +136,8 @@ static class SelfCheck
         var testsModule = ModuleAggregator.ModuleOf("src/Piv/tests/PivMetadataProtocolTests.cs");
         yield return ("module-of-tests-path-is-excluded", testsModule is null, $"expected null, got '{testsModule}'");
 
-        var order = ModuleAggregator.OrderModules(["OpenPgp", "Cli.Shared", "Core", "Piv", "Cli.Commands", "Fido2"]);
-        var expectedOrder = new[] { "Core", "Piv", "Fido2", "OpenPgp", "Cli.Commands", "Cli.Shared" };
+        var order = ModuleAggregator.OrderModules(["OpenPgp", "Cli.Shared", "Core", "Piv", "Cli.Commands", "Ctap2"]);
+        var expectedOrder = new[] { "Core", "Piv", "Ctap2", "OpenPgp", "Cli.Commands", "Cli.Shared" };
         yield return ("module-order-core-then-applets-then-alphabetical",
             order.SequenceEqual(expectedOrder),
             $"expected [{string.Join(",", expectedOrder)}], got [{string.Join(",", order)}]");

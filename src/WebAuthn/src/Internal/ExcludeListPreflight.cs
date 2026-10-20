@@ -13,10 +13,9 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 
 namespace Yubico.YubiKit.WebAuthn.Internal;
@@ -34,7 +33,7 @@ namespace Yubico.YubiKit.WebAuthn.Internal;
 /// </para>
 /// <para>
 /// This is the client-layer orchestration that sits between WebAuthn API and raw CTAP.
-/// The Fido2 layer stays CTAP-direct and does not implement this pre-flight logic.
+/// The CTAP2 layer stays protocol-direct and does not implement this pre-flight logic.
 /// </para>
 /// </remarks>
 internal static class ExcludeListPreflight

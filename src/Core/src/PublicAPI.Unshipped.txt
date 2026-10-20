@@ -119,11 +119,11 @@ const Yubico.YubiKit.Core.Credentials.UserPresenceApplications.YubiHsmAuth = "Yu
 Yubico.YubiKit.Core.Credentials.UserPresenceIntent
 static Yubico.YubiKit.Core.Credentials.UserPresenceIntent.BeginScope(string! intent) -> System.IDisposable!
 Yubico.YubiKit.Core.Credentials.UserPresenceOperations
-Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Fido2
-const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Fido2.Selection = "Fido2.Selection" -> string!
-const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Fido2.Reset = "Fido2.Reset" -> string!
-const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Fido2.MakeCredential = "Fido2.MakeCredential" -> string!
-const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Fido2.GetAssertion = "Fido2.GetAssertion" -> string!
+Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Ctap2
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Ctap2.Selection = "Ctap2.Selection" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Ctap2.Reset = "Ctap2.Reset" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Ctap2.MakeCredential = "Ctap2.MakeCredential" -> string!
+const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Ctap2.GetAssertion = "Ctap2.GetAssertion" -> string!
 Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Piv
 const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Piv.SignOrDecrypt = "Piv.SignOrDecrypt" -> string!
 const Yubico.YubiKit.Core.Credentials.UserPresenceOperations.Piv.Decrypt = "Piv.Decrypt" -> string!
@@ -592,8 +592,8 @@ Yubico.YubiKit.Core.Sessions.ApplicationSession.IsInitialized.set -> void
 Yubico.YubiKit.Core.Sessions.ApplicationSession.IsSupported(Yubico.YubiKit.Core.Devices.Feature feature) -> bool
 Yubico.YubiKit.Core.Sessions.ApplicationSession.Logger.get -> Microsoft.Extensions.Logging.ILogger!
 Yubico.YubiKit.Core.Sessions.ApplicationSession.ThrowIfDisposed() -> void
-Yubico.YubiKit.Core.Sessions.RawFidoHidSession
-Yubico.YubiKit.Core.Sessions.RawFidoHidSession.SendAndReceiveAsync(byte command, System.ReadOnlyMemory<byte> payload, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Sessions.RawCtapHidSession
+Yubico.YubiKit.Core.Sessions.RawCtapHidSession.SendAndReceiveAsync(byte command, System.ReadOnlyMemory<byte> payload, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
 Yubico.YubiKit.Core.Sessions.RawOtpHidSession
 Yubico.YubiKit.Core.Sessions.RawOtpHidSession.SendAndReceiveAsync(byte command, System.ReadOnlyMemory<byte> payload, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
 Yubico.YubiKit.Core.Sessions.RawSmartCardSession
@@ -1044,7 +1044,7 @@ static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator <=(Yubico.YubiKit.Co
 static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator ==(Yubico.YubiKit.Core.Devices.FirmwareVersion? left, Yubico.YubiKit.Core.Devices.FirmwareVersion? right) -> bool
 static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator >(Yubico.YubiKit.Core.Devices.FirmwareVersion? left, Yubico.YubiKit.Core.Devices.FirmwareVersion? right) -> bool
 static Yubico.YubiKit.Core.Devices.FirmwareVersion.operator >=(Yubico.YubiKit.Core.Devices.FirmwareVersion? left, Yubico.YubiKit.Core.Devices.FirmwareVersion? right) -> bool
-static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateRawFidoHidSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawFidoHidSession!>!
+static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateRawCtapHidSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawCtapHidSession!>!
 static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateRawOtpHidSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawOtpHidSession!>!
 static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateRawSmartCardSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!
 static Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateRawSmartCardSessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters! scpKeyParameters, Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration? configuration = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!
@@ -1100,7 +1100,7 @@ static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters.operator ==(
 static Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys.GetDefaultKeys() -> Yubico.YubiKit.Core.Protocols.SmartCard.Scp.StaticKeys!
 static Yubico.YubiKit.Core.ServiceLocator.GetService<T>() -> T
 static Yubico.YubiKit.Core.ServiceLocator.SetLocatorProvider(System.IServiceProvider! serviceProvider) -> void
-static Yubico.YubiKit.Core.Sessions.ApplicationIds.Fido2.get -> System.ReadOnlyMemory<byte>
+static Yubico.YubiKit.Core.Sessions.ApplicationIds.Fido.get -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.Core.Sessions.ApplicationIds.FidoU2f.get -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.Core.Sessions.ApplicationIds.Management.get -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.Core.Sessions.ApplicationIds.Oath.get -> System.ReadOnlyMemory<byte>
@@ -1110,7 +1110,7 @@ static Yubico.YubiKit.Core.Sessions.ApplicationIds.Piv.get -> System.ReadOnlyMem
 static Yubico.YubiKit.Core.Sessions.ApplicationIds.SecurityDomain.get -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.Core.Sessions.ApplicationIds.YubiHsmAuth.get -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.Core.Sessions.ApplicationSession.Construct<TSession>(Yubico.YubiKit.Core.Abstractions.IConnection! connection, System.Func<TSession!>! create) -> TSession!
-static Yubico.YubiKit.Core.Sessions.RawFidoHidSession.CreateAsync(Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawFidoHidSession!>!
+static Yubico.YubiKit.Core.Sessions.RawCtapHidSession.CreateAsync(Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawCtapHidSession!>!
 static Yubico.YubiKit.Core.Sessions.RawOtpHidSession.CreateAsync(Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawOtpHidSession!>!
 static Yubico.YubiKit.Core.Sessions.RawSmartCardSession.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!
 static Yubico.YubiKit.Core.Sessions.RawSmartCardSession.CreateAsync(Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection! connection, Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpKeyParameters! scpKeyParameters, Yubico.YubiKit.Core.Devices.FirmwareVersion! firmwareVersion, Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ProtocolConfiguration? configuration = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Sessions.RawSmartCardSession!>!

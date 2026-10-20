@@ -12,7 +12,7 @@ High-level package guidance:
 
 - Core device, transport, connection, APDU, logging, and platform infrastructure move to `Yubico.YubiKit.Core`.
 - Management interfaces move to `Yubico.YubiKit.Management`.
-- Application features are split by applet: `Yubico.YubiKit.Piv`, `Yubico.YubiKit.Fido2`, `Yubico.YubiKit.Oath`, `Yubico.YubiKit.YubiOtp`, `Yubico.YubiKit.OpenPgp`, `Yubico.YubiKit.SecurityDomain`, and `Yubico.YubiKit.YubiHsm`.
+- Application features are split by applet: `Yubico.YubiKit.Piv`, `Yubico.YubiKit.Ctap2`, `Yubico.YubiKit.Oath`, `Yubico.YubiKit.YubiOtp`, `Yubico.YubiKit.OpenPgp`, `Yubico.YubiKit.SecurityDomain`, and `Yubico.YubiKit.YubiHsm`.
 
 Treat package and namespace changes as assisted migrations until the specific v1 type or member mapping is present in `v1-to-v2-map.yml`.
 
@@ -72,7 +72,7 @@ Migration review is required for code that:
 - Reuses one connection across multiple applet sessions.
 - Depends on implicit transport selection.
 
-Every v2 applet package exposes an `IYubiKey.Create{Applet}SessionAsync(...)` extension method (for example `CreatePivSessionAsync`, `CreateFidoSessionAsync`, `CreateOathSessionAsync`, `CreateOpenPgpSessionAsync`, `CreateSecurityDomainSessionAsync`, `CreateHsmAuthSessionAsync`, `CreateYubiOtpSessionAsync`) and `Yubico.YubiKit.Management` exposes `CreateManagementSessionAsync`. These are the preferred v2 entry points: they open the correct connection/transport and construct the session in one call. Treat the underlying connection handling, transport selection defaults, and SCP key parameter plumbing as assisted rather than automatic until the specific v1 call site is reviewed.
+Every v2 applet package exposes an `IYubiKey.Create{Applet}SessionAsync(...)` extension method (for example `CreatePivSessionAsync`, `CreateCtap2SessionAsync`, `CreateOathSessionAsync`, `CreateOpenPgpSessionAsync`, `CreateSecurityDomainSessionAsync`, `CreateHsmAuthSessionAsync`, `CreateYubiOtpSessionAsync`) and `Yubico.YubiKit.Management` exposes `CreateManagementSessionAsync`. These are the preferred v2 entry points: they open the correct connection/transport and construct the session in one call. Treat the underlying connection handling, transport selection defaults, and SCP key parameter plumbing as assisted rather than automatic until the specific v1 call site is reviewed.
 
 Creation policy is grouped in `SessionCreationOptions`. Applet dependency-injection registration methods and
 session-factory delegates from earlier v2 alphas were removed; call the static factory or `IYubiKey` extension.
@@ -123,7 +123,7 @@ the corresponding `IYubiKey.CreateXSessionAsync` extension directly:
 | Removed file/API family | Direct replacement |
 |---|---|
 | Management `DependencyInjection`, `ManagementSessionFactory`, `AddYubiKeyManager` | `ManagementSession.CreateAsync` or `CreateManagementSessionAsync` |
-| FIDO2 `DependencyInjection`, `FidoSessionFactoryDelegate`, `SmartCardFidoSessionFactoryDelegate`, `AddYubiKeyFido2` | `FidoSession.CreateAsync` or `CreateFidoSessionAsync` |
+| FIDO2 `DependencyInjection`, `FidoSessionFactoryDelegate`, `SmartCardFidoSessionFactoryDelegate`, `AddYubiKeyFido2` | `Ctap2Session.CreateAsync` or `CreateCtap2SessionAsync` |
 | OATH `DependencyInjection`, `OathSessionFactory`, `AddOath` | `OathSession.CreateAsync` or `CreateOathSessionAsync` |
 | OpenPGP `DependencyInjection`, `OpenPgpSessionFactory`, `AddOpenPgp` | `OpenPgpSession.CreateAsync` or `CreateOpenPgpSessionAsync` |
 | Security Domain `DependencyInjection`, `SecurityDomainSessionFactory`, `AddYubiKeySecurityDomain` | `SecurityDomainSession.CreateAsync` or `CreateSecurityDomainSessionAsync` |
@@ -152,6 +152,10 @@ var info = await yubiKey.GetFidoInfoAsync(cancellationToken);
 // alpha.3
 var info = await yubiKey.GetFidoInfoAsync(cancellationToken: cancellationToken);
 ```
+
+The alpha.2/alpha.3 names above are historical. In the current CTAP2 surface, use
+`GetCtap2InfoAsync(cancellationToken: cancellationToken)`; see `ctap2-semantic-rename`
+in `v1-to-v2-map.yml` for the related package, session, factory, and operation-string renames.
 
 Copy an application identifier only when an API specifically requires an array:
 
@@ -370,15 +374,15 @@ var info = fido.AuthenticatorInfo;
 V2 reads fresh authenticator info asynchronously:
 
 ```csharp
-using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Ctap2;
 
-var info = await device.GetFidoInfoAsync(cancellationToken: cancellationToken);
+var info = await device.GetCtap2InfoAsync(cancellationToken: cancellationToken);
 ```
 
 For several FIDO2 operations, keep the session open:
 
 ```csharp
-await using var fido = await device.CreateFidoSessionAsync(
+await using var fido = await device.CreateCtap2SessionAsync(
     cancellationToken: cancellationToken);
 
 var info = await fido.GetInfoAsync(cancellationToken);
@@ -590,7 +594,7 @@ Migrate v1 touch notification and the removed alpha `PivSession.OnTouchRequired`
 
 ### FIDO2
 
-Use `Yubico.YubiKit.Fido2` for FIDO2/WebAuthn operations. Review transport selection, PIN/UV flows, credential management, and authenticator state assumptions manually.
+Use `Yubico.YubiKit.Ctap2` for FIDO2 authenticator operations over CTAP2. Review transport selection, PIN/UV flows, credential management, and authenticator state assumptions manually. See `ctap2-semantic-rename` in `v1-to-v2-map.yml` for the current package/session/factory rename.
 
 Touch notification uses `SessionCreationOptions.UserPresencePrompt`. FIDO HID can report the live
 `DeviceWaiting` signal; smart-card FIDO uses policy-based notification. PIN and UV input remain separate.
@@ -599,7 +603,7 @@ Typed response models now preserve the original CBOR envelope for fields this SD
 
 ### WebAuthn
 
-Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new package built on top of `Yubico.YubiKit.Fido2` (`IFidoSession`); v1 had no equivalent package. `WebAuthnClient` accepts an optional `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) that supplies a PIN on demand instead of requiring `pinBytes` up front, and owns a bounded retry loop instead of v1 FIDO2 code's global, unbounded `KeyCollector` pattern; see `webauthn-credential-prompt` in `v1-to-v2-map.yml`.
+Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new package built on top of `Yubico.YubiKit.Ctap2` (`ICtap2Session`); v1 had no equivalent package. `WebAuthnClient` accepts an optional `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) that supplies a PIN on demand instead of requiring `pinBytes` up front, and owns a bounded retry loop instead of v1 FIDO2 code's global, unbounded `KeyCollector` pattern; see `webauthn-credential-prompt` in `v1-to-v2-map.yml`.
 
 WebAuthn touch notification is the separate `IUserPresencePrompt` supplied in the FIDO session's
 `SessionCreationOptions`; over FIDO HID it receives the authenticator's live wait signal.

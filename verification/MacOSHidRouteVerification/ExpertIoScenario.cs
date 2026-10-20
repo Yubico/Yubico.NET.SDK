@@ -42,14 +42,14 @@ internal static class ExpertIoScenario
                     Console.WriteLine($"PHASE_EXPERT_TIMEOUT serial={serial} elapsedMs={timer.Elapsed.TotalMilliseconds:F0} exception={ex.GetType().Name}");
                 }
 
-                await using RawFidoHidSession raw = await RawFidoHidSession.CreateAsync(new ExpertIoConnection(io));
+                await using RawCtapHidSession raw = await RawCtapHidSession.CreateAsync(new ExpertIoConnection(io));
                 await AssertGetInfoAsync(raw);
                 Console.WriteLine($"PHASE_EXPERT_SAME_CONNECTION_INFO serial={serial}");
             }
 
             await using (IHidConnection reopened = fidoInterfaces[0].ConnectToIOReports())
             {
-                await using RawFidoHidSession raw = await RawFidoHidSession.CreateAsync(new ExpertIoConnection(reopened));
+                await using RawCtapHidSession raw = await RawCtapHidSession.CreateAsync(new ExpertIoConnection(reopened));
                 await AssertGetInfoAsync(raw);
             }
             Console.WriteLine($"PASS mode=expert-io serial={serial} timeout=1 sameConnectionInfo=1 reopenInfo=1");
@@ -66,7 +66,7 @@ internal static class ExpertIoScenario
         }
     }
 
-    private static async Task AssertGetInfoAsync(RawFidoHidSession raw)
+    private static async Task AssertGetInfoAsync(RawCtapHidSession raw)
     {
         ReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(0x10, new byte[] { 0x04 });
         if (response.Length < 2 || response.Span[0] != 0)

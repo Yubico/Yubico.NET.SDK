@@ -14,10 +14,9 @@
 
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Internal;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
@@ -78,7 +77,7 @@ public class ExcludeListPreflightTests
 
         // Mock backend to return success (actual response content doesn't matter
         // because chunk.Count == 1 short-circuits to return chunk[0])
-        var mockResponse = MockFido2Responses.CreateMockGetAssertionResponse(credentialId);
+        var mockResponse = MockCtap2Responses.CreateMockGetAssertionResponse(credentialId);
         backend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
@@ -151,7 +150,7 @@ public class ExcludeListPreflightTests
 
         // Descriptor #5 (index 5, first item in second chunk) will match
         var matchingCredentialId = new byte[] { 0x05 };
-        var matchingResponse = MockFido2Responses.CreateMockGetAssertionResponse(matchingCredentialId);
+        var matchingResponse = MockCtap2Responses.CreateMockGetAssertionResponse(matchingCredentialId);
 
         var callCount = 0;
         backend.GetAssertionAsync(

@@ -2,7 +2,7 @@
 
 Guidance for AI agents working in this repository. Yubico.NET.SDK (YubiKit) is a .NET 10 / C# 14 SDK for YubiKey devices. The 2.0 rewrite lives on `develop` and `main`; the source-of-truth root is the `yubikit` branch.
 
-**IMPORTANT:** When working under a subproject (`src/Piv/`, `src/Fido2/`, `src/SecurityDomain/`, etc.) you MUST also read that subproject's `CLAUDE.md` if present. Subproject files contain module-specific patterns, test harness wiring, and protocol context that overrides nothing here but extends it.
+**IMPORTANT:** When working under a subproject (`src/Piv/`, `src/Ctap2/`, `src/SecurityDomain/`, etc.) you MUST also read that subproject's `CLAUDE.md` if present. Subproject files contain module-specific patterns, test harness wiring, and protocol context that overrides nothing here but extends it.
 
 ## Project Overview
 
@@ -15,8 +15,8 @@ Guidance for AI agents working in this repository. Yubico.NET.SDK (YubiKit) is a
 | `Core/` | Device management, connections, APDU pipeline, platform interop |
 | `Management/` | Device info, capability detection, firmware version |
 | `Piv/` | PIV smart-card functionality |
-| `Fido2/` | FIDO2/WebAuthn |
-| `WebAuthn/` | Higher-level WebAuthn surface (delegates to Fido2 — duplicate ZERO behavior) |
+| `Ctap2/` | CTAP2 authenticator operations |
+| `WebAuthn/` | Higher-level WebAuthn surface (delegates to CTAP2 — duplicate ZERO behavior) |
 | `Oath/` | TOTP/HOTP |
 | `YubiOtp/` | Yubico OTP |
 | `OpenPgp/` | OpenPGP card |
@@ -159,7 +159,7 @@ Valid device response data that the SDK does not yet model must not block users.
 `codemapper .` generates the full surface map. The non-obvious patterns:
 
 - **Device discovery** — `IDeviceRepository` + `DeviceMonitorService` (hosted) + `DeviceListenerService` (background). Events flow through one internal `DeviceEventHub` (per-watcher bounded buffers), surfaced as `YubiKeyManager.WatchAsync` (`IAsyncEnumerable`), the only public device change stream. No reactive dependency - see `docs/usage/device-discovery.md`.
-- **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawFidoHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is explicitly unguarded direct raw-connection access, with framing, sequencing, and recovery left to the caller. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
+- **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawCtapHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is explicitly unguarded direct raw-connection access, with framing, sequencing, and recovery left to the caller. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
 - **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
 - **HID vocabulary** — `IYubiKey` is the physical key; `IHidInterface` is an operating-system-exposed report interface enumerated by `FindHidInterfaces`; `IHidConnection` is an opened report connection. Windows `IWindowsHidReportAccess` is the internal report-handle seam, not another physical device.
 - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.

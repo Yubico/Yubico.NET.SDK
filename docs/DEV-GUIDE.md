@@ -1,5 +1,9 @@
 # Developer Guide
 
+## Branches
+
+v2 (this SDK) lives only on `yubikit` and `yubikit-*` branches. `develop` (the repository's default branch) and `main` hold the legacy v1 SDK and share no git history with `yubikit`. Base v2 branches and PRs on `yubikit`, or on the `yubikit-*` branch the work belongs to, and always pass that base explicitly: tools that use the default branch would pick `develop`, and GitHub closes a v2 PR retargeted there. v2 is expected to move to `main` in the future.
+
 ## Stacked PR Workflow
 
 - Use GitHub stacked PRs (`gh stack`) for multi-step work that lands in layers.

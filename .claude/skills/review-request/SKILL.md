@@ -9,7 +9,7 @@ description: Use when completing features or before merging - dispatches code re
 
 - Completing a task in subagent-driven development
 - Finishing a major feature implementation
-- Before merging to main branch
+- Before merging into the base branch (`yubikit` for v2)
 - When stuck and need fresh perspective
 - Before major refactoring (baseline check)
 - After fixing complex bugs
@@ -23,7 +23,7 @@ Dispatch code-reviewer agent to catch issues before they cascade.
 **Mandatory:**
 - After each task in subagent-driven development
 - After completing major feature
-- Before merge to main
+- Before merging into the base branch
 
 **Optional but valuable:**
 - When stuck (fresh perspective)
@@ -34,7 +34,7 @@ Dispatch code-reviewer agent to catch issues before they cascade.
 
 **1. Get git SHAs:**
 ```bash
-BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
+BASE_SHA=$(git rev-parse HEAD~1)  # or the whole branch: $(git merge-base HEAD origin/yubikit) (v1: origin/develop)
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 

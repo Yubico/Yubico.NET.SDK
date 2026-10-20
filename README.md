@@ -4,7 +4,7 @@ A .NET SDK for YubiKey hardware security devices, for applications that need to 
 directly: enterprise tooling, provisioning, custom authenticators, and services that verify or manage
 keys. One package per YubiKey application, all on a shared core.
 
-This is v2, developed on the `yubikit` branch. v1 lives on `develop`; see the
+This is v2, developed on the `yubikit` branch (and `yubikit-*` branches). v1 lives on `develop` and `main`; see the
 [migration guide](docs/migration/v1-to-v2.md) if you are coming from it.
 
 > ## Alpha - not for production

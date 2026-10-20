@@ -32,8 +32,10 @@ The trunk is the branch the bottom PR targets. This repository holds two SDKs wi
 
 | Line | Trunk | How to recognise it |
 |------|-------|---------------------|
-| **v2** (YubiKit rewrite, `toolchain.cs`, `src/<Module>/`) | **`yubikit`** | shares history with `origin/yubikit` |
-| **v1** (legacy `Yubico.YubiKey` SDK) | **`develop`** | shares history with `origin/develop` |
+| **v2** (YubiKit rewrite, `toolchain.cs`, `src/<Module>/`) | **`yubikit`**, or the `yubikit-*` branch the work was cut from | shares history with `origin/yubikit` |
+| **v1** (legacy `Yubico.YubiKey` SDK) | **`develop`** (`main` is v1 releases) | shares history with `origin/develop` |
+
+v2 lives only on `yubikit` and `yubikit-*` branches. It is expected to move to `main` one day; until then, v2 work never targets `develop` or `main`.
 
 `develop` is the repository's **default branch**, and `gh stack init`, `gh stack link` and `gh stack submit` fall back to it when no `--base` is given. For v2 work that is always wrong. A v2 PR retargeted to `develop` has no common history with it, so **GitHub closes the PR immediately and refuses to reopen it or change its base back**. The only recovery is a new PR.
 
@@ -56,7 +58,7 @@ gh stack link --base "$TRUNK" <prs-or-branches...>
 
 Exceptions, both deliberate:
 - **Stacking on someone else's open PR:** the trunk is that PR's head branch, not `yubikit`/`develop`.
-- **Another v2 integration branch** (e.g. `yubikit-applets`, which shares history with `yubikit`): the history check cannot tell them apart. Use the branch the work was cut from (`git log --oneline origin/yubikit-applets..HEAD` is short when it was), or the one the user named.
+- **A `yubikit-*` integration branch** (e.g. `yubikit-applets`, which shares history with `yubikit`): the history check cannot tell them apart. Use the branch the work was cut from (`git log --oneline origin/yubikit-applets..HEAD` is short when it was), or the one the user named.
 
 > ⚠️ Never let a `gh stack` command default its base. If you see `→ develop` (or "Updated base branch ... to develop") on v2 work, stop: that PR is about to be closed.
 

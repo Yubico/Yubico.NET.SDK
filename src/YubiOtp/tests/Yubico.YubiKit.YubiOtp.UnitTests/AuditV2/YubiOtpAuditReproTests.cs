@@ -24,15 +24,35 @@ public sealed class YubiOtpAuditReproTests
         Assert.Throws<ArgumentException>(() => config.ProtectSlot2());
     }
 
-    [Fact(Skip = "Parked: YESDK-1634 (26p) — reproduces an open finding; unskip when fixed")]
+    /// <summary>
+    ///     The request bytes are what ykman sends: challenge.ljust(64, b"\1" if challenge.endswith(b"\0") else b"\0").
+    ///     A short challenge and its explicitly padded 64-byte form are the same request by design; in
+    ///     short-challenge mode the YubiKey reads the final byte as the end marker either way.
+    /// </summary>
+    [Theory]
+    [InlineData(new byte[0], (byte)0x00)]
+    [InlineData(new byte[] { 0x41 }, (byte)0x00)]
+    [InlineData(new byte[] { 0x41, 0x00 }, (byte)0x01)]
+    [InlineData(new byte[] { 0x00 }, (byte)0x01)]
     [Trait("Audit", "YESDK-1634")]
-    public void YESDK1634_DistinctChallengeLengthsDoNotHaveSameRequestBytes()
+    public void YESDK1634_PaddingMatchesYkman(byte[] challenge, byte padByte)
     {
-        byte[] shortChallenge = [0x41];
-        byte[] fixedChallenge = [0x41, .. new byte[63]];
-        byte[] shortRequest = YubiOtpSession.PadHmacChallenge(shortChallenge);
-        byte[] fixedRequest = YubiOtpSession.PadHmacChallenge(fixedChallenge);
+        byte[] expected = [.. challenge, .. Enumerable.Repeat(padByte, 64 - challenge.Length)];
 
-        Assert.NotEqual(shortRequest, fixedRequest);
+        Assert.Equal(expected, YubiOtpSession.PadHmacChallenge(challenge));
+    }
+
+    [Theory]
+    [InlineData(63)]
+    [InlineData(64)]
+    [Trait("Audit", "YESDK-1634")]
+    public void YESDK1634_LongChallengesAreSentAsGiven(int length)
+    {
+        byte[] challenge = Enumerable.Range(1, length).Select(i => (byte)i).ToArray();
+
+        byte[] padded = YubiOtpSession.PadHmacChallenge(challenge);
+
+        Assert.Equal(challenge, padded[..length]);
+        Assert.All(padded[length..], b => Assert.Equal(0x00, b));
     }
 }

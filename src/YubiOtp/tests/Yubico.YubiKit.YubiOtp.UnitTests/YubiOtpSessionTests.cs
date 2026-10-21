@@ -493,16 +493,16 @@ public class YubiOtpSessionTests
             Assert.All(padded[3..], b => Assert.Equal(0x01, b));
         }
 
+        /// <summary>Same as ykman: an empty challenge does not end in 0x00, so it pads with 0x00.</summary>
         [Fact]
-        public void PadHmacChallenge_EmptyChallenge_PadsWithNonZero()
+        public void PadHmacChallenge_EmptyChallenge_PadsWithZero()
         {
             byte[] challenge = [];
 
             var padded = YubiOtpSession.PadHmacChallenge(challenge);
 
-            // Empty challenge: lastByte defaults to 0, so pad with 0x01
             Assert.Equal(64, padded.Length);
-            Assert.All(padded, b => Assert.Equal(0x01, b));
+            Assert.All(padded, b => Assert.Equal(0x00, b));
         }
 
         [Fact]

@@ -207,6 +207,22 @@ public interface IYubiOtpSession : IApplicationSession
     /// <summary>
     /// Performs an HMAC-SHA1 challenge-response operation on the specified slot.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The YubiKey always receives 64 bytes. A shorter challenge is padded with a byte that differs
+    /// from its last byte (0x01 after a trailing 0x00, otherwise 0x00), the same encoding ykman uses.
+    /// </para>
+    /// <para>
+    /// What the YubiKey then hashes depends on how the slot was programmed. In short-challenge mode
+    /// (<see cref="HmacSha1SlotConfiguration.UseShortChallenge"/>, the default, and the only mode ykman
+    /// programs) the final byte of the 64 is the end-of-input marker: the YubiKey discards it together
+    /// with the run of equal bytes before it, so the HMAC covers exactly the challenge given, at most
+    /// 63 bytes. A 64-byte challenge to such a slot therefore loses at least its last byte, and a
+    /// challenge whose bytes are all equal (including an empty one, sent as 64 × 0x00) is hashed as a
+    /// single byte of that value. In fixed mode (<c>UseShortChallenge(false)</c>) all 64 bytes are
+    /// hashed as sent; pass exactly 64 bytes, padded as your verifier expects.
+    /// </para>
+    /// </remarks>
     /// <param name="slot">The slot configured for HMAC-SHA1.</param>
     /// <param name="challenge">The challenge data (up to 64 bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>

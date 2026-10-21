@@ -422,8 +422,10 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <summary>
-    /// Pads the HMAC challenge to 64 bytes. The pad byte must differ from the last byte
-    /// of the challenge to allow the YubiKey to detect the actual data length.
+    /// Pads the HMAC challenge to 64 bytes with a byte that differs from its last byte, the same rule
+    /// as ykman: 0x01 after a trailing 0x00, otherwise 0x00 (so an empty challenge pads with 0x00).
+    /// In short-challenge mode the YubiKey reads the final byte as the end-of-input marker and discards
+    /// the run of equal bytes before it, which is why the pad byte must not equal the last data byte.
     /// </summary>
     internal static byte[] PadHmacChallenge(ReadOnlySpan<byte> challenge)
     {
@@ -432,9 +434,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
         if (challenge.Length < YubiOtpConstants.HmacChallengeSize)
         {
-            byte lastByte = challenge.Length > 0 ? challenge[^1] : (byte)0;
-            byte padByte = lastByte == 0 ? (byte)1 : (byte)0;
-
+            byte padByte = challenge.Length > 0 && challenge[^1] == 0 ? (byte)1 : (byte)0;
             padded.AsSpan(challenge.Length).Fill(padByte);
         }
 

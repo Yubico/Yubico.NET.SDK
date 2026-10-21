@@ -108,7 +108,7 @@ public sealed class OathAuditReproTests
         Assert.Equal("normal", only.Name);
     }
 
-    [Theory(Skip = "Parked: YESDK-1634 (26k) — reproduces an open finding; unskip when fixed")]
+    [Theory]
     [InlineData("delete")]
     [InlineData("rename")]
     [InlineData("calculate")]
@@ -137,6 +137,38 @@ public sealed class OathAuditReproTests
             _ => session.CalculateCodeAsync(foreign, 1_704_067_200, TestContext.Current.CancellationToken)
         });
         Assert.Equal(before, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
+    [InlineData("delete")]
+    [InlineData("rename")]
+    [InlineData("calculate")]
+    [InlineData("code")]
+    [Trait("Audit", "YESDK-1634")]
+    public async Task YESDK1634_CredentialFromThisDeviceIsSentToTheDevice(string operation)
+    {
+        byte[] operationResponse = operation switch
+        {
+            "calculate" => [0x75, 0x01, 0x01, 0x90, 0x00],
+            "code" => [0x76, 0x05, 0x06, 0, 0, 0, 1, 0x90, 0x00],
+            _ => [0x90, 0x00]
+        };
+        var connection = new RecordingSmartCardConnection(SelectResponse(), operationResponse);
+        await using var session = await OathSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        var local = new Credential(session.DeviceId, "shared"u8.ToArray(), null, "shared",
+            OathType.Totp, 30, false);
+        int before = connection.TransmittedCommands.Count;
+
+        await (operation switch
+        {
+            "delete" => session.DeleteCredentialAsync(local, TestContext.Current.CancellationToken),
+            "rename" => session.RenameCredentialAsync(local, null, "renamed", TestContext.Current.CancellationToken),
+            "calculate" => session.CalculateAsync(local, new byte[8], TestContext.Current.CancellationToken),
+            _ => session.CalculateCodeAsync(local, 1_704_067_200, TestContext.Current.CancellationToken)
+        });
+
+        Assert.Equal(before + 1, connection.TransmittedCommands.Count);
     }
 
     [Fact]

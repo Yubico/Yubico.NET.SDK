@@ -1,0 +1,9 @@
+{
+  "name": "yubico-yubikit-ci-tools",
+  "private": true,
+  "description": "Node tools the CI workflows run, pinned here so Dependabot keeps them current and npm ci installs exactly these versions.",
+  "devDependencies": {
+    "@anthropic-ai/claude-code": "2.1.199",
+    "@mermaid-js/mermaid-cli": "11.16.0"
+  }
+}

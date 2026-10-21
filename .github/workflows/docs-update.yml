@@ -75,21 +75,22 @@ jobs:
             echo "has_range=false" >> "$GITHUB_OUTPUT"
           fi
           echo "has_migration_impact=$has_migration_impact" >> "$GITHUB_OUTPUT"
-      - name: Install Claude Code
+      - name: Install pinned Node tools
         if: ${{ steps.impact.outputs.has_migration_impact == 'true' }}
         run: |
-          curl -fsSL https://claude.ai/install.sh | bash -s 2.1.199
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          npm ci --no-audit --no-fund
+          echo "$GITHUB_WORKSPACE/node_modules/.bin" >> "$GITHUB_PATH"
       - name: Update migration documentation
         if: ${{ steps.impact.outputs.has_migration_impact == 'true' }}
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          DISABLE_AUTOUPDATER: '1'
         run: |
           printf '%s\n' \
             'Read and follow `.github/prompts/migration-docs-post-merge.md`.' \
             'The generated context is in `.migration-context/`.' \
             'Update only the allowed migration documentation files.' \
-            | "$HOME/.local/bin/claude" -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write
+            | claude -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write
       - name: Record no-impact migration analysis
         if: ${{ steps.impact.outputs.has_range == 'true' && steps.impact.outputs.has_migration_impact != 'true' }}
         shell: bash
@@ -158,11 +159,12 @@ jobs:
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
           dotnet-version: "10.0.x"
-      - name: Install pinned Mermaid CLI
+      - name: Install pinned Node tools
         shell: bash
         run: |
-          version="$(sed -n 's/^MERMAID_CLI_VERSION="\(.*\)"/\1/p' scripts/architecture/architecture-images.env | head -n 1)"
-          npm install -g "@mermaid-js/mermaid-cli@$version"
+          npm ci --no-audit --no-fund
+          echo "$GITHUB_WORKSPACE/node_modules/.bin" >> "$GITHUB_PATH"
+          export PATH="$GITHUB_WORKSPACE/node_modules/.bin:$PATH"
           bash scripts/architecture/render-architecture.sh --check
       - name: Fetch architecture baseline
         run: git fetch origin +refs/heads/yubikit:refs/remotes/origin/yubikit
@@ -185,21 +187,17 @@ jobs:
         shell: bash
         run: |
           echo "has_affected=$([[ -s .architecture-context/affected-diagrams.txt ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-      - name: Install Claude Code
-        if: ${{ steps.impact.outputs.has_affected == 'true' }}
-        run: |
-          curl -fsSL https://claude.ai/install.sh | bash -s 2.1.199
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Update architecture documentation
         if: ${{ steps.impact.outputs.has_affected == 'true' }}
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          DISABLE_AUTOUPDATER: '1'
         run: |
           printf '%s\n' \
             'Read and follow `.github/prompts/architecture-docs-post-merge.md`.' \
             'The generated context is in `.architecture-context/`.' \
             'Update only the allowed architecture documentation files.' \
-            | "$HOME/.local/bin/claude" -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write,Bash
+            | claude -p --model sonnet --allowedTools Read,Grep,Glob,Edit,Write,Bash
       - name: Enforce architecture-only edits
         if: ${{ steps.impact.outputs.has_affected == 'true' }}
         shell: bash

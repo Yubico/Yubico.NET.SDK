@@ -28,11 +28,12 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - name: Install pinned Mermaid CLI
+      - name: Install pinned Node tools
         shell: bash
         run: |
-          version="$(sed -n 's/^MERMAID_CLI_VERSION="\(.*\)"/\1/p' scripts/architecture/architecture-images.env | head -n 1)"
-          npm install -g "@mermaid-js/mermaid-cli@$version"
+          npm ci --no-audit --no-fund
+          echo "$GITHUB_WORKSPACE/node_modules/.bin" >> "$GITHUB_PATH"
+          export PATH="$GITHUB_WORKSPACE/node_modules/.bin:$PATH"
           bash scripts/architecture/render-architecture.sh --check
 
       - name: Fetch architecture baseline

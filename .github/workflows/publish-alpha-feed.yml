@@ -71,14 +71,13 @@ jobs:
         with:
           subject-path: 'artifacts/packages/*.nupkg'
 
-      - name: Install Sleet
-        run: dotnet tool install -g sleet
+      - name: Restore pinned tools
+        run: dotnet tool restore
 
       - name: Generate static feed
         run: |
-          export PATH="$PATH:$HOME/.dotnet/tools"
-          sleet init --config scripts/alpha/sleet.json --source alpha
-          sleet push artifacts/packages --config scripts/alpha/sleet.json --source alpha --force
+          dotnet sleet init --config scripts/alpha/sleet.json --source alpha
+          dotnet sleet push artifacts/packages --config scripts/alpha/sleet.json --source alpha --force
 
       - name: Assemble Pages content
         run: |

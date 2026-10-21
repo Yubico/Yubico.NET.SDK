@@ -196,7 +196,17 @@ namespace Yubico.YubiKit.Core.Cryptography
         /// <paramref name="privateValue"/> and <paramref name="keyType"/>.
         /// </summary>
         /// <remarks>
-        /// The <paramref name="privateValue"/> is taken as the raw private key data (scalar value).
+        /// <para>
+        /// The <paramref name="privateValue"/> is taken as the raw private key data (scalar value). The
+        /// public point is derived from it by the .NET runtime, and the copies this SDK makes on the way
+        /// are cleared.
+        /// </para>
+        /// <para>
+        /// On macOS the runtime's own derivation keeps a copy of the scalar that it does not clear. This
+        /// is a runtime behaviour, not one the SDK can reach. Supplying the public point yourself through
+        /// <see cref="CreateFromParameters(ECParameters)"/> does not avoid it, because the SDK checks that the point
+        /// belongs to the scalar by signing with the same runtime path.
+        /// </para>
         /// </remarks>
         /// <param name="privateValue">
         /// The borrowed raw private value to copy. The caller retains ownership and remains

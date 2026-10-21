@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
@@ -34,16 +35,8 @@ public class OpenPgpDecryptTests
 
                 // Import an RSA 2048 key into the decryption slot
                 using var rsa = RSA.Create(2048);
-                var parameters = rsa.ExportParameters(includePrivateParameters: true);
-
-                var template = new RsaKeyTemplate(
-                    KeyRef.Dec,
-                    e: parameters.Exponent!,
-                    p: parameters.P!,
-                    q: parameters.Q!);
-
-                var attributes = RsaAttributes.Create(RsaSize.Rsa2048, RsaImportFormat.Standard);
-                await session.PutKeyAsync(KeyRef.Dec, template, attributes);
+                using var key = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
+                await session.PutKeyAsync(KeyRef.Dec, key);
 
                 // Encrypt a message using the public key
                 var plaintext = "Hello RSA decrypt"u8.ToArray();
@@ -70,17 +63,8 @@ public class OpenPgpDecryptTests
 
                 // Import an EC P-256 key into the decryption slot
                 using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
-                var parameters = ecdh.ExportParameters(includePrivateParameters: true);
-
-                var privateKey = parameters.D!;
-                var publicKey = new byte[1 + parameters.Q.X!.Length + parameters.Q.Y!.Length];
-                publicKey[0] = 0x04;
-                parameters.Q.X.CopyTo(publicKey, 1);
-                parameters.Q.Y.CopyTo(publicKey, 1 + parameters.Q.X.Length);
-
-                var template = new EcKeyTemplate(KeyRef.Dec, privateKey, publicKey);
-                var attributes = EcAttributes.Create(KeyRef.Dec, CurveOid.Secp256R1);
-                await session.PutKeyAsync(KeyRef.Dec, template, attributes);
+                using var key = ECPrivateKey.CreateFromEcdh(ecdh);
+                await session.PutKeyAsync(KeyRef.Dec, key);
 
                 // Generate an ephemeral key pair for the other side
                 using var ephemeral = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
@@ -90,12 +74,9 @@ public class OpenPgpDecryptTests
                 ephemeralParams.Q.X.CopyTo(ephemeralPubKey, 1);
                 ephemeralParams.Q.Y.CopyTo(ephemeralPubKey, 1 + ephemeralParams.Q.X.Length);
 
-                // Send the ephemeral public key to the card for ECDH
+                // The card returns the shared x-coordinate, which must equal what the host derives with the same two keys.
                 await session.VerifyPinAsync(DefaultUserPin, extended: true);
                 var sharedSecret = await session.DecryptAsync(ephemeralPubKey);
-
-                // The shared secret should be a 32-byte value (P-256 x-coordinate)
-                Assert.True(sharedSecret.Length > 0);
-                Assert.True(sharedSecret.Length <= 32);
+                Assert.Equal(ephemeral.DeriveRawSecretAgreement(ecdh.PublicKey), sharedSecret.ToArray());
             });
 }

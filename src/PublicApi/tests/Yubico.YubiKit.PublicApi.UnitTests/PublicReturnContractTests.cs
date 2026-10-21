@@ -39,11 +39,7 @@ public sealed class PublicReturnContractTests
         [Mutable("Yubico.YubiKit.Fido2.Pin.PinUvAuthProtocolV2.Encapsulate(System.Collections.Generic.IReadOnlyDictionary<System.Int32, System.Object>): System.ValueTuple<System.Collections.Generic.Dictionary<System.Int32, System.Object>, System.Byte[]>", "System.Collections.Generic.Dictionary<System.Int32, System.Object>")] =
             "Existing low-level PIN/UV protocol implementation transfers an encoded mutable map.",
         [Tuple("Yubico.YubiKit.OpenPgp.OpenPgpAid.Version: System.ValueTuple<System.Int32, System.Int32>", "System.ValueTuple<System.Int32, System.Int32>")] =
-            "Existing AID parser exposes the protocol's two-part version as a pair.",
-        [Mutable("Yubico.YubiKit.OpenPgp.PrivateKeyTemplate.GetComponents(): Yubico.YubiKit.Core.Utilities.Tlv[]", "Yubico.YubiKit.Core.Utilities.Tlv[]")] =
-            "Existing protected template hook transfers disposable TLV components to the base serializer.",
-        [Mutable("Yubico.YubiKit.OpenPgp.RsaKeyTemplate.GetComponents(): Yubico.YubiKit.Core.Utilities.Tlv[]", "Yubico.YubiKit.Core.Utilities.Tlv[]")] =
-            "Existing protected RSA template override transfers disposable TLV components to the base serializer."
+            "Existing AID parser exposes the protocol's two-part version as a pair."
     };
 
     [Fact]

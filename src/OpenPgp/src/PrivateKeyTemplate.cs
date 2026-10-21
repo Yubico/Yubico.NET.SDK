@@ -18,33 +18,21 @@ using Yubico.YubiKit.Core.Utilities;
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     Base class for private key import templates used with PUT_DATA_ODD (INS 0xDB).
+///     The key components of a private key import (PUT DATA ODD, INS 0xDB). The slot is not part of the
+///     template; <see cref="ToBytes" /> takes it, so one import names its slot once.
 /// </summary>
 /// <remarks>
 ///     Wire format:
 ///     <code>
 ///     TLV(0x4D,
-///         CRT bytes
+///         CRT of the slot
 ///         + TLV(0x7F48, concatenated tag+length headers for each component)
 ///         + TLV(0x5F48, concatenated raw values for each component)
 ///     )
 ///     </code>
 /// </remarks>
-public abstract class PrivateKeyTemplate
+internal abstract class PrivateKeyTemplate
 {
-    /// <summary>
-    ///     The Control Reference Template identifying the target key slot.
-    /// </summary>
-    public ReadOnlyMemory<byte> CrtBytes { get; }
-
-    /// <summary>
-    ///     Creates a new private key template for the specified key slot.
-    /// </summary>
-    protected PrivateKeyTemplate(KeyRef keyRef)
-    {
-        CrtBytes = keyRef.GetCrt();
-    }
-
     /// <summary>
     ///     Gets the list of TLV components that make up the key data.
     ///     Each TLV has a tag identifying the component and the raw key bytes as value.
@@ -52,10 +40,11 @@ public abstract class PrivateKeyTemplate
     protected abstract Tlv[] GetComponents();
 
     /// <summary>
-    ///     Serializes the private key template to its wire format for PUT_DATA_ODD.
+    ///     Serializes the private key template to its wire format for PUT_DATA_ODD, addressed to <paramref name="keyRef" />.
     /// </summary>
-    public byte[] ToBytes()
+    public byte[] ToBytes(KeyRef keyRef)
     {
+        var crtBytes = keyRef.GetCrt();
         var components = GetComponents();
         try
         {
@@ -98,11 +87,11 @@ public abstract class PrivateKeyTemplate
                 using var headerTlv = new Tlv(0x7F48, headers);
                 using var valueTlv = new Tlv(0x5F48, values);
 
-                var innerSize = CrtBytes.Length + headerTlv.TotalLength + valueTlv.TotalLength;
+                var innerSize = crtBytes.Length + headerTlv.TotalLength + valueTlv.TotalLength;
                 inner = new byte[innerSize];
-                CrtBytes.Span.CopyTo(inner);
-                headerTlv.AsSpan().CopyTo(inner.AsSpan(CrtBytes.Length));
-                valueTlv.AsSpan().CopyTo(inner.AsSpan(CrtBytes.Length + headerTlv.TotalLength));
+                crtBytes.Span.CopyTo(inner);
+                headerTlv.AsSpan().CopyTo(inner.AsSpan(crtBytes.Length));
+                valueTlv.AsSpan().CopyTo(inner.AsSpan(crtBytes.Length + headerTlv.TotalLength));
 
                 using var outerTlv = new Tlv(0x4D, inner);
                 return outerTlv.AsSpan().ToArray();
@@ -129,7 +118,7 @@ public abstract class PrivateKeyTemplate
 /// <summary>
 ///     RSA private key template in standard format (e, p, q).
 /// </summary>
-public class RsaKeyTemplate : PrivateKeyTemplate
+internal class RsaKeyTemplate : PrivateKeyTemplate
 {
     /// <summary>
     ///     The public exponent (e).
@@ -146,8 +135,7 @@ public class RsaKeyTemplate : PrivateKeyTemplate
     /// </summary>
     public ReadOnlyMemory<byte> Q { get; }
 
-    public RsaKeyTemplate(KeyRef keyRef, ReadOnlyMemory<byte> e, ReadOnlyMemory<byte> p, ReadOnlyMemory<byte> q)
-        : base(keyRef)
+    public RsaKeyTemplate(ReadOnlyMemory<byte> e, ReadOnlyMemory<byte> p, ReadOnlyMemory<byte> q)
     {
         E = e;
         P = p;
@@ -167,7 +155,7 @@ public class RsaKeyTemplate : PrivateKeyTemplate
 ///     RSA private key template in CRT (Chinese Remainder Theorem) format
 ///     (e, p, q, iqmp, dmp1, dmq1, n).
 /// </summary>
-public sealed class RsaCrtKeyTemplate : RsaKeyTemplate
+internal sealed class RsaCrtKeyTemplate : RsaKeyTemplate
 {
     /// <summary>
     ///     The CRT coefficient (q^-1 mod p).
@@ -190,7 +178,6 @@ public sealed class RsaCrtKeyTemplate : RsaKeyTemplate
     public ReadOnlyMemory<byte> N { get; }
 
     public RsaCrtKeyTemplate(
-        KeyRef keyRef,
         ReadOnlyMemory<byte> e,
         ReadOnlyMemory<byte> p,
         ReadOnlyMemory<byte> q,
@@ -198,7 +185,7 @@ public sealed class RsaCrtKeyTemplate : RsaKeyTemplate
         ReadOnlyMemory<byte> dmp1,
         ReadOnlyMemory<byte> dmq1,
         ReadOnlyMemory<byte> n)
-        : base(keyRef, e, p, q)
+        : base(e, p, q)
     {
         Iqmp = iqmp;
         Dmp1 = dmp1;
@@ -220,7 +207,7 @@ public sealed class RsaCrtKeyTemplate : RsaKeyTemplate
 /// <summary>
 ///     EC private key template containing the private scalar and optional public key.
 /// </summary>
-public sealed class EcKeyTemplate : PrivateKeyTemplate
+internal sealed class EcKeyTemplate : PrivateKeyTemplate
 {
     /// <summary>
     ///     The EC private key scalar.
@@ -232,8 +219,7 @@ public sealed class EcKeyTemplate : PrivateKeyTemplate
     /// </summary>
     public ReadOnlyMemory<byte>? PublicKey { get; }
 
-    public EcKeyTemplate(KeyRef keyRef, ReadOnlyMemory<byte> privateKey, ReadOnlyMemory<byte>? publicKey = null)
-        : base(keyRef)
+    public EcKeyTemplate(ReadOnlyMemory<byte> privateKey, ReadOnlyMemory<byte>? publicKey = null)
     {
         PrivateKey = privateKey;
         PublicKey = publicKey;

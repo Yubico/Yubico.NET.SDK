@@ -4,7 +4,9 @@
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using System.Formats.Asn1;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -44,13 +46,10 @@ public sealed class KeysImportCommand : OpenPgpCommand<KeysImportCommand.Setting
 
         var pem = await File.ReadAllTextAsync(settings.PemFile);
 
-        // Determine key type and create appropriate template
-        PrivateKeyTemplate template;
-        AlgorithmAttributes attributes;
-
+        PrivateKey privateKey;
         try
         {
-            (template, attributes) = LoadPrivateKey(pem, keyRef);
+            privateKey = LoadPrivateKey(pem);
         }
         catch (Exception ex)
         {
@@ -58,89 +57,81 @@ public sealed class KeysImportCommand : OpenPgpCommand<KeysImportCommand.Setting
             return 1;
         }
 
-        using var adminPin = GetAdminPin(settings.AdminPin);
-        if (adminPin is null)
+        using (privateKey)
         {
-            OutputHelpers.WriteError("Admin PIN is required.");
-            return 1;
-        }
-
-        await session.VerifyAdminAsync(adminPin.Memory);
-
-        await AnsiConsole.Status()
-            .StartAsync("Importing private key...", async _ =>
+            using var adminPin = GetAdminPin(settings.AdminPin);
+            if (adminPin is null)
             {
-                await session.PutKeyAsync(keyRef, template, attributes);
-            });
+                OutputHelpers.WriteError("Admin PIN is required.");
+                return 1;
+            }
+
+            await session.VerifyAdminAsync(adminPin.Memory);
+
+            await AnsiConsole.Status()
+                .StartAsync("Importing private key...", async _ =>
+                {
+                    await session.PutKeyAsync(keyRef, privateKey);
+                });
+        }
 
         OutputHelpers.WriteSuccess(
             $"Private key imported to {FormatKeyRef(keyRef)} slot.");
         return 0;
     }
 
-    private static (PrivateKeyTemplate Template, AlgorithmAttributes Attributes) LoadPrivateKey(
-        string pem, KeyRef keyRef)
+    /// <summary>
+    ///     Reads a PEM private key: PKCS#8 ("PRIVATE KEY", any supported algorithm), PKCS#1 ("RSA PRIVATE KEY")
+    ///     or SEC1 ("EC PRIVATE KEY").
+    /// </summary>
+    private static PrivateKey LoadPrivateKey(string pem)
     {
-        // Try RSA first
-        try
+        if (!PemEncoding.TryFind(pem, out var fields))
+        {
+            throw new NotSupportedException("No PEM-encoded private key found.");
+        }
+
+        var label = pem[fields.Label];
+        if (label == "PRIVATE KEY")
+        {
+            byte[] der = Convert.FromBase64String(pem[fields.Base64Data]);
+            try
+            {
+                return Pkcs8AlgorithmOid(der) switch
+                {
+                    "1.2.840.113549.1.1.1" => RSAPrivateKey.CreateFromPkcs8(der),
+                    "1.2.840.10045.2.1" => ECPrivateKey.CreateFromPkcs8(der),
+                    "1.3.101.110" or "1.3.101.112" => Curve25519PrivateKey.CreateFromPkcs8(der),
+                    var oid => throw new NotSupportedException($"Unsupported private key algorithm {oid}."),
+                };
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(der);
+            }
+        }
+
+        if (label == "RSA PRIVATE KEY")
         {
             using var rsa = RSA.Create();
             rsa.ImportFromPem(pem);
-            var parameters = rsa.ExportParameters(includePrivateParameters: true);
-
-            var modulusLenBits = parameters.Modulus!.Length * 8;
-            var size = modulusLenBits switch
-            {
-                2048 => RsaSize.Rsa2048,
-                3072 => RsaSize.Rsa3072,
-                4096 => RsaSize.Rsa4096,
-                _ => throw new NotSupportedException(
-                    $"Unsupported RSA key size: {modulusLenBits}")
-            };
-
-            var template = new RsaCrtKeyTemplate(
-                keyRef,
-                parameters.Exponent!,
-                parameters.P!,
-                parameters.Q!,
-                parameters.InverseQ!,
-                parameters.DP!,
-                parameters.DQ!,
-                parameters.Modulus!);
-
-            var attributes = RsaAttributes.Create(size, RsaImportFormat.Crt);
-            return (template, attributes);
-        }
-        catch (CryptographicException)
-        {
-            // Not RSA, try EC
+            return RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
         }
 
-        try
+        if (label == "EC PRIVATE KEY")
         {
             using var ec = ECDsa.Create();
             ec.ImportFromPem(pem);
-            var parameters = ec.ExportParameters(includePrivateParameters: true);
-
-            var curve = parameters.Curve.Oid?.Value switch
-            {
-                "1.2.840.10045.3.1.7" => CurveOid.Secp256R1,
-                "1.3.132.0.34" => CurveOid.Secp384R1,
-                "1.3.132.0.35" => CurveOid.Secp521R1,
-                _ => throw new NotSupportedException(
-                    $"Unsupported curve: {parameters.Curve.Oid?.FriendlyName ?? "unknown"}")
-            };
-
-            var template = new EcKeyTemplate(keyRef, parameters.D!);
-            var attributes = EcAttributes.Create(keyRef, curve);
-            return (template, attributes);
-        }
-        catch (CryptographicException)
-        {
-            // Not ECDSA either
+            return ECPrivateKey.CreateFromParameters(ec.ExportParameters(includePrivateParameters: true));
         }
 
-        throw new NotSupportedException(
-            "Unsupported key format. Expected RSA or ECDSA PEM-encoded private key.");
+        throw new NotSupportedException($"Unsupported PEM label '{label}'. Expected PRIVATE KEY, RSA PRIVATE KEY or EC PRIVATE KEY.");
+    }
+
+    private static string Pkcs8AlgorithmOid(byte[] pkcs8)
+    {
+        var privateKeyInfo = new AsnReader(pkcs8, AsnEncodingRules.DER).ReadSequence();
+        _ = privateKeyInfo.ReadInteger();
+        return privateKeyInfo.ReadSequence().ReadObjectIdentifier();
     }
 }

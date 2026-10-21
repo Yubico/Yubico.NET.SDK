@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -6,25 +7,33 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests.AuditV2;
 
 public sealed class OpenPgpAuditReproTests
 {
-    [Fact(Skip = "Parked: YESDK-1634 (26i) — reproduces an open finding; unskip when fixed")]
+    /// <summary>The import names its slot once: the template CRT is derived from keyRef, never supplied separately.</summary>
+    [Theory]
+    [InlineData(KeyRef.Sig, 0xB6)]
+    [InlineData(KeyRef.Dec, 0xB8)]
+    [InlineData(KeyRef.Aut, 0xA4)]
     [Trait("Audit", "YESDK-1634")]
-    public async Task YESDK1634_ImportDoesNotTargetTemplateSlotInsteadOfRequestedSlot()
+    public async Task YESDK1634_ImportTargetsTheRequestedSlot(KeyRef keyRef, byte crtTag)
     {
         byte[] appData = ApplicationData();
         var connection = new RecordingSmartCardConnection(
             [0x90, 0x00], [0x05, 0x08, 0x00, 0x90, 0x00], appData,
-            [0x90, 0x00], [0x90, 0x00], appData);
+            [0x90, 0x00], // algorithm attributes
+            [0x90, 0x00], [0x90, 0x00], // import, chained in two short APDUs
+            appData);
         await using var session = await OpenPgpSession.CreateAsync(connection,
             cancellationToken: TestContext.Current.CancellationToken);
-        var template = new RsaKeyTemplate(KeyRef.Aut, new byte[] { 0x01, 0x00, 0x01 },
-            new byte[] { 0x03 }, new byte[] { 0x05 });
+        using var rsa = RSA.Create(2048);
+        using var key = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
 
-        await session.PutKeyAsync(KeyRef.Sig, template, RsaAttributes.Create(RsaSize.Rsa2048),
-            TestContext.Current.CancellationToken);
+        await session.PutKeyAsync(keyRef, key, TestContext.Current.CancellationToken);
 
-        byte[] import = Assert.Single(connection.TransmittedCommands, command => command[1] == 0xDB);
-        // The outer 4D length is variable; the first child CRT must be SIG (B6 00), not AUT (A4 00).
-        Assert.Equal([0xB6, 0x00], import.AsSpan(7, 2).ToArray());
+        byte[] attributes = Assert.Single(connection.TransmittedCommands, command => command[1] == 0xDA);
+        Assert.Equal((byte)keyRef.AlgorithmAttributesDo(), attributes[3]);
+        byte[] import = connection.TransmittedCommands.First(command => command[1] == 0xDB);
+        // Short APDU (Lc at [4]); outer 4D with a two-byte length (82 LL LL); the CRT is the first child.
+        Assert.Equal([0x4D, 0x82], import.AsSpan(5, 2).ToArray());
+        Assert.Equal([crtTag, 0x00], import.AsSpan(9, 2).ToArray());
     }
 
     [Theory(Skip = "Parked: YESDK-1633 (25h/26q) — reproduces an open finding; unskip when fixed")]

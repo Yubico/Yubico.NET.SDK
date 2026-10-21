@@ -67,8 +67,8 @@ public class PrivateKeyTemplateTests
         byte[] p = [0xAA, 0xBB];
         byte[] q = [0xCC, 0xDD];
 
-        var template = new RsaKeyTemplate(KeyRef.Sig, e, p, q);
-        var result = template.ToBytes();
+        var template = new RsaKeyTemplate(e, p, q);
+        var result = template.ToBytes(KeyRef.Sig);
 
         // Outer tag must be 0x4D
         using var outer = Tlv.Create(result);
@@ -101,8 +101,8 @@ public class PrivateKeyTemplateTests
         byte[] dmq1 = [0xEE];
         byte[] n = [0xFF];
 
-        var template = new RsaCrtKeyTemplate(KeyRef.Sig, e, p, q, iqmp, dmp1, dmq1, n);
-        var result = template.ToBytes();
+        var template = new RsaCrtKeyTemplate(e, p, q, iqmp, dmp1, dmq1, n);
+        var result = template.ToBytes(KeyRef.Sig);
 
         using var outer = Tlv.Create(result);
         Assert.Equal(0x4D, outer.Tag);
@@ -126,8 +126,8 @@ public class PrivateKeyTemplateTests
     {
         byte[] privateKey = [0x01, 0x02, 0x03, 0x04];
 
-        var template = new EcKeyTemplate(KeyRef.Sig, privateKey);
-        var result = template.ToBytes();
+        var template = new EcKeyTemplate(privateKey);
+        var result = template.ToBytes(KeyRef.Sig);
 
         using var outer = Tlv.Create(result);
         var dict = TlvHelper.DecodeDictionary(outer.Value.Span);
@@ -148,8 +148,8 @@ public class PrivateKeyTemplateTests
         byte[] privateKey = [0x01, 0x02, 0x03, 0x04];
         byte[] publicKey = [0x04, 0x05, 0x06, 0x07, 0x08];
 
-        var template = new EcKeyTemplate(KeyRef.Sig, privateKey, publicKey);
-        var result = template.ToBytes();
+        var template = new EcKeyTemplate(privateKey, publicKey);
+        var result = template.ToBytes(KeyRef.Sig);
 
         using var outer = Tlv.Create(result);
         var dict = TlvHelper.DecodeDictionary(outer.Value.Span);
@@ -173,8 +173,8 @@ public class PrivateKeyTemplateTests
         byte[] p = new byte[128]; // 128 bytes
         byte[] q = new byte[128]; // 128 bytes
 
-        var template = new RsaKeyTemplate(KeyRef.Dec, e, p, q);
-        var result = template.ToBytes();
+        var template = new RsaKeyTemplate(e, p, q);
+        var result = template.ToBytes(KeyRef.Dec);
 
         using var outer = Tlv.Create(result);
         var dict = TlvHelper.DecodeDictionary(outer.Value.Span);

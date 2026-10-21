@@ -1,10 +1,12 @@
+// Copyright 2026 Yubico AB
+// Licensed under the Apache License, Version 2.0.
+
 using System.Buffers;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Credentials;
 
-namespace Yubico.YubiKit.Piv.Authentication;
+namespace Yubico.YubiKit.Core.Credentials;
 
-internal static class PivCredentialAcquisition
+internal static class CredentialAcquisition
 {
     internal static async Task<IMemoryOwner<byte>> AcquireAsync(
         ICredentialPrompt prompt, CredentialPromptContext context, CancellationToken cancellationToken,

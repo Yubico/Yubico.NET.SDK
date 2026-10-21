@@ -182,3 +182,32 @@ dotnet run --project src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj
 - [User interaction](../../docs/usage/user-interaction.md) and [device discovery](../../docs/usage/device-discovery.md) - cross-module guides.
 - [YubiHSM Auth](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-yubihsm-auth.html) - the applet.
 - [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.
+
+## Prompted authentication
+
+Configure a caller-owned `ICredentialPrompt` through `SessionCreationOptions.CredentialPrompt`:
+
+```csharp
+await using var session = await device.CreateHsmAuthSessionAsync(
+    new SessionCreationOptions { CredentialPrompt = credentialProvider, MaxCredentialPromptAttempts = 3 },
+    cancellationToken);
+using var keys = await session.CalculateSessionKeysSymmetricWithPromptAsync(
+    label, peerContext, peerCardCryptogram, cancellationToken);
+await session.DeleteCredentialWithPromptAsync(label, cancellationToken);
+```
+
+The provider returns an exactly sized owned byte buffer, not a secret string. Passwords accept 0..16
+encoded bytes (empty is valid); management keys require exactly 16 raw bytes. Returning `null` declines.
+The session wipes and disposes each owner, including rejected input and late arrivals after cancellation.
+The provider itself remains caller-owned. `HsmAuthCredentialPromptContext.CredentialLabel` identifies
+the target; `Kind` distinguishes its password from the applet-wide management key.
+
+Only confirmed command rejection permits a new acquisition. Local invalid input consumes the bounded
+prompt budget without consuming device retries. Existing explicit-input methods never prompt or retry.
+Keep the peer context and optional cryptogram unchanged until calculation completes; the session does
+not manufacture peer challenges or restart an external handshake. Dispose returned session keys.
+This applet derives keys; applet-only known-answer tests do not verify an external YubiHSM connector.
+
+Session operations reject overlap and callback reentry. A deletion error after transmission does not
+prove the protected action did not occur. See [user interaction](../../docs/usage/user-interaction.md)
+for callback disposal, touch-attempt lifecycle, and cancellation ownership details.

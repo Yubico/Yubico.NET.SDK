@@ -59,7 +59,7 @@ internal sealed class PivPromptedAuthentication(
                 MinLengthBytes = 6,
                 MaxLengthBytes = 8
             };
-            IMemoryOwner<byte> owner = await PivCredentialAcquisition.AcquireAsync(
+            IMemoryOwner<byte> owner = await CredentialAcquisition.AcquireAsync(
                 prompt, context, cancellationToken, session.MarkCredentialCallback).ConfigureAwait(false);
             try
             {
@@ -84,7 +84,7 @@ internal sealed class PivPromptedAuthentication(
             finally
             {
                 // The prompt transfers ownership even when validation, verification, or cancellation fails.
-                PivCredentialAcquisition.Release(owner);
+                CredentialAcquisition.Release(owner);
             }
         }
         throw lastRejection ?? new InvalidOperationException("No PIN was submitted.");
@@ -106,7 +106,7 @@ internal sealed class PivPromptedAuthentication(
                 MinLengthBytes = keyLength,
                 MaxLengthBytes = keyLength
             };
-            IMemoryOwner<byte> owner = await PivCredentialAcquisition.AcquireAsync(
+            IMemoryOwner<byte> owner = await CredentialAcquisition.AcquireAsync(
                 prompt, context, cancellationToken, session.MarkCredentialCallback).ConfigureAwait(false);
             try
             {
@@ -129,7 +129,7 @@ internal sealed class PivPromptedAuthentication(
             }
             finally
             {
-                PivCredentialAcquisition.Release(owner);
+                CredentialAcquisition.Release(owner);
             }
         }
         throw lastRejection ?? new InvalidOperationException("No management key was submitted.");

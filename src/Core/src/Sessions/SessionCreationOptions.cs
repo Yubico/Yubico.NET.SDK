@@ -60,7 +60,7 @@ public sealed class SessionCreationOptions
     /// </remarks>
     public IUserPresencePrompt? UserPresencePrompt { get; init; }
 
-    /// <summary>Gets the caller-owned credential provider, supported by PIV sessions only.</summary>
+    /// <summary>Gets the caller-owned provider for adopted PIV operations and prompted YubiHSM Auth calculation and deletion.</summary>
     public ICredentialPrompt? CredentialPrompt { get; init; }
 
     private int _maxCredentialPromptAttempts = 3;

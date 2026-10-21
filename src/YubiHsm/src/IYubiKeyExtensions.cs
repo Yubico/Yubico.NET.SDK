@@ -44,7 +44,6 @@ public static class IYubiKeyExtensions
             CancellationToken cancellationToken = default)
         {
             var preferredConnectionType = options?.PreferredConnectionType;
-            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, UserPresenceApplications.YubiHsmAuth);
             var transport = yubiKey.ResolveSessionTransport(
                 preferredConnectionType,
                 UserPresenceApplications.YubiHsmAuth,

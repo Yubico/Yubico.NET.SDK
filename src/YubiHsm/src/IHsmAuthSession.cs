@@ -22,6 +22,25 @@ namespace Yubico.YubiKit.YubiHsm;
 /// </summary>
 public interface IHsmAuthSession : IApplicationSession
 {
+    /// <summary>Deletes a named credential using fresh owned management-key input on confirmed rejection only.</summary>
+    /// <param name="label">The exact deletion target; the requested management key is applet-wide.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing deletion.</returns>
+    /// <exception cref="InvalidOperationException">No provider is configured, retry metadata is unusable, or another operation is active.</exception>
+    /// <remarks>Success and communication uncertainty never retry. A cleanup or cancellation failure after transmission does not prove deletion did not occur.</remarks>
+    Task DeleteCredentialWithPromptAsync(string label, CancellationToken cancellationToken = default);
+
+    /// <summary>Calculates symmetric session keys, acquiring a fresh owned password for each confirmed rejection.</summary>
+    /// <param name="label">The exact target credential label.</param>
+    /// <param name="context">Borrowed 16-byte host and peer challenge context; keep stable until completion.</param>
+    /// <param name="cardCryptogram">Optional borrowed peer cryptogram; keep stable until completion.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Caller-owned keys, which must be disposed.</returns>
+    /// <exception cref="InvalidOperationException">No provider is configured, metadata is unusable, or another operation is active.</exception>
+    /// <remarks>Empty supplied password bytes are valid. Only returned command rejection statuses retry; communication uncertainty never retries.</remarks>
+    Task<SessionKeys> CalculateSessionKeysSymmetricWithPromptAsync(string label, ReadOnlyMemory<byte> context,
+        ReadOnlyMemory<byte>? cardCryptogram = null, CancellationToken cancellationToken = default);
+
     /// <summary>
     ///     Lists all credentials stored in the YubiHSM Auth applet.
     /// </summary>

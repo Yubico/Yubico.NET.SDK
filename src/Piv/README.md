@@ -107,6 +107,34 @@ needs firmware 5.3.0; older keys need the overload that takes an explicit `PivAl
 
 ## User interaction
 
+On firmware 5.3 and later, `SessionCreationOptions.CredentialPrompt` enables automatic PIN
+verification before `SignOrDecryptAsync` and management-key authentication before `GenerateKeyAsync`.
+The provider receives a `CredentialPromptContext` with `Application = "PIV"`, the role and scope,
+byte-length bounds, and a device-reported PIN retry count when available. It returns an exactly sized
+`IMemoryOwner<byte>` containing UTF-8 PIN bytes or **raw management-key bytes** (decode any hex input
+in the application). The session wipes and disposes the owner even when verification fails. Requests
+are bounded by `MaxCredentialPromptAttempts` (default 3); a declined request throws
+`CredentialPromptDeclinedException`. Biometric slot policies do not request a typed PIN. A provider
+does not change direct `VerifyPinAsync` or `AuthenticateAsync` calls, and a session without one keeps
+its previous command sequence. Never configure a provider on another applet session: its factory
+rejects the option.
+
+For a signing key with `PivPinPolicy.Once`, a verified PIN can be reused within the session. A key
+with `PivPinPolicy.Always` requests and verifies a fresh PIN before every signature, even if an
+earlier Once verification makes an empty VERIFY status query report "verified".
+The session checks PIN metadata before an Always prompt: it declines to prompt when a valid retry
+count is zero, reports a valid count in the first prompt context, and leaves that count unknown
+when the retry field is absent or unusable.
+
+```csharp
+var options = new SessionCreationOptions { CredentialPrompt = credentials, MaxCredentialPromptAttempts = 3 };
+await using var session = await device.CreatePivSessionAsync(options);
+ReadOnlyMemory<byte> signature = await session.SignOrDecryptAsync(PivSlot.Signature, digest);
+```
+
+`credentials` is a caller-owned `ICredentialPrompt` implementation. The example assumes a configured
+non-touch signing slot and a precomputed digest; changing the slot's key or policy is persistent state.
+
 - Verify the PIN before private-key operations in slots created with `PivPinPolicy.Once` or `Always`.
 - Authenticate the management key before key or certificate writes, retry-limit changes, and key move or delete.
 - Touch follows the slot's `PivTouchPolicy`. `VerifyUvAsync` does fingerprint verification on biometric keys.

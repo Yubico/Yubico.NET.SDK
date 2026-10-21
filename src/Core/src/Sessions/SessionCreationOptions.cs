@@ -60,6 +60,20 @@ public sealed class SessionCreationOptions
     /// </remarks>
     public IUserPresencePrompt? UserPresencePrompt { get; init; }
 
+    /// <summary>Gets the caller-owned credential provider, supported by PIV sessions only.</summary>
+    public ICredentialPrompt? CredentialPrompt { get; init; }
+
+    private int _maxCredentialPromptAttempts = 3;
+
+    /// <summary>Gets the maximum number of fresh credential requests for an operation.</summary>
+    public int MaxCredentialPromptAttempts
+    {
+        get => _maxCredentialPromptAttempts;
+        init => _maxCredentialPromptAttempts = value > 0
+            ? value
+            : throw new ArgumentOutOfRangeException(nameof(MaxCredentialPromptAttempts), "The prompt attempt bound must be positive.");
+    }
+
     /// <summary>
     ///     Creates a copy with the specified preferred connection type.
     /// </summary>
@@ -75,6 +89,8 @@ public sealed class SessionCreationOptions
             ScpKeyParameters = ScpKeyParameters,
             PreferredConnectionType = connectionType,
             FirmwareVersionOverride = FirmwareVersionOverride,
-            UserPresencePrompt = UserPresencePrompt
+            UserPresencePrompt = UserPresencePrompt,
+            CredentialPrompt = CredentialPrompt,
+            MaxCredentialPromptAttempts = MaxCredentialPromptAttempts
         };
 }

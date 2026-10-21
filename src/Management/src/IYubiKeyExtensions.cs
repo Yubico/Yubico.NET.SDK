@@ -104,6 +104,7 @@ public static class IYubiKeyExtensions
         {
             var scpKeyParams = options?.ScpKeyParameters;
             var preferredConnectionType = options?.PreferredConnectionType;
+            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "Management");
             var transport = yubiKey.ResolveSessionTransport(
                 scpKeyParams is not null && preferredConnectionType is null
                     ? ConnectionType.SmartCard

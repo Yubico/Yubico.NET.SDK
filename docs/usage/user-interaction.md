@@ -4,9 +4,11 @@ YubiKit separates secret acquisition from physical user-presence notifications. 
 SDK-to-application callbacks, but they have different contracts:
 
 - `ICredentialPrompt` obtains secret bytes such as a PIN. It returns an exactly sized owned buffer,
-  and the consuming component owns verification and retry policy. It is currently used by
-  `WebAuthnClient` through `WebAuthnClientOptions.CredentialPrompt`; lower-level applet methods still
-  take credentials directly unless their documentation says otherwise.
+  and the consuming component owns verification and retry policy. `WebAuthnClient` configures it through
+  `WebAuthnClientOptions.CredentialPrompt`. PIV supports it through `SessionCreationOptions.CredentialPrompt`
+  for signing and key generation; non-adopting applet factories reject this option instead of ignoring it.
+  A low-level FIDO2 session does not adopt `SessionCreationOptions.CredentialPrompt`; use
+  `WebAuthnClientOptions.CredentialPrompt` for WebAuthn ceremonies.
 - `IUserPresencePrompt` reports that an operation requires or may require a physical touch. It never
   supplies a credential and does not report that the user touched the device. Configure it once in
   `SessionCreationOptions.UserPresencePrompt` for any applet session or one-shot operation that
@@ -26,6 +28,15 @@ await using PivSession session = await yubiKey.CreatePivSessionAsync(
     options,
     cancellationToken);
 ```
+
+For PIV firmware 5.3 or newer, an optional credential provider can supply an encoded PIN when a
+slot's policy requires verification for `SignOrDecryptAsync`, or raw management-key bytes when
+`GenerateKeyAsync` needs authentication. The provider must decode a hex-entered management key itself;
+the SDK accepts its raw 16-, 24-, or 32-byte value. Set `MaxCredentialPromptAttempts` (default 3,
+positive) to bound fresh requests. The session zeroes and disposes each returned owner, including
+rejected or late-arriving buffers. A `null` return throws `CredentialPromptDeclinedException`, not a
+cancellation or device rejection. Direct calls to `VerifyPinAsync` and `AuthenticateAsync` remain
+single attempts; other PIV operations do not prompt. Older firmware keeps the existing signing flow.
 
 `ConsoleUserPresencePrompt` is the reference terminal implementation. It writes `Touch your
 YubiKey.` immediately for certain requests and debounces uncertain requests for about 300 ms so a
@@ -189,7 +200,8 @@ for the user-interface thread. Prompt callbacks must not make re-entrant calls i
 raised them, because the session operation is still in progress.
 
 Session factories snapshot `SessionCreationOptions`, but the session retains the
-`IUserPresencePrompt` reference for its lifetime. The caller owns that service and must keep it alive
+`IUserPresencePrompt` reference for its lifetime, and PIV retains `ICredentialPrompt` the same way.
+The caller owns those services and must keep them alive
 and dispose it, if applicable, only after all sessions using it have ended. The SDK does not dispose
 it.
 

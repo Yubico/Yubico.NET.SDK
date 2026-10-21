@@ -31,3 +31,14 @@ public enum PivManagementKeyType : byte
     /// <summary>AES-256 key (32 bytes, 16-byte challenge) - requires YubiKey 5.4+.</summary>
     Aes256 = 0x0C
 }
+
+internal static class PivManagementKeyTypeExtensions
+{
+    internal static int KeyLength(this PivManagementKeyType type) => type switch
+    {
+        PivManagementKeyType.Aes128 => 16,
+        PivManagementKeyType.TripleDes or PivManagementKeyType.Aes192 => 24,
+        PivManagementKeyType.Aes256 => 32,
+        _ => throw new ArgumentException($"Unsupported management key type: {type}", nameof(type))
+    };
+}

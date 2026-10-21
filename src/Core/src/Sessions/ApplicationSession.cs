@@ -112,6 +112,9 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     /// <summary>Gets whether this session retained a user-presence prompt.</summary>
     internal bool IsUserPresenceNotificationEnabled => _userPresencePrompt is not null;
 
+    /// <summary>Allows an applet to scope its own notification callbacks to an admitted operation.</summary>
+    internal IUserPresencePrompt? SessionUserPresencePrompt => _userPresencePrompt;
+
     /// <summary>Creates the non-null notification handle for one operation.</summary>
     /// <param name="context">The optional policy context determined by the applet session.</param>
     /// <returns>An enabled per-operation handle, or the shared no-op handle.</returns>

@@ -16,7 +16,11 @@ The PIV module implements YubiKey PIV smart-card operations through a single pub
 
 Current structure:
 
-- `PivSession.cs` - public facade, lifecycle, authentication state, user-presence notification, and one-hop delegation.
+- `PivSession.cs` - public facade, operation admission/lifecycle, PIV-only prompt ownership,
+  management-authentication state, user-presence notification, and one-hop delegation.
+- `Authentication/PivPromptedAuthentication.cs` - PIV-only PIN requirement and bounded credential-attempt
+  orchestration for prompted signing and management-key authentication; the session still owns admission,
+  cancellation linked to disposal, and the final management-authentication state transition.
 - `IPivSession.cs` - public session contract.
 - `IYubiKeyExtensions.cs` - `IYubiKey.CreatePivSessionAsync(...)` convenience creation.
 - `Authentication/` - PIN, PUK, and management-key protocol helpers.
@@ -66,6 +70,22 @@ success responses therefore resolve as `Failed`, and raw or untransferred parsed
 `TimedOut` because these exchanges provide no confirmed touch-timeout status.
 
 ## Critical Security Requirements
+
+Prompted `SignOrDecryptAsync` uses one slot metadata snapshot, queries empty VERIFY for Once and
+uncertain policies, and always acquires a fresh PIN for Always: an earlier Once verification can
+return a verified status while an Always signing command rejects it. Match policies pass through
+without typed PIN prompting. For Always, separate PIN metadata supplies an authoritative retry
+count before prompting; a valid zero count stops before requesting a secret, while a missing or
+malformed retry field remains unknown rather than being treated as blocked. The sign command is
+sent once. Prompted
+`GenerateKeyAsync` retries only a rejected host challenge (never a failed witness request or local
+device-response mismatch) and generates once. Every public operation holds a session admission lease,
+preventing another operation from interleaving while a credential callback is outstanding. The
+callback supplies owned raw bytes; zero and dispose each owner even on cancellation or late arrival.
+PIV also wraps both user-presence notification callbacks with the admitted operation's identity:
+disposal initiated inside either callback cannot self-wait, and stale callback contexts cannot
+skip draining a later operation. A 0x6982 key-generation response clears recorded management-key
+authentication without replaying generation, just like SET MANAGEMENT KEY.
 
 PIV handles PINs, PUKs, management keys, private keys, and cryptographic operation payloads.
 

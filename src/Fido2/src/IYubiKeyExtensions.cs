@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -127,6 +128,8 @@ public static class IYubiKeyExtensions
         {
             var scpKeyParams = options?.ScpKeyParameters;
             var preferredConnectionType = options?.PreferredConnectionType;
+            SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(
+                options, UserPresenceApplications.Fido2, FidoSession.CredentialPromptAlternative);
             var transport = yubiKey.ResolveFidoSessionTransport(
                 scpKeyParams is not null && preferredConnectionType is null
                     ? ConnectionType.SmartCard
@@ -169,7 +172,7 @@ public static class IYubiKeyExtensions
             {
                 return yubiKey.ResolveSessionTransport(
                     preferredConnection,
-                    "FIDO2",
+                    UserPresenceApplications.Fido2,
                     FidoTransportOrder);
             }
             catch (NotSupportedException) when (preferredConnection is null)

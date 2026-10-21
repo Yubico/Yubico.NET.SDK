@@ -1,6 +1,9 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core.Abstractions;
+using System.Buffers;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.WebAuthn;
 using Yubico.YubiKit.WebAuthn.Client;
@@ -9,6 +12,58 @@ namespace Yubico.YubiKit.PublicApi.UnitTests;
 
 public sealed class FactoryShapeTests
 {
+    [Fact]
+    public async Task NonAdoptingDeviceFactories_RejectCredentialPromptBeforeConnecting()
+    {
+        var options = new SessionCreationOptions { CredentialPrompt = new DecliningPrompt() };
+        foreach (var (session, _, factoryName) in AppletSessionShapeTests.Sessions)
+        {
+            if (session.Name == "PivSession")
+                continue;
+            MethodInfo factory = AppletSessionShapeTests.GetDeviceExtensionMethods(session)
+                .Single(method => method.Name == factoryName);
+            var task = (Task)(factory.Invoke(null, [null, options, CancellationToken.None])
+                ?? throw new InvalidOperationException("Factory returned no task"));
+            await Assert.ThrowsAsync<ArgumentException>(() => task);
+        }
+    }
+
+    private sealed class DecliningPrompt : ICredentialPrompt
+    {
+        public ValueTask<IMemoryOwner<byte>?> RequestSecretAsync(CredentialPromptContext context, CancellationToken cancellationToken) =>
+            ValueTask.FromResult<IMemoryOwner<byte>?>(null);
+    }
+
+    [Fact]
+    public async Task NonAdoptingDirectFactories_RejectCredentialPromptWithoutTransportExchange()
+    {
+        var connection = DispatchProxy.Create<ISmartCardConnection, NoTransportCalls>();
+        var options = new SessionCreationOptions { CredentialPrompt = new DecliningPrompt() };
+        foreach (var (session, _, factoryName) in AppletSessionShapeTests.Sessions)
+        {
+            if (session.Name == "PivSession")
+                continue;
+            MethodInfo method = session.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                .Single(m => m.Name == "CreateAsync");
+            var task = (Task)(method.Invoke(null, [connection, options, CancellationToken.None])
+                ?? throw new InvalidOperationException("Factory returned no task"));
+            var directError = await Assert.ThrowsAsync<ArgumentException>(() => task);
+            MethodInfo extension = AppletSessionShapeTests.GetDeviceExtensionMethods(session)
+                .Single(method => method.Name == factoryName);
+            var deviceTask = (Task)(extension.Invoke(null, [null, options, CancellationToken.None])
+                ?? throw new InvalidOperationException("Factory returned no task"));
+            var deviceError = await Assert.ThrowsAsync<ArgumentException>(() => deviceTask);
+            Assert.Equal(directError.Message, deviceError.Message);
+            if (session.Name == "FidoSession")
+                Assert.Contains("WebAuthnClientOptions.CredentialPrompt", directError.Message);
+        }
+    }
+
+    public class NoTransportCalls : DispatchProxy
+    {
+        protected override object? Invoke(MethodInfo? targetMethod, object?[]? args) =>
+            throw new InvalidOperationException($"Unexpected connection access: {targetMethod?.Name}");
+    }
     [Fact]
     public void AppletFactories_UseUniformOptionsAndCancellationShape()
     {

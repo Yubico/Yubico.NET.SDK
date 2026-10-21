@@ -27,6 +27,12 @@ public record CredentialPromptContext
     /// <summary>Gets the kind of secret being requested.</summary>
     public required CredentialKind Kind { get; init; }
 
+    /// <summary>Gets the applet requesting the secret, when known.</summary>
+    public string? Application { get; init; }
+
+    /// <summary>Gets the minimum accepted length measured in encoded bytes.</summary>
+    public int MinLengthBytes { get; init; }
+
     /// <summary>
     /// Gets a display-oriented description of what the secret unlocks, such as
     /// a relying-party identifier (<c>"example.com"</c>) for WebAuthn or an

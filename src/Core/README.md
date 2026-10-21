@@ -70,6 +70,11 @@ contexts set `Operation` to a unique constant such as `UserPresenceOperations.Fi
 can switch on it directly. Wrap a call in `UserPresenceIntent.BeginScope("approve the transfer")` to pass the
 application's reason to the prompt as `UserPresenceContext.Intent`.
 
+PIV also accepts `SessionCreationOptions.CredentialPrompt` for on-demand PIN verification when signing
+and management-key authentication when generating a key. `MaxCredentialPromptAttempts` defaults to
+three. Other applet factories reject a credential provider until they support interactive credentials;
+the provider remains caller-owned. See the [PIV guide](../Piv/README.md#user-interaction).
+
 ### Select one device
 
 ```csharp

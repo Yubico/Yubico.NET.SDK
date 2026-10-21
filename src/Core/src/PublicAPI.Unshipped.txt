@@ -40,6 +40,13 @@ Yubico.YubiKit.Core.Credentials.CredentialKind.Pin = 0 -> Yubico.YubiKit.Core.Cr
 Yubico.YubiKit.Core.Credentials.CredentialKind.Puk = 1 -> Yubico.YubiKit.Core.Credentials.CredentialKind
 Yubico.YubiKit.Core.Credentials.CredentialKind.ResetCode = 7 -> Yubico.YubiKit.Core.Credentials.CredentialKind
 Yubico.YubiKit.Core.Credentials.CredentialPromptContext
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.Application.get -> string?
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.Application.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.MinLengthBytes.get -> int
+Yubico.YubiKit.Core.Credentials.CredentialPromptContext.MinLengthBytes.init -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptDeclinedException
+Yubico.YubiKit.Core.Credentials.CredentialPromptDeclinedException.CredentialPromptDeclinedException(Yubico.YubiKit.Core.Credentials.CredentialKind kind) -> void
+Yubico.YubiKit.Core.Credentials.CredentialPromptDeclinedException.Kind.get -> Yubico.YubiKit.Core.Credentials.CredentialKind
 Yubico.YubiKit.Core.Credentials.CredentialPromptContext.CredentialPromptContext() -> void
 Yubico.YubiKit.Core.Credentials.CredentialPromptContext.CredentialPromptContext(Yubico.YubiKit.Core.Credentials.CredentialPromptContext! original) -> void
 Yubico.YubiKit.Core.Credentials.CredentialPromptContext.IsRetry.get -> bool
@@ -602,6 +609,10 @@ Yubico.YubiKit.Core.Sessions.RawSmartCardSession.SelectAsync(System.ReadOnlyMemo
 Yubico.YubiKit.Core.Sessions.RawSmartCardSession.TransmitAndReceiveAsync(Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduCommand command, bool throwOnError = true, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse>!
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion?
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.CredentialPrompt.get -> Yubico.YubiKit.Core.Credentials.ICredentialPrompt?
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.CredentialPrompt.init -> void
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.MaxCredentialPromptAttempts.get -> int
+Yubico.YubiKit.Core.Sessions.SessionCreationOptions.MaxCredentialPromptAttempts.init -> void
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride.init -> void
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.PreferredConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType?
 Yubico.YubiKit.Core.Sessions.SessionCreationOptions.PreferredConnectionType.init -> void

@@ -133,6 +133,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         var firmwareVersionOverride = options?.FirmwareVersionOverride;
 
         ValidatePreferredConnectionType(connection, options);
+        SessionCreationOptionsValidation.RejectUnsupportedCredentialPrompt(options, "Security Domain");
 
         // A session that fails to initialize must not keep its claim on the connection: the connection
         // outlives it, and the next session over it would otherwise be refused forever.

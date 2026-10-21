@@ -14,9 +14,10 @@ on:
       - docs/architecture/**
   workflow_dispatch:
 
+# The generator jobs read the repository and run an external tool with an API token; only
+# create-pr may write. Job-level grants below widen this for that job alone.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: docs-yubikit
@@ -33,6 +34,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: yubikit
+          persist-credentials: false
       - name: Fetch migration baselines
         run: |
           git fetch origin +refs/heads/develop:refs/remotes/origin/develop
@@ -155,6 +157,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: yubikit
+          persist-credentials: false
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
@@ -257,6 +260,9 @@ jobs:
     needs: [ migration, architecture ]
     if: ${{ always() && needs.migration.result == 'success' && needs.architecture.result == 'success' && (needs.migration.outputs.has_changes == 'true' || needs.architecture.outputs.has_changes == 'true') }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Check out yubikit
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5

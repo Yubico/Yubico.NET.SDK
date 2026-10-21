@@ -100,19 +100,25 @@ public sealed class KdfNone : Kdf
 }
 
 /// <summary>
-///     Iterated-Salted-S2K key derivation as defined in OpenPGP (RFC 4880 §3.7.1.3).
+///     Iterated and Salted String-to-Key derivation (RFC 9580 §3.7.1.3), as the OpenPGP card's KDF-DO
+///     applies it to PINs.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         IMPORTANT: The <c>IterationCount</c> is the total number of BYTES to feed into the
-///         hash function, NOT the number of rounds. The salt+pin data is repeated until the
-///         byte count is reached, then the hash is finalized once.
+///         <c>IterationCount</c> is the total number of bytes fed to one hash computation, not a number
+///         of rounds; the card stores it as an unsigned 32-bit value. The salt followed by the PIN is
+///         repeated until that many bytes have been hashed, then the hash is finalised once. When the
+///         count is smaller than salt plus PIN, one full copy is hashed anyway: "at least one copy of
+///         the full salt plus passphrase will be provided as input to each hash context regardless of
+///         the octet count" (RFC 9580 §3.7.1.3). This is what GnuPG computes (libgcrypt
+///         <c>GCRY_KDF_ITERSALTED_S2K</c>), so PINs set by either side verify on the other.
 ///     </para>
 ///     <para>
-///         This is NOT PBKDF2. The algorithm is:
+///         This is not PBKDF2. The algorithm is:
 ///         <code>
 ///         data = salt + pin_bytes
-///         (data_count, trailing) = divmod(iteration_count, len(data))
+///         total = max(iteration_count, len(data))
+///         (data_count, trailing) = divmod(total, len(data))
 ///         feed data data_count times into hash
 ///         feed data[:trailing] into hash
 ///         return hash.finalize()
@@ -141,9 +147,16 @@ public sealed class KdfIterSaltedS2k : Kdf
     public KdfHashAlgorithm HashAlgorithm { get; init; }
 
     /// <summary>
-    ///     The total number of bytes to feed into the hash function.
+    ///     The total number of bytes to feed into the hash function, 0 to <see cref="uint.MaxValue" />.
     /// </summary>
-    public int IterationCount { get; init; }
+    /// <exception cref="ArgumentOutOfRangeException">The value does not fit the card's unsigned 32-bit field.</exception>
+    public long IterationCount
+    {
+        get;
+        init => field = value is >= 0 and <= uint.MaxValue
+            ? value
+            : throw new ArgumentOutOfRangeException(nameof(IterationCount), value, "The KDF iteration count is an unsigned 32-bit value.");
+    }
 
     /// <summary>
     ///     8-byte salt for the User PIN.
@@ -233,9 +246,10 @@ public sealed class KdfIterSaltedS2k : Kdf
     /// <summary>
     ///     Performs the iterated-salted-S2K hash computation.
     /// </summary>
-    internal static byte[] DoProcess(KdfHashAlgorithm hashAlgorithm, int iterationCount, ReadOnlySpan<byte> data)
+    internal static byte[] DoProcess(KdfHashAlgorithm hashAlgorithm, long iterationCount, ReadOnlySpan<byte> data)
     {
-        var (dataCount, trailing) = Math.DivRem(iterationCount, data.Length);
+        // RFC 9580 §3.7.1.3: never less than one full salt + PIN.
+        var (dataCount, trailing) = Math.DivRem(Math.Max(iterationCount, data.Length), data.Length);
 
         using var incrementalHash = hashAlgorithm switch
         {
@@ -244,14 +258,14 @@ public sealed class KdfIterSaltedS2k : Kdf
             _ => throw new ArgumentOutOfRangeException(nameof(hashAlgorithm)),
         };
 
-        for (var i = 0; i < dataCount; i++)
+        for (long i = 0; i < dataCount; i++)
         {
             incrementalHash.AppendData(data);
         }
 
         if (trailing > 0)
         {
-            incrementalHash.AppendData(data[..trailing]);
+            incrementalHash.AppendData(data[..(int)trailing]);
         }
 
         return incrementalHash.GetHashAndReset();
@@ -320,7 +334,7 @@ public sealed class KdfIterSaltedS2k : Kdf
         new()
         {
             HashAlgorithm = (KdfHashAlgorithm)data[0x82].Span[0],
-            IterationCount = (int)BinaryPrimitives.ReadUInt32BigEndian(data[0x83].Span),
+            IterationCount = BinaryPrimitives.ReadUInt32BigEndian(data[0x83].Span),
             SaltUser = data[0x84],                                                // init setter clones
             SaltReset = data.TryGetValue(0x85, out var sr) ? sr : null,           // init setter clones
             SaltAdmin = data.TryGetValue(0x86, out var sa) ? sa : null,           // init setter clones

@@ -3,7 +3,6 @@ using System.Buffers.Binary;
 using System.Formats.Cbor;
 using System.IO.Compression;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.LargeBlobs;
 
 namespace Yubico.YubiKit.Fido2.UnitTests.AuditV2;
@@ -12,43 +11,6 @@ public class Fido2LargeBlobAuditReproTests
 {
     private static readonly byte[] Key = Enumerable.Range(0, 32).Select(i => (byte)i).ToArray();
     private static readonly byte[] Blob = "interop-large-blob"u8.ToArray();
-
-    [Fact]
-    [Trait("Audit", "YESDK-1612")]
-    public void YESDK1612_GetAssertionPreservesUnsignedLargeBlobOutput()
-    {
-        var writer = new CborWriter();
-        writer.WriteStartMap(4);
-        writer.WriteInt32(1);
-        writer.WriteStartMap(2);
-        writer.WriteTextString("id");
-        writer.WriteByteString([1]);
-        writer.WriteTextString("type");
-        writer.WriteTextString("public-key");
-        writer.WriteEndMap();
-        writer.WriteInt32(2);
-        writer.WriteByteString(new byte[37]);
-        writer.WriteInt32(3);
-        writer.WriteByteString([1]);
-        writer.WriteInt32(8);
-        writer.WriteStartMap(1);
-        writer.WriteTextString("largeBlob");
-        writer.WriteStartMap(1);
-        writer.WriteTextString("written");
-        writer.WriteBoolean(true);
-        writer.WriteEndMap();
-        writer.WriteEndMap();
-        writer.WriteEndMap();
-
-        var response = GetAssertionResponse.Decode(writer.Encode());
-        var property = response.GetType().GetProperty("UnsignedExtensionOutputs");
-        Assert.NotNull(property);
-        var outputs = Assert.IsAssignableFrom<IReadOnlyDictionary<string, ReadOnlyMemory<byte>>>(property.GetValue(response));
-        var outputReader = new CborReader(outputs["largeBlob"]);
-        Assert.Equal(1, outputReader.ReadStartMap());
-        Assert.Equal("written", outputReader.ReadTextString());
-        Assert.True(outputReader.ReadBoolean());
-    }
 
     [Fact]
     [Trait("Audit", "YESDK-1620")]

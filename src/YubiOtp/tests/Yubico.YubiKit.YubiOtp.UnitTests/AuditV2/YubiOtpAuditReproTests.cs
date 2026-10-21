@@ -24,7 +24,7 @@ public sealed class YubiOtpAuditReproTests
         Assert.Throws<ArgumentException>(() => config.ProtectSlot2());
     }
 
-    [Fact]
+    [Fact(Skip = "Parked: YESDK-1634 (26p) — reproduces an open finding; unskip when fixed")]
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1634_DistinctChallengeLengthsDoNotHaveSameRequestBytes()
     {

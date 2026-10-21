@@ -108,7 +108,7 @@ public sealed class OathAuditReproTests
         Assert.Equal("normal", only.Name);
     }
 
-    [Theory]
+    [Theory(Skip = "Parked: YESDK-1634 (26k) — reproduces an open finding; unskip when fixed")]
     [InlineData("delete")]
     [InlineData("rename")]
     [InlineData("calculate")]

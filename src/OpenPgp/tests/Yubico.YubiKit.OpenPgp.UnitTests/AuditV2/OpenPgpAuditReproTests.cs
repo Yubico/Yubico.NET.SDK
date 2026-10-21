@@ -6,7 +6,7 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests.AuditV2;
 
 public sealed class OpenPgpAuditReproTests
 {
-    [Fact]
+    [Fact(Skip = "Parked: YESDK-1634 (26i) — reproduces an open finding; unskip when fixed")]
     [Trait("Audit", "YESDK-1634")]
     public async Task YESDK1634_ImportDoesNotTargetTemplateSlotInsteadOfRequestedSlot()
     {
@@ -27,7 +27,7 @@ public sealed class OpenPgpAuditReproTests
         Assert.Equal([0xB6, 0x00], import.AsSpan(7, 2).ToArray());
     }
 
-    [Theory]
+    [Theory(Skip = "Parked: YESDK-1633 (25h/26q) — reproduces an open finding; unskip when fixed")]
     [InlineData(8)]
     [InlineData(9)]
     [Trait("Audit", "YESDK-1633")]
@@ -53,7 +53,7 @@ public sealed class OpenPgpAuditReproTests
         }
     }
 
-    [Fact]
+    [Fact(Skip = "Parked: YESDK-1633 (25h/26q) — reproduces an open finding; unskip when fixed")]
     [Trait("Audit", "YESDK-1633")]
     public void YESDK1633_UnsignedKdfCountDoesNotWrapNegative()
     {

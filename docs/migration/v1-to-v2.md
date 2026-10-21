@@ -27,6 +27,10 @@ Review code that assumes:
 - A device object that directly owns all applet operations.
 - Synchronous connection setup for operations that are async in v2.
 
+### Connection Recovery Proof
+
+V1 connection and session disposal never had to prove that native resources were released before a later open was allowed; failure paths after an abandoned exchange relied on best-effort cleanup. V2 tracks this explicitly: `IYubiKey.ConnectAsync()`/`ConnectAsync<TConnection>()` can now throw `UnrecoveredConnectionException` (`Yubico.YubiKit.Core.Devices`) when a previous native connection or discovery operation for the same physical YubiKey could not be proven released. The managed physical-interface claim is then retained rather than cleared, so later `ConnectAsync` calls for that device keep failing until the underlying reader or driver failure is resolved and the process restarts. There is no v1 equivalent to migrate from; catch this alongside the existing `ConnectionInUseException` at `ConnectAsync` call sites. See `core-connection-recovery-proof` in `v1-to-v2-map.yml` and [Raw Access Tiers](../architecture/raw-access-tiers.md) for the full native-recovery behavior backing this contract.
+
 ### HID Listener Callbacks
 
 V1 low-level HID listeners used `Yubico.Core.Devices.Hid.HidDeviceListener.Arrived` and `Removed` events (`EventHandler<HidDeviceEventArgs>`) carrying the affected `IHidDevice`. V1 YubiKey-level monitoring used `YubiKeyDeviceListener.Arrived`/`Removed` and the `YubiKeyDevice.FindAll()` cache. In v2, the low-level `Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener.DeviceEvent` callback is `Action<HidDeviceRescanHint>?`: a diagnostic rescan hint with `HidDeviceChangeKind` plus optional platform identifier/path. It is not authoritative physical-device state. Applications that need real YubiKey arrivals and removals should use `YubiKeyManager.WatchAsync`, which emits after the device repository rescans and diffs the discovered device set.

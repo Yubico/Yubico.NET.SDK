@@ -1,10 +1,10 @@
-using Yubico.YubiKit.Core.Transports.Hid.MacOS;
-using Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
+using System.Buffers.Binary;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
-using System.Buffers.Binary;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.Hid.MacOS;
+using Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
 
 namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid;
 
@@ -14,8 +14,13 @@ public class MacOSHidFidoRouteLifetimeTests
     public async Task RegisteredMacSlotClaimsBeforeOpenAndReleasesAfterTeardown()
     {
         var bridge = new ControlledBridge();
-        var descriptor = new HidDescriptorInfo { VendorId = 0x1050, ProductId = 0x0407,
-            UsagePage = 0xF1D0, Usage = 1 };
+        var descriptor = new HidDescriptorInfo
+        {
+            VendorId = 0x1050,
+            ProductId = 0x0407,
+            UsagePage = 0xF1D0,
+            Usage = 1
+        };
         var slot = new HidConnectionSlot(new MacOSHidInterface(13579, descriptor), bridge);
         var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([slot.InterfaceId], TestContext.Current.CancellationToken);
         var opening = slot.OpenRegisteredConnectionAsync(claim, TestContext.Current.CancellationToken);
@@ -45,8 +50,12 @@ public class MacOSHidFidoRouteLifetimeTests
     public async Task KeepaliveCancellationSendsOneCancelDrainsAndReusesTheSameChannel()
     {
         using var abandoned = new CancellationTokenSource();
-        var bridge = new ControlledBridge { RespondToInit = true, RespondToVendor = true,
-            CancelAfterKeepalive = abandoned }; bridge.ReleaseOpen.SetResult();
+        var bridge = new ControlledBridge
+        {
+            RespondToInit = true,
+            RespondToVendor = true,
+            CancelAfterKeepalive = abandoned
+        }; bridge.ReleaseOpen.SetResult();
         await using var connection = await MacOSFidoHidConnection.OpenAsync(1, bridge, TestContext.Current.CancellationToken);
         using var protocol = new FidoHidProtocol(connection);
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => protocol.SendVendorCommandAsync(
@@ -63,17 +72,18 @@ public class MacOSHidFidoRouteLifetimeTests
 
     private sealed class InitializingSession(IFidoHidConnection connection) : ApplicationSession(connection)
     {
-        internal static async Task<InitializingSession> CreateAsync(IFidoHidConnection connection, CancellationToken token)
-        {
-            var session = Construct(connection, () => new InitializingSession(connection));
-            try
-            {
-                await session.InitializeProtocolAsync(new FidoHidProtocol(connection),
-                    new FirmwareVersion(5, 8, 0), cancellationToken: token);
-                return session;
-            }
-            catch { session.DisposeAfterInitializationFailure(); throw; }
-        }
+        internal static Task<InitializingSession> CreateAsync(IFidoHidConnection connection, CancellationToken token) =>
+            ConstructInitializedAsync(
+                connection,
+                null,
+                () => new InitializingSession(connection),
+                async (session, cancellationToken) =>
+                {
+                    var protocol = await session.CreateProtocolAsync(null, cancellationToken);
+                    await session.InitializeProtocolAsync(protocol,
+                        new FirmwareVersion(5, 8, 0), cancellationToken: cancellationToken);
+                },
+                token);
     }
 
     [Fact]
@@ -164,13 +174,13 @@ public class MacOSHidFidoRouteLifetimeTests
             {
                 var bridge = new ControlledBridge { CloseResult = 6 }; bridge.ReleaseOpen.SetResult();
                 const string interfaceId = "hid:close-fault-test";
-                 var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([interfaceId], TestContext.Current.CancellationToken);
-                 var connection = await MacOSFidoHidConnection.OpenAsync(1, bridge, TestContext.Current.CancellationToken, claim);
-                 var read = connection.ReceiveAsync(CancellationToken.None);
-                 await Assert.ThrowsAsync<Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
-                 Assert.True(read.IsCompleted);
-                 await Assert.ThrowsAsync<InvalidOperationException>(() => read);
-                 await Assert.ThrowsAsync<Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
+                var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([interfaceId], TestContext.Current.CancellationToken);
+                var connection = await MacOSFidoHidConnection.OpenAsync(1, bridge, TestContext.Current.CancellationToken, claim);
+                var read = connection.ReceiveAsync(CancellationToken.None);
+                await Assert.ThrowsAsync<Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
+                Assert.True(read.IsCompleted);
+                await Assert.ThrowsAsync<InvalidOperationException>(() => read);
+                await Assert.ThrowsAsync<Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
                 Assert.Equal(1, bridge.DestroyCount);
                 Assert.Equal(0, bridge.ReleaseCount);
                 Assert.True(DeviceConnectionRegistry.IsInUse(interfaceId));

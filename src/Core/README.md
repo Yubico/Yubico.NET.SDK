@@ -70,6 +70,12 @@ contexts set `Operation` to a unique constant such as `UserPresenceOperations.Fi
 can switch on it directly. Wrap a call in `UserPresenceIntent.BeginScope("approve the transfer")` to pass the
 application's reason to the prompt as `UserPresenceContext.Intent`.
 
+Applet factories share connection binding, protocol preparation, and failure cleanup in `ApplicationSession`.
+SCP requires PC/SC SmartCard: requesting it on a HID connection fails before any initialization commands are
+sent. FIDO HID channels are prepared before applet discovery; SCP is established after selection and firmware
+discovery. A failed direct factory releases its session claim without disposing the caller's connection.
+Raw FIDO sessions still defer channel initialization until the first operation.
+
 ### Select one device
 
 ```csharp

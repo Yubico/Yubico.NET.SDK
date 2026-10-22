@@ -19,6 +19,7 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -28,6 +29,24 @@ namespace Yubico.YubiKit.YubiOtp.UnitTests;
 
 public class YubiOtpSessionTests
 {
+    [Fact]
+    public async Task CreateAsync_WithScpOnHid_RejectsBeforeStatusReadAndReleasesClaim()
+    {
+        var connection = Substitute.For<IOtpHidConnection>();
+        connection.Type.Returns(ConnectionType.HidOtp);
+        connection.FeatureReportSize.Returns(8);
+        using var scp = Scp03KeyParameters.Default;
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => YubiOtpSession.CreateAsync(
+            connection, new SessionCreationOptions { ScpKeyParameters = scp }, TestContext.Current.CancellationToken));
+
+        await connection.DidNotReceive().SendAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        await connection.DidNotReceive().ReceiveAsync(Arg.Any<CancellationToken>());
+        connection.DidNotReceive().Dispose();
+        await using var next = await RawOtpHidSession.CreateAsync(connection, TestContext.Current.CancellationToken);
+        Assert.True(next.IsInitialized);
+    }
+
     [Fact]
     public async Task CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached()
     {

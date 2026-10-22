@@ -13,7 +13,9 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -29,6 +31,141 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// </summary>
 public class ApplicationSessionScpTests
 {
+    [Fact]
+    public async Task Factory_InitializationFailure_PreservesFailureAndReleasesClaimDespiteCleanupFailure()
+    {
+        var connection = new InertConnection();
+        var expected = new InvalidOperationException("initialization failure");
+        var protocol = new TrackingProtocol(disposeException: new IOException("cleanup failure"));
+
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => TestSession.CreateInitializedAsync(
+            connection,
+            (session, token) =>
+            {
+                session.Protocol = protocol;
+                Assert.Equal(TestContext.Current.CancellationToken, token);
+                return Task.FromException(expected);
+            },
+            TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+        Assert.Equal(1, protocol.DisposeCount);
+        Assert.Equal(0, connection.DisposeCount);
+        using var next = TestSession.Create(connection);
+    }
+
+    [Fact]
+    public async Task Factory_Cancellation_DisposesProtocolAndReleasesBorrowedConnectionClaim()
+    {
+        var connection = new InertConnection();
+        var protocol = new TrackingProtocol();
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => TestSession.CreateInitializedAsync(
+            connection,
+            (session, token) =>
+            {
+                session.Protocol = protocol;
+                cancellation.Cancel();
+                return Task.FromCanceled(token);
+            },
+            cancellation.Token));
+
+        Assert.Equal(1, protocol.DisposeCount);
+        Assert.Equal(0, connection.DisposeCount);
+        using var next = TestSession.Create(connection);
+    }
+
+    [Fact]
+    public async Task Factory_OccupiedConnection_DoesNotRunInitializationOrDisturbIncumbent()
+    {
+        var connection = new InertConnection();
+        using var incumbent = TestSession.Create(connection);
+        var initialized = false;
+
+        await Assert.ThrowsAsync<ConnectionInUseException>(() => TestSession.CreateInitializedAsync(
+            connection,
+            (_, _) =>
+            {
+                initialized = true;
+                return Task.CompletedTask;
+            },
+            TestContext.Current.CancellationToken));
+
+        Assert.False(initialized);
+        Assert.Equal(0, connection.DisposeCount);
+        using var protocol = new TrackingProtocol();
+        await incumbent.RunInitializeAsync(
+            protocol, new FirmwareVersion(5, 7, 0), null, TestContext.Current.CancellationToken);
+        Assert.True(incumbent.IsInitialized);
+    }
+
+    [Fact]
+    public async Task Factory_Success_RetainsProtocolAndClaimUntilDisposal()
+    {
+        var connection = new InertConnection();
+        var protocol = new TrackingProtocol();
+        var session = await TestSession.CreateInitializedAsync(
+            connection,
+            (created, token) => created.RunInitializeAsync(protocol, new FirmwareVersion(5, 7, 0), null, token),
+            TestContext.Current.CancellationToken);
+
+        Assert.True(session.IsInitialized);
+        Assert.Equal(0, protocol.DisposeCount);
+        Assert.Throws<ConnectionInUseException>(() => TestSession.Create(connection));
+
+        session.Dispose();
+        Assert.Equal(1, protocol.DisposeCount);
+        Assert.Equal(0, connection.DisposeCount);
+        using var next = TestSession.Create(connection);
+    }
+
+    [Fact]
+    public async Task Factory_HidScp_RejectedBeforeIoAndReleasesClaim()
+    {
+        var connection = new FailingFidoConnection();
+        using var scp = Scp03KeyParameters.Default;
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => TestSession.CreateInitializedAsync(
+            connection,
+            (session, token) => session.CreateProtocolAsync(scp, token),
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(0, connection.SendCount);
+        Assert.Equal(0, connection.DisposeCount);
+        using var next = TestSession.Create(connection);
+    }
+
+    [Fact]
+    public async Task Factory_HidHandshakeFailure_ReleasesClaimWithoutClosingBorrowedConnection()
+    {
+        var connection = new FailingFidoConnection();
+
+        await Assert.ThrowsAsync<IOException>(() => TestSession.CreateInitializedAsync(
+            connection,
+            (session, token) => session.CreateProtocolAsync(null, token),
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(1, connection.SendCount);
+        Assert.Equal(0, connection.DisposeCount);
+        using var next = TestSession.Create(connection);
+    }
+
+    [Fact]
+    public async Task InitializeProtocol_WithScpOnHid_RejectsBeforeChannelInitialization()
+    {
+        using var session = TestSession.Create(new InertConnection());
+        using var protocol = new TrackingFidoProtocol();
+        using var scp = Scp03KeyParameters.Default;
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.RunInitializeAsync(
+            protocol, new FirmwareVersion(5, 7, 0), scp, TestContext.Current.CancellationToken));
+
+        Assert.Equal(0, protocol.InitializeCount);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+    }
+
     [Fact]
     public async Task InitializeProtocol_WithScpOnNonSmartCardProtocol_ThrowsNotSupported()
     {
@@ -191,6 +328,12 @@ public class ApplicationSessionScpTests
         public static TestSession Create(IConnection connection)
             => Construct(connection, () => new TestSession(connection));
 
+        public static Task<TestSession> CreateInitializedAsync(
+            IConnection connection,
+            Func<TestSession, CancellationToken, Task> initialize,
+            CancellationToken cancellationToken) =>
+            ConstructInitializedAsync(connection, null, () => new TestSession(connection), initialize, cancellationToken);
+
         public Task RunInitializeAsync(
             IProtocol protocol,
             FirmwareVersion firmwareVersion,
@@ -258,6 +401,28 @@ public class ApplicationSessionScpTests
         }
     }
 
+    private sealed class TrackingFidoProtocol : IFidoHidProtocol
+    {
+        public int InitializeCount { get; private set; }
+        public bool IsChannelInitialized => InitializeCount > 0;
+        public FirmwareVersion? FirmwareVersion => null;
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default)
+        {
+            InitializeCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+            byte command,
+            ReadOnlyMemory<byte> data,
+            UserPresenceNotification userPresenceNotification,
+            CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null) { }
+        public void Dispose() { }
+    }
+
     private sealed class TrackingProtocol(
         Exception? configureException = null,
         Exception? disposeException = null) : IProtocol
@@ -283,12 +448,35 @@ public class ApplicationSessionScpTests
     private sealed class InertConnection : IConnection
     {
         public ConnectionType Type => ConnectionType.SmartCard;
+        public int DisposeCount { get; private set; }
 
-        public void Dispose()
-        {
-        }
+        public void Dispose() => DisposeCount++;
 
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    private sealed class FailingFidoConnection : IFidoHidConnection
+    {
+        public ConnectionType Type => ConnectionType.HidFido;
+        public int PacketSize => 64;
+        public int SendCount { get; private set; }
+        public int DisposeCount { get; private set; }
+
+        public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default)
+        {
+            SendCount++;
+            throw new IOException("HID initialization failure");
+        }
+
+        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("No HID request succeeded.");
+
+        public void Dispose() => DisposeCount++;
+        public ValueTask DisposeAsync()
+        {
+            Dispose();
+            return ValueTask.CompletedTask;
+        }
     }
 
     // A protocol that is deliberately NOT an ISmartCardProtocol (mirrors a HID FIDO/OTP protocol for the

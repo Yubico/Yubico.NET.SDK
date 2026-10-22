@@ -20,7 +20,6 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -106,35 +105,17 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// <returns>An initialized PIV session.</returns>
     /// <exception cref="ArgumentNullException">If connection is null.</exception>
     /// <exception cref="ApduException">If PIV application selection fails.</exception>
-    public static async Task<PivSession> CreateAsync(
+    public static Task<PivSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
             connection,
-            () => new PivSession(connection, scpKeyParams, options?.UserPresencePrompt));
-        try
-        {
-            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+            options,
+            () => new PivSession(connection, options?.ScpKeyParameters, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+            cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
@@ -144,8 +125,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
-        Protocol = protocol;
+        var protocol = (ISmartCardProtocol)await CreateProtocolAsync(_scpKeyParams, cancellationToken)
+            .ConfigureAwait(false);
         var backend = new PivBackend(protocol);
 
         try

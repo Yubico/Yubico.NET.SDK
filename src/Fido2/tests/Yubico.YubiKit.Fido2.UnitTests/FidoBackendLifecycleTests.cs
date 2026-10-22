@@ -83,7 +83,7 @@ public class FidoBackendLifecycleTests
     }
 
     [Fact]
-    public async Task HidBackend_InitializeAsync_InitializesBorrowedProtocol()
+    public async Task HidBackend_InitializeAsync_DoesNotRepeatSessionProtocolInitialization()
     {
         // Arrange
         var protocol = Substitute.For<IFidoHidProtocol>();
@@ -93,7 +93,7 @@ public class FidoBackendLifecycleTests
         await backend.InitializeAsync(TestContext.Current.CancellationToken);
 
         // Assert
-        await protocol.Received(1).InitializeAsync(TestContext.Current.CancellationToken);
+        await protocol.DidNotReceive().InitializeAsync(Arg.Any<CancellationToken>());
     }
 
     [Theory]

@@ -134,6 +134,13 @@ Application modules should converge on this shape when possible:
 - Session uses `IsSupported(...)` / `EnsureSupports(...)` for firmware and feature gates.
 - Session keeps public API operations readable and close to the wire behavior.
 
+Applet `CreateAsync` methods use `ApplicationSession.ConstructInitializedAsync` for connection validation,
+binding before wire I/O, and cleanup on initialization failure. Applet initializers call `CreateProtocolAsync`
+to register their protocol, reject unsupported SCP combinations, and prepare FIDO HID before backend discovery.
+They then select the applet and discover firmware before calling `InitializeProtocolAsync` for configuration
+and optional SCP establishment. Backend rebinding and applet-specific state remain local. Keep raw-session
+initialization contracts separate, including lazy raw FIDO channel initialization.
+
 The durable applet API grammar is in [Applet public API](architecture/applet-public-api.md). Applet factories take
 `SessionCreationOptions?` and a final defaulted cancellation token; required domain inputs remain positional;
 options objects are reserved for real growth axes or policy groups; and applet dependency-injection registrations

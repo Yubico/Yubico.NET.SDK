@@ -69,6 +69,15 @@ If using DI, configure logging explicitly from the DI-provided `ILoggerFactory` 
 
 ## Critical Patterns
 
+### Applet session initialization
+
+Applet factories delegate binding and failure cleanup to `ApplicationSession.ConstructInitializedAsync`.
+The initializer calls `CreateProtocolAsync` before selecting its applet: Core registers the protocol for
+disposal, rejects SCP on non-PC/SC protocols before device I/O, and initializes a FIDO HID channel when needed.
+After applet selection and firmware discovery, `InitializeProtocolAsync` configures the protocol and establishes
+optional SCP. Backends do not initialize HID channels themselves. Applet firmware gates, backend rebinding,
+and Security Domain exception translation remain in the applet. Raw FIDO sessions retain lazy initialization.
+
 ### Built-in macOS FIDO lifetime
 
 The built-in macOS FIDO report connection opens asynchronously through

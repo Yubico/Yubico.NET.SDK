@@ -20,7 +20,6 @@ using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -121,33 +120,17 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     certificate, or SCP unsupported by the connected firmware/transport). The original failure is
     ///     available as <see cref="Exception.InnerException" />.
     /// </exception>
-    public static async Task<SecurityDomainSession> CreateAsync(
+    public static Task<SecurityDomainSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(connection, () => new SecurityDomainSession(connection, scpKeyParams));
-        try
-        {
-            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
+            connection,
+            options,
+            () => new SecurityDomainSession(connection, options?.ScpKeyParameters),
+            (session, token) => session.InitializeAsync(
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+            cancellationToken);
 
     /// <summary>
     ///     Ensures the Security Domain application is selected and secure messaging is configured if requested.
@@ -165,8 +148,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
-        Protocol = protocol;
+        var protocol = (ISmartCardProtocol)await CreateProtocolAsync(_scpKeyParams, cancellationToken)
+            .ConfigureAwait(false);
         ISecurityDomainBackend backend = new SecurityDomainBackend(protocol);
         await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
 

@@ -12,6 +12,10 @@ This file provides Claude-specific guidance for working with the Management modu
 
 ## Module Context
 
+`ApplicationSession` prepares the protocol before Management probes firmware. On HID FIDO, the backend reads
+the firmware from the already-initialized channel and does not initialize it again. SCP requested on either
+HID transport is rejected before the first initialization exchange.
+
 The Management module is the **primary interface for YubiKey device configuration**. It's unique because:
 
 1. **Device-level operations**: Works across all applications (PIV, OATH, FIDO2, etc.)

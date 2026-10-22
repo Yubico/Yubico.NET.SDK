@@ -14,6 +14,9 @@ configuration lock code. Other modules talk to one application; this one decides
 - Any YubiKey with firmware 4.1.0 or later; writing configuration needs 5.0.0 or later.
 - Transports: SmartCard (CCID, USB or NFC), HID FIDO, or HID OTP - the only module that runs over all three.
 
+SCP is available only over SmartCard. Supplying `SessionCreationOptions.ScpKeyParameters` with a HID connection
+throws before any initialization commands are sent.
+
 | Feature | Minimum firmware |
 |---------|------------------|
 | Read device information | 4.1.0 |

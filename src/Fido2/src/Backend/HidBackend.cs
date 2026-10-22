@@ -38,7 +38,7 @@ internal sealed class HidBackend : IFidoBackend
     }
 
     public Task InitializeAsync(CancellationToken cancellationToken = default) =>
-        _protocol.InitializeAsync(cancellationToken);
+        Task.CompletedTask;
 
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,

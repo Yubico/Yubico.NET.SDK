@@ -30,13 +30,8 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
     private const byte CtapYubikeyDeviceConfig = 0xC0;
     private const byte CtapWriteConfig = 0xC3;
 
-    public async ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken)
-    {
-        await _hidProtocol.InitializeAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return _hidProtocol.FirmwareVersion;
-    }
+    public ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken) =>
+        ValueTask.FromResult(_hidProtocol.FirmwareVersion);
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {

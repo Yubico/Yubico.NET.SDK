@@ -18,7 +18,6 @@ using System.Text;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -118,36 +117,17 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     /// <summary>
     /// Creates and initializes a new YubiOTP session.
     /// </summary>
-    public static async Task<YubiOtpSession> CreateAsync(
+    public static Task<YubiOtpSession> CreateAsync(
         IConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-        var userPresencePrompt = options?.UserPresencePrompt;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
             connection,
-            () => new YubiOtpSession(connection, scpKeyParams, userPresencePrompt));
-        try
-        {
-            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+            options,
+            () => new YubiOtpSession(connection, options?.ScpKeyParameters, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+            cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
@@ -159,8 +139,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             return;
         }
 
-        var protocol = ProtocolFactory.Create(Connection);
-        Protocol = protocol;
+        var protocol = await CreateProtocolAsync(_scpKeyParams, cancellationToken).ConfigureAwait(false);
         var backend = CreateBackend(protocol);
 
         var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);

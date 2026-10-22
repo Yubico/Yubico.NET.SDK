@@ -16,6 +16,8 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
@@ -242,6 +244,30 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         return session;
     }
 
+    private protected static async Task<TSession> ConstructInitializedAsync<TSession>(
+        IConnection connection,
+        SessionCreationOptions? options,
+        Func<TSession> create,
+        Func<TSession, CancellationToken, Task> initialize,
+        CancellationToken cancellationToken)
+        where TSession : ApplicationSession
+    {
+        ArgumentNullException.ThrowIfNull(initialize);
+        ValidatePreferredConnectionType(connection, options);
+
+        var session = Construct(connection, create);
+        try
+        {
+            await initialize(session, cancellationToken).ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
+    }
+
     /// <summary>
     ///     Validates the connection-type assertion supplied to a direct session factory.
     /// </summary>
@@ -277,6 +303,42 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     /// </remarks>
     internal void OwnConnection() => _ownsConnection = true;
 
+    internal async Task<IProtocol> CreateProtocolAsync(
+        ScpKeyParameters? scpKeyParams,
+        CancellationToken cancellationToken)
+    {
+        ThrowIfDisposed();
+        EnsureConnectionBound();
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var protocol = ProtocolFactory.Create(Connection);
+        Protocol = protocol;
+        _ = GetScpProtocol(protocol, scpKeyParams);
+
+        if (protocol is IFidoHidProtocol fidoProtocol)
+            await fidoProtocol.InitializeAsync(cancellationToken).ConfigureAwait(false);
+
+        return protocol;
+    }
+
+    private static PcscProtocol? GetScpProtocol(IProtocol protocol, ScpKeyParameters? scpKeyParams) =>
+        (protocol, scpKeyParams) switch
+        {
+            (PcscProtocol pcscProtocol, not null) => pcscProtocol,
+            (not PcscProtocol, not null) => throw new NotSupportedException(
+                "SCP is only supported on PC/SC SmartCard protocols created by Core."),
+            (_, null) => null
+        };
+
+    private void EnsureConnectionBound()
+    {
+        if (!ConnectionSessionGuard.IsHolder(Connection, this))
+            throw new InvalidOperationException(
+                $"{GetType().Name} was not bound to its connection. Sessions must be created through their " +
+                "CreateAsync factory, which routes construction through ApplicationSession.Construct so the " +
+                "one-live-session-per-connection rule is enforced before any wire operation.");
+    }
+
     internal async Task<IProtocol> InitializeProtocolAsync(
         IProtocol protocol,
         FirmwareVersion firmwareVersion,
@@ -288,11 +350,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         // itself would otherwise skip the bind check entirely and run unguarded.
         // Binding is not automatic, so a session reaching initialization without having gone through
         // Construct could run concurrently with another on the same connection and deselect its applet.
-        if (!ConnectionSessionGuard.IsHolder(Connection, this))
-            throw new InvalidOperationException(
-                $"{GetType().Name} was not bound to its connection. Sessions must be created through their " +
-                "CreateAsync factory, which routes construction through ApplicationSession.Construct so the " +
-                "one-live-session-per-connection rule is enforced before any wire operation.");
+        EnsureConnectionBound();
 
         ArgumentNullException.ThrowIfNull(protocol);
 
@@ -300,20 +358,12 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
             return Protocol ?? protocol;
 
         protocol.Configure(firmwareVersion, configuration);
-        if (protocol is Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidProtocol fidoProtocol)
-            await fidoProtocol.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         IProtocol effectiveProtocol = protocol;
         var isAuthenticated = false;
 
-        if (scpKeyParams is not null)
+        if (GetScpProtocol(protocol, scpKeyParams) is { } pcscProtocol && scpKeyParams is not null)
         {
-            if (effectiveProtocol is not PcscProtocol pcscProtocol)
-            {
-                throw new NotSupportedException(
-                    "SCP is only supported on PC/SC SmartCard protocols created by Core.");
-            }
-
             effectiveProtocol = await pcscProtocol
                 .InitializeScpAsync(scpKeyParams, cancellationToken)
                 .ConfigureAwait(false);

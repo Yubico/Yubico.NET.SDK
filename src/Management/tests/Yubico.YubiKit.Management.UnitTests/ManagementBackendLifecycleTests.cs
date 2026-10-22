@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Management.Backend;
 
 namespace Yubico.YubiKit.Management.UnitTests;
@@ -23,6 +27,17 @@ namespace Yubico.YubiKit.Management.UnitTests;
 /// </summary>
 public class ManagementBackendLifecycleTests
 {
+    [Fact]
+    public async Task FidoHidBackend_InitializeAsync_ReadsPreparedFirmwareWithoutInitializingChannel()
+    {
+        using var protocol = new PreparedFidoProtocol();
+        var backend = new FidoHidBackend(protocol);
+
+        var firmwareVersion = await backend.InitializeAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(protocol.FirmwareVersion, firmwareVersion);
+    }
+
     [Fact]
     public void IManagementBackend_DoesNotAdvertiseResourceOwnership()
     {
@@ -45,5 +60,23 @@ public class ManagementBackendLifecycleTests
     public void OtpBackend_DoesNotAdvertiseResourceOwnership()
     {
         Assert.False(typeof(IDisposable).IsAssignableFrom(typeof(OtpBackend)));
+    }
+
+    private sealed class PreparedFidoProtocol : IFidoHidProtocol
+    {
+        public bool IsChannelInitialized => true;
+        public FirmwareVersion? FirmwareVersion => new FirmwareVersion(5, 7, 2);
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("The session already initialized the channel.");
+
+        public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+            byte command,
+            ReadOnlyMemory<byte> data,
+            UserPresenceNotification userPresenceNotification,
+            CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null) { }
+        public void Dispose() { }
     }
 }

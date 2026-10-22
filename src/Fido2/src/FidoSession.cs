@@ -18,7 +18,6 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -106,36 +105,17 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
     /// <returns>An initialized FidoSession.</returns>
     /// <exception cref="ArgumentNullException">If <paramref name="connection"/> is null.</exception>
     /// <exception cref="NotSupportedException">If the connection type is not supported.</exception>
-    public static async Task<FidoSession> CreateAsync(
+    public static Task<FidoSession> CreateAsync(
         IConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-        var userPresencePrompt = options?.UserPresencePrompt;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
             connection,
-            () => new FidoSession(connection, scpKeyParams, userPresencePrompt));
-        try
-        {
-            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+            options,
+            () => new FidoSession(connection, options?.ScpKeyParameters, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+            cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
@@ -145,8 +125,7 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create(Connection);
-        Protocol = protocol;
+        var protocol = await CreateProtocolAsync(_scpKeyParams, cancellationToken).ConfigureAwait(false);
         var backend = CreateBackend(protocol);
         await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
 

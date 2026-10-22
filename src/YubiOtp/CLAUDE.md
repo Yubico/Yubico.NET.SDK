@@ -35,6 +35,9 @@ The backend borrows the protocol and owns no disposable state, so `IYubiOtpBacke
 
 ## Session Initialization
 
+The shared `ApplicationSession` factory binds the session and handles failure cleanup. Its protocol preparation
+step rejects SCP on OTP HID before reading status; backend programming-sequence state remains applet-owned.
+
 SmartCard path:
 1. SELECT `AID.MANAGEMENT` (for NEO version reliability)
 2. SELECT `AID.OTP` → store status bytes

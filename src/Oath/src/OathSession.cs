@@ -19,7 +19,6 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -72,40 +71,19 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <summary>
     ///     Creates and initializes an OATH session.
     /// </summary>
-    public static async Task<OathSession> CreateAsync(
+    public static Task<OathSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-        var userPresencePrompt = options?.UserPresencePrompt;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
             connection,
-            () => new OathSession(connection, scpKeyParams, userPresencePrompt));
-        try
-        {
-            await session.InitializeAsync(
-                    CreateOathProtocolConfiguration(configuration),
-                    firmwareVersionOverride,
-                    cancellationToken)
-                .ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+            options,
+            () => new OathSession(connection, options?.ScpKeyParameters, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                CreateOathProtocolConfiguration(options?.ProtocolConfiguration),
+                options?.FirmwareVersionOverride,
+                token),
+            cancellationToken);
 
     private static ProtocolConfiguration CreateOathProtocolConfiguration(ProtocolConfiguration? configuration) =>
         (configuration ?? default) with { InsSendRemaining = OathConstants.InsSendRemaining };
@@ -118,8 +96,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
-        Protocol = protocol;
+        var protocol = (ISmartCardProtocol)await CreateProtocolAsync(_scpKeyParams, cancellationToken)
+            .ConfigureAwait(false);
         IOathBackend backend = new OathBackend(protocol);
 
         var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);

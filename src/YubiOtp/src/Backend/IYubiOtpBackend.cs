@@ -34,10 +34,10 @@ internal readonly record struct YubiOtpInitialization(
 internal interface IYubiOtpBackend
 {
     /// <summary>
-    /// Performs transport-specific YubiOTP initialization and returns applet status.
+    /// Selects YubiOTP on SmartCard or reads HID status and returns firmware and applet status.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    ValueTask<YubiOtpInitialization> InitializeAsync(CancellationToken cancellationToken);
+    ValueTask<YubiOtpInitialization> ReadInitialStateAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Writes a configuration to a slot and returns the updated status bytes.

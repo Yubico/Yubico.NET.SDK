@@ -41,9 +41,9 @@ internal sealed class SmartCardBackend : IFidoBackend
     }
 
     /// <summary>
-    /// Initializes the backend by selecting the FIDO2 application.
+    /// Selects the FIDO2 application.
     /// </summary>
-    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    public async Task SelectApplicationAsync(CancellationToken cancellationToken = default)
     {
         try
         {

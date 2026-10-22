@@ -25,7 +25,7 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
 {
     private readonly IOtpHidProtocol _otpProtocol = otpProtocol ?? throw new ArgumentNullException(nameof(otpProtocol));
 
-    public async ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken)
+    public async ValueTask<FirmwareVersion?> ReadInitialStateAsync(CancellationToken cancellationToken)
     {
         var status = await _otpProtocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
         return _otpProtocol.FirmwareVersion ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);

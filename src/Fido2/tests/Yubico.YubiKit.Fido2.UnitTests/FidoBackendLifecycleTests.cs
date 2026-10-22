@@ -83,14 +83,14 @@ public class FidoBackendLifecycleTests
     }
 
     [Fact]
-    public async Task HidBackend_InitializeAsync_DoesNotRepeatSessionProtocolInitialization()
+    public async Task HidBackend_SelectApplicationAsync_DoesNotRepeatSessionProtocolInitialization()
     {
         // Arrange
         var protocol = Substitute.For<IFidoHidProtocol>();
         var backend = new HidBackend(protocol);
 
         // Act
-        await backend.InitializeAsync(TestContext.Current.CancellationToken);
+        await backend.SelectApplicationAsync(TestContext.Current.CancellationToken);
 
         // Assert
         await protocol.DidNotReceive().InitializeAsync(Arg.Any<CancellationToken>());

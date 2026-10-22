@@ -24,13 +24,59 @@ using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
-///     Covers <c>ApplicationSession.InitializeProtocolAsync</c>'s SCP guard: SCP is only valid on a PC/SC SmartCard
+///     Covers <c>ApplicationSession.ConfigureProtocolAsync</c>'s SCP guard: SCP is only valid on a PC/SC SmartCard
 ///     protocol. This is the Core contract that backs the Phase 38 FIDO2 rule (ISC-9.1) — supplying
 ///     <c>scpKeyParams</c> while a non-SmartCard transport (e.g. the default HID FIDO) is selected throws,
 ///     rather than silently ignoring the requested secure channel.
 /// </summary>
 public class ApplicationSessionScpTests
 {
+    [Fact]
+    public async Task Factory_ProtocolConfigured_RemainsUninitializedUntilAppletSetupCompletes()
+    {
+        var connection = new InertConnection();
+        var protocol = new TrackingProtocol();
+        using var session = await TestSession.CreateInitializedAsync(
+            connection,
+            async (created, token) =>
+            {
+                await created.RunInitializeAsync(protocol, new FirmwareVersion(5, 7, 0), null, token);
+                Assert.Same(protocol, created.Protocol);
+                Assert.False(created.IsInitialized);
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.True(session.IsInitialized);
+    }
+
+    [Fact]
+    public async Task Factory_AppletSetupFailureAfterConfiguration_RemainsUninitializedAndReleasesClaim()
+    {
+        var connection = new InertConnection();
+        var protocol = new TrackingProtocol();
+        var expected = new IOException("applet setup failure");
+        TestSession? failedSession = null;
+
+        var actual = await Assert.ThrowsAsync<IOException>(() => TestSession.CreateInitializedAsync(
+            connection,
+            async (created, token) =>
+            {
+                failedSession = created;
+                await created.RunInitializeAsync(protocol, new FirmwareVersion(5, 7, 0), null, token);
+                Assert.False(created.IsInitialized);
+                throw expected;
+            },
+            TestContext.Current.CancellationToken));
+
+        Assert.Same(expected, actual);
+        Assert.NotNull(failedSession);
+        Assert.False(failedSession.IsInitialized);
+        Assert.False(failedSession.IsAuthenticated);
+        Assert.Equal(1, protocol.DisposeCount);
+        Assert.Equal(0, connection.DisposeCount);
+        using var next = TestSession.Create(connection);
+    }
+
     [Fact]
     public async Task Factory_InitializationFailure_PreservesFailureAndReleasesClaimDespiteCleanupFailure()
     {
@@ -97,7 +143,8 @@ public class ApplicationSessionScpTests
         using var protocol = new TrackingProtocol();
         await incumbent.RunInitializeAsync(
             protocol, new FirmwareVersion(5, 7, 0), null, TestContext.Current.CancellationToken);
-        Assert.True(incumbent.IsInitialized);
+        Assert.Same(protocol, incumbent.Protocol);
+        Assert.False(incumbent.IsInitialized);
     }
 
     [Fact]
@@ -128,7 +175,7 @@ public class ApplicationSessionScpTests
 
         await Assert.ThrowsAsync<NotSupportedException>(() => TestSession.CreateInitializedAsync(
             connection,
-            (session, token) => session.CreateProtocolAsync(scp, token),
+            (session, token) => session.PrepareProtocolAsync(scp, token),
             TestContext.Current.CancellationToken));
 
         Assert.Equal(0, connection.SendCount);
@@ -143,7 +190,7 @@ public class ApplicationSessionScpTests
 
         await Assert.ThrowsAsync<IOException>(() => TestSession.CreateInitializedAsync(
             connection,
-            (session, token) => session.CreateProtocolAsync(null, token),
+            (session, token) => session.PrepareProtocolAsync(null, token),
             TestContext.Current.CancellationToken));
 
         Assert.Equal(1, connection.SendCount);
@@ -152,7 +199,7 @@ public class ApplicationSessionScpTests
     }
 
     [Fact]
-    public async Task InitializeProtocol_WithScpOnHid_RejectsBeforeChannelInitialization()
+    public async Task ConfigureProtocol_WithScpOnHid_RejectsBeforeChannelInitialization()
     {
         using var session = TestSession.Create(new InertConnection());
         using var protocol = new TrackingFidoProtocol();
@@ -167,7 +214,7 @@ public class ApplicationSessionScpTests
     }
 
     [Fact]
-    public async Task InitializeProtocol_WithScpOnNonSmartCardProtocol_ThrowsNotSupported()
+    public async Task ConfigureProtocol_WithScpOnNonSmartCardProtocol_ThrowsNotSupported()
     {
         var session = TestSession.Create(new InertConnection());
         using var protocol = new NonSmartCardProtocol();
@@ -186,7 +233,7 @@ public class ApplicationSessionScpTests
     }
 
     [Fact]
-    public async Task InitializeProtocol_WithoutScpOnNonSmartCardProtocol_Succeeds()
+    public async Task ConfigureProtocol_WithoutScpOnNonSmartCardProtocol_Succeeds()
     {
         var session = TestSession.Create(new InertConnection());
         using var protocol = new NonSmartCardProtocol();
@@ -197,20 +244,18 @@ public class ApplicationSessionScpTests
             scpKeyParams: null,
             TestContext.Current.CancellationToken);
 
-        Assert.True(session.IsInitialized);
+        Assert.Same(protocol, session.Protocol);
+        Assert.False(session.IsInitialized);
         Assert.False(session.IsAuthenticated);
     }
 
     [Fact]
-    public async Task InitializeProtocol_WhenAlreadyInitialized_RejectsNullProtocol()
+    public async Task ConfigureProtocol_WhenAlreadyInitialized_RejectsNullProtocol()
     {
-        using var session = TestSession.Create(new InertConnection());
         using var protocol = new TrackingProtocol();
-
-        await session.RunInitializeAsync(
-            protocol,
-            new FirmwareVersion(5, 7, 0),
-            scpKeyParams: null,
+        using var session = await TestSession.CreateInitializedAsync(
+            new InertConnection(),
+            (created, token) => created.RunInitializeAsync(protocol, new FirmwareVersion(5, 7, 0), null, token),
             TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
@@ -339,7 +384,7 @@ public class ApplicationSessionScpTests
             FirmwareVersion firmwareVersion,
             ScpKeyParameters? scpKeyParams,
             CancellationToken cancellationToken) =>
-            InitializeProtocolAsync(protocol, firmwareVersion, configuration: null, scpKeyParams, cancellationToken);
+            ConfigureProtocolAsync(protocol, firmwareVersion, configuration: null, scpKeyParams, cancellationToken);
 
         public async Task RunOwnedInitializeAsync(
             IProtocol protocol,
@@ -350,7 +395,7 @@ public class ApplicationSessionScpTests
             Protocol = protocol;
             try
             {
-                await InitializeProtocolAsync(
+                await ConfigureProtocolAsync(
                         protocol,
                         firmwareVersion,
                         configuration: null,

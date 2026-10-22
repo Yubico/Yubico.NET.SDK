@@ -156,7 +156,7 @@ public class PivDataObjectProtocolTests
 
         public int CapturedCount { get; private set; }
 
-        public Task<PivInitialization> InitializeAsync(CancellationToken cancellationToken = default) =>
+        public Task<PivInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException("Not needed for these tests.");
 
         public Task<ApduResponse> SendAsync(
@@ -181,7 +181,7 @@ public class PivDataObjectProtocolTests
 
         public Action<ApduCommand>? OnSend { get; set; }
 
-        public Task<PivInitialization> InitializeAsync(CancellationToken cancellationToken = default) =>
+        public Task<PivInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException("Not needed for these tests.");
 
         public Task<ApduResponse> SendAsync(

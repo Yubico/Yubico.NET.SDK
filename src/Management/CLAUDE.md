@@ -760,35 +760,22 @@ public async Task ResetDeviceAsync(CancellationToken cancellationToken = default
 ## Session Initialization Pattern
 
 ```csharp
-public static async Task<ManagementSession> CreateAsync(
+public static Task<ManagementSession> CreateAsync(
     IConnection connection,
-    ProtocolConfiguration? configuration = null,
-    ScpKeyParameters? scpKeyParams = null,
-    CancellationToken cancellationToken = default)
-{
-    // Two-phase initialization
-    var session = new ManagementSession(connection, configuration, scpKeyParams);
-    await session.InitializeAsync(configuration, cancellationToken);
-
-    return session;
-}
-
-private async Task InitializeAsync(
-    ProtocolConfiguration? configuration,
-    CancellationToken cancellationToken)
-{
-    // 1. Get firmware version (needed for feature detection)
-    FirmwareVersion = await GetVersionAsync(cancellationToken);
-
-    // 2. Configure protocol with version info
-    Protocol!.Configure(FirmwareVersion, configuration);
-
-    // 3. Optionally establish SCP through ApplicationSession.InitializeProtocolAsync(...)
-    //    when the effective protocol is Core's PC/SC SmartCard implementation.
-
-    IsInitialized = true;
-}
+    SessionCreationOptions? options = null,
+    CancellationToken cancellationToken = default) =>
+    ConstructInitializedAsync(
+        connection,
+        options,
+        () => new ManagementSession(connection),
+        (session, token) => session.InitializeAsync(
+            options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+        cancellationToken);
 ```
+
+The applet callback calls `PrepareProtocolAsync`, reads backend state through `ReadInitialStateAsync`,
+resolves firmware, and calls `ConfigureProtocolAsync` before rebinding the backend. The shared factory marks
+the session ready only after this callback completes. SCP parameters are callback inputs, not session fields.
 
 ## Architecture - Backend Pattern
 
@@ -803,14 +790,14 @@ private IManagementBackend _backend = null!;
 // Backend abstraction: deliberately NOT IDisposable
 internal interface IManagementBackend
 {
-    ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken);
+    ValueTask<FirmwareVersion?> ReadInitialStateAsync(CancellationToken cancellationToken);
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
     ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
     ValueTask DeviceResetAsync(CancellationToken cancellationToken);
 }
 ```
 
-Device-info reads do not go through the backend; `ManagementSession` uses `DeviceInfoReader.ReadAsync(_protocol, ...)` directly.
+Device-info reads do not go through the backend; `ManagementSession` uses `DeviceInfoReader.ReadAsync` with the base-owned `Protocol` directly.
 
 ### Implementations
 

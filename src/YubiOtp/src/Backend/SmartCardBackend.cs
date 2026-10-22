@@ -50,7 +50,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         _lastProgSeq = initialProgSeq;
     }
 
-    public async ValueTask<YubiOtpInitialization> InitializeAsync(CancellationToken cancellationToken)
+    public async ValueTask<YubiOtpInitialization> ReadInitialStateAsync(CancellationToken cancellationToken)
     {
         FirmwareVersion? managementVersion = null;
 

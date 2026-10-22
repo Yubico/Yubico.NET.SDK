@@ -117,14 +117,14 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         if (IsInitialized)
             return;
 
-        var protocol = (ISmartCardProtocol)await CreateProtocolAsync(scpKeyParams, cancellationToken)
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
             .ConfigureAwait(false);
         IOpenPgpBackend backend = new OpenPgpBackend(protocol);
 
-        var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
         var firmwareVersion = initialization.FirmwareVersion;
 
-        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+        var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
                 firmwareVersionOverride ?? firmwareVersion,
                 configuration,

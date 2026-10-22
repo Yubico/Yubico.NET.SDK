@@ -26,10 +26,10 @@ namespace Yubico.YubiKit.Fido2.Backend;
 internal interface IFidoBackend
 {
     /// <summary>
-    /// Performs transport-specific initialization needed before CTAP commands.
+    /// Selects the FIDO application on SmartCard; no selection is needed on the prepared HID channel.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task InitializeAsync(CancellationToken cancellationToken = default);
+    Task SelectApplicationAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sends a CTAP CBOR command and receives the response.

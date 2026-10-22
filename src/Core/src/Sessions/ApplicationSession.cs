@@ -213,7 +213,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     ///     <para>
     ///         It must NOT move later still — into initialization — because derived
     ///         <c>InitializeAsync</c> implementations issue their applet SELECT before calling
-    ///         <see cref="InitializeProtocolAsync" />. Binding there would refuse the second session only after
+    ///         <see cref="ConfigureProtocolAsync" />. Binding there would refuse the second session only after
     ///         the first session's state had already been destroyed, which is the damage this guard exists to
     ///         prevent. Construction performs no wire I/O, so here is the last safe point.
     ///     </para>
@@ -258,7 +258,8 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         var session = Construct(connection, create);
         try
         {
-            await initialize(session, cancellationToken).ConfigureAwait(false);
+            await session.InitializeSessionAsync(token => initialize(session, token), cancellationToken)
+                .ConfigureAwait(false);
             return session;
         }
         catch
@@ -303,7 +304,23 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     /// </remarks>
     internal void OwnConnection() => _ownsConnection = true;
 
-    internal async Task<IProtocol> CreateProtocolAsync(
+    internal async Task InitializeSessionAsync(
+        Func<CancellationToken, Task> initialize,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(initialize);
+        ThrowIfDisposed();
+        EnsureConnectionBound();
+
+        if (IsInitialized)
+            return;
+
+        await initialize(cancellationToken).ConfigureAwait(false);
+        ThrowIfDisposed();
+        IsInitialized = true;
+    }
+
+    internal async Task<IProtocol> PrepareProtocolAsync(
         ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
@@ -339,7 +356,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
                 "one-live-session-per-connection rule is enforced before any wire operation.");
     }
 
-    internal async Task<IProtocol> InitializeProtocolAsync(
+    internal async Task<IProtocol> ConfigureProtocolAsync(
         IProtocol protocol,
         FirmwareVersion firmwareVersion,
         ProtocolConfiguration? configuration = null,
@@ -375,7 +392,6 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         Protocol = effectiveProtocol;
         FirmwareVersion = firmwareVersion;
         IsAuthenticated = isAuthenticated;
-        IsInitialized = true;
 
         return effectiveProtocol;
     }

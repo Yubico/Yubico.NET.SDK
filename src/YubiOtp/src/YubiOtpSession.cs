@@ -86,20 +86,16 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     ];
 
     private readonly ILogger _logger;
-    private readonly ScpKeyParameters? _scpKeyParams;
 
-    private IProtocol _protocol = null!;
     private IYubiOtpBackend _backend = null!;
     private ReadOnlyMemory<byte> _status;
 
     private YubiOtpSession(
         IConnection connection,
-        ScpKeyParameters? scpKeyParams = null,
         IUserPresencePrompt? userPresencePrompt = null)
         : base(EnsureSupportedConnection(connection), userPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
-        _scpKeyParams = scpKeyParams;
         _logger = Logger;
     }
 
@@ -124,14 +120,15 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ConstructInitializedAsync(
             connection,
             options,
-            () => new YubiOtpSession(connection, options?.ScpKeyParameters, options?.UserPresencePrompt),
+            () => new YubiOtpSession(connection, options?.UserPresencePrompt),
             (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
             cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
@@ -139,17 +136,17 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             return;
         }
 
-        var protocol = await CreateProtocolAsync(_scpKeyParams, cancellationToken).ConfigureAwait(false);
+        var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
         var backend = CreateBackend(protocol);
 
-        var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
         _status = initialization.Status;
 
-        var effectiveProtocol = await InitializeProtocolAsync(
+        var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
                 firmwareVersionOverride ?? initialization.FirmwareVersion,
                 configuration,
-                _scpKeyParams,
+                scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -162,10 +159,9 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                 GetProgSeq());
         }
 
-        _protocol = effectiveProtocol;
         _backend = backend;
 
-        _logger.LogDebug("YubiOTP session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
+        _logger.LogDebug("YubiOTP session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
     }
 
     public Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
@@ -584,7 +580,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             ? Slot.One
             : Slot.Two;
 
-        if (_protocol is IOtpHidProtocol)
+        if (Protocol is IOtpHidProtocol)
         {
             return new UserPresenceContext
             {
@@ -595,7 +591,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             };
         }
 
-        if (_protocol is not ISmartCardProtocol || !IsKnownTouchTriggered(slot))
+        if (Protocol is not ISmartCardProtocol || !IsKnownTouchTriggered(slot))
         {
             return null;
         }

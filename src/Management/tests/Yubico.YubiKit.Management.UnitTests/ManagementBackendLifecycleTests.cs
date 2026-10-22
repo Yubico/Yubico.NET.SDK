@@ -28,12 +28,12 @@ namespace Yubico.YubiKit.Management.UnitTests;
 public class ManagementBackendLifecycleTests
 {
     [Fact]
-    public async Task FidoHidBackend_InitializeAsync_ReadsPreparedFirmwareWithoutInitializingChannel()
+    public async Task FidoHidBackend_ReadInitialStateAsync_ReadsPreparedFirmwareWithoutInitializingChannel()
     {
         using var protocol = new PreparedFidoProtocol();
         var backend = new FidoHidBackend(protocol);
 
-        var firmwareVersion = await backend.InitializeAsync(TestContext.Current.CancellationToken);
+        var firmwareVersion = await backend.ReadInitialStateAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(protocol.FirmwareVersion, firmwareVersion);
     }

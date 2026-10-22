@@ -99,19 +99,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal static ReadOnlySpan<byte> Pbkdf2Salt => "Yubico"u8;
     internal const int Pbkdf2DerivedKeyLength = 32;
 
-    private readonly ScpKeyParameters? _scpKeyParams;
-    private ISmartCardProtocol _protocol = null!;
     private IHsmAuthBackend _backend = null!;
 
     private HsmAuthSession(
         ISmartCardConnection connection,
-        ScpKeyParameters? scpKeyParams = null,
         IUserPresencePrompt? userPresencePrompt = null)
         : base(connection, userPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
-
-        _scpKeyParams = scpKeyParams;
     }
 
     /// <summary>
@@ -128,31 +123,32 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ConstructInitializedAsync(
             connection,
             options,
-            () => new HsmAuthSession(connection, options?.ScpKeyParameters, options?.UserPresencePrompt),
+            () => new HsmAuthSession(connection, options?.UserPresencePrompt),
             (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
             cancellationToken);
 
     private async Task InitializeAsync(
-        ProtocolConfiguration? configuration = null,
-        FirmwareVersion? firmwareVersion = null,
-        CancellationToken cancellationToken = default)
+        ProtocolConfiguration? configuration,
+        FirmwareVersion? firmwareVersion,
+        ScpKeyParameters? scpKeyParams,
+        CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = (ISmartCardProtocol)await CreateProtocolAsync(_scpKeyParams, cancellationToken)
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
             .ConfigureAwait(false);
         IHsmAuthBackend backend = new HsmAuthBackend(protocol);
 
-        var initializationFirmwareVersion = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var initializationFirmwareVersion = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
         var resolvedFirmwareVersion = firmwareVersion ?? initializationFirmwareVersion;
 
-        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+        var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
                 resolvedFirmwareVersion,
                 configuration,
-                _scpKeyParams,
+                scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -161,7 +157,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             backend = new HsmAuthBackend(effectiveProtocol);
         }
 
-        _protocol = effectiveProtocol;
         _backend = backend;
     }
 
@@ -516,7 +511,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         // state, not caller policy, so a SessionCreationOptions.FirmwareVersionOverride supplied at
         // creation must survive it; otherwise the override would silently lapse mid-session and
         // later feature gates would disagree with earlier ones.
-        _ = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        _ = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

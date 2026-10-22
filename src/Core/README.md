@@ -74,6 +74,8 @@ Applet factories share connection binding, protocol preparation, and failure cle
 SCP requires PC/SC SmartCard: requesting it on a HID connection fails before any initialization commands are
 sent. FIDO HID channels are prepared before applet discovery; SCP is established after selection and firmware
 discovery. A failed direct factory releases its session claim without disposing the caller's connection.
+`IsInitialized` becomes true only after all applet setup completes, not merely after protocol configuration.
+Security Domain reset uses the same readiness transition when reinitializing the session.
 Raw FIDO sessions still defer channel initialization until the first operation.
 
 ### Select one device

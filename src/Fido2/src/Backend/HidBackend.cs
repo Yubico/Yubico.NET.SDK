@@ -37,7 +37,7 @@ internal sealed class HidBackend : IFidoBackend
         _logger = YubiKitLogging.LoggerFactory.CreateLogger(nameof(HidBackend));
     }
 
-    public Task InitializeAsync(CancellationToken cancellationToken = default) =>
+    public Task SelectApplicationAsync(CancellationToken cancellationToken = default) =>
         Task.CompletedTask;
 
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(

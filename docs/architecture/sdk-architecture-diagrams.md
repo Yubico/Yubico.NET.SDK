@@ -163,7 +163,7 @@ flowchart TD
 - The protocol layer shown here is internal session machinery. Consumers choose applet sessions first,
   guarded `Raw*Session` types for supported low-level exchanges, or explicitly unguarded raw connections.
 - **Two-phase init pattern (memorize this):** private ctor stores connection →
-  static `CreateAsync(...)` does async selection + `InitializeProtocolAsync(...)`.
+  static `CreateAsync(...)` does async selection + `ConfigureProtocolAsync(...)`.
 - **Deliberately flat command model:** there are **no** `SignCommand`/`VerifyPinCommand`
   classes. Session methods build the `ApduCommand` inline. (FIDO2 is the exception — it
   builds CBOR via `CtapRequestBuilder`.)

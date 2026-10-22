@@ -29,10 +29,10 @@ namespace Yubico.YubiKit.Management.Backend;
 internal interface IManagementBackend
 {
     /// <summary>
-    /// Performs transport-specific Management initialization and returns the version learned from that probe, if any.
+    /// Selects Management or reads prepared HID state and returns the discovered firmware version, if any.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken);
+    ValueTask<FirmwareVersion?> ReadInitialStateAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Write configuration data to the device.

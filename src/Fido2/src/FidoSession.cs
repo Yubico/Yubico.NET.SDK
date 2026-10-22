@@ -81,18 +81,15 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
 
     private static readonly Feature FeatureFido2UsbSmartCard = new("FIDO2 over USB SmartCard", 5, 8, 0);
 
-    private readonly ScpKeyParameters? _scpKeyParams;
     private readonly ILogger _logger;
 
     private IFidoBackend _backend = null!;
 
     private FidoSession(
         IConnection connection,
-        ScpKeyParameters? scpKeyParams = null,
         IUserPresencePrompt? userPresencePrompt = null)
         : base(connection, userPresencePrompt)
     {
-        _scpKeyParams = scpKeyParams;
         _logger = Logger;
     }
 
@@ -112,22 +109,23 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         ConstructInitializedAsync(
             connection,
             options,
-            () => new FidoSession(connection, options?.ScpKeyParameters, options?.UserPresencePrompt),
+            () => new FidoSession(connection, options?.UserPresencePrompt),
             (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
             cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = await CreateProtocolAsync(_scpKeyParams, cancellationToken).ConfigureAwait(false);
+        var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
         var backend = CreateBackend(protocol);
-        await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        await backend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
 
         // Get firmware version from authenticator info
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
@@ -139,11 +137,11 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         }
 
         // Initialize base class
-        var effectiveProtocol = await InitializeProtocolAsync(
+        var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
                 firmwareVersionOverride ?? detectedFirmwareVersion,
                 configuration,
-                _scpKeyParams,
+                scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 

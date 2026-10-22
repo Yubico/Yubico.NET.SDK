@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using NSubstitute;
-using System.Linq;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
@@ -39,7 +38,7 @@ public class SmartCardBackendTests
     }
 
     [Fact]
-    public async Task InitializeAsync_MalformedManagementVersion_UsesOtpStatusVersion()
+    public async Task ReadInitialStateAsync_MalformedManagementVersion_UsesOtpStatusVersion()
     {
         _protocol.SelectAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
             .Returns(
@@ -48,7 +47,7 @@ public class SmartCardBackendTests
 
         var backend = CreateBackend();
 
-        YubiOtpInitialization initialization = await backend.InitializeAsync(TestContext.Current.CancellationToken);
+        YubiOtpInitialization initialization = await backend.ReadInitialStateAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(new FirmwareVersion(5, 7, 0), initialization.FirmwareVersion);
     }

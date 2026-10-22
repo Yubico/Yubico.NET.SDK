@@ -79,8 +79,8 @@ public class MacOSHidFidoRouteLifetimeTests
                 () => new InitializingSession(connection),
                 async (session, cancellationToken) =>
                 {
-                    var protocol = await session.CreateProtocolAsync(null, cancellationToken);
-                    await session.InitializeProtocolAsync(protocol,
+                    var protocol = await session.PrepareProtocolAsync(null, cancellationToken);
+                    await session.ConfigureProtocolAsync(protocol,
                         new FirmwareVersion(5, 8, 0), cancellationToken: cancellationToken);
                 },
                 token);

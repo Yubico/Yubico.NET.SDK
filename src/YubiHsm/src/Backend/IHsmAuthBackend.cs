@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.YubiHsm.Backend;
 
 internal interface IHsmAuthBackend
 {
-    Task<FirmwareVersion> InitializeAsync(CancellationToken cancellationToken = default);
+    Task<FirmwareVersion> ReadInitialStateAsync(CancellationToken cancellationToken = default);
 
     Task<ApduResponse> SendAsync(
         ApduCommand command,

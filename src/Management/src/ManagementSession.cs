@@ -39,21 +39,16 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         new("Device Reset", 5, 6, 0);
 
     private readonly ILogger _logger;
-    private readonly ScpKeyParameters? _scpKeyParams;
 
-    private IProtocol _protocol = null!;
     private IManagementBackend _backend = null!;
 
     private FirmwareVersion? _version;
 
-    private ManagementSession(
-        IConnection connection,
-        ScpKeyParameters? scpKeyParams = null)
+    private ManagementSession(IConnection connection)
         : base(EnsureSupportedConnection(connection))
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        _scpKeyParams = scpKeyParams;
         _logger = Logger;
 
     }
@@ -76,32 +71,32 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         ConstructInitializedAsync(
             connection,
             options,
-            () => new ManagementSession(connection, options?.ScpKeyParameters),
+            () => new ManagementSession(connection),
             (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
             cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken = default)
     {
         if (IsInitialized)
             return;
 
-        var protocol = await CreateProtocolAsync(_scpKeyParams, cancellationToken).ConfigureAwait(false);
+        var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
         var backend = CreateBackend(protocol);
-        _protocol = protocol;
         _backend = backend;
 
         _version = await ResolveFirmwareVersionAsync(backend, protocol, cancellationToken).ConfigureAwait(false);
         var effectiveFirmwareVersion = firmwareVersionOverride ?? _version;
 
-        var effectiveProtocol = await InitializeProtocolAsync(
+        var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
                 effectiveFirmwareVersion,
                 configuration,
-                _scpKeyParams,
+                scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -110,16 +105,16 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             backend = CreateBackend(effectiveProtocol);
         }
 
-        _protocol = effectiveProtocol;
         _backend = backend;
 
-        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
+        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
     }
 
     public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        return DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
+        var protocol = Protocol ?? throw new InvalidOperationException("Management session is not initialized.");
+        return DeviceInfoReader.ReadAsync(protocol, _version, cancellationToken);
     }
 
     public Task SetDeviceConfigAsync(
@@ -176,7 +171,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         IProtocol protocol,
         CancellationToken cancellationToken)
     {
-        var probedVersion = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var probedVersion = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             var deviceInfo = await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);

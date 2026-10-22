@@ -48,7 +48,6 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private const byte P2Pin = 0x80;
     private const byte P2Puk = 0x81;
 
-    private readonly ScpKeyParameters? _scpKeyParams;
     private IPivBackend? _backend;
     private bool _isAuthenticated;
 
@@ -85,15 +84,12 @@ public sealed class PivSession : ApplicationSession, IPivSession
     ///     create an unbound session that bypassed the guard.
     /// </remarks>
     /// <param name="connection">The connection to use for PIV operations.</param>
-    /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
     /// <param name="userPresencePrompt">Optional user-presence notification service.</param>
     internal PivSession(
         IConnection connection,
-        ScpKeyParameters? scpKeyParams,
         IUserPresencePrompt? userPresencePrompt = null)
         : base(connection, userPresencePrompt)
     {
-        _scpKeyParams = scpKeyParams;
     }
 
     /// <summary>
@@ -112,20 +108,21 @@ public sealed class PivSession : ApplicationSession, IPivSession
         ConstructInitializedAsync(
             connection,
             options,
-            () => new PivSession(connection, options?.ScpKeyParameters, options?.UserPresencePrompt),
+            () => new PivSession(connection, options?.UserPresencePrompt),
             (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
             cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = (ISmartCardProtocol)await CreateProtocolAsync(_scpKeyParams, cancellationToken)
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
             .ConfigureAwait(false);
         var backend = new PivBackend(protocol);
 
@@ -134,17 +131,17 @@ public sealed class PivSession : ApplicationSession, IPivSession
             // Note: PIV GET VERSION returns the PIV application version (often 0.0.1),
             // not the YubiKey firmware version. Feature detection should use metadata
             // commands rather than version comparisons.
-            var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+            var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
             var detectedFirmwareVersion = initialization.FirmwareVersion;
             var effectiveFirmwareVersion = firmwareVersionOverride ?? detectedFirmwareVersion;
             Logger.LogDebug("PIV firmware version: {Version}", detectedFirmwareVersion);
 
             // Initialize base session
-            var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+            var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                     protocol,
                     effectiveFirmwareVersion,
                     configuration,
-                    _scpKeyParams,
+                    scpKeyParams,
                     cancellationToken)
                 .ConfigureAwait(false);
 
@@ -160,7 +157,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
             ManagementKeyType = GetConservativeDefaultManagementKeyType(detectedFirmwareVersion);
             try
             {
-                var metadata = await GetManagementKeyMetadataAsync(cancellationToken).ConfigureAwait(false);
+                var metadata = await PivMetadataProtocol.GetManagementKeyMetadataAsync(
+                    backend, Logger, cancellationToken).ConfigureAwait(false);
                 ManagementKeyType = metadata.KeyType;
                 Logger.LogDebug("Management key type detected from metadata: {KeyType}", ManagementKeyType);
             }

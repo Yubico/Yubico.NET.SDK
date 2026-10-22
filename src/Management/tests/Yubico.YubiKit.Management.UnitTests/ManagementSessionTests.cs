@@ -171,7 +171,7 @@ public class ManagementSessionTests
             typeof(ManagementSession),
             BindingFlags.Instance | BindingFlags.NonPublic,
             binder: null,
-            [new InertSmartCardConnection(), null],
+            [new InertSmartCardConnection()],
             culture: null)!;
 
         typeof(ApplicationSession)
@@ -201,7 +201,7 @@ public class ManagementSessionTests
         public ReadOnlyMemory<byte> CapturedConfig { get; private set; }
         public bool SawNonZeroConfig { get; private set; }
 
-        public ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken = default) =>
+        public ValueTask<FirmwareVersion?> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
             ValueTask.FromResult<FirmwareVersion?>(new FirmwareVersion(5, 0, 0));
 
         public ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken = default)

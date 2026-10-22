@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.SecurityDomain.Backend;
 
 internal interface ISecurityDomainBackend
 {
-    Task InitializeAsync(CancellationToken cancellationToken = default);
+    Task SelectApplicationAsync(CancellationToken cancellationToken = default);
 
     Task<ApduResponse> SendAsync(
         ApduCommand command,

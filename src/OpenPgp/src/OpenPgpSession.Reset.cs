@@ -58,7 +58,7 @@ public sealed partial class OpenPgpSession
         // state, not caller policy, so a SessionCreationOptions.FirmwareVersionOverride supplied at
         // creation must survive it; otherwise the override would silently lapse mid-session and
         // later feature gates would disagree with earlier ones.
-        _ = await _backend!.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        _ = await _backend!.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
 
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);

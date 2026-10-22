@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.Oath.Backend;
 
 internal interface IOathBackend
 {
-    Task<OathInitialization> InitializeAsync(CancellationToken cancellationToken = default);
+    Task<OathInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default);
 
     Task<ApduResponse> SendAsync(
         ApduCommand command,

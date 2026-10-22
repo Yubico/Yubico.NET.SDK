@@ -148,10 +148,10 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         if (IsInitialized)
             return;
 
-        var protocol = (ISmartCardProtocol)await CreateProtocolAsync(_scpKeyParams, cancellationToken)
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(_scpKeyParams, cancellationToken)
             .ConfigureAwait(false);
         ISecurityDomainBackend backend = new SecurityDomainBackend(protocol);
-        await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        await backend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
 
         // Security Domain is available on firmware 5.3.0 and newer.
         // If the caller already knows the firmware, they can provide it and enable feature gating.
@@ -161,7 +161,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         ISmartCardProtocol effectiveProtocol;
         try
         {
-            effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+            effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                     protocol,
                     resolvedFirmwareVersion,
                     configuration,
@@ -849,7 +849,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// </exception>
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
-        await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        await InitializeSessionAsync(token => InitializeAsync(cancellationToken: token), cancellationToken)
+            .ConfigureAwait(false);
 
         var keyInfo = await ListKeyInformationAsync(cancellationToken).ConfigureAwait(false);
         if (keyInfo.Count == 0)
@@ -878,7 +879,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         IsAuthenticated = false;
         IsInitialized = false;
 
-        await InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        await InitializeSessionAsync(token => InitializeAsync(cancellationToken: token), cancellationToken)
+            .ConfigureAwait(false);
     }
 
     [MemberNotNull(nameof(_protocol), nameof(_backend))]

@@ -29,7 +29,7 @@ internal sealed class OathBackend(ISmartCardProtocol protocol) : IOathBackend
     private readonly ISmartCardProtocol _protocol =
         protocol ?? throw new ArgumentNullException(nameof(protocol));
 
-    public async Task<OathInitialization> InitializeAsync(CancellationToken cancellationToken = default)
+    public async Task<OathInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default)
     {
         var selectResponse = await SelectAsync(cancellationToken).ConfigureAwait(false);
 

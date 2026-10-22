@@ -37,9 +37,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private static readonly Feature FeatureScp03 = new("SCP03 for OATH", 5, 6, 3);
 
     private readonly ILogger _logger;
-    private readonly ScpKeyParameters? _scpKeyParams;
 
-    private ISmartCardProtocol _protocol = null!;
     private IOathBackend _backend = null!;
     private byte[] _salt = [];
     private byte[] _challenge = [];
@@ -58,13 +56,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
     private OathSession(
         ISmartCardConnection connection,
-        ScpKeyParameters? scpKeyParams = null,
         IUserPresencePrompt? userPresencePrompt = null)
         : base(connection, userPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        _scpKeyParams = scpKeyParams;
         _logger = Logger;
     }
 
@@ -78,10 +74,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ConstructInitializedAsync(
             connection,
             options,
-            () => new OathSession(connection, options?.ScpKeyParameters, options?.UserPresencePrompt),
+            () => new OathSession(connection, options?.UserPresencePrompt),
             (session, token) => session.InitializeAsync(
                 CreateOathProtocolConfiguration(options?.ProtocolConfiguration),
                 options?.FirmwareVersionOverride,
+                options?.ScpKeyParameters,
                 token),
             cancellationToken);
 
@@ -91,19 +88,20 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = (ISmartCardProtocol)await CreateProtocolAsync(_scpKeyParams, cancellationToken)
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
             .ConfigureAwait(false);
         IOathBackend backend = new OathBackend(protocol);
 
-        var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
         ApplyInitialization(initialization, firmwareVersionOverride);
 
-        if (_scpKeyParams is not null)
+        if (scpKeyParams is not null)
         {
             if (!IsSupported(FeatureScp03))
             {
@@ -113,11 +111,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
             }
         }
 
-        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+        var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
                 FirmwareVersion,
                 configuration,
-                _scpKeyParams,
+                scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -126,7 +124,6 @@ public sealed class OathSession : ApplicationSession, IOathSession
             backend = new OathBackend(effectiveProtocol);
         }
 
-        _protocol = effectiveProtocol;
         _backend = backend;
 
         _logger.LogDebug("OATH session initialized, DeviceId={DeviceId}, IsLocked={IsLocked}", DeviceId, IsLocked);
@@ -568,7 +565,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
         // Re-select and re-parse to get new state
-        var initialization = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var initialization = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
         // Preserve the effective version selected at creation; reset refreshes applet state, not caller policy.
         ApplyInitialization(initialization, FirmwareVersion);
 

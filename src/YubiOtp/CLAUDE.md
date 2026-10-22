@@ -42,13 +42,13 @@ SmartCard path:
 1. SELECT `AID.MANAGEMENT` (for NEO version reliability)
 2. SELECT `AID.OTP` → store status bytes
 3. Extract firmware version (NEO workaround: use max of management/OTP versions)
-4. `InitializeProtocolAsync` → configure protocol, optionally establish SCP
+4. `ConfigureProtocolAsync` → configure protocol, optionally establish SCP
 5. Recreate the SmartCard backend with the effective protocol while carrying forward the SELECT programming sequence
 
 OTP HID path:
 1. `ReadStatusAsync()` → store status bytes
 2. Extract firmware version from protocol or status bytes
-3. `InitializeProtocolAsync` → configure protocol
+3. `ConfigureProtocolAsync` → configure protocol
 
 ## User-presence notifications
 

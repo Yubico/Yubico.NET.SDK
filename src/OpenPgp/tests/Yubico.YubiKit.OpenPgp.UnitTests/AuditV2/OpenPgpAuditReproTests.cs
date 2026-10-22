@@ -27,9 +27,14 @@ public sealed class OpenPgpAuditReproTests
         Assert.Equal([0xB6, 0x00], import.AsSpan(7, 2).ToArray());
     }
 
-    [Theory(Skip = "Parked: YESDK-1633 (25h/26q) — reproduces an open finding; unskip when fixed")]
+    /// <summary>RFC 9580 §3.7.1.3: a count below salt+PIN still hashes one full copy (libgcrypt does the same).</summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
     [InlineData(8)]
     [InlineData(9)]
+    [InlineData(13)]
+    [InlineData(14)]
     [Trait("Audit", "YESDK-1633")]
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1633_ShortKdfCountStillHashesCompletePin(int count)
@@ -53,17 +58,57 @@ public sealed class OpenPgpAuditReproTests
         }
     }
 
-    [Fact(Skip = "Parked: YESDK-1633 (25h/26q) — reproduces an open finding; unskip when fixed")]
+    /// <summary>The KDF-DO count is an unsigned 32-bit value; 0x80000000 is 2^31, not a negative number.</summary>
+    [Theory]
+    [InlineData(new byte[] { 0x80, 0, 0, 0 }, 2_147_483_648L)]
+    [InlineData(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, 4_294_967_295L)]
+    [InlineData(new byte[] { 0x00, 0x78, 0, 0 }, 0x780000L)]
     [Trait("Audit", "YESDK-1633")]
-    public void YESDK1633_UnsignedKdfCountDoesNotWrapNegative()
+    public void YESDK1633_UnsignedKdfCountDoesNotWrapNegative(byte[] countBytes, long expected)
     {
         byte[] encoded =
         [
-            0x81, 1, 3, 0x82, 1, 8, 0x83, 4, 0x80, 0, 0, 0,
+            0x81, 1, 3, 0x82, 1, 8, 0x83, 4, .. countBytes,
             0x84, 8, 1, 2, 3, 4, 5, 6, 7, 8
         ];
         using var parsed = Kdf.Parse(encoded);
-        Assert.Throws<ArgumentException>(() => parsed.Process(Pw.User, "123456"u8));
+        var kdf = Assert.IsType<KdfIterSaltedS2k>(parsed);
+
+        Assert.Equal(expected, kdf.IterationCount);
+        Assert.Equal(countBytes, TlvHelper.DecodeDictionary(kdf.ToBytes())[0x83].ToArray());
+    }
+
+    /// <summary>One copy + 1 byte: the count is a byte count, so 15 hashes salt+PIN followed by the first salt byte.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1633")]
+    public void YESDK1633_CountOneAboveInputLength_HashesOneCopyAndOneByte()
+    {
+        using var kdf = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256,
+            SaltUser = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 },
+            IterationCount = 15
+        };
+        byte[] expected = SHA256.HashData([1, 2, 3, 4, 5, 6, 7, 8, .. "123456"u8, 1]);
+
+        Assert.Equal(expected, kdf.Process(Pw.User, "123456"u8));
+    }
+
+    /// <summary>Known answers from libgcrypt 1.12.3 gcry_kdf_derive(GCRY_KDF_ITERSALTED_S2K, SHA256), what gpg-agent computes.</summary>
+    [Theory]
+    [InlineData(8, "1ae0f1043e1492a1acffc2319de52fa4713cf4bfd7123563345550f0da8eee9a")]
+    [InlineData(100_000, "8fc77436ded3825377da921acc4fb1e0c619e426b926c30f06fbb428c6ac9701")]
+    [Trait("Audit", "YESDK-1633")]
+    public void YESDK1633_MatchesLibgcrypt(long count, string expectedHex)
+    {
+        using var kdf = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256,
+            SaltUser = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 },
+            IterationCount = count
+        };
+
+        Assert.Equal(Convert.FromHexString(expectedHex), kdf.Process(Pw.User, "123456"u8));
     }
 
     private static byte[] ApplicationData()

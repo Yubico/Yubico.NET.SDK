@@ -228,7 +228,7 @@ Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.InitialHashAdmin.get -> System.ReadOnlyM
 Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.InitialHashAdmin.init -> void
 Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.InitialHashUser.get -> System.ReadOnlyMemory<byte>?
 Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.InitialHashUser.init -> void
-Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.IterationCount.get -> int
+Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.IterationCount.get -> long
 Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.IterationCount.init -> void
 Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.KdfIterSaltedS2k() -> void
 Yubico.YubiKit.OpenPgp.KdfIterSaltedS2k.SaltAdmin.get -> System.ReadOnlyMemory<byte>?

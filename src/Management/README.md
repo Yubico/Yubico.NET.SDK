@@ -17,6 +17,10 @@ configuration lock code. Other modules talk to one application; this one decides
 SCP is available only over SmartCard. Supplying `SessionCreationOptions.ScpKeyParameters` with a HID connection
 throws before any initialization commands are sent.
 
+Creation selects Management over SmartCard, reads status over OTP HID, or uses the prepared FIDO HID channel
+version before resolving DeviceInfo. Device reset is available only over SmartCard; HID reset requests are
+rejected without sending a reset command.
+
 | Feature | Minimum firmware |
 |---------|------------------|
 | Read device information | 4.1.0 |

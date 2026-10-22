@@ -80,7 +80,7 @@ public class YubiOtpSessionTests
     }
 
     [Fact]
-    public async Task CreateAsync_SmartCardBackendRebinding_PreservesProgrammingSequence()
+    public async Task CreateAsync_SmartCardBackendConstruction_PreservesProgrammingSequence()
     {
         var connection = Substitute.For<ISmartCardConnection>();
         connection.Type.Returns(ConnectionType.SmartCard);

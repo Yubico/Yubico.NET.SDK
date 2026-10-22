@@ -37,18 +37,21 @@ The backend borrows the protocol and owns no disposable state, so `IYubiOtpBacke
 
 The shared `ApplicationSession` factory binds the session and handles failure cleanup. Its protocol preparation
 step rejects SCP on OTP HID before reading status; backend programming-sequence state remains applet-owned.
+Static `ReadInitialStateAsync` helpers on each concrete backend perform discovery without constructing a backend.
+`IYubiOtpBackend` exposes only operational commands, not initialization.
 
 SmartCard path:
 1. SELECT `AID.MANAGEMENT` (for NEO version reliability)
 2. SELECT `AID.OTP` → store status bytes
 3. Extract firmware version (NEO workaround: use max of management/OTP versions)
 4. `ConfigureProtocolAsync` → configure protocol, optionally establish SCP
-5. Recreate the SmartCard backend with the effective protocol while carrying forward the SELECT programming sequence
+5. Construct the SmartCard backend once with the effective protocol, firmware, and SELECT programming sequence
 
 OTP HID path:
 1. `ReadStatusAsync()` → store status bytes
 2. Extract firmware version from protocol or status bytes
 3. `ConfigureProtocolAsync` → configure protocol
+4. Construct the HID backend with the effective protocol
 
 ## User-presence notifications
 

@@ -104,9 +104,9 @@ Yubico.YubiKit.Fido2/
 
 ### Session Creation
 
-`ApplicationSession` prepares the HID channel before backend initialization and GetInfo. The HID backend
-does not initialize it again. SCP on HID is rejected before channel initialization or GetInfo; SmartCard
-selection and firmware discovery still precede SCP establishment.
+`ApplicationSession` prepares the HID channel before GetInfo. `FidoSession` calls `SelectApplicationAsync`
+only on `SmartCardBackend`; neither `IFidoBackend` nor `HidBackend` exposes selection. SCP on HID is rejected
+before channel initialization or GetInfo; SmartCard selection and firmware discovery still precede SCP establishment.
 
 ```csharp
 // Recommended: Use extension method

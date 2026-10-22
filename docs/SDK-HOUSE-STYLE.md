@@ -145,9 +145,12 @@ Keep raw-session initialization contracts separate, including lazy raw FIDO chan
 
 Pass creation-only SCP parameters directly to the initializer; retain them only when a later operation needs
 them, as Security Domain reinitialization does. `ApplicationSession.Protocol` owns protocol lifetime; avoid
-duplicate applet fields unless typed operational access requires them. Backend lifecycle names describe applet
-work: `ReadInitialStateAsync` for discovery and status, `SelectApplicationAsync` for selection. FIDO HID selection
-is a no-op because channel preparation already happened in Core.
+duplicate applet fields unless typed operational access requires them. Backend contracts describe shared
+operations, not lifecycle symmetry: FIDO selection exists only on its SmartCard backend, and Management reset
+exists only on its SmartCard backend. Sessions dispatch these transport-specific operations explicitly.
+Management and YubiOTP discover initial state through static transport-specific helpers beside their backends,
+then construct operational backends after protocol configuration. Do not create OTP backends with placeholder
+firmware or programming sequence values. FIDO HID firmware discovery reads the already-prepared protocol state.
 
 The durable applet API grammar is in [Applet public API](architecture/applet-public-api.md). Applet factories take
 `SessionCreationOptions?` and a final defaulted cancellation token; required domain inputs remain positional;

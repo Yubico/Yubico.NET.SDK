@@ -28,14 +28,14 @@ namespace Yubico.YubiKit.Management.UnitTests;
 public class ManagementBackendLifecycleTests
 {
     [Fact]
-    public async Task FidoHidBackend_ReadInitialStateAsync_ReadsPreparedFirmwareWithoutInitializingChannel()
+    public async Task FidoHidBackend_WriteConfigAsync_UsesPreparedChannelWithoutInitializingIt()
     {
         using var protocol = new PreparedFidoProtocol();
         var backend = new FidoHidBackend(protocol);
 
-        var firmwareVersion = await backend.ReadInitialStateAsync(TestContext.Current.CancellationToken);
+        await backend.WriteConfigAsync(ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken);
 
-        Assert.Equal(protocol.FirmwareVersion, firmwareVersion);
+        Assert.Equal((byte)0xC3, protocol.LastCommand);
     }
 
     [Fact]
@@ -64,6 +64,7 @@ public class ManagementBackendLifecycleTests
 
     private sealed class PreparedFidoProtocol : IFidoHidProtocol
     {
+        public byte? LastCommand { get; private set; }
         public bool IsChannelInitialized => true;
         public FirmwareVersion? FirmwareVersion => new FirmwareVersion(5, 7, 2);
 
@@ -74,7 +75,11 @@ public class ManagementBackendLifecycleTests
             byte command,
             ReadOnlyMemory<byte> data,
             UserPresenceNotification userPresenceNotification,
-            CancellationToken cancellationToken = default) => throw new NotSupportedException();
+            CancellationToken cancellationToken = default)
+        {
+            LastCommand = command;
+            return Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        }
 
         public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null) { }
         public void Dispose() { }

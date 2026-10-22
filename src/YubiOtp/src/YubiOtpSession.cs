@@ -137,9 +137,14 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
 
         var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
-        var backend = CreateBackend(protocol);
-
-        var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+        var initialization = protocol switch
+        {
+            ISmartCardProtocol smartCard =>
+                await SmartCardBackend.ReadInitialStateAsync(smartCard, cancellationToken).ConfigureAwait(false),
+            IOtpHidProtocol otp =>
+                await HidBackend.ReadInitialStateAsync(otp, cancellationToken).ConfigureAwait(false),
+            _ => throw new NotSupportedException("Unsupported OTP protocol.")
+        };
         _status = initialization.Status;
 
         var effectiveProtocol = await ConfigureProtocolAsync(
@@ -150,16 +155,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
                 cancellationToken)
             .ConfigureAwait(false);
 
-        if (effectiveProtocol is ISmartCardProtocol smartCardProtocol)
-        {
-            // Rebinding must carry forward the programming sequence read during SELECT.
-            backend = new SmartCardBackend(
-                smartCardProtocol,
-                FirmwareVersion,
-                GetProgSeq());
-        }
-
-        _backend = backend;
+        _backend = CreateBackend(effectiveProtocol, FirmwareVersion, GetProgSeq());
 
         _logger.LogDebug("YubiOTP session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
     }
@@ -616,14 +612,16 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return state.FirmwareVersion.IsAtLeast(3, 0, 0) && state.IsTouchTriggered(slot);
     }
 
-    private static IYubiOtpBackend CreateBackend(IProtocol protocol) =>
+    private static IYubiOtpBackend CreateBackend(
+        IProtocol protocol,
+        FirmwareVersion firmwareVersion,
+        byte initialProgSeq) =>
         protocol switch
         {
-            // Initial prog_seq and firmware version will be set after SELECT.
             ISmartCardProtocol smartCard => new SmartCardBackend(
                 smartCard,
-                new FirmwareVersion(),
-                0),
+                firmwareVersion,
+                initialProgSeq),
             IOtpHidProtocol otpHid => new HidBackend(otpHid),
             _ => throw new NotSupportedException(
                 $"Protocol type {protocol.GetType().Name} is not supported by YubiOtpSession. " +

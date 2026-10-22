@@ -125,7 +125,8 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
 
         var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
         var backend = CreateBackend(protocol);
-        await backend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
+        if (backend is SmartCardBackend smartCardBackend)
+            await smartCardBackend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
 
         // Get firmware version from authenticator info
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);

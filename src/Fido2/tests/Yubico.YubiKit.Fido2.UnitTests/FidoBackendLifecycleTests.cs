@@ -80,19 +80,6 @@ public class FidoBackendLifecycleTests
             Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<UserPresenceNotification>(),
             cancellationToken: TestContext.Current.CancellationToken);
-    }
-
-    [Fact]
-    public async Task HidBackend_SelectApplicationAsync_DoesNotRepeatSessionProtocolInitialization()
-    {
-        // Arrange
-        var protocol = Substitute.For<IFidoHidProtocol>();
-        var backend = new HidBackend(protocol);
-
-        // Act
-        await backend.SelectApplicationAsync(TestContext.Current.CancellationToken);
-
-        // Assert
         await protocol.DidNotReceive().InitializeAsync(Arg.Any<CancellationToken>());
     }
 

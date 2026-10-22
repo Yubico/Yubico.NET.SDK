@@ -45,9 +45,8 @@ public class SmartCardBackendTests
                 Task.FromResult<ReadOnlyMemory<byte>>("YubiKey 5.4.x"u8.ToArray()),
                 Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 5, 7, 0, 0, 0, 0 }));
 
-        var backend = CreateBackend();
-
-        YubiOtpInitialization initialization = await backend.ReadInitialStateAsync(TestContext.Current.CancellationToken);
+        YubiOtpInitialization initialization = await SmartCardBackend.ReadInitialStateAsync(
+            _protocol, TestContext.Current.CancellationToken);
 
         Assert.Equal(new FirmwareVersion(5, 7, 0), initialization.FirmwareVersion);
     }

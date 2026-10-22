@@ -31,9 +31,11 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
     private const byte InsSetMode = 0x16;
     private const byte InsDeviceReset = 0x1F;
 
-    public async ValueTask<FirmwareVersion?> ReadInitialStateAsync(CancellationToken cancellationToken)
+    public static async ValueTask<FirmwareVersion?> SelectApplicationAsync(
+        ISmartCardProtocol protocol,
+        CancellationToken cancellationToken)
     {
-        var versionBytes = await _protocol.SelectAsync(ApplicationIds.Management, cancellationToken)
+        var versionBytes = await protocol.SelectAsync(ApplicationIds.Management, cancellationToken)
             .ConfigureAwait(false);
 
         return FirmwareVersion.FromSelectResponse(versionBytes.Span);

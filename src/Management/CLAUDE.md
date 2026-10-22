@@ -773,9 +773,12 @@ public static Task<ManagementSession> CreateAsync(
         cancellationToken);
 ```
 
-The applet callback calls `PrepareProtocolAsync`, reads backend state through `ReadInitialStateAsync`,
-resolves firmware, and calls `ConfigureProtocolAsync` before rebinding the backend. The shared factory marks
-the session ready only after this callback completes. SCP parameters are callback inputs, not session fields.
+The applet callback calls `PrepareProtocolAsync`, then explicitly dispatches discovery: SmartCard uses
+`SmartCardBackend.SelectApplicationAsync`, OTP HID uses `OtpBackend.ReadStatusVersionAsync`, and FIDO HID
+reads firmware from the prepared protocol. These static probes do not require an operational backend.
+Firmware resolution prefers DeviceInfo and falls back to the discovered version. After `ConfigureProtocolAsync`,
+the session constructs its backend with the effective protocol. The shared factory marks the session ready only
+after this callback completes. SCP parameters are callback inputs, not session fields.
 
 ## Architecture - Backend Pattern
 
@@ -790,14 +793,15 @@ private IManagementBackend _backend = null!;
 // Backend abstraction: deliberately NOT IDisposable
 internal interface IManagementBackend
 {
-    ValueTask<FirmwareVersion?> ReadInitialStateAsync(CancellationToken cancellationToken);
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
     ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
-    ValueTask DeviceResetAsync(CancellationToken cancellationToken);
 }
 ```
 
 Device-info reads do not go through the backend; `ManagementSession` uses `DeviceInfoReader.ReadAsync` with the base-owned `Protocol` directly.
+
+`DeviceResetAsync` belongs only to `SmartCardBackend`. The session preserves disposal and firmware checks before
+dispatching reset or rejecting HID; HID backends do not expose unsupported reset methods.
 
 ### Implementations
 

@@ -34,12 +34,6 @@ internal readonly record struct YubiOtpInitialization(
 internal interface IYubiOtpBackend
 {
     /// <summary>
-    /// Selects YubiOTP on SmartCard or reads HID status and returns firmware and applet status.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    ValueTask<YubiOtpInitialization> ReadInitialStateAsync(CancellationToken cancellationToken);
-
-    /// <summary>
     /// Writes a configuration to a slot and returns the updated status bytes.
     /// Used for programming slots, swapping, deleting, setting scan maps, and NDEF configuration.
     /// </summary>

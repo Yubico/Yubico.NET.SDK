@@ -141,16 +141,16 @@ public sealed partial class WebAuthnClient
         {
             await extensions.PrepareAsync(ct).ConfigureAwait(false);
 
-            // Exclude-list pre-flight: with a token, probe the
-            // list and send only the match so the authenticator never sees more than it can process.
-            // Without a token the caller's list goes through unchanged and the authenticator enforces it.
+            // Exclude-list pre-flight: probe with up:false, with or without a token, and send only
+            // the match so the authenticator never sees more than it can process. The final
+            // makeCredential still requests user presence before reporting an excluded credential.
             // The probe's answer does not change across a UV escalation, so it runs once per ceremony.
             var excludeList = options.ExcludeCredentials;
             if (probedExcludeList is not null)
             {
                 excludeList = probedExcludeList;
             }
-            else if (excludeList is { Count: > 0 } && auth.Token is not null)
+            else if (excludeList is { Count: > 0 })
             {
                 var matched = await ProbeCredentialsAsync(
                     options.Rp.Id, excludeList, info, auth, decision, PinUvAuthTokenPermissions.MakeCredential, ct)

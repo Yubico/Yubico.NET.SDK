@@ -295,7 +295,7 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     [Fact]
-    public async Task MakeCredential_ExcludeListWithoutToken_PreservesOriginalExcludeList()
+    public async Task MakeCredential_ExcludeListWithoutToken_DoesNotMutateCallerList()
     {
         // Arrange
         var excludeCredential = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
@@ -313,14 +313,17 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
             .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+        _mockBackend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Throws(new CtapException(CtapStatus.NoCredentials));
 
         // Act
-        await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
+        await _client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(capturedRequest);
-        Assert.Same(options.ExcludeCredentials, capturedRequest.ExcludeList);
-        await _mockBackend.DidNotReceive().GetAssertionAsync(
+        Assert.Empty(capturedRequest.ExcludeList!);
+        Assert.Same(excludeCredential, Assert.Single(options.ExcludeCredentials));
+        await _mockBackend.Received(1).GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>());
     }

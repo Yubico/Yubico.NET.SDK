@@ -258,6 +258,8 @@ Extensions follow the processor model described in
   dropped (WebAuthn L3 §9.4) unless the API promises a typed error (previewSign).
 - `Client/CredentialFilter` is the shared `up:false` probe for the exclude-list pre-flight and allow-list
   selection; with an allow list the real getAssertion carries exactly one descriptor.
+  Exclude-list pre-flight also runs without a PIN/UV token: probes omit PIN-auth fields and the final
+  makeCredential carries only the matching descriptor (or an empty list), retaining its normal touch requirement.
 
 Adding an extension: a codec, a processor, a line in each session's factory, a property on the typed
 input/output records, unit tests for the codec and for the processor against a mocked backend, and a

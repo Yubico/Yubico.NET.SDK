@@ -15,6 +15,7 @@
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
@@ -170,6 +171,98 @@ public class WebAuthnClientCeremonyFrameTests
         Assert.NotNull(sent);
         Assert.Empty(sent.ExcludeList!);
     }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public async Task MakeCredential_ExcludeListWithoutToken_ProbesInBatchesAndNarrowsTheFinalList(
+        bool credentialExists, bool pinSupplied)
+    {
+        ArrangeDiscouragedUvAuthenticator();
+        var absent = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
+        var candidate = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
+        var probes = new List<BackendGetAssertionRequest>();
+        _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(probes.Add), Arg.Any<CancellationToken>())
+            .Returns(call => credentialExists && call.Arg<BackendGetAssertionRequest>().AllowList!.Contains(candidate)
+                ? MockFido2Responses.CreateMockGetAssertionResponse(candidate.Id.ToArray())
+                : throw new CtapException(CtapStatus.NoCredentials));
+        BackendMakeCredentialRequest? sent = null;
+        _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(request => sent = request), Arg.Any<CancellationToken>())
+            .Returns(call => call.Arg<BackendMakeCredentialRequest>().ExcludeList is { Count: > 0 }
+                ? throw new CtapException(CtapStatus.CredentialExcluded)
+                : MockFido2Responses.CreateMockMakeCredentialResponse());
+        var options = Registration(UserVerificationPreference.Discouraged) with
+        {
+            ExcludeCredentials = [absent, candidate]
+        };
+
+        if (credentialExists)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
+                _client.MakeCredentialAsync(options, pinSupplied ? Pin : null, TestContext.Current.CancellationToken));
+            Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+        }
+        else
+        {
+            await _client.MakeCredentialAsync(options, pinSupplied ? Pin : null, TestContext.Current.CancellationToken);
+        }
+
+        Assert.Equal(2, probes.Count);
+        Assert.Equal([absent], probes[0].AllowList);
+        Assert.Equal([candidate], probes[1].AllowList);
+        Assert.All(probes, probe =>
+        {
+            Assert.False(probe.Options!["up"]);
+            Assert.Null(probe.PinUvAuthParam);
+            Assert.Null(probe.PinUvAuthProtocol);
+        });
+        Assert.NotNull(sent);
+        Assert.Equal<PublicKeyCredentialDescriptor>(credentialExists ? [candidate] : [], sent.ExcludeList!);
+        Assert.Null(sent.PinUvAuthParam);
+        Assert.Null(sent.PinUvAuthProtocol);
+        Assert.Null(sent.Options);
+        await _backend.DidNotReceive().GetPinUvTokenAsync(
+            Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(), Arg.Any<string>(),
+            Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task MakeCredential_ExcludeListWithoutToken_UvEscalationReusesTheProbedMatch()
+    {
+        ArrangeDiscouragedUvAuthenticator();
+        var excluded = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(excluded.Id.ToArray()));
+        var attempts = new List<BackendMakeCredentialRequest>();
+        _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(attempts.Add), Arg.Any<CancellationToken>())
+            .Throws(_ => new CtapException(attempts.Count == 1 ? CtapStatus.PuatRequired : CtapStatus.CredentialExcluded));
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.MakeCredentialAsync(
+            Registration(UserVerificationPreference.Discouraged) with { ExcludeCredentials = [excluded] },
+            Pin, TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+        Assert.Equal(2, attempts.Count);
+        Assert.All(attempts, attempt => Assert.Equal([excluded], attempt.ExcludeList));
+        Assert.Null(attempts[0].PinUvAuthParam);
+        Assert.NotNull(attempts[1].PinUvAuthParam);
+        await _backend.Received(1).GetAssertionAsync(
+            Arg.Is<BackendGetAssertionRequest>(request => !request.PinUvAuthParam.HasValue && !request.PinUvAuthProtocol.HasValue),
+            Arg.Any<CancellationToken>());
+        await _backend.Received(1).GetPinUvTokenAsync(
+            PinUvAuthMethod.Pin, Arg.Any<PinUvAuthTokenPermissions>(), RpId,
+            Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
+    }
+
+    private void ArrangeDiscouragedUvAuthenticator() =>
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(new AuthenticatorInfo
+        {
+            Versions = ["FIDO_2_1"],
+            Options = new Dictionary<string, bool> { ["clientPin"] = true, ["makeCredUvNotRqd"] = true },
+            MaxCredentialCountInList = 1
+        });
 
     /// <summary>A probe failure other than NoCredentials keeps its dedicated wrapping and does not escalate UV.</summary>
     [Fact]

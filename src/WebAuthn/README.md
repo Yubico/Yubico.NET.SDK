@@ -155,6 +155,10 @@ User verification is separate from touch, and `UserVerification` on either optio
 | `Preferred` (default) | Obtains a token only when the key has verification configured, and otherwise proceeds unverified. |
 | `Discouraged` | Obtains no token unless the key forces one, for example `alwaysUv` is enabled or a registration runs on a key that does not advertise `makeCredUvNotRqd`. |
 
+Registration checks nonempty `ExcludeCredentials` lists in device-sized batches, even when verification is
+discouraged and no PIN token is used. The final registration still requires touch before reporting that a
+credential is excluded.
+
 ## Constraints
 
 - The client owns the `IFidoSession` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself.

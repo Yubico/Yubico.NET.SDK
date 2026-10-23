@@ -18,7 +18,6 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -82,18 +81,15 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
 
     private static readonly Feature FeatureFido2UsbSmartCard = new("FIDO2 over USB SmartCard", 5, 8, 0);
 
-    private readonly ScpKeyParameters? _scpKeyParams;
     private readonly ILogger _logger;
 
     private IFidoBackend _backend = null!;
 
     private FidoSession(
         IConnection connection,
-        ScpKeyParameters? scpKeyParams = null,
         IUserPresencePrompt? userPresencePrompt = null)
         : base(connection, userPresencePrompt)
     {
-        _scpKeyParams = scpKeyParams;
         _logger = Logger;
     }
 
@@ -106,49 +102,31 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
     /// <returns>An initialized FidoSession.</returns>
     /// <exception cref="ArgumentNullException">If <paramref name="connection"/> is null.</exception>
     /// <exception cref="NotSupportedException">If the connection type is not supported.</exception>
-    public static async Task<FidoSession> CreateAsync(
+    public static Task<FidoSession> CreateAsync(
         IConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-        var userPresencePrompt = options?.UserPresencePrompt;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
             connection,
-            () => new FidoSession(connection, scpKeyParams, userPresencePrompt));
-        try
-        {
-            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+            options,
+            () => new FidoSession(connection, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+            cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create(Connection);
-        Protocol = protocol;
+        var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
         var backend = CreateBackend(protocol);
-        await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        if (backend is SmartCardBackend smartCardBackend)
+            await smartCardBackend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
 
         // Get firmware version from authenticator info
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
@@ -160,11 +138,11 @@ public sealed class FidoSession : ApplicationSession, IFidoSession
         }
 
         // Initialize base class
-        var effectiveProtocol = await InitializeProtocolAsync(
+        var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
                 firmwareVersionOverride ?? detectedFirmwareVersion,
                 configuration,
-                _scpKeyParams,
+                scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 

@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -40,21 +39,16 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         new("Device Reset", 5, 6, 0);
 
     private readonly ILogger _logger;
-    private readonly ScpKeyParameters? _scpKeyParams;
 
-    private IProtocol _protocol = null!;
     private IManagementBackend _backend = null!;
 
     private FirmwareVersion? _version;
 
-    private ManagementSession(
-        IConnection connection,
-        ScpKeyParameters? scpKeyParams = null)
+    private ManagementSession(IConnection connection)
         : base(EnsureSupportedConnection(connection))
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        _scpKeyParams = scpKeyParams;
         _logger = Logger;
 
     }
@@ -70,74 +64,59 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
                 "Supported types: ISmartCardConnection, IFidoHidConnection, IOtpHidConnection.");
     }
 
-    public static async Task<ManagementSession> CreateAsync(
+    public static Task<ManagementSession> CreateAsync(
         IConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(connection, () => new ManagementSession(connection, scpKeyParams));
-        try
-        {
-            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
+            connection,
+            options,
+            () => new ManagementSession(connection),
+            (session, token) => session.InitializeAsync(
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+            cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken = default)
     {
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create(Connection);
-        Protocol = protocol;
-        var backend = CreateBackend(protocol);
-        _protocol = protocol;
-        _backend = backend;
+        var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
+        var fallbackVersion = protocol switch
+        {
+            ISmartCardProtocol smartCard =>
+                await SmartCardBackend.SelectApplicationAsync(smartCard, cancellationToken).ConfigureAwait(false),
+            IOtpHidProtocol otp =>
+                await OtpBackend.ReadStatusVersionAsync(otp, cancellationToken).ConfigureAwait(false),
+            IFidoHidProtocol fido => fido.FirmwareVersion,
+            _ => throw new NotSupportedException("Unsupported Management protocol.")
+        };
 
-        _version = await ResolveFirmwareVersionAsync(backend, protocol, cancellationToken).ConfigureAwait(false);
+        _version = await ResolveFirmwareVersionAsync(protocol, fallbackVersion, cancellationToken).ConfigureAwait(false);
         var effectiveFirmwareVersion = firmwareVersionOverride ?? _version;
 
-        var effectiveProtocol = await InitializeProtocolAsync(
+        var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
                 effectiveFirmwareVersion,
                 configuration,
-                _scpKeyParams,
+                scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        if (!ReferenceEquals(protocol, effectiveProtocol))
-        {
-            backend = CreateBackend(effectiveProtocol);
-        }
+        _backend = CreateBackend(effectiveProtocol);
 
-        _protocol = effectiveProtocol;
-        _backend = backend;
-
-        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", _protocol.GetType().Name);
+        _logger.LogDebug("Management session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
     }
 
     public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        return DeviceInfoReader.ReadAsync(_protocol, _version, cancellationToken);
+        var protocol = Protocol ?? throw new InvalidOperationException("Management session is not initialized.");
+        return DeviceInfoReader.ReadAsync(protocol, _version, cancellationToken);
     }
 
     public Task SetDeviceConfigAsync(
@@ -186,15 +165,18 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     {
         ThrowIfDisposed();
         EnsureSupports(FeatureDeviceReset);
-        return _backend.DeviceResetAsync(cancellationToken).AsTask();
+        return _backend switch
+        {
+            SmartCardBackend smartCard => smartCard.DeviceResetAsync(cancellationToken).AsTask(),
+            _ => throw new NotSupportedException("Device reset is only available over SmartCard (CCID) connections.")
+        };
     }
 
     private async Task<FirmwareVersion> ResolveFirmwareVersionAsync(
-        IManagementBackend backend,
         IProtocol protocol,
+        FirmwareVersion? fallbackVersion,
         CancellationToken cancellationToken)
     {
-        var probedVersion = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             var deviceInfo = await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
@@ -206,7 +188,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
                 "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
         }
 
-        return probedVersion
+        return fallbackVersion
             ?? throw new InvalidOperationException("Could not determine firmware version from device");
     }
 

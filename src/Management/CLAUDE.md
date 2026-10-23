@@ -12,6 +12,10 @@ This file provides Claude-specific guidance for working with the Management modu
 
 ## Module Context
 
+`ApplicationSession` prepares the protocol before Management probes firmware. On HID FIDO, the backend reads
+the firmware from the already-initialized channel and does not initialize it again. SCP requested on either
+HID transport is rejected before the first initialization exchange.
+
 The Management module is the **primary interface for YubiKey device configuration**. It's unique because:
 
 1. **Device-level operations**: Works across all applications (PIV, OATH, FIDO2, etc.)
@@ -756,35 +760,25 @@ public async Task ResetDeviceAsync(CancellationToken cancellationToken = default
 ## Session Initialization Pattern
 
 ```csharp
-public static async Task<ManagementSession> CreateAsync(
+public static Task<ManagementSession> CreateAsync(
     IConnection connection,
-    ProtocolConfiguration? configuration = null,
-    ScpKeyParameters? scpKeyParams = null,
-    CancellationToken cancellationToken = default)
-{
-    // Two-phase initialization
-    var session = new ManagementSession(connection, configuration, scpKeyParams);
-    await session.InitializeAsync(configuration, cancellationToken);
-
-    return session;
-}
-
-private async Task InitializeAsync(
-    ProtocolConfiguration? configuration,
-    CancellationToken cancellationToken)
-{
-    // 1. Get firmware version (needed for feature detection)
-    FirmwareVersion = await GetVersionAsync(cancellationToken);
-
-    // 2. Configure protocol with version info
-    Protocol!.Configure(FirmwareVersion, configuration);
-
-    // 3. Optionally establish SCP through ApplicationSession.InitializeProtocolAsync(...)
-    //    when the effective protocol is Core's PC/SC SmartCard implementation.
-
-    IsInitialized = true;
-}
+    SessionCreationOptions? options = null,
+    CancellationToken cancellationToken = default) =>
+    ConstructInitializedAsync(
+        connection,
+        options,
+        () => new ManagementSession(connection),
+        (session, token) => session.InitializeAsync(
+            options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+        cancellationToken);
 ```
+
+The applet callback calls `PrepareProtocolAsync`, then explicitly dispatches discovery: SmartCard uses
+`SmartCardBackend.SelectApplicationAsync`, OTP HID uses `OtpBackend.ReadStatusVersionAsync`, and FIDO HID
+reads firmware from the prepared protocol. These static probes do not require an operational backend.
+Firmware resolution prefers DeviceInfo and falls back to the discovered version. After `ConfigureProtocolAsync`,
+the session constructs its backend with the effective protocol. The shared factory marks the session ready only
+after this callback completes. SCP parameters are callback inputs, not session fields.
 
 ## Architecture - Backend Pattern
 
@@ -799,14 +793,15 @@ private IManagementBackend _backend = null!;
 // Backend abstraction: deliberately NOT IDisposable
 internal interface IManagementBackend
 {
-    ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken);
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
     ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
-    ValueTask DeviceResetAsync(CancellationToken cancellationToken);
 }
 ```
 
-Device-info reads do not go through the backend; `ManagementSession` uses `DeviceInfoReader.ReadAsync(_protocol, ...)` directly.
+Device-info reads do not go through the backend; `ManagementSession` uses `DeviceInfoReader.ReadAsync` with the base-owned `Protocol` directly.
+
+`DeviceResetAsync` belongs only to `SmartCardBackend`. The session preserves disposal and firmware checks before
+dispatching reset or rejecting HID; HID backends do not expose unsupported reset methods.
 
 ### Implementations
 

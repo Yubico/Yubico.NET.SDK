@@ -39,10 +39,12 @@ internal sealed class HidBackend : IYubiOtpBackend
         _protocol = protocol;
     }
 
-    public async ValueTask<YubiOtpInitialization> InitializeAsync(CancellationToken cancellationToken)
+    public static async ValueTask<YubiOtpInitialization> ReadInitialStateAsync(
+        IOtpHidProtocol protocol,
+        CancellationToken cancellationToken)
     {
-        var status = await _protocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
-        var firmwareVersion = _protocol.FirmwareVersion
+        var status = await protocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
+        var firmwareVersion = protocol.FirmwareVersion
                               ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
 
         return new YubiOtpInitialization(firmwareVersion, status);

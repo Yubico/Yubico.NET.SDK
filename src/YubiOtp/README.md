@@ -26,6 +26,9 @@ challenge-response, and sets the NFC NDEF record. Stored TOTP and HOTP credentia
 - Transports: SmartCard (USB CCID and NFC) and OTP HID. `CreateYubiOtpSessionAsync` picks the first supported transport
   in the order SmartCard, then OTP HID; `ScpKeyParameters` without an explicit preference forces SmartCard.
 
+Session creation discovers firmware and slot status before constructing its operational backend. SmartCard
+programming-sequence validation starts from the value returned by OTP selection, including when SCP is enabled.
+
 ## Installation
 
 ```bash

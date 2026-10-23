@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.OpenPgp.Backend;
 
 internal interface IOpenPgpBackend
 {
-    Task<OpenPgpInitialization> InitializeAsync(CancellationToken cancellationToken = default);
+    Task<OpenPgpInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default);
 
     Task<ApduResponse> SendAsync(
         ApduCommand command,

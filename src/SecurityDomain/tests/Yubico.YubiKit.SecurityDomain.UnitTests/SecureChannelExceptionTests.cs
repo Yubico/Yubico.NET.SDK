@@ -34,6 +34,29 @@ public class SecureChannelExceptionTests
 {
     private static byte[] OkResponse() => [0x90, 0x00];
 
+    [Fact]
+    public async Task RawSmartCardSession_CreateWithScp_MarksSessionReadyAfterHandshake()
+    {
+        using var connection = new Scp03HandshakeFakeConnection();
+        using var scpKeyParams = Scp03KeyParameters.Default;
+
+        using (var raw = await RawSmartCardSession.CreateAsync(connection, TestContext.Current.CancellationToken))
+        {
+            Assert.True(raw.IsInitialized);
+            await raw.SelectAsync(ApplicationIds.SecurityDomain, TestContext.Current.CancellationToken);
+        }
+
+        using var secured = await RawSmartCardSession.CreateAsync(
+            connection,
+            scpKeyParams,
+            new FirmwareVersion(5, 7, 2),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(secured.IsInitialized);
+        Assert.True(secured.IsAuthenticated);
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+    }
+
     // --- ISC-43: APDU-level rejection (e.g. wrong key detected by the device) ---
 
     [Fact]
@@ -172,5 +195,7 @@ public class SecureChannelExceptionTests
         var inner = Assert.IsType<ApduException>(ex.InnerException);
         Assert.Equal(connection.ReinitRejectionStatusWord, inner.SW);
         Assert.Contains("INITIALIZE UPDATE", inner.Message);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
     }
 }

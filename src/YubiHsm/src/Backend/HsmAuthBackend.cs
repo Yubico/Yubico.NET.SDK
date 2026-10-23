@@ -24,7 +24,7 @@ internal sealed class HsmAuthBackend(ISmartCardProtocol protocol) : IHsmAuthBack
     private readonly ISmartCardProtocol _protocol =
         protocol ?? throw new ArgumentNullException(nameof(protocol));
 
-    public async Task<FirmwareVersion> InitializeAsync(CancellationToken cancellationToken = default)
+    public async Task<FirmwareVersion> ReadInitialStateAsync(CancellationToken cancellationToken = default)
     {
         var selectResponse = await SelectAsync(cancellationToken).ConfigureAwait(false);
         return ParseVersionFromSelectResponse(selectResponse) ?? HsmAuthSession.FeatureHsmAuth.Version;

@@ -131,7 +131,7 @@ public class SessionConstructionGuardTests
             => Construct(connection, () => new OkSession(connection));
 
         public Task InitializeForTestAsync()
-            => InitializeProtocolAsync(new StubProtocol(), new FirmwareVersion());
+            => ConfigureProtocolAsync(new StubProtocol(), new FirmwareVersion());
     }
 
     private sealed class FailingSession : ApplicationSession

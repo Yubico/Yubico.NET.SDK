@@ -31,7 +31,7 @@ internal sealed class OpenPgpBackend(ISmartCardProtocol protocol) : IOpenPgpBack
     private readonly ISmartCardProtocol _protocol =
         protocol ?? throw new ArgumentNullException(nameof(protocol));
 
-    public async Task<OpenPgpInitialization> InitializeAsync(CancellationToken cancellationToken = default)
+    public async Task<OpenPgpInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default)
     {
         try
         {

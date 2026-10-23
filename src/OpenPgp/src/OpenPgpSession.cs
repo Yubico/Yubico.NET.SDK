@@ -15,7 +15,6 @@
 using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -93,35 +92,17 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     /// <param name="options">Optional cross-cutting session creation settings.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>An initialized <see cref="OpenPgpSession" />.</returns>
-    public static async Task<OpenPgpSession> CreateAsync(
+    public static Task<OpenPgpSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-        var userPresencePrompt = options?.UserPresencePrompt;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(connection, () => new OpenPgpSession(connection, userPresencePrompt));
-        try
-        {
-            await session.InitializeAsync(configuration, scpKeyParams, firmwareVersionOverride, cancellationToken)
-                .ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
+            connection,
+            options,
+            () => new OpenPgpSession(connection, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                options?.ProtocolConfiguration, options?.ScpKeyParameters, options?.FirmwareVersionOverride, token),
+            cancellationToken);
 
     // ── Initialization ────────────────────────────────────────────────
 
@@ -136,14 +117,14 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
-        Protocol = protocol;
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
+            .ConfigureAwait(false);
         IOpenPgpBackend backend = new OpenPgpBackend(protocol);
 
-        var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
         var firmwareVersion = initialization.FirmwareVersion;
 
-        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+        var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
                 firmwareVersionOverride ?? firmwareVersion,
                 configuration,

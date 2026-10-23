@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Credentials;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 
 namespace Yubico.YubiKit.Management.Backend;
@@ -29,14 +28,6 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
     // CTAP vendor command codes
     private const byte CtapYubikeyDeviceConfig = 0xC0;
     private const byte CtapWriteConfig = 0xC3;
-
-    public async ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken)
-    {
-        await _hidProtocol.InitializeAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return _hidProtocol.FirmwareVersion;
-    }
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {
@@ -60,6 +51,4 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
             .ConfigureAwait(false);
     }
 
-    public ValueTask DeviceResetAsync(CancellationToken cancellationToken) =>
-        throw new NotSupportedException("Device reset is only available over SmartCard (CCID) connections.");
 }

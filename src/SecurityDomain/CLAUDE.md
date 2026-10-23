@@ -222,7 +222,7 @@ private async Task InitializeAsync(
     await backend.SelectAsync(cancellationToken);
 
     // 3. Establish SCP if keys provided
-    await InitializeProtocolAsync(smartCardProtocol, firmwareVersion, configuration, scpKeyParams, cancellationToken);
+    await ConfigureProtocolAsync(smartCardProtocol, firmwareVersion, configuration, scpKeyParams, cancellationToken);
     // Protocol and ISmartCardProtocol are Core-internal implementation seams.
     var selectedProtocol = Protocol as ISmartCardProtocol;
     if (selectedProtocol is null)

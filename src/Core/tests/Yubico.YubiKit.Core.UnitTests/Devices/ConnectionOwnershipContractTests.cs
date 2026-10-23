@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
@@ -490,26 +489,20 @@ public class ConnectionOwnershipContractTests
             Protocol = _protocol;
         }
 
-        public static async Task<ProbeSession> CreateAsync(
+        public static Task<ProbeSession> CreateAsync(
             ISmartCardConnection connection,
-            CancellationToken cancellationToken)
-        {
-            var session = Construct(connection, () => new ProbeSession(connection));
-            try
-            {
-                await session.SelectAsync(cancellationToken);
-                await session.InitializeProtocolAsync(
-                    session._protocol,
-                    new FirmwareVersion(5, 7, 2),
-                    cancellationToken: cancellationToken);
-                return session;
-            }
-            catch
-            {
-                await session.DisposeAsync();
-                throw;
-            }
-        }
+            CancellationToken cancellationToken) =>
+            ConstructInitializedAsync(
+                connection, null, () => new ProbeSession(connection),
+                async (session, token) =>
+                {
+                    await session.SelectAsync(token);
+                    await session.ConfigureProtocolAsync(
+                        session._protocol,
+                        new FirmwareVersion(5, 7, 2),
+                        cancellationToken: token);
+                },
+                cancellationToken);
 
         public Task SelectAsync(CancellationToken cancellationToken) =>
             _protocol.SelectAsync(ApplicationIds.Management, cancellationToken);

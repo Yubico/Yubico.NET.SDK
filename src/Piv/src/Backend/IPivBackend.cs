@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.Piv.Backend;
 
 internal interface IPivBackend
 {
-    Task<PivInitialization> InitializeAsync(CancellationToken cancellationToken = default);
+    Task<PivInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default);
 
     Task<ApduResponse> SendAsync(
         ApduCommand command,

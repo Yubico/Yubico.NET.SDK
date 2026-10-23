@@ -20,7 +20,6 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -49,7 +48,6 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private const byte P2Pin = 0x80;
     private const byte P2Puk = 0x81;
 
-    private readonly ScpKeyParameters? _scpKeyParams;
     private IPivBackend? _backend;
     private bool _isAuthenticated;
 
@@ -86,15 +84,12 @@ public sealed class PivSession : ApplicationSession, IPivSession
     ///     create an unbound session that bypassed the guard.
     /// </remarks>
     /// <param name="connection">The connection to use for PIV operations.</param>
-    /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
     /// <param name="userPresencePrompt">Optional user-presence notification service.</param>
     internal PivSession(
         IConnection connection,
-        ScpKeyParameters? scpKeyParams,
         IUserPresencePrompt? userPresencePrompt = null)
         : base(connection, userPresencePrompt)
     {
-        _scpKeyParams = scpKeyParams;
     }
 
     /// <summary>
@@ -106,46 +101,29 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// <returns>An initialized PIV session.</returns>
     /// <exception cref="ArgumentNullException">If connection is null.</exception>
     /// <exception cref="ApduException">If PIV application selection fails.</exception>
-    public static async Task<PivSession> CreateAsync(
+    public static Task<PivSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
             connection,
-            () => new PivSession(connection, scpKeyParams, options?.UserPresencePrompt));
-        try
-        {
-            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+            options,
+            () => new PivSession(connection, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+            cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
-        Protocol = protocol;
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
+            .ConfigureAwait(false);
         var backend = new PivBackend(protocol);
 
         try
@@ -153,17 +131,17 @@ public sealed class PivSession : ApplicationSession, IPivSession
             // Note: PIV GET VERSION returns the PIV application version (often 0.0.1),
             // not the YubiKey firmware version. Feature detection should use metadata
             // commands rather than version comparisons.
-            var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+            var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
             var detectedFirmwareVersion = initialization.FirmwareVersion;
             var effectiveFirmwareVersion = firmwareVersionOverride ?? detectedFirmwareVersion;
             Logger.LogDebug("PIV firmware version: {Version}", detectedFirmwareVersion);
 
             // Initialize base session
-            var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+            var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                     protocol,
                     effectiveFirmwareVersion,
                     configuration,
-                    _scpKeyParams,
+                    scpKeyParams,
                     cancellationToken)
                 .ConfigureAwait(false);
 
@@ -179,7 +157,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
             ManagementKeyType = GetConservativeDefaultManagementKeyType(detectedFirmwareVersion);
             try
             {
-                var metadata = await GetManagementKeyMetadataAsync(cancellationToken).ConfigureAwait(false);
+                var metadata = await PivMetadataProtocol.GetManagementKeyMetadataAsync(
+                    backend, Logger, cancellationToken).ConfigureAwait(false);
                 ManagementKeyType = metadata.KeyType;
                 Logger.LogDebug("Management key type detected from metadata: {KeyType}", ManagementKeyType);
             }

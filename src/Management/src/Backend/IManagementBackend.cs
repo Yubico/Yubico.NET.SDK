@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Devices;
-
 namespace Yubico.YubiKit.Management.Backend;
 
 /// <summary>
@@ -29,12 +27,6 @@ namespace Yubico.YubiKit.Management.Backend;
 internal interface IManagementBackend
 {
     /// <summary>
-    /// Performs transport-specific Management initialization and returns the version learned from that probe, if any.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken);
-
-    /// <summary>
     /// Write configuration data to the device.
     /// </summary>
     /// <param name="config">TLV-encoded configuration data.</param>
@@ -48,9 +40,4 @@ internal interface IManagementBackend
     /// <param name="cancellationToken">Cancellation token.</param>
     ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Perform device reset (factory reset).
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    ValueTask DeviceResetAsync(CancellationToken cancellationToken);
 }

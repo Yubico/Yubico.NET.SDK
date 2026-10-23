@@ -88,13 +88,7 @@ public class ManagementSessionTests
         var backend = new CapturingBackend();
         var session = CreateSessionForBackend(backend);
         var lockCode = Enumerable.Repeat((byte)0xA5, 16).ToArray();
-        var config = new DeviceConfig
-        {
-            EnabledCapabilities = new Dictionary<Transport, int>
-            {
-                [Transport.Usb] = 1
-            }
-        };
+        var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Otp };
 
         await session.SetDeviceConfigAsync(
             config,
@@ -162,10 +156,7 @@ public class ManagementSessionTests
 
         _ = await Assert.ThrowsAsync<ObjectDisposedException>(
             () => session.SetDeviceConfigAsync(
-                new DeviceConfig
-                {
-                    EnabledCapabilities = new Dictionary<Transport, int> { [Transport.Usb] = 1 }
-                },
+                new DeviceConfig { UsbEnabled = DeviceCapabilities.Otp },
                 cancellationToken: TestContext.Current.CancellationToken));
     }
 

@@ -75,46 +75,6 @@ public class ExtensionBuilderTests
     }
 
     [Fact]
-    public void Build_WithLargeBlob_EncodesCorrectly()
-    {
-        // Arrange
-        var builder = new ExtensionBuilder()
-            .WithLargeBlob(LargeBlobSupport.Required);
-
-        // Act
-        var result = builder.Build();
-
-        // Assert
-        Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("largeBlob", reader.ReadTextString());
-        reader.ReadStartMap();
-        Assert.Equal("support", reader.ReadTextString());
-        Assert.Equal("required", reader.ReadTextString());
-    }
-
-    [Fact]
-    public void Build_WithLargeBlobRead_EncodesCorrectly()
-    {
-        // Arrange
-        var builder = new ExtensionBuilder()
-            .WithLargeBlobRead();
-
-        // Act
-        var result = builder.Build();
-
-        // Assert
-        Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("largeBlob", reader.ReadTextString());
-        reader.ReadStartMap();
-        Assert.Equal("read", reader.ReadTextString());
-        Assert.True(reader.ReadBoolean());
-    }
-
-    [Fact]
     public void Build_WithMinPinLength_EncodesCorrectly()
     {
         // Arrange
@@ -132,42 +92,59 @@ public class ExtensionBuilderTests
         Assert.True(reader.ReadBoolean());
     }
 
+    /// <summary>CTAP 2.1-2.3 §12.7 makeCredential input: "hmac-secret": true (the WebAuthn prf registration request).</summary>
     [Fact]
-    public void Build_WithPrf_EncodesCorrectly()
+    public void Build_WithHmacSecretRequested_EncodesBooleanTrue()
     {
-        // Arrange
-        var builder = new ExtensionBuilder()
-            .WithPrf();
+        var result = new ExtensionBuilder().WithHmacSecret().Build();
 
-        // Act
-        var result = builder.Build();
-
-        // Assert
         Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("prf", reader.ReadTextString());
-        // Empty map for makeCredential
-        var mapCount = reader.ReadStartMap();
-        Assert.Equal(0, mapCount);
+        var reader = new CborReader(result.Value, CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(1, reader.ReadStartMap());
+        Assert.Equal("hmac-secret", reader.ReadTextString());
+        Assert.True(reader.ReadBoolean());
     }
 
     [Fact]
-    public void Build_WithHmacSecretMc_EncodesCorrectly()
+    public void Build_WithHmacSecretRequested_AndGetAssertionInput_ThrowsAtBuild()
     {
-        // Arrange
         var builder = new ExtensionBuilder()
-            .WithHmacSecretMakeCredential();
+            .WithHmacSecret()
+            .WithHmacSecret(new HmacSecretInput
+            {
+                KeyAgreement = new Dictionary<int, object?> { [1] = 2 },
+                SaltEnc = new byte[48],
+                SaltAuth = new byte[16],
+                PinUvAuthProtocol = 2
+            });
 
-        // Act
-        var result = builder.Build();
+        Assert.Throws<InvalidOperationException>(() => builder.Build());
+    }
 
-        // Assert
+    /// <summary>
+    /// CTAP 2.2-2.3 §12.8: hmac-secret-mc carries "the same as the hmac secret extension's getAssertion input" and
+    /// "the hmac-secret extension MUST also be present with the value of "hmac-secret" set to true".
+    /// </summary>
+    [Fact]
+    public void Build_WithHmacSecretMakeCredential_EncodesHmacSecretTrueAndTheInputMap()
+    {
+        var result = new ExtensionBuilder()
+            .WithHmacSecretMakeCredential(new HmacSecretInput
+            {
+                KeyAgreement = new Dictionary<int, object?> { [1] = 2 },
+                SaltEnc = new byte[48],
+                SaltAuth = new byte[16],
+                PinUvAuthProtocol = 2
+            })
+            .Build();
+
         Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("hmac-secret-mc", reader.ReadTextString());
+        var reader = new CborReader(result.Value, CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(2, reader.ReadStartMap());
+        Assert.Equal("hmac-secret", reader.ReadTextString());
         Assert.True(reader.ReadBoolean());
+        Assert.Equal("hmac-secret-mc", reader.ReadTextString());
+        Assert.Equal(4, reader.ReadStartMap());
     }
 
     [Fact]
@@ -286,9 +263,9 @@ public class ExtensionBuilderTests
         var builder = new ExtensionBuilder()
             .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
             .WithCredBlob(new byte[16])
-            .WithLargeBlob(LargeBlobSupport.Preferred)
+            .WithLargeBlobKey()
             .WithMinPinLength()
-            .WithPrf();
+            .WithHmacSecret();
 
         var result = builder.Build();
 
@@ -300,6 +277,30 @@ public class ExtensionBuilderTests
     }
 
 
+
+    /// <summary>CTAP 2.1-2.3 §12.2.1: the getAssertion input is <c>"credBlob": true</c>, not a byte string.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1619")]
+    public void WithGetCredBlob_EncodesBooleanTrue()
+    {
+        var result = new ExtensionBuilder().WithGetCredBlob().Build();
+
+        Assert.NotNull(result);
+        var reader = new CborReader(result.Value, CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(1, reader.ReadStartMap());
+        Assert.Equal("credBlob", reader.ReadTextString());
+        Assert.True(reader.ReadBoolean());
+    }
+
+    /// <summary>Store (makeCredential) and retrieve (getAssertion) are different ceremonies; one request cannot carry both.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1619")]
+    public void WithCredBlob_AndWithGetCredBlob_ThrowsAtBuild()
+    {
+        var builder = new ExtensionBuilder().WithCredBlob(new byte[] { 0x01 }).WithGetCredBlob();
+
+        Assert.Throws<InvalidOperationException>(() => builder.Build());
+    }
 
     [Fact]
     public void WithCredBlob_EmptyBlob_EncodesEmptyByteString()
@@ -339,26 +340,6 @@ public class ExtensionBuilderTests
         reader.ReadStartMap();
         Assert.Equal("credProtect", reader.ReadTextString());
         Assert.Equal(expectedValue, reader.ReadInt32());
-    }
-
-    [Fact]
-    public void WithLargeBlob_PreferredSupport_EncodesPreferred()
-    {
-        // Arrange
-        var builder = new ExtensionBuilder()
-            .WithLargeBlob(LargeBlobSupport.Preferred);
-
-        // Act
-        var result = builder.Build();
-
-        // Assert
-        Assert.NotNull(result);
-        var reader = new CborReader(result.Value, CborConformanceMode.Lax);
-        reader.ReadStartMap();
-        Assert.Equal("largeBlob", reader.ReadTextString());
-        reader.ReadStartMap();
-        Assert.Equal("support", reader.ReadTextString());
-        Assert.Equal("preferred", reader.ReadTextString());
     }
 
     [Fact]

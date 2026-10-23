@@ -150,7 +150,7 @@ public class WebAuthnExcludeListStressTests
                     var userName = $"user{i}@example.com";
                     var challenge = RandomNumberGenerator.GetBytes(32);
 
-                    var options = new RegistrationOptions
+                    var options = new PublicKeyCredentialCreationOptions
                     {
                         Challenge = challenge,
                         Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),
@@ -179,7 +179,7 @@ public class WebAuthnExcludeListStressTests
                 var finalUserId = RandomNumberGenerator.GetBytes(16);
                 var finalChallenge = RandomNumberGenerator.GetBytes(32);
 
-                var finalOptions = new RegistrationOptions
+                var finalOptions = new PublicKeyCredentialCreationOptions
                 {
                     Challenge = finalChallenge,
                     Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),

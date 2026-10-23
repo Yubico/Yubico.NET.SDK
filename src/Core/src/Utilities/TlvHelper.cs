@@ -235,31 +235,35 @@ public static class TlvHelper
     {
         if (tlvData.Count == 0) return Memory<byte>.Empty;
 
-        var estimatedSize = tlvData.Sum(kvp => 2 + (kvp.Value?.Length ?? 0));
-        var rented = ArrayPool<byte>.Shared.Rent(estimatedSize);
-
+        // Build first and size exactly from TotalLength, as EncodeList does: tags may be two bytes and
+        // lengths above 127 take extra octets, so a per-entry estimate cannot be right.
+        var tlvs = new Tlv[tlvData.Count];
         try
         {
-            var position = 0;
-            var buffer = rented.AsSpan();
-
+            var index = 0;
+            var totalLength = 0;
             foreach (var (tag, value) in tlvData.OrderBy(kvp => kvp.Key))
             {
-                using var tlv = new Tlv(tag, value ?? []);
-                var tlvBytes = tlv.AsMemory().Span;
-                tlvBytes.CopyTo(buffer[position..]);
+                var tlv = new Tlv(tag, value ?? []);
+                tlvs[index++] = tlv;
+                totalLength += tlv.TotalLength;
+            }
+
+            var encoded = new byte[totalLength];
+            var position = 0;
+            foreach (var tlv in tlvs)
+            {
+                var tlvBytes = tlv.AsSpan();
+                tlvBytes.CopyTo(encoded.AsSpan(position));
                 position += tlvBytes.Length;
             }
 
-            // Copy only the written portion
-            var result = new byte[position];
-            buffer[..position].CopyTo(result);
-            return result;
+            return encoded;
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(rented);
-            ArrayPool<byte>.Shared.Return(rented);
+            foreach (var tlv in tlvs)
+                tlv?.Dispose();
         }
     }
 }

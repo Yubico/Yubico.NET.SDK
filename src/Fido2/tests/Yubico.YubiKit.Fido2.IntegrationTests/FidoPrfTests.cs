@@ -85,7 +85,7 @@ public class FidoPrfTests
 
                 // Request PRF support during credential creation
                 var extensions = new ExtensionBuilder()
-                    .WithPrf()
+                    .WithHmacSecret()
                     .Build();
 
                 var makeResult = await session.MakeCredentialAsync(
@@ -171,7 +171,7 @@ public class FidoPrfTests
 
                 // Create credential with hmac-secret support
                 var makeExtensions = new ExtensionBuilder()
-                    .WithPrf()
+                    .WithHmacSecret()
                     .Build();
 
                 var makeResult = await session.MakeCredentialAsync(

@@ -151,6 +151,47 @@ ReadOnlySpan<byte> body = apdu[5..^2];
 byte last = apdu[^1];
 ```
 
+## Side Effects: Make Them Visible
+
+Prefer functions whose outputs are fully described by their signature. Where a method must change
+state, the reader should be able to tell from the call site or the XML docs, never by reading the body.
+
+| Kind | Convention | Example |
+|---|---|---|
+| Pure | Plain verb, returns its result, reads only its arguments. Make it `static` so it *cannot* reach instance state. | `static void ComputeCmac(key, chain, data, destination)` |
+| Writes into a caller buffer | BCL style: last parameter is named `destination`, returns `void` or `int bytesWritten`. Nothing else changes. | `SHA256.HashData(data, destination)`, `Mac(data, destination)` |
+| Mutates instance state | Name the state change when a verb fits (`Advance…`, `Next…`, `Consume…`). When the name is fixed by a protocol or a canonical reference, keep it and state the effect in `<remarks>`. | `/// <remarks>Advances the MAC chaining value.</remarks>` on `ScpState.Mac` |
+
+Rules of thumb:
+
+- If it returns a value, it changed nothing.
+- If it changed something, the name or the `<remarks>` says exactly what.
+- Pass state *into* helpers as arguments (`_macChain` → `chain`) rather than letting them read fields.
+  The protocol operation that owns the state is then the only place a change can happen.
+
+```csharp
+// ✅ Helper is static and pure; the protocol op owns the state change and says so.
+/// <remarks>Advances the MAC chaining value. Unchanged if the provider fails.</remarks>
+public void Mac(ReadOnlySpan<byte> data, Span<byte> destination)
+{
+    var next = new byte[16];
+    ComputeCmac(keys.Smac, _macChain, data, next);
+    (_macChain, var previous) = (next, _macChain);
+    CryptographicOperations.ZeroMemory(previous);
+    next.AsSpan(0, 8).CopyTo(destination);
+}
+
+private static void ComputeCmac(ReadOnlySpan<byte> key, ReadOnlySpan<byte> chain,
+    ReadOnlySpan<byte> data, Span<byte> destination) { /* ... */ }
+
+// ❌ Helper silently reads and the caller cannot see which state moved.
+private void ComputeCmac(ReadOnlySpan<byte> data, Span<byte> destination)
+{
+    mac.CmacUpdate(_macChain);   // hidden dependency on instance state
+    // ...
+}
+```
+
 ## What NOT to Do (Examples)
 
 The mandates live in `CLAUDE.md`. The reasoning behind each:

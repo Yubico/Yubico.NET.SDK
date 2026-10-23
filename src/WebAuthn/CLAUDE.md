@@ -13,7 +13,7 @@ For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.m
 
 ## Module Context
 
-The WebAuthn module implements the W3C Web Authentication API (Level 2/3) on top of the FIDO2 CTAP protocol. It provides:
+The WebAuthn module implements the W3C Web Authentication API (Level 3) on top of the FIDO2 CTAP protocol. It provides:
 - **High-level WebAuthn API**: `WebAuthnClient` orchestrates credential registration and authentication
 - **Extension Framework**: Pluggable CTAP v4 extensions (e.g., `previewSign`)
 - **Backend Abstraction**: `IWebAuthnBackend` (internal) routes operations through `IFidoSession`
@@ -44,10 +44,10 @@ src/
 │   ├── Validation/
 │   │   └── RpIdValidator.cs
 │   ├── Registration/             # Registration options and responses
-│   │   ├── RegistrationOptions.cs
+│   │   ├── PublicKeyCredentialCreationOptions.cs
 │   │   └── RegistrationResponse.cs
 │   └── Authentication/           # Authentication options and responses
-│       ├── AuthenticationOptions.cs
+│       ├── PublicKeyCredentialRequestOptions.cs
 │       ├── AuthenticationResponse.cs
 │       ├── CredentialMatcher.cs
 │       └── MatchedCredential.cs
@@ -118,7 +118,7 @@ await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
     });
 
 // Registration
-var createOptions = new RegistrationOptions
+var createOptions = new PublicKeyCredentialCreationOptions
 {
     Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
     User = new PublicKeyCredentialUserEntity(userId, "user@example.com", "User"),
@@ -131,7 +131,7 @@ var createOptions = new RegistrationOptions
 var credential = await client.MakeCredentialAsync(createOptions, pinBytes: null);
 
 // Authentication
-var requestOptions = new AuthenticationOptions
+var requestOptions = new PublicKeyCredentialRequestOptions
 {
     Challenge = challenge,
     RpId = "example.com",
@@ -242,13 +242,28 @@ operations. Public suffixes such as `com` and `co.uk` must be rejected for suffi
 production callers must provide a `PublicSuffixChecker` backed by Public Suffix List data. The
 explicit suffix checker is required; a caller-supplied effective-domain shortcut is not a substitute.
 
-### Extension Adapter Pattern
+### Extension Processing
 
-Extensions use internal static adapters coordinated by `ExtensionPipeline`. Input methods are named
-`ApplyToBuilder` or `ApplyToBuilderForRegistration`/`ApplyToBuilderForAuthentication`. Output methods
-are generally named `ParseRegistrationOutput` and `ParseAuthenticationOutput`; `MinPinLengthAdapter`
-uses `ParseOutput`, and client-derived `CredPropsAdapter` uses `DeriveOutput`. Add each supported
-ceremony to `Extensions/ExtensionPipeline.cs` and cover its encoded map and parsed output.
+Extensions follow the processor model described in
+[docs/architecture/webauthn-extension-processing.md](../../docs/architecture/webauthn-extension-processing.md)
+(the .NET counterpart of python-fido2's `ExtensionProcessor` and yubikit-android's `Extension` processors):
+
+- `Extensions/Codec/*` are pure static CBOR encoders/decoders for one extension each. No ceremony state.
+- `Extensions/Processing/Processors/*` are single-use, one sealed class per extension. They implement
+  `IRegistrationExtensionProcessor` / `IAuthenticationExtensionProcessor`: `Permissions` (folded into the
+  PIN/UV token request), `PrepareInputs(builder, [selected,] token)` and
+  `PrepareOutputsAsync(response, token, outputs, ct)`.
+- `RegistrationExtensionSession` / `AuthenticationExtensionSession` are created per ceremony attempt from the
+  typed inputs and an `ExtensionContext` (GetInfo, PIN/UV protocol, backend). Unsupported extensions are
+  dropped (WebAuthn L3 §9.4) unless the API promises a typed error (previewSign).
+- `Client/CredentialFilter` is the shared `up:false` probe for the exclude-list pre-flight and allow-list
+  selection; with an allow list the real getAssertion carries exactly one descriptor.
+  Exclude-list pre-flight also runs without a PIN/UV token: probes omit PIN-auth fields and the final
+  makeCredential carries only the matching descriptor (or an empty list), retaining its normal touch requirement.
+
+Adding an extension: a codec, a processor, a line in each session's factory, a property on the typed
+input/output records, unit tests for the codec and for the processor against a mocked backend, and a
+hardware test if a test key advertises it.
 
 **previewSign Example:**
 ```csharp

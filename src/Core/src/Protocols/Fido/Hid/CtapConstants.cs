@@ -17,6 +17,7 @@ internal static class CtapConstants
     public const byte CtapHidError = 0x3F;      // Error response
     public const byte CtapHidKeepAlive = 0x3B;  // Processing status notification
     public const byte KeepAliveStatusUpNeeded = 0x02;
+    public const byte CtapStatusSuccess = 0x00;  // First byte of a CTAPHID_CBOR response: CTAP2_OK
 
     // YubiKey Management Vendor Commands (CTAP_TYPE_INIT | CTAP_VENDOR_FIRST + offset)
     public const byte CtapVendorFirst = 0x40;

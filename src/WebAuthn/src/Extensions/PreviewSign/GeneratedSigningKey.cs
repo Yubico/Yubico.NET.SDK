@@ -43,10 +43,12 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// The signing algorithm chosen from the <c>algorithms</c> extension input.
 /// </param>
 /// <param name="AttestationObject">
-/// The attestation object for the generated signing key pair.
+/// The attestation object for the generated signing key pair. Always present: the previewSign draft
+/// (v4 §10.2.1) makes it a required member, and <see cref="KeyHandle"/> and <see cref="PublicKey"/>
+/// are taken from its attested credential data.
 /// </param>
 public sealed record class GeneratedSigningKey(
     ReadOnlyMemory<byte> KeyHandle,
     CoseKey PublicKey,
     CoseAlgorithm Algorithm,
-    WebAuthnAttestationObject? AttestationObject);
+    WebAuthnAttestationObject AttestationObject);

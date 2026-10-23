@@ -54,6 +54,15 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
     public nint EstablishedContextHandle => Volatile.Read(ref _establishedContextHandle);
     public nint ConnectedContextHandle => Volatile.Read(ref _connectedContextHandle);
     public bool FailNextConnect { get; set; }
+
+    /// <summary>Share modes requested by each Connect call, in order (SCardConnect dwShareMode).</summary>
+    public List<SCARD_SHARE> ConnectShareModes { get; } = [];
+
+    /// <summary>When set, an EXCLUSIVE Connect answers SCARD_E_SHARING_VIOLATION (another client holds the card).</summary>
+    public bool RefuseExclusive { get; set; }
+
+    /// <summary>Dispositions passed to Disconnect, in order (SCardDisconnect dwDisposition).</summary>
+    public List<SCARD_DISPOSITION> DisconnectDispositions { get; } = [];
     public bool HoldBegin { get; set; }
     // Opt in only for non-sensitive test commands; never retain arbitrary caller payloads by default.
     public bool CaptureTransmitBuffers { get; set; }
@@ -87,6 +96,14 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
         Volatile.Write(ref _connectedContextHandle, context.DangerousGetHandle());
         Record("connect");
         _ = Interlocked.Increment(ref _connectCalls);
+        ConnectShareModes.Add(shareMode);
+        if (RefuseExclusive && shareMode == SCARD_SHARE.EXCLUSIVE)
+        {
+            cardHandle = new SCardCardHandle();
+            activeProtocol = SCARD_PROTOCOL.Undefined;
+            return ErrorCode.SCARD_E_SHARING_VIOLATION;
+        }
+
         if (FailNextConnect)
         {
             FailNextConnect = false;
@@ -149,6 +166,7 @@ internal sealed class ControlledSCardConnectionApi : ISCardConnectionApi
     public uint Disconnect(SCardCardHandle cardHandle, SCARD_DISPOSITION disposition)
     {
         Record("disconnect");
+        DisconnectDispositions.Add(disposition);
         _ = Interlocked.Increment(ref _disconnectCalls);
         return DisconnectResult;
     }

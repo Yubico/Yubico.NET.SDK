@@ -109,6 +109,7 @@ needs firmware 5.3.0; older keys need the overload that takes an explicit `PivAl
 
 - Verify the PIN before private-key operations in slots created with `PivPinPolicy.Once` or `Always`.
 - Authenticate the management key before key or certificate writes, retry-limit changes, and key move or delete.
+  Retry-limit changes (`SetPinAttemptsAsync`) also need a verified PIN.
 - Touch follows the slot's `PivTouchPolicy`. `VerifyUvAsync` does fingerprint verification on biometric keys.
 
 Supply an `IUserPresencePrompt` to learn when an operation needs a touch.
@@ -138,6 +139,8 @@ unreadable slot metadata map to `PolicyMayRequire`, because the touch cache is n
   disposes it with `await using`; a session from `CreatePivSessionAsync` owns and disposes the one it opened.
 - `ResetAsync`, `DeleteKeyAsync`, `DeleteCertificateAsync`, `MoveKeyAsync`, `SetManagementKeyAsync`,
   `SetPinAttemptsAsync`, and `SetPinOnlyModeAsync` change persistent state. `ResetAsync` destroys every key.
+  `SetPinAttemptsAsync` resets the PIN to `123456` and the PUK to `12345678` every time it runs, even with
+  unchanged limits; follow it with `ChangePinAsync` and `ChangePukAsync`.
 - Firmware gates throw `NotSupportedException`; `PivFeatures.SupportsRsaGeneration` screens ROCA-affected 4.2.6-4.3.4.
 
 ## Security notes

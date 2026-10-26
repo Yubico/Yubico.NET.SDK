@@ -32,7 +32,7 @@ public class MacOSOtpRouteTests
                 TestContext.Current.CancellationToken, waitForWorkerSlot: true,
                 scope: ProtocolDeviceInfo.CreateScope()));
 
-            Assert.True(native.InGet.Wait(TimeSpan.FromSeconds(5)));
+            Assert.True(native.InGet.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
             var failure = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() =>
                 device.ConnectAsync<IOtpHidConnection>(TestContext.Current.CancellationToken));
             Assert.Contains("was abandoned", failure.InnerException!.Message);
@@ -56,13 +56,13 @@ public class MacOSOtpRouteTests
         var native = new Lifetime();
         native.AllowSet.Set();
         var claim = new Claim();
-        var open = MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None, claim);
+        var open = MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken, claim);
         Assert.False(open.IsCompleted);
         native.AllowOpen.Set();
         var connection = await open;
-        await connection.SendAsync(new byte[8]).WaitAsync(TimeSpan.FromSeconds(5));
-        Assert.Equal(8, (await connection.ReceiveAsync()).Length);
-        await connection.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+        await connection.SendAsync(new byte[8], TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        Assert.Equal(8, (await connection.ReceiveAsync(TestContext.Current.CancellationToken)).Length);
+        await connection.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
         Assert.Equal(new[] { "create", "open", "set", "get", "close", "release" }, native.Calls);
         Assert.Single(native.Threads.Distinct());
         Assert.True(claim.Disposed);
@@ -73,43 +73,61 @@ public class MacOSOtpRouteTests
     {
         var native = new Lifetime();
         native.AllowOpen.Set();
-        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None);
+        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken);
         var report = new byte[8];
         report[0] = 7;
-        var send = connection.SendAsync(report);
-        Assert.True(native.InSet.Wait(TimeSpan.FromSeconds(5)));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => connection.ReceiveAsync());
-        var dispose = connection.DisposeAsync();
-        Assert.False(dispose.IsCompleted);
-        Assert.False(send.IsCompleted);
-        native.AllowSet.Set();
-        await send;
-        await dispose;
-        Assert.Equal(new[] { "create", "open", "set", "close", "release" }, native.Calls);
-        Assert.Equal((byte)7, native.CapturedReport?[0]);
-        Assert.All(native.LastReport ?? [], value => Assert.Equal(0, value));
+        Task send = Task.CompletedTask;
+        try
+        {
+            send = connection.SendAsync(report, TestContext.Current.CancellationToken);
+            Assert.True(native.InSet.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => connection.ReceiveAsync(TestContext.Current.CancellationToken));
+            var dispose = connection.DisposeAsync();
+            Assert.False(dispose.IsCompleted);
+            Assert.False(send.IsCompleted);
+            native.AllowSet.Set();
+            await send;
+            await dispose;
+            Assert.Equal(new[] { "create", "open", "set", "close", "release" }, native.Calls);
+            Assert.Equal((byte)7, native.CapturedReport?[0]);
+            Assert.All(native.LastReport ?? [], value => Assert.Equal(0, value));
+        }
+        finally
+        {
+            native.AllowSet.Set();
+            await DrainAndDisposeAsync(send, connection);
+        }
     }
 
     [Fact]
     public async Task CancelBeforeDispatchDoesNotSubmit_AndCancelDuringNativeWaitDrains()
     {
         var native = new Lifetime();
-        using var openCancel = new CancellationTokenSource();
+        using var openCancel = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         openCancel.Cancel();
         var opening = MacOSOtpHidConnection.OpenAsync(42, native, openCancel.Token);
         native.AllowOpen.Set();
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => opening);
         Assert.Empty(native.Calls);
 
-        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None);
-        using var sendCancel = new CancellationTokenSource();
-        var send = connection.SendAsync(new byte[8], sendCancel.Token);
-        Assert.True(native.InSet.Wait(TimeSpan.FromSeconds(5)));
-        sendCancel.Cancel();
-        Assert.False(send.IsCompleted);
-        native.AllowSet.Set();
-        await send;
-        await connection.DisposeAsync();
+        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken);
+        using var sendCancel = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        Task send = Task.CompletedTask;
+        try
+        {
+            send = connection.SendAsync(new byte[8], sendCancel.Token);
+            Assert.True(native.InSet.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+            sendCancel.Cancel();
+            Assert.False(send.IsCompleted);
+            native.AllowSet.Set();
+            await send;
+            await connection.DisposeAsync();
+        }
+        finally
+        {
+            native.AllowSet.Set();
+            await DrainAndDisposeAsync(send, connection);
+        }
     }
 
     [Fact]
@@ -118,7 +136,7 @@ public class MacOSOtpRouteTests
         var native = new Lifetime { FailClose = true };
         native.AllowOpen.Set();
         var claim = new Claim();
-        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None, claim);
+        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken, claim);
         await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
         await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask());
         Assert.False(claim.Disposed);
@@ -132,9 +150,9 @@ public class MacOSOtpRouteTests
         var native = new Lifetime { FailOpen = true, FailClose = true };
         native.AllowOpen.Set();
         const string id = "hid:otp-partial-42";
-        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id]);
+        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken);
         await Assert.ThrowsAsync<PlatformApiException>(() =>
-            MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None, claim));
+            MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken, claim));
         Assert.False(DeviceConnectionRegistry.IsInUse(id));
         Assert.Equal(new[] { "create", "open", "release" }, native.Calls);
     }
@@ -145,12 +163,12 @@ public class MacOSOtpRouteTests
         var native = new Lifetime { FailOpen = true };
         native.AllowOpen.Set();
         const string id = "hid:otp-proven-partial-42";
-        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id]);
+        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken);
         await Assert.ThrowsAsync<PlatformApiException>(() =>
-            MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None, claim).WaitAsync(TimeSpan.FromSeconds(5)));
+            MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken, claim).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Equal(new[] { "create", "open", "release" }, native.Calls);
         Assert.False(DeviceConnectionRegistry.IsInUse(id));
-        using var next = await DeviceConnectionRegistry.AcquireConnectionAsync([id]);
+        using var next = await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -159,9 +177,9 @@ public class MacOSOtpRouteTests
         var native = new Lifetime { FailClose = true };
         native.AllowOpen.Set();
         const string id = "hid:otp-close-unproven-42";
-        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id]);
-        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None, claim);
-        await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5)));
+        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken);
+        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken, claim);
+        await Assert.ThrowsAsync<UnrecoveredConnectionException>(() => connection.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
         Assert.Throws<UnrecoveredConnectionException>(() => DeviceConnectionRegistry.TryAcquireDiscovery(id));
         Assert.DoesNotContain("release", native.Calls);
@@ -172,18 +190,28 @@ public class MacOSOtpRouteTests
     {
         var native = new Lifetime { HoldGet = true };
         native.AllowOpen.Set();
-        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None);
-        using var cancellation = new CancellationTokenSource();
-        var read = connection.ReceiveAsync(cancellation.Token);
-        Assert.True(native.InGet.Wait(TimeSpan.FromSeconds(5)));
-        cancellation.Cancel();
-        var dispose = connection.DisposeAsync().AsTask();
-        Assert.False(read.IsCompleted);
-        Assert.False(dispose.IsCompleted);
-        native.AllowGet.Set();
-        Assert.Equal(8, (await read.WaitAsync(TimeSpan.FromSeconds(5))).Length);
-        await dispose.WaitAsync(TimeSpan.FromSeconds(5));
-        Assert.Equal(new[] { "create", "open", "get", "close", "release" }, native.Calls);
+        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken);
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        Task operation = Task.CompletedTask;
+        try
+        {
+            var read = connection.ReceiveAsync(cancellation.Token);
+            operation = read;
+            Assert.True(native.InGet.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+            cancellation.Cancel();
+            var dispose = connection.DisposeAsync().AsTask();
+            Assert.False(read.IsCompleted);
+            Assert.False(dispose.IsCompleted);
+            native.AllowGet.Set();
+            Assert.Equal(8, (await read.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Length);
+            await dispose.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+            Assert.Equal(new[] { "create", "open", "get", "close", "release" }, native.Calls);
+        }
+        finally
+        {
+            native.AllowGet.Set();
+            await DrainAndDisposeAsync(operation, connection);
+        }
     }
 
     [Theory]
@@ -193,8 +221,8 @@ public class MacOSOtpRouteTests
     {
         var native = new Lifetime { FailGet = failGet, ShortGet = !failGet };
         native.AllowOpen.Set();
-        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None);
-        await Assert.ThrowsAnyAsync<Exception>(() => connection.ReceiveAsync().WaitAsync(TimeSpan.FromSeconds(5)));
+        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken);
+        await Assert.ThrowsAnyAsync<Exception>(() => connection.ReceiveAsync(TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.NotNull(native.LastGetReport);
         Assert.All(native.LastGetReport, value => Assert.Equal(0, value));
         await connection.DisposeAsync();
@@ -206,9 +234,9 @@ public class MacOSOtpRouteTests
         var native = new Lifetime { FailOpen = true, FailRelease = true };
         native.AllowOpen.Set();
         const string id = "hid:otp-failed-release-42";
-        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id]);
+        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken);
         var failure = await Assert.ThrowsAsync<UnrecoveredConnectionException>(() =>
-            MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None, claim).WaitAsync(TimeSpan.FromSeconds(5)));
+            MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken, claim).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         var both = Assert.IsType<AggregateException>(failure.InnerException);
         Assert.Contains(both.InnerExceptions, error => error is PlatformApiException);
         Assert.True(DeviceConnectionRegistry.IsInUse(id));
@@ -222,7 +250,7 @@ public class MacOSOtpRouteTests
         native.AllowOpen.Set();
         var claim = new Claim();
         await Assert.ThrowsAsync<PlatformApiException>(() =>
-            MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None, claim).WaitAsync(TimeSpan.FromSeconds(5)));
+            MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken, claim).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Equal(new[] { "create", "open", "close", "release" }, native.Calls);
         Assert.True(claim.Disposed);
     }
@@ -233,12 +261,12 @@ public class MacOSOtpRouteTests
         var native = new Lifetime { ExclusiveOpen = true };
         native.AllowOpen.Set();
         const string id = "hid:otp-exclusive-open-42";
-        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id]);
+        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken);
         await Assert.ThrowsAsync<PlatformApiException>(() =>
-            MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None, claim).WaitAsync(TimeSpan.FromSeconds(5)));
+            MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken, claim).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Equal(new[] { "create", "open", "close", "release" }, native.Calls);
         Assert.False(DeviceConnectionRegistry.IsInUse(id));
-        using var next = await DeviceConnectionRegistry.AcquireConnectionAsync([id]);
+        using var next = await DeviceConnectionRegistry.AcquireConnectionAsync([id], TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -246,12 +274,12 @@ public class MacOSOtpRouteTests
     {
         var native = new Lifetime { ThrowGet = true };
         native.AllowOpen.Set();
-        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None);
+        var connection = await MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken);
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            connection.ReceiveAsync().WaitAsync(TimeSpan.FromSeconds(5)));
+            connection.ReceiveAsync(TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.NotNull(native.LastGetReport);
         Assert.All(native.LastGetReport, value => Assert.Equal(0, value));
-        await connection.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5));
+        await connection.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
         Assert.Equal(new[] { "create", "open", "get", "close", "release" }, native.Calls);
     }
 
@@ -267,15 +295,29 @@ public class MacOSOtpRouteTests
             Usage = 6
         };
         var slot = new HidConnectionSlot(new MacOSHidInterface(42, descriptor), otpLifetime: native);
-        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([slot.InterfaceId]);
-        var opening = slot.OpenRegisteredConnectionAsync(claim, CancellationToken.None);
+        var claim = await DeviceConnectionRegistry.AcquireConnectionAsync([slot.InterfaceId], TestContext.Current.CancellationToken);
+        var opening = slot.OpenRegisteredConnectionAsync(claim, TestContext.Current.CancellationToken);
         Assert.True(DeviceConnectionRegistry.IsInUse(slot.InterfaceId));
         Assert.False(opening.IsCompleted);
         native.AllowOpen.Set();
-        var connection = await opening.WaitAsync(TimeSpan.FromSeconds(5));
+        var connection = await opening.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
         await connection.DisposeAsync();
         Assert.Equal(new[] { "create", "open", "close", "release" }, native.Calls);
         Assert.False(DeviceConnectionRegistry.IsInUse(slot.InterfaceId));
+    }
+
+    private static async Task DrainAndDisposeAsync(Task operation, MacOSOtpHidConnection connection)
+    {
+        // After releasing the native gate, drain and close even if the runner cancelled the test.
+        try
+        {
+            await Task.WhenAll(operation, connection.DisposeAsync().AsTask())
+                .WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+        }
+        catch (OperationCanceledException) when (TestContext.Current.CancellationToken.IsCancellationRequested)
+        {
+            // Cancellation before dispatch is expected; WhenAll has still awaited disposal.
+        }
     }
 
     private sealed class Claim : IDisposable

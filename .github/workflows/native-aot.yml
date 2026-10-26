@@ -1,6 +1,6 @@
 name: Native AOT Publish Gate (2.0)
 
-# Publish-and-run verification for the macOS Native AOT host.
+# Publish-and-run verification on macOS, Linux, and Windows.
 #
 # The host references every supported SDK library, so publishing provides link evidence for all
 # ten libraries. Running it with no attached key provides process-startup evidence and exercises
@@ -22,6 +22,10 @@ jobs:
         include:
           - os: macos-latest
             rid: osx-arm64
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: windows-latest
+            rid: win-x64
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -41,6 +45,12 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Install Linux native dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpcsclite-dev libudev-dev
+
       - name: Cache NuGet packages
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
@@ -55,11 +65,13 @@ jobs:
           -c Release -r ${{ matrix.rid }} --self-contained -p:PublishAot=true
 
       - name: Run published Native AOT binary (Core discovery entry point)
+        timeout-minutes: 5
+        shell: bash
         working-directory: verification/NativeAotVerification/bin/Release/net10.0/${{ matrix.rid }}/publish
         run: |
-          BIN="./Yubico.YubiKit.NativeAotVerification"
+          BIN="./Yubico.YubiKit.NativeAotVerification${{ runner.os == 'Windows' && '.exe' || '' }}"
           chmod +x "$BIN"
-          output="$($BIN)"
+          output="$("$BIN" | tr -d '\r')"
           printf '%s\n' "$output"
           test "$(printf '%s\n' "$output" | grep -c '^  Linked module entry type: ')" -eq 10
           printf '%s\n' "$output" | grep -Fx 'Found 0 YubiKey(s).'

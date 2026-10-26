@@ -98,13 +98,9 @@ public sealed class RawSmartCardSession : ApplicationSession
             ISmartCardProtocol protocol = ProtocolFactory.Create(connection);
             session.Protocol = protocol;
 
-            if (scpKeyParameters is null)
+            if (scpKeyParameters is not null)
             {
-                session.IsInitialized = true;
-            }
-            else
-            {
-                await session.InitializeProtocolAsync(
+                await session.ConfigureProtocolAsync(
                         protocol,
                         firmwareVersion,
                         configuration,
@@ -113,6 +109,7 @@ public sealed class RawSmartCardSession : ApplicationSession
                     .ConfigureAwait(false);
             }
 
+            session.IsInitialized = true;
             return session;
         }
         catch

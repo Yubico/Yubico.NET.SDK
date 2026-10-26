@@ -28,6 +28,5 @@ public class ExtensionIdentifiersTests
         Assert.Equal("largeBlob", ExtensionIdentifiers.LargeBlob);
         Assert.Equal("largeBlobKey", ExtensionIdentifiers.LargeBlobKey);
         Assert.Equal("minPinLength", ExtensionIdentifiers.MinPinLength);
-        Assert.Equal("prf", ExtensionIdentifiers.Prf);
     }
 }

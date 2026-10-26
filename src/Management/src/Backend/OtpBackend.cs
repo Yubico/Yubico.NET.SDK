@@ -25,10 +25,12 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
 {
     private readonly IOtpHidProtocol _otpProtocol = otpProtocol ?? throw new ArgumentNullException(nameof(otpProtocol));
 
-    public async ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken)
+    public static async ValueTask<FirmwareVersion?> ReadStatusVersionAsync(
+        IOtpHidProtocol protocol,
+        CancellationToken cancellationToken)
     {
-        var status = await _otpProtocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
-        return _otpProtocol.FirmwareVersion ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
+        var status = await protocol.ReadStatusAsync(cancellationToken).ConfigureAwait(false);
+        return protocol.FirmwareVersion ?? new FirmwareVersion(status.Span[0], status.Span[1], status.Span[2]);
     }
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
@@ -51,6 +53,4 @@ internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBacke
             .ConfigureAwait(false);
     }
 
-    public ValueTask DeviceResetAsync(CancellationToken cancellationToken) =>
-        throw new NotSupportedException("Device reset is only available over SmartCard (CCID) connections.");
 }

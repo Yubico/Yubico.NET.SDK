@@ -26,12 +26,6 @@ namespace Yubico.YubiKit.Ctap2.Backend;
 internal interface ICtap2Backend
 {
     /// <summary>
-    /// Performs transport-specific initialization needed before CTAP commands.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    Task InitializeAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Sends a CTAP CBOR command and receives the response.
     /// </summary>
     /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>

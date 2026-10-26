@@ -109,9 +109,19 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
                 await session.StoreAllowListAsync(oceKeyRef, serials);
             }, scpKeyParams: keyParams, cancellationToken: CancellationTokenSource.Token);
 
+        // A new SCP11a session succeeding here shows the allowlist admitted our OCE certificate.
+        // Removing the list is an explicit operation (audit 26m); the key must still authenticate afterwards.
         await state.WithSecurityDomainSessionAsync(false,
             async session =>
             {
+                Assert.True(session.IsAuthenticated);
+                await session.ClearAllowListAsync(oceKeyRef, CancellationTokenSource.Token);
+            }, scpKeyParams: keyParams, cancellationToken: CancellationTokenSource.Token);
+
+        await state.WithSecurityDomainSessionAsync(false,
+            async session =>
+            {
+                Assert.True(session.IsAuthenticated);
                 await session.DeleteKeyAsync(new KeyReference(ScpKid.SCP11a, kvn));
             }, scpKeyParams: keyParams, cancellationToken: CancellationTokenSource.Token);
     }

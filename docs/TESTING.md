@@ -51,23 +51,15 @@ Platform; the integration projects run xUnit v2 under VSTest, where only `FullyQ
 `FullyQualifiedName~` for those projects so one syntax works on both runners. `FullyQualifiedName~`
 is the precise form if you would rather be explicit.
 
-**A zero-match filter fails the target.** VSTest prints `No test matches the given testcase filter`
-and still exits `0`, so an unguarded run reports `✓ All tests passed` having executed nothing. The
-toolchain preflights both runners and fails with `No tests matched the specified filter` instead.
+**A run that executes nothing fails.** VSTest prints `No test matches the given testcase filter`
+and still exits `0`, and a run where every test is skipped (no matching YubiKey) exits `0` too. The
+toolchain preflights both runners and reports such a project as `○ NO-TESTS`, which fails the
+`test` target.
 
-**The closing summary counts projects, not tests.** This line:
-
-```
-Passed: 1 | Failed: 0 | Skipped: 1 | Total: 2
-```
-
-means two *projects*. Grepping for `Passed:` will read green off a run of zero tests. Assert on the
-per-project figure instead:
-
-```bash
-dotnet toolchain.cs -- test --project Core --filter "FullyQualifiedName~FidoHidProtocol" \
-  | grep -E "total:|failed:"
-```
+**Read the RESULT block at the end.** It states `PASSED` or `FAILED`, the per-test totals
+(`tests: N executed, N failed, N skipped`), each failing test with its message, and a `Next:`
+command that re-runs only those tests. The full output is saved under `artifacts/toolchain/`. See
+"Reading the Output" in [TOOLCHAIN.md](../TOOLCHAIN.md).
 
 ## Integration Test Strategy
 
@@ -484,6 +476,33 @@ dotnet toolchain.cs -- test --filter "Category!=RequiresUserPresence"
 ## Writing New Tests
 
 > READ WHEN authoring a new unit or integration test, naming a test method, or writing setup/cleanup for hardware-dependent tests.
+
+### Warning-Free Test Code
+
+Test projects inherit `TreatWarningsAsErrors=true` from `Directory.Build.props`, just like shipping code. Compiler and enabled analyzer warnings must be fixed before a push; do not add blanket suppressions, disable analyzers, or override warnings-as-errors to make a build pass.
+
+- **Cancellation (`xUnit1051`, xUnit v3):** Pass `TestContext.Current.CancellationToken` to APIs that accept a token, including `Task.Run`, `Task.Delay`, `WaitAsync`, synchronization waits, and SDK calls. Pass the token both to the operation and to a separate timeout wait; cancelling `WaitAsync` alone does not cancel the underlying operation. Test helpers should accept and forward the caller's token. xUnit v2 has no equivalent `TestContext.Current` cancellation API; do not copy v3-only code into v2 projects.
+- **Cancellation scenarios:** Use a disposed `CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken)` and cancel that source at the intended point. Preserve pre-cancelled and mid-operation cancellation assertions rather than replacing their tokens with the runner token.
+- **Async (`xUnit1031`):** Use `async Task`/`async ValueTask` tests and `await`. Do not use `.Result`, `.Wait()`, or `.GetAwaiter().GetResult()`, even after a completion assertion or another wait. For `Task<Task<T>>`, await the invocation to obtain the inner task, then await that task separately; this preserves tests that distinguish returning promptly from completing promptly.
+- **Synchronous boundary tests:** A deliberately blocked native fake or a synchronous compatibility API may still require a dedicated caller thread. Keep such blocking work off the test's async execution path; use bounded, cancellable coordination waits and release fake gates in `finally`.
+- **Cleanup:** Always release held fake/native gates in `finally`. If cancellation would abandon a worker that still uses resources about to be disposed, cleanup may explicitly use `CancellationToken.None` with a finite timeout to drain it. Explain that lifetime requirement locally. This is a narrow teardown exception, not a default for ordinary operations or waits.
+- **Nullable flow (`CS8602` and related warnings):** Guard the nullable value directly before dereferencing it. A derived condition (such as an index calculated with `?.`) does not prove the original value is non-null. Use `Assert.NotNull` or a value returned by `Assert.IsType<T>` for test expectations, and `is null`/`?? throw` guards for helpers. Do not add `!` merely to silence the compiler.
+
+```csharp
+[Fact]
+public async Task Read_WhenCancelled_StopsWaiting()
+{
+    using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
+        TestContext.Current.CancellationToken);
+    var read = reader.ReadAsync(cancellation.Token);
+    cancellation.Cancel();
+
+    await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+        read.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+}
+```
+
+Rule references: [xUnit1051](https://xunit.net/xunit.analyzers/rules/xUnit1051) and [xUnit1031](https://xunit.net/xunit.analyzers/rules/xUnit1031). The pre-push gate is documented in [Commit Guidelines](COMMIT_GUIDELINES.md#pre-push-and-pr-gate).
 
 ### Test Project Layout
 

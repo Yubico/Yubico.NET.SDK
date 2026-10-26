@@ -120,9 +120,9 @@
 
     <!-- Analyzer configuration overrides -->
     <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+        <!-- Tests inherit TreatWarningsAsErrors=true; compiler and xUnit warnings must fail builds. -->
         <AnalysisMode>Recommended</AnalysisMode>
         <NoWarn>$(NoWarn);CA1707;CA1716;CA1873;CA1001;CA1513;CA1852;CA1859;CA1826;CS8892</NoWarn>
         <!-- Relax noisy test-only diagnostics: keywords (CA1716), logging perf (CA1873), disposable/test harness patterns (CA1001/CA1513/CA1852/CA1859), LINQ on indexables (CA1826), and duplicated generated entry points (CS8892) -->
-        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
 </Project>

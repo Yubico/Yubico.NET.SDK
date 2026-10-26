@@ -61,8 +61,15 @@ public sealed class WebAuthnClientData
     /// <param name="type">The operation type ("webauthn.create" or "webauthn.get").</param>
     /// <param name="challenge">The challenge from the relying party.</param>
     /// <param name="origin">The origin URL.</param>
-    /// <param name="crossOrigin">Whether this is a cross-origin request. If null, the field is omitted.</param>
-    /// <param name="topOrigin">The top-level origin for cross-origin requests. If null, the field is omitted.</param>
+    /// <param name="crossOrigin">
+    /// Whether this is a cross-origin request. The field is always serialized; null is written as
+    /// <c>false</c> (WebAuthn L3 §5.8.1.1).
+    /// </param>
+    /// <param name="topOrigin">
+    /// The top-level origin of a cross-origin request. Written when not null; callers must only supply it
+    /// when <paramref name="crossOrigin"/> is true (WebAuthn L3 §5.8.1). <see cref="WebAuthnClient"/>
+    /// validates this before building client data.
+    /// </param>
     /// <returns>A WebAuthnClientData instance with populated JSON and hash.</returns>
     public static WebAuthnClientData Create(
         string type,
@@ -113,11 +120,11 @@ public sealed class WebAuthnClientData
         sb.Append(",\"origin\":");
         AppendJsonString(sb, originString);
 
-        // "crossOrigin": true/false (included even if false per Swift reference)
+        // "crossOrigin": always serialized, false when absent (WebAuthn L3 §5.8.1.1)
         sb.Append(",\"crossOrigin\":");
         sb.Append(crossOrigin == true ? "true" : "false");
 
-        // "topOrigin": "<value>" (only if not null)
+        // "topOrigin": only present for cross-origin requests (WebAuthn L3 §5.8.1)
         if (topOrigin is not null)
         {
             sb.Append(",\"topOrigin\":");

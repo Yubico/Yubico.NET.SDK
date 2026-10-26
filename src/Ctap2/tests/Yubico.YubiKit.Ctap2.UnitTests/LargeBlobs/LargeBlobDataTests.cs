@@ -43,7 +43,9 @@ public class LargeBlobDataTests
 
         // Assert
         Assert.NotNull(entry);
-        Assert.True(entry.EncryptedData.Length > data.Length); // Includes nonce + tag
+        Assert.Equal(12, entry.Nonce.Length);
+        Assert.Equal(data.Length, entry.OriginalSize);
+        Assert.True(entry.Ciphertext.Length >= 16); // includes the tag
     }
 
     [Fact]
@@ -79,17 +81,9 @@ public class LargeBlobDataTests
     }
 
     [Fact]
-    public void LargeBlobEntry_TryDecrypt_WithTruncatedData_ReturnsNull()
+    public void LargeBlobEntry_Constructor_RejectsCiphertextShorterThanTheTag()
     {
-        // Arrange
-        var key = CreateRandomKey();
-        var entry = new LargeBlobEntry { EncryptedData = new byte[10] }; // Too short
-
-        // Act
-        var result = entry.TryDecrypt(key);
-
-        // Assert
-        Assert.Null(result);
+        Assert.Throws<ArgumentException>(() => new LargeBlobEntry(new byte[10], new byte[12], 0));
     }
 
     [Fact]
@@ -97,7 +91,7 @@ public class LargeBlobDataTests
     {
         // Arrange
         var invalidKey = new byte[16]; // Should be 32
-        var entry = new LargeBlobEntry { EncryptedData = new byte[50] };
+        var entry = new LargeBlobEntry(new byte[50], new byte[12], 0);
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => entry.TryDecrypt(invalidKey));

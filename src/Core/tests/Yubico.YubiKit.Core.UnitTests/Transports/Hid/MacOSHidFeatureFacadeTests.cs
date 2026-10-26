@@ -39,7 +39,7 @@ public class MacOSHidFeatureFacadeTests
         var operation = Task.Run(() => { if (get) _ = connection.GetReport(); else connection.SetReport(new byte[13]); }, TestContext.Current.CancellationToken);
         try
         {
-            Assert.True(native.InReport.Wait(TimeSpan.FromSeconds(5)));
+            Assert.True(native.InReport.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
             var disposal = connection.DisposeAsync().AsTask();
             Assert.False(disposal.IsCompleted);
             Assert.Equal(0, native.Releases);

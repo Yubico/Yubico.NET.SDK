@@ -294,7 +294,7 @@ public class UvDecisionLogicTests
         Assert.True(decision.UseToken);
         Assert.True(decision.UseUv);
         Assert.Equal(PinUvAuthMethod.Uv, decision.Method);
-        Assert.True(decision.UvOption);
+        Assert.Null(decision.UvOption); // token carries UV; CTAP §6.1 forbids "uv" next to pinUvAuthParam
     }
 
     // ---------------------------------------------------------------------------------------
@@ -305,7 +305,7 @@ public class UvDecisionLogicTests
     /// Required always verifies, and pins the CTAP <c>uv</c> option to true.
     /// </summary>
     [Fact]
-    public void Decide_RequiredWithPinSet_RequestsTokenAndSetsUvOption()
+    public void Decide_RequiredWithPinSet_RequestsTokenWithoutUvOption()
     {
         var info = InfoWithOptions(clientPin: true, uv: false, makeCredUvNotRqd: true);
 
@@ -317,7 +317,7 @@ public class UvDecisionLogicTests
 
         Assert.True(decision.UseToken);
         Assert.Equal(PinUvAuthMethod.Pin, decision.Method);
-        Assert.True(decision.UvOption);
+        Assert.Null(decision.UvOption); // token carries UV; CTAP §6.1 forbids "uv" next to pinUvAuthParam
     }
 
     /// <summary>

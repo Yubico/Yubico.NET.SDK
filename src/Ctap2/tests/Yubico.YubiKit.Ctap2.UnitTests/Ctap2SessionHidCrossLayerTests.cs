@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid.MacOS;
 using Yubico.YubiKit.Ctap2.Credentials;
@@ -12,6 +13,28 @@ public class Ctap2SessionHidCrossLayerTests
 {
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(5);
     private const uint Channel = 0x01020304;
+
+    [Fact]
+    public async Task CreateAsync_WithScpOnHid_RejectsBeforeIoAndAllowsNextSession()
+    {
+        var bridge = new FramedFidoBridge(getInfoOnly: true);
+        await using var connection = await MacOSFidoHidConnection.OpenAsync(
+            1, bridge, TestContext.Current.CancellationToken);
+        using var scp = Scp03KeyParameters.Default;
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => Ctap2Session.CreateAsync(
+            connection, new SessionCreationOptions { ScpKeyParameters = scp }, TestContext.Current.CancellationToken));
+
+        Assert.Empty(bridge.Commands);
+        Assert.False(bridge.Released);
+
+        await using var session = await Ctap2Session.CreateAsync(
+            connection, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.True(session.IsInitialized);
+        Assert.Equal(1, bridge.InitCount);
+        Assert.Equal(1, bridge.CborCount);
+        Assert.False(bridge.Released);
+    }
 
     [Fact]
     public async Task CreateAsync_AfterIdleSessionDisposal_ReusesBorrowedMacConnection()

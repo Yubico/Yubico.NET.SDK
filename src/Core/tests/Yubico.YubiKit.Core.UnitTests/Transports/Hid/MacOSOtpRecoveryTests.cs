@@ -12,16 +12,16 @@ public class MacOSOtpRecoveryTests
     [Fact]
     public async Task CancelAfterAcceptedReadOnlyFrame_ResetsBeforeReuseAndReturnsCorrelatedCrcResponse()
     {
-        using var cancellation = new CancellationTokenSource();
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         using var native = new TouchThenDataLifetime();
-        await using var connection = await MacOSOtpHidConnection.OpenAsync(42, native, CancellationToken.None);
+        await using var connection = await MacOSOtpHidConnection.OpenAsync(42, native, TestContext.Current.CancellationToken);
         await using var protocol = new OtpHidProtocol(connection);
 
         Task<ReadOnlyMemory<byte>> abandoned = protocol.SendAndReceiveAsync(
             OtpConstants.CmdYk4Capabilities, ReadOnlyMemory<byte>.Empty, cancellation.Token);
         try
         {
-            await native.TouchReportReached.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            await native.TouchReportReached.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
             Assert.Equal(10, native.Sent.Count);
             cancellation.Cancel();
         }
@@ -29,11 +29,11 @@ public class MacOSOtpRecoveryTests
         {
             native.ReleaseTouchReport.Set();
         }
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => abandoned.WaitAsync(TimeSpan.FromSeconds(5)));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => abandoned.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
 
         ReadOnlyMemory<byte> response = await protocol.SendAndReceiveAsync(
             OtpConstants.CmdYk4Capabilities, ReadOnlyMemory<byte>.Empty,
-            TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5));
+            TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         Assert.Equal(native.ExpectedResponse, response.Span[..native.ExpectedResponse.Length].ToArray());
         Assert.True(ChecksumUtils.CheckCrc(response.Span, native.ExpectedResponse.Length));

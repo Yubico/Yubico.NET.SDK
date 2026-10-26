@@ -27,9 +27,23 @@ public enum TicketFlag : byte
     AppendDelay1 = 0x08,
     AppendDelay2 = 0x10,
     AppendCr = 0x20,
-    ProtectSlot2 = 0x40,
+
+    /// <summary>
+    ///     OATH-HOTP mode. Shares bit 0x40 with <see cref="ChalResp" />; the configuration flags decide
+    ///     which mode the slot is in.
+    /// </summary>
     OathHotp = 0x40,
-    ChalResp = 0x40
+
+    /// <summary>
+    ///     Challenge-response mode. Shares bit 0x40 with <see cref="OathHotp" />.
+    /// </summary>
+    ChalResp = 0x40,
+
+    /// <summary>
+    ///     Set on slot 1: the YubiKey refuses to write slot 2 unless slot 2 is already configured with
+    ///     this flag too. Not part of the update mask.
+    /// </summary>
+    ProtectSlot2 = 0x80
 }
 
 /// <summary>

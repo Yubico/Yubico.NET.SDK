@@ -16,6 +16,8 @@ using Microsoft.Extensions.Logging;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
@@ -211,7 +213,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     ///     <para>
     ///         It must NOT move later still — into initialization — because derived
     ///         <c>InitializeAsync</c> implementations issue their applet SELECT before calling
-    ///         <see cref="InitializeProtocolAsync" />. Binding there would refuse the second session only after
+    ///         <see cref="ConfigureProtocolAsync" />. Binding there would refuse the second session only after
     ///         the first session's state had already been destroyed, which is the damage this guard exists to
     ///         prevent. Construction performs no wire I/O, so here is the last safe point.
     ///     </para>
@@ -240,6 +242,31 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         }
 
         return session;
+    }
+
+    private protected static async Task<TSession> ConstructInitializedAsync<TSession>(
+        IConnection connection,
+        SessionCreationOptions? options,
+        Func<TSession> create,
+        Func<TSession, CancellationToken, Task> initialize,
+        CancellationToken cancellationToken)
+        where TSession : ApplicationSession
+    {
+        ArgumentNullException.ThrowIfNull(initialize);
+        ValidatePreferredConnectionType(connection, options);
+
+        var session = Construct(connection, create);
+        try
+        {
+            await session.InitializeSessionAsync(token => initialize(session, token), cancellationToken)
+                .ConfigureAwait(false);
+            return session;
+        }
+        catch
+        {
+            session.DisposeAfterInitializationFailure();
+            throw;
+        }
     }
 
     /// <summary>
@@ -277,7 +304,59 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     /// </remarks>
     internal void OwnConnection() => _ownsConnection = true;
 
-    internal async Task<IProtocol> InitializeProtocolAsync(
+    internal async Task InitializeSessionAsync(
+        Func<CancellationToken, Task> initialize,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(initialize);
+        ThrowIfDisposed();
+        EnsureConnectionBound();
+
+        if (IsInitialized)
+            return;
+
+        await initialize(cancellationToken).ConfigureAwait(false);
+        ThrowIfDisposed();
+        IsInitialized = true;
+    }
+
+    internal async Task<IProtocol> PrepareProtocolAsync(
+        ScpKeyParameters? scpKeyParams,
+        CancellationToken cancellationToken)
+    {
+        ThrowIfDisposed();
+        EnsureConnectionBound();
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var protocol = ProtocolFactory.Create(Connection);
+        Protocol = protocol;
+        _ = GetScpProtocol(protocol, scpKeyParams);
+
+        if (protocol is IFidoHidProtocol fidoProtocol)
+            await fidoProtocol.InitializeAsync(cancellationToken).ConfigureAwait(false);
+
+        return protocol;
+    }
+
+    private static PcscProtocol? GetScpProtocol(IProtocol protocol, ScpKeyParameters? scpKeyParams) =>
+        (protocol, scpKeyParams) switch
+        {
+            (PcscProtocol pcscProtocol, not null) => pcscProtocol,
+            (not PcscProtocol, not null) => throw new NotSupportedException(
+                "SCP is only supported on PC/SC SmartCard protocols created by Core."),
+            (_, null) => null
+        };
+
+    private void EnsureConnectionBound()
+    {
+        if (!ConnectionSessionGuard.IsHolder(Connection, this))
+            throw new InvalidOperationException(
+                $"{GetType().Name} was not bound to its connection. Sessions must be created through their " +
+                "CreateAsync factory, which routes construction through ApplicationSession.Construct so the " +
+                "one-live-session-per-connection rule is enforced before any wire operation.");
+    }
+
+    internal async Task<IProtocol> ConfigureProtocolAsync(
         IProtocol protocol,
         FirmwareVersion firmwareVersion,
         ProtocolConfiguration? configuration = null,
@@ -288,11 +367,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         // itself would otherwise skip the bind check entirely and run unguarded.
         // Binding is not automatic, so a session reaching initialization without having gone through
         // Construct could run concurrently with another on the same connection and deselect its applet.
-        if (!ConnectionSessionGuard.IsHolder(Connection, this))
-            throw new InvalidOperationException(
-                $"{GetType().Name} was not bound to its connection. Sessions must be created through their " +
-                "CreateAsync factory, which routes construction through ApplicationSession.Construct so the " +
-                "one-live-session-per-connection rule is enforced before any wire operation.");
+        EnsureConnectionBound();
 
         ArgumentNullException.ThrowIfNull(protocol);
 
@@ -300,20 +375,12 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
             return Protocol ?? protocol;
 
         protocol.Configure(firmwareVersion, configuration);
-        if (protocol is Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidProtocol fidoProtocol)
-            await fidoProtocol.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         IProtocol effectiveProtocol = protocol;
         var isAuthenticated = false;
 
-        if (scpKeyParams is not null)
+        if (GetScpProtocol(protocol, scpKeyParams) is { } pcscProtocol && scpKeyParams is not null)
         {
-            if (effectiveProtocol is not PcscProtocol pcscProtocol)
-            {
-                throw new NotSupportedException(
-                    "SCP is only supported on PC/SC SmartCard protocols created by Core.");
-            }
-
             effectiveProtocol = await pcscProtocol
                 .InitializeScpAsync(scpKeyParams, cancellationToken)
                 .ConfigureAwait(false);
@@ -325,7 +392,6 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         Protocol = effectiveProtocol;
         FirmwareVersion = firmwareVersion;
         IsAuthenticated = isAuthenticated;
-        IsInitialized = true;
 
         return effectiveProtocol;
     }

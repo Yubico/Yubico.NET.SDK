@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -51,9 +50,7 @@ public class ManagementLockCodeTests
             try
             {
                 // Set a lock code on the device
-                var configToLock = DeviceConfig.CreateBuilder()
-                    .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
-                    .Build();
+                var configToLock = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
                 await mgmt.SetDeviceConfigAsync(configToLock, new SetDeviceConfigOptions { NewLockCode = lockCode });
 
@@ -62,26 +59,20 @@ public class ManagementLockCodeTests
                 Assert.True(lockedInfo.IsLocked);
 
                 // Verify that a config change WITHOUT the lock code fails
-                var configWithoutCode = DeviceConfig.CreateBuilder()
-                    .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
-                    .Build();
+                var configWithoutCode = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
                 await Assert.ThrowsAnyAsync<Exception>(async () =>
                     await mgmt.SetDeviceConfigAsync(configWithoutCode));
 
                 // Verify that a config change WITH the lock code succeeds
-                var configWithCode = DeviceConfig.CreateBuilder()
-                    .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
-                    .Build();
+                var configWithCode = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
                 await mgmt.SetDeviceConfigAsync(configWithCode, new SetDeviceConfigOptions { CurrentLockCode = lockCode });
             }
             finally
             {
                 // Clear the lock code by setting it to all zeros
-                var unlockConfig = DeviceConfig.CreateBuilder()
-                    .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
-                    .Build();
+                var unlockConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
                 await mgmt.SetDeviceConfigAsync(
                     unlockConfig,
@@ -119,17 +110,12 @@ public class ManagementLockCodeTests
             try
             {
                 // Set a lock code
-                var lockConfig = DeviceConfig.CreateBuilder()
-                    .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
-                    .Build();
+                var lockConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
                 await mgmt.SetDeviceConfigAsync(lockConfig, new SetDeviceConfigOptions { NewLockCode = lockCode });
 
                 // Change auto-eject timeout with lock code
-                var changeConfig = DeviceConfig.CreateBuilder()
-                    .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
-                    .WithAutoEjectTimeout(newAutoEject)
-                    .Build();
+                var changeConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = newAutoEject };
 
                 await mgmt.SetDeviceConfigAsync(changeConfig, new SetDeviceConfigOptions { CurrentLockCode = lockCode });
 
@@ -140,10 +126,7 @@ public class ManagementLockCodeTests
             finally
             {
                 // Restore original timeout and clear lock code
-                var restoreConfig = DeviceConfig.CreateBuilder()
-                    .WithCapabilities(Transport.Usb, (int)deviceInfo.UsbEnabled)
-                    .WithAutoEjectTimeout(originalAutoEject)
-                    .Build();
+                var restoreConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = originalAutoEject };
 
                 await mgmt.SetDeviceConfigAsync(
                     restoreConfig,

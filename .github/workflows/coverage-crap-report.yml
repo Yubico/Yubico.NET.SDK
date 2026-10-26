@@ -26,6 +26,7 @@ on:
       - '.github/scripts/report-comment*.js'
       - 'global.json'
       - 'toolchain.cs'
+      - 'scripts/toolchain/**'
       - 'coverlet.runsettings.xml'
       - '.config/dotnet-tools.json'
       - 'Directory.Build.props'
@@ -168,6 +169,8 @@ jobs:
           cp .config/dotnet-tools.json "$RUNNER_TEMP/tooling/dotnet-tools.json"
           # crap.cs pulls its shared code in with #:include, so it travels with it.
           cp -r scripts/code-metrics "$RUNNER_TEMP/tooling/code-metrics"
+          # toolchain.cs likewise pulls its targets in from scripts/toolchain.
+          cp -r scripts/toolchain "$RUNNER_TEMP/tooling/toolchain"
 
       - name: Cache base measurement
         id: base-cache
@@ -177,7 +180,7 @@ jobs:
           # The base is measured with the head's tooling (see above), so the tooling is part
           # of what the cached result depends on. Keying on the base commit alone would reuse
           # a measurement taken with older tooling.
-          key: crap-base-${{ github.event.pull_request.base.sha }}-${{ hashFiles('crap.cs', 'scripts/code-metrics/**', 'toolchain.cs', 'coverlet.runsettings.xml', '.config/dotnet-tools.json') }}
+          key: crap-base-${{ github.event.pull_request.base.sha }}-${{ hashFiles('crap.cs', 'scripts/code-metrics/**', 'toolchain.cs', 'scripts/toolchain/**', 'coverlet.runsettings.xml', '.config/dotnet-tools.json') }}
 
       - name: Measure base coverage and CRAP
         if: steps.base-cache.outputs.cache-hit != 'true'
@@ -196,6 +199,8 @@ jobs:
           rm -rf scripts/code-metrics
           mkdir -p scripts
           cp -r "$RUNNER_TEMP/tooling/code-metrics" scripts/code-metrics
+          rm -rf scripts/toolchain
+          cp -r "$RUNNER_TEMP/tooling/toolchain" scripts/toolchain
 
           rm -rf artifacts/coverage
           dotnet toolchain.cs coverage
@@ -203,11 +208,13 @@ jobs:
           cp artifacts/crap/base.json "$RUNNER_TEMP/base.json"
 
           # Discard the tooling overlay so the return checkout has a clean tree. The base may
-          # predate scripts/code-metrics, in which case the overlay is untracked there and
+          # predate scripts/code-metrics or scripts/toolchain, in which case the overlay is untracked there and
           # would block the checkout back to head unless removed.
           git checkout -- crap.cs toolchain.cs coverlet.runsettings.xml .config/dotnet-tools.json
           git checkout -- scripts/code-metrics 2>/dev/null || true
           git clean -fdq -- scripts/code-metrics
+          git checkout -- scripts/toolchain 2>/dev/null || true
+          git clean -fdq -- scripts/toolchain
           git checkout --detach "$head_sha"
 
       - name: Render coverage and CRAP report

@@ -23,7 +23,7 @@ internal sealed class SecurityDomainBackend(ISmartCardProtocol protocol) : ISecu
     private readonly ISmartCardProtocol _protocol =
         protocol ?? throw new ArgumentNullException(nameof(protocol));
 
-    public async Task InitializeAsync(CancellationToken cancellationToken = default) =>
+    public async Task SelectApplicationAsync(CancellationToken cancellationToken = default) =>
         await SelectAsync(cancellationToken).ConfigureAwait(false);
 
     public Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken = default) =>

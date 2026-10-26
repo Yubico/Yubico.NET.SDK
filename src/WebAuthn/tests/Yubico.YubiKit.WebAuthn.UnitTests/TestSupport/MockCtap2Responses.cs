@@ -24,11 +24,11 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 /// </summary>
 internal static class MockCtap2Responses
 {
-    public static MakeCredentialResponse CreateMockMakeCredentialResponse(Guid? aaguid = null)
+    public static MakeCredentialResponse CreateMockMakeCredentialResponse(Guid? aaguid = null, byte[]? largeBlobKey = null)
     {
         var guid = aaguid ?? Guid.NewGuid();
         var authData = BuildAuthDataWithAttestedCredential(guid);
-        var cborBytes = BuildMakeCredentialResponseCbor(authData, "none");
+        var cborBytes = BuildMakeCredentialResponseCbor(authData, "none", largeBlobKey);
         return MakeCredentialResponse.Decode(cborBytes);
     }
 
@@ -36,7 +36,9 @@ internal static class MockCtap2Responses
         byte[]? credentialId = null,
         int? numberOfCredentials = null,
         byte[]? signature = null,
-        PublicKeyCredentialUserEntity? user = null)
+        PublicKeyCredentialUserEntity? user = null,
+        byte[]? authDataExtensionsCbor = null,
+        byte[]? largeBlobKey = null)
     {
         credentialId ??= RandomNumberGenerator.GetBytes(32);
         signature ??= RandomNumberGenerator.GetBytes(64);
@@ -44,10 +46,11 @@ internal static class MockCtap2Responses
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
         // credential (1) + authData (2) + signature (3) + optional user (4) + optional
-        // numberOfCredentials (5)
+        // numberOfCredentials (5) + optional largeBlobKey (7)
         var keyCount = 3;
         if (user is not null) keyCount++;
         if (numberOfCredentials is not null) keyCount++;
+        if (largeBlobKey is not null) keyCount++;
 
         writer.WriteStartMap(keyCount);
 
@@ -62,7 +65,7 @@ internal static class MockCtap2Responses
 
         // 0x02: authData
         writer.WriteInt32(2);
-        writer.WriteByteString(BuildAuthData());
+        writer.WriteByteString(BuildAuthData(authDataExtensionsCbor));
 
         // 0x03: signature
         writer.WriteInt32(3);
@@ -85,6 +88,13 @@ internal static class MockCtap2Responses
             writer.WriteInt32(numberOfCredentials.Value);
         }
 
+        // 0x07: largeBlobKey (optional, CTAP §12.3)
+        if (largeBlobKey is not null)
+        {
+            writer.WriteInt32(7);
+            writer.WriteByteString(largeBlobKey);
+        }
+
         writer.WriteEndMap();
 
         return GetAssertionResponse.Decode(writer.Encode());
@@ -94,25 +104,39 @@ internal static class MockCtap2Responses
     /// Bare authenticator data: rpIdHash (32) + flags UP|UV (1) + signCount (4), with no attested
     /// credential data.
     /// </summary>
-    public static byte[] BuildAuthData()
+    public static byte[] BuildAuthData(byte[]? extensionsCbor = null)
     {
-        var authData = new byte[37];
+        var authData = new byte[37 + (extensionsCbor?.Length ?? 0)];
         SHA256.HashData("example.com"u8, authData.AsSpan(0, 32));
-        authData[32] = 0x05;
+        authData[32] = (byte)(0x05 | (extensionsCbor is null ? 0 : 0x80)); // UP | UV, ED when extensions follow
         authData[36] = 0x01;
+        extensionsCbor?.CopyTo(authData.AsSpan(37));
         return authData;
     }
+
+    /// <summary>The GetInfo "extensions" list the mock advertises unless a test overrides it.</summary>
+    public static readonly string[] DefaultExtensions = ["hmac-secret"];
+
+    /// <summary>Every extension the processors know, for tests that exercise them all.</summary>
+    public static readonly string[] AllKnownExtensions =
+        ["credProtect", "credBlob", "hmac-secret", "largeBlobKey", "minPinLength", "previewSign"];
 
     public static AuthenticatorInfo CreateMockAuthenticatorInfo(
         bool clientPinSupported = false,
         bool uvSupported = false,
-        int? minPinLength = null)
+        int? minPinLength = null,
+        bool residentKeySupported = false,
+        IReadOnlyList<string>? extensions = null,
+        bool largeBlobsSupported = false)
     {
+        extensions ??= DefaultExtensions;
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
         var optionsCount = 0;
         if (clientPinSupported) optionsCount++;
         if (uvSupported) optionsCount++;
+        if (residentKeySupported) optionsCount++;
+        if (largeBlobsSupported) optionsCount++;
 
         var mapSize = (optionsCount > 0 ? 4 : 3) + (minPinLength.HasValue ? 1 : 0);
         writer.WriteStartMap(mapSize);
@@ -126,8 +150,11 @@ internal static class MockCtap2Responses
 
         // 0x02: extensions
         writer.WriteInt32(2);
-        writer.WriteStartArray(1);
-        writer.WriteTextString("hmac-secret");
+        writer.WriteStartArray(extensions.Count);
+        foreach (var extension in extensions)
+        {
+            writer.WriteTextString(extension);
+        }
         writer.WriteEndArray();
 
         // 0x03: aaguid
@@ -140,15 +167,28 @@ internal static class MockCtap2Responses
             writer.WriteInt32(4);
             writer.WriteStartMap(optionsCount);
 
-            if (clientPinSupported)
+            // CTAP2 canonical order: shorter keys first, then bytewise ("rk", "uv", "clientPin", "largeBlobs").
+            if (residentKeySupported)
             {
-                writer.WriteTextString("clientPin");
+                writer.WriteTextString("rk");
                 writer.WriteBoolean(true);
             }
 
             if (uvSupported)
             {
                 writer.WriteTextString("uv");
+                writer.WriteBoolean(true);
+            }
+
+            if (clientPinSupported)
+            {
+                writer.WriteTextString("clientPin");
+                writer.WriteBoolean(true);
+            }
+
+            if (largeBlobsSupported)
+            {
+                writer.WriteTextString("largeBlobs");
                 writer.WriteBoolean(true);
             }
 
@@ -223,11 +263,11 @@ internal static class MockCtap2Responses
         return [.. data];
     }
 
-    public static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format)
+    public static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format, byte[]? largeBlobKey = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        writer.WriteStartMap(3);
+        writer.WriteStartMap(largeBlobKey is null ? 3 : 4);
 
         // 0x01: fmt
         writer.WriteInt32(1);
@@ -241,6 +281,13 @@ internal static class MockCtap2Responses
         writer.WriteInt32(3);
         writer.WriteStartMap(0);
         writer.WriteEndMap();
+
+        // 0x05: largeBlobKey (optional, CTAP §12.3: in the response, not in authData extensions)
+        if (largeBlobKey is not null)
+        {
+            writer.WriteInt32(5);
+            writer.WriteByteString(largeBlobKey);
+        }
 
         writer.WriteEndMap();
 

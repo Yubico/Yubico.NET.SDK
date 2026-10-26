@@ -59,9 +59,14 @@ internal class ScpProcessor(
 
         byte[]? scpCommandData = null;
         byte[]? finalCommandData = null;
-        byte[]? mac = null;
         byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
         Memory<byte> formattedApdu = default;
+
+        // Encrypt() advances the encryption counter and Mac() advances the MAC chain, both before the
+        // command reaches the card. A failure before either leaves host and card provably in step, so
+        // the session stays usable. A failure after either (provider, transport, bad R-MAC) means the
+        // host's state moved and the card's may or may not have: no later command can be trusted to
+        // chain correctly, so the protocol must latch "recovery required" with the original failure.
         var stateAdvanced = false;
 
         try
@@ -108,11 +113,9 @@ internal class ScpProcessor(
             var leLength = isExtendedApdu ? 2 : 1;
             var macLength = apduToMac.Length - MacLength - leLength;
 
-            mac = State.Mac(apduToMac[..macLength]);
+            // Step 7: Compute the MAC straight into the reserved slot in the last 8 bytes
+            State.Mac(apduToMac[..macLength], macedData.Span[commandData.Length..]);
             stateAdvanced = true;
-
-            // Step 7: Fill in the MAC in the last 8 bytes
-            mac.AsSpan().CopyTo(macedData.Span[commandData.Length..]);
 
             // Step 8: Create final command with MAC filled in
             finalCommandData = macedData.Span.ToArray();
@@ -132,8 +135,14 @@ internal class ScpProcessor(
                 // regardless of whether the command data was encrypted
                 if (unmacdData.Length > 0)
                 {
-                    var decryptedData = State.Decrypt(unmacdData);
-                    return new ApduResponse(decryptedData, response.SW);
+                    try
+                    {
+                        return new ApduResponse(State.Decrypt(unmacdData), response.SW);
+                    }
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(unmacdData);
+                    }
                 }
 
                 return new ApduResponse(unmacdData, response.SW);
@@ -141,6 +150,9 @@ internal class ScpProcessor(
 
             return response;
         }
+        // Includes cancellation: a token observed after Encrypt()/Mac() still leaves the counter or
+        // chain advanced. Report the original failure to the protocol so it refuses further exchanges
+        // (see PcscProtocol.MarkRecoveryRequired), then rethrow unchanged: no wrapping, no replay.
         catch (Exception ex) when (stateAdvanced)
         {
             onSecureFailure?.Invoke(ex);
@@ -152,7 +164,6 @@ internal class ScpProcessor(
             CryptographicOperations.ZeroMemory(formattedApdu.Span);
             CryptographicOperations.ZeroMemory(scpCommandData.AsSpan());
             CryptographicOperations.ZeroMemory(finalCommandData.AsSpan());
-            CryptographicOperations.ZeroMemory(mac.AsSpan());
         }
     }
 

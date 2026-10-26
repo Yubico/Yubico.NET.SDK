@@ -80,20 +80,7 @@ public class Ctap2BackendLifecycleTests
             Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<UserPresenceNotification>(),
             cancellationToken: TestContext.Current.CancellationToken);
-    }
-
-    [Fact]
-    public async Task HidBackend_InitializeAsync_InitializesBorrowedProtocol()
-    {
-        // Arrange
-        var protocol = Substitute.For<IFidoHidProtocol>();
-        var backend = new HidBackend(protocol);
-
-        // Act
-        await backend.InitializeAsync(TestContext.Current.CancellationToken);
-
-        // Assert
-        await protocol.Received(1).InitializeAsync(TestContext.Current.CancellationToken);
+        await protocol.DidNotReceive().InitializeAsync(Arg.Any<CancellationToken>());
     }
 
     [Theory]

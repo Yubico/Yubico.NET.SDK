@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <content>Request validation and the mapping from CTAP statuses to WebAuthn errors.</content>
 public sealed partial class WebAuthnClient
 {
-    private static void ValidateRegistrationOptions(RegistrationOptions options)
+    private static void ValidateRegistrationOptions(PublicKeyCredentialCreationOptions options)
     {
         if (options.Challenge.Length == 0)
         {
@@ -50,9 +50,35 @@ public sealed partial class WebAuthnClient
                 WebAuthnClientErrorCode.InvalidRequest,
                 "At least one public key credential parameter is required");
         }
+
+        if (options.PubKeyCredParams.Distinct().Count() != options.PubKeyCredParams.Count)
+        {
+            // CTAP 2.1-2.3 §6.1: pubKeyCredParams "MUST NOT include duplicate entries" (a platform requirement).
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "PubKeyCredParams must not contain duplicate algorithms");
+        }
+
+        if (options.Timeout is { } timeout && timeout <= TimeSpan.Zero)
+        {
+            // WebAuthn L3 §5.1.3 corrects an out-of-range timeout; this client does not clamp, so a
+            // value that could never be waited for is a malformed request (null means no deadline).
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "Timeout must be positive, or null for no deadline");
+        }
+
+        if (options.TopOrigin is not null && options.CrossOrigin != true)
+        {
+            // WebAuthn L3 §5.8.1: topOrigin "is set only if the call was made from a context that is not
+            // same-origin with its ancestors, i.e. if crossOrigin is true."
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "TopOrigin is only meaningful for a cross-origin request; set CrossOrigin = true or clear TopOrigin");
+        }
     }
 
-    private static void ValidateAuthenticationOptions(AuthenticationOptions options)
+    private static void ValidateAuthenticationOptions(PublicKeyCredentialRequestOptions options)
     {
         if (options.Challenge.Length == 0)
         {
@@ -67,7 +93,34 @@ public sealed partial class WebAuthnClient
                 WebAuthnClientErrorCode.InvalidRequest,
                 "RP ID cannot be null or empty");
         }
+
+        if (options.TopOrigin is not null && options.CrossOrigin != true)
+        {
+            // WebAuthn L3 §5.8.1: topOrigin "is set only if the call was made from a context that is not
+            // same-origin with its ancestors, i.e. if crossOrigin is true."
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "TopOrigin is only meaningful for a cross-origin request; set CrossOrigin = true or clear TopOrigin");
+        }
+
+        if (options.Timeout is { } timeout && timeout <= TimeSpan.Zero)
+        {
+            // WebAuthn L3 §5.1.3 corrects an out-of-range timeout; this client does not clamp, so a
+            // value that could never be waited for is a malformed request (null means no deadline).
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidRequest,
+                "Timeout must be positive, or null for no deadline");
+        }
     }
+
+    /// <summary>
+    /// WebAuthn L3 §5.1.3 / §5.1.4: "If lifetimeTimer expires ... invoke the authenticatorCancel operation
+    /// ... Throw a "NotAllowedError" DOMException." The cancel was already signalled through the deadline
+    /// token; this turns the resulting cancellation into the typed error. Caller cancellation is not
+    /// wrapped (module rule: cancelling the token abandons the ceremony with OperationCanceledException).
+    /// </summary>
+    private static WebAuthnClientError CeremonyTimedOut(TimeSpan? timeout, OperationCanceledException inner) =>
+        new(WebAuthnClientErrorCode.NotAllowed, $"The ceremony did not complete within its timeout of {timeout}", inner);
 
     /// <summary>
     /// Maps a raw <see cref="CtapException"/> to a typed <see cref="WebAuthnClientError"/> per

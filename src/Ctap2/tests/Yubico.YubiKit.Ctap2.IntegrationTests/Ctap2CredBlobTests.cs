@@ -128,7 +128,7 @@ public class Ctap2CredBlobTests
 
                 // Request credBlob retrieval during assertion
                 var assertExtensions = new ExtensionBuilder()
-                    .WithCredBlob(ReadOnlyMemory<byte>.Empty)
+                    .WithGetCredBlob()
                     .Build();
 
                 var assertionResult = await session.GetAssertionAsync(
@@ -144,15 +144,12 @@ public class Ctap2CredBlobTests
 
                 Assert.NotNull(assertionResult);
 
-                // Verify we got the blob back
-                if (assertionResult.ExtensionOutputs.HasValue)
-                {
-                    var assertExtOutput = ExtensionOutput.DecodeWithRawData(assertionResult.ExtensionOutputs.Value);
-                    if (assertExtOutput.TryGetCredBlob(out var retrievedBlob))
-                    {
-                        Assert.Equal(blobData, retrievedBlob.ToArray());
-                    }
-                }
+                // Verify we got the blob back. Asserted unconditionally so a silently dropped
+                // extension cannot pass.
+                Assert.True(assertionResult.ExtensionOutputs.HasValue, "getAssertion returned no extension outputs");
+                var assertExtOutput = ExtensionOutput.DecodeWithRawData(assertionResult.ExtensionOutputs!.Value);
+                Assert.True(assertExtOutput.TryGetCredBlob(out var retrievedBlob), "credBlob output missing");
+                Assert.Equal(blobData, retrievedBlob.ToArray());
             }
             catch (Exception ex) when (
                 (ex is NullReferenceException || ex is InvalidOperationException)

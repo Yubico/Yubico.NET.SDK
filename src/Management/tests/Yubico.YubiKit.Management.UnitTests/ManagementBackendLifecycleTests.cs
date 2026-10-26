@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Management.Backend;
 
 namespace Yubico.YubiKit.Management.UnitTests;
@@ -23,6 +27,17 @@ namespace Yubico.YubiKit.Management.UnitTests;
 /// </summary>
 public class ManagementBackendLifecycleTests
 {
+    [Fact]
+    public async Task FidoHidBackend_WriteConfigAsync_UsesPreparedChannelWithoutInitializingIt()
+    {
+        using var protocol = new PreparedFidoProtocol();
+        var backend = new FidoHidBackend(protocol);
+
+        await backend.WriteConfigAsync(ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken);
+
+        Assert.Equal((byte)0xC3, protocol.LastCommand);
+    }
+
     [Fact]
     public void IManagementBackend_DoesNotAdvertiseResourceOwnership()
     {
@@ -45,5 +60,28 @@ public class ManagementBackendLifecycleTests
     public void OtpBackend_DoesNotAdvertiseResourceOwnership()
     {
         Assert.False(typeof(IDisposable).IsAssignableFrom(typeof(OtpBackend)));
+    }
+
+    private sealed class PreparedFidoProtocol : IFidoHidProtocol
+    {
+        public byte? LastCommand { get; private set; }
+        public bool IsChannelInitialized => true;
+        public FirmwareVersion? FirmwareVersion => new FirmwareVersion(5, 7, 2);
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("The session already initialized the channel.");
+
+        public Task<ReadOnlyMemory<byte>> SendCommandAsync(
+            byte command,
+            ReadOnlyMemory<byte> data,
+            UserPresenceNotification userPresenceNotification,
+            CancellationToken cancellationToken = default)
+        {
+            LastCommand = command;
+            return Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        }
+
+        public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null) { }
+        public void Dispose() { }
     }
 }

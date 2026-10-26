@@ -109,7 +109,11 @@ ECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, repla
 Persist `devicePublicKey`. Later sessions authenticate by passing `new Scp11KeyParameters(keyReference,
 devicePublicKey)` as `ScpKeyParameters`, exactly as in the SCP03 flow above. SCP11a and SCP11c also need the
 Off-Card Entity side configured: `StoreCertificatesAsync` loads the certificate bundle (leaf last),
-`StoreCaIssuerAsync` records the CA subject key identifier, and `StoreAllowListAsync` restricts serial numbers.
+`StoreCaIssuerAsync` records the CA subject key identifier, and `StoreAllowListAsync` restricts which certificate
+serial numbers the key accepts. An allowlist must contain at least one serial; `StoreAllowListAsync` rejects an
+empty list, because on the device a zero-length allowlist means "remove the allowlist", after which every
+certificate signed by the CA is accepted again. Remove one on purpose with `ClearAllowListAsync`. There is no
+device-level "deny all": to stop trusting a CA, delete its key.
 
 ### Factory reset
 

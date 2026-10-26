@@ -19,6 +19,7 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -28,6 +29,24 @@ namespace Yubico.YubiKit.YubiOtp.UnitTests;
 
 public class YubiOtpSessionTests
 {
+    [Fact]
+    public async Task CreateAsync_WithScpOnHid_RejectsBeforeStatusReadAndReleasesClaim()
+    {
+        var connection = Substitute.For<IOtpHidConnection>();
+        connection.Type.Returns(ConnectionType.HidOtp);
+        connection.FeatureReportSize.Returns(8);
+        using var scp = Scp03KeyParameters.Default;
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => YubiOtpSession.CreateAsync(
+            connection, new SessionCreationOptions { ScpKeyParameters = scp }, TestContext.Current.CancellationToken));
+
+        await connection.DidNotReceive().SendAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        await connection.DidNotReceive().ReceiveAsync(Arg.Any<CancellationToken>());
+        connection.DidNotReceive().Dispose();
+        await using var next = await RawOtpHidSession.CreateAsync(connection, TestContext.Current.CancellationToken);
+        Assert.True(next.IsInitialized);
+    }
+
     [Fact]
     public async Task CreateAsync_UnsupportedConnection_DoesNotLeaveSessionAttached()
     {
@@ -61,7 +80,7 @@ public class YubiOtpSessionTests
     }
 
     [Fact]
-    public async Task CreateAsync_SmartCardBackendRebinding_PreservesProgrammingSequence()
+    public async Task CreateAsync_SmartCardBackendConstruction_PreservesProgrammingSequence()
     {
         var connection = Substitute.For<ISmartCardConnection>();
         connection.Type.Returns(ConnectionType.SmartCard);
@@ -493,16 +512,16 @@ public class YubiOtpSessionTests
             Assert.All(padded[3..], b => Assert.Equal(0x01, b));
         }
 
+        /// <summary>Same as ykman: an empty challenge does not end in 0x00, so it pads with 0x00.</summary>
         [Fact]
-        public void PadHmacChallenge_EmptyChallenge_PadsWithNonZero()
+        public void PadHmacChallenge_EmptyChallenge_PadsWithZero()
         {
             byte[] challenge = [];
 
             var padded = YubiOtpSession.PadHmacChallenge(challenge);
 
-            // Empty challenge: lastByte defaults to 0, so pad with 0x01
             Assert.Equal(64, padded.Length);
-            Assert.All(padded, b => Assert.Equal(0x01, b));
+            Assert.All(padded, b => Assert.Equal(0x00, b));
         }
 
         [Fact]

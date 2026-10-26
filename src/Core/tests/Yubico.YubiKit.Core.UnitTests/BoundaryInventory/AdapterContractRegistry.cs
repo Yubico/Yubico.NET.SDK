@@ -135,9 +135,15 @@ internal static class AdapterContractRegistry
                 errors.Add($"missing role: {row.Route}/{row.Operation}/{role}");
     }
 
-    private static void ValidateTestMethod(string profile, Assembly tests, List<string> errors)
+    private static void ValidateTestMethod(string? profile, Assembly tests, List<string> errors)
     {
-        var separator = profile?.LastIndexOf('.') ?? -1;
+        if (profile is null)
+        {
+            errors.Add($"stale profile: {profile}");
+            return;
+        }
+
+        var separator = profile.LastIndexOf('.');
         var type = separator > 0 ? tests.GetType(profile[..separator]) : null;
         var name = separator > 0 ? profile[(separator + 1)..] : "";
         const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;

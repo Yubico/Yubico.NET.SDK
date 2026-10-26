@@ -769,7 +769,9 @@ public class PcscProtocolScpTests
     private static byte[] ComputeMac(byte[] macInput)
     {
         using var state = CreateZeroedScpState();
-        return state.Mac(macInput);
+        var mac = new byte[8];
+        state.Mac(macInput, mac);
+        return mac;
     }
 
     private sealed class RecordingApduProcessor(IApduFormatter formatter) : IApduProcessor

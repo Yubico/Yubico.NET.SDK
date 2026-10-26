@@ -18,7 +18,6 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -32,7 +31,7 @@ using Yubico.YubiKit.Ctap2;
 namespace Yubico.YubiKit.Ctap2;
 
 /// <summary>
-/// Provides CTAP2 session operations for YubiKey authenticators.
+/// Provides FIDO2/CTAP2 session operations for YubiKey authenticators.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -46,9 +45,9 @@ namespace Yubico.YubiKit.Ctap2;
 public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 {
     /// <summary>
-    /// Feature flag for CTAP2 support (requires firmware 5.0+).
+    /// Feature flag for FIDO2 support (requires firmware 5.0+).
     /// </summary>
-    public static readonly Feature FeatureCtap2 = new("CTAP2", 5, 0, 0);
+    public static readonly Feature FeatureFido2 = new("FIDO2", 5, 0, 0);
 
     /// <summary>
     /// Feature flag for Bio Enrollment support (requires firmware 5.2+).
@@ -80,25 +79,22 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     /// </summary>
     public static readonly Feature FeatureEncIdentifier = new("Encrypted Identifier", 5, 7, 0);
 
-    private static readonly Feature FeatureCtap2UsbSmartCard = new("CTAP2 over USB SmartCard", 5, 8, 0);
+    private static readonly Feature FeatureFido2UsbSmartCard = new("FIDO2 over USB SmartCard", 5, 8, 0);
 
-    private readonly ScpKeyParameters? _scpKeyParams;
     private readonly ILogger _logger;
 
     private ICtap2Backend _backend = null!;
 
     private Ctap2Session(
         IConnection connection,
-        ScpKeyParameters? scpKeyParams = null,
         IUserPresencePrompt? userPresencePrompt = null)
         : base(connection, userPresencePrompt)
     {
-        _scpKeyParams = scpKeyParams;
         _logger = Logger;
     }
 
     /// <summary>
-    /// Creates and initializes a CTAP2 session from a connection.
+    /// Creates and initializes a FIDO session from a connection.
     /// </summary>
     /// <param name="connection">The connection to the YubiKey (SmartCard or FIDO HID).</param>
     /// <param name="options">Optional cross-cutting session creation settings.</param>
@@ -106,49 +102,31 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     /// <returns>An initialized Ctap2Session.</returns>
     /// <exception cref="ArgumentNullException">If <paramref name="connection"/> is null.</exception>
     /// <exception cref="NotSupportedException">If the connection type is not supported.</exception>
-    public static async Task<Ctap2Session> CreateAsync(
+    public static Task<Ctap2Session> CreateAsync(
         IConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-        var userPresencePrompt = options?.UserPresencePrompt;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
             connection,
-            () => new Ctap2Session(connection, scpKeyParams, userPresencePrompt));
-        try
-        {
-            await session.InitializeAsync(configuration, firmwareVersionOverride, cancellationToken).ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+            options,
+            () => new Ctap2Session(connection, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+            cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create(Connection);
-        Protocol = protocol;
+        var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
         var backend = CreateBackend(protocol);
-        await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        if (backend is SmartCardBackend smartCardBackend)
+            await smartCardBackend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
 
         // Get firmware version from authenticator info
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
@@ -160,11 +138,11 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         }
 
         // Initialize base class
-        var effectiveProtocol = await InitializeProtocolAsync(
+        var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
                 firmwareVersionOverride ?? detectedFirmwareVersion,
                 configuration,
-                _scpKeyParams,
+                scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -176,7 +154,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         _backend = backend;
 
         _logger.LogDebug(
-            "CTAP2 session initialized. Firmware: {Version}, Versions: [{Versions}]",
+            "FIDO session initialized. Firmware: {Version}, Versions: [{Versions}]",
             detectedFirmwareVersion,
             string.Join(", ", info.Versions));
     }
@@ -239,6 +217,14 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         ArgumentNullException.ThrowIfNull(rp);
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(pubKeyCredParams);
+        if (options?.UserPresence is false)
+        {
+            // CTAP 2.1-2.3 §6.1: "its value MUST be true if present. The value false will cause a
+            // CTAP2_ERR_INVALID_OPTION response regardless of authenticator version."
+            throw new ArgumentException(
+                "UserPresence cannot be false for makeCredential; use getAssertion with up=false for a silent probe.",
+                nameof(options));
+        }
 
         if (clientDataHash.Length != 32)
         {
@@ -254,6 +240,8 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
                 nameof(pubKeyCredParams));
         }
 
+        Ctap2SessionRequestEncoding.ThrowIfDuplicateCredentialParameters(pubKeyCredParams, nameof(pubKeyCredParams));
+
         EnsureInitialized();
 
         byte[]? request = null;
@@ -265,16 +253,15 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 
             _logger.LogDebug("MakeCredential for RP: {RpId}", rp.Id);
 
+            // makeCredential always collects user presence (up=false is rejected above).
             UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
-                options?.UserPresence is false
-                    ? null
-                    : new UserPresenceContext
-                    {
-                        Basis = UserPresenceBasis.PolicyRequires,
-                        Application = UserPresenceApplications.Fido2,
-                        Operation = UserPresenceOperations.Ctap2.MakeCredential,
-                        Scope = rp.Id
-                    });
+                new UserPresenceContext
+                {
+                    Basis = UserPresenceBasis.PolicyRequires,
+                    Application = UserPresenceApplications.Fido2,
+                    Operation = UserPresenceOperations.Ctap2.MakeCredential,
+                    Scope = rp.Id
+                });
 
             response = await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken)
                 .ConfigureAwait(false);
@@ -455,13 +442,13 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             return;
         }
 
-        if (FeatureCtap2UsbSmartCard.IsSupportedByFirmware(firmwareVersion))
+        if (FeatureFido2UsbSmartCard.IsSupportedByFirmware(firmwareVersion))
         {
             return;
         }
 
         throw new NotSupportedException(
-            "CTAP2 over USB SmartCard requires firmware 5.8.0 or later. " +
+            "FIDO2 over USB SmartCard requires firmware 5.8.0 or later. " +
             "For older USB-connected YubiKeys, use IFidoHidConnection instead.");
     }
 

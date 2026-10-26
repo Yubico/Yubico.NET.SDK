@@ -44,6 +44,7 @@ public class MigrationDiagnosticsTests
         Assert.Equal(new[]
         {
             "Initializing smart card connection to reader {ReaderName}",
+            "Failed to get exclusive access to reader {ReaderName}; using a shared connection. Card-wide security state is reachable from other smart card clients.",
             "Smart card connection initialized to reader {ReaderName}",
             "SCardEndTransaction returned {Error}",
             "SCardEndTransaction returned {Error}"

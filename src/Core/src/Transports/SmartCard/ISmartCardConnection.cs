@@ -20,6 +20,12 @@ public interface ISmartCardConnection : IConnection
 {
     Transport Transport { get; }
 
+    /// <summary>
+    ///     True when this connection holds the card exclusively; see <see cref="SmartCardSharing" /> for what a
+    ///     shared handle means. Custom implementations that do not model sharing report false.
+    /// </summary>
+    bool IsExclusive => false;
+
     /// <summary>Transmits caller-formatted SmartCard bytes and returns the raw response bytes.</summary>
     /// <remarks>
     ///     This Tier 2 method bypasses <see cref="Sessions.ApplicationSession" />, the connection session guard,

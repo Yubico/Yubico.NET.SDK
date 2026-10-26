@@ -17,4 +17,8 @@
     <ProjectReference Include="..\..\Core\src\Yubico.YubiKit.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Yubico.YubiKit.Management.UnitTests" />
+  </ItemGroup>
+
 </Project>

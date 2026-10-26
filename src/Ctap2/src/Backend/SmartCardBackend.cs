@@ -41,19 +41,19 @@ internal sealed class SmartCardBackend : ICtap2Backend
     }
 
     /// <summary>
-    /// Initializes the backend by selecting the FIDO application.
+    /// Selects the FIDO2 application.
     /// </summary>
-    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    public async Task SelectApplicationAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogDebug("Selecting FIDO application via SmartCard");
+            _logger.LogDebug("Selecting FIDO2 application via SmartCard");
             await _protocol.SelectAsync(ApplicationIds.Fido, cancellationToken).ConfigureAwait(false);
         }
         catch (ApduException ex)
         {
             throw new NotSupportedException(
-                "CTAP2 over SmartCard is not supported because the authenticator did not expose the FIDO AID.",
+                "FIDO2 over SmartCard is not supported because the authenticator did not expose the FIDO2 AID.",
                 ex);
         }
     }

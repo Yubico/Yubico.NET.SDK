@@ -42,6 +42,7 @@ public static class ExtendedFlagMasks
         ExtendedFlag.SerialApiVisible |
         ExtendedFlag.UseNumericKeypad |
         ExtendedFlag.FastTrigger |
+        ExtendedFlag.AllowUpdate |
         ExtendedFlag.Dormant |
         ExtendedFlag.InvertLed;
 }

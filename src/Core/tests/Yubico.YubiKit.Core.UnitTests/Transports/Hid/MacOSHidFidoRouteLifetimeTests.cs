@@ -1,10 +1,10 @@
-using Yubico.YubiKit.Core.Transports.Hid.MacOS;
-using Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
+using System.Buffers.Binary;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
-using System.Buffers.Binary;
+using Yubico.YubiKit.Core.Transports.Hid;
+using Yubico.YubiKit.Core.Transports.Hid.MacOS;
+using Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
 
 namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid;
 
@@ -72,17 +72,18 @@ public class MacOSHidFidoRouteLifetimeTests
 
     private sealed class InitializingSession(IFidoHidConnection connection) : ApplicationSession(connection)
     {
-        internal static async Task<InitializingSession> CreateAsync(IFidoHidConnection connection, CancellationToken token)
-        {
-            var session = Construct(connection, () => new InitializingSession(connection));
-            try
-            {
-                await session.InitializeProtocolAsync(new FidoHidProtocol(connection),
-                    new FirmwareVersion(5, 8, 0), cancellationToken: token);
-                return session;
-            }
-            catch { session.DisposeAfterInitializationFailure(); throw; }
-        }
+        internal static Task<InitializingSession> CreateAsync(IFidoHidConnection connection, CancellationToken token) =>
+            ConstructInitializedAsync(
+                connection,
+                null,
+                () => new InitializingSession(connection),
+                async (session, cancellationToken) =>
+                {
+                    var protocol = await session.PrepareProtocolAsync(null, cancellationToken);
+                    await session.ConfigureProtocolAsync(protocol,
+                        new FirmwareVersion(5, 8, 0), cancellationToken: cancellationToken);
+                },
+                token);
     }
 
     [Fact]

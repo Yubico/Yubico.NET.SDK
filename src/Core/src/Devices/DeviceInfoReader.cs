@@ -98,6 +98,10 @@ internal static class DeviceInfoReader
                 allPagesTlvs.Add(tlv);
             }
 
+            // The page index travels in the single P1 byte, so 256 pages is the protocol maximum.
+            if (remainingPages > 0 && page == byte.MaxValue)
+                throw new BadResponseException("Device info announces more than 256 pages.");
+
             ++page;
         }
 

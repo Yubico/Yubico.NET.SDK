@@ -71,7 +71,7 @@ public sealed class WebAuthnClientPinRetryTests
 
         var pinBytes = Encoding.UTF8.GetBytes("123456");
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
             User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user", "User"),
@@ -107,7 +107,7 @@ public sealed class WebAuthnClientPinRetryTests
 
         var pinBytes = Encoding.UTF8.GetBytes("123456");
 
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             RpId = "example.com",
             Challenge = RandomNumberGenerator.GetBytes(32),

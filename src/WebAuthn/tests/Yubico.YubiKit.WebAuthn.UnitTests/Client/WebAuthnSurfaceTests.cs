@@ -61,9 +61,9 @@ public class WebAuthnSurfaceTests
         Assert.False(RequireType(fullName).IsPublic);
 
     [Fact]
-    public void ConcreteBackend_IsNamedWebAuthnBackend_NotFidoSessionWebAuthnBackend() =>
+    public void ConcreteBackend_IsNamedWebAuthnBackend_NotCtap2SessionWebAuthnBackend() =>
         Assert.Null(WebAuthnAssembly.GetType(
-            "Yubico.YubiKit.WebAuthn.Client.FidoSessionWebAuthnBackend", throwOnError: false));
+            "Yubico.YubiKit.WebAuthn.Client.Ctap2SessionWebAuthnBackend", throwOnError: false));
 
     [Theory]
     [InlineData("MakeCredentialStreamAsync")]

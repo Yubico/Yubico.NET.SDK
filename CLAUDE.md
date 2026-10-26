@@ -119,6 +119,9 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 
 **Testing:**
 - ✅ ALWAYS use `dotnet toolchain.cs test` (handles xUnit v2/v3 runner differences)
+- ✅ xUnit v3: pass `TestContext.Current.CancellationToken` to cancellable operations and waits; use a linked token source when testing cancellation (`xUnit1051`).
+- ✅ Await tasks in tests; never use `.Result`, `.Wait()`, or `.GetAwaiter().GetResult()` (`xUnit1031`), even after checking completion.
+- ✅ Keep compiler and analyzer warnings as errors in test projects too; fix nullable flow with explicit guards or typed assertions, not unjustified `!` or suppression.
 - ❌ NEVER use `dotnet test` directly (fails on xUnit v3 with wrong syntax)
 - ❌ NEVER write validation-only or skipped-as-placeholder tests (see Test Philosophy below — verbatim policy)
 
@@ -144,6 +147,8 @@ dotnet toolchain.cs -- test --project WebAuthn --smoke
 dotnet toolchain.cs -- test --project Piv --filter "FullyQualifiedName~Sign"
 dotnet toolchain.cs -- pack --include-docs
 ```
+
+Read the **RESULT block** at the end of every run (and the exit code), not the runner lines above it. It lists each project once, the failing tests with their messages, a `Next:` command that re-runs only those, the warning count, and the run log. Every run is saved under `artifacts/toolchain/` (5 newest); `dotnet toolchain.cs -- last` reprints the newest RESULT block, e.g. after a timeout. `dotnet toolchain.cs` with no target only prints usage.
 
 ## Architecture
 
@@ -595,6 +600,7 @@ If you answered "no" to any of these, don't write the test.
 - Stage explicitly with `git add path/to/file` — NEVER `git add .` or `git add -A`
 - Use GitHub stacked PRs (`gh stack`) for multi-layer work. Put unrelated work in a **separate stack**; do not piggyback unrelated changes into an existing stack/PR.
 - Keep each stack layer and PR narrow and independently reviewable (one concern per PR, no mixed unrelated diffs).
+- Before pushing or submitting a PR, finish the Pre-Commit Checklist on the final changes. A successful build with warnings is not a passing gate; do not disable analyzers or warnings-as-errors to push.
 
 Minimal stack flow:
 ```bash
@@ -609,7 +615,7 @@ Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL
 ## Pre-Commit Checklist
 
 1. ✅ `git status` — only your files staged
-2. ✅ Build clean: `dotnet toolchain.cs build`
+2. ✅ Build warning-free: `dotnet toolchain.cs build` (full solution, including unit and integration test compilation; **0 warnings, 0 errors**). Tests inherit `TreatWarningsAsErrors=true` from `Directory.Build.props`; do not override it. Use `dotnet toolchain.cs -- build --clean` (cleans, then rebuilds with `--no-incremental`) when a fresh compilation is needed to rule out stale/incremental diagnostics. The RESULT block must show `Warnings: 0`.
 3. ✅ Tests pass: `dotnet toolchain.cs test`
 4. ✅ Formatted — use `dotnet format` freely to apply style, whitespace, and analyzer fixes. Always scope it with `--include` to only your edited files; never format the whole solution:
     ```
@@ -617,11 +623,11 @@ Full rules: `docs/COMMIT_GUIDELINES.md`. Skill: `.claude/skills/git-commit/SKILL
     ```
     This example includes staged and unstaged tracked C# edits. Add any new, untracked C# files explicitly. `--include` silently skips nonexistent/stale paths, so check the file list if a file seems to be missed.
 
-    Caveat: `dotnet format` only visits documents that belong to a project in the solution. Scoping it to a file-based app script such as `toolchain.cs`, or to a Markdown/props file, matches zero documents and exits `0` — that is "skipped", not "verified clean". Do not report it as a passing gate.
+    Caveat: `dotnet format` only visits documents that belong to a project in the solution. Scoping it to a file-based app script such as `toolchain.cs` or its `scripts/toolchain/*.cs` includes, or to a Markdown/props file, matches zero documents and exits `0` — that is "skipped", not "verified clean". Do not report it as a passing gate.
 
     Caveat: `--include` takes a **space-separated** list, which is why the command above leaves `$(...)` unquoted and lets the shell word-split it. Passing several paths as one quoted string joined by `;` or `,` matches **zero** documents and exits `0`, indistinguishable from a clean run. Ensure the paths passed to `--include` are the files you edited.
 5. ✅ Complexity checked: `dotnet toolchain.cs complexity`. It reports the methods you changed that exceed cyclomatic 10 or cognitive 20, marked new, worse, unchanged, or improved compared with `HEAD`. For each method marked **new** or **worse**, simplify it, or keep it and add the `Complexity-Justification:` line the report prints to your commit message with a real reason. Unchanged and improved methods are existing debt; simplifying them is welcome but optional. Coverage is not part of this check. The same check runs on every pull request and appears in its report comment; before opening one, check the whole branch with `dotnet toolchain.cs -- complexity --complexity-args "--base $(git merge-base HEAD origin/yubikit)"`. Details: `TOOLCHAIN.md` § Complexity check.
-6. ✅ No nullable warnings
+6. ✅ No compiler or analyzer warnings (including nullable diagnostics, `xUnit1031`, and `xUnit1051`); see `docs/TESTING.md` for cancellation and cleanup exceptions.
 7. ✅ Sensitive data zeroed (`ZeroMemory` / `Dispose`)
 8. ✅ No unnecessary allocations in hot paths
 9. ✅ Modern C# (`is null`, switch expressions, file-scoped namespaces)

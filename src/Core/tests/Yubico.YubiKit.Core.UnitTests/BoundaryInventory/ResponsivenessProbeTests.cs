@@ -17,7 +17,7 @@ public class ResponsivenessProbeTests
         probe.Start(() => Task.FromResult(new MacOSHidFeatureReportConnection(42, native)));
         try
         {
-            Assert.True(native.OpenEntered.Wait(TimeSpan.FromSeconds(5)));
+            Assert.True(native.OpenEntered.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
             Assert.NotEqual(probe.CallerThread, native.OpenThread);
             Assert.False(probe.Returned.IsSet);
         }

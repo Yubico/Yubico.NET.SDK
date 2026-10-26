@@ -44,17 +44,53 @@ internal interface IRegisteredSmartCardConnectionFactory
 /// </remarks>
 public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IRegisteredSmartCardConnectionFactory
 {
+    private static readonly Lock s_defaultSharingLock = new();
     private readonly ISCardConnectionApi _api;
+    private readonly SmartCardSharing _sharing;
 
-    /// <summary>Creates a factory that uses the configured <see cref="YubiKitLogging" /> logger factory.</summary>
+    /// <summary>
+    ///     The <see cref="SmartCardSharing" /> used by factories created without an explicit mode, including the
+    ///     one behind <see cref="Devices.YubiKeyManager" />. Set it once at start-up, before any device is opened.
+    ///     Defaults to <see cref="SmartCardSharing.ExclusiveWithSharedFallback" />.
+    /// </summary>
+    public static SmartCardSharing DefaultSharing
+    {
+        get
+        {
+            lock (s_defaultSharingLock)
+                return field;
+        }
+        set
+        {
+            lock (s_defaultSharingLock)
+                field = value;
+        }
+    } = SmartCardSharing.ExclusiveWithSharedFallback;
+
+    /// <summary>
+    ///     Creates a factory that uses the configured <see cref="YubiKitLogging" /> logger factory and
+    ///     <see cref="DefaultSharing" />.
+    /// </summary>
     public SmartCardConnectionFactory()
-        : this(new NativeSCardConnectionApi())
+        : this(new NativeSCardConnectionApi(), DefaultSharing)
+    {
+    }
+
+    /// <summary>Creates a factory that opens card handles with <paramref name="sharing"/>.</summary>
+    public SmartCardConnectionFactory(SmartCardSharing sharing)
+        : this(new NativeSCardConnectionApi(), sharing)
     {
     }
 
     internal SmartCardConnectionFactory(ISCardConnectionApi api)
+        : this(api, DefaultSharing)
+    {
+    }
+
+    internal SmartCardConnectionFactory(ISCardConnectionApi api, SmartCardSharing sharing)
     {
         _api = api;
+        _sharing = sharing;
     }
 
     public async Task<ISmartCardConnection> CreateAsync(IPcscDevice smartCardDevice,
@@ -62,7 +98,8 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     {
         var connection = new UsbSmartCardConnection(
             smartCardDevice,
-            api: _api);
+            api: _api,
+            sharing: _sharing);
 
         await connection.InitializeAsync(cancellationToken).ConfigureAwait(false);
         return connection;
@@ -79,6 +116,7 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
             connection = new UsbSmartCardConnection(
                 smartCardDevice,
                 api: _api,
+                sharing: _sharing,
                 released: registration.Dispose,
                 unrecovered: failure => DeviceConnectionRegistry.MarkUnrecovered(registration, failure));
         }

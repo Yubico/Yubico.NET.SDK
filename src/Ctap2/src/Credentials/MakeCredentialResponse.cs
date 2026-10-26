@@ -233,7 +233,8 @@ public sealed class MakeCredentialResponse
             authDataRaw,
             attStmt,
             epAtt,
-            largeBlobKey,
+            // byte[]? → ReadOnlyMemory<byte>? converts a null array to an EMPTY memory; keep absent as null.
+            largeBlobKey is null ? null : (ReadOnlyMemory<byte>?)largeBlobKey,
             extensionOutputs,
             unsignedExtensionOutputs);
     }

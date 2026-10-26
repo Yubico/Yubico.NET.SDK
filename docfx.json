@@ -4,7 +4,9 @@
     {
       "src": [
         {
-          "files": ["**/Yubico.Core.csproj"],
+          "files": [
+            "**/Yubico.Core.csproj"
+          ],
           "src": "./Yubico.Core/src/"
         }
       ],
@@ -13,13 +15,18 @@
       "namespaceLayout": "flattened",
       "memberLayout": "samePage",
       "filter": "./docs/filterConfig.yml",
-      "output": "./docs/core-api",
-      "properties": { "TargetFramework": "netstandard2.0" }
+      "output": "./.docbuild/metadata/core-api",
+      "properties": {
+        "TargetFramework": "netstandard2.0",
+        "NuGetLockFilePath": "obj/docfx.packages.lock.json"
+      }
     },
     {
       "src": [
         {
-          "files": ["**/Yubico.YubiKey.csproj"],
+          "files": [
+            "**/Yubico.YubiKey.csproj"
+          ],
           "src": "./Yubico.YubiKey/src/"
         }
       ],
@@ -28,8 +35,11 @@
       "namespaceLayout": "flattened",
       "memberLayout": "samePage",
       "filter": "./docs/filterConfig.yml",
-      "output": "./docs/yubikey-api",
-      "properties": { "TargetFramework": "netstandard2.0" }
+      "output": "./.docbuild/metadata/yubikey-api",
+      "properties": {
+        "TargetFramework": "netstandard2.0",
+        "NuGetLockFilePath": "obj/docfx.packages.lock.json"
+      }
     }
   ],
   "build": {
@@ -40,28 +50,43 @@
     "content": [
       {
         "files": [
-          "yubikey-api/**.yml",
           "yubikey-api/index.md",
-          "core-api/**.yml",
           "core-api/index.md",
           "users-manual/**.md",
           "users-manual/**/toc.yml",
           "toc.yml",
-          "*.md"
+          "*.md",
+          "v2-api/index.md",
+          "core-api/**/*.yml",
+          "yubikey-api/**/*.yml",
+          "v2-api/**/*.yml"
         ],
         "src": "./docs/"
       }
     ],
     "resource": [
       {
-        "files": ["images/**"],
+        "files": [
+          "images/**"
+        ],
         "src": "./docs/"
+      },
+      {
+        "files": [
+          "build-info.json"
+        ],
+        "src": "./.docbuild/"
       }
     ],
     "overwrite": [
       {
-        "files": ["namespaces/**.md"],
-        "exclude": ["obj/**", "_site/**"],
+        "files": [
+          "namespaces/**.md"
+        ],
+        "exclude": [
+          "obj/**",
+          "_site/**"
+        ],
         "src": "./docs/"
       }
     ],
@@ -71,17 +96,23 @@
       "_googleAnalyticsTagId": "G-WLE96T8XZ3",
       "_appFaviconPath": "./images/favicon.ico",
       "_enableSearch": true,
-      "_appName" : "Yubico",
-      "_appLogoPath" : "./images/yubico-circle-y-mark-white.png",
+      "_appName": "Yubico",
+      "_appLogoPath": "./images/yubico-circle-y-mark-white.png",
       "_lang": "en",
       "_gitContribute": {
-        "repo":"https://github.com/Yubico/Yubico.NET.SDK",
-        "branch":"develop"
+        "repo": "https://github.com/Yubico/Yubico.NET.SDK",
+        "branch": "develop"
       }
     },
     "fileMetadataFiles": [],
-    "template": ["default", "modern", "docs/custom-template"],
-    "postProcessors": ["ExtractSearchIndex"],
+    "template": [
+      "default",
+      "modern",
+      "docs/custom-template"
+    ],
+    "postProcessors": [
+      "ExtractSearchIndex"
+    ],
     "disableGitFeatures": false
   }
 }

@@ -1,0 +1,52 @@
+name: Build documentation preview
+
+on:
+  pull_request:
+    branches: [main, 'develop**', 'release**']
+    paths:
+      - 'docfx*.json'
+      - 'docs/**'
+      - 'build/build-docs.py'
+      - 'build/docfx.targets'
+      - '.github/workflows/build-docs.yml'
+      - '.github/workflows/build.yml'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  docs:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: yubikit
+          path: .docbuild/yubikit
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: .docbuild/yubikit/global.json
+      - name: Build combined documentation
+        run: python build/build-docs.py
+        env:
+          NuGetPackageSourceCredentials_Yubico_GH: ${{ github.event.pull_request.head.repo.full_name == github.repository && format('Username={0};Password={1}', github.actor, secrets.GITHUB_TOKEN) || '' }}
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: Documentation preview logs
+          path: .docbuild/logs/
+          if-no-files-found: warn
+      - name: Upload preview
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: Documentation preview
+          path: docs/_site/
+          if-no-files-found: error

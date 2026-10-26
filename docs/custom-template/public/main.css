@@ -152,3 +152,18 @@ header.bg-body {
   border-radius: 0;
   background-color: rgb(250, 250, 250);
 }
+
+/* V2 preview notice uses the existing Yubico brand palette. */
+.v2-alpha-notice {
+  border-left: 4px solid #6a9b2a;
+  background-color: #eff6e6;
+  color: #25351a;
+  padding: 16px 20px;
+  margin: 24px 0;
+}
+.v2-alpha-notice p { margin: 8px 0 0; }
+[data-bs-theme="dark"] .v2-alpha-notice {
+  background-color: #27351d;
+  color: #edf5e5;
+  border-color: #8cc041;
+}

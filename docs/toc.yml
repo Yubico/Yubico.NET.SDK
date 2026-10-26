@@ -17,9 +17,13 @@
 - name: User's Manual
   href: users-manual/
   homepage: users-manual/intro.md
-- name: YubiKey API docs
+- name: V1 YubiKey API
   href: yubikey-api/
   homepage: yubikey-api/index.md
-- name: Core API docs
+- name: V1 Core API
   href: core-api/
   homepage: core-api/index.md
+
+- name: V2 API (alpha)
+  href: v2-api/
+  homepage: v2-api/index.md

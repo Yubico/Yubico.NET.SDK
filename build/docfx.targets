@@ -1,0 +1,13 @@
+<Project>
+  <!-- PublicApiAnalyzers and V2 Directory.Build.targets both add these files.
+       Keep each analyzer input once in DocFX's design-time compilation. -->
+  <Target Name="DeduplicateDocfxAdditionalFiles" BeforeTargets="CoreCompile">
+    <RemoveDuplicates Inputs="@(AdditionalFiles->'%(FullPath)')">
+      <Output TaskParameter="Filtered" ItemName="_DocfxAdditionalFiles" />
+    </RemoveDuplicates>
+    <ItemGroup>
+      <AdditionalFiles Remove="@(AdditionalFiles)" />
+      <AdditionalFiles Include="@(_DocfxAdditionalFiles)" />
+    </ItemGroup>
+  </Target>
+</Project>

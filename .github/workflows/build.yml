@@ -27,6 +27,10 @@ on:
       - '**.csproj'
       - '**.sln'
       - '.github/workflows/build.yml'
+      - 'docfx*.json'
+      - 'docs/**'
+      - 'build/build-docs.py'
+      - 'build/docfx.targets'
 
   workflow_dispatch:
     inputs:
@@ -163,20 +167,35 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
 
+      # Keep V2 source and its .NET SDK isolated from the V1 package build.
+      - name: Check out V2 documentation source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: yubikit
+          path: .docbuild/yubikit
+          persist-credentials: false
+
+      - name: Set up V2 .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: .docbuild/yubikit/global.json
+
       # Build the documentation
       - name: Build docs
-        run: |
-          dotnet tool install --global docfx --version "2.*"
-          docfx docfx.json --logLevel warning --log docfx.log --warningsAsErrors
+        run: python build/build-docs.py
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NuGetPackageSourceCredentials_Yubico_GH: Username=${{ github.actor }};Password=${{ secrets.GITHUB_TOKEN }}
 
       # Upload documentation log
       - name: "Save build artifacts: Docs log"
         id: docs-log-upload
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: Documentation log
-          path: docfx.log
-          if-no-files-found: error
+          path: .docbuild/logs/
+          if-no-files-found: warn
 
       # Upload documentation
       - name: "Save build artifacts: Docs"

@@ -1,0 +1,29 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [
+            "src/Core/src/Yubico.YubiKit.Core.csproj",
+            "src/Fido2/src/Yubico.YubiKit.Fido2.csproj",
+            "src/Management/src/Yubico.YubiKit.Management.csproj",
+            "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+            "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",
+            "src/Piv/src/Yubico.YubiKit.Piv.csproj",
+            "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+            "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+            "src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj",
+            "src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj"
+          ]
+        }
+      ],
+      "disableGitFeatures": true,
+      "disableDefaultFilter": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "properties": {
+        "TargetFramework": "net10.0"
+      }
+    }
+  ]
+}

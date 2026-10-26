@@ -41,16 +41,14 @@ public sealed class ExtensionBuilder
     private CredProtectPolicy? _credProtect;
     private bool _credProtectEnforcePolicy;
     private ReadOnlyMemory<byte>? _credBlob;
-    private LargeBlobInput? _largeBlob;
-    private LargeBlobAssertionInput? _largeBlobAssertion;
+    private bool _getCredBlob;
     private HmacSecretInput? _hmacSecret;
-    private bool _hmacSecretMc;
+    private HmacSecretInput? _hmacSecretMc;
     private bool _minPinLength;
     private bool _largeBlobKey;
-    private bool _prf;
-    private PrfInput? _prfInput;
+    private bool _hmacSecretRequested;
     private PreviewSignRegistrationInput? _previewSignRegistration;
-    private PreviewSignAuthenticationInput? _previewSignAuthentication;
+    private PreviewSignSigningParams? _previewSignAuthentication;
 
     /// <summary>
     /// Adds the credProtect extension with the specified policy.
@@ -68,9 +66,14 @@ public sealed class ExtensionBuilder
     }
 
     /// <summary>
-    /// Adds the credBlob extension with data to store.
+    /// Adds the credBlob extension with data to store (authenticatorMakeCredential only).
     /// </summary>
-    /// <param name="blob">The blob data to store (max 32 bytes typically).</param>
+    /// <remarks>
+    /// CTAP 2.1-2.3 §12.2.1: the makeCredential input is a "Byte String containing the credBlob value".
+    /// To read a stored blob back at getAssertion use <see cref="WithGetCredBlob"/>; a byte string is
+    /// not the getAssertion input.
+    /// </remarks>
+    /// <param name="blob">The blob data to store (at most the authenticator's maxCredBlobLength).</param>
     /// <returns>This builder for chaining.</returns>
     public ExtensionBuilder WithCredBlob(ReadOnlyMemory<byte> blob)
     {
@@ -79,34 +82,16 @@ public sealed class ExtensionBuilder
     }
 
     /// <summary>
-    /// Adds the largeBlob extension for makeCredential.
+    /// Requests the stored credBlob (authenticatorGetAssertion only).
     /// </summary>
-    /// <param name="support">The required support level.</param>
+    /// <remarks>
+    /// CTAP 2.1-2.3 §12.2.1: the platform sends <c>"credBlob": true</c> in the getAssertion extensions
+    /// when the relying party set the <c>getCredBlob</c> client input.
+    /// </remarks>
     /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithLargeBlob(LargeBlobSupport support = LargeBlobSupport.Preferred)
+    public ExtensionBuilder WithGetCredBlob()
     {
-        _largeBlob = new LargeBlobInput { Support = support };
-        return this;
-    }
-
-    /// <summary>
-    /// Adds the largeBlob extension for getAssertion with read.
-    /// </summary>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithLargeBlobRead()
-    {
-        _largeBlobAssertion = new LargeBlobAssertionInput { Read = true };
-        return this;
-    }
-
-    /// <summary>
-    /// Adds the largeBlob extension for getAssertion with write.
-    /// </summary>
-    /// <param name="data">The data to write.</param>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithLargeBlobWrite(ReadOnlyMemory<byte> data)
-    {
-        _largeBlobAssertion = new LargeBlobAssertionInput { Write = data };
+        _getCredBlob = true;
         return this;
     }
 
@@ -120,15 +105,28 @@ public sealed class ExtensionBuilder
     /// This key is then used to encrypt/decrypt data in the large blob array.
     /// </para>
     /// <para>
-    /// This is distinct from the WebAuthn-level "largeBlob" extension which uses
-    /// "support": "required"/"preferred" semantics. Use <see cref="WithLargeBlob"/>
-    /// for the WebAuthn-level extension.
+    /// WebAuthn's <c>largeBlob</c> client extension ({support}, read, write; L3 §10.1.5) is built on this
+    /// key in the WebAuthn package together with <see cref="LargeBlobs.LargeBlobStorage"/> (§6.10); CTAP
+    /// itself carries no <c>largeBlob: {support}</c>. The direct getAssertion largeBlob read/write
+    /// extension of CTAP 2.2-2.3 §12.4 is a mutually exclusive alternative to largeBlobKey (§12.4:
+    /// authenticators "MUST NOT support both extensions") and is not offered by this builder.
     /// </para>
     /// </remarks>
     /// <returns>This builder for chaining.</returns>
     public ExtensionBuilder WithLargeBlobKey()
     {
         _largeBlobKey = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Requests hmac-secret at authenticatorMakeCredential: CTAP 2.1-2.3 §12.7 <c>"hmac-secret": true</c>.
+    /// WebAuthn's prf extension (L3 §10.1.4) sends this at registration.
+    /// </summary>
+    /// <returns>This builder for chaining.</returns>
+    public ExtensionBuilder WithHmacSecret()
+    {
+        _hmacSecretRequested = true;
         return this;
     }
 
@@ -158,7 +156,16 @@ public sealed class ExtensionBuilder
         ReadOnlySpan<byte> sharedSecret,
         IReadOnlyDictionary<int, object?> keyAgreement,
         ReadOnlySpan<byte> salt1,
-        ReadOnlySpan<byte> salt2 = default)
+        ReadOnlySpan<byte> salt2 = default) =>
+        WithHmacSecret(BuildHmacSecretInput(protocol, sharedSecret, keyAgreement, salt1, salt2));
+
+    /// <summary>CTAP §12.7: saltEnc = encrypt(sharedSecret, salt1 || salt2), saltAuth = authenticate(sharedSecret, saltEnc).</summary>
+    private static HmacSecretInput BuildHmacSecretInput(
+        IPinUvAuthProtocol protocol,
+        ReadOnlySpan<byte> sharedSecret,
+        IReadOnlyDictionary<int, object?> keyAgreement,
+        ReadOnlySpan<byte> salt1,
+        ReadOnlySpan<byte> salt2)
     {
         ArgumentNullException.ThrowIfNull(protocol);
         ArgumentNullException.ThrowIfNull(keyAgreement);
@@ -192,30 +199,45 @@ public sealed class ExtensionBuilder
         // Compute auth tag
         var saltAuth = protocol.Authenticate(sharedSecret, saltEnc);
 
-        _hmacSecret = new HmacSecretInput
+        return new HmacSecretInput
         {
             KeyAgreement = keyAgreement,
             SaltEnc = saltEnc,
             SaltAuth = saltAuth,
             PinUvAuthProtocol = protocol.Version
         };
+    }
 
+    /// <summary>
+    /// Adds the hmac-secret-mc extension (CTAP 2.2-2.3 §12.8): evaluate hmac-secret during
+    /// authenticatorMakeCredential.
+    /// </summary>
+    /// <remarks>
+    /// §12.8: "This extension input is the same as the hmac secret extension's getAssertion input" and
+    /// "the hmac-secret extension MUST also be present with the value of "hmac-secret" set to true", so
+    /// this method also emits <c>"hmac-secret": true</c>. Advertised by YubiKey 5.8 and later.
+    /// </remarks>
+    /// <param name="input">The encrypted and authenticated salts, as for getAssertion.</param>
+    /// <returns>This builder for chaining.</returns>
+    public ExtensionBuilder WithHmacSecretMakeCredential(HmacSecretInput input)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        _hmacSecretMc = input;
+        _hmacSecretRequested = true;
         return this;
     }
 
     /// <summary>
-    /// Adds the hmac-secret-mc extension for makeCredential.
+    /// Adds the hmac-secret-mc extension (CTAP 2.2-2.3 §12.8), encrypting the salts under the shared
+    /// secret exactly as <see cref="WithHmacSecret(IPinUvAuthProtocol, ReadOnlySpan{byte}, IReadOnlyDictionary{int, object?}, ReadOnlySpan{byte}, ReadOnlySpan{byte})"/> does.
     /// </summary>
-    /// <remarks>
-    /// This extension allows retrieving hmac-secret output during credential creation.
-    /// Requires firmware 5.4+.
-    /// </remarks>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithHmacSecretMakeCredential()
-    {
-        _hmacSecretMc = true;
-        return this;
-    }
+    public ExtensionBuilder WithHmacSecretMakeCredential(
+        IPinUvAuthProtocol protocol,
+        ReadOnlySpan<byte> sharedSecret,
+        IReadOnlyDictionary<int, object?> keyAgreement,
+        ReadOnlySpan<byte> salt1,
+        ReadOnlySpan<byte> salt2 = default) =>
+        WithHmacSecretMakeCredential(BuildHmacSecretInput(protocol, sharedSecret, keyAgreement, salt1, salt2));
 
     /// <summary>
     /// Adds the minPinLength extension.
@@ -227,28 +249,7 @@ public sealed class ExtensionBuilder
         return this;
     }
 
-    /// <summary>
-    /// Indicates PRF extension support request for makeCredential.
-    /// </summary>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithPrf()
-    {
-        _prf = true;
-        return this;
-    }
 
-    /// <summary>
-    /// Adds PRF extension with evaluation inputs for getAssertion.
-    /// </summary>
-    /// <param name="input">The PRF input parameters.</param>
-    /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithPrf(PrfInput input)
-    {
-        ArgumentNullException.ThrowIfNull(input);
-        _prf = true;
-        _prfInput = input;
-        return this;
-    }
 
     /// <summary>
     /// Adds previewSign extension with key generation parameters for makeCredential.
@@ -263,14 +264,19 @@ public sealed class ExtensionBuilder
     }
 
     /// <summary>
-    /// Adds previewSign extension with signing parameters for getAssertion.
+    /// Adds the previewSign extension for getAssertion: the signing parameters of the one credential
+    /// this assertion is for (Yubico previewSign draft v4 §10.2.1: key-handle, tbs, additional-args).
     /// </summary>
-    /// <param name="input">The previewSign authentication input.</param>
+    /// <remarks>
+    /// CTAP carries exactly one credential's parameters. Choosing among a relying party's per-credential
+    /// map (<c>signByCredential</c>) is the WebAuthn client's job, after it has selected the credential.
+    /// </remarks>
+    /// <param name="signingParams">The selected credential's signing parameters.</param>
     /// <returns>This builder for chaining.</returns>
-    public ExtensionBuilder WithPreviewSign(PreviewSignAuthenticationInput input)
+    public ExtensionBuilder WithPreviewSign(PreviewSignSigningParams signingParams)
     {
-        ArgumentNullException.ThrowIfNull(input);
-        _previewSignAuthentication = input;
+        ArgumentNullException.ThrowIfNull(signingParams);
+        _previewSignAuthentication = signingParams;
         return this;
     }
 
@@ -302,12 +308,23 @@ public sealed class ExtensionBuilder
         writer.WriteStartMap(count);
 
         // Extensions must be sorted by key for canonical CBOR
-        // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "previewSign" < "prf"
+        // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "previewSign"
+
+        if (_credBlob.HasValue && _getCredBlob)
+        {
+            throw new InvalidOperationException(
+                "WithCredBlob (makeCredential) and WithGetCredBlob (getAssertion) cannot be combined in one request.");
+        }
 
         if (_credBlob.HasValue)
         {
             writer.WriteTextString(ExtensionIdentifiers.CredBlob);
             writer.WriteByteString(_credBlob.Value.Span);
+        }
+        else if (_getCredBlob)
+        {
+            writer.WriteTextString(ExtensionIdentifiers.CredBlob);
+            writer.WriteBoolean(true);
         }
 
         if (_credProtect.HasValue)
@@ -316,29 +333,27 @@ public sealed class ExtensionBuilder
             writer.WriteInt32((int)_credProtect.Value);
         }
 
+        if (_hmacSecret is not null && _hmacSecretRequested)
+        {
+            throw new InvalidOperationException(
+                "WithHmacSecret() (makeCredential: \"hmac-secret\": true) and WithHmacSecret(input) (getAssertion map) cannot be combined in one request.");
+        }
+
         if (_hmacSecret is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.HmacSecret);
             _hmacSecret.Encode(writer);
         }
-
-        if (_hmacSecretMc)
+        else if (_hmacSecretRequested)
         {
-            writer.WriteTextString(ExtensionIdentifiers.HmacSecretMakeCredential);
+            writer.WriteTextString(ExtensionIdentifiers.HmacSecret);
             writer.WriteBoolean(true);
         }
 
-        if (_largeBlobAssertion is not null)
+        if (_hmacSecretMc is not null)
         {
-            // Assertion input takes precedence over makeCredential input;
-            // both use the same "largeBlob" key, so only one may be written.
-            writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
-            _largeBlobAssertion.Encode(writer);
-        }
-        else if (_largeBlob is not null)
-        {
-            writer.WriteTextString(ExtensionIdentifiers.LargeBlob);
-            _largeBlob.Encode(writer);
+            writer.WriteTextString(ExtensionIdentifiers.HmacSecretMakeCredential);
+            _hmacSecretMc.Encode(writer);
         }
 
         if (_largeBlobKey)
@@ -361,50 +376,9 @@ public sealed class ExtensionBuilder
         else if (_previewSignAuthentication is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
-            EncodePreviewSignAuthenticationInput(writer, _previewSignAuthentication);
+            EncodePreviewSignSigningParams(writer, _previewSignAuthentication);
         }
 
-        if (_prf)
-        {
-            writer.WriteTextString(ExtensionIdentifiers.Prf);
-            if (_prfInput is not null)
-            {
-                EncodePrfInput(writer, _prfInput);
-            }
-            else
-            {
-                // For makeCredential, just indicate support request
-                writer.WriteStartMap(0);
-                writer.WriteEndMap();
-            }
-        }
-
-        writer.WriteEndMap();
-    }
-
-    private static void EncodePrfInput(CborWriter writer, PrfInput input)
-    {
-        writer.WriteStartMap(1);
-        writer.WriteTextString("eval");
-
-        var evalCount = 1;
-        if (input.Second.HasValue) evalCount++;
-
-        writer.WriteStartMap(evalCount);
-
-        if (input.First.HasValue)
-        {
-            writer.WriteTextString("first");
-            writer.WriteByteString(input.First.Value.Span);
-        }
-
-        if (input.Second.HasValue)
-        {
-            writer.WriteTextString("second");
-            writer.WriteByteString(input.Second.Value.Span);
-        }
-
-        writer.WriteEndMap();
         writer.WriteEndMap();
     }
 
@@ -417,12 +391,8 @@ public sealed class ExtensionBuilder
         CopyCborValue(reader, writer);
     }
 
-    private static void EncodePreviewSignAuthenticationInput(CborWriter writer, PreviewSignAuthenticationInput input)
+    private static void EncodePreviewSignSigningParams(CborWriter writer, PreviewSignSigningParams signingParams)
     {
-        // Extract the single credential's signing params (validated by the encoder)
-        var firstEntry = input.SignByCredential.First();
-        var signingParams = firstEntry.Value;
-
         var encodedBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
         var reader = new CborReader(encodedBytes, CborConformanceMode.Ctap2Canonical);
 
@@ -493,13 +463,12 @@ public sealed class ExtensionBuilder
     {
         return _credProtect.HasValue ||
                _credBlob.HasValue ||
-               _largeBlob is not null ||
-               _largeBlobAssertion is not null ||
+               _getCredBlob ||
                _largeBlobKey ||
                _hmacSecret is not null ||
-               _hmacSecretMc ||
+               _hmacSecretRequested ||
+               _hmacSecretMc is not null ||
                _minPinLength ||
-               _prf ||
                _previewSignRegistration is not null ||
                _previewSignAuthentication is not null;
     }
@@ -508,13 +477,11 @@ public sealed class ExtensionBuilder
     {
         var count = 0;
         if (_credProtect.HasValue) count++;
-        if (_credBlob.HasValue) count++;
-        if (_largeBlob is not null || _largeBlobAssertion is not null) count++;
+        if (_credBlob.HasValue || _getCredBlob) count++;
         if (_largeBlobKey) count++;
-        if (_hmacSecret is not null) count++;
-        if (_hmacSecretMc) count++;
+        if (_hmacSecret is not null || _hmacSecretRequested) count++;
+        if (_hmacSecretMc is not null) count++;
         if (_minPinLength) count++;
-        if (_prf) count++;
         if (_previewSignRegistration is not null || _previewSignAuthentication is not null) count++;
         return count;
     }

@@ -90,7 +90,7 @@ public class FidoHmacSecretTests
                 clientPin.Protocol, pinToken, challenge);
 
             var extensions = new ExtensionBuilder()
-                .WithHmacSecretMakeCredential()
+                .WithHmacSecret()
                 .Build();
 
             var options = new MakeCredentialOptions
@@ -165,7 +165,7 @@ public class FidoHmacSecretTests
                     clientPin.Protocol, makePinToken, makeChallenge);
 
                 var makeExtensions = new ExtensionBuilder()
-                    .WithHmacSecretMakeCredential()
+                    .WithHmacSecret()
                     .Build();
 
                 var makeResult = await session.MakeCredentialAsync(
@@ -284,7 +284,7 @@ public class FidoHmacSecretTests
                     clientPin.Protocol, makePinToken, makeChallenge);
 
                 var makeExtensions = new ExtensionBuilder()
-                    .WithHmacSecretMakeCredential()
+                    .WithHmacSecret()
                     .Build();
 
                 var makeResult = await session.MakeCredentialAsync(

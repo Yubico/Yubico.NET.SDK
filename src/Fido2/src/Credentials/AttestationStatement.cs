@@ -268,6 +268,12 @@ public sealed record AppleAttestationStatement : AttestationStatement
 /// </summary>
 public sealed record NoneAttestationStatement : AttestationStatement
 {
+    /// <summary>
+    /// The "none" statement WebAuthn clients substitute for an authenticator's statement: an empty
+    /// CBOR map (WebAuthn L3 §8.7).
+    /// </summary>
+    public static NoneAttestationStatement Empty { get; } = new(new byte[] { 0xA0 });
+
     public override ReadOnlyMemory<byte> RawCbor { get; }
     public override AttestationFormat Format => AttestationFormat.None;
 

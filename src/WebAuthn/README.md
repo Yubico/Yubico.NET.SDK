@@ -65,7 +65,7 @@ and both need a touch, so there is no read-only WebAuthn call to try first; read
 ### Register a credential
 
 ```csharp
-var registrationOptions = new RegistrationOptions
+var registrationOptions = new PublicKeyCredentialCreationOptions
 {
     Challenge = RandomNumberGenerator.GetBytes(32),
     Rp = new PublicKeyCredentialRpEntity("example.com", "Example Corp"),
@@ -90,7 +90,7 @@ finally
 ### Authenticate with an allow list
 
 ```csharp
-var authenticationOptions = new AuthenticationOptions
+var authenticationOptions = new PublicKeyCredentialRequestOptions
 {
     Challenge = RandomNumberGenerator.GetBytes(32),
     RpId = "example.com",
@@ -155,6 +155,10 @@ User verification is separate from touch, and `UserVerification` on either optio
 | `Preferred` (default) | Obtains a token only when the key has verification configured, and otherwise proceeds unverified. |
 | `Discouraged` | Obtains no token unless the key forces one, for example `alwaysUv` is enabled or a registration runs on a key that does not advertise `makeCredUvNotRqd`. |
 
+Registration checks nonempty `ExcludeCredentials` lists in device-sized batches, even when verification is
+discouraged and no PIN token is used. The final registration still requires touch before reporting that a
+credential is excluded.
+
 ## Constraints
 
 - The client owns the `IFidoSession` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself.
@@ -176,7 +180,7 @@ User verification is separate from touch, and `UserVerification` on either optio
 - [../Core/README.md](../Core/README.md) - device discovery, connections, and the credential contracts.
 - [../Fido2/README.md](../Fido2/README.md) - the CTAP layer this package builds on, and [FidoTool](../Fido2/examples/FidoTool/), the interactive sample; this package has none of its own.
 - [user-interaction.md](../../docs/usage/user-interaction.md) and [device-discovery.md](../../docs/usage/device-discovery.md).
-- The [WebAuthn Level 2](https://www.w3.org/TR/webauthn-2/) specification and the [Public Suffix List](https://publicsuffix.org/).
+- The [WebAuthn Level 3](https://www.w3.org/TR/webauthn-3/) specification and the [Public Suffix List](https://publicsuffix.org/).
 - [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.
 
 ## Migration from earlier v2 development builds

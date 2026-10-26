@@ -14,7 +14,7 @@
 
 using Yubico.YubiKit.Fido2;
 using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
+using Yubico.YubiKit.Fido2.LargeBlobs;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Util;
 
@@ -53,6 +53,38 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         }
 
         return _cachedInfo;
+    }
+
+    /// <inheritdoc/>
+    public IPinUvAuthProtocol Protocol
+    {
+        get
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            EnsureProtocolInitialized();
+            return _protocol!;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<PinUvSharedSecret> EncapsulateAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        EnsureProtocolInitialized();
+        var clientPin = new ClientPin(_session, _protocol!);
+        var authenticatorKey = await clientPin.GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
+        var (keyAgreement, sharedSecret) = _protocol!.Encapsulate(authenticatorKey);
+        return new PinUvSharedSecret(keyAgreement, sharedSecret);
+    }
+
+    /// <inheritdoc/>
+    public ILargeBlobStorage CreateLargeBlobStorage(PinUvAuthTokenSession? token)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return token is null
+            ? new LargeBlobStorage(_session)
+            : new LargeBlobStorage(_session, token.Protocol, token.Token);
     }
 
     /// <inheritdoc/>
@@ -121,8 +153,10 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
                 desc.Transports
             )).ToList(),
 
-            ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true && rk,
-            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true && uv
+            // Absent stays absent, as in GetAssertionAsync: an explicit "uv": false is still the uv
+            // option key, which CTAP §6.1 forbids next to pinUvAuthParam.
+            ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true ? rk : null,
+            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true ? uv : null
         };
 
         // Add PIN/UV auth if provided
@@ -191,7 +225,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         // Add PIN/UV auth if provided
         if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
         {
-            // Load-bearing copy: see the note in MakeCredentialAsync. ExcludeListPreflight probes
+            // Load-bearing copy: see the note in MakeCredentialAsync. CredentialFilter probes
             // several exclude-list chunks with one pinUvAuthParam, so this method must not zero
             // the caller's buffer.
             options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();

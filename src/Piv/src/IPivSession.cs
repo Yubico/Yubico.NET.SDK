@@ -156,8 +156,18 @@ public interface IPivSession : IApplicationSession
     Task UnblockPinAsync(ReadOnlyMemory<byte> pukUtf8, ReadOnlyMemory<byte> newPinUtf8, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Set PIN and PUK retry limits.
+    ///     Sets the PIN and PUK retry limits (Yubico SET PIN RETRIES, INS FA). Requires management key
+    ///     authentication (<see cref="AuthenticateAsync" />) and a verified PIN (<see cref="VerifyPinAsync" />);
+    ///     the card refuses the command without both.
     /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         <b>This resets both credentials.</b> The YubiKey sets the PIN back to <c>123456</c> and the PUK
+    ///         to <c>12345678</c> every time this command runs, even when the limits do not change. Follow it
+    ///         with <see cref="ChangePinAsync" /> and <see cref="ChangePukAsync" /> to set real values. The
+    ///         three commands are separate; a failure between them leaves the defaults in place.
+    ///     </para>
+    /// </remarks>
     /// <param name="pinAttempts">PIN retry limit (1-255).</param>
     /// <param name="pukAttempts">PUK retry limit (1-255).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -249,11 +259,16 @@ public interface IPivSession : IApplicationSession
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Operation depends on key algorithm:
-    /// - RSA: PKCS#1 v1.5 padding for both sign and decrypt
-    /// - ECDSA: Sign hash directly (caller must hash data)
-    /// - EdDSA: Sign message directly
-    /// - X25519: Not supported (use CalculateSecretAsync)
+    /// The YubiKey performs the raw private-key operation; what <paramref name="data" /> must contain
+    /// depends on the algorithm:
+    /// - RSA: the complete encoded block (PKCS#1 v1.5, OAEP or PSS), at most the modulus length. The SDK
+    ///   adds no padding; a shorter block is left-padded with zeros, a longer one throws
+    ///   <see cref="ArgumentException" />.
+    /// - ECDSA: the digest. A digest longer than the curve order uses its leftmost bytes
+    ///   (FIPS 186-5 §6.4.1); a shorter one is left-padded, which keeps its integer value.
+    /// - EdDSA (Ed25519): the message itself, passed through unchanged (RFC 8032 PureEdDSA). The SDK
+    ///   applies no length limit; the device does.
+    /// - X25519: not supported here (use CalculateSecretAsync)
     /// </para>
     /// <para>
     /// May require PIN verification or touch based on key policy.

@@ -19,11 +19,11 @@ using System.Text;
 using Yubico.YubiKit.Fido2.Cose;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -57,7 +57,7 @@ public class WebAuthnClientMakeCredentialTests
     {
         // Arrange
         var challenge = RandomNumberGenerator.GetBytes(32);
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = challenge,
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -84,7 +84,7 @@ public class WebAuthnClientMakeCredentialTests
     public async Task MakeCredential_RpIdMismatch_ThrowsInvalidRequest()
     {
         // Arrange
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("evil.com", "Evil"),
@@ -109,7 +109,7 @@ public class WebAuthnClientMakeCredentialTests
             origin!,
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -144,7 +144,7 @@ public class WebAuthnClientMakeCredentialTests
                 EnterpriseRpIds = new HashSet<string> { "partner.test" }
             });
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("partner.test", "Partner"),
@@ -170,7 +170,9 @@ public class WebAuthnClientMakeCredentialTests
     public async Task MakeCredential_ResidentKeyRequired_SetsRkOption()
     {
         // Arrange
-        var options = new RegistrationOptions
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(residentKeySupported: true));
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -194,11 +196,83 @@ public class WebAuthnClientMakeCredentialTests
         Assert.True(capturedRequest.Options.TryGetValue("rk", out var rk) && rk);
     }
 
+    /// <summary>CTAP 2.1-2.3 §6.1: pubKeyCredParams "MUST NOT include duplicate entries"; rejected before any backend call.</summary>
+    [Fact]
+    [Trait("Audit", "N1")]
+    public async Task MakeCredential_DuplicatePubKeyCredParams_ThrowsInvalidRequestBeforeBackendCall()
+    {
+        var options = new PublicKeyCredentialCreationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7), new CoseAlgorithm(-257), new CoseAlgorithm(-7)]
+        };
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(
+            () => _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
+        await _mockBackend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>WebAuthn L3 §5.1.3: an authenticator that cannot store discoverable credentials is skipped for "required".</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1615")]
+    public async Task MakeCredential_ResidentKeyRequired_WithoutRkSupport_ThrowsNotSupportedBeforeBackendCall()
+    {
+        var options = new PublicKeyCredentialCreationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            ResidentKey = ResidentKeyPreference.Required
+        };
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(
+            () => _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+        await _mockBackend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>WebAuthn L3 §5.4.6 "preferred": discoverable if the authenticator can, otherwise the key is omitted.</summary>
+    [Theory]
+    [Trait("Audit", "YESDK-1615")]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public async Task MakeCredential_ResidentKeyPreferred_FollowsAuthenticatorCapability(bool rkSupported, bool expectRkTrue)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(residentKeySupported: rkSupported));
+        var options = new PublicKeyCredentialCreationOptions
+        {
+            Challenge = RandomNumberGenerator.GetBytes(32),
+            Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
+            User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "user@example.com", "User"),
+            PubKeyCredParams = [new CoseAlgorithm(-7)],
+            ResidentKey = ResidentKeyPreference.Preferred
+        };
+        BackendMakeCredentialRequest? capturedRequest = null;
+        _mockBackend.MakeCredentialAsync(
+            Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
+            Arg.Any<CancellationToken>())
+            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+
+        await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
+
+        Assert.NotNull(capturedRequest);
+        bool hasRkTrue = capturedRequest.Options?.TryGetValue("rk", out var rk) == true && rk;
+        Assert.Equal(expectRkTrue, hasRkTrue);
+        Assert.False(capturedRequest.Options?.ContainsKey("rk") == true && !expectRkTrue, "rk must be omitted, never false");
+    }
+
     [Fact]
     public async Task MakeCredential_ResponsePopulatesAaguidAndPublicKey()
     {
         // Arrange
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -221,11 +295,11 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     [Fact]
-    public async Task MakeCredential_ExcludeListWithoutToken_PreservesOriginalExcludeList()
+    public async Task MakeCredential_ExcludeListWithoutToken_DoesNotMutateCallerList()
     {
         // Arrange
         var excludeCredential = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -239,14 +313,17 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Do<BackendMakeCredentialRequest>(r => capturedRequest = r),
             Arg.Any<CancellationToken>())
             .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+        _mockBackend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Throws(new CtapException(CtapStatus.NoCredentials));
 
         // Act
-        await _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None);
+        await _client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(capturedRequest);
-        Assert.Same(options.ExcludeCredentials, capturedRequest.ExcludeList);
-        await _mockBackend.DidNotReceive().GetAssertionAsync(
+        Assert.Empty(capturedRequest.ExcludeList!);
+        Assert.Same(excludeCredential, Assert.Single(options.ExcludeCredentials));
+        await _mockBackend.Received(1).GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>());
     }
@@ -265,7 +342,7 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -295,14 +372,14 @@ public class WebAuthnClientMakeCredentialTests
         // Assert
         Assert.Equal(2, requests.Count);
         Assert.Null(requests[0].Options);
-        Assert.NotNull(requests[1].Options);
-        Assert.True(requests[1].Options!.TryGetValue("uv", out var uv) && uv);
+        // The token is the verification; CTAP §6.1 forbids the "uv" key next to pinUvAuthParam.
+        Assert.False(requests[1].Options?.ContainsKey("uv") ?? false);
         Assert.NotNull(requests[1].PinUvAuthParam);
         Assert.Equal((byte)2, requests[1].PinUvAuthProtocol.GetValueOrDefault());
     }
 
     [Fact]
-    public async Task MakeCredential_PuatRequired_WithExcludeList_RetriesWithGetAssertionPermissionForPreflight()
+    public async Task MakeCredential_PuatRequired_WithExcludeList_ProbesOnceAndRemintsOnlyAfterTheProbe()
     {
         // Arrange
         var tokenPermissions = new List<PinUvAuthTokenPermissions>();
@@ -320,7 +397,7 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Any<CancellationToken>())
             .Throws(new CtapException(CtapStatus.NoCredentials));
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -347,17 +424,15 @@ public class WebAuthnClientMakeCredentialTests
         // Act
         await _client.MakeCredentialAsync(options, Encoding.UTF8.GetBytes("123456"), CancellationToken.None);
 
-        // Assert
-        Assert.Equal(4, tokenPermissions.Count);
+        // Assert: the pre-flight runs once per ceremony (its answer does not change with UV); the first
+        // attempt mints MC|GA for the probe then re-mints MC-only, the escalated attempt mints MC|GA
+        // again under required UV and reuses the probe result.
         Assert.Equal(
-            PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
-            tokenPermissions[0]);
-        Assert.Equal(PinUvAuthTokenPermissions.MakeCredential, tokenPermissions[1]);
-        Assert.Equal(
-            PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
-            tokenPermissions[2]);
-        Assert.Equal(PinUvAuthTokenPermissions.MakeCredential, tokenPermissions[3]);
-        await _mockBackend.Received(2).GetAssertionAsync(
+            [PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
+             PinUvAuthTokenPermissions.MakeCredential,
+             PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion],
+            tokenPermissions);
+        await _mockBackend.Received(1).GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>());
     }
@@ -431,7 +506,7 @@ public class WebAuthnClientMakeCredentialTests
             TestContext.Current.CancellationToken);
 
         // Assert
-        AssertEveryIssuedTokenZeroed(issued, expectedCount: 4);
+        AssertEveryIssuedTokenZeroed(issued, expectedCount: 3);
     }
 
     /// <summary>
@@ -464,39 +539,27 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     /// <summary>
-    /// A ceremony that fails while building extension CBOR must not leave a live PIN/UV auth
-    /// parameter behind.
+    /// Invalid extension input is rejected when the extension session is created, before any PIN/UV token
+    /// is minted or any auth parameter computed (a largeBlob read at registration: WebAuthn L3 §10.1.5).
     /// </summary>
-    /// <remarks>
-    /// The parameter is computed after everything in the request builder that can throw, so the
-    /// correct outcome here is that it was never produced at all - there is no stranded buffer to
-    /// clean up. Computing it earlier would strand it: the request never reaches
-    /// <c>ExecuteMakeCredentialAsync</c>, whose finally is what clears the parameter on every
-    /// other path. LargeBlob "Required" is used as the trigger because it is a shipped
-    /// not-yet-implemented input, so this is a path real callers can reach.
-    /// </remarks>
     [Fact]
-    public async Task MakeCredential_WhenExtensionBuildFails_NeverComputesPinUvAuthParam()
+    public async Task MakeCredential_InvalidExtensionInput_IsRejectedBeforeAnyTokenIsMinted()
     {
-        // Arrange
         var protocol = new TestPinUvAuthProtocol();
         ArrangePinTokenAcquisition(protocol);
-
         var options = CreateUvRequiredOptions() with
         {
-            Extensions = new RegistrationExtensionInputs(
-                LargeBlob: new LargeBlobInput { Support = LargeBlobSupport.Required })
+            Extensions = new RegistrationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
         };
 
-        // Act
         var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.MakeCredentialAsync(
-            options,
-            "123456"u8.ToArray(),
-            TestContext.Current.CancellationToken));
+            options, "123456"u8.ToArray(), TestContext.Current.CancellationToken));
 
-        // Assert
         Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
         Assert.Empty(protocol.IssuedAuthTags);
+        await _mockBackend.DidNotReceive().GetPinUvTokenAsync(
+            Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(), Arg.Any<string?>(),
+            Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -508,7 +571,7 @@ public class WebAuthnClientMakeCredentialTests
             Arg.Any<CancellationToken>())
             .Returns<MakeCredentialResponse>(_ => throw new CtapException(CtapStatus.OperationDenied));
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -529,7 +592,7 @@ public class WebAuthnClientMakeCredentialTests
             .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
                 clientPinSupported: true, uvSupported: false));
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -627,7 +690,8 @@ public class WebAuthnClientMakeCredentialTests
     private void ArrangePinTokenAcquisition(TestPinUvAuthProtocol protocol)
     {
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+                clientPinSupported: true, extensions: MockFido2Responses.AllKnownExtensions, largeBlobsSupported: true));
 
         _mockBackend.GetPinUvTokenAsync(
             PinUvAuthMethod.Pin,
@@ -643,7 +707,7 @@ public class WebAuthnClientMakeCredentialTests
     /// an authentication tag of its own - does not run and the tag count stays attributable to the
     /// request builder alone.
     /// </summary>
-    private static RegistrationOptions CreateUvRequiredOptions() => new()
+    private static PublicKeyCredentialCreationOptions CreateUvRequiredOptions() => new()
     {
         Challenge = RandomNumberGenerator.GetBytes(32),
         Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
@@ -652,7 +716,7 @@ public class WebAuthnClientMakeCredentialTests
         UserVerification = UserVerificationPreference.Required
     };
 
-    private static RegistrationOptions CreateExcludeListOptions(
+    private static PublicKeyCredentialCreationOptions CreateExcludeListOptions(
         UserVerificationPreference userVerification = UserVerificationPreference.Preferred) => new()
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
@@ -663,6 +727,6 @@ public class WebAuthnClientMakeCredentialTests
             UserVerification = userVerification
         };
 
-    private static RegistrationOptions CreateExcludeListUvRequiredOptions() =>
+    private static PublicKeyCredentialCreationOptions CreateExcludeListUvRequiredOptions() =>
         CreateExcludeListOptions(UserVerificationPreference.Required);
 }

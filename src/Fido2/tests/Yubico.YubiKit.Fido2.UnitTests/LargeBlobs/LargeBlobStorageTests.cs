@@ -77,15 +77,6 @@ public class LargeBlobStorageTests
     }
 
     [Fact]
-    public void Constructor_ReadOnly_ThrowsOnInvalidFragmentLength()
-    {
-        Assert.Throws<ArgumentOutOfRangeException>(
-            () => new LargeBlobStorage(_mockSession, 0));
-        Assert.Throws<ArgumentOutOfRangeException>(
-            () => new LargeBlobStorage(_mockSession, -1));
-    }
-
-    [Fact]
     public void Constructor_ReadWrite_ThrowsOnNullProtocol()
     {
         Assert.Throws<ArgumentNullException>(
@@ -107,7 +98,7 @@ public class LargeBlobStorageTests
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(response));
 
-        var storage = new LargeBlobStorage(_mockSession, 1024);
+        var storage = new LargeBlobStorage(_mockSession);
 
         // Act
         await storage.ReadLargeBlobArrayAsync(TestContext.Current.CancellationToken);

@@ -16,7 +16,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
-using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Utilities;
@@ -402,6 +402,8 @@ public sealed class OpenPgpSessionWireTests
             ],
             KeyMutation.Import =>
             [
+                OkResponse(), // algorithm attributes
+                OkResponse(), // import, chained in two short APDUs
                 OkResponse(),
                 OkResponse(),
                 ApplicationRelatedDataResponse(Uif.Off),
@@ -430,9 +432,8 @@ public sealed class OpenPgpSessionWireTests
             TestContext.Current.CancellationToken);
 
         await session.SetUifAsync(KeyRef.Sig, Uif.On, TestContext.Current.CancellationToken);
-        byte[] exponent = [0x01];
-        byte[] primeP = [0x02];
-        byte[] primeQ = [0x03];
+        using var rsa = RSA.Create(2048);
+        using var importKey = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
         await (mutation switch
         {
             KeyMutation.Generate => session.GenerateKeyAsync(
@@ -441,8 +442,8 @@ public sealed class OpenPgpSessionWireTests
                 TestContext.Current.CancellationToken),
             KeyMutation.Import => session.PutKeyAsync(
                 KeyRef.Sig,
-                new RsaKeyTemplate(KeyRef.Sig, exponent, primeP, primeQ),
-                cancellationToken: TestContext.Current.CancellationToken),
+                importKey,
+                TestContext.Current.CancellationToken),
             KeyMutation.Delete => session.DeleteKeyAsync(KeyRef.Sig, TestContext.Current.CancellationToken),
             _ => throw new ArgumentOutOfRangeException(nameof(mutation))
         });

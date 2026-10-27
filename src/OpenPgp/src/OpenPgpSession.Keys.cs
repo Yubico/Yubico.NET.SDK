@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 namespace Yubico.YubiKit.OpenPgp;
@@ -47,25 +48,32 @@ public sealed partial class OpenPgpSession
     /// <inheritdoc />
     public async Task PutKeyAsync(
         KeyRef keyRef,
-        PrivateKeyTemplate template,
-        AlgorithmAttributes? attributes = null,
+        IPrivateKey privateKey,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        ArgumentNullException.ThrowIfNull(template);
+        ArgumentNullException.ThrowIfNull(privateKey);
 
-        _logger.LogInformation("Importing key into {Slot}", keyRef);
+        _logger.LogInformation("Importing {KeyType} key into {Slot}", privateKey.KeyType, keyRef);
 
-        if (attributes is not null)
+        using var import = PrivateKeyImport.Create(privateKey, keyRef, FirmwareVersion);
+        if (import.Attributes is EcAttributes)
+            EnsureSupports(FeatureEc);
+
+        if (_appData.Discretionary.ExtendedCapabilities.Flags.HasFlag(ExtendedCapabilityFlags.AlgorithmAttributesChangeable))
         {
-            await SetAlgorithmAttributesAsync(keyRef, attributes, cancellationToken)
+            await SetAlgorithmAttributesAsync(keyRef, import.Attributes, cancellationToken)
                 .ConfigureAwait(false);
+        }
+        else if (import.Attributes is not RsaAttributes { NLen: (int)RsaSize.Rsa2048 })
+        {
+            throw new NotSupportedException("This YubiKey only supports RSA 2048 keys.");
         }
 
         byte[]? templateBytes = null;
         try
         {
-            templateBytes = template.ToBytes();
+            templateBytes = import.Template.ToBytes(keyRef);
 
             var command = new ApduCommand
             {

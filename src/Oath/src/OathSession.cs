@@ -144,6 +144,20 @@ public sealed class OathSession : ApplicationSession, IOathSession
         IsPasswordProtected = IsLocked;
     }
 
+    /// <summary>
+    ///     A <see cref="Credential" /> names the device it was read from. Sending its ID to a different
+    ///     device would act on whichever credential there happens to share the name.
+    /// </summary>
+    private void ThrowIfFromAnotherDevice(Credential credential)
+    {
+        if (credential.DeviceId != DeviceId)
+        {
+            throw new ArgumentException(
+                $"The credential belongs to OATH device '{credential.DeviceId}', not to this session's device '{DeviceId}'.",
+                nameof(credential));
+        }
+    }
+
     internal static string ComputeDeviceId(ReadOnlySpan<byte> salt)
     {
         Span<byte> hash = stackalloc byte[32];
@@ -313,6 +327,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
 
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         var command = new ApduCommand(0x00, OathConstants.InsDelete, 0x00, 0x00, nameTlv.AsMemory());
@@ -328,6 +343,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
         EnsureSupports(FeatureRenameCredential);
 
         ReadOnlyMemory<byte> oldId = credential.Id;
@@ -365,6 +381,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
 
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
@@ -417,6 +434,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
 
         long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         byte[] challenge;

@@ -78,17 +78,29 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Deletes a credential from the device.
     /// </summary>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="credential" /> was read from a different device (its <see cref="Credential.DeviceId" />
+    ///     is not this session's <see cref="DeviceId" />). Nothing is sent.
+    /// </exception>
     Task DeleteCredentialAsync(Credential credential, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Renames a credential on the device. Requires firmware 5.3.1+.
     /// </summary>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="credential" /> was read from a different device (its <see cref="Credential.DeviceId" />
+    ///     is not this session's <see cref="DeviceId" />). Nothing is sent.
+    /// </exception>
     Task<Credential> RenameCredentialAsync(Credential credential, string? newIssuer, string newName,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Calculates the full HMAC response for a single credential.
     /// </summary>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="credential" /> was read from a different device (its <see cref="Credential.DeviceId" />
+    ///     is not this session's <see cref="DeviceId" />). Nothing is sent.
+    /// </exception>
     Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default);
 
@@ -96,7 +108,9 @@ public interface IOathSession : IApplicationSession
     ///     Calculates a formatted OTP code for a single credential (RFC 4226 for HOTP, RFC 6238 for TOTP).
     /// </summary>
     /// <exception cref="ArgumentException">
-    ///     <paramref name="credential" /> is TOTP with a period that is not positive.
+    ///     <paramref name="credential" /> is TOTP with a period that is not positive, or was read from a
+    ///     different device (its <see cref="Credential.DeviceId" /> is not this session's <see cref="DeviceId" />).
+    ///     Nothing is sent.
     /// </exception>
     Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
         CancellationToken cancellationToken = default);

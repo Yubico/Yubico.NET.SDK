@@ -28,6 +28,7 @@ internal class ScpProcessor(
 {
     // SCP Constants
     private const byte ClaBitSecureMessaging = 0x04; // Bit 2 in CLA byte indicates secure messaging
+    private const byte InsExternalAuthenticate = 0x82;
     private const int MacLength = 8; // AES-CMAC output truncated to 8 bytes
 
     private readonly ApduFormatterExtended _apduFormatterExtended = new(SmartCardMaxApduSizes.Yk43);
@@ -41,6 +42,10 @@ internal class ScpProcessor(
     ///     Disposes the SCP state, zeroing all session keys.
     /// </summary>
     public void Dispose() => State.Dispose();
+
+    /// <summary>9000, 62xx and 63xx: the status words a card answers with an R-MAC (SCP03 Amd D §6.2.5).</summary>
+    private static bool IsSuccessOrWarning(short sw) =>
+        sw == SWConstants.Success || (sw & 0xFF00) is 0x6200 or 0x6300;
 
     /// <summary>
     ///     Transmits a command APDU with optional SCP encryption and MAC.
@@ -146,6 +151,16 @@ internal class ScpProcessor(
                 }
 
                 return new ApduResponse(unmacdData, response.SW);
+            }
+
+            // No data field. The card puts an R-MAC on every success or warning response, data or not
+            // (SCP03 Amd D §6.2.5), and none on an error. The one unauthenticated success is the
+            // EXTERNAL AUTHENTICATE reply, which precedes the R-MAC session. Anything else claiming
+            // success without an R-MAC did not come from the card.
+            if (IsSuccessOrWarning(response.SW) && command.Ins != InsExternalAuthenticate)
+            {
+                throw new BadResponseException(
+                    $"Response with status 0x{response.SW:X4} carries no R-MAC; every success under SCP is authenticated.");
             }
 
             return response;

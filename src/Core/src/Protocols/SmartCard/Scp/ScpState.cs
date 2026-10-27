@@ -238,6 +238,29 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     }
 
     /// <summary>
+    ///     The R-MAC the card would put on a response of <paramref name="data" /> and <paramref name="sw" />
+    ///     at the current chaining value (the same computation <see cref="Unmac" /> checks against).
+    ///     Does not change state. Lets a test double answer a secured command the way the card does.
+    /// </summary>
+    internal byte[] ComputeRmac(ReadOnlySpan<byte> data, short sw)
+    {
+        Span<byte> msg = stackalloc byte[data.Length + 2];
+        Span<byte> mac = stackalloc byte[BlockSize];
+        try
+        {
+            data.CopyTo(msg);
+            BinaryPrimitives.WriteInt16BigEndian(msg[data.Length..], sw);
+            ComputeCmac(keys.Srmac, _macChain, msg, mac);
+            return mac[..RmacLength].ToArray();
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(mac);
+            CryptographicOperations.ZeroMemory(msg);
+        }
+    }
+
+    /// <summary>
     ///     Writes CMAC(<paramref name="key" />, <paramref name="chain" /> || <paramref name="data" />) to
     ///     <paramref name="destination" />. Only provider failures are wrapped, as
     ///     <see cref="NotSupportedException" />; other exceptions propagate unchanged.

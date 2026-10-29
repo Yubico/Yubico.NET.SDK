@@ -1,8 +1,11 @@
 # Yubico.YubiKit.WebAuthn
 
-W3C Web Authentication client for YubiKey devices, built on `Yubico.YubiKit.Fido2`. It reduces
+W3C Web Authentication client for YubiKey devices, built on `Yubico.YubiKit.Ctap2`. It reduces
 registration and authentication to two calls and requires a WebAuthn origin and a Public Suffix List
 backed checker.
+
+WebAuthn handles client ceremonies and origin/RP validation; CTAP2 handles authenticator operations.
+FIDO2 remains the authenticator application identity.
 
 > ## Alpha - not for production
 >
@@ -17,10 +20,10 @@ dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json
 dotnet add package Yubico.YubiKit.WebAuthn --prerelease
 ```
 
-`Yubico.YubiKit.Core` and `Yubico.YubiKit.Fido2` are installed transitively.
+`Yubico.YubiKit.Core` and `Yubico.YubiKit.Ctap2` are installed transitively.
 
 ## Documentation
 
 - [WebAuthn module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/WebAuthn/README.md): requirements, getting started, common operations, constraints, and security notes.
-- [FIDO2 module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Fido2/README.md): the CTAP layer underneath, including transport rules and firmware minimums.
+- [CTAP2 module documentation](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/src/Ctap2/README.md): the authenticator operations layer underneath, including transport rules and firmware minimums.
 - [Yubico.NET.SDK on GitHub](https://github.com/Yubico/Yubico.NET.SDK/tree/yubikit): all modules, building from source, and release notes.

@@ -14,9 +14,9 @@
 
 using NSubstitute;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -27,22 +27,22 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 public class WebAuthnClientConstructionTests
 {
     [Fact]
-    public async Task Constructor_WithFidoSession_DelegatesMakeCredentialToSession()
+    public async Task Constructor_WithCtap2Session_DelegatesMakeCredentialToSession()
     {
-        var fidoSession = Substitute.For<IFidoSession>();
-        fidoSession.GetInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
-        fidoSession.MakeCredentialAsync(
+        var ctap2Session = Substitute.For<ICtap2Session>();
+        ctap2Session.GetInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
+        ctap2Session.MakeCredentialAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<PublicKeyCredentialRpEntity>(),
                 Arg.Any<PublicKeyCredentialUserEntity>(),
                 Arg.Any<IReadOnlyList<PublicKeyCredentialParameters>>(),
                 Arg.Any<MakeCredentialOptions?>(),
                 Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         var client = new WebAuthnClient(
-            fidoSession,
+            ctap2Session,
             ParseOrigin("https://example.com"),
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
@@ -56,7 +56,7 @@ public class WebAuthnClientConstructionTests
 
         await client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
 
-        await fidoSession.Received(1).MakeCredentialAsync(
+        await ctap2Session.Received(1).MakeCredentialAsync(
             Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<PublicKeyCredentialRpEntity>(),
             Arg.Any<PublicKeyCredentialUserEntity>(),
@@ -66,53 +66,53 @@ public class WebAuthnClientConstructionTests
     }
 
     [Fact]
-    public async Task DisposeAsync_WithFidoSessionConstructor_DisposesSession()
+    public async Task DisposeAsync_WithCtap2SessionConstructor_DisposesSession()
     {
-        var fidoSession = Substitute.For<IFidoSession>();
+        var ctap2Session = Substitute.For<ICtap2Session>();
         var client = new WebAuthnClient(
-            fidoSession,
+            ctap2Session,
             ParseOrigin("https://example.com"),
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
         await client.DisposeAsync();
 
-        await fidoSession.Received(1).DisposeAsync();
+        await ctap2Session.Received(1).DisposeAsync();
     }
 
     [Fact]
     public async Task Constructor_WithNullOrigin_DoesNotAdoptSession()
     {
-        var fidoSession = Substitute.For<IFidoSession>();
+        var ctap2Session = Substitute.For<ICtap2Session>();
 
         Assert.Throws<ArgumentNullException>(
             () => new WebAuthnClient(
-                fidoSession,
+                ctap2Session,
                 origin: null!,
                 new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" }));
 
-        await fidoSession.DidNotReceive().DisposeAsync();
+        await ctap2Session.DidNotReceive().DisposeAsync();
     }
 
     [Fact]
     public async Task Constructor_WithNullOptions_DoesNotAdoptSession()
     {
-        var fidoSession = Substitute.For<IFidoSession>();
+        var ctap2Session = Substitute.For<ICtap2Session>();
 
         Assert.Throws<ArgumentNullException>(
             () => new WebAuthnClient(
-                fidoSession,
+                ctap2Session,
                 ParseOrigin("https://example.com"),
                 options: null!));
 
-        await fidoSession.DidNotReceive().DisposeAsync();
+        await ctap2Session.DidNotReceive().DisposeAsync();
     }
 
     [Fact]
-    public async Task GetAssertion_WithFidoSessionConstructor_RejectsPublicSuffixRpId()
+    public async Task GetAssertion_WithCtap2SessionConstructor_RejectsPublicSuffixRpId()
     {
-        var fidoSession = Substitute.For<IFidoSession>();
+        var ctap2Session = Substitute.For<ICtap2Session>();
         var client = new WebAuthnClient(
-            fidoSession,
+            ctap2Session,
             ParseOrigin("https://login.example.com"),
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
 
@@ -126,7 +126,7 @@ public class WebAuthnClientConstructionTests
             () => client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken));
 
         Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
-        await fidoSession.DidNotReceive().GetInfoAsync(Arg.Any<CancellationToken>());
+        await ctap2Session.DidNotReceive().GetInfoAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -178,22 +178,22 @@ public class WebAuthnClientConstructionTests
     }
 
     [Fact]
-    public async Task MakeCredential_WithFidoSessionConstructor_AllowsEnterpriseRpId()
+    public async Task MakeCredential_WithCtap2SessionConstructor_AllowsEnterpriseRpId()
     {
-        var fidoSession = Substitute.For<IFidoSession>();
-        fidoSession.GetInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
-        fidoSession.MakeCredentialAsync(
+        var ctap2Session = Substitute.For<ICtap2Session>();
+        ctap2Session.GetInfoAsync(Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
+        ctap2Session.MakeCredentialAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<PublicKeyCredentialRpEntity>(),
                 Arg.Any<PublicKeyCredentialUserEntity>(),
                 Arg.Any<IReadOnlyList<PublicKeyCredentialParameters>>(),
                 Arg.Any<MakeCredentialOptions?>(),
                 Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         var client = new WebAuthnClient(
-            fidoSession,
+            ctap2Session,
             ParseOrigin("https://example.com"),
             new WebAuthnClientOptions
             {
@@ -211,7 +211,7 @@ public class WebAuthnClientConstructionTests
 
         await client.MakeCredentialAsync(options, pinBytes: null, TestContext.Current.CancellationToken);
 
-        await fidoSession.Received(1).MakeCredentialAsync(
+        await ctap2Session.Received(1).MakeCredentialAsync(
             Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Is<PublicKeyCredentialRpEntity>(rp => rp.Id == "partner.test"),
             Arg.Any<PublicKeyCredentialUserEntity>(),

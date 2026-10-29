@@ -14,8 +14,8 @@
 
 using NSubstitute;
 using System.Formats.Cbor;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
@@ -56,7 +56,7 @@ public class PrfProcessorTests
         _backend.EncapsulateAsync(Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvSharedSecret(_platformKey, (byte[])SharedSecretV2.Clone()));
         return new ExtensionContext(
-            MockFido2Responses.CreateMockAuthenticatorInfo(extensions: extensions), _protocol, _backend);
+            MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: extensions), _protocol, _backend);
     }
 
     private static Dictionary<int, object?> ReadHmacSecretInput(ReadOnlyMemory<byte> extensionsCbor)
@@ -123,10 +123,10 @@ public class PrfProcessorTests
         outputs.WriteTextString("hmac-secret");
         outputs.WriteBoolean(true);
         outputs.WriteEndMap();
-        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData(outputs.Encode()));
+        var authData = WebAuthnAuthenticatorData.Decode(MockCtap2Responses.BuildAuthData(outputs.Encode()));
 
         var result = await session.PrepareOutputsAsync(
-            MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
+            MockCtap2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
 
         Assert.True(result?.Prf?.Enabled);
     }
@@ -170,10 +170,10 @@ public class PrfProcessorTests
         outputs.WriteTextString("hmac-secret");
         outputs.WriteByteString(OutputEncV2Two);
         outputs.WriteEndMap();
-        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData(outputs.Encode()));
+        var authData = WebAuthnAuthenticatorData.Decode(MockCtap2Responses.BuildAuthData(outputs.Encode()));
 
         var result = await session.PrepareOutputsAsync(
-            MockFido2Responses.CreateMockGetAssertionResponse(), authData, token: null, TestContext.Current.CancellationToken);
+            MockCtap2Responses.CreateMockGetAssertionResponse(), authData, token: null, TestContext.Current.CancellationToken);
 
         Assert.Equal(Output1, result?.Prf?.Results.First.ToArray());
         Assert.Equal(Output2, result?.Prf?.Results.Second?.ToArray());
@@ -233,10 +233,10 @@ public class PrfProcessorTests
         outputs.WriteTextString("hmac-secret");
         outputs.WriteByteString(new byte[7]); // not even a whole AES block
         outputs.WriteEndMap();
-        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData(outputs.Encode()));
+        var authData = WebAuthnAuthenticatorData.Decode(MockCtap2Responses.BuildAuthData(outputs.Encode()));
 
         var result = await session.PrepareOutputsAsync(
-            MockFido2Responses.CreateMockGetAssertionResponse(), authData, token: null, TestContext.Current.CancellationToken);
+            MockCtap2Responses.CreateMockGetAssertionResponse(), authData, token: null, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.Null(result.Prf);
@@ -324,10 +324,10 @@ public class PrfProcessorTests
         var context = Context("hmac-secret");
         var session = RegistrationExtensionSession.Create(
             new RegistrationExtensionInputs(Prf: new PrfInput()), ExtensionSessionTests.CreateMockOptions(), requireResidentKey: false, context);
-        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData());
+        var authData = WebAuthnAuthenticatorData.Decode(MockCtap2Responses.BuildAuthData());
 
         var result = await session.PrepareOutputsAsync(
-            MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
+            MockCtap2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result?.Prf);
         Assert.False(result.Prf.Enabled);
@@ -346,10 +346,10 @@ public class PrfProcessorTests
         outputs.WriteTextString("hmac-secret");
         outputs.WriteInt32(1);
         outputs.WriteEndMap();
-        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData(outputs.Encode()));
+        var authData = WebAuthnAuthenticatorData.Decode(MockCtap2Responses.BuildAuthData(outputs.Encode()));
 
         var result = await session.PrepareOutputsAsync(
-            MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
+            MockCtap2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result?.Prf);
         Assert.False(result.Prf.Enabled);
@@ -383,9 +383,9 @@ public class PrfProcessorTests
         outputs.WriteTextString("hmac-secret"); outputs.WriteBoolean(true);
         outputs.WriteTextString("hmac-secret-mc"); outputs.WriteByteString(OutputEncV2Two);
         outputs.WriteEndMap();
-        var authData = WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData(outputs.Encode()));
+        var authData = WebAuthnAuthenticatorData.Decode(MockCtap2Responses.BuildAuthData(outputs.Encode()));
         var result = await session.PrepareOutputsAsync(
-            MockFido2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
+            MockCtap2Responses.CreateMockMakeCredentialResponse(), authData, token: null, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result?.Prf);
         Assert.True(result.Prf.Enabled);

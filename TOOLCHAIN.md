@@ -441,7 +441,7 @@ dotnet toolchain.cs -- test --project Core
 dotnet toolchain.cs -- test --filter "FullyQualifiedName~MyTest"
 
 # ❌ WRONG - May fail if project uses xUnit v3
-dotnet test Yubico.YubiKit.Fido2/tests/Yubico.YubiKit.Fido2.UnitTests/Yubico.YubiKit.Fido2.UnitTests.csproj
+dotnet test Yubico.YubiKit.Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj
 ```
 
 ### Test Filtering Tips

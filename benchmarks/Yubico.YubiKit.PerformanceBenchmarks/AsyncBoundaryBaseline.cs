@@ -352,7 +352,7 @@ internal static class AsyncBoundaryBaseline
                     }
                     else
                     {
-                        await using var session = await RawFidoHidSession.CreateAsync(connection);
+                        await using var session = await RawCtapHidSession.CreateAsync(connection);
                         // CTAPHID_CBOR 0x10; authenticatorGetInfo 0x04, a non-mutating command.
                         var operationWatch = Stopwatch.StartNew();
                         EmitProgress("invocation_started", operationWatch);
@@ -380,7 +380,7 @@ internal static class AsyncBoundaryBaseline
                 if (scenario == Lifecycle)
                 {
                     await using (var reopened = await device.ConnectAsync<IFidoHidConnection>())
-                    await using (var reopenedSession = await RawFidoHidSession.CreateAsync(reopened))
+                    await using (var reopenedSession = await RawCtapHidSession.CreateAsync(reopened))
                     {
                         var response = await reopenedSession.SendAndReceiveAsync(0x10, new byte[] { 0x04 });
                         if (response.IsEmpty || response.Span[0] != 0) return 5;

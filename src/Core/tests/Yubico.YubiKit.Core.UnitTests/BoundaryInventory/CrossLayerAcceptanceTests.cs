@@ -21,7 +21,7 @@ public class CrossLayerAcceptanceTests
         byte[] request = new byte[58];
         request.AsSpan().Fill(0x5A);
 
-        Task<ReadOnlyMemory<byte>> first = protocol.SendVendorCommandAsync(0x41, request,
+        Task<ReadOnlyMemory<byte>> first = protocol.SendCommandAsync(0x41, request,
             UserPresenceNotification.Create(prompt, new UserPresenceContext
             {
                 Application = "FIDO2",
@@ -32,7 +32,7 @@ public class CrossLayerAcceptanceTests
             await bridge.CancelSent.Task.WaitAsync(Bound, TestContext.Current.CancellationToken);
             Assert.False(first.IsCompleted);
             InvalidOperationException overlap = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                protocol.SendVendorCommandAsync(0x41, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
+                protocol.SendCommandAsync(0x41, ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken));
             Assert.Contains("already has an exchange in flight", overlap.Message, StringComparison.Ordinal);
         }
         finally
@@ -40,7 +40,7 @@ public class CrossLayerAcceptanceTests
             bridge.ReleaseContinuation();
         }
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => first.WaitAsync(Bound, TestContext.Current.CancellationToken));
-        ReadOnlyMemory<byte> second = await protocol.SendVendorCommandAsync(0x41, ReadOnlyMemory<byte>.Empty,
+        ReadOnlyMemory<byte> second = await protocol.SendCommandAsync(0x41, ReadOnlyMemory<byte>.Empty,
             TestContext.Current.CancellationToken).WaitAsync(Bound, TestContext.Current.CancellationToken);
 
         Assert.Equal((byte)0xAC, second.Span[0]);

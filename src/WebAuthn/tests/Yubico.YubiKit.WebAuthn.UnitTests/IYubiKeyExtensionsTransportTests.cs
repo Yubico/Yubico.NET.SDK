@@ -23,9 +23,9 @@ using Yubico.YubiKit.WebAuthn.Client;
 namespace Yubico.YubiKit.WebAuthn.UnitTests;
 
 /// <summary>
-///     WebAuthn forwards its session creation options to the underlying FIDO2 session and adds no independent
-///     transport logic. These tests prove the pass-through: WebAuthn sees the FIDO2 default (HID FIDO first),
-///     honors an explicit override, and surfaces the FIDO2 validation errors unchanged.
+///     WebAuthn forwards its session creation options to the underlying CTAP2 session and adds no independent
+///     transport logic. These tests prove the pass-through: WebAuthn sees the CTAP2 default (HID FIDO first),
+///     honors an explicit override, and surfaces the CTAP2 validation errors unchanged.
 /// </summary>
 public class IYubiKeyExtensionsTransportTests
 {
@@ -67,7 +67,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Null(device.RequestedConnection);
     }
 
-    // Default both transports -> HID FIDO (the FIDO2 default), proving WebAuthn adds no transport logic.
+    // Default both transports -> HID FIDO (the CTAP2 default), proving WebAuthn adds no transport logic.
     [Fact]
     public async Task CreateWebAuthnClientAsync_DefaultBothTransports_PicksHidFido()
     {
@@ -140,7 +140,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal(typeof(ISmartCardConnection), device.RequestedConnection);
     }
 
-    // Non-concrete override -> ArgumentException from the shared FIDO2 validation, no connect attempt.
+    // Non-concrete override -> ArgumentException from the shared CTAP2 validation, no connect attempt.
     [Theory]
     [InlineData(ConnectionType.Hid)]
     [InlineData(ConnectionType.All)]

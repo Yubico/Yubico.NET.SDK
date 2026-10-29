@@ -18,10 +18,10 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Utilities;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Preferences;
@@ -138,7 +138,7 @@ public class CredentialPromptRetryTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
                 clientPinSupported: true, uvSupported: false));
 
         backend.GetPinRetriesAsync(Arg.Any<CancellationToken>()).Returns(retriesRemaining);
@@ -166,7 +166,7 @@ public class CredentialPromptRetryTests
         backend.MakeCredentialAsync(
                 Arg.Any<BackendMakeCredentialRequest>(),
                 Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         return backend;
     }
@@ -214,7 +214,7 @@ public class CredentialPromptRetryTests
     {
         var backend = CreateBackend();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
                 clientPinSupported: true, uvSupported: false, minPinLength: 8));
         var prompt = new ScriptedPrompt(CorrectPin);
         await using var client = new WebAuthnClient(

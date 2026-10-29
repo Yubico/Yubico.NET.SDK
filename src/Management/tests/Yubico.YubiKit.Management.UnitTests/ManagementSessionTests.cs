@@ -233,7 +233,7 @@ public class ManagementSessionTests
         public Task InitializeAsync(CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("Unexpected protocol initialization.");
 
-        public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+        public Task<ReadOnlyMemory<byte>> SendCommandAsync(
             byte command,
             ReadOnlyMemory<byte> data,
             UserPresenceNotification userPresenceNotification,

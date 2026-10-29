@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Extensions;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Extensions;
 using Yubico.YubiKit.WebAuthn.Attestation;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
@@ -66,7 +66,7 @@ internal static class PreviewSignCodec
             : (byte)PreviewSignFlags.RequireUserPresence;
 
         // Translate WebAuthn input to Fido2 input
-        var fido2Input = new Fido2.Extensions.PreviewSignRegistrationInput(
+        var fido2Input = new Ctap2.Extensions.PreviewSignRegistrationInput(
             algorithms: input.Algorithms.Select(a => a.Value).ToList(),
             flags: resolvedFlags);
 
@@ -77,7 +77,7 @@ internal static class PreviewSignCodec
     /// Translates one credential's WebAuthn signing parameters to the CTAP2 shape. additionalArgs are
     /// algorithm-specific bytes and pass through unchanged.
     /// </summary>
-    public static Fido2.Extensions.PreviewSignSigningParams ToCtap(PreviewSign.PreviewSignSigningParams signingParams) =>
+    public static Ctap2.Extensions.PreviewSignSigningParams ToCtap(PreviewSign.PreviewSignSigningParams signingParams) =>
         new(keyHandle: signingParams.KeyHandle, tbs: signingParams.Tbs, additionalArgs: signingParams.AdditionalArgs);
 
     /// <summary>
@@ -112,7 +112,7 @@ internal static class PreviewSignCodec
         // Decode algorithm + flags from authData.extensions["previewSign"] via Fido2 decoder
         var reader = new System.Formats.Cbor.CborReader(rawCbor, System.Formats.Cbor.CborConformanceMode.Ctap2Canonical);
 
-        (int algorithmInt, int? flagsInt) = Fido2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(reader);
+        (int algorithmInt, int? flagsInt) = Ctap2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(reader);
 
         var algorithm = new CoseAlgorithm(algorithmInt);
         var flags = flagsInt.HasValue
@@ -133,8 +133,8 @@ internal static class PreviewSignCodec
         // Decode the CTAP-shaped inner attestation object via the Fido2 decoder. The wire
         // payload uses integer keys ({1:fmt, 2:authData, 3:attStmt}), so WebAuthn rebuilds
         // the attestation object from the decoded components.
-        Fido2.Extensions.PreviewSignCbor.InnerAttestationObject inner =
-            Fido2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor);
+        Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject inner =
+            Ctap2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(unsignedCbor);
 
         var innerAuthData = WebAuthnAuthenticatorData.Decode(inner.AuthData);
         var format = new AttestationFormat(inner.Fmt);
@@ -179,7 +179,7 @@ internal static class PreviewSignCodec
         }
 
         // Decode signature via Fido2 decoder
-        ReadOnlyMemory<byte> signature = Fido2.Extensions.PreviewSignCbor.DecodeAuthenticationOutput(rawCbor);
+        ReadOnlyMemory<byte> signature = Ctap2.Extensions.PreviewSignCbor.DecodeAuthenticationOutput(rawCbor);
 
         return new PreviewSign.PreviewSignAuthenticationOutput(signature);
     }

@@ -26,8 +26,8 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// through unchanged.
 /// Pass <c>null</c> to omit <c>additionalArgs</c>. Passing an empty memory value emits key 7 with
 /// an empty byte string, matching the caller-supplied algorithm-specific value.
-/// Experimental Fido2 typed helpers can be converted to raw bytes with
-/// <see cref="Fido2.Extensions.PreviewSignCbor.EncodeAdditionalArgs"/> before constructing this type.
+/// Experimental CTAP2 typed helpers can be converted to raw bytes with
+/// <see cref="Ctap2.Extensions.PreviewSignCbor.EncodeAdditionalArgs"/> before constructing this type.
 /// </para>
 /// </remarks>
 public sealed record class PreviewSignSigningParams

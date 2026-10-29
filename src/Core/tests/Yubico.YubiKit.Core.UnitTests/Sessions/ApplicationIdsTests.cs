@@ -25,7 +25,7 @@ public sealed class ApplicationIdsTests
         nameof(ApplicationIds.Management),
         nameof(ApplicationIds.Otp),
         nameof(ApplicationIds.FidoU2f),
-        nameof(ApplicationIds.Fido2),
+        nameof(ApplicationIds.Fido),
         nameof(ApplicationIds.Oath),
         nameof(ApplicationIds.OpenPgp),
         nameof(ApplicationIds.Piv),
@@ -94,7 +94,8 @@ public sealed class ApplicationIdsTests
         Assert.Equal([0xA0, 0x00, 0x00, 0x05, 0x27, 0x47, 0x11, 0x17], ApplicationIds.Management.ToArray());
         Assert.Equal([0xA0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01, 0x01], ApplicationIds.Otp.ToArray());
         Assert.Equal([0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01], ApplicationIds.FidoU2f.ToArray());
-        Assert.Equal([0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01], ApplicationIds.Fido2.ToArray());
+        Assert.Equal([0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01], ApplicationIds.Fido.ToArray());
+        Assert.Equal(ApplicationIds.Fido.ToArray(), ApplicationIds.FidoU2f.ToArray());
         Assert.Equal([0xA0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01], ApplicationIds.Oath.ToArray());
         Assert.Equal([0xD2, 0x76, 0x00, 0x01, 0x24, 0x01], ApplicationIds.OpenPgp.ToArray());
         Assert.Equal([0xA0, 0x00, 0x00, 0x03, 0x08, 0x00, 0x00, 0x10, 0x00], ApplicationIds.Piv.ToArray());

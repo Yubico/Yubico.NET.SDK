@@ -15,11 +15,10 @@
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -48,8 +47,8 @@ public class WebAuthnClientCeremonyFrameTests
     {
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
-                clientPinSupported: true, extensions: MockFido2Responses.AllKnownExtensions));
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
+                clientPinSupported: true, extensions: MockCtap2Responses.AllKnownExtensions));
         _backend.GetPinUvTokenAsync(
                 PinUvAuthMethod.Pin, Arg.Any<PinUvAuthTokenPermissions>(), RpId,
                 Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
@@ -110,7 +109,7 @@ public class WebAuthnClientCeremonyFrameTests
         _backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
             .Returns(_ => ++calls == 1
                 ? throw new CtapException(CtapStatus.PuatRequired)
-                : MockFido2Responses.CreateMockMakeCredentialResponse());
+                : MockCtap2Responses.CreateMockMakeCredentialResponse());
         var options = Registration() with
         {
             ResidentKey = ResidentKeyPreference.Discouraged,
@@ -132,7 +131,7 @@ public class WebAuthnClientCeremonyFrameTests
         var probes = new List<BackendGetAssertionRequest>();
         _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(probes.Add), Arg.Any<CancellationToken>())
             .Returns(call => call.Arg<BackendGetAssertionRequest>().AllowList!.Any(d => d.Id.Span.SequenceEqual(excluded.Id.Span))
-                ? MockFido2Responses.CreateMockGetAssertionResponse(excluded.Id.ToArray())
+                ? MockCtap2Responses.CreateMockGetAssertionResponse(excluded.Id.ToArray())
                 : throw new CtapException(CtapStatus.NoCredentials));
         BackendMakeCredentialRequest? sent = null;
         _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(r => sent = r), Arg.Any<CancellationToken>())
@@ -162,7 +161,7 @@ public class WebAuthnClientCeremonyFrameTests
             .Throws(new CtapException(CtapStatus.NoCredentials));
         BackendMakeCredentialRequest? sent = null;
         _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(r => sent = r), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         await _client.MakeCredentialAsync(
             Registration(UserVerificationPreference.Required) with { ExcludeCredentials = [new PublicKeyCredentialDescriptor(new byte[] { 1 })] },
@@ -186,13 +185,13 @@ public class WebAuthnClientCeremonyFrameTests
         var probes = new List<BackendGetAssertionRequest>();
         _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(probes.Add), Arg.Any<CancellationToken>())
             .Returns(call => credentialExists && call.Arg<BackendGetAssertionRequest>().AllowList!.Contains(candidate)
-                ? MockFido2Responses.CreateMockGetAssertionResponse(candidate.Id.ToArray())
+                ? MockCtap2Responses.CreateMockGetAssertionResponse(candidate.Id.ToArray())
                 : throw new CtapException(CtapStatus.NoCredentials));
         BackendMakeCredentialRequest? sent = null;
         _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(request => sent = request), Arg.Any<CancellationToken>())
             .Returns(call => call.Arg<BackendMakeCredentialRequest>().ExcludeList is { Count: > 0 }
                 ? throw new CtapException(CtapStatus.CredentialExcluded)
-                : MockFido2Responses.CreateMockMakeCredentialResponse());
+                : MockCtap2Responses.CreateMockMakeCredentialResponse());
         var options = Registration(UserVerificationPreference.Discouraged) with
         {
             ExcludeCredentials = [absent, candidate]
@@ -234,7 +233,7 @@ public class WebAuthnClientCeremonyFrameTests
         ArrangeDiscouragedUvAuthenticator();
         var excluded = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(excluded.Id.ToArray()));
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(excluded.Id.ToArray()));
         var attempts = new List<BackendMakeCredentialRequest>();
         _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(attempts.Add), Arg.Any<CancellationToken>())
             .Throws(_ => new CtapException(attempts.Count == 1 ? CtapStatus.PuatRequired : CtapStatus.CredentialExcluded));
@@ -293,7 +292,7 @@ public class WebAuthnClientCeremonyFrameTests
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
             .Throws(new CtapException(CtapStatus.NoCredentials));
         _backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
 
         await _client.MakeCredentialAsync(
             Registration(UserVerificationPreference.Required) with { ExcludeCredentials = [new PublicKeyCredentialDescriptor(new byte[] { 1 })] },
@@ -326,10 +325,10 @@ public class WebAuthnClientCeremonyFrameTests
     public async Task GetAssertion_WithoutToken_SendsNoPinUvAuthParamAndNoUvOption()
     {
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo()); // no clientPin, no uv
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo()); // no clientPin, no uv
         BackendGetAssertionRequest? sent = null;
         _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => sent = r), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockGetAssertionResponse());
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
 
         await _client.GetAssertionAsync(Authentication(UserVerificationPreference.Discouraged), pinBytes: null, TestContext.Current.CancellationToken);
 
@@ -348,7 +347,7 @@ public class WebAuthnClientCeremonyFrameTests
 
     private void ArrangeNoTokenAuthenticator() =>
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo()); // no clientPin: ceremony runs without a token
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo()); // no clientPin: ceremony runs without a token
 
     /// <summary>
     ///     With an allow list the client first finds the credential with an up:false probe, then asserts with
@@ -363,7 +362,7 @@ public class WebAuthnClientCeremonyFrameTests
         var requests = new List<BackendGetAssertionRequest>();
         _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(requests.Add), Arg.Any<CancellationToken>())
             .Returns(call => call.Arg<BackendGetAssertionRequest>().AllowList!.Any(d => d.Id.Span.SequenceEqual(present.Id.Span))
-                ? MockFido2Responses.CreateMockGetAssertionResponse(present.Id.ToArray())
+                ? MockCtap2Responses.CreateMockGetAssertionResponse(present.Id.ToArray())
                 : throw new CtapException(CtapStatus.NoCredentials));
 
         var matches = await _client.GetAssertionAsync(WithAllowList(absent, present), pinBytes: null, TestContext.Current.CancellationToken);
@@ -414,7 +413,7 @@ public class WebAuthnClientCeremonyFrameTests
         var credential = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
         var requests = new List<BackendGetAssertionRequest>();
         _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(requests.Add), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credential.Id.ToArray()));
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(credential.Id.ToArray()));
 
         await _client.GetAssertionAsync(
             Authentication(UserVerificationPreference.Required) with { AllowCredentials = [credential] }, Pin, TestContext.Current.CancellationToken);
@@ -430,7 +429,7 @@ public class WebAuthnClientCeremonyFrameTests
     {
         ArrangeNoTokenAuthenticator();
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockGetAssertionResponse());
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
 
         await _client.GetAssertionAsync(Authentication(UserVerificationPreference.Discouraged), pinBytes: null, TestContext.Current.CancellationToken);
 

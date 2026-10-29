@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
@@ -22,7 +22,7 @@ public class WebAuthnAuditHardwareTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task YESDK1609_PrfRoundTripProducesStable32ByteResult(YubiKeyTestState state)
     {
-        await using var session = await state.Device.CreateFidoSessionAsync();
+        await using var session = await state.Device.CreateCtap2SessionAsync();
         var info = await session.GetInfoAsync();
         Skip.IfNot(info.Extensions.Contains("hmac-secret"), "Authenticator lacks hmac-secret");
         await NormalizePinAsync(session);
@@ -44,7 +44,7 @@ public class WebAuthnAuditHardwareTests
             Assert.True(registration.ClientExtensionResults?.Prf?.Enabled);
         }
 
-        await using var assertionSession = await state.Device.CreateFidoSessionAsync();
+        await using var assertionSession = await state.Device.CreateCtap2SessionAsync();
         await using var assertionClient = CreateClient(assertionSession);
         byte[]? previous = null;
         for (var i = 0; i < 2; i++)
@@ -92,7 +92,7 @@ public class WebAuthnAuditHardwareTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task R4_AllowListSelection_PicksTheHeldCredentialAndItsPrfInputs(YubiKeyTestState state)
     {
-        await using var session = await state.Device.CreateFidoSessionAsync();
+        await using var session = await state.Device.CreateCtap2SessionAsync();
         var info = await session.GetInfoAsync();
         Skip.IfNot(info.Extensions.Contains("hmac-secret"), "Authenticator lacks hmac-secret");
         await NormalizePinAsync(session);
@@ -107,7 +107,7 @@ public class WebAuthnAuditHardwareTests
         byte[] evalInput = "selected-credential-input"u8.ToArray();
         static string B64(byte[] id) => Convert.ToBase64String(id).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
-        await using var assertionSession = await state.Device.CreateFidoSessionAsync();
+        await using var assertionSession = await state.Device.CreateCtap2SessionAsync();
         await using var assertionClient = CreateClient(assertionSession);
         var byCredential = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
@@ -153,7 +153,7 @@ public class WebAuthnAuditHardwareTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task Prf_WithAndWithoutUserVerification_YieldsDifferentOutputs(YubiKeyTestState state)
     {
-        await using var session = await state.Device.CreateFidoSessionAsync();
+        await using var session = await state.Device.CreateCtap2SessionAsync();
         var info = await session.GetInfoAsync();
         Skip.IfNot(info.Extensions.Contains("hmac-secret"), "Authenticator lacks hmac-secret");
         await NormalizePinAsync(session);
@@ -165,7 +165,7 @@ public class WebAuthnAuditHardwareTests
         }
 
         byte[] input = "uv-comparison-input"u8.ToArray();
-        await using var assertionSession = await state.Device.CreateFidoSessionAsync();
+        await using var assertionSession = await state.Device.CreateCtap2SessionAsync();
         await using var assertionClient = CreateClient(assertionSession);
 
         async Task<(byte[] Result, bool UvFlag)> AssertAsync(UserVerificationPreference uv, ReadOnlyMemory<byte>? pin)
@@ -201,7 +201,7 @@ public class WebAuthnAuditHardwareTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task YESDK1613_LargeBlobRegisterWriteRead_RoundTrips(YubiKeyTestState state)
     {
-        await using var session = await state.Device.CreateFidoSessionAsync();
+        await using var session = await state.Device.CreateCtap2SessionAsync();
         var info = await session.GetInfoAsync();
         Skip.IfNot(info.Extensions.Contains("largeBlobKey") && info.Options.TryGetValue("largeBlobs", out var lb) && lb,
             "Authenticator has no large-blob storage");
@@ -225,7 +225,7 @@ public class WebAuthnAuditHardwareTests
         }
 
         byte[] blob = "hello from the webauthn largeBlob extension"u8.ToArray();
-        await using var assertionSession = await state.Device.CreateFidoSessionAsync();
+        await using var assertionSession = await state.Device.CreateCtap2SessionAsync();
         await using var assertionClient = CreateClient(assertionSession);
 
         var writeMatches = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions

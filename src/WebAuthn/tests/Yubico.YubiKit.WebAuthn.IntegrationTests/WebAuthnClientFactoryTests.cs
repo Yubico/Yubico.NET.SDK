@@ -16,9 +16,9 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 using Yubico.YubiKit.WebAuthn.Client;
@@ -52,7 +52,7 @@ public class WebAuthnClientFactoryTests
         catch (NotSupportedException)
         {
             Skip.If(true,
-                "FIDO2 SmartCard session failed because the connected authenticator did not expose the FIDO2 AID or does not support USB SmartCard FIDO2 on this firmware.");
+                "CTAP2 SmartCard session failed because the connected authenticator did not expose the FIDO AID or does not support USB SmartCard CTAP2 on this firmware.");
         }
     }
 
@@ -61,16 +61,16 @@ public class WebAuthnClientFactoryTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task CreateWebAuthnClientAsync_WithSmartCard_MakeCredentialReturnsResponse(YubiKeyTestState state)
     {
-        FidoSession setupSession;
+        Ctap2Session setupSession;
         try
         {
-            setupSession = await state.Device.CreateFidoSessionAsync(
+            setupSession = await state.Device.CreateCtap2SessionAsync(
                 new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
         }
         catch (NotSupportedException)
         {
             Skip.If(true,
-                "FIDO2 SmartCard session failed because the connected authenticator did not expose the FIDO2 AID or does not support USB SmartCard FIDO2 on this firmware.");
+                "CTAP2 SmartCard session failed because the connected authenticator did not expose the FIDO AID or does not support USB SmartCard CTAP2 on this firmware.");
             return;
         }
 

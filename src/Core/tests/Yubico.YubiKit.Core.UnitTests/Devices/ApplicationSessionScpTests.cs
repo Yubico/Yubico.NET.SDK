@@ -458,7 +458,7 @@ public class ApplicationSessionScpTests
             return Task.CompletedTask;
         }
 
-        public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+        public Task<ReadOnlyMemory<byte>> SendCommandAsync(
             byte command,
             ReadOnlyMemory<byte> data,
             UserPresenceNotification userPresenceNotification,

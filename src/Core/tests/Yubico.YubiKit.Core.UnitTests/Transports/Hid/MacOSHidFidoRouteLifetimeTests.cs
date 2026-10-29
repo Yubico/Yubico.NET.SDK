@@ -58,10 +58,10 @@ public class MacOSHidFidoRouteLifetimeTests
         }; bridge.ReleaseOpen.SetResult();
         await using var connection = await MacOSFidoHidConnection.OpenAsync(1, bridge, TestContext.Current.CancellationToken);
         using var protocol = new FidoHidProtocol(connection);
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => protocol.SendVendorCommandAsync(
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => protocol.SendCommandAsync(
             0x41, ReadOnlyMemory<byte>.Empty, abandoned.Token));
         Assert.Equal(1, bridge.CancelCount);
-        var response = await protocol.SendVendorCommandAsync(0x41, ReadOnlyMemory<byte>.Empty,
+        var response = await protocol.SendCommandAsync(0x41, ReadOnlyMemory<byte>.Empty,
             TestContext.Current.CancellationToken);
         Assert.Equal((byte)0xAC, response.Span[0]);
         Assert.Equal(1, bridge.CancelCount);

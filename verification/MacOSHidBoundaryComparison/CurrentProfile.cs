@@ -294,7 +294,7 @@ internal static class CurrentProfile
             connectionType = connection.GetType().FullName ?? "unknown";
             if (connection.GetType().Name != "MacOSFidoHidConnection")
                 throw new InvalidOperationException("Unexpected FIDO connection type");
-            await using (var session = await RawFidoHidSession.CreateAsync(connection))
+            await using (var session = await RawCtapHidSession.CreateAsync(connection))
             {
                 var invocationStart = watch.Elapsed.TotalMilliseconds;
                 var pending = session.SendAndReceiveAsync(0x10, new byte[] { 0x04 });

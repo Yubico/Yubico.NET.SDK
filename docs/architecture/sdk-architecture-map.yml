@@ -46,7 +46,7 @@ diagrams:
 
   L1-assembly-deps:
     title: "Assembly dependency graph"
-    # The one-hub + WebAuthn->Fido2 story is a pure <ProjectReference> claim,
+    # The one-hub + WebAuthn->Ctap2 story is a pure <ProjectReference> claim,
     # asserted as directed edges below (verified against each csproj).
     projects:
       - src/Core/src/Yubico.YubiKit.Core.csproj
@@ -57,7 +57,7 @@ diagrams:
       - src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj
       - src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj
       - src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj
-      - src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+      - src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
       - src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj
     project_edges:
       - src/Management/src/Yubico.YubiKit.Management.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
@@ -67,15 +67,15 @@ diagrams:
       - src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
       - src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
       - src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
-      - src/Fido2/src/Yubico.YubiKit.Fido2.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
-      - src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj -> src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+      - src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
+      - src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj -> src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
     forbidden_project_edges:
       # "App modules are independent verticals over Core" + "WebAuthn is the only
       # 2nd-level module". These assert edges that MUST NOT exist; the resolver
       # fails if any appears (catches a new cross-module reference silently
       # invalidating the L1 story).
       - src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj -> src/Core/src/Yubico.YubiKit.Core.csproj
-      - src/Piv/src/Yubico.YubiKit.Piv.csproj -> src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+      - src/Piv/src/Yubico.YubiKit.Piv.csproj -> src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
       - src/Management/src/Yubico.YubiKit.Management.csproj -> src/Piv/src/Yubico.YubiKit.Piv.csproj
       - src/Oath/src/Yubico.YubiKit.Oath.csproj -> src/Piv/src/Yubico.YubiKit.Piv.csproj
     paths: []
@@ -85,14 +85,14 @@ diagrams:
     title: "Layered stack: how one module is built"
     projects:
       - src/Piv/src/Yubico.YubiKit.Piv.csproj
-      - src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+      - src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
     paths:
       - src/Core/src/Protocols/SmartCard/Apdu
-      - src/Fido2/src/Backend
+      - src/Ctap2/src/Backend
     symbols:
       PivSession: src/Piv/src/PivSession.cs
       IPivSession: src/Piv/src/IPivSession.cs
-      FidoSession: src/Fido2/src/FidoSession.cs
+      Ctap2Session: src/Ctap2/src/Ctap2Session.cs
       ApplicationSession: src/Core/src/Sessions/ApplicationSession.cs
       ISmartCardProtocol: src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs
       IFidoHidProtocol: src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs
@@ -105,11 +105,11 @@ diagrams:
       ISmartCardConnection: src/Core/src/Transports/SmartCard/ISmartCardConnection.cs
       IFidoHidConnection: src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs
       IOtpHidConnection: src/Core/src/Transports/Hid/IOtpHidConnection.cs
-      CtapRequestBuilder: src/Fido2/src/Cbor/CtapRequestBuilder.cs
-      CtapResponseParser: src/Fido2/src/Cbor/CtapResponseParser.cs
-      IFidoBackend: src/Fido2/src/Backend/IFidoBackend.cs
-      HidBackend: src/Fido2/src/Backend/HidBackend.cs
-      SmartCardBackend: src/Fido2/src/Backend/SmartCardBackend.cs
+      CtapRequestBuilder: src/Ctap2/src/Cbor/CtapRequestBuilder.cs
+      CtapResponseParser: src/Ctap2/src/Cbor/CtapResponseParser.cs
+      ICtap2Backend: src/Ctap2/src/Backend/ICtap2Backend.cs
+      HidBackend: src/Ctap2/src/Backend/HidBackend.cs
+      SmartCardBackend: src/Ctap2/src/Backend/SmartCardBackend.cs
 
   L3-apdu-sequence:
     title: "Command execution: how one API call becomes bytes and back"
@@ -131,19 +131,19 @@ diagrams:
       ApduResponse: src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs
 
   L3b-fido2-ctap-sequence:
-    title: "FIDO2 CTAP variant"
+    title: "CTAP2 variant"
     projects:
-      - src/Fido2/src/Yubico.YubiKit.Fido2.csproj
+      - src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
     paths:
-      - src/Fido2/src/Backend
-      - src/Fido2/src/Cbor
+      - src/Ctap2/src/Backend
+      - src/Ctap2/src/Cbor
     symbols:
-      FidoSession: src/Fido2/src/FidoSession.cs
-      CtapRequestBuilder: src/Fido2/src/Cbor/CtapRequestBuilder.cs
-      CtapResponseParser: src/Fido2/src/Cbor/CtapResponseParser.cs
-      IFidoBackend: src/Fido2/src/Backend/IFidoBackend.cs
-      HidBackend: src/Fido2/src/Backend/HidBackend.cs
-      SmartCardBackend: src/Fido2/src/Backend/SmartCardBackend.cs
+      Ctap2Session: src/Ctap2/src/Ctap2Session.cs
+      CtapRequestBuilder: src/Ctap2/src/Cbor/CtapRequestBuilder.cs
+      CtapResponseParser: src/Ctap2/src/Cbor/CtapResponseParser.cs
+      ICtap2Backend: src/Ctap2/src/Backend/ICtap2Backend.cs
+      HidBackend: src/Ctap2/src/Backend/HidBackend.cs
+      SmartCardBackend: src/Ctap2/src/Backend/SmartCardBackend.cs
 
   L4-discovery:
     title: "Device discovery & connection flow"

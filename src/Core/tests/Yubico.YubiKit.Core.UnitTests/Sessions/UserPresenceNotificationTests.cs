@@ -77,8 +77,8 @@ public sealed class UserPresenceNotificationTests
 
         Assert.NotSame(initialContext, prompt.RequestContext);
         Assert.Equal(UserPresenceBasis.DeviceWaiting, prompt.RequestContext?.Basis);
-        Assert.Equal(UserPresenceOperations.Fido2.MakeCredential, prompt.RequestContext?.Operation);
-        Assert.Equal(UserPresenceOperations.Fido2.MakeCredential, prompt.ResolutionContext?.Operation);
+        Assert.Equal(UserPresenceOperations.Ctap2.MakeCredential, prompt.RequestContext?.Operation);
+        Assert.Equal(UserPresenceOperations.Ctap2.MakeCredential, prompt.ResolutionContext?.Operation);
         Assert.Same(prompt.RequestContext, prompt.ResolutionContext);
     }
 
@@ -176,7 +176,7 @@ public sealed class UserPresenceNotificationTests
         Assert.NotEqual(first, equalValues);
         Assert.False(contexts.ContainsKey(equalValues));
         Assert.Contains("FIDO2", first.ToString(), StringComparison.Ordinal);
-        Assert.Contains("Operation = Fido2.MakeCredential", first.ToString(), StringComparison.Ordinal);
+        Assert.Contains("Operation = Ctap2.MakeCredential", first.ToString(), StringComparison.Ordinal);
         Assert.DoesNotContain("example.com", first.ToString(), StringComparison.Ordinal);
     }
 
@@ -213,7 +213,7 @@ public sealed class UserPresenceNotificationTests
         {
             Basis = basis,
             Application = "FIDO2",
-            Operation = UserPresenceOperations.Fido2.MakeCredential,
+            Operation = UserPresenceOperations.Ctap2.MakeCredential,
             Scope = "example.com"
         };
 

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using NSubstitute;
-using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 
@@ -23,7 +23,7 @@ internal static class TestExtensionContext
 {
     /// <summary>A context whose authenticator advertises every extension the processors know.</summary>
     public static ExtensionContext SupportingAll(IWebAuthnBackend? backend = null) =>
-        For(MockFido2Responses.CreateMockAuthenticatorInfo(extensions: MockFido2Responses.AllKnownExtensions, largeBlobsSupported: true), backend);
+        For(MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: MockCtap2Responses.AllKnownExtensions, largeBlobsSupported: true), backend);
 
     public static ExtensionContext For(AuthenticatorInfo info, IWebAuthnBackend? backend = null) =>
         new(info, new TestPinUvAuthProtocol(), backend ?? Substitute.For<IWebAuthnBackend>());

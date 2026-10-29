@@ -321,7 +321,7 @@ public class DeviceInfoReaderTests
         public Task InitializeAsync(CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+        public Task<ReadOnlyMemory<byte>> SendCommandAsync(
             byte command,
             ReadOnlyMemory<byte> data,
             global::Yubico.YubiKit.Core.Credentials.UserPresenceNotification userPresenceNotification,

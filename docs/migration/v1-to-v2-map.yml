@@ -32,7 +32,7 @@ mappings:
       - yubikit:src/Core/
       - yubikit:src/Management/
       - yubikit:src/Piv/
-      - yubikit:src/Fido2/
+      - yubikit:src/Ctap2/
       - yubikit:src/Oath/
       - yubikit:src/YubiOtp/
       - yubikit:src/OpenPgp/
@@ -56,12 +56,12 @@ mappings:
     confidence: high
     migration_kind: namespace
     v1: Yubico.YubiKey.*
-    v2: Yubico.YubiKit.{Management,Piv,Fido2,Oath,YubiOtp,OpenPgp,SecurityDomain,YubiHsm}
+    v2: Yubico.YubiKit.{Management,Piv,Ctap2,Oath,YubiOtp,OpenPgp,SecurityDomain,YubiHsm}
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/
       - yubikit:src/Management/
       - yubikit:src/Piv/
-      - yubikit:src/Fido2/
+      - yubikit:src/Ctap2/
       - yubikit:src/Oath/
       - yubikit:src/YubiOtp/
       - yubikit:src/OpenPgp/
@@ -128,7 +128,7 @@ mappings:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Oath/OathSession.cs
       - yubikit:src/Core/src/Sessions/ApplicationSession.cs
       - yubikit:src/Piv/src/PivSession.cs
-      - yubikit:src/Fido2/src/FidoSession.cs
+      - yubikit:src/Ctap2/src/Ctap2Session.cs
     notes: Check construction, async disposal, transport, authentication, and connection reuse semantics before migrating mechanically.
     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
   - id: user-presence-prompt
@@ -141,7 +141,7 @@ mappings:
       - yubikit:src/Core/src/Credentials/IUserPresencePrompt.cs
       - yubikit:src/Core/src/Sessions/SessionCreationOptions.cs
       - yubikit:src/Piv/src/PivSession.cs
-      - yubikit:src/Fido2/src/FidoSession.cs
+      - yubikit:src/Ctap2/src/Ctap2Session.cs
       - yubikit:src/Oath/src/OathSession.cs
       - yubikit:src/OpenPgp/src/OpenPgpSession.cs
       - yubikit:src/YubiOtp/src/YubiOtpSession.cs
@@ -181,10 +181,10 @@ mappings:
     confidence: high
     migration_kind: package
     v1: v1 FIDO2 APIs
-    v2: Yubico.YubiKit.Fido2
+    v2: Yubico.YubiKit.Ctap2
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.cs
-      - yubikit:src/Fido2/
+      - yubikit:src/Ctap2/
     notes: Review PIN/UV and transport behavior manually. PIN and UV inputs remain distinct from touch notification. Supply SessionCreationOptions.UserPresencePrompt for touch; FIDO HID can report DeviceWaiting from an authenticator keep-alive, while SmartCard notification is policy-based.
     last_reviewed_commit: 2918ae0774e182a58cbc98c03c27defc5d18bc43
   - id: applet-oath
@@ -262,7 +262,7 @@ mappings:
     v2: IYubiKey.Create{Applet}SessionAsync(...) extension methods per applet package
     evidence:
       - yubikit:src/Piv/src/IYubiKeyExtensions.cs
-      - yubikit:src/Fido2/src/IYubiKeyExtensions.cs
+      - yubikit:src/Ctap2/src/IYubiKeyExtensions.cs
       - yubikit:src/Oath/src/IYubiKeyExtensions.cs
       - yubikit:src/OpenPgp/src/IYubiKeyExtensions.cs
       - yubikit:src/SecurityDomain/src/IYubiKeyExtensions.cs
@@ -330,12 +330,12 @@ mappings:
     confidence: high
     migration_kind: member
     v1: Fido2Session.AuthenticatorInfo
-    v2: IYubiKey.GetFidoInfoAsync(...) or FidoSession.GetInfoAsync(...)
+    v2: IYubiKey.GetCtap2InfoAsync(...) or Ctap2Session.GetInfoAsync(...)
     evidence:
       - develop:Yubico.YubiKey/examples/Fido2SampleCode/YubiKeyOperations/Fido2Protocol.cs
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.cs
-      - yubikit:src/Fido2/src/IYubiKeyExtensions.cs
-      - yubikit:src/Fido2/src/IFidoSession.cs
+      - yubikit:src/Ctap2/src/IYubiKeyExtensions.cs
+      - yubikit:src/Ctap2/src/ICtap2Session.cs
     notes: V2 returns authenticator info asynchronously and fetches fresh data. Transport choice, SCP, PIN/UV, and user-presence flows remain behavior-specific review items.
     last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
   - id: recipe-oath-credential-add-calculate
@@ -519,7 +519,7 @@ mappings:
     confidence: medium
     migration_kind: behavior
     v1: Fido2Session.KeyCollector-driven interactive PIN collection and retry (v1 had no WebAuthn package)
-    v2: WebAuthnClient(fidoSession, origin, new WebAuthnClientOptions { PublicSuffixChecker = ..., CredentialPrompt = ... }) with an SDK-owned bounded retry loop
+    v2: WebAuthnClient(ctap2Session, origin, new WebAuthnClientOptions { PublicSuffixChecker = ..., CredentialPrompt = ... }) with an SDK-owned bounded retry loop
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.Pin.cs
       - develop:Yubico.YubiKey/examples/Fido2SampleCode/KeyCollector/Fido2SampleKeyCollector.cs
@@ -527,7 +527,7 @@ mappings:
       - yubikit:src/WebAuthn/src/Client/WebAuthnClient.cs
       - yubikit:src/WebAuthn/src/Client/WebAuthnClientOptions.cs
       - yubikit:src/WebAuthn/CLAUDE.md
-    notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Fido2 (IFidoSession); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt (set via WebAuthnClientOptions.CredentialPrompt - see `webauthn-client-construction-and-streams` for the options-record construction change), an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (WebAuthnClientOptions.MaxPromptAttempts, default 3, now caller-configurable); returning null from the prompt means the user declined, not a retry request. This replaces the credential-collection part of KeyCollector only for WebAuthn; the lower-level Yubico.YubiKit.Fido2.IFidoSession still takes PIN bytes explicitly. Touch is separate and no longer a gap; supply IUserPresencePrompt through the FIDO SessionCreationOptions, and FIDO HID reports DeviceWaiting from the authenticator's live user-presence-needed keep-alive. Review the credential prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
+    notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Ctap2 (ICtap2Session); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt (set via WebAuthnClientOptions.CredentialPrompt - see `webauthn-client-construction-and-streams` for the options-record construction change), an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (WebAuthnClientOptions.MaxPromptAttempts, default 3, now caller-configurable); returning null from the prompt means the user declined, not a retry request. This replaces the credential-collection part of KeyCollector only for WebAuthn; the lower-level Yubico.YubiKit.Ctap2.ICtap2Session still takes PIN bytes explicitly. Touch is separate and no longer a gap; supply IUserPresencePrompt through the FIDO SessionCreationOptions, and FIDO HID reports DeviceWaiting from the authenticator's live user-presence-needed keep-alive. Review the credential prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
     last_reviewed_commit: a05f96552f504a031823fd8c315df4e37656abff
   - id: yubihsm-credential-password-bytes
     status: assisted
@@ -558,7 +558,7 @@ mappings:
     confidence: medium
     migration_kind: construction
     v1: No v1 equivalent (v1 had no WebAuthn package)
-    v2: WebAuthnClient(IFidoSession, origin, WebAuthnClientOptions options) / IYubiKeyExtensions.CreateWebAuthnClientAsync(origin, WebAuthnClientOptions clientOptions, SessionCreationOptions? sessionOptions = null, cancellationToken); WebAuthnClientOptions { required PublicSuffixChecker, MaxPromptAttempts, CredentialPrompt, EnterpriseRpIds }
+    v2: WebAuthnClient(ICtap2Session, origin, WebAuthnClientOptions options) / IYubiKeyExtensions.CreateWebAuthnClientAsync(origin, WebAuthnClientOptions clientOptions, SessionCreationOptions? sessionOptions = null, cancellationToken); WebAuthnClientOptions { required PublicSuffixChecker, MaxPromptAttempts, CredentialPrompt, EnterpriseRpIds }
     evidence:
       - yubikit:src/WebAuthn/src/Client/WebAuthnClient.cs
       - yubikit:src/WebAuthn/src/Client/WebAuthnClientOptions.cs
@@ -573,11 +573,11 @@ mappings:
     v1: No direct equivalent; unmodeled or newer authenticatorGetInfo/credential-management/bio-enrollment CBOR fields were silently dropped during decoding
     v2: AuthenticatorInfo.RawData, FingerprintSensorInfo.RawData, EnrollmentSampleResult.RawData, CredentialMetadata.RawData, and RelyingPartyInfo.RawData (all ReadOnlyMemory<byte>) preserve the complete original CBOR-encoded response
     evidence:
-      - yubikit:src/Fido2/src/AuthenticatorInfo.cs
-      - yubikit:src/Fido2/src/BioEnrollment/BioEnrollmentModels.cs
-      - yubikit:src/Fido2/src/CredentialManagement/CredentialManagementModels.cs
-      - yubikit:src/Fido2/CLAUDE.md
-    notes: Implements the SDK's forward-compatibility doctrine (see the root CLAUDE.md and the new "Forward compatibility and escape hatches" section in src/Fido2/CLAUDE.md) - typed properties still model only known fields, but callers who need a field this SDK version does not yet expose can parse RawData themselves instead of being blocked. Populated only by the Decode(ReadOnlyMemory<byte>) path; empty on caller-constructed instances. Not a v1-to-v2 API mapping (v1 had no raw-response escape hatch here at all), but relevant to anyone porting v1 code that reached into ad hoc CBOR parsing to read fields the typed model omitted. Related, lower-confidence behavior note: the same range's COSE key decoding refactor (`48d49523`, `01eff955`) made CoseKey.Decode tolerant of unexpected CBOR value types for unmodeled parameters/labels (previously an InvalidOperationException) instead of throwing; code that relied on that exception to detect malformed-shaped keys will no longer see it.
+      - yubikit:src/Ctap2/src/AuthenticatorInfo.cs
+      - yubikit:src/Ctap2/src/BioEnrollment/BioEnrollmentModels.cs
+      - yubikit:src/Ctap2/src/CredentialManagement/CredentialManagementModels.cs
+      - yubikit:src/Ctap2/CLAUDE.md
+    notes: Implements the SDK's forward-compatibility doctrine (see the root CLAUDE.md and the "Forward compatibility and escape hatches" section in src/Ctap2/CLAUDE.md) - typed properties still model only known fields, but callers who need a field this SDK version does not yet expose can parse RawData themselves instead of being blocked. Populated only by the Decode(ReadOnlyMemory<byte>) path; empty on caller-constructed instances. Not a v1-to-v2 API mapping (v1 had no raw-response escape hatch here at all), but relevant to anyone porting v1 code that reached into ad hoc CBOR parsing to read fields the typed model omitted. Related, lower-confidence behavior note: the same range's COSE key decoding refactor (`48d49523`, `01eff955`) made CoseKey.Decode tolerant of unexpected CBOR value types for unmodeled parameters/labels (previously an InvalidOperationException) instead of throwing; code that relied on that exception to detect malformed-shaped keys will no longer see it.
     last_reviewed_commit: 277920d9de48d4aedad7ecc5d00201a015b5a297
   - id: core-find-first-discovery-helpers
     status: assisted
@@ -620,22 +620,40 @@ mappings:
     v1: GetPinRetriesResponse/GetUvRetriesResponse implementing IYubiKeyResponseWithData<(int retries, bool? powerCycleRequired)>; IOpenPgpSession.GetAlgorithmInformationAsync returning (KeyRef, AlgorithmAttributes) tuples; Fido2 credential-management enumeration exposing only a flat credential/RP list with the reported total discoverable solely on the first entry; positional WebAuthn extension-output records; MatchedCredential.RequiresSelection
     v2: ClientPin.GetPinRetriesAsync()/GetUvRetriesAsync() returning PinRetryStatus/UserVerificationRetryStatus (RetriesRemaining, PowerCycleRequired); IOpenPgpSession.GetSupportedAlgorithmsAsync() returning IReadOnlyList<SupportedAlgorithm> (KeyRef, Attributes); CredentialManagement.EnumerateRelyingPartiesAsync()/EnumerateCredentialsAsync() returning RelyingPartyEnumerationResult / disposable CredentialEnumerationResult (RelyingParties/Credentials plus ReportedTotal); WebAuthn RegistrationExtensionOutputs/AuthenticationExtensionOutputs as non-positional records with optional init properties; MatchedCredential.RequiresSelection removed outright (use IReadOnlyList<MatchedCredential>.Count)
     evidence:
-      - yubikit:src/Fido2/src/Pin/ClientPin.cs
-      - yubikit:src/Fido2/src/Pin/PinRetryStatus.cs
-      - yubikit:src/Fido2/src/Pin/UserVerificationRetryStatus.cs
+      - yubikit:src/Ctap2/src/Pin/ClientPin.cs
+      - yubikit:src/Ctap2/src/Pin/PinRetryStatus.cs
+      - yubikit:src/Ctap2/src/Pin/UserVerificationRetryStatus.cs
       - yubikit:src/OpenPgp/src/IOpenPgpSession.cs
       - yubikit:src/OpenPgp/src/OpenPgpSession.Config.cs
       - yubikit:src/OpenPgp/src/SupportedAlgorithm.cs
-      - yubikit:src/Fido2/src/CredentialManagement/CredentialManagement.cs
-      - yubikit:src/Fido2/src/CredentialManagement/CredentialEnumerationResult.cs
-      - yubikit:src/Fido2/src/CredentialManagement/RelyingPartyEnumerationResult.cs
-      - yubikit:src/Fido2/src/CredentialManagement/StoredCredentialInfo.cs
+      - yubikit:src/Ctap2/src/CredentialManagement/CredentialManagement.cs
+      - yubikit:src/Ctap2/src/CredentialManagement/CredentialEnumerationResult.cs
+      - yubikit:src/Ctap2/src/CredentialManagement/RelyingPartyEnumerationResult.cs
+      - yubikit:src/Ctap2/src/CredentialManagement/StoredCredentialInfo.cs
       - yubikit:src/WebAuthn/src/Extensions/WebAuthnExtensionOutputs.cs
       - yubikit:src/WebAuthn/src/Client/Authentication/MatchedCredential.cs
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Commands/GetPinRetriesResponse.cs
       - yubikit:docs/plans/2026-09-14-public-return-contracts.md
     notes: "`refactor(applets)!: clarify public return contracts` (`84889b92`, PR #667) replaced several tuple- or bare-collection-shaped return values with named result types across Fido2, OpenPGP, and WebAuthn. `ClientPin.GetPinRetriesAsync`/`GetUvRetriesAsync` now return `PinRetryStatus`/`UserVerificationRetryStatus` (internal construction, additive-only properties) instead of `(int, bool)` tuples; v1's `GetPinRetriesResponse` already carried the same `(retriesRemaining, powerCycleRequired)` tuple shape being replaced. `IOpenPgpSession.GetAlgorithmInformationAsync` (tuple list) became `GetSupportedAlgorithmsAsync` returning `IReadOnlyList<SupportedAlgorithm>`; repeated `KeyRef` entries remain possible (one slot can support more than one algorithm), so this is not a dictionary. `CredentialManagement.EnumerateRelyingPartiesAsync`/`EnumerateCredentialsAsync` now return `RelyingPartyEnumerationResult`/`CredentialEnumerationResult` instead of a bare `IReadOnlyList<T>`, adding `ReportedTotal` (the authenticator's first-response total, independent of the returned count) alongside the entries; `CredentialEnumerationResult` is `IDisposable` and owns its `StoredCredentialInfo` entries (`using var result = await EnumerateCredentialsAsync(...)`), and on a mid-enumeration failure the already-decoded entries are disposed before the exception propagates. The same commit also added `StoredCredentialInfo.RawData` (a disposable, secret-capable complete-response view, unlike the non-disposable `RawData` properties covered by `fido2-forward-compat-raw-data`) and made `StoredCredentialInfo` itself `IDisposable`; direct `StoredCredentialInfo.Decode` callers must dispose the returned instance. Separately, WebAuthn's `RegistrationExtensionOutputs`/`AuthenticationExtensionOutputs` moved from positional records to non-positional records with optional `init` properties (construction syntax changes; all members remain optional and default to null), and `MatchedCredential.RequiresSelection` was removed outright with no replacement -- inspect `IReadOnlyList<MatchedCredential>.Count` instead. WebAuthn has no v1 comparison point for the last two changes because the package postdates v1. The same commit already added the `docs/migration/v1-to-v2.md` 'Result-contract migration' table documenting all of these; this entry supplies the map record the guide's own convention requires to back it."
     last_reviewed_commit: 2f1d912a1c8d4779c7e6a9ca9b7753417287f99c
+  - id: ctap2-semantic-rename
+    status: assisted
+    confidence: high
+    migration_kind: package and public naming
+    v1: Fido2Session and Yubico.YubiKey.Fido2; earlier v2 alphas used Yubico.YubiKit.Fido2, FidoSession/IFidoSession, CreateFidoSessionAsync/GetFidoInfoAsync, FidoCredentialOptions.ForFido2Pin, and RawFidoHidSession
+    v2: Yubico.YubiKit.Ctap2, Ctap2Session/ICtap2Session, CreateCtap2SessionAsync/GetCtap2InfoAsync, Ctap2CredentialOptions.ForCtap2Pin, and Core RawCtapHidSession/CreateRawCtapHidSessionAsync
+    evidence:
+      - develop:Yubico.YubiKey/src/Yubico/YubiKey/Fido2/Fido2Session.cs
+      - yubikit:src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj
+      - yubikit:src/Ctap2/src/Ctap2Session.cs
+      - yubikit:src/Ctap2/src/ICtap2Session.cs
+      - yubikit:src/Ctap2/src/IYubiKeyExtensions.cs
+      - yubikit:src/Ctap2/src/Credentials/Ctap2CredentialOptions.cs
+      - yubikit:src/Core/src/Sessions/ApplicationIds.cs
+      - yubikit:src/Core/src/Sessions/RawCtapHidSession.cs
+      - yubikit:src/Core/src/Credentials/UserPresenceOperations.cs
+      - yubikit:src/Core/src/Credentials/UserPresenceApplications.cs
+    notes: Coordinated pre-release rename, not a reinterpretation of earlier historical commits. Update package references, namespaces, factories, and named arguments such as ctap2Session wherever the public signature was renamed. CtapCommand, CtapStatus, and CtapException are directly in Yubico.YubiKit.Ctap2, without a nested Ctap namespace. Replace ApplicationIds.Fido2 with ApplicationIds.Fido for the shared FIDO smart-card AID; FidoU2f is its explicit alias, not a separate or CTAP2-specific AID. UserPresenceOperations.Ctap2 emits Ctap2.Method strings; UserPresenceApplications.Fido2 remains FIDO2. DeviceCapabilities.Fido2 and FIDO HID transport identifiers remain unchanged. Internal ICtap2Backend, Ctap2SessionRequestEncoding, and Ctap2TransportOrder follow the CTAP2 module name; IFidoHidProtocol.SendCommandAsync describes shared CTAPHID command dispatch, not only vendor commands. No protocol bytes, control flow, or connection ownership change. Historical v1 names, stable mapping IDs, python-fido2/libfido2 package names, and commit subjects retain their original spelling.
 manual_review:
   - device discovery call sites
   - low-level HID listener DeviceEvent callback signatures

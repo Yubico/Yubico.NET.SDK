@@ -161,8 +161,8 @@ the SCP-capable SmartCard transport is selected instead of the normal default:
 | --- | --- | --- |
 | Management (`CreateManagementSessionAsync`) | `SmartCard → HidFido → HidOtp` | any of those three |
 | YubiOTP (`CreateYubiOtpSessionAsync`) | `SmartCard → HidOtp` | `SmartCard` or `HidOtp` |
-| FIDO2 (`CreateFidoSessionAsync`) | `HidFido → SmartCard` | `HidFido` or `SmartCard` |
-| WebAuthn (`CreateWebAuthnClientAsync`) | `HidFido → SmartCard` (forwards to FIDO2) | `HidFido` or `SmartCard` |
+| CTAP2 (`CreateCtap2SessionAsync`) | `HidFido → SmartCard` | `HidFido` or `SmartCard` |
+| WebAuthn (`CreateWebAuthnClientAsync`) | `HidFido → SmartCard` (forwards to CTAP2) | `HidFido` or `SmartCard` |
 
 Single-transport applets (PIV, OATH, OpenPGP, Security Domain, YubiHSM) are SmartCard-only and take no
 override.

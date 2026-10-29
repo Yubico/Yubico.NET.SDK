@@ -5,7 +5,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Ctap2;
 
 // The verification executable itself contains the integration assertions. No fake bridge, HID
 // experiment library, device mutation, or implicit transport fallback is involved.
@@ -197,7 +197,7 @@ static async Task<int> DiscoverAsync(int? serial)
         for (int cycle = 1; cycle <= 3; cycle++)
         {
             IFidoHidConnection? connection = null;
-            FidoSession? session = null;
+            Ctap2Session? session = null;
             try
             {
                 int callerThread = Environment.CurrentManagedThreadId;
@@ -210,7 +210,7 @@ static async Task<int> DiscoverAsync(int? serial)
                     throw new InvalidOperationException("Selected connection did not use the production macOS native owner");
 
                 timer.Restart();
-                Task<FidoSession> creating = FidoSession.CreateAsync(connection);
+                Task<Ctap2Session> creating = Ctap2Session.CreateAsync(connection);
                 Console.WriteLine($"cycle={cycle} init+getInfo invocationMs={timer.Elapsed.TotalMilliseconds:F3} pending={!creating.IsCompleted} callerThread={Environment.CurrentManagedThreadId} returnThread={Environment.CurrentManagedThreadId}");
                 session = await creating;
                 Console.WriteLine($"cycle={cycle} CTAPHID_INIT + session authenticatorGetInfo completedMs={timer.Elapsed.TotalMilliseconds:F3} sessionFirmware={session.FirmwareVersion}");
@@ -290,7 +290,7 @@ static async Task<int> DiscoverAsync(int? serial)
         {
             if (reopened.GetType().Name != "MacOSFidoHidConnection")
                 throw new InvalidOperationException("Reopened connection did not use the production macOS native owner");
-            await using FidoSession session = await FidoSession.CreateAsync(reopened);
+            await using Ctap2Session session = await Ctap2Session.CreateAsync(reopened);
             AuthenticatorInfo info = await session.GetInfoAsync();
             if (info.Versions.Count == 0)
                 throw new InvalidOperationException("Reopened authenticatorGetInfo returned no versions");
@@ -308,7 +308,7 @@ static async Task<int> DiscoverAsync(int? serial)
         {
             if (cancelConnection.GetType().Name != "MacOSFidoHidConnection")
                 throw new InvalidOperationException("Cancellation probe did not use the production macOS native owner");
-            await using RawFidoHidSession raw = await RawFidoHidSession.CreateAsync(cancelConnection);
+            await using RawCtapHidSession raw = await RawCtapHidSession.CreateAsync(cancelConnection);
             using var cancelled = new CancellationTokenSource();
             cancelled.Cancel();
             try
@@ -329,7 +329,7 @@ static async Task<int> DiscoverAsync(int? serial)
             await cancelConnection.DisposeAsync();
         }
         await using (IFidoHidConnection finalConnection = await selected.ConnectAsync<IFidoHidConnection>())
-        await using (FidoSession finalSession = await FidoSession.CreateAsync(finalConnection))
+        await using (Ctap2Session finalSession = await Ctap2Session.CreateAsync(finalConnection))
         {
             AuthenticatorInfo finalInfo = await finalSession.GetInfoAsync();
             if (finalInfo.Versions.Count == 0)
@@ -373,7 +373,7 @@ static async Task ProbeBorrowedSessionReuseAsync(IYubiKey selected, int serial)
 
 static async Task UseBorrowedSessionAsync(IFidoHidConnection connection, int use)
 {
-    FidoSession session = await FidoSession.CreateAsync(connection);
+    Ctap2Session session = await Ctap2Session.CreateAsync(connection);
     try
     {
         AuthenticatorInfo info = await session.GetInfoAsync();

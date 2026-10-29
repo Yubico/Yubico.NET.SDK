@@ -6,8 +6,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Ctap;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Management;
 
 internal static class AcceptanceScenarios
@@ -106,7 +105,7 @@ internal static class AcceptanceScenarios
         return matches[0];
     }
 
-    private static async Task PresenceAsyncOnSession(FidoSession session, PresencePrompt prompt, bool cancel,
+    private static async Task PresenceAsyncOnSession(Ctap2Session session, PresencePrompt prompt, bool cancel,
         CancellationToken token, CancelTiming? timing)
     {
         if (cancel)
@@ -129,7 +128,7 @@ internal static class AcceptanceScenarios
         Console.WriteLine($"PHASE_SAME_SESSION_INFO serial={prompt.Serial}");
     }
 
-    private static async Task CancelSelectionAsync(FidoSession session, PresencePrompt prompt,
+    private static async Task CancelSelectionAsync(Ctap2Session session, PresencePrompt prompt,
         CancellationToken token, CancelTiming? timing)
     {
         var cancelled = false;
@@ -173,7 +172,7 @@ internal static class AcceptanceScenarios
         {
             if (connection.GetType().Name != "MacOSFidoHidConnection")
                 throw new InvalidOperationException("Selected FIDO route is not the built-in macOS connection");
-            await using (var session = await FidoSession.CreateAsync(connection,
+            await using (var session = await Ctap2Session.CreateAsync(connection,
                 new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido, UserPresencePrompt = prompt }))
             {
                 await PresenceAsyncOnSession(session, prompt, cancel, operation.Token, timing);
@@ -184,7 +183,7 @@ internal static class AcceptanceScenarios
         {
             if (reopened.GetType().Name != "MacOSFidoHidConnection")
                 throw new InvalidOperationException("Reopened FIDO route is not built-in macOS");
-            await using var session = await FidoSession.CreateAsync(reopened);
+            await using var session = await Ctap2Session.CreateAsync(reopened);
             if ((await session.GetInfoAsync()).Versions.Count == 0)
                 throw new InvalidOperationException("Reopened getInfo returned no versions");
         }
@@ -279,7 +278,7 @@ internal static class AcceptanceScenarios
         {
             if (reopened.GetType().Name != "MacOSFidoHidConnection")
                 throw new InvalidOperationException("Replacement route is not built-in macOS");
-            await using var session = await FidoSession.CreateAsync(reopened);
+            await using var session = await Ctap2Session.CreateAsync(reopened);
             if ((await session.GetInfoAsync()).Versions.Count == 0)
                 throw new InvalidOperationException("Replacement getInfo returned no versions");
         }

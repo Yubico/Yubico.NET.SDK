@@ -6,11 +6,10 @@ using System.Buffers;
 using System.Formats.Cbor;
 using System.Text.Json;
 using Yubico.YubiKit.Core.Credentials;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -52,7 +51,7 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
                 clientPinSupported: !builtInUv, uvSupported: builtInUv));
         backend.GetPinUvTokenAsync(Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(),
                 Arg.Any<string>(), Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
@@ -63,7 +62,7 @@ public class WebAuthnAuditReproTests
             {
                 sent = call.Arg<BackendMakeCredentialRequest>();
                 Assert.NotNull(sent.PinUvAuthParam);
-                return MockFido2Responses.CreateMockMakeCredentialResponse();
+                return MockCtap2Responses.CreateMockMakeCredentialResponse();
             });
 
         await using var client = CreateClient(backend);
@@ -83,7 +82,7 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
                 clientPinSupported: !builtInUv, uvSupported: builtInUv));
         backend.GetPinUvTokenAsync(Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(),
                 Arg.Any<string>(), Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
@@ -94,7 +93,7 @@ public class WebAuthnAuditReproTests
             {
                 sent = call.Arg<BackendGetAssertionRequest>();
                 Assert.NotNull(sent.PinUvAuthParam);
-                return MockFido2Responses.CreateMockGetAssertionResponse();
+                return MockCtap2Responses.CreateMockGetAssertionResponse();
             });
 
         await using var client = CreateClient(backend);
@@ -112,7 +111,7 @@ public class WebAuthnAuditReproTests
     [Trait("Audit", "YESDK-1610")]
     public async Task YESDK1610_BackendPreservesAbsentUvOption(bool registration)
     {
-        var session = Substitute.For<IFidoSession>();
+        var session = Substitute.For<ICtap2Session>();
         bool? uv = null;
         session.MakeCredentialAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<PublicKeyCredentialRpEntity>(),
                 Arg.Any<PublicKeyCredentialUserEntity>(), Arg.Any<IReadOnlyList<PublicKeyCredentialParameters>>(),
@@ -120,14 +119,14 @@ public class WebAuthnAuditReproTests
             .Returns(call =>
             {
                 uv = call.Arg<MakeCredentialOptions>().UserVerification;
-                return MockFido2Responses.CreateMockMakeCredentialResponse();
+                return MockCtap2Responses.CreateMockMakeCredentialResponse();
             });
         session.GetAssertionAsync(Arg.Any<string>(), Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<GetAssertionOptions>(), Arg.Any<CancellationToken>())
             .Returns(call =>
             {
                 uv = call.Arg<GetAssertionOptions>().UserVerification;
-                return MockFido2Responses.CreateMockGetAssertionResponse();
+                return MockCtap2Responses.CreateMockGetAssertionResponse();
             });
         await using var backend = new WebAuthnBackend(session);
         if (registration)
@@ -149,7 +148,7 @@ public class WebAuthnAuditReproTests
             }, TestContext.Current.CancellationToken);
         }
 
-        Assert.Null(uv); // nullable false is encoded as an actual uv:false option by FidoSessionRequestEncoding
+        Assert.Null(uv); // nullable false is encoded as an actual uv:false option by Ctap2SessionRequestEncoding
     }
 
     [Fact]
@@ -158,7 +157,7 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
         writer.WriteTextString("alg"); writer.WriteInt32(-7);
@@ -168,7 +167,7 @@ public class WebAuthnAuditReproTests
         writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
         writer.WriteInt32(1); writer.WriteTextString("packed");
-        writer.WriteInt32(2); writer.WriteByteString(MockFido2Responses.BuildAuthDataWithAttestedCredential(Guid.NewGuid()));
+        writer.WriteInt32(2); writer.WriteByteString(MockCtap2Responses.BuildAuthDataWithAttestedCredential(Guid.NewGuid()));
         writer.WriteInt32(3); writer.WriteEncodedValue(statement);
         writer.WriteEndMap();
         backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
@@ -222,7 +221,7 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         var aaguid = zeroAaguid ? Guid.Empty : Guid.NewGuid();
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(includeX5c ? 3 : 2);
@@ -237,7 +236,7 @@ public class WebAuthnAuditReproTests
         writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
         writer.WriteInt32(1); writer.WriteTextString("packed");
-        writer.WriteInt32(2); writer.WriteByteString(MockFido2Responses.BuildAuthDataWithAttestedCredential(aaguid));
+        writer.WriteInt32(2); writer.WriteByteString(MockCtap2Responses.BuildAuthDataWithAttestedCredential(aaguid));
         writer.WriteInt32(3); writer.WriteEncodedValue(statement);
         writer.WriteEndMap();
         backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
@@ -265,7 +264,7 @@ public class WebAuthnAuditReproTests
             .Returns(call =>
             {
                 sent = call.Arg<BackendMakeCredentialRequest>();
-                return MockFido2Responses.CreateMockMakeCredentialResponse();
+                return MockCtap2Responses.CreateMockMakeCredentialResponse();
             });
         await using var client = CreateClient(backend);
         _ = await client.MakeCredentialAsync(Registration() with { ResidentKey = ResidentKeyPreference.Preferred },
@@ -280,7 +279,7 @@ public class WebAuthnAuditReproTests
     [Trait("Audit", "YESDK-1615")]
     public async Task YESDK1615_BackendPreservesAbsentResidentKeyOption()
     {
-        var session = Substitute.For<IFidoSession>();
+        var session = Substitute.For<ICtap2Session>();
         bool? residentKey = null;
         session.MakeCredentialAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<PublicKeyCredentialRpEntity>(),
                 Arg.Any<PublicKeyCredentialUserEntity>(), Arg.Any<IReadOnlyList<PublicKeyCredentialParameters>>(),
@@ -288,7 +287,7 @@ public class WebAuthnAuditReproTests
             .Returns(call =>
             {
                 residentKey = call.Arg<MakeCredentialOptions>().ResidentKey;
-                return MockFido2Responses.CreateMockMakeCredentialResponse();
+                return MockCtap2Responses.CreateMockMakeCredentialResponse();
             });
         await using var backend = new WebAuthnBackend(session);
         _ = await backend.MakeCredentialAsync(new BackendMakeCredentialRequest
@@ -299,7 +298,7 @@ public class WebAuthnAuditReproTests
             PubKeyCredParams = [PublicKeyCredentialParameters.CreateES256()]
         }, TestContext.Current.CancellationToken);
 
-        Assert.Null(residentKey); // FidoSessionRequestEncoding writes rk:false if HasValue is true
+        Assert.Null(residentKey); // Ctap2SessionRequestEncoding writes rk:false if HasValue is true
     }
 
     /// <summary>
@@ -314,7 +313,7 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         await using var client = CreateClient(backend);
 
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(Registration() with
@@ -335,7 +334,7 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         await using var client = CreateClient(backend);
 
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(Authentication() with
@@ -358,9 +357,9 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
         await using var client = CreateClient(backend);
 
         var crossOrigin = await client.MakeCredentialAsync(Registration() with
@@ -406,14 +405,14 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
             .Returns(async call =>
             {
                 entered.SetResult();
                 await Task.Delay(Timeout.InfiniteTimeSpan, call.Arg<CancellationToken>());
-                return MockFido2Responses.CreateMockMakeCredentialResponse();
+                return MockCtap2Responses.CreateMockMakeCredentialResponse();
             });
         return (backend, entered);
     }
@@ -446,14 +445,14 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
             .Returns(async call =>
             {
                 entered.SetResult();
                 await Task.Delay(Timeout.InfiniteTimeSpan, call.Arg<CancellationToken>());
-                return MockFido2Responses.CreateMockGetAssertionResponse();
+                return MockCtap2Responses.CreateMockGetAssertionResponse();
             });
         await using var client = CreateClient(backend);
         using var guard = new CancellationTokenSource(TestGuard);
@@ -491,10 +490,10 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         CancellationToken observed = default;
         backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Do<CancellationToken>(token => observed = token))
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
         await using var client = CreateClient(backend);
 
         var response = await client.MakeCredentialAsync(Registration(), cancellationToken: CancellationToken.None);
@@ -510,9 +509,9 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockMakeCredentialResponse());
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
         await using var client = CreateClient(backend);
 
         var response = await client.MakeCredentialAsync(Registration() with { Timeout = DeadlineThatDoesNotExpire },
@@ -530,7 +529,7 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo());
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
         await using var client = CreateClient(backend);
 
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(
@@ -548,7 +547,7 @@ public class WebAuthnAuditReproTests
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
         backend.GetPinRetriesAsync(Arg.Any<CancellationToken>()).Returns(8);
         var prompt = new HangingPrompt();
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));

@@ -44,7 +44,7 @@ public sealed class UserPresenceIntentTests
 
         UserPresenceContext requested = Assert.Single(prompt.Requested);
         Assert.Equal("approve the transfer", requested.Intent);
-        Assert.Equal(UserPresenceOperations.Fido2.GetAssertion, requested.Operation);
+        Assert.Equal(UserPresenceOperations.Ctap2.GetAssertion, requested.Operation);
         Assert.Equal("example.com", requested.Scope);
         Assert.Same(requested, Assert.Single(prompt.Resolved));
     }
@@ -364,7 +364,7 @@ public sealed class UserPresenceIntentTests
         {
             Basis = basis,
             Application = UserPresenceApplications.Fido2,
-            Operation = UserPresenceOperations.Fido2.GetAssertion,
+            Operation = UserPresenceOperations.Ctap2.GetAssertion,
             Scope = "example.com"
         };
 

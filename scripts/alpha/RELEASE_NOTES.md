@@ -27,7 +27,7 @@ package list and versions.
 
 ## Packages (10)
 
-`Yubico.YubiKit.Core`, `.Management`, `.Piv`, `.Fido2`, `.WebAuthn`, `.Oath`,
+`Yubico.YubiKit.Core`, `.Management`, `.Piv`, `.Ctap2`, `.WebAuthn`, `.Oath`,
 `.YubiOtp`, `.OpenPgp`, `.SecurityDomain`, `.YubiHsm`.
 
 ## Updates

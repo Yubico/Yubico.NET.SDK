@@ -17,7 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\src\Yubico.YubiKit.Core.csproj" />
     <ProjectReference Include="..\..\Management\src\Yubico.YubiKit.Management.csproj" />
-    <ProjectReference Include="..\..\Fido2\src\Yubico.YubiKit.Fido2.csproj" />
+    <ProjectReference Include="..\..\Ctap2\src\Yubico.YubiKit.Ctap2.csproj" />
     <ProjectReference Include="..\..\Piv\src\Yubico.YubiKit.Piv.csproj" />
     <ProjectReference Include="..\..\Oath\src\Yubico.YubiKit.Oath.csproj" />
     <ProjectReference Include="..\..\OpenPgp\src\Yubico.YubiKit.OpenPgp.csproj" />

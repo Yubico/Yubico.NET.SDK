@@ -46,7 +46,7 @@ public class FidoHidProtocolConcurrencyTests
     }
 
     [Fact]
-    public async Task SendVendorCommandAsync_OverlappingOperation_ThrowsImmediately()
+    public async Task SendCommandAsync_OverlappingOperation_ThrowsImmediately()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new FakeCtapHidDevice { Responder = (_, payload) => payload };
@@ -60,17 +60,17 @@ public class FidoHidProtocolConcurrencyTests
 
         // Operation A's init packet goes out and is held in flight — its continuation packet is still owed.
         fake.HoldSends();
-        var operationA = protocol.SendVendorCommandAsync(VendorCommandA, payloadA, cancellationToken: ct);
+        var operationA = protocol.SendCommandAsync(VendorCommandA, payloadA, cancellationToken: ct);
         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
 
         var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(VendorCommandB, payloadB, cancellationToken: ct));
+            protocol.SendCommandAsync(VendorCommandB, payloadB, cancellationToken: ct));
         Assert.Contains("one operation at a time", refusal.Message, StringComparison.Ordinal);
         Assert.False(await fake.WaitForSendsAsync(2, ObservationWindow, ct));
 
         fake.ReleaseSends();
         var responseA = await operationA.WaitAsync(CompletionBound, ct);
-        var responseB = await protocol.SendVendorCommandAsync(VendorCommandB, payloadB, cancellationToken: ct);
+        var responseB = await protocol.SendCommandAsync(VendorCommandB, payloadB, cancellationToken: ct);
 
         // Both operations must see their own echoed payloads...
         Assert.Equal(payloadA.ToArray(), responseA.ToArray());
@@ -88,7 +88,7 @@ public class FidoHidProtocolConcurrencyTests
     }
 
     [Fact]
-    public async Task SendVendorCommandAsync_OverlappingFirstUse_RefusesSecondAndInitializesOnce()
+    public async Task SendCommandAsync_OverlappingFirstUse_RefusesSecondAndInitializesOnce()
     {
         var ct = TestContext.Current.CancellationToken;
         var fake = new FakeCtapHidDevice { Responder = (_, payload) => payload };
@@ -99,11 +99,11 @@ public class FidoHidProtocolConcurrencyTests
 
         // Channel not yet initialized: both operations race the lazy CTAPHID_INIT handshake.
         fake.HoldSends();
-        var operationA = Task.Run(() => protocol.SendVendorCommandAsync(VendorCommandA, payloadA, cancellationToken: ct), ct);
+        var operationA = Task.Run(() => protocol.SendCommandAsync(VendorCommandA, payloadA, cancellationToken: ct), ct);
         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            protocol.SendVendorCommandAsync(VendorCommandB, payloadB, cancellationToken: ct));
+            protocol.SendCommandAsync(VendorCommandB, payloadB, cancellationToken: ct));
         Assert.False(await fake.WaitForSendsAsync(2, ObservationWindow, ct));
 
         fake.ReleaseSends();
@@ -126,7 +126,7 @@ public class FidoHidProtocolConcurrencyTests
 
         // Operation A enters the guard first and starts the lazy CTAPHID_INIT handshake.
         fake.HoldSends();
-        var operationA = Task.Run(() => protocol.SendVendorCommandAsync(VendorCommandA, payloadA, cancellationToken: ct), ct);
+        var operationA = Task.Run(() => protocol.SendCommandAsync(VendorCommandA, payloadA, cancellationToken: ct), ct);
         Assert.True(await fake.WaitForSendsAsync(1, ObservationWindow, ct));
 
         // Configuration is local; it must neither block on the held send nor start a second INIT.

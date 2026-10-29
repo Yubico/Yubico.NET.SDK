@@ -56,7 +56,7 @@ Review PRDs against .NET Framework Design Guidelines and existing SDK patterns. 
 | Pattern | Check Here |
 |---------|------------|
 | PIV Session | `Yubico.YubiKit.Piv/src/PivSession.cs` |
-| FIDO2 Session | `Yubico.YubiKit.Fido2/src/Fido2Session.cs` |
+| CTAP2 Session | `src/Ctap2/src/Ctap2Session.cs` |
 | OATH Session | `Yubico.YubiKit.Oath/src/OathSession.cs` |
 | Errors | `Yubico.YubiKit.Core/src/Exceptions/` |
 

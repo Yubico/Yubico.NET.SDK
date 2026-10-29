@@ -22,7 +22,7 @@ Raw sessions are the supported power-user path:
 
 - `RawSmartCardSession` supplies APDU formatting, command/response chaining, overlap refusal, explicit
   application selection, and optional SCP.
-- `RawFidoHidSession` supplies CTAP HID channel allocation, packet framing, continuation packets,
+- `RawCtapHidSession` supplies CTAP HID channel allocation, packet framing, continuation packets,
   keep-alive handling, final-command correlation, CTAPHID error rejection, and overlap refusal.
 - `RawOtpHidSession` supplies OTP feature-report framing, sequencing, polling, outbound CRC generation, and
   overlap refusal. It cannot validate command-specific inbound CRC without caller-supplied response semantics.
@@ -80,8 +80,8 @@ await using PivSession piv = await PivSession.CreateAsync(connection, cancellati
 ### FIDO HID
 
 ```csharp
-await using RawFidoHidSession raw =
-    await yubiKey.CreateRawFidoHidSessionAsync(cancellationToken);
+await using RawCtapHidSession raw =
+    await yubiKey.CreateRawCtapHidSessionAsync(cancellationToken);
 
 ReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(
     ctapHidCommand,
@@ -89,7 +89,7 @@ ReadOnlyMemory<byte> response = await raw.SendAndReceiveAsync(
     cancellationToken);
 ```
 
-The caller supplies and interprets the CTAP HID command payload. This API does not add FIDO2 or WebAuthn
+The caller supplies and interprets the CTAPHID command payload. This API does not add CTAP2 or WebAuthn
 request semantics. A final response command must match the request; `CTAPHID_KEEPALIVE` is accepted only while
 waiting, and `CTAPHID_ERROR` fails the exchange instead of returning an apparently successful payload.
 
@@ -271,5 +271,5 @@ await using RawSmartCardSession raw = await RawSmartCardSession.CreateAsync(conn
 await raw.SelectAsync(applicationId, cancellationToken);
 ```
 
-Use `RawFidoHidSession` or `RawOtpHidSession` for the corresponding HID logical exchanges. Third-party protocol
+Use `RawCtapHidSession` or `RawOtpHidSession` for the corresponding HID logical exchanges. Third-party protocol
 composition should wrap a raw session rather than injecting or implementing Core protocol internals.

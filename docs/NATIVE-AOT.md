@@ -3,7 +3,7 @@
 This document defines Native AOT support for the v2 SDK libraries. The supported set is not a list
 maintained here: it is every published SDK library, which `dotnet toolchain.cs
 native-aot-contract-qa` derives from the `src/<Module>/src/*.csproj` layout and reports on each
-build. At the time of writing that is `Core`, `Management`, `Piv`, `Fido2`, `WebAuthn`, `Oath`,
+build. At the time of writing that is `Core`, `Management`, `Piv`, `Ctap2`, `WebAuthn`, `Oath`,
 `OpenPgp`, `SecurityDomain`, `YubiOtp`, and `YubiHsm`. Command-line tools, example applications,
 verification hosts, and test projects are not part of this support surface.
 
@@ -21,7 +21,7 @@ The evidence is not equally deep for every platform or module:
 - Core device discovery has run against physical YubiKeys on macOS, Windows, and Linux.
 - Management device-information reads, a PIV session, and device monitoring have run against
   physical YubiKeys on macOS.
-- Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and YubiHsm are link-verified but have not
+- Ctap2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and YubiHsm are link-verified but have not
   had representative protocol operations runtime-exercised under Native AOT.
 - Recurring continuous-integration coverage publishes and runs the host on macOS Apple Silicon,
   Windows x64, and Linux x64 with no hardware attached. The corrected NativeShims 1.18.1 integration
@@ -158,7 +158,7 @@ The following work would strengthen support evidence without changing the curren
 metadata:
 
 - Run the monitoring protocol on Windows and Linux.
-- Runtime-exercise representative Fido2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and
+- Runtime-exercise representative Ctap2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and
   YubiHsm operations under Native AOT.
 - Add runtime evidence for any native interop implementation that becomes reachable through a
   default production provider.

@@ -72,14 +72,14 @@ internal class FidoHidProtocol(
     }
 
     /// <inheritdoc />
-    public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+    public Task<ReadOnlyMemory<byte>> SendCommandAsync(
         byte command,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default) =>
-        SendVendorCommandAsync(command, data, UserPresenceNotification.None, cancellationToken);
+        SendCommandAsync(command, data, UserPresenceNotification.None, cancellationToken);
 
-    /// <inheritdoc cref="IFidoHidProtocol.SendVendorCommandAsync(byte, ReadOnlyMemory{byte}, UserPresenceNotification, CancellationToken)" />
-    public async Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+    /// <inheritdoc cref="IFidoHidProtocol.SendCommandAsync(byte, ReadOnlyMemory{byte}, UserPresenceNotification, CancellationToken)" />
+    public async Task<ReadOnlyMemory<byte>> SendCommandAsync(
         byte command,
         ReadOnlyMemory<byte> data,
         UserPresenceNotification userPresenceNotification,
@@ -88,7 +88,7 @@ internal class FidoHidProtocol(
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(userPresenceNotification);
 
-        _logger.LogTrace("Sending CTAP vendor command 0x{Command:X2} with {Length} bytes",
+        _logger.LogTrace("Sending CTAP HID command 0x{Command:X2} with {Length} bytes",
             command, data.Length);
 
         var response = await _exchangeGuard.RunAsync(
@@ -112,7 +112,7 @@ internal class FidoHidProtocol(
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _logger.LogTrace("Received vendor command response: {Length} bytes", response.Length);
+        _logger.LogTrace("Received CTAP HID command response: {Length} bytes", response.Length);
         return response;
     }
 

@@ -6,8 +6,8 @@
     <AssemblyName>Yubico.YubiKit.WebAuthn</AssemblyName>
 
     <!-- Package Metadata -->
-    <Description>WebAuthn client implementation for YubiKey FIDO2 authenticators with support for credential management, extensions, and the previewSign draft specification.</Description>
-    <PackageTags>yubikey;yubico;webauthn;fido2;passkeys;authentication</PackageTags>
+    <Description>WebAuthn client implementation for YubiKey FIDO2 authenticators over CTAP2 with support for credential management, extensions, and the previewSign draft specification.</Description>
+    <PackageTags>yubikey;yubico;webauthn;fido2;ctap2;passkeys;authentication</PackageTags>
 
     <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
     <IsYubiKitSdkLibrary>true</IsYubiKitSdkLibrary>
@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Fido2\src\Yubico.YubiKit.Fido2.csproj" />
+    <ProjectReference Include="..\..\Ctap2\src\Yubico.YubiKit.Ctap2.csproj" />
   </ItemGroup>
 
 </Project>

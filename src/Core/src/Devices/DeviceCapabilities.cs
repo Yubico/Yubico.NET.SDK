@@ -50,7 +50,7 @@ public enum DeviceCapabilities
     HsmAuth = 0x01_00,
 
     /// <summary>
-    ///     Identifies the FIDO2 = CTAP2 portion of the FIDO application.
+    ///     Identifies the FIDO2 (CTAP2) portion of the FIDO application.
     /// </summary>
     Fido2 = 0x02_00,
 

@@ -57,8 +57,8 @@ call, then covers the common operations. For applet specifics and features, see 
 | Package | YubiKey application |
 |---|---|
 | [Yubico.YubiKit.Piv](src/Piv/README.md) | PIV smart card: keys, certificates, signing, decryption |
-| [Yubico.YubiKit.Fido2](src/Fido2/README.md) | FIDO2 CTAP authenticator operations |
-| [Yubico.YubiKit.WebAuthn](src/WebAuthn/README.md) | WebAuthn client API over FIDO2 |
+| [Yubico.YubiKit.Ctap2](src/Ctap2/README.md) | FIDO2 authenticator operations over CTAP2 |
+| [Yubico.YubiKit.WebAuthn](src/WebAuthn/README.md) | WebAuthn client API over CTAP2 |
 | [Yubico.YubiKit.Oath](src/Oath/README.md) | TOTP and HOTP credentials |
 | [Yubico.YubiKit.YubiOtp](src/YubiOtp/README.md) | OTP slot configuration and challenge-response |
 | [Yubico.YubiKit.OpenPgp](src/OpenPgp/README.md) | OpenPGP card keys, PINs, signing, decryption |

@@ -16,7 +16,7 @@ For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.m
 The WebAuthn module implements the W3C Web Authentication API (Level 3) on top of the FIDO2 CTAP protocol. It provides:
 - **High-level WebAuthn API**: `WebAuthnClient` orchestrates credential registration and authentication
 - **Extension Framework**: Pluggable CTAP v4 extensions (e.g., `previewSign`)
-- **Backend Abstraction**: `IWebAuthnBackend` (internal) routes operations through `IFidoSession`
+- **Backend Abstraction**: `IWebAuthnBackend` (internal) routes operations through `ICtap2Session`
 - **Credential Prompting**: Optional `ICredentialPrompt` supplies a PIN on demand; the SDK owns the retry loop
 
 **Key Dependencies:**
@@ -93,7 +93,7 @@ Logger.LogError(ex, "PreviewSign authentication failed");
 // The PublicSuffixChecker should be backed by Public Suffix List data.
 // WebAuthnClientOptions and its PublicSuffixChecker are required. CredentialPrompt remains optional.
 await using var client = new WebAuthnClient(
-    fidoSession,
+    ctap2Session,
     origin,
     new WebAuthnClientOptions
     {
@@ -150,7 +150,7 @@ authentication extension outputs are non-positional records with optional init p
 
 The device factory takes two independent configuration carriers, and mixing them up is the easy mistake:
 required `clientOptions` (`WebAuthnClientOptions`) is forwarded to the created `WebAuthnClient`, while optional
-`sessionOptions` (`SessionCreationOptions`) is forwarded unchanged to `CreateFidoSessionAsync`.
+`sessionOptions` (`SessionCreationOptions`) is forwarded unchanged to `CreateCtap2SessionAsync`.
 The origin and client options are required; `PublicSuffixChecker` is required within the client options,
 while `CredentialPrompt` remains optional. The earlier standalone public-suffix checker and overload ending
 in `scpKeyParams`, `configuration`, and `cancellationToken` were removed during the coordinated 2.0 breaking window.
@@ -230,7 +230,7 @@ with `SessionCreationOptions.UserPresencePrompt` now provides touch notification
 `MakeCredentialAsync` and `GetAssertionAsync`: HID reports the authoritative CTAPHID wait signal,
 while SmartCard reports the effective required-UP policy before its APDU. Device-factory callers pass
 the prompt in the `SessionCreationOptions` already forwarded to FIDO2; callers supplying an existing
-`IFidoSession` must configure the prompt when that session is created.
+`ICtap2Session` must configure the prompt when that session is created.
 
 The prompt is informational, not a user-verification input. To abandon a ceremony, cancel its token.
 A PIN still comes only from `pinBytes` or `WebAuthnClientOptions.CredentialPrompt`.
@@ -305,11 +305,11 @@ var authenticationExtensions = new AuthenticationExtensionInputs(
 
 **Key Files:**
 - `src/Extensions/Adapters/PreviewSignAdapter.cs` — WebAuthn-level adapter (translates to Fido2)
-- `../../Fido2/src/Extensions/PreviewSign/` — Canonical Fido2 types and encoder
+- `../../Ctap2/src/Extensions/PreviewSign/` — Canonical Fido2 types and encoder
 - `src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs` — WebAuthn authentication input
 - `Plans/previewSign_Implementation_Requirements.md` — Full spec
 
-**Architectural Note:** The CBOR encoding logic lives in the Fido2 layer (`Yubico.YubiKit.Fido2.Extensions.PreviewSignCbor`), ensuring a single canonical encoder shared by both Fido2 and WebAuthn. The WebAuthn adapter translates WebAuthn-level types to Fido2 types and delegates encoding to the Fido2 layer. Generic signing params carry raw `additionalArgs`; ARKG-specific helpers can be converted to raw bytes with `PreviewSignCbor.EncodeAdditionalArgs(...)` before being passed to WebAuthn. **WARNING -- EXPERIMENTAL --** Those ARKG helpers are not ready for production use and must not be treated as production cryptographic guidance.
+**Architectural Note:** The CBOR encoding logic lives in the Fido2 layer (`Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor`), ensuring a single canonical encoder shared by both Fido2 and WebAuthn. The WebAuthn adapter translates WebAuthn-level types to Fido2 types and delegates encoding to the Fido2 layer. Generic signing params carry raw `additionalArgs`; ARKG-specific helpers can be converted to raw bytes with `PreviewSignCbor.EncodeAdditionalArgs(...)` before being passed to WebAuthn. **WARNING -- EXPERIMENTAL --** Those ARKG helpers are not ready for production use and must not be treated as production cryptographic guidance.
 
 ## Security Boundary
 
@@ -335,8 +335,8 @@ var authenticationExtensions = new AuthenticationExtensionInputs(
 **Location:** `tests/Yubico.YubiKit.WebAuthn.IntegrationTests/`
 
 **Test Helpers:**
-- `WebAuthnTestHelpers.NormalizePinAsync(FidoSession, ReadOnlyMemory<byte>, CancellationToken)` — Sets/verifies PIN, more defensive than Fido2's helper (handles `ForcePinChange`, skips on mismatch)
-- `WebAuthnTestHelpers.DeleteAllCredentialsForRpAsync(FidoSession, string rpId, CancellationToken)` — Cleanup helper
+- `WebAuthnTestHelpers.NormalizePinAsync(Ctap2Session, ReadOnlyMemory<byte>, CancellationToken)` — Sets/verifies PIN, more defensive than Fido2's helper (handles `ForcePinChange`, skips on mismatch)
+- `WebAuthnTestHelpers.DeleteAllCredentialsForRpAsync(Ctap2Session, string rpId, CancellationToken)` — Cleanup helper
 
 **Traits:**
 - `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]` — Tests requiring touch
@@ -360,12 +360,12 @@ Agents must not run WebAuthn User Presence, UV/PIN, reset, insert/remove, or des
 [WithYubiKey]
 public async Task Registration_WithPreviewSign_ReturnsGeneratedSigningKey(YubiKeyTestState state)
 {
-    await using var fidoSession = await state.Device.CreateFidoSessionAsync();
-    await WebAuthnTestHelpers.NormalizePinAsync(fidoSession, TestPin);
+    await using var ctap2Session = await state.Device.CreateCtap2SessionAsync();
+    await WebAuthnTestHelpers.NormalizePinAsync(ctap2Session, TestPin);
 
     WebAuthnOrigin.TryParse(TestOriginUrl, out var origin);
     await using var client = new WebAuthnClient(
-        fidoSession,
+        ctap2Session,
         origin!,
         new WebAuthnClientOptions
         {
@@ -395,7 +395,7 @@ dotnet toolchain.cs -- test --integration --project WebAuthn --smoke
 ## Peer Module Pointers
 
 **Related Modules:**
-- **Yubico.YubiKit.Fido2** — Lower-level CTAP protocol; WebAuthn builds on top of `IFidoSession`
+- **Yubico.YubiKit.Ctap2** — Lower-level CTAP protocol; WebAuthn builds on top of `ICtap2Session`
 - **Yubico.YubiKit.Core** — Shared types, logging (`YubiKitLogging`), memory utilities
 
 **Integration:**

@@ -1,9 +1,9 @@
 using NSubstitute;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -24,7 +24,7 @@ public class WebAuthnExtensionAuditReproTests
         backend.EncapsulateAsync(Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvSharedSecret(new Dictionary<int, object?> { [1] = 2 }, new byte[64]));
         return new ExtensionContext(
-            MockFido2Responses.CreateMockAuthenticatorInfo(extensions: MockFido2Responses.AllKnownExtensions),
+            MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: MockCtap2Responses.AllKnownExtensions),
             new PinUvAuthProtocolV2(), backend);
     }
 
@@ -101,15 +101,15 @@ public class WebAuthnExtensionAuditReproTests
         extensions.WriteInt32(CoseAlgorithm.Es256.Value);
         extensions.WriteEndMap();
         extensions.WriteEndMap();
-        var authData = MockFido2Responses.BuildAuthDataWithAttestedCredential(Guid.NewGuid()).ToList();
+        var authData = MockCtap2Responses.BuildAuthDataWithAttestedCredential(Guid.NewGuid()).ToList();
         authData[32] |= 0x80; // ED: extensions follow the attested credential data
         authData.AddRange(extensions.Encode());
 
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(extensions: MockFido2Responses.AllKnownExtensions));
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: MockCtap2Responses.AllKnownExtensions));
         backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
-            .Returns(MakeCredentialResponse.Decode(MockFido2Responses.BuildMakeCredentialResponseCbor([.. authData], "none")));
+            .Returns(MakeCredentialResponse.Decode(MockCtap2Responses.BuildMakeCredentialResponseCbor([.. authData], "none")));
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
@@ -185,10 +185,10 @@ public class WebAuthnExtensionAuditReproTests
 
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(extensions: MockFido2Responses.AllKnownExtensions));
+            .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: MockCtap2Responses.AllKnownExtensions));
         BackendGetAssertionRequest? sent = null;
         backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => sent = r), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(authDataExtensionsCbor: outputExtensions.Encode()));
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(authDataExtensionsCbor: outputExtensions.Encode()));
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
             new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });

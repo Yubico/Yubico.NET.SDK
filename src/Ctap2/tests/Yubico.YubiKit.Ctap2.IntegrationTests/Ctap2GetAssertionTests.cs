@@ -1,0 +1,295 @@
+// Copyright 2025 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
+using Yubico.YubiKit.Ctap2.Pin;
+using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.Tests.Shared.Infrastructure;
+
+using CredentialManagementClass = Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement;
+
+namespace Yubico.YubiKit.Ctap2.IntegrationTests;
+
+/// <summary>
+/// Integration tests for GetAssertion (authentication) operations.
+/// </summary>
+[Trait("Category", "Integration")]
+public class Ctap2GetAssertionTests
+{
+    /// <summary>
+    /// Tests that GetAssertion returns a valid signature after creating a credential.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    public async Task GetAssertion_AfterMakeCredential_ReturnsValidSignature(YubiKeyTestState state) =>
+        await state.WithCtap2SessionAsync(async session =>
+        {
+            byte[]? credentialId = null;
+
+            try
+            {
+                using var clientPin = await Ctap2TestHelpers.SetOrVerifyPinAsync(session, Ctap2TestData.PinUtf8);
+
+                var rp = Ctap2TestData.CreateRelyingParty();
+                var user = Ctap2TestData.CreateUser();
+
+                var info = await session.GetInfoAsync();
+                var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
+                                           info.Versions.Contains("FIDO_2_1_PRE");
+
+                // Create credential
+                var makeChallenge = Ctap2TestData.GenerateChallenge();
+                byte[] makePinToken;
+                if (supportsPermissions)
+                {
+                    makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                        Ctap2TestData.PinUtf8,
+                        PinUvAuthTokenPermissions.MakeCredential,
+                        Ctap2TestData.RpId);
+                }
+                else
+                {
+                    makePinToken = await clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8);
+                }
+
+                var makePinUvAuthParam = Ctap2TestHelpers.ComputeMakeCredentialAuthParam(
+                    clientPin.Protocol, makePinToken, makeChallenge);
+
+                var makeResult = await session.MakeCredentialAsync(
+                    clientDataHash: makeChallenge,
+                    rp: rp,
+                    user: user,
+                    pubKeyCredParams: Ctap2TestData.ES256Params,
+                    options: new MakeCredentialOptions
+                    {
+                        ResidentKey = true,
+                        PinUvAuthParam = makePinUvAuthParam,
+                        PinUvAuthProtocol = clientPin.Protocol.Version
+                    });
+
+                credentialId = makeResult.GetCredentialId().ToArray();
+
+                // Act: Get assertion with allow list
+                var assertChallenge = Ctap2TestData.GenerateChallenge();
+                byte[] assertPinToken;
+                if (supportsPermissions)
+                {
+                    assertPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                        Ctap2TestData.PinUtf8,
+                        PinUvAuthTokenPermissions.GetAssertion,
+                        Ctap2TestData.RpId);
+                }
+                else
+                {
+                    assertPinToken = await clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8);
+                }
+
+                var assertPinUvAuthParam = Ctap2TestHelpers.ComputeGetAssertionAuthParam(
+                    clientPin.Protocol, assertPinToken, assertChallenge);
+
+                var assertionResult = await session.GetAssertionAsync(
+                    rpId: Ctap2TestData.RpId,
+                    clientDataHash: assertChallenge,
+                    options: new GetAssertionOptions
+                    {
+                        AllowList = [new PublicKeyCredentialDescriptor(credentialId)],
+                        PinUvAuthParam = assertPinUvAuthParam,
+                        PinUvAuthProtocol = clientPin.Protocol.Version
+                    });
+
+                // Assert
+                Assert.NotNull(assertionResult);
+                Assert.NotNull(assertionResult.AuthenticatorData);
+                Assert.False(assertionResult.Signature.IsEmpty, "Signature should not be empty");
+            }
+            finally
+            {
+                if (credentialId is not null)
+                {
+                    await CleanupCredentialAsync(session, credentialId);
+                }
+            }
+        });
+
+    /// <summary>
+    /// Tests that GetAssertion with a resident key returns the user handle.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    public async Task GetAssertion_ResidentKey_ReturnsUserHandle(YubiKeyTestState state) =>
+        await state.WithCtap2SessionAsync(async session =>
+        {
+            byte[]? credentialId = null;
+            byte[]? expectedUserId = null;
+
+            try
+            {
+                using var clientPin = await Ctap2TestHelpers.SetOrVerifyPinAsync(session, Ctap2TestData.PinUtf8);
+
+                var rp = Ctap2TestData.CreateRelyingParty();
+                expectedUserId = Ctap2TestData.GenerateUserId();
+                var user = Ctap2TestData.CreateUser(expectedUserId);
+
+                var info = await session.GetInfoAsync();
+                var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
+                                           info.Versions.Contains("FIDO_2_1_PRE");
+
+                var makeChallenge = Ctap2TestData.GenerateChallenge();
+                byte[] makePinToken;
+                if (supportsPermissions)
+                {
+                    makePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                        Ctap2TestData.PinUtf8,
+                        PinUvAuthTokenPermissions.MakeCredential,
+                        Ctap2TestData.RpId);
+                }
+                else
+                {
+                    makePinToken = await clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8);
+                }
+
+                var makePinUvAuthParam = Ctap2TestHelpers.ComputeMakeCredentialAuthParam(
+                    clientPin.Protocol, makePinToken, makeChallenge);
+
+                var makeResult = await session.MakeCredentialAsync(
+                    clientDataHash: makeChallenge,
+                    rp: rp,
+                    user: user,
+                    pubKeyCredParams: Ctap2TestData.ES256Params,
+                    options: new MakeCredentialOptions
+                    {
+                        ResidentKey = true,
+                        PinUvAuthParam = makePinUvAuthParam,
+                        PinUvAuthProtocol = clientPin.Protocol.Version
+                    });
+
+                credentialId = makeResult.GetCredentialId().ToArray();
+
+                // Act: Get assertion without allow list (discoverable credential)
+                var assertChallenge = Ctap2TestData.GenerateChallenge();
+                byte[] assertPinToken;
+                if (supportsPermissions)
+                {
+                    assertPinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                        Ctap2TestData.PinUtf8,
+                        PinUvAuthTokenPermissions.GetAssertion,
+                        Ctap2TestData.RpId);
+                }
+                else
+                {
+                    assertPinToken = await clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8);
+                }
+
+                var assertPinUvAuthParam = Ctap2TestHelpers.ComputeGetAssertionAuthParam(
+                    clientPin.Protocol, assertPinToken, assertChallenge);
+
+                var assertionResult = await session.GetAssertionAsync(
+                    rpId: Ctap2TestData.RpId,
+                    clientDataHash: assertChallenge,
+                    options: new GetAssertionOptions
+                    {
+                        PinUvAuthParam = assertPinUvAuthParam,
+                        PinUvAuthProtocol = clientPin.Protocol.Version
+                    });
+
+                Assert.NotNull(assertionResult);
+                var userHandle = assertionResult.GetUserHandle();
+                Assert.False(userHandle.IsEmpty, "User handle should be present for discoverable credential");
+                Assert.True(userHandle.Span.SequenceEqual(expectedUserId), "User handle should match expected user ID");
+            }
+            finally
+            {
+                if (credentialId is not null)
+                {
+                    await CleanupCredentialAsync(session, credentialId);
+                }
+            }
+        });
+
+    /// <summary>
+    /// Tests that GetAssertion throws NoCredentials when no matching credential exists.
+    /// </summary>
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+    [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    public async Task GetAssertion_NoCredentials_ThrowsNoCredentials(YubiKeyTestState state) =>
+        await state.WithCtap2SessionAsync(async session =>
+        {
+            var uniqueRpId = $"test-{Guid.NewGuid()}.example.com";
+
+            using var clientPin = await Ctap2TestHelpers.SetOrVerifyPinAsync(session, Ctap2TestData.PinUtf8);
+
+            var info = await session.GetInfoAsync();
+            var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
+                                       info.Versions.Contains("FIDO_2_1_PRE");
+
+            var challenge = Ctap2TestData.GenerateChallenge();
+            byte[] pinToken;
+            if (supportsPermissions)
+            {
+                pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+                    Ctap2TestData.PinUtf8,
+                    PinUvAuthTokenPermissions.GetAssertion,
+                    uniqueRpId);
+            }
+            else
+            {
+                pinToken = await clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8);
+            }
+
+            var pinUvAuthParam = Ctap2TestHelpers.ComputeGetAssertionAuthParam(
+                clientPin.Protocol, pinToken, challenge);
+
+            var ex = await Assert.ThrowsAsync<CtapException>(async () =>
+            {
+                await session.GetAssertionAsync(
+                    rpId: uniqueRpId,
+                    clientDataHash: challenge,
+                    options: new GetAssertionOptions
+                    {
+                        PinUvAuthParam = pinUvAuthParam,
+                        PinUvAuthProtocol = clientPin.Protocol.Version
+                    });
+            });
+
+            Assert.Equal(CtapStatus.NoCredentials, ex.Status);
+        });
+
+    private static async Task CleanupCredentialAsync(Ctap2Session session, byte[] credentialId)
+    {
+        try
+        {
+            var (pinToken, clientPin, protocol) = await Ctap2TestHelpers.GetCredManTokenAsync(
+                session, Ctap2TestData.PinUtf8);
+
+            using (clientPin)
+            {
+                var credMan = new CredentialManagementClass(session, protocol, pinToken);
+                var descriptor = new PublicKeyCredentialDescriptor(credentialId);
+                await credMan.DeleteCredentialAsync(descriptor);
+            }
+
+            CryptographicOperations.ZeroMemory(pinToken);
+        }
+        catch
+        {
+            // Cleanup failures should not fail the test
+        }
+    }
+}

@@ -148,7 +148,7 @@ YubiKit uses the following log categories (class names):
 | `Yubico.YubiKit.Core.Transports.Hid.*` | HID device and transport operations |
 | `Yubico.YubiKit.Management.ManagementSession` | Management application commands |
 | `Yubico.YubiKit.Piv.PivSession` | PIV application commands |
-| `Yubico.YubiKit.Fido2.Fido2Session` | FIDO2 application commands |
+| `Yubico.YubiKit.Ctap2.Ctap2Session` | CTAP2 authenticator commands |
 
 ## Log Levels
 
@@ -220,13 +220,13 @@ If you have strict compliance requirements, use `LogLevel.Warning` or higher to 
 
 ```csharp
 // ✅ CORRECT: Static logger from YubiKitLogging
-public class FidoSession
+public class Ctap2Session
 {
-    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FidoSession>();
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<Ctap2Session>();
 }
 
 // ❌ WRONG: Injected logger (breaks consistency)
-public class FidoSession(ILogger<FidoSession> logger) { }
+public class Ctap2Session(ILogger<Ctap2Session> logger) { }
 ```
 
 Canonical logger factory: `YubiKitLogging.CreateLogger<T>()` at `src/Core/src/YubiKitLogging.cs:20`.

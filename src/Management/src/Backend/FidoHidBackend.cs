@@ -31,7 +31,7 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
 
     public async ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
     {
-        await _hidProtocol.SendVendorCommandAsync(
+        await _hidProtocol.SendCommandAsync(
                 CtapWriteConfig,
                 config,
                 UserPresenceNotification.None,
@@ -43,7 +43,7 @@ internal sealed class FidoHidBackend(IFidoHidProtocol hidProtocol) : IManagement
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        await _hidProtocol.SendVendorCommandAsync(
+        await _hidProtocol.SendCommandAsync(
                 CtapYubikeyDeviceConfig,
                 data,
                 UserPresenceNotification.None,

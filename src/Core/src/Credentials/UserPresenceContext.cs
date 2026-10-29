@@ -33,7 +33,7 @@ public sealed record UserPresenceContext
 
     /// <summary>
     ///     Gets a stable identifier for the SDK operation requesting presence, normally one of the constants in
-    ///     <see cref="UserPresenceOperations" />, such as <see cref="UserPresenceOperations.Fido2.GetAssertion" />.
+    ///     <see cref="UserPresenceOperations" />, such as <see cref="UserPresenceOperations.Ctap2.GetAssertion" />.
     /// </summary>
     /// <remarks>
     ///     Values are unique across applications, so a prompt can switch on this property alone. They identify the

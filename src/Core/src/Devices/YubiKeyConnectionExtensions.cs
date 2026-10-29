@@ -87,14 +87,14 @@ public static class YubiKeyConnectionExtensions
 
     /// <summary>Opens exactly the FIDO HID transport and creates a raw CTAP HID session that owns it.</summary>
     /// <remarks>No fallback transport is attempted. The returned session must be disposed.</remarks>
-    public static Task<RawFidoHidSession> CreateRawFidoHidSessionAsync(
+    public static Task<RawCtapHidSession> CreateRawCtapHidSessionAsync(
         this IYubiKey yubiKey,
         CancellationToken cancellationToken = default) =>
         yubiKey.CreateSessionOverTransportAsync(
             ConnectionType.HidFido,
             async (connection, token) =>
             {
-                RawFidoHidSession session = await RawFidoHidSession.CreateAsync(
+                RawCtapHidSession session = await RawCtapHidSession.CreateAsync(
                         (IFidoHidConnection)connection,
                         token)
                     .ConfigureAwait(false);

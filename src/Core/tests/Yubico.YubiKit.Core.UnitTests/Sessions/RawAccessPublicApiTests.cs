@@ -27,7 +27,7 @@ public class RawAccessPublicApiTests
     public void RawSessionsArePublicWhileProtocolMachineryIsInternal()
     {
         Assert.True(typeof(RawSmartCardSession).IsPublic);
-        Assert.True(typeof(RawFidoHidSession).IsPublic);
+        Assert.True(typeof(RawCtapHidSession).IsPublic);
         Assert.True(typeof(RawOtpHidSession).IsPublic);
 
         Assert.False(typeof(ProtocolFactory).IsPublic);

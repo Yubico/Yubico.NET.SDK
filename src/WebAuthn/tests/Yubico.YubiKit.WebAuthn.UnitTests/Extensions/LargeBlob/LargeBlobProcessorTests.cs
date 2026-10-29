@@ -15,8 +15,8 @@
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Formats.Cbor;
-using Yubico.YubiKit.Fido2.LargeBlobs;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2.LargeBlobs;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
@@ -41,7 +41,7 @@ public class LargeBlobProcessorTests
     {
         _backend.CreateLargeBlobStorage(Arg.Any<PinUvAuthTokenSession?>()).Returns(_storage);
         return new ExtensionContext(
-            MockFido2Responses.CreateMockAuthenticatorInfo(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(
                 extensions: largeBlobsSupported ? ["largeBlobKey"] : [], largeBlobsSupported: largeBlobsSupported),
             new TestPinUvAuthProtocol(), _backend);
     }
@@ -66,8 +66,8 @@ public class LargeBlobProcessorTests
             ExtensionSessionTests.CreateMockOptions(), requireResidentKey: false, Context());
 
         Assert.Null(session.PrepareInputs(token: null));
-        var result = await session.PrepareOutputsAsync(MockFido2Responses.CreateMockMakeCredentialResponse(),
-            WebAuthnAuthenticatorData.Decode(MockFido2Responses.BuildAuthData()), token: null, TestContext.Current.CancellationToken);
+        var result = await session.PrepareOutputsAsync(MockCtap2Responses.CreateMockMakeCredentialResponse(),
+            WebAuthnAuthenticatorData.Decode(MockCtap2Responses.BuildAuthData()), token: null, TestContext.Current.CancellationToken);
         Assert.False(result?.LargeBlob?.Supported);
     }
 
@@ -83,7 +83,7 @@ public class LargeBlobProcessorTests
             ExtensionSessionTests.CreateMockOptions(), requireResidentKey: true, Context());
 
         Assert.True(RequestsLargeBlobKey(session.PrepareInputs(token: null)));
-        var response = MockFido2Responses.CreateMockMakeCredentialResponse(largeBlobKey: keyReturned ? LargeBlobKey : null);
+        var response = MockCtap2Responses.CreateMockMakeCredentialResponse(largeBlobKey: keyReturned ? LargeBlobKey : null);
         var result = await session.PrepareOutputsAsync(response,
             WebAuthnAuthenticatorData.Decode(response.AuthenticatorDataRaw), token: null, TestContext.Current.CancellationToken);
 
@@ -127,7 +127,7 @@ public class LargeBlobProcessorTests
 
         Assert.True(RequestsLargeBlobKey(session.PrepareInputs(selected: null, token: null)));
         Assert.Equal(PinUvAuthTokenPermissions.None, session.Permissions);
-        var response = MockFido2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
+        var response = MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
         var result = await session.PrepareOutputsAsync(response,
             WebAuthnAuthenticatorData.Decode(response.AuthenticatorDataRaw), token: null, TestContext.Current.CancellationToken);
 
@@ -145,7 +145,7 @@ public class LargeBlobProcessorTests
         var token = new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]);
 
         Assert.Equal(PinUvAuthTokenPermissions.LargeBlobWrite, session.Permissions);
-        var response = MockFido2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
+        var response = MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
         var result = await session.PrepareOutputsAsync(response,
             WebAuthnAuthenticatorData.Decode(response.AuthenticatorDataRaw), token, TestContext.Current.CancellationToken);
 
@@ -161,10 +161,10 @@ public class LargeBlobProcessorTests
     public async Task Authentication_WriteFails_ReportsWrittenFalse()
     {
         _storage.SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Fido2.Ctap.CtapException(Fido2.Ctap.CtapStatus.LargeBlobStorageFull));
+            .ThrowsAsync(new Ctap2.CtapException(Ctap2.CtapStatus.LargeBlobStorageFull));
         using var session = AuthenticationExtensionSession.Create(
             new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Write = new byte[] { 1 } }), allowCredentials: null, Context());
-        var response = MockFido2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
+        var response = MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
 
         var result = await session.PrepareOutputsAsync(response,
             WebAuthnAuthenticatorData.Decode(response.AuthenticatorDataRaw),
@@ -179,7 +179,7 @@ public class LargeBlobProcessorTests
     {
         using var session = AuthenticationExtensionSession.Create(
             new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true }), allowCredentials: null, Context());
-        var response = MockFido2Responses.CreateMockGetAssertionResponse();
+        var response = MockCtap2Responses.CreateMockGetAssertionResponse();
 
         var result = await session.PrepareOutputsAsync(response,
             WebAuthnAuthenticatorData.Decode(response.AuthenticatorDataRaw), token: null, TestContext.Current.CancellationToken);

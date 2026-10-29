@@ -54,9 +54,15 @@ They name the SDK method without `Async`, so some, such as `Piv.SignOrDecrypt`, 
 user-facing verbs. The application knows the user's intent (why an action is being performed); the SDK
 does not.
 
+CTAP2 operations use the `UserPresenceOperations.Ctap2` group and values such as
+`"Ctap2.MakeCredential"`. Their applet identifier remains `UserPresenceApplications.Fido2`
+(value `"FIDO2"`): CTAP2 names the operation protocol, while FIDO2 names the user-facing application.
+Applications migrating from an earlier alpha must update comparisons against the former
+`"Fido2.Method"` operation strings; see the `ctap2-semantic-rename` migration-map entry.
+
 | Group | Operation constants |
 |---|---|
-| `UserPresenceOperations.Fido2` | `Selection`, `Reset`, `MakeCredential`, `GetAssertion` |
+| `UserPresenceOperations.Ctap2` | `Selection`, `Reset`, `MakeCredential`, `GetAssertion` |
 | `UserPresenceOperations.Piv` | `SignOrDecrypt`, `Decrypt`, `CalculateSecret` |
 | `UserPresenceOperations.OpenPgp` | `Sign`, `Decrypt`, `Authenticate`, `AttestKey` |
 | `UserPresenceOperations.Oath` | `Calculate`, `CalculateCode` |
@@ -71,8 +77,8 @@ using Yubico.YubiKit.Core.Credentials;
 
 string message = context.Operation switch
 {
-    UserPresenceOperations.Fido2.MakeCredential => "Touch your YubiKey to create a passkey.",
-    UserPresenceOperations.Fido2.GetAssertion => "Touch your YubiKey to sign in.",
+    UserPresenceOperations.Ctap2.MakeCredential => "Touch your YubiKey to create a passkey.",
+    UserPresenceOperations.Ctap2.GetAssertion => "Touch your YubiKey to sign in.",
     UserPresenceOperations.Piv.SignOrDecrypt => "Touch your YubiKey for the PIV key operation.",
     _ when context.Application == UserPresenceApplications.Oath => "Touch your YubiKey to generate a code.",
     _ => "Touch your YubiKey to continue."
@@ -98,8 +104,8 @@ public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, Cance
 {
     string operation = context.Operation switch
     {
-        UserPresenceOperations.Fido2.GetAssertion => "sign-in",
-        UserPresenceOperations.Fido2.MakeCredential => "passkey registration",
+        UserPresenceOperations.Ctap2.GetAssertion => "sign-in",
+        UserPresenceOperations.Ctap2.MakeCredential => "passkey registration",
         _ => "key operation"
     };
 

@@ -8,7 +8,7 @@ public sealed class AsyncSurfaceConventionTests
     [
         "ManagementSession.IsSupported", "ManagementSession.EnsureSupports",
         "PivSession.IsSupported", "PivSession.EnsureSupports",
-        "FidoSession.IsSupported", "FidoSession.EnsureSupports",
+        "Ctap2Session.IsSupported", "Ctap2Session.EnsureSupports",
         "OathSession.IsSupported", "OathSession.EnsureSupports", "OathSession.DeriveKey",
         "OpenPgpSession.IsSupported", "OpenPgpSession.EnsureSupports",
         "SecurityDomainSession.IsSupported", "SecurityDomainSession.EnsureSupports",

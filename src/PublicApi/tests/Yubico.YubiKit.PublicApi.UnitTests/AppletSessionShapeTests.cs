@@ -1,6 +1,6 @@
 using System.Reflection;
 using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Fido2;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Management;
 using Yubico.YubiKit.Oath;
 using Yubico.YubiKit.OpenPgp;
@@ -17,7 +17,7 @@ public sealed class AppletSessionShapeTests
     [
         (typeof(ManagementSession), typeof(IManagementSession), "CreateManagementSessionAsync"),
         (typeof(PivSession), typeof(IPivSession), "CreatePivSessionAsync"),
-        (typeof(FidoSession), typeof(IFidoSession), "CreateFidoSessionAsync"),
+        (typeof(Ctap2Session), typeof(ICtap2Session), "CreateCtap2SessionAsync"),
         (typeof(OathSession), typeof(IOathSession), "CreateOathSessionAsync"),
         (typeof(OpenPgpSession), typeof(IOpenPgpSession), "CreateOpenPgpSessionAsync"),
         (typeof(SecurityDomainSession), typeof(ISecurityDomainSession), "CreateSecurityDomainSessionAsync"),

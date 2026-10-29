@@ -14,9 +14,8 @@
 
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -69,7 +68,7 @@ public class CredentialFilterTests
 
         // Mock backend to return success (actual response content doesn't matter
         // because chunk.Count == 1 short-circuits to return chunk[0])
-        var mockResponse = MockFido2Responses.CreateMockGetAssertionResponse(credentialId);
+        var mockResponse = MockCtap2Responses.CreateMockGetAssertionResponse(credentialId);
         backend.GetAssertionAsync(
             Arg.Any<BackendGetAssertionRequest>(),
             Arg.Any<CancellationToken>())
@@ -136,7 +135,7 @@ public class CredentialFilterTests
 
         // Descriptor #5 (index 5, first item in second chunk) will match
         var matchingCredentialId = new byte[] { 0x05 };
-        var matchingResponse = MockFido2Responses.CreateMockGetAssertionResponse(matchingCredentialId);
+        var matchingResponse = MockCtap2Responses.CreateMockGetAssertionResponse(matchingCredentialId);
 
         var callCount = 0;
         backend.GetAssertionAsync(
@@ -177,7 +176,7 @@ public class CredentialFilterTests
         var info = new AuthenticatorInfo { MaxCredentialCountInList = 8 };
         BackendGetAssertionRequest? sent = null;
         backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => sent = r), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockGetAssertionResponse());
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
 
         var result = await CredentialFilter.SelectAsync(
             backend, "example.com", [new PublicKeyCredentialDescriptor(new byte[] { 0x01 })], info, token: null,
@@ -209,7 +208,7 @@ public class CredentialFilterTests
                 }
 
                 return allowList[0].Id.Span[0] == 3
-                    ? MockFido2Responses.CreateMockGetAssertionResponse()
+                    ? MockCtap2Responses.CreateMockGetAssertionResponse()
                     : throw new CtapException(CtapStatus.NoCredentials);
             });
 
@@ -246,7 +245,7 @@ public class CredentialFilterTests
         var fits = new PublicKeyCredentialDescriptor(new byte[] { 0xAA, 0xBB });
         BackendGetAssertionRequest? sent = null;
         backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => sent = r), Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockGetAssertionResponse());
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
 
         var result = await CredentialFilter.SelectAsync(
             backend, "example.com", [tooLong, fits], info, CreateToken(), TestContext.Current.CancellationToken);

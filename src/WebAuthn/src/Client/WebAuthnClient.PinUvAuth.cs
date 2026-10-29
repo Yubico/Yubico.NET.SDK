@@ -14,8 +14,8 @@
 
 using System.Buffers;
 using Yubico.YubiKit.Core.Credentials;
-using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Pin;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 
 namespace Yubico.YubiKit.WebAuthn.Client;

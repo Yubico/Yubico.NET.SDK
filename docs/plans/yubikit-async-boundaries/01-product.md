@@ -101,7 +101,7 @@ connection ownership, asynchronous return, overlap/concurrency scope, cancellati
 presence outcomes, recovery and disposal together. Matching signatures alone are
 not acceptance: documented promises must match observable public journeys.
 
-Compare all applet surfaces, including Management, Piv, Fido2, WebAuthn, Oath,
+Compare all applet surfaces, including Management, Piv, Ctap2, WebAuthn, Oath,
 YubiOtp, OpenPgp, SecurityDomain and YubiHsm. Normalize equivalent concepts where
 feasible; explicitly explain transport, device and domain differences rather than
 promise identical capabilities or cancellation latency. Keep applet sessions,

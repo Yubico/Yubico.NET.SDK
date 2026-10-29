@@ -4,9 +4,9 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Fido2;
-using Yubico.YubiKit.Fido2.Cose;
-using Yubico.YubiKit.Fido2.Credentials;
+using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
@@ -33,7 +33,7 @@ public class WebAuthnAuditHardwareReproTests
         var deadline = TimeSpan.FromSeconds(5);
         var keepAliveAndCancelSlack = TimeSpan.FromSeconds(2);
 
-        await using var session = await state.Device.CreateFidoSessionAsync();
+        await using var session = await state.Device.CreateCtap2SessionAsync();
         await NormalizePinAsync(session);
         await using var client = CreateClient(session);
 
@@ -63,7 +63,7 @@ public class WebAuthnAuditHardwareReproTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task YESDK1615_PreferredResidentKeyCanBeDiscoveredWithoutAllowList(YubiKeyTestState state)
     {
-        await using var registrationSession = await state.Device.CreateFidoSessionAsync();
+        await using var registrationSession = await state.Device.CreateCtap2SessionAsync();
         await NormalizePinAsync(registrationSession);
         var info = await registrationSession.GetInfoAsync();
         Skip.If(!info.Options.TryGetValue("rk", out var capable) || !capable,
@@ -86,7 +86,7 @@ public class WebAuthnAuditHardwareReproTests
             credentialId = registration.CredentialId;
         }
 
-        await using var assertionSession = await state.Device.CreateFidoSessionAsync();
+        await using var assertionSession = await state.Device.CreateCtap2SessionAsync();
         await using var assertionClient = CreateClient(assertionSession);
         var matches = await assertionClient.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
@@ -107,7 +107,7 @@ public class WebAuthnAuditHardwareReproTests
     {
         // Spec-correct behaviour: UV=Required with a PIN obtains a pinUvAuthToken and omits the
         // "uv" option key (CTAP 2.3 §6.1). Today the SDK sends both and the device rejects it.
-        await using var session = await state.Device.CreateFidoSessionAsync();
+        await using var session = await state.Device.CreateCtap2SessionAsync();
         await NormalizePinAsync(session);
         await using var client = CreateClient(session);
         var registration = await client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions

@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -6,30 +7,43 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests.AuditV2;
 
 public sealed class OpenPgpAuditReproTests
 {
-    [Fact(Skip = "Parked: YESDK-1634 (26i) — reproduces an open finding; unskip when fixed")]
+    /// <summary>The import names its slot once: the template CRT is derived from keyRef, never supplied separately.</summary>
+    [Theory]
+    [InlineData(KeyRef.Sig, 0xB6)]
+    [InlineData(KeyRef.Dec, 0xB8)]
+    [InlineData(KeyRef.Aut, 0xA4)]
     [Trait("Audit", "YESDK-1634")]
-    public async Task YESDK1634_ImportDoesNotTargetTemplateSlotInsteadOfRequestedSlot()
+    public async Task YESDK1634_ImportTargetsTheRequestedSlot(KeyRef keyRef, byte crtTag)
     {
         byte[] appData = ApplicationData();
         var connection = new RecordingSmartCardConnection(
             [0x90, 0x00], [0x05, 0x08, 0x00, 0x90, 0x00], appData,
-            [0x90, 0x00], [0x90, 0x00], appData);
+            [0x90, 0x00], // algorithm attributes
+            [0x90, 0x00], [0x90, 0x00], // import, chained in two short APDUs
+            appData);
         await using var session = await OpenPgpSession.CreateAsync(connection,
             cancellationToken: TestContext.Current.CancellationToken);
-        var template = new RsaKeyTemplate(KeyRef.Aut, new byte[] { 0x01, 0x00, 0x01 },
-            new byte[] { 0x03 }, new byte[] { 0x05 });
+        using var rsa = RSA.Create(2048);
+        using var key = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
 
-        await session.PutKeyAsync(KeyRef.Sig, template, RsaAttributes.Create(RsaSize.Rsa2048),
-            TestContext.Current.CancellationToken);
+        await session.PutKeyAsync(keyRef, key, TestContext.Current.CancellationToken);
 
-        byte[] import = Assert.Single(connection.TransmittedCommands, command => command[1] == 0xDB);
-        // The outer 4D length is variable; the first child CRT must be SIG (B6 00), not AUT (A4 00).
-        Assert.Equal([0xB6, 0x00], import.AsSpan(7, 2).ToArray());
+        byte[] attributes = Assert.Single(connection.TransmittedCommands, command => command[1] == 0xDA);
+        Assert.Equal((byte)keyRef.AlgorithmAttributesDo(), attributes[3]);
+        byte[] import = connection.TransmittedCommands.First(command => command[1] == 0xDB);
+        // Short APDU (Lc at [4]); outer 4D with a two-byte length (82 LL LL); the CRT is the first child.
+        Assert.Equal([0x4D, 0x82], import.AsSpan(5, 2).ToArray());
+        Assert.Equal([crtTag, 0x00], import.AsSpan(9, 2).ToArray());
     }
 
-    [Theory(Skip = "Parked: YESDK-1633 (25h/26q) — reproduces an open finding; unskip when fixed")]
+    /// <summary>RFC 9580 §3.7.1.3: a count below salt+PIN still hashes one full copy (libgcrypt does the same).</summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
     [InlineData(8)]
     [InlineData(9)]
+    [InlineData(13)]
+    [InlineData(14)]
     [Trait("Audit", "YESDK-1633")]
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1633_ShortKdfCountStillHashesCompletePin(int count)
@@ -53,17 +67,57 @@ public sealed class OpenPgpAuditReproTests
         }
     }
 
-    [Fact(Skip = "Parked: YESDK-1633 (25h/26q) — reproduces an open finding; unskip when fixed")]
+    /// <summary>The KDF-DO count is an unsigned 32-bit value; 0x80000000 is 2^31, not a negative number.</summary>
+    [Theory]
+    [InlineData(new byte[] { 0x80, 0, 0, 0 }, 2_147_483_648L)]
+    [InlineData(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, 4_294_967_295L)]
+    [InlineData(new byte[] { 0x00, 0x78, 0, 0 }, 0x780000L)]
     [Trait("Audit", "YESDK-1633")]
-    public void YESDK1633_UnsignedKdfCountDoesNotWrapNegative()
+    public void YESDK1633_UnsignedKdfCountDoesNotWrapNegative(byte[] countBytes, long expected)
     {
         byte[] encoded =
         [
-            0x81, 1, 3, 0x82, 1, 8, 0x83, 4, 0x80, 0, 0, 0,
+            0x81, 1, 3, 0x82, 1, 8, 0x83, 4, .. countBytes,
             0x84, 8, 1, 2, 3, 4, 5, 6, 7, 8
         ];
         using var parsed = Kdf.Parse(encoded);
-        Assert.Throws<ArgumentException>(() => parsed.Process(Pw.User, "123456"u8));
+        var kdf = Assert.IsType<KdfIterSaltedS2k>(parsed);
+
+        Assert.Equal(expected, kdf.IterationCount);
+        Assert.Equal(countBytes, TlvHelper.DecodeDictionary(kdf.ToBytes())[0x83].ToArray());
+    }
+
+    /// <summary>One copy + 1 byte: the count is a byte count, so 15 hashes salt+PIN followed by the first salt byte.</summary>
+    [Fact]
+    [Trait("Audit", "YESDK-1633")]
+    public void YESDK1633_CountOneAboveInputLength_HashesOneCopyAndOneByte()
+    {
+        using var kdf = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256,
+            SaltUser = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 },
+            IterationCount = 15
+        };
+        byte[] expected = SHA256.HashData([1, 2, 3, 4, 5, 6, 7, 8, .. "123456"u8, 1]);
+
+        Assert.Equal(expected, kdf.Process(Pw.User, "123456"u8));
+    }
+
+    /// <summary>Known answers from libgcrypt 1.12.3 gcry_kdf_derive(GCRY_KDF_ITERSALTED_S2K, SHA256), what gpg-agent computes.</summary>
+    [Theory]
+    [InlineData(8, "1ae0f1043e1492a1acffc2319de52fa4713cf4bfd7123563345550f0da8eee9a")]
+    [InlineData(100_000, "8fc77436ded3825377da921acc4fb1e0c619e426b926c30f06fbb428c6ac9701")]
+    [Trait("Audit", "YESDK-1633")]
+    public void YESDK1633_MatchesLibgcrypt(long count, string expectedHex)
+    {
+        using var kdf = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256,
+            SaltUser = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 },
+            IterationCount = count
+        };
+
+        Assert.Equal(Convert.FromHexString(expectedHex), kdf.Process(Pw.User, "123456"u8));
     }
 
     private static byte[] ApplicationData()

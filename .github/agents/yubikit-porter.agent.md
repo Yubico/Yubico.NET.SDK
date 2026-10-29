@@ -163,8 +163,8 @@ dotnet toolchain.cs test
 
 ## Git Workflow
 
-- Main branch: `develop`
-- Porting branches: `yubikit-*`
+- Base branch: `yubikit` (v2 lives only on `yubikit` and `yubikit-*` branches; `develop` and `main` are the legacy v1 SDK and share no history with it)
+- Porting branches: `yubikit-*`; open PRs against `yubikit` (or the `yubikit-*` branch you cut from), never `develop`
 - **Commit Guidelines**: See [`COMMIT_GUIDELINES.md`](../../docs/COMMIT_GUIDELINES.md)
 
 ### Commit Rules (CRITICAL)

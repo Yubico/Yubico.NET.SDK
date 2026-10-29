@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 /// </summary>
 internal sealed class FakeApduProcessor : IApduProcessor
 {
-    private readonly Queue<ApduResponse> _responses = new();
+    private readonly Queue<Func<ApduResponse>> _responses = new();
     public List<ApduCommand> TransmittedCommands { get; } = [];
 
 
@@ -39,11 +39,14 @@ internal sealed class FakeApduProcessor : IApduProcessor
         if (_responses.Count == 0)
             throw new InvalidOperationException("No response enqueued for transmission");
 
-        return await Task.FromResult(_responses.Dequeue());
+        return await Task.FromResult(_responses.Dequeue()());
     }
 
 
-    public void EnqueueResponse(ApduResponse response) => _responses.Enqueue(response);
+    public void EnqueueResponse(ApduResponse response) => _responses.Enqueue(() => response);
+
+    /// <summary>Builds the response when the command arrives, for replies that depend on state advanced by sending it.</summary>
+    public void EnqueueResponse(Func<ApduResponse> response) => _responses.Enqueue(response);
 
     public void EnqueueResponse(byte sw1, byte sw2, ReadOnlyMemory<byte> data = default)
     {
@@ -51,7 +54,8 @@ internal sealed class FakeApduProcessor : IApduProcessor
         data.Span.CopyTo(responseBytes);
         responseBytes[^2] = sw1;
         responseBytes[^1] = sw2;
-        _responses.Enqueue(new ApduResponse(responseBytes));
+        var response = new ApduResponse(responseBytes);
+        _responses.Enqueue(() => response);
     }
 }
 

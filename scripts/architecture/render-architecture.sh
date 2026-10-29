@@ -19,7 +19,7 @@ export LC_ALL=C
 #   scripts/architecture/render-architecture.sh --check  # dry: fail if mmdc missing/mismatched version
 #
 # Requires @mermaid-js/mermaid-cli (mmdc) at the pinned version (see
-# architecture-images.env). CI installs it; locally: npm i -g @mermaid-js/mermaid-cli.
+# architecture-images.env, which reads package.json). CI and local: `npm ci` at the repo root.
 
 here="$(cd "$(dirname "$0")" && pwd)"
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"

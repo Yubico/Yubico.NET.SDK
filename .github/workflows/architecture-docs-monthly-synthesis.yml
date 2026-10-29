@@ -5,9 +5,10 @@ on:
   # yubikit workflow manually dispatchable; use a default-branch wrapper for cron.
   workflow_dispatch:
 
+# The generator job reads the repository and runs an external tool with an API token; only
+# create-pr may write.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: docs-yubikit
@@ -16,23 +17,27 @@ concurrency:
 jobs:
   synthesize:
     runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.patch.outputs.has_changes }}
     steps:
       - name: Check out yubikit
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
           ref: yubikit
+          persist-credentials: false
 
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
           dotnet-version: "10.0.x"
 
-      - name: Install pinned Mermaid CLI
+      - name: Install pinned Node tools
         shell: bash
         run: |
-          version="$(sed -n 's/^MERMAID_CLI_VERSION="\(.*\)"/\1/p' scripts/architecture/architecture-images.env | head -n 1)"
-          npm install -g "@mermaid-js/mermaid-cli@$version"
+          npm ci --no-audit --no-fund
+          echo "$GITHUB_WORKSPACE/node_modules/.bin" >> "$GITHUB_PATH"
+          export PATH="$GITHUB_WORKSPACE/node_modules/.bin:$PATH"
           bash scripts/architecture/render-architecture.sh --check
 
       - name: Fetch architecture baseline
@@ -50,6 +55,8 @@ jobs:
 
       - name: Synthesize architecture documentation
         uses: anthropics/claude-code-action@769e3bdff9bb7ecfb51bad4c9cba23d6f5fc5ea5 # v1.0.163
+        env:
+          DISABLE_AUTOUPDATER: '1'
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -83,6 +90,63 @@ jobs:
           else
             bash scripts/architecture/render-architecture.sh
           fi
+
+      - name: Validate architecture documentation
+        run: dotnet toolchain.cs -- docs-architecture
+
+      - name: Create architecture patch
+        id: patch
+        shell: bash
+        run: |
+          git add -N docs/architecture
+          git diff --binary -- docs/architecture > architecture.patch
+          echo "has_changes=$([[ -s architecture.patch ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload architecture patch
+        if: ${{ steps.patch.outputs.has_changes == 'true' }}
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: architecture-synthesis-patch
+          path: architecture.patch
+          if-no-files-found: error
+
+  create-pr:
+    needs: synthesize
+    if: ${{ needs.synthesize.outputs.has_changes == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out yubikit
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+          ref: yubikit
+
+      - name: Download architecture patch
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: architecture-synthesis-patch
+          path: patches
+
+      - name: Apply architecture patch
+        shell: bash
+        run: |
+          git apply --check --whitespace=error patches/architecture.patch
+          git apply --whitespace=error patches/architecture.patch
+          outside="$(git status --porcelain --untracked-files=all | while IFS= read -r line; do path="${line#???}"; case "$path" in docs/architecture/*|patches/*) ;; *) printf '%s\n' "$path" ;; esac; done)"
+          if [[ -n "$outside" ]]; then
+            echo "Architecture patch contains paths outside docs/architecture:" >&2
+            printf '%s\n' "$outside" >&2
+            exit 1
+          fi
+          git diff --check
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
 
       - name: Validate architecture documentation
         run: dotnet toolchain.cs -- docs-architecture

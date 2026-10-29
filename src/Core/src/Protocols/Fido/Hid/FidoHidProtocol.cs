@@ -298,7 +298,12 @@ internal class FidoHidProtocol(
                 // Only here is the channel provably clean. Throwing any earlier would strand the
                 // remaining frames for the next exchange to misread.
                 promptFailure?.Throw();
-                if (cancelRequested)
+
+                // CTAP 2.3 §11.2.9.1.5: a cancelled request "will reply with the error
+                // CTAP2_ERR_KEEPALIVE_CANCEL". A touch that raced the cancel yields a real success
+                // instead; the authenticator has done the work (a credential may now exist), and the
+                // spec never says to discard it, so it is returned.
+                if (cancelRequested && !IsCtapSuccess(expectedCommand, responseData))
                     callerToken.ThrowIfCancellationRequested();
 
                 ownershipTransferred = true;
@@ -375,6 +380,11 @@ internal class FidoHidProtocol(
 
         return (initPacket, cancelRequested, promptFailure);
     }
+
+    private static bool IsCtapSuccess(byte command, ReadOnlySpan<byte> response) =>
+        command == CtapConstants.CtapHidCbor
+        && response.Length > 0
+        && response[0] == CtapConstants.CtapStatusSuccess;
 
     private static bool IsUserPresenceKeepAlive(ReadOnlySpan<byte> packet) =>
         GetPacketLength(packet) > 0 && packet[CtapConstants.InitHeaderSize] == CtapConstants.KeepAliveStatusUpNeeded;

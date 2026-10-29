@@ -134,6 +134,24 @@ Application modules should converge on this shape when possible:
 - Session uses `IsSupported(...)` / `EnsureSupports(...)` for firmware and feature gates.
 - Session keeps public API operations readable and close to the wire behavior.
 
+Applet `CreateAsync` methods use `ApplicationSession.ConstructInitializedAsync` for connection validation,
+binding before wire I/O, and cleanup on initialization failure. Applet initializers call `PrepareProtocolAsync`
+to register their protocol, reject unsupported SCP combinations, and prepare FIDO HID before backend discovery.
+They then select the applet and discover firmware before calling `ConfigureProtocolAsync` for configuration
+and optional SCP establishment. Backend rebinding and applet-specific state remain local. The factory uses
+`InitializeSessionAsync` to set `IsInitialized` only after the applet initializer completes, including metadata
+discovery and cache population. Security Domain reset uses the same completion boundary after clearing readiness.
+Keep raw-session initialization contracts separate, including lazy raw FIDO channel initialization.
+
+Pass creation-only SCP parameters directly to the initializer; retain them only when a later operation needs
+them, as Security Domain reinitialization does. `ApplicationSession.Protocol` owns protocol lifetime; avoid
+duplicate applet fields unless typed operational access requires them. Backend contracts describe shared
+operations, not lifecycle symmetry: FIDO selection exists only on its SmartCard backend, and Management reset
+exists only on its SmartCard backend. Sessions dispatch these transport-specific operations explicitly.
+Management and YubiOTP discover initial state through static transport-specific helpers beside their backends,
+then construct operational backends after protocol configuration. Do not create OTP backends with placeholder
+firmware or programming sequence values. FIDO HID firmware discovery reads the already-prepared protocol state.
+
 The durable applet API grammar is in [Applet public API](architecture/applet-public-api.md). Applet factories take
 `SessionCreationOptions?` and a final defaulted cancellation token; required domain inputs remain positional;
 options objects are reserved for real growth axes or policy groups; and applet dependency-injection registrations

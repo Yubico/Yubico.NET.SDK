@@ -177,6 +177,9 @@ The prompt shows the indication and returns without waiting. Over HID the reques
 
 ## Constraints
 
+Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, GetInfo follows channel
+preparation directly; there is no applet-selection step.
+
 - The default transport is HID FIDO, falling back to SmartCard; `SessionCreationOptions.PreferredConnectionType`
   forces one. `ConnectionType.HidOtp` throws `ArgumentException`, an unexposed one `NotSupportedException`.
 - SCP runs only over SmartCard. `ScpKeyParameters` without an explicit preference selects SmartCard; pairing

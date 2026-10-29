@@ -50,13 +50,15 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         _lastProgSeq = initialProgSeq;
     }
 
-    public async ValueTask<YubiOtpInitialization> InitializeAsync(CancellationToken cancellationToken)
+    public static async ValueTask<YubiOtpInitialization> ReadInitialStateAsync(
+        ISmartCardProtocol protocol,
+        CancellationToken cancellationToken)
     {
         FirmwareVersion? managementVersion = null;
 
         try
         {
-            var mgmtResponse = await _protocol
+            var mgmtResponse = await protocol
                 .SelectAsync(ApplicationIds.Management, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -67,7 +69,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
             Logger.LogDebug(ex, "Could not get version from Management SELECT, continuing with OTP SELECT.");
         }
 
-        var status = await _protocol
+        var status = await protocol
             .SelectAsync(ApplicationIds.Otp, cancellationToken)
             .ConfigureAwait(false);
 

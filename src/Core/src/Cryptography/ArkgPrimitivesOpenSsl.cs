@@ -256,7 +256,7 @@ internal sealed partial class ArkgPrimitivesOpenSsl : IArkgPrimitives
             Encoding.ASCII.GetBytes("ARKG-KEM-HMAC-mac."),
             dstAug,
             ctx);
-        byte[] mk = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: macInfo, length: 32).ToArray();
+        byte[] mk = HKDF.DeriveKey(HashAlgorithmName.SHA256, kPrime, 32, salt: null, info: macInfo);
 
         byte[] tag;
         try
@@ -276,7 +276,7 @@ internal sealed partial class ArkgPrimitivesOpenSsl : IArkgPrimitives
             Encoding.ASCII.GetBytes("ARKG-KEM-HMAC-shared."),
             dstAug,
             ctx);
-        byte[] shared = HkdfUtilities.DeriveKey(kPrime, salt: ReadOnlySpan<byte>.Empty, contextInfo: sharedInfo, length: kPrime.Length).ToArray();
+        byte[] shared = HKDF.DeriveKey(HashAlgorithmName.SHA256, kPrime, kPrime.Length, salt: null, info: sharedInfo);
         CryptographicOperations.ZeroMemory(kPrime); // ZeroMemory site #6
 
         // Ciphertext = MAC tag || ephemeral public key.

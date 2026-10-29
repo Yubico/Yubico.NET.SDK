@@ -88,7 +88,7 @@ public class WebAuthnClientFactoryTests
             },
             sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 
-        var options = new RegistrationOptions
+        var options = new PublicKeyCredentialCreationOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),

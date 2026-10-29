@@ -63,6 +63,10 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Lists all credentials stored on the device.
     /// </summary>
+    /// <remarks>
+    ///     A credential whose ID is malformed (for example a TOTP period prefix of 0 written by another
+    ///     client; RFC 6238 §4.1 requires a positive time step) is omitted and logged at warning level.
+    /// </remarks>
     Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -74,30 +78,52 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Deletes a credential from the device.
     /// </summary>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="credential" /> was read from a different device (its <see cref="Credential.DeviceId" />
+    ///     is not this session's <see cref="DeviceId" />). Nothing is sent.
+    /// </exception>
     Task DeleteCredentialAsync(Credential credential, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Renames a credential on the device. Requires firmware 5.3.1+.
     /// </summary>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="credential" /> was read from a different device (its <see cref="Credential.DeviceId" />
+    ///     is not this session's <see cref="DeviceId" />). Nothing is sent.
+    /// </exception>
     Task<Credential> RenameCredentialAsync(Credential credential, string? newIssuer, string newName,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Calculates the full HMAC response for a single credential.
     /// </summary>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="credential" /> was read from a different device (its <see cref="Credential.DeviceId" />
+    ///     is not this session's <see cref="DeviceId" />). Nothing is sent.
+    /// </exception>
     Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Calculates a formatted OTP code for a single credential.
+    ///     Calculates a formatted OTP code for a single credential (RFC 4226 for HOTP, RFC 6238 for TOTP).
     /// </summary>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="credential" /> is TOTP with a period that is not positive, or was read from a
+    ///     different device (its <see cref="Credential.DeviceId" /> is not this session's <see cref="DeviceId" />).
+    ///     Nothing is sent.
+    /// </exception>
     Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Calculates codes for all credentials on the device.
+    ///     Calculates codes for all credentials on the device (YKOATH CALCULATE ALL).
     ///     HOTP and touch-required credentials return <c>null</c> codes.
     /// </summary>
+    /// <remarks>
+    ///     The device computes every TOTP response with the default 30-second time step; credentials with
+    ///     another period are recalculated individually. A credential whose ID is malformed is omitted
+    ///     and logged at warning level, as in <see cref="ListCredentialsAsync" />.
+    /// </remarks>
     Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null,
         CancellationToken cancellationToken = default);
 

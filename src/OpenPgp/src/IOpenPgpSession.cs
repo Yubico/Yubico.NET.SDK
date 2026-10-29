@@ -16,6 +16,8 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Abstractions;
 
+using Yubico.YubiKit.Core.Cryptography;
+
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
@@ -210,18 +212,24 @@ public interface IOpenPgpSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Imports a private key into the specified slot using a key template.
+    ///     Imports a private key into the specified slot. Requires Admin PIN verification.
     /// </summary>
+    /// <remarks>
+    ///     The algorithm attributes for the slot are derived from the key and written first (when the card
+    ///     allows changing them; otherwise only RSA 2048 can be imported). Supported keys: RSA 2048, 3072 and
+    ///     4096 with public exponent 65537, P-256, P-384, P-521, Ed25519 and X25519. The private key is not
+    ///     cleared by this method.
+    /// </remarks>
     /// <param name="keyRef">The target key slot.</param>
-    /// <param name="template">The private key template containing key material.</param>
-    /// <param name="attributes">
-    ///     Optional algorithm attributes to set before import. If null, existing attributes are used.
-    /// </param>
+    /// <param name="privateKey">The private key to import.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <exception cref="NotSupportedException">
+    ///     The key type, size or public exponent is not one the card imports, or the card cannot change its
+    ///     algorithm attributes and the key is not RSA 2048. Nothing is sent.
+    /// </exception>
     Task PutKeyAsync(
         KeyRef keyRef,
-        PrivateKeyTemplate template,
-        AlgorithmAttributes? attributes = null,
+        IPrivateKey privateKey,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -239,8 +247,18 @@ public interface IOpenPgpSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Gets an attestation certificate for the specified key slot. Requires firmware 5.2.0+.
+    ///     Creates an attestation certificate for the key in <paramref name="keyRef" /> and returns it.
+    ///     Requires firmware 5.2.0+ and User PIN verification (<see cref="VerifyPinAsync" />).
     /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         <b>This replaces the cardholder certificate for that key.</b> The YubiKey writes the
+    ///         attestation statement into the key's cardholder certificate slot (DO 7F21) and discards
+    ///         whatever was stored there. The SDK keeps no copy: read it first with
+    ///         <see cref="GetCertificateAsync" /> if you need it, and note that putting it back with
+    ///         <see cref="PutCertificateAsync" /> needs Admin PIN verification.
+    ///     </para>
+    /// </remarks>
     /// <exception cref="NotSupportedException">
     ///     Thrown when the device firmware does not support key attestation (requires 5.2.0+).
     /// </exception>

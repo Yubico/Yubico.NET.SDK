@@ -14,6 +14,13 @@ configuration lock code. Other modules talk to one application; this one decides
 - Any YubiKey with firmware 4.1.0 or later; writing configuration needs 5.0.0 or later.
 - Transports: SmartCard (CCID, USB or NFC), HID FIDO, or HID OTP - the only module that runs over all three.
 
+SCP is available only over SmartCard. Supplying `SessionCreationOptions.ScpKeyParameters` with a HID connection
+throws before any initialization commands are sent.
+
+Creation selects Management over SmartCard, reads status over OTP HID, or uses the prepared FIDO HID channel
+version before resolving DeviceInfo. Device reset is available only over SmartCard; HID reset requests are
+rejected without sending a reset command.
+
 | Feature | Minimum firmware |
 |---------|------------------|
 | Read device information | 4.1.0 |
@@ -67,9 +74,7 @@ Console.WriteLine($"Configuration locked: {info.IsLocked}");
 ### Enable or disable applications
 
 ```csharp
-var config = DeviceConfig.CreateBuilder()
-    .WithCapabilities(Transport.Usb, (int)(DeviceCapabilities.Piv | DeviceCapabilities.Oath))
-    .Build();
+var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv | DeviceCapabilities.Oath };
 
 await using (var session = await device.CreateManagementSessionAsync())
 {
@@ -81,9 +86,11 @@ await Task.Delay(TimeSpan.FromSeconds(3));
 var rebooted = await YubiKeyManager.FindAllAsync(forceRescan: true);
 ```
 
-The builder also carries `WithAutoEjectTimeout`, `WithChallengeResponseTimeout`, `WithNfcRestricted`, and
-`WithDeviceFlags`, which takes a byte such as `(byte)DeviceFlags.TouchEject`. At least one USB capability must
-remain enabled; `Build()` rejects zero.
+`DeviceConfig` is a record whose properties mirror `DeviceInfo`: `UsbEnabled`, `NfcEnabled`, `AutoEjectTimeout`,
+`ChallengeResponseTimeout`, `DeviceFlags` and `NfcRestricted`. Leave a property `null` to keep the device's
+current value, so deriving from what the key reports is a one-liner:
+`new DeviceConfig { UsbEnabled = info.UsbEnabled & ~DeviceCapabilities.Otp }`. At least one USB capability must
+remain enabled; `SetDeviceConfigAsync` rejects `DeviceCapabilities.None` before anything is sent.
 
 ### Lock the configuration
 
@@ -94,7 +101,7 @@ try
 {
     // Persist lockCode in your secret store first. It cannot be recovered.
     await session.SetDeviceConfigAsync(
-        DeviceConfig.CreateBuilder().Build(),
+        new DeviceConfig(),
         new SetDeviceConfigOptions { NewLockCode = lockCode });
 }
 finally

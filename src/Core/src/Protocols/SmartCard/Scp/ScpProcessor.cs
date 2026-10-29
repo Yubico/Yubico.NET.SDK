@@ -28,6 +28,7 @@ internal class ScpProcessor(
 {
     // SCP Constants
     private const byte ClaBitSecureMessaging = 0x04; // Bit 2 in CLA byte indicates secure messaging
+    private const byte InsExternalAuthenticate = 0x82;
     private const int MacLength = 8; // AES-CMAC output truncated to 8 bytes
 
     private readonly ApduFormatterExtended _apduFormatterExtended = new(SmartCardMaxApduSizes.Yk43);
@@ -41,6 +42,10 @@ internal class ScpProcessor(
     ///     Disposes the SCP state, zeroing all session keys.
     /// </summary>
     public void Dispose() => State.Dispose();
+
+    /// <summary>9000, 62xx and 63xx: the status words a card answers with an R-MAC (SCP03 Amd D §6.2.5).</summary>
+    private static bool IsSuccessOrWarning(short sw) =>
+        sw == SWConstants.Success || (sw & 0xFF00) is 0x6200 or 0x6300;
 
     /// <summary>
     ///     Transmits a command APDU with optional SCP encryption and MAC.
@@ -59,9 +64,14 @@ internal class ScpProcessor(
 
         byte[]? scpCommandData = null;
         byte[]? finalCommandData = null;
-        byte[]? mac = null;
         byte[]? encryptedData = null; // Declared here so finally can zero it (T11)
         Memory<byte> formattedApdu = default;
+
+        // Encrypt() advances the encryption counter and Mac() advances the MAC chain, both before the
+        // command reaches the card. A failure before either leaves host and card provably in step, so
+        // the session stays usable. A failure after either (provider, transport, bad R-MAC) means the
+        // host's state moved and the card's may or may not have: no later command can be trusted to
+        // chain correctly, so the protocol must latch "recovery required" with the original failure.
         var stateAdvanced = false;
 
         try
@@ -108,11 +118,9 @@ internal class ScpProcessor(
             var leLength = isExtendedApdu ? 2 : 1;
             var macLength = apduToMac.Length - MacLength - leLength;
 
-            mac = State.Mac(apduToMac[..macLength]);
+            // Step 7: Compute the MAC straight into the reserved slot in the last 8 bytes
+            State.Mac(apduToMac[..macLength], macedData.Span[commandData.Length..]);
             stateAdvanced = true;
-
-            // Step 7: Fill in the MAC in the last 8 bytes
-            mac.AsSpan().CopyTo(macedData.Span[commandData.Length..]);
 
             // Step 8: Create final command with MAC filled in
             finalCommandData = macedData.Span.ToArray();
@@ -132,15 +140,34 @@ internal class ScpProcessor(
                 // regardless of whether the command data was encrypted
                 if (unmacdData.Length > 0)
                 {
-                    var decryptedData = State.Decrypt(unmacdData);
-                    return new ApduResponse(decryptedData, response.SW);
+                    try
+                    {
+                        return new ApduResponse(State.Decrypt(unmacdData), response.SW);
+                    }
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(unmacdData);
+                    }
                 }
 
                 return new ApduResponse(unmacdData, response.SW);
             }
 
+            // No data field. The card puts an R-MAC on every success or warning response, data or not
+            // (SCP03 Amd D §6.2.5), and none on an error. The one unauthenticated success is the
+            // EXTERNAL AUTHENTICATE reply, which precedes the R-MAC session. Anything else claiming
+            // success without an R-MAC did not come from the card.
+            if (IsSuccessOrWarning(response.SW) && command.Ins != InsExternalAuthenticate)
+            {
+                throw new BadResponseException(
+                    $"Response with status 0x{response.SW:X4} carries no R-MAC; every success under SCP is authenticated.");
+            }
+
             return response;
         }
+        // Includes cancellation: a token observed after Encrypt()/Mac() still leaves the counter or
+        // chain advanced. Report the original failure to the protocol so it refuses further exchanges
+        // (see PcscProtocol.MarkRecoveryRequired), then rethrow unchanged: no wrapping, no replay.
         catch (Exception ex) when (stateAdvanced)
         {
             onSecureFailure?.Invoke(ex);
@@ -152,7 +179,6 @@ internal class ScpProcessor(
             CryptographicOperations.ZeroMemory(formattedApdu.Span);
             CryptographicOperations.ZeroMemory(scpCommandData.AsSpan());
             CryptographicOperations.ZeroMemory(finalCommandData.AsSpan());
-            CryptographicOperations.ZeroMemory(mac.AsSpan());
         }
     }
 

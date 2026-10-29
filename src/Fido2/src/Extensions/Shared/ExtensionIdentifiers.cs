@@ -87,15 +87,6 @@ public static class ExtensionIdentifiers
     /// </remarks>
     public const string MinPinLength = "minPinLength";
 
-    /// <summary>
-    /// The prf extension identifier (WebAuthn).
-    /// </summary>
-    /// <remarks>
-    /// Pseudo-random function extension. WebAuthn-level extension that
-    /// maps to hmac-secret at the CTAP level. Allows deriving secrets
-    /// from arbitrary inputs.
-    /// </remarks>
-    public const string Prf = "prf";
 
     /// <summary>
     /// The previewSign extension identifier (CTAP v4).

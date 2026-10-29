@@ -26,7 +26,7 @@ This skill provides **domain expertise** for comparing and porting functionality
 2. **Yubico.NET.SDK (C# - Current)** - This repository
    - Modern .NET implementation
    - Target: .NET 10, C# 14
-   - Active development in branches prefixed with `yubikit-*`
+   - Lives only on the `yubikit` branch and `yubikit-*` branches (`develop`/`main` are the legacy v1 SDK)
 
 3. **Yubico.NET.SDK (C# - Legacy)** - `./legacy-develop/` (git worktree)
    - Git worktree with legacy implementation

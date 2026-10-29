@@ -82,38 +82,52 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        // Read first entry
-        _console.Write(options.Prompt);
-        var first = ReadCredentialCore(options, cancellationToken);
-        if (first is null)
+        IMemoryOwner<byte>? first = null;
+        IMemoryOwner<byte>? second = null;
+        var returnFirst = false;
+
+        try
         {
-            return null;
-        }
+            // Same mode selection as ReadCredential: masked keystrokes on a console, line input when
+            // redirected (Console.KeyAvailable throws there). The non-interactive warning prints once.
+            var interactive = _console.IsInteractive;
+            if (!interactive)
+            {
+                WriteNonInteractiveWarning();
+            }
 
-        // Read confirmation
-        _console.Write(options.ConfirmPrompt);
-        var second = ReadCredentialCore(options, cancellationToken);
-        if (second is null)
+            first = ReadEntry(options.Prompt, interactive, options, cancellationToken);
+            if (first is null)
+            {
+                return null;
+            }
+
+            second = ReadEntry(options.ConfirmPrompt, interactive, options, cancellationToken);
+            if (second is null)
+            {
+                return null;
+            }
+
+            bool match = first.Memory.Length == second.Memory.Length &&
+                         CryptographicOperations.FixedTimeEquals(first.Memory.Span, second.Memory.Span);
+            if (!match)
+            {
+                _console.WriteLine("Credentials do not match.");
+                return null;
+            }
+
+            returnFirst = true;
+            return first;
+        }
+        finally
         {
-            first.Dispose();
-            return null;
+            // Both entries are cleared on every path except the one that hands `first` to the caller.
+            second?.Dispose();
+            if (!returnFirst)
+            {
+                first?.Dispose();
+            }
         }
-
-        // Compare using timing-safe method
-        bool match = first.Memory.Length == second.Memory.Length &&
-                     CryptographicOperations.FixedTimeEquals(first.Memory.Span, second.Memory.Span);
-
-        if (!match)
-        {
-            first.Dispose();
-            second.Dispose();
-            _console.WriteLine("Credentials do not match.");
-            return null;
-        }
-
-        // Return first, dispose second
-        second.Dispose();
-        return first;
     }
 
     private IMemoryOwner<byte>? ReadInteractive(CredentialReaderOptions options, CancellationToken cancellationToken)
@@ -122,11 +136,26 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         return ReadCredentialCore(options, cancellationToken);
     }
 
+    private IMemoryOwner<byte>? ReadEntry(string prompt, bool interactive, CredentialReaderOptions options, CancellationToken cancellationToken)
+    {
+        _console.Write(prompt);
+        return interactive
+            ? ReadCredentialCore(options, cancellationToken)
+            : ReadLineEntry(options);
+    }
+
+    private void WriteNonInteractiveWarning() =>
+        _console.WriteLine("Warning: Running in non-interactive mode. Input will not be masked.");
+
     private IMemoryOwner<byte>? ReadNonInteractive(CredentialReaderOptions options)
     {
-        _console.WriteLine("Warning: Running in non-interactive mode. Input will not be masked.");
+        WriteNonInteractiveWarning();
         _console.Write(options.Prompt);
+        return ReadLineEntry(options);
+    }
 
+    private IMemoryOwner<byte>? ReadLineEntry(CredentialReaderOptions options)
+    {
         string? line = _console.ReadLine();
         if (line is null)
         {
@@ -135,6 +164,14 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
 
         try
         {
+            // Hex mode validates in ParseHex. Text mode must apply the same policy the interactive
+            // path enforces keystroke by keystroke; reject rather than filter, so the credential the
+            // device receives is always exactly what was supplied.
+            if (!options.IsHexMode && !SatisfiesPolicy(line.AsSpan(), options))
+            {
+                return null;
+            }
+
             return ConvertToResult(line.AsSpan(), options);
         }
         finally
@@ -142,6 +179,32 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
             // Can't zero a managed string, but we minimize exposure
             line = null;
         }
+    }
+
+    private bool SatisfiesPolicy(ReadOnlySpan<char> input, CredentialReaderOptions options)
+    {
+        if (input.Length < options.MinLength)
+        {
+            _console.WriteLine($"Input too short. Minimum {options.MinLength} characters required.");
+            return false;
+        }
+
+        if (input.Length > options.MaxLength)
+        {
+            _console.WriteLine($"Input too long. Maximum {options.MaxLength} characters allowed.");
+            return false;
+        }
+
+        foreach (char c in input)
+        {
+            if (char.IsControl(c) || (options.CharacterFilter is not null && !options.CharacterFilter(c)))
+            {
+                _console.WriteLine("Input contains characters that are not allowed.");
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private IMemoryOwner<byte>? ReadCredentialCore(CredentialReaderOptions options, CancellationToken cancellationToken)

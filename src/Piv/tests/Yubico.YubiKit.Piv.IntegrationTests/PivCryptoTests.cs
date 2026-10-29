@@ -100,6 +100,7 @@ public class PivCryptoTests
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
+    [Trait("Audit", "YESDK-1632")]
     public async Task SignOrDecryptAsync_Ed25519_ProducesSignature(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreatePivSessionAsync();
@@ -123,9 +124,22 @@ public class PivCryptoTests
         var curve25519Key = (Curve25519PublicKey)publicKey;
         Assert.Equal(KeyDefinitions.Ed25519.LengthInBytes, curve25519Key.PublicPoint.Length);
 
-        // NOTE: .NET 10 does not support Ed25519 signature verification.
-        // Full verification would require OpenSSL or BouncyCastle.
-        // This test verifies signature format only.
+        // .NET has no Ed25519 verifier, so use determinism (RFC 8032 §8.2) to show the message reaches
+        // the key unchanged: a message and its zero-padded form, and two long messages sharing their
+        // first 32 bytes, must produce different signatures. A client that padded or truncated the
+        // message to 32 bytes would produce identical ones.
+        byte[] paddedTo32 = new byte[32];
+        dataToSign.CopyTo(paddedTo32, 0);
+        var paddedSignature = await session.SignOrDecryptAsync(PivSlot.Signature, PivAlgorithm.Ed25519, paddedTo32);
+        Assert.NotEqual(signature.ToArray(), paddedSignature.ToArray());
+
+        byte[] long1 = Enumerable.Range(1, 64).Select(i => (byte)i).ToArray();
+        byte[] long2 = (byte[])long1.Clone();
+        long2[63] ^= 0xFF;
+        var longSignature1 = await session.SignOrDecryptAsync(PivSlot.Signature, PivAlgorithm.Ed25519, long1);
+        var longSignature2 = await session.SignOrDecryptAsync(PivSlot.Signature, PivAlgorithm.Ed25519, long2);
+        Assert.NotEqual(longSignature1.ToArray(), longSignature2.ToArray());
+        Assert.Equal(longSignature1.ToArray(), (await session.SignOrDecryptAsync(PivSlot.Signature, PivAlgorithm.Ed25519, long1)).ToArray());
     }
 
     [SkippableTheory]

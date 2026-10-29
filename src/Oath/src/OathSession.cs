@@ -19,7 +19,6 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
@@ -38,9 +37,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private static readonly Feature FeatureScp03 = new("SCP03 for OATH", 5, 6, 3);
 
     private readonly ILogger _logger;
-    private readonly ScpKeyParameters? _scpKeyParams;
 
-    private ISmartCardProtocol _protocol = null!;
     private IOathBackend _backend = null!;
     private byte[] _salt = [];
     private byte[] _challenge = [];
@@ -59,53 +56,31 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
     private OathSession(
         ISmartCardConnection connection,
-        ScpKeyParameters? scpKeyParams = null,
         IUserPresencePrompt? userPresencePrompt = null)
         : base(connection, userPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        _scpKeyParams = scpKeyParams;
         _logger = Logger;
     }
 
     /// <summary>
     ///     Creates and initializes an OATH session.
     /// </summary>
-    public static async Task<OathSession> CreateAsync(
+    public static Task<OathSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var configuration = options?.ProtocolConfiguration;
-        var scpKeyParams = options?.ScpKeyParameters;
-        var firmwareVersionOverride = options?.FirmwareVersionOverride;
-        var userPresencePrompt = options?.UserPresencePrompt;
-
-        ValidatePreferredConnectionType(connection, options);
-
-        // A session that fails to initialize must not keep its claim on the connection: the connection
-        // outlives it, and the next session over it would otherwise be refused forever.
-        var session = Construct(
+        CancellationToken cancellationToken = default) =>
+        ConstructInitializedAsync(
             connection,
-            () => new OathSession(connection, scpKeyParams, userPresencePrompt));
-        try
-        {
-            await session.InitializeAsync(
-                    CreateOathProtocolConfiguration(configuration),
-                    firmwareVersionOverride,
-                    cancellationToken)
-                .ConfigureAwait(false);
-            return session;
-        }
-        catch
-        {
-            session.DisposeAfterInitializationFailure();
-            throw;
-        }
-    }
+            options,
+            () => new OathSession(connection, options?.UserPresencePrompt),
+            (session, token) => session.InitializeAsync(
+                CreateOathProtocolConfiguration(options?.ProtocolConfiguration),
+                options?.FirmwareVersionOverride,
+                options?.ScpKeyParameters,
+                token),
+            cancellationToken);
 
     private static ProtocolConfiguration CreateOathProtocolConfiguration(ProtocolConfiguration? configuration) =>
         (configuration ?? default) with { InsSendRemaining = OathConstants.InsSendRemaining };
@@ -113,19 +88,20 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
+        ScpKeyParameters? scpKeyParams,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = ProtocolFactory.Create((ISmartCardConnection)Connection);
-        Protocol = protocol;
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
+            .ConfigureAwait(false);
         IOathBackend backend = new OathBackend(protocol);
 
-        var initialization = await backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
         ApplyInitialization(initialization, firmwareVersionOverride);
 
-        if (_scpKeyParams is not null)
+        if (scpKeyParams is not null)
         {
             if (!IsSupported(FeatureScp03))
             {
@@ -135,11 +111,11 @@ public sealed class OathSession : ApplicationSession, IOathSession
             }
         }
 
-        var effectiveProtocol = (ISmartCardProtocol)await InitializeProtocolAsync(
+        var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
                 FirmwareVersion,
                 configuration,
-                _scpKeyParams,
+                scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -148,7 +124,6 @@ public sealed class OathSession : ApplicationSession, IOathSession
             backend = new OathBackend(effectiveProtocol);
         }
 
-        _protocol = effectiveProtocol;
         _backend = backend;
 
         _logger.LogDebug("OATH session initialized, DeviceId={DeviceId}, IsLocked={IsLocked}", DeviceId, IsLocked);
@@ -167,6 +142,20 @@ public sealed class OathSession : ApplicationSession, IOathSession
         DeviceId = ComputeDeviceId(_salt);
         IsLocked = _challenge.Length > 0;
         IsPasswordProtected = IsLocked;
+    }
+
+    /// <summary>
+    ///     A <see cref="Credential" /> names the device it was read from. Sending its ID to a different
+    ///     device would act on whichever credential there happens to share the name.
+    /// </summary>
+    private void ThrowIfFromAnotherDevice(Credential credential)
+    {
+        if (credential.DeviceId != DeviceId)
+        {
+            throw new ArgumentException(
+                $"The credential belongs to OATH device '{credential.DeviceId}', not to this session's device '{DeviceId}'.",
+                nameof(credential));
+        }
     }
 
     internal static string ComputeDeviceId(ReadOnlySpan<byte> salt)
@@ -218,7 +207,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
             var oathType = (OathType)(typeByte & OathConstants.MaskType);
             var credentialId = value[1..].ToArray();
 
-            var (issuer, name, period) = Credential.ParseCredentialId(credentialId, oathType);
+            if (!TryParseCredentialId(credentialId, oathType, "LIST", out var issuer, out var name, out var period))
+                continue;
 
             credentials.Add(new Credential(
                 DeviceId,
@@ -337,6 +327,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
 
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         var command = new ApduCommand(0x00, OathConstants.InsDelete, 0x00, 0x00, nameTlv.AsMemory());
@@ -352,6 +343,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
         EnsureSupports(FeatureRenameCredential);
 
         ReadOnlyMemory<byte> oldId = credential.Id;
@@ -389,6 +381,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
 
         using var nameTlv = new Tlv(OathConstants.TagName, credential.Id);
         using var challengeTlv = new Tlv(OathConstants.TagChallenge, challenge);
@@ -441,12 +434,18 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credential);
+        ThrowIfFromAnotherDevice(credential);
 
         long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         byte[] challenge;
 
         if (credential.OathType == OathType.Totp)
         {
+            // RFC 6238 §4.2: T = floor((now - T0) / X). Credentials read from the device are already
+            // validated; this guards a Credential built by the caller.
+            if (credential.Period <= 0)
+                throw new ArgumentException("TOTP credential period must be positive (RFC 6238 §4.1).", nameof(credential));
+
             long timeStep = ts / credential.Period;
             challenge = new byte[OathConstants.ChallengeLength];
             BinaryPrimitives.WriteInt64BigEndian(challenge, timeStep);
@@ -517,6 +516,36 @@ public sealed class OathSession : ApplicationSession, IOathSession
         };
     }
 
+    /// <summary>
+    ///     Parses a credential ID from a device response. A malformed ID (for example a TOTP period
+    ///     prefix of 0, written by another client) is logged by length and skipped, so one bad entry
+    ///     does not hide the rest of the device's credentials.
+    /// </summary>
+    private bool TryParseCredentialId(
+        byte[] credentialId,
+        OathType oathType,
+        string instruction,
+        out string? issuer,
+        out string name,
+        out int period)
+    {
+        try
+        {
+            (issuer, name, period) = Credential.ParseCredentialId(credentialId, oathType);
+            return true;
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex,
+                "Skipping credential with malformed ID (length {Length}) in {Instruction} response",
+                credentialId.Length, instruction);
+            issuer = null;
+            name = string.Empty;
+            period = 0;
+            return false;
+        }
+    }
+
     /// <inheritdoc />
     public async Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(
         long? timestamp = null,
@@ -559,7 +588,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
             // a type byte before the credential ID.
             var credentialId = nameTlv.Value.ToArray();
             var oathType = responseTlv.Tag == OathConstants.TagHotp ? OathType.Hotp : OathType.Totp;
-            var (issuer, name, period) = Credential.ParseCredentialId(credentialId, oathType);
+            if (!TryParseCredentialId(credentialId, oathType, "CALCULATE ALL", out var issuer, out var name, out var period))
+                continue;
 
             bool touchRequired = responseTlv.Tag == OathConstants.TagTouch;
             var credential = new Credential(DeviceId, credentialId, issuer, name, oathType, period, touchRequired);
@@ -590,7 +620,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
         // Re-select and re-parse to get new state
-        var initialization = await _backend.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        var initialization = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
         // Preserve the effective version selected at creation; reset refreshes applet state, not caller policy.
         ApplyInitialization(initialization, FirmwareVersion);
 

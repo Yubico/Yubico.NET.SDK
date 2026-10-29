@@ -18,7 +18,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
+using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -85,13 +88,7 @@ public class ManagementSessionTests
         var backend = new CapturingBackend();
         var session = CreateSessionForBackend(backend);
         var lockCode = Enumerable.Repeat((byte)0xA5, 16).ToArray();
-        var config = new DeviceConfig
-        {
-            EnabledCapabilities = new Dictionary<Transport, int>
-            {
-                [Transport.Usb] = 1
-            }
-        };
+        var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Otp };
 
         await session.SetDeviceConfigAsync(
             config,
@@ -103,15 +100,31 @@ public class ManagementSessionTests
     }
 
     [Fact]
-    public async Task SmartCardBackend_DeviceResetAsync_SendsDeviceResetApdu()
+    public async Task ResetDeviceAsync_SmartCard_SendsDeviceResetApdu()
     {
         var protocol = new RecordingSmartCardProtocol();
         var backend = new SmartCardBackend(protocol);
+        var session = CreateSessionForBackend(backend, new FirmwareVersion(5, 6, 0));
 
-        await backend.DeviceResetAsync(TestContext.Current.CancellationToken);
+        await session.ResetDeviceAsync(TestContext.Current.CancellationToken);
 
         var command = Assert.Single(protocol.Commands);
         Assert.Equal(0x1F, command.Ins);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ResetDeviceAsync_Hid_RejectsWithoutProtocolIo(bool useFido)
+    {
+        using var protocol = new InertHidProtocol();
+        IManagementBackend backend = useFido ? new FidoHidBackend(protocol) : new OtpBackend(protocol);
+        var session = CreateSessionForBackend(backend, new FirmwareVersion(5, 6, 0));
+
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() =>
+            session.ResetDeviceAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal("Device reset is only available over SmartCard (CCID) connections.", exception.Message);
     }
 
     /// <summary>
@@ -143,10 +156,7 @@ public class ManagementSessionTests
 
         _ = await Assert.ThrowsAsync<ObjectDisposedException>(
             () => session.SetDeviceConfigAsync(
-                new DeviceConfig
-                {
-                    EnabledCapabilities = new Dictionary<Transport, int> { [Transport.Usb] = 1 }
-                },
+                new DeviceConfig { UsbEnabled = DeviceCapabilities.Otp },
                 cancellationToken: TestContext.Current.CancellationToken));
     }
 
@@ -171,7 +181,7 @@ public class ManagementSessionTests
             typeof(ManagementSession),
             BindingFlags.Instance | BindingFlags.NonPublic,
             binder: null,
-            [new InertSmartCardConnection(), null],
+            [new InertSmartCardConnection()],
             culture: null)!;
 
         typeof(ApplicationSession)
@@ -181,7 +191,9 @@ public class ManagementSessionTests
         return session;
     }
 
-    private static ManagementSession CreateSessionForBackend(IManagementBackend backend)
+    private static ManagementSession CreateSessionForBackend(
+        IManagementBackend backend,
+        FirmwareVersion? firmwareVersion = null)
     {
         var session = (ManagementSession)RuntimeHelpers.GetUninitializedObject(typeof(ManagementSession));
 
@@ -191,7 +203,7 @@ public class ManagementSessionTests
 
         typeof(ApplicationSession)
             .GetProperty(nameof(ApplicationSession.FirmwareVersion))!
-            .SetValue(session, new FirmwareVersion(5, 0, 0));
+            .SetValue(session, firmwareVersion ?? new FirmwareVersion(5, 0, 0));
 
         return session;
     }
@@ -200,9 +212,6 @@ public class ManagementSessionTests
     {
         public ReadOnlyMemory<byte> CapturedConfig { get; private set; }
         public bool SawNonZeroConfig { get; private set; }
-
-        public ValueTask<FirmwareVersion?> InitializeAsync(CancellationToken cancellationToken = default) =>
-            ValueTask.FromResult<FirmwareVersion?>(new FirmwareVersion(5, 0, 0));
 
         public ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken = default)
         {
@@ -214,8 +223,34 @@ public class ManagementSessionTests
         public ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
-        public ValueTask DeviceResetAsync(CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
+    }
+
+    private sealed class InertHidProtocol : IFidoHidProtocol, IOtpHidProtocol
+    {
+        public bool IsChannelInitialized => true;
+        public FirmwareVersion? FirmwareVersion => new FirmwareVersion(5, 6, 0);
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("Unexpected protocol initialization.");
+
+        public Task<ReadOnlyMemory<byte>> SendVendorCommandAsync(
+            byte command,
+            ReadOnlyMemory<byte> data,
+            UserPresenceNotification userPresenceNotification,
+            CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("Unexpected FIDO exchange.");
+
+        public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
+            byte slot,
+            ReadOnlyMemory<byte> data,
+            CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("Unexpected OTP exchange.");
+
+        public Task<ReadOnlyMemory<byte>> ReadStatusAsync(CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("Unexpected status read.");
+
+        public void Configure(FirmwareVersion version, ProtocolConfiguration? configuration = null) { }
+        public void Dispose() { }
     }
 
     private sealed class UnsupportedConnection : IConnection

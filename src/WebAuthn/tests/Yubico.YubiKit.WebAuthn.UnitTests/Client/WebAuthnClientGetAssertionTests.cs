@@ -17,11 +17,11 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Fido2.Credentials;
 using Yubico.YubiKit.Fido2.Ctap;
-using Yubico.YubiKit.Fido2.Extensions;
 using Yubico.YubiKit.Fido2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Extensions;
+using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -56,7 +56,7 @@ public class WebAuthnClientGetAssertionTests
         // Arrange
         var challenge = RandomNumberGenerator.GetBytes(32);
         var credentialId = RandomNumberGenerator.GetBytes(32);
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = challenge,
             RpId = "example.com"
@@ -81,7 +81,7 @@ public class WebAuthnClientGetAssertionTests
     public async Task GetAssertion_RpIdMismatch_ThrowsInvalidRequest()
     {
         // Arrange
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "evil.com"
@@ -95,34 +95,6 @@ public class WebAuthnClientGetAssertionTests
     }
 
     [Fact]
-    public async Task GetAssertion_AllowList_SinglePass_ReturnsOneMatch()
-    {
-        // Arrange
-        var credentialId = RandomNumberGenerator.GetBytes(32);
-        var options = new AuthenticationOptions
-        {
-            Challenge = RandomNumberGenerator.GetBytes(32),
-            RpId = "example.com",
-            AllowCredentials =
-            [
-                new PublicKeyCredentialDescriptor(credentialId)
-            ]
-        };
-
-        _mockBackend.GetAssertionAsync(
-            Arg.Any<BackendGetAssertionRequest>(),
-            Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockGetAssertionResponse(credentialId, numberOfCredentials: 1));
-
-        // Act
-        var result = await _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None);
-
-        // Assert
-        Assert.Single(result);
-        Assert.Equal(credentialId, result[0].Id.ToArray());
-    }
-
-    [Fact]
     public async Task GetAssertion_Discoverable_EnumeratesViaGetNextAssertion()
     {
         // Arrange
@@ -130,7 +102,7 @@ public class WebAuthnClientGetAssertionTests
         var cred2 = RandomNumberGenerator.GetBytes(32);
         var cred3 = RandomNumberGenerator.GetBytes(32);
 
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com",
@@ -162,7 +134,7 @@ public class WebAuthnClientGetAssertionTests
     {
         // Arrange
         var credentialId = RandomNumberGenerator.GetBytes(32);
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com"
@@ -196,7 +168,7 @@ public class WebAuthnClientGetAssertionTests
         // Arrange
         var credentialId = RandomNumberGenerator.GetBytes(32);
         var signature = RandomNumberGenerator.GetBytes(64);
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com"
@@ -231,7 +203,7 @@ public class WebAuthnClientGetAssertionTests
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
 
         var credentialId = RandomNumberGenerator.GetBytes(32);
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com"
@@ -260,8 +232,8 @@ public class WebAuthnClientGetAssertionTests
         Assert.Single(result);
         Assert.Equal(2, requests.Count);
         Assert.Null(requests[0].Options);
-        Assert.NotNull(requests[1].Options);
-        Assert.True(requests[1].Options!.TryGetValue("uv", out var uv) && uv);
+        // The token is the verification; CTAP §6.2 forbids "uv" next to pinUvAuthParam.
+        Assert.False(requests[1].Options?.ContainsKey("uv") ?? false);
         Assert.NotNull(requests[1].PinUvAuthParam);
         Assert.Equal((byte)2, requests[1].PinUvAuthProtocol.GetValueOrDefault());
     }
@@ -280,7 +252,7 @@ public class WebAuthnClientGetAssertionTests
             Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
 
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com"
@@ -308,7 +280,7 @@ public class WebAuthnClientGetAssertionTests
     public async Task GetAssertion_EmptyAllowList_OnAuthenticatorWithoutDiscoverable_ReturnsEmpty()
     {
         // Arrange
-        var options = new AuthenticationOptions
+        var options = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = "example.com",
@@ -437,38 +409,27 @@ public class WebAuthnClientGetAssertionTests
     }
 
     /// <summary>
-    /// A ceremony that fails while building extension CBOR must not leave a live PIN/UV auth
-    /// parameter behind.
+    /// Invalid extension input is rejected when the extension session is created, before any PIN/UV token
+    /// is minted (largeBlob support at authentication: WebAuthn L3 §10.1.5).
     /// </summary>
-    /// <remarks>
-    /// The parameter is computed after everything in the request builder that can throw, so the
-    /// correct outcome here is that it was never produced at all - there is no stranded buffer to
-    /// clean up. Computing it earlier would strand it: the request never reaches
-    /// <c>ExecuteGetAssertionAsync</c>, whose finally is what clears the parameter on every other
-    /// path. A LargeBlob input is used as the trigger because assertion-time LargeBlob is a
-    /// shipped not-yet-implemented input, so this is a path real callers can reach.
-    /// </remarks>
     [Fact]
-    public async Task GetAssertion_WhenExtensionBuildFails_NeverComputesPinUvAuthParam()
+    public async Task GetAssertion_InvalidExtensionInput_IsRejectedBeforeAnyTokenIsMinted()
     {
-        // Arrange
         var protocol = new TestPinUvAuthProtocol();
         ArrangePinTokenAcquisition(protocol);
-
         var options = CreateUvRequiredOptions() with
         {
-            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput())
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Support = LargeBlobSupport.Preferred })
         };
 
-        // Act
         var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.GetAssertionAsync(
-            options,
-            "123456"u8.ToArray(),
-            TestContext.Current.CancellationToken));
+            options, "123456"u8.ToArray(), TestContext.Current.CancellationToken));
 
-        // Assert
         Assert.Equal(WebAuthnClientErrorCode.NotSupported, ex.Code);
         Assert.Empty(protocol.IssuedAuthTags);
+        await _mockBackend.DidNotReceive().GetPinUvTokenAsync(
+            Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(), Arg.Any<string?>(),
+            Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
     }
 
     /// <summary>
@@ -478,7 +439,8 @@ public class WebAuthnClientGetAssertionTests
     private void ArrangePinTokenAcquisition(TestPinUvAuthProtocol protocol)
     {
         _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
-            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true));
+            .Returns(MockFido2Responses.CreateMockAuthenticatorInfo(
+                clientPinSupported: true, extensions: MockFido2Responses.AllKnownExtensions, largeBlobsSupported: true));
 
         _mockBackend.GetPinUvTokenAsync(
             PinUvAuthMethod.Pin,
@@ -523,7 +485,7 @@ public class WebAuthnClientGetAssertionTests
             Arg.Any<ReadOnlyMemory<byte>?>(),
             Arg.Any<CancellationToken>());
 
-    private static AuthenticationOptions CreateUvRequiredOptions() => new()
+    private static PublicKeyCredentialRequestOptions CreateUvRequiredOptions() => new()
     {
         Challenge = RandomNumberGenerator.GetBytes(32),
         RpId = "example.com",

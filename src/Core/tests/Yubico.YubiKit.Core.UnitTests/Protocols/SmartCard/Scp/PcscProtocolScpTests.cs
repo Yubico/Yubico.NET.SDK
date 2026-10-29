@@ -294,12 +294,12 @@ public class PcscProtocolScpTests
     {
         // Arrange
         var rawProcessor = new FakeApduProcessor();
-        rawProcessor.EnqueueResponse(0x61, 0x01);
-        rawProcessor.EnqueueResponse(0x90, 0x00);
-
         using var state = new ScpState(
             new SessionKeys(new byte[16], new byte[16], new byte[16]),
             new byte[16]);
+        rawProcessor.EnqueueResponse(0x61, 0x01);
+        // The final chunk is the card's answer and carries the R-MAC for the current chain.
+        rawProcessor.EnqueueResponse(() => new ApduResponse(SignedEmptySuccess(state)));
 
         var secureProcessor = ScpInitializer.CreateSecureProcessor(
             rawProcessor,
@@ -539,8 +539,8 @@ public class PcscProtocolScpTests
     [Fact]
     public async Task ValidationBeforeCommandMac_DoesNotReportSecureFailure()
     {
-        var rawProcessor = new RecordingApduProcessor(new ApduFormatterExtended(SmartCardMaxApduSizes.Yk43));
         using var state = CreateZeroedScpState();
+        var rawProcessor = new RecordingApduProcessor(new ApduFormatterExtended(SmartCardMaxApduSizes.Yk43), state);
         var failures = new List<Exception>();
         using var processor = new ScpProcessor(rawProcessor, state, failures.Add);
 
@@ -730,8 +730,8 @@ public class PcscProtocolScpTests
     [Fact]
     public async Task TransmitAsync_ShortFormatter_MacInputExcludesAppendedLe()
     {
-        var rawProcessor = new RecordingApduProcessor(new ApduFormatterShort());
         using var state = CreateZeroedScpState();
+        var rawProcessor = new RecordingApduProcessor(new ApduFormatterShort(), state);
         using var processor = new ScpProcessor(rawProcessor, state);
 
         var commandData = new byte[] { 0x01, 0x02, 0x03 };
@@ -748,8 +748,8 @@ public class PcscProtocolScpTests
     [Fact]
     public async Task TransmitAsync_ExtendedFormatter_MacInputExcludesAppendedLe()
     {
-        var rawProcessor = new RecordingApduProcessor(new ApduFormatterExtended(SmartCardMaxApduSizes.Yk43));
         using var state = CreateZeroedScpState();
+        var rawProcessor = new RecordingApduProcessor(new ApduFormatterExtended(SmartCardMaxApduSizes.Yk43), state);
         using var processor = new ScpProcessor(rawProcessor, state);
 
         var commandData = new byte[] { 0x01, 0x02, 0x03 };
@@ -763,16 +763,23 @@ public class PcscProtocolScpTests
         Assert.Equal(expectedMac, transmittedData[^8..]);
     }
 
+    /// <summary>An empty 9000 with the R-MAC the card would put on it at the state's current chaining value.</summary>
+    private static byte[] SignedEmptySuccess(ScpState state) =>
+        [.. state.ComputeRmac(ReadOnlySpan<byte>.Empty, SWConstants.Success), 0x90, 0x00];
+
     private static ScpState CreateZeroedScpState() =>
         new(new SessionKeys(new byte[16], new byte[16], new byte[16]), new byte[16]);
 
     private static byte[] ComputeMac(byte[] macInput)
     {
         using var state = CreateZeroedScpState();
-        return state.Mac(macInput);
+        var mac = new byte[8];
+        state.Mac(macInput, mac);
+        return mac;
     }
 
-    private sealed class RecordingApduProcessor(IApduFormatter formatter) : IApduProcessor
+    /// <summary>Answers every command with an empty 9000 carrying the R-MAC the card would compute for it.</summary>
+    private sealed class RecordingApduProcessor(IApduFormatter formatter, ScpState state) : IApduProcessor
     {
         public IApduFormatter Formatter { get; } = formatter;
 
@@ -785,7 +792,7 @@ public class PcscProtocolScpTests
         {
             cancellationToken.ThrowIfCancellationRequested();
             TransmittedCommandData = command.Data.ToArray();
-            return Task.FromResult(new ApduResponse(new byte[] { 0x90, 0x00 }));
+            return Task.FromResult(new ApduResponse(SignedEmptySuccess(state)));
         }
     }
 

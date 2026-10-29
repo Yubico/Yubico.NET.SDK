@@ -26,7 +26,7 @@ internal sealed class PivBackend(ISmartCardProtocol protocol) : IPivBackend
     private readonly ISmartCardProtocol _protocol =
         protocol ?? throw new ArgumentNullException(nameof(protocol));
 
-    public async Task<PivInitialization> InitializeAsync(CancellationToken cancellationToken = default)
+    public async Task<PivInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default)
     {
         await SelectAsync(cancellationToken).ConfigureAwait(false);
 

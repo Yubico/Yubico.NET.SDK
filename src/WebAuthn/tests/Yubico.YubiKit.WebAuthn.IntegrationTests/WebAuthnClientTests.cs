@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 [Trait("Category", "Integration")]
 public class WebAuthnClientTests
 {
-    private static RegistrationOptions CreateRegistrationOptions(
+    private static PublicKeyCredentialCreationOptions CreateRegistrationOptions(
         ReadOnlyMemory<byte>? challenge = null,
         ResidentKeyPreference residentKey = ResidentKeyPreference.Discouraged)
     {
@@ -40,7 +40,7 @@ public class WebAuthnClientTests
         Span<byte> userId = stackalloc byte[16];
         RandomNumberGenerator.Fill(userId);
 
-        return new RegistrationOptions
+        return new PublicKeyCredentialCreationOptions
         {
             Challenge = challenge ?? challengeBytes.ToArray(),
             Rp = new PublicKeyCredentialRpEntity(TestRpId, "Example Corp"),
@@ -136,7 +136,7 @@ public class WebAuthnClientTests
 
         await using var authClient = CreateClient(session2);
 
-        var authOptions = new AuthenticationOptions
+        var authOptions = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,
@@ -190,7 +190,7 @@ public class WebAuthnClientTests
 
         await using var authClient = CreateClient(session2);
 
-        var authOptions = new AuthenticationOptions
+        var authOptions = new PublicKeyCredentialRequestOptions
         {
             Challenge = RandomNumberGenerator.GetBytes(32),
             RpId = TestRpId,

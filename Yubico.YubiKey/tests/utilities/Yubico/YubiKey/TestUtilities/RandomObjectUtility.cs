@@ -14,7 +14,6 @@
 
 using System;
 using System.Security.Cryptography;
-using Moq;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.TestUtilities
@@ -110,7 +109,7 @@ namespace Yubico.YubiKey.TestUtilities
         // have the option of creating this object with a specified seed to get it
         // to return the same bytes (based on that seed) every time. It is
         // "autoseeded".
-        // The second object will be a Mock RandomNumberGenerator, with the
+        // The second object will be a fixed-output RandomNumberGenerator, with the
         // GetBytes methods overridden. If you supply a byte array for the
         // fixedBytes arg, the object returned will "generate" the bytes of that
         // buffer, and only those bytes. As soon as that buffer has been
@@ -160,9 +159,7 @@ namespace Yubico.YubiKey.TestUtilities
         //   void GetBytes(byte[])
         //   void GetBytes(byte[], int, int)
         //
-        // If you get a Mock RNG, you can call other methods, such as GetInt32 or
-        // GetNonZeroBytes, however, the behavior will likely be inappropriate.
-        // If you need more methods overridden, add them to the Mock Setup.
+        // Other RNG methods are not supported by this test utility.
         public static RandomNumberGenerator GetRandomObject(byte[]? fixedBytes)
         {
             if (fixedBytes is null)
@@ -170,17 +167,22 @@ namespace Yubico.YubiKey.TestUtilities
                 return RandomNumberGenerator.Create();
             }
 
-            var mock = new Mock<RandomNumberGenerator>();
-            var redirect = new RandomObjectUtility(fixedBytes);
+            return new FixedBytesRandomNumberGenerator(fixedBytes);
+        }
 
-            // Set up the mock object so that calls to GetBytes will be redirected to
-            // the fixed-output version.
-            _ = mock.Setup(rand => rand.GetBytes(It.IsAny<byte[]>()))
-                .Callback<byte[]>(randomBytes => redirect.GetBytes(randomBytes));
-            _ = mock.Setup(rand => rand.GetBytes(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()))
-                .Callback<byte[], int, int>((randomBytes, offset, count) => redirect.GetBytes(randomBytes, offset, count));
+        private sealed class FixedBytesRandomNumberGenerator : RandomNumberGenerator
+        {
+            private readonly RandomObjectUtility _utility;
 
-            return mock.Object;
+            public FixedBytesRandomNumberGenerator(byte[] fixedBytes)
+            {
+                _utility = new RandomObjectUtility(fixedBytes);
+            }
+
+            public override void GetBytes(byte[] data) => _utility.GetBytes(data);
+
+            public override void GetBytes(byte[] data, int offset, int count) =>
+                _utility.GetBytes(data, offset, count);
         }
 
         // Use this method to load the FixedBytes version of the
@@ -235,7 +237,7 @@ namespace Yubico.YubiKey.TestUtilities
             _original = null;
         }
 
-        // Create a new instance of the Mock RandomNumberGenerator that returns
+        // Create a new instance of the fixed-output RandomNumberGenerator that returns
         // the fixed bytes.
         public RandomNumberGenerator CreateFixedBytesRng()
         {

@@ -180,6 +180,17 @@ set(NATIVE_SHIMS_SOURCES
     ssl.cmac.c          # OpenSSL CMAC operations
     )
 
+if(APPLE)
+    include(cmake/hidinput-common.cmake)
+    list(APPEND NATIVE_SHIMS_SOURCES
+        ${HIDINPUT_COMMON_SOURCES}
+        hidinput/native_exports.c)
+    target_compile_options(Yubico.NativeShims PRIVATE ${HIDINPUT_COMPILE_OPTIONS})
+    if(YUBICO_BUILD_STATIC)
+        target_compile_options(Yubico.NativeShims.Static PRIVATE ${HIDINPUT_COMPILE_OPTIONS})
+    endif()
+endif()
+
 target_sources(Yubico.NativeShims PRIVATE ${NATIVE_SHIMS_SOURCES})
 if(YUBICO_BUILD_STATIC)
     target_sources(Yubico.NativeShims.Static PRIVATE ${NATIVE_SHIMS_SOURCES})
@@ -205,6 +216,10 @@ target_link_libraries(
         ${PCSC_CUSTOM_LIBS}     # Cross-compilation overrides
         OpenSSL::Crypto         # libcrypto (static via vcpkg on Windows)
         )
+
+if(APPLE)
+    target_link_libraries(Yubico.NativeShims ${HIDINPUT_FRAMEWORKS})
+endif()
 
 if(YUBICO_BUILD_STATIC)
     # PC/SC remains a final-consumer dependency. OpenSSL supplies include paths

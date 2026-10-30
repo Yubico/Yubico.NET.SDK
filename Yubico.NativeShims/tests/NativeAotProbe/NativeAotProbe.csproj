@@ -4,14 +4,14 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- build-nativeshims.yml passes -p:NativeShimsVersion=<exact version> to pin the probe to the
+         package produced by the current build. Generic tooling (e.g. dependency-submission restores)
+         that doesn't set it falls back to the same floating range used by Yubico.Core.csproj. -->
+    <_NativeShimsProbeVersion Condition="'$(NativeShimsVersion)' != ''">[$(NativeShimsVersion)]</_NativeShimsProbeVersion>
+    <_NativeShimsProbeVersion Condition="'$(NativeShimsVersion)' == ''">1.*-*</_NativeShimsProbeVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Yubico.NativeShims" Version="[$(NativeShimsVersion)]" />
+    <PackageReference Include="Yubico.NativeShims" Version="$(_NativeShimsProbeVersion)" />
   </ItemGroup>
-
-  <Target Name="ValidateNativeShimsVersion" BeforeTargets="CollectPackageReferences">
-    <Error Condition="'$(NativeShimsVersion)' == ''"
-           Text="NativeShimsVersion is required so the probe restores the package produced by the current build." />
-  </Target>
 </Project>

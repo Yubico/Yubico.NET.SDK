@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "attestationRepo": "Yubico/Yubico.NET.SDK",
+  "signerWorkflow": "Yubico/Yubico.NET.SDK/.github/workflows/build.yml",
+  "packages": {
+    "Yubico.Core": {
+      "symbols": "required",
+      "authenticode": {
+        "include": [
+          "lib/net472/Yubico.Core.dll",
+          "lib/netstandard2.0/Yubico.Core.dll",
+          "lib/netstandard2.1/Yubico.Core.dll"
+        ],
+        "firstParty": [
+          "Yubico.*.dll"
+        ]
+      }
+    },
+    "Yubico.YubiKey": {
+      "symbols": "required",
+      "authenticode": {
+        "include": [
+          "lib/net472/Yubico.YubiKey.dll",
+          "lib/netstandard2.0/Yubico.YubiKey.dll",
+          "lib/netstandard2.1/Yubico.YubiKey.dll"
+        ],
+        "firstParty": [
+          "Yubico.*.dll"
+        ]
+      }
+    }
+  }
+}

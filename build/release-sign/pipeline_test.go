@@ -226,7 +226,7 @@ func TestAtomicOutputReportOrderingMetadataAndNoSecrets(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(stage, "a.nupkg"), []byte("a"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := commitOutputs(filepath.Join(dir, "signed"), stage, []string{"a.nupkg", "missing.nupkg"}, []byte(`{}`), false); err == nil {
+	if err := commitOutputs(t.Context(), filepath.Join(dir, "signed"), stage, []string{"a.nupkg", "missing.nupkg"}, []byte(`{}`), false); err == nil {
 		t.Fatal("expected atomic failure")
 	}
 	if _, err := os.Stat(filepath.Join(dir, "signed")); !errors.Is(err, os.ErrNotExist) {
@@ -254,7 +254,7 @@ func TestAtomicOutputReportOrderingMetadataAndNoSecrets(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "signed", "stale"), []byte("keep"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := commitOutputs(filepath.Join(dir, "signed"), stage, []string{"a.nupkg"}, b, false); err == nil {
+	if err := commitOutputs(t.Context(), filepath.Join(dir, "signed"), stage, []string{"a.nupkg"}, b, false); err == nil {
 		t.Fatal("overwrote stale output")
 	}
 }

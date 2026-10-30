@@ -135,7 +135,7 @@ func run(ctx context.Context, cfg runConfig, runner commandRunner) error {
 	if err != nil {
 		return err
 	}
-	return commitOutputs(filepath.Join(cfg.WorkingDirectory, "signed"), staging, outputNames, reportContents, cfg.Clean)
+	return commitOutputs(ctx, filepath.Join(cfg.WorkingDirectory, "signed"), staging, outputNames, reportContents, cfg.Clean)
 }
 
 func prepareAndSignPackages(ctx context.Context, runner commandRunner, cfg runConfig, packages []packageInfo, staging string) ([]map[string]struct{}, error) {

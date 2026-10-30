@@ -39,7 +39,7 @@ func certificateFingerprint(certificate *x509.Certificate) string {
 // Package author signatures are applied together after every package is ready.
 func preparePackage(ctx context.Context, runner commandRunner, cfg runConfig, info packageInfo, output string, selected map[string]struct{}) error {
 	if info.Kind == "snupkg" {
-		return copyNewFile(info.Path, output)
+		return copyNewFile(ctx, info.Path, output)
 	}
 	directory, err := os.MkdirTemp(filepath.Dir(output), ".release-sign-assemblies-")
 	if err != nil {

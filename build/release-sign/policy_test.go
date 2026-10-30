@@ -166,6 +166,9 @@ func TestArtifactSafetyPackagePlanNamespacedNuspecAndAttestation(t *testing.T) {
 	}
 	artifact := writeZip(t, work, "artifact.zip", []zipItem{{"package.nupkg", []byte("not inspected before attestation")}})
 	pipelineRunner := &fakeRunner{run: func(call []string) ([]byte, error) {
+		if len(call) == 2 && call[1] == "capabilities" {
+			return []byte(`{"schema":1,"privateStdin":true,"batchSign":true}`), nil
+		}
 		if len(call) == 2 && call[1] == "--version" {
 			if filepath.Base(call[0]) == "nuget-sign" {
 				return []byte("nuget-sign version 0.1.0\n"), nil

@@ -35,11 +35,11 @@ func certificateFingerprint(certificate *x509.Certificate) string {
 	return strings.ToUpper(hex.EncodeToString(digest[:]))
 }
 
-// signPackage signs the manifest-selected assemblies of an already packed
-// package, repacks them in place of the originals, and author-signs the result.
-func signPackage(ctx context.Context, runner commandRunner, cfg runConfig, info packageInfo, output string, selected map[string]struct{}) error {
+// preparePackage signs the selected assemblies and repacks into private staging.
+// Package author signatures are applied together after every package is ready.
+func preparePackage(ctx context.Context, runner commandRunner, cfg runConfig, info packageInfo, output string, selected map[string]struct{}) error {
 	if info.Kind == "snupkg" {
-		return runNugetSign(ctx, runner, cfg, info.Path, output)
+		return copyNewFile(info.Path, output)
 	}
 	directory, err := os.MkdirTemp(filepath.Dir(output), ".release-sign-assemblies-")
 	if err != nil {
@@ -52,7 +52,7 @@ func signPackage(ctx context.Context, runner commandRunner, cfg runConfig, info 
 	}
 	sort.Strings(names)
 	paths := make(map[string]string, len(names))
-	args := []string{"sign-assemblies", "--key", cfg.KeyLocation, "--certificate", cfg.CertificatePath, "--hash-algorithm", "sha256", "--timestamper", cfg.Timestamper}
+	args := signingArgs("sign-assemblies", cfg)
 	for _, name := range names {
 		contents, err := zipEntry(info.Path, name)
 		if err != nil {
@@ -68,31 +68,30 @@ func signPackage(ctx context.Context, runner commandRunner, cfg runConfig, info 
 		paths[name] = filename
 		args = append(args, filename)
 	}
-	if err := runner.RunAttached(ctx, cfg.NugetSign, signingEnvironment(cfg.signingPIN), args...); err != nil {
-		return fmt.Errorf("nuget-sign sign-assemblies: %w", err)
+	if len(names) != 0 {
+		if err := runner.RunAttached(ctx, cfg.NugetSign, cfg.signingPIN, args...); err != nil {
+			return fmt.Errorf("nuget-sign sign-assemblies: %w", err)
+		}
 	}
-	rebuilt := filepath.Join(directory, "rebuilt.nupkg")
-	if err := rewritePackage(info.Path, rebuilt, selected, func(name string, _ []byte) ([]byte, error) {
+	return rewritePackage(info.Path, output, selected, func(name string, _ []byte) ([]byte, error) {
 		return os.ReadFile(paths[name])
-	}); err != nil {
-		return err
-	}
-	return runNugetSign(ctx, runner, cfg, rebuilt, output)
+	})
 }
 
-func runNugetSign(ctx context.Context, runner commandRunner, cfg runConfig, input, output string) error {
-	args := []string{"sign", "--key", cfg.KeyLocation, "--certificate", cfg.CertificatePath, "--hash-algorithm", "sha256", "--timestamper", cfg.Timestamper, "--output", output, input}
-	if err := runner.RunAttached(ctx, cfg.NugetSign, signingEnvironment(cfg.signingPIN), args...); err != nil {
+func signingArgs(command string, cfg runConfig) []string {
+	args := []string{command, "--key", cfg.KeyLocation, "--certificate", cfg.CertificatePath, "--hash-algorithm", "sha256", "--timestamper", cfg.Timestamper, "--certificate-fingerprint", cfg.signerFingerprint}
+	if cfg.signingPIN != nil {
+		args = append(args, "--pin-stdin")
+	}
+	return args
+}
+
+func runNugetSign(ctx context.Context, runner commandRunner, cfg runConfig, inputs []string) error {
+	args := append(signingArgs("sign", cfg), inputs...)
+	if err := runner.RunAttached(ctx, cfg.NugetSign, cfg.signingPIN, args...); err != nil {
 		return fmt.Errorf("nuget-sign sign: %w", err)
 	}
 	return nil
-}
-
-func signingEnvironment(pin string) []string {
-	if pin == "" {
-		return nil
-	}
-	return []string{"NUGET_SIGN_PIN=" + pin}
 }
 
 func zipEntry(filename, name string) ([]byte, error) {

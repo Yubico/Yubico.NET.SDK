@@ -10,6 +10,8 @@ import (
 )
 
 func TestTaskSpecificCredentialEnvironments(t *testing.T) {
+	const sessionBus = "unix:path=/run/user/1000/custom-session-bus"
+	t.Setenv("DBUS_SESSION_BUS_ADDRESS", sessionBus)
 	for _, name := range []string{"GH_TOKEN", "NUGET_API_KEY", "NUGET_SIGN_PIN", "NUGET_SIGN_PASSWORD", "GOOGLE_APPLICATION_CREDENTIALS", "HTTPS_PROXY", "SSL_CERT_FILE"} {
 		t.Setenv(name, "test-value")
 	}
@@ -24,6 +26,13 @@ func TestTaskSpecificCredentialEnvironments(t *testing.T) {
 		}
 		if (env["GH_TOKEN"] != "") != (purpose == "attest") {
 			t.Fatalf("%s: GitHub credentials sent to wrong task", purpose)
+		}
+		if purpose == "attest" {
+			if env["DBUS_SESSION_BUS_ADDRESS"] != sessionBus {
+				t.Fatal("attestation lost its custom Secret Service session bus")
+			}
+		} else if _, present := env["DBUS_SESSION_BUS_ADDRESS"]; present {
+			t.Fatalf("%s inherited the attestation session bus", purpose)
 		}
 		if (env["NUGET_SIGN_PASSWORD"] != "") != (purpose == "sign") || (env["GOOGLE_APPLICATION_CREDENTIALS"] != "") != (purpose == "sign") {
 			t.Fatalf("%s: file/KMS credentials sent to wrong task", purpose)

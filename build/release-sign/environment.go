@@ -18,7 +18,8 @@ func childEnvironment(purpose string) []string {
 		allowed[name] = true
 	}
 	if purpose == "attest" {
-		for _, name := range strings.Fields("GH_TOKEN GITHUB_TOKEN GH_ENTERPRISE_TOKEN GITHUB_ENTERPRISE_TOKEN GH_HOST GH_CONFIG_DIR") {
+		// gh may retrieve its token from Secret Service on a custom session bus.
+		for _, name := range strings.Fields("GH_TOKEN GITHUB_TOKEN GH_ENTERPRISE_TOKEN GITHUB_ENTERPRISE_TOKEN GH_HOST GH_CONFIG_DIR DBUS_SESSION_BUS_ADDRESS") {
 			allowed[name] = true
 		}
 	}

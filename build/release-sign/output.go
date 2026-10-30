@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -93,7 +94,10 @@ func safeKeyLocation(location string) string {
 	return parsed.String()
 }
 
-func commitOutputs(signedDirectory, packageStaging string, names []string, reportContents []byte, clean bool) error {
+func commitOutputs(ctx context.Context, signedDirectory, packageStaging string, names []string, reportContents []byte, clean bool) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	parent := filepath.Dir(signedDirectory)
 	if err := os.MkdirAll(parent, 0o700); err != nil {
 		return err
@@ -108,7 +112,7 @@ func commitOutputs(signedDirectory, packageStaging string, names []string, repor
 		return err
 	}
 	for _, name := range names {
-		if err := copyNewFile(filepath.Join(packageStaging, name), filepath.Join(packagesDirectory, name)); err != nil {
+		if err := copyNewFile(ctx, filepath.Join(packageStaging, name), filepath.Join(packagesDirectory, name)); err != nil {
 			return err
 		}
 	}
@@ -116,6 +120,11 @@ func commitOutputs(signedDirectory, packageStaging string, names []string, repor
 		_, err := writer.Write(reportContents)
 		return err
 	}); err != nil {
+		return err
+	}
+	// This is the publication boundary. Once replacement starts, finish it
+	// without cancellation checks between removing the old output and renaming.
+	if err := ctx.Err(); err != nil {
 		return err
 	}
 	if _, err := os.Lstat(signedDirectory); err == nil {
@@ -135,14 +144,26 @@ func commitOutputs(signedDirectory, packageStaging string, names []string, repor
 	return nil
 }
 
-func copyNewFile(source, destination string) error {
+func copyNewFile(ctx context.Context, source, destination string) error {
 	in, err := os.Open(source)
 	if err != nil {
 		return err
 	}
 	defer in.Close()
 	return writeNewFile(destination, func(out io.Writer) error {
-		_, err := io.Copy(out, in)
+		_, err := io.Copy(out, contextReader{ctx: ctx, reader: in})
 		return err
 	})
+}
+
+type contextReader struct {
+	ctx    context.Context
+	reader io.Reader
+}
+
+func (r contextReader) Read(buffer []byte) (int, error) {
+	if err := r.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return r.reader.Read(buffer)
 }

@@ -18,10 +18,17 @@ func defaultNugetSign() string {
 }
 
 func main() {
-	if err := execute(context.Background(), os.Args[1:], osRunner{}); err != nil {
+	if err := runMain(); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
+}
+
+func runMain() error {
+	if err := hardenProcess(); err != nil {
+		return fmt.Errorf("protect release signing process: %w", err)
+	}
+	return execute(context.Background(), os.Args[1:], osRunner{})
 }
 
 func execute(ctx context.Context, args []string, runner commandRunner) error {

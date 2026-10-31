@@ -41,6 +41,9 @@ internal interface IRegisteredSmartCardConnectionFactory
 /// <remarks>
 ///     Custom factories implement <see cref="ISmartCardConnectionFactory" /> rather than deriving from this type.
 ///     Configure connection logging through <see cref="YubiKitLogging" />.
+///     Without an explicit sharing policy, new factories snapshot <see cref="DefaultSharing" />, initially
+///     <see cref="SmartCardSharing.Exclusive" />. Contention fails with <see cref="ConnectionInUseException" />
+///     rather than retrying shared access. All built-in sharing modes request card power-off on release.
 /// </remarks>
 public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IRegisteredSmartCardConnectionFactory
 {
@@ -50,9 +53,22 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
 
     /// <summary>
     ///     The <see cref="SmartCardSharing" /> used by factories created without an explicit mode, including the
-    ///     one behind <see cref="Devices.YubiKeyManager" />. Set it once at start-up, before any device is opened.
-    ///     Defaults to <see cref="SmartCardSharing.ExclusiveWithSharedFallback" />.
+    ///     one behind <see cref="Devices.YubiKeyManager" />. Defaults to <see cref="SmartCardSharing.Exclusive" />.
     /// </summary>
+    /// <remarks>
+    ///     Set it once at start-up, before constructing factories or using <see cref="Devices.YubiKeyManager" />
+    ///     for discovery or monitoring. Existing factories and connections retain their selected policy.
+    ///     Migration: applications that require the former fallback behavior must explicitly select
+    ///     <see cref="SmartCardSharing.ExclusiveWithSharedFallback" /> and accept shared card-wide security state.
+    ///     <see cref="SmartCardSharing.Shared" /> is also an explicit coexistence opt-in, not an isolation policy.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Explicit compatibility opt-in, before any discovery or monitoring:
+    /// SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;
+    /// var devices = await YubiKeyManager.FindAllAsync();
+    /// </code>
+    /// </example>
     public static SmartCardSharing DefaultSharing
     {
         get
@@ -65,7 +81,7 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
             lock (s_defaultSharingLock)
                 field = value;
         }
-    } = SmartCardSharing.ExclusiveWithSharedFallback;
+    } = SmartCardSharing.Exclusive;
 
     /// <summary>
     ///     Creates a factory that uses the configured <see cref="YubiKitLogging" /> logger factory and
@@ -77,6 +93,13 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     }
 
     /// <summary>Creates a factory that opens card handles with <paramref name="sharing"/>.</summary>
+    /// <example>
+    /// <code>
+    /// // Explicitly accept shared access for this factory only:
+    /// var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);
+    /// await using var connection = await factory.CreateAsync(reader, cancellationToken);
+    /// </code>
+    /// </example>
     public SmartCardConnectionFactory(SmartCardSharing sharing)
         : this(new NativeSCardConnectionApi(), sharing)
     {

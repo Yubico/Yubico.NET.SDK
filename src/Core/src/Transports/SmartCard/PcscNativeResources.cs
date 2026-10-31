@@ -38,7 +38,7 @@ internal sealed class PcscNativeResources
 
     private readonly SmartCardSharing _sharing;
 
-    public PcscNativeResources(string readerName, ISCardConnectionApi api, SmartCardSharing sharing = SmartCardSharing.ExclusiveWithSharedFallback)
+    public PcscNativeResources(string readerName, ISCardConnectionApi api, SmartCardSharing sharing = SmartCardSharing.Exclusive)
     {
         _readerName = readerName;
         _api = api;

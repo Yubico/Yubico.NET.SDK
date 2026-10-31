@@ -78,6 +78,13 @@ A forced scan retries failed metadata reads; it does not guarantee a serial if t
 unavailable, or does not report one. With monitoring active, a later successful scan can also refresh
 the metadata.
 
+Without topology evidence, contention on multiple same-model keys can leave PC/SC interfaces separate
+from serial-bearing HID interfaces. A serial match may then lack SmartCard support; a PIV-opening
+`NotSupportedException` can mean incomplete discovery, not that the hardware lacks PIV. After closing
+the competing clients, force a scan as above and reacquire the device by serial before retrying; check
+`SupportsConnection(ConnectionType.SmartCard)`. Previously returned `IYubiKey` objects have immutable
+`AvailableConnections` and do not gain the remerged interfaces.
+
 To retain the former fallback behavior for device-manager connections, configure once at startup,
 **before discovery or monitoring**:
 

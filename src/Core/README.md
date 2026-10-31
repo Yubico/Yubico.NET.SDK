@@ -54,6 +54,36 @@ Discovery needs no PIN, touch, or open session. Later snippets assume these dire
 
 ## Common operations
 
+### PC/SC sharing policy and migration
+
+Built-in PC/SC connections default to strict `SmartCardSharing.Exclusive`. If another smart-card client
+holds the card, opening fails with `ConnectionInUseException`; it does not retry shared access. Close
+the competing client before retrying, or explicitly accept a coexistence policy. This replaces the former
+`ExclusiveWithSharedFallback` default and can affect applications running alongside gpg-agent, browsers,
+or OS smart-card services.
+
+To retain the former fallback behavior for device-manager connections, configure once at startup,
+**before discovery or monitoring**:
+
+```csharp
+SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+```
+
+Use `SmartCardSharing.Shared` instead to open shared without first attempting exclusive access, or select
+a policy for one raw factory:
+
+```csharp
+var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);
+await using ISmartCardConnection connection = await factory.CreateAsync(reader, cancellationToken);
+```
+
+Factories snapshot `DefaultSharing` when constructed; changing it does not reconfigure existing factories
+or connections. Shared and fallback policies permit other PC/SC handles to use card-wide security state,
+including verified PIV PIN state. `connection.IsExclusive` reports the acquired mode. All built-in modes
+still request `SCARD_UNPOWER_CARD` on release. PC/SC exclusivity is not an isolation guarantee for HID or
+custom transports; no-hardware policy tests do not independently prove physical card isolation.
+
 ### Open an application session
 
 Application sessions are the intended path. Each module adds a `Create<Application>SessionAsync`

@@ -15,6 +15,7 @@
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Core.UnitTests.Devices;
 using Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
 
 namespace Yubico.YubiKit.Core.UnitTests.Transports.SmartCard;
@@ -23,9 +24,11 @@ namespace Yubico.YubiKit.Core.UnitTests.Transports.SmartCard;
 ///     How a PC/SC handle is opened and released. The PIV PIN security status is card-wide
 ///     (NIST SP 800-73-5 Part 2 §2.4.2), so a shared handle opened by another local process can use a PIN=ONCE
 ///     slot during and after an SDK session unless the SDK holds the card exclusively and powers it off on
-///     release. Default: exclusive with shared fallback, SCARD_UNPOWER_CARD on disconnect.
+///     release. These no-hardware tests prove strict exclusive mode selection, no shared retry on
+///     contention, and SCARD_UNPOWER_CARD on disconnect, not physical card isolation.
 /// </summary>
 [Trait("Audit", "YESDK-1630")]
+[Collection(DiscoveryWorkerAdmissionCollection.Name)]
 public class SmartCardSharingTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -35,6 +38,10 @@ public class SmartCardSharingTests
         var factory = sharing is { } s ? new SmartCardConnectionFactory(api, s) : new SmartCardConnectionFactory(api);
         return await PcscTestDevices.Create(factory, out _).ConnectAsync<ISmartCardConnection>(Ct);
     }
+
+    [Fact]
+    public void DefaultSharing_InitiallyRequiresStrictExclusiveAccess() =>
+        Assert.Equal(SmartCardSharing.Exclusive, SmartCardConnectionFactory.DefaultSharing);
 
     [Fact]
     public async Task Default_OpensExclusively()
@@ -47,16 +54,157 @@ public class SmartCardSharingTests
         Assert.True(connection.IsExclusive);
     }
 
-    /// <summary>Another client already holds the card: the exclusive attempt fails and a shared one follows.</summary>
     [Fact]
-    public async Task Default_FallsBackToSharedWhenAnotherClientHoldsTheCard()
+    public async Task Default_ContentionFailsWithoutSharedRetryAndReleasesClaim()
+    {
+        var api = new ControlledSCardConnectionApi { RefuseExclusive = true };
+        var device = PcscTestDevices.Create(new SmartCardConnectionFactory(api), out var slot);
+
+        await Assert.ThrowsAsync<ConnectionInUseException>(async () =>
+        {
+            await using var unexpected = await device.ConnectAsync<ISmartCardConnection>(Ct);
+        });
+
+        Assert.Equal([SCARD_SHARE.EXCLUSIVE], api.ConnectShareModes);
+        Assert.Equal(1, api.ReleaseContextCalls);
+        Assert.Equal(0, api.DisconnectCalls);
+        Assert.False(DeviceConnectionRegistry.IsInUse(slot.InterfaceId));
+
+        api.RefuseExclusive = false;
+        await using var reopened = await device.ConnectAsync<ISmartCardConnection>(Ct);
+        Assert.True(reopened.IsExclusive);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task UnregisteredFactory_DefaultRequiresExclusiveAccess(bool contention)
+    {
+        var api = new ControlledSCardConnectionApi { RefuseExclusive = contention };
+        var factory = new SmartCardConnectionFactory(api);
+        var reader = new PcscDevice { ReaderName = "default-factory", Atr = null };
+
+        if (contention)
+        {
+            await Assert.ThrowsAsync<ConnectionInUseException>(async () =>
+            {
+                await using var unexpected = await factory.CreateAsync(reader, Ct);
+            });
+        }
+        else
+        {
+            await using var connection = await factory.CreateAsync(reader, Ct);
+            Assert.True(connection.IsExclusive);
+        }
+
+        Assert.Equal([SCARD_SHARE.EXCLUSIVE], api.ConnectShareModes);
+        Assert.Equal(1, api.ReleaseContextCalls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task DirectConnection_DefaultRequiresExclusiveAccess(bool contention)
+    {
+        var api = new ControlledSCardConnectionApi { RefuseExclusive = contention };
+        var reader = new PcscDevice { ReaderName = "default-connection", Atr = null };
+        await using var connection = new UsbSmartCardConnection(reader, api);
+
+        if (contention)
+            await Assert.ThrowsAsync<ConnectionInUseException>(() => connection.InitializeAsync(Ct).AsTask());
+        else
+        {
+            await connection.InitializeAsync(Ct);
+            Assert.True(connection.IsExclusive);
+        }
+
+        Assert.Equal([SCARD_SHARE.EXCLUSIVE], api.ConnectShareModes);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task NativeState_DefaultRequiresExclusiveAccess(bool contention)
+    {
+        var api = new ControlledSCardConnectionApi { RefuseExclusive = contention };
+        var state = new PcscConnectionNativeState("default-state", api);
+        try
+        {
+            if (contention)
+                await Assert.ThrowsAsync<ConnectionInUseException>(() => state.OpenAsync(Ct));
+            else
+            {
+                await state.OpenAsync(Ct);
+                Assert.True(state.IsExclusive);
+            }
+
+            Assert.Equal([SCARD_SHARE.EXCLUSIVE], api.ConnectShareModes);
+        }
+        finally
+        {
+            await state.RequestShutdown();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void NativeResources_DefaultRequiresExclusiveAccess(bool contention)
+    {
+        var api = new ControlledSCardConnectionApi { RefuseExclusive = contention };
+        var resources = new PcscNativeResources("default-resources", api);
+        try
+        {
+            if (contention)
+                Assert.Throws<ConnectionInUseException>(resources.Open);
+            else
+            {
+                resources.Open();
+                Assert.True(resources.IsExclusive);
+            }
+
+            Assert.Equal([SCARD_SHARE.EXCLUSIVE], api.ConnectShareModes);
+        }
+        finally
+        {
+            Assert.True(resources.TryRelease(out var cleanupError));
+            Assert.Null(cleanupError);
+        }
+    }
+
+    [Fact]
+    public async Task ExplicitFallback_ContentionRetriesShared()
     {
         var api = new ControlledSCardConnectionApi { RefuseExclusive = true };
 
-        await using var connection = await ConnectAsync(api);
+        await using var connection = await ConnectAsync(api, SmartCardSharing.ExclusiveWithSharedFallback);
 
         Assert.Equal([SCARD_SHARE.EXCLUSIVE, SCARD_SHARE.SHARED], api.ConnectShareModes);
         Assert.False(connection.IsExclusive);
+    }
+
+    [Fact]
+    public async Task ExplicitFallback_WithoutContentionOpensExclusively()
+    {
+        var api = new ControlledSCardConnectionApi();
+
+        await using var connection = await ConnectAsync(api, SmartCardSharing.ExclusiveWithSharedFallback);
+
+        Assert.Equal([SCARD_SHARE.EXCLUSIVE], api.ConnectShareModes);
+        Assert.True(connection.IsExclusive);
+    }
+
+    [Fact]
+    public async Task ExplicitFallback_OtherConnectFailureDoesNotRetryShared()
+    {
+        var api = new ControlledSCardConnectionApi { FailNextConnect = true };
+
+        var failure = await Assert.ThrowsAsync<SCardException>(
+            () => ConnectAsync(api, SmartCardSharing.ExclusiveWithSharedFallback));
+
+        Assert.Equal(unchecked((int)ErrorCode.SCARD_E_NO_SMARTCARD), failure.HResult);
+        Assert.Equal([SCARD_SHARE.EXCLUSIVE], api.ConnectShareModes);
+        Assert.Equal(1, api.ReleaseContextCalls);
     }
 
     [Fact]
@@ -80,18 +228,25 @@ public class SmartCardSharingTests
         Assert.False(connection.IsExclusive);
     }
 
-    [Fact]
-    public async Task DefaultSharing_IsUsedByFactoriesWithoutAnExplicitMode()
+    [Theory]
+    [InlineData(SmartCardSharing.Shared)]
+    [InlineData(SmartCardSharing.ExclusiveWithSharedFallback)]
+    public async Task DefaultSharing_ExplicitOptInIsUsedByNewFactories(SmartCardSharing sharing)
     {
         var previous = SmartCardConnectionFactory.DefaultSharing;
         try
         {
-            SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.Shared;
-            var api = new ControlledSCardConnectionApi();
+            SmartCardConnectionFactory.DefaultSharing = sharing;
+            var api = new ControlledSCardConnectionApi { RefuseExclusive = true };
+            var factory = new SmartCardConnectionFactory(api);
+            SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.Exclusive;
 
-            await using var connection = await ConnectAsync(api);
+            await using var connection = await PcscTestDevices.Create(factory, out _).ConnectAsync<ISmartCardConnection>(Ct);
 
-            Assert.Equal([SCARD_SHARE.SHARED], api.ConnectShareModes);
+            Assert.Equal(sharing == SmartCardSharing.Shared
+                ? [SCARD_SHARE.SHARED]
+                : [SCARD_SHARE.EXCLUSIVE, SCARD_SHARE.SHARED], api.ConnectShareModes);
+            Assert.False(connection.IsExclusive);
         }
         finally
         {
@@ -119,11 +274,14 @@ public class SmartCardSharingTests
     }
 
     /// <summary>Power the card off on release so PIN=ONCE state cannot outlive the session.</summary>
-    [Fact]
-    public async Task Release_PowersTheCardOff()
+    [Theory]
+    [InlineData(SmartCardSharing.Exclusive)]
+    [InlineData(SmartCardSharing.Shared)]
+    [InlineData(SmartCardSharing.ExclusiveWithSharedFallback)]
+    public async Task Release_AllModesPowerTheCardOff(SmartCardSharing sharing)
     {
-        var api = new ControlledSCardConnectionApi();
-        var connection = await ConnectAsync(api);
+        var api = new ControlledSCardConnectionApi { RefuseExclusive = sharing != SmartCardSharing.Exclusive };
+        var connection = await ConnectAsync(api, sharing);
 
         await connection.DisposeAsync();
 

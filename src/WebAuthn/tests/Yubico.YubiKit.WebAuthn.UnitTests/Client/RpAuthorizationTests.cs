@@ -33,7 +33,12 @@ public class RpAuthorizationTests
     [InlineData("x:/credential")]
     [InlineData("x://partner.test/credential")]
     [InlineData("x:")]
-    public async Task Ceremonies_ApplicationAuthorizesNonSuffix_PreserveRpIdAndOrigin(string rpId)
+    [InlineData("http:credential")]
+    [InlineData("example-.com")]
+    [InlineData("bad rp id")]
+    [InlineData("example.com\0")]
+    [InlineData("   ")]
+    public async Task Ceremonies_ApplicationApprovesWireText_PreserveRpIdAndOrigin(string rpId)
     {
         var backend = CreateBackend();
         var origin = Origin();
@@ -103,14 +108,14 @@ public class RpAuthorizationTests
     [InlineData("x://[bad]/credential")]
     [InlineData("x:credential[bad]")]
     [InlineData("x://partner.test:invalid/credential")]
-    public async Task Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend(string rpId)
+    public async Task Ceremonies_ApplicationRejectsRpValidity_BlocksBothBeforeBackend(string rpId)
     {
         var backend = CreateBackend();
         int calls = 0;
         await using var client = new WebAuthnClient(backend, Origin(), Options((_, _) =>
         {
             calls++;
-            return true;
+            return false;
         }));
         backend.ClearReceivedCalls();
 
@@ -119,9 +124,9 @@ public class RpAuthorizationTests
         var authenticationError = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(
             Authentication(rpId), cancellationToken: TestContext.Current.CancellationToken));
 
-        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, registrationError.Code);
-        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, authenticationError.Code);
-        Assert.Equal(0, calls);
+        Assert.Equal(WebAuthnClientErrorCode.Security, registrationError.Code);
+        Assert.Equal(WebAuthnClientErrorCode.Security, authenticationError.Code);
+        Assert.Equal(2, calls);
         Assert.Empty(backend.ReceivedCalls());
     }
 
@@ -144,30 +149,70 @@ public class RpAuthorizationTests
     public async Task Ceremonies_InvalidUnicodeCannotBeReplacedDuringEncoding()
     {
         // Build at runtime: runner serialization can replace unpaired UTF-16 surrogates in theory data.
-        await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend(new string('\ud800', 1));
-        await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend("https://partner.test/" + new string('\udc00', 1));
+        await AssertWireRejectedAsync(new string('\ud800', 1));
+        await AssertWireRejectedAsync("https://partner.test/" + new string('\udc00', 1));
     }
 
     [Fact]
-    public async Task Ceremonies_ValidIdn_UsesActualAsciiLabelLengthButPreservesInput()
+    public async Task Ceremonies_IdnText_ReachesApplicationUnchanged()
     {
-        // 32 Unicode characters encode to a 38-byte ASCII label, not Uri's estimated 68 bytes.
-        await Ceremonies_ApplicationAuthorizesNonSuffix_PreserveRpIdAndOrigin(new string('例', 32) + ".com");
+        await Ceremonies_ApplicationApprovesWireText_PreserveRpIdAndOrigin(new string('例', 32) + ".com");
+        await Ceremonies_ApplicationRejectsRpValidity_BlocksBothBeforeBackend("a\u05d0.com");
     }
 
     [Fact]
-    public async Task Ceremonies_DomainLabelAndNameLengthLimits_CannotBeOverridden()
+    public async Task Ceremonies_DomainLengthPolicy_BelongsToApplication()
     {
-        await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend(new string('a', 64) + ".com");
-        await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend(
+        await Ceremonies_ApplicationApprovesWireText_PreserveRpIdAndOrigin(new string('a', 64) + ".com");
+        await Ceremonies_ApplicationRejectsRpValidity_BlocksBothBeforeBackend(
             string.Join('.', Enumerable.Repeat(new string('a', 63), 4)));
     }
 
     [Fact]
-    public async Task Ceremonies_DocumentedUriSubset_RejectsUnsupportedSchemeSpecificForm()
+    public async Task Authentication_NullOrEmptyRpId_StopsAtWireBoundary()
     {
-        // Valid generic RFC3986 syntax, but not supported by System.Uri's HTTP parser.
-        await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend("http:credential");
+        var backend = CreateBackend();
+        int calls = 0;
+        await using var client = new WebAuthnClient(backend, Origin(), Options((_, _) =>
+        {
+            calls++;
+            return true;
+        }));
+        backend.ClearReceivedCalls();
+        // Intentionally bypass nullable annotations to exercise malformed caller input.
+        PublicKeyCredentialRequestOptions[] requests = [Authentication(""), Authentication("example.com") with { RpId = null! }];
+
+        foreach (var request in requests)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(
+                request, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
+        }
+
+        Assert.Equal(0, calls);
+        Assert.Empty(backend.ReceivedCalls());
+    }
+
+    private static async Task AssertWireRejectedAsync(string rpId)
+    {
+        var backend = CreateBackend();
+        int calls = 0;
+        await using var client = new WebAuthnClient(backend, Origin(), Options((_, _) =>
+        {
+            calls++;
+            return true;
+        }));
+        backend.ClearReceivedCalls();
+
+        var registrationError = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(
+            Registration(rpId), cancellationToken: TestContext.Current.CancellationToken));
+        var authenticationError = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(
+            Authentication(rpId), cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, registrationError.Code);
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, authenticationError.Code);
+        Assert.Equal(0, calls);
+        Assert.Empty(backend.ReceivedCalls());
     }
 
     private static WebAuthnClientOptions Options(Func<WebAuthnOrigin, string, bool> validator)

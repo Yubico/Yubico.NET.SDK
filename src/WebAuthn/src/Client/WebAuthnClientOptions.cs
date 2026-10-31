@@ -36,11 +36,11 @@ public sealed record WebAuthnClientOptions
     private readonly RpIdValidator? _rpIdValidator;
 
     /// <summary>
-    /// Gets the required application callback authorizing each origin/RP pair before ceremony device I/O.
+    /// Gets the required application callback checking RP validity and origin/RP authorization before ceremony device I/O.
     /// </summary>
     /// <remarks>
-    /// The application owns the complete RP binding policy. The SDK independently checks protocol
-    /// supported syntax and encoding, not browser domain-suffix authorization. See <see cref="Client.RpIdValidator"/>
+    /// The application owns RP syntax validity and the complete RP binding policy. The SDK checks
+    /// only nonempty, faithfully UTF-8 encodable RP text. See <see cref="Client.RpIdValidator"/>
     /// for responsibilities, synchronous execution, failure behavior, and RP-server checks.
     /// </remarks>
     /// <exception cref="ArgumentNullException">The property is initialized with <see langword="null"/>.</exception>

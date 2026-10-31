@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// context (https:// or http://localhost).
 /// </para>
 /// <para>
-/// Origin parsing is independent of application RP authorization. Arbitrary native-app,
+/// Origin parsing is independent of application RP validity and authorization. Arbitrary native-app,
 /// opaque, and custom-scheme origins are not representable by this type; configuring
 /// <see cref="WebAuthnClientOptions.RpIdValidator"/> does not extend its supported origins.
 /// </para>

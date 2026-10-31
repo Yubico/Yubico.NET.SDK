@@ -4,7 +4,8 @@ This package is a W3C Web Authentication client over `Yubico.YubiKit.Ctap2`. It 
 authentication to two calls, handling client data JSON, RP ID validation, and PIN/UV token acquisition on the way to
 CTAP2; every ceremony runs over an `ICtap2Session` that the client owns and disposes. It requires a WebAuthn origin and
 client options containing a required application-supplied `RpIdValidator`. The application owns authorization
-of the RP ID for the configured origin; the SDK independently checks protocol syntax and encoding.
+of RP validity (including syntax) and authorization for the configured origin; the SDK checks only
+nonempty RP text that can be encoded faithfully as UTF-8.
 
 WebAuthn owns client ceremonies and origin parsing; `Yubico.YubiKit.Ctap2` owns direct
 authenticator operations. FIDO2 remains the authenticator application identity, and FIDO HID remains
@@ -53,7 +54,7 @@ IYubiKey device = await YubiKeyManager.FindFirstAsync();
 if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
     throw new InvalidOperationException("The origin is not a secure context.");
 
-// A deliberately narrow application policy: this origin may use exactly this RP ID.
+// A complete, deliberately narrow allowlist: this origin may use exactly this known-valid RP ID.
 var clientOptions = new WebAuthnClientOptions
 {
     RpIdValidator = (requestOrigin, rpId) =>
@@ -168,36 +169,22 @@ credential is excluded.
 
 `RpIdValidator(WebAuthnOrigin origin, string rpId)` is synchronous and required. It is called once
 for each registration and authentication, before any ceremony device I/O (including capability reads,
-credential probes, and PIN/UV acquisition). Return `true` only when the application authorizes that
-exact origin/RP pair. Returning `false` or throwing fails with `WebAuthnClientErrorCode.Security`;
+credential probes, and PIN/UV acquisition). The callback owns **RP validity, including domain/URI
+syntax, and caller/RP authorization**. Return `true` only when the application considers the RP ID
+valid under its chosen binding model and authorizes that exact origin/RP pair. Returning `false`
+or throwing fails with `WebAuthnClientErrorCode.Security`;
 exceptions are retained as `InnerException`. Cancellation exceptions thrown by the callback propagate
 as cancellation, but also block the operation. The callback runs before the ceremony timeout starts:
 keep it prompt, local, and thread-safe if clients share it; do not block on network lookups.
 
-The SDK does **not** add a public-suffix or origin/domain-binding policy after approval. It still
-rejects malformed RP IDs with `InvalidRequest`, before invoking the callback: RP IDs must be nonempty,
-well-formed Unicode encodable as UTF-8 and have supported domain-string or absolute-URI syntax. It sends the
-original RP ID unchanged (no case folding, IDNA conversion, or URI normalization). CTAP encodes it as
-a CBOR text string; authenticator message/credential limits remain in the CTAP2 layer.
-
-**Supported syntax boundary:** standalone domains use .NET `IdnMapping` with
-[`UseStd3AsciiRules = true`](https://learn.microsoft.com/en-us/dotnet/api/system.globalization.idnmapping.usestd3asciirules?view=net-10.0),
-ACE-label validation, explicit 1–63-byte ASCII label and 253-byte name limits (excluding a root dot),
-hyphen checks, and the [WHATWG valid-domain](https://url.spec.whatwg.org/#valid-domain) numeric-ending
-exclusion. Length checks use the actual IDN conversion, not `Uri.CheckHostName` estimates. All conversion
-is validation-only: the callback and authenticator still receive the exact input string.
-
-URI RP IDs use the
-[.NET well-formed absolute URI parser](https://learn.microsoft.com/en-us/dotnet/api/system.uri.iswellformeduristring?view=net-10.0).
-For a one-letter scheme, only a validation copy receives a longer generic scheme prefix, avoiding
-.NET's DOS-drive interpretation: `x:credential`, `x:/credential`, and `x://partner.test/credential`
-are supported; malformed escapes, whitespace, and backslashes are still rejected. This is **not a
-general RFC3986 parser**: .NET scheme-specific and authority restrictions remain (for example,
-`http:credential` is not supported although it matches the generic RFC3986 grammar). Likewise,
-non-ASCII IDN behavior depends on .NET's ICU/NLS/invariant globalization backend and Unicode tables;
-these checks do not claim complete WHATWG URL/UTS46 conformance, including identical bidi behavior
-across backends. Applications needing full browser conformance must use an authoritative browser
-validator. This boundary does not change RP authorization ownership or supported origin schemes.
+The SDK's RP wire checks reject only null/empty RP IDs and invalid UTF-16 that cannot be encoded
+faithfully as UTF-8, using `InvalidRequest` without invoking the callback. **Wire-valid is not
+RP-valid**: all other RP text reaches the callback unchanged, including whitespace or malformed
+domain/URI strings. The SDK does not parse domains/URIs, perform IDNA conversion, or impose any
+public-suffix or caller/RP-binding rule before or after callback approval. It sends the approved RP
+ID unchanged (no case folding or normalization). CTAP encodes it as a CBOR text string; authenticator
+message/credential limits remain in the CTAP2 layer. Passing the callback is an application decision,
+not a blanket claim of browser-WebAuthn conformance.
 
 ### Explicit origin/RP allowlist
 
@@ -214,29 +201,34 @@ var allowlistOptions = new WebAuthnClientOptions
 ```
 
 Load trusted configuration before constructing the client; do not mutate the set during ceremonies.
-This authorizes only the listed pairs. An unrelated RP ID such as `partner.test` requires an intentional
+This is a complete allowlist: only the listed known-valid origin/RP pairs pass; every other string
+is rejected. Validate trusted configuration entries against the application's binding model before
+including them. An unrelated RP ID such as `partner.test` requires an intentional
 application binding decision and a corresponding RP-server origin policy. It is not automatic browser
 related-origin validation, and an allowlist is not a blanket claim of browser-WebAuthn conformance.
 
 ### Application-service validator
 
-Bind your existing application authorization method directly; no SDK policy service is needed:
+Bind your existing application validator directly; no SDK policy service is needed. The service must
+validate **both RP validity (including domain/URI syntax) and caller/RP binding**, using the applicable
+[WebAuthn RP ID definition](https://www.w3.org/TR/webauthn-3/#rp-id) or established native binding model:
 
 ```csharp
-// authorizationService is your application's service. Its synchronous method returns bool
-// and takes (WebAuthnOrigin origin, string rpId), using trusted, already-loaded bindings.
+// rpValidationService is your application's service. Its synchronous method returns bool
+// and takes (WebAuthnOrigin origin, string rpId), validating RP syntax AND caller/RP binding.
+// It uses trusted, already-loaded policy; the SDK does not validate domain/URI syntax for it.
 var serviceOptions = new WebAuthnClientOptions
 {
-    RpIdValidator = authorizationService.IsRpAuthorized
+    RpIdValidator = rpValidationService.IsRpValidForOrigin
 };
 ```
 
-For browser-compatible use, the application must implement the browser RP/origin binding rules,
-including public-suffix handling, through its validator. Other native binding models are permitted by
+For browser-compatible use, the application must implement RP syntax validity and browser RP/origin
+binding rules, including public-suffix handling, through its validator. Other native binding models are permitted by
 [WebAuthn Level 3, RP ID](https://www.w3.org/TR/webauthn-3/#rp-id), whose syntax requirement remains
 domain strings or URIs. The delegation also follows python-fido2's
 [`ClientDataCollector` / `DefaultClientDataCollector`](https://github.com/Yubico/python-fido2/blob/9d5991d6785e20bd487c8b6c996df6ce2226642a/fido2/client/__init__.py):
-client-data collection delegates RP authorization to application-supplied logic. This SDK does not
+client-data collection delegates RP validation to application-supplied logic. This SDK does not
 implement a policy framework or fetch a Public Suffix List or related-origin resources.
 
 **Origin representation limit:** `WebAuthnOrigin` remains a serialized `https://host[:port]` origin,
@@ -256,7 +248,7 @@ does not change the origin in client data or make an assertion acceptable to the
 - The client owns the `ICtap2Session` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself.
 - A physical YubiKey admits one live connection across all of its interfaces, and one session per connection; a second session throws `ConnectionInUseException` until the first is disposed.
 - Transport is fixed when the CTAP2 session is created and is never renegotiated after a failure. Override it with `SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }`, which is also how to reach SCP.
-- RP/origin authorization is mandatory application policy through `WebAuthnClientOptions.RpIdValidator`; there is no built-in domain-suffix policy or enterprise bypass.
+- RP validity and origin/RP authorization are mandatory application policy through `WebAuthnClientOptions.RpIdValidator`; there is no built-in domain/URI syntax gate, domain-suffix policy, or enterprise bypass.
 - The client asks for nothing but a PIN, supplied as `pinBytes` or by the prompt. A ceremony that needs one and has neither fails with `NotAllowed` rather than prompting.
 - `ResidentKeyPreference.Required` consumes persistent credential slots. This package deletes nothing, and firmware gates live in the CTAP2 layer, which throws `NotSupportedException`. The experimental `previewSign` extension is reachable through `Extensions` on either options record and is not covered here.
 
@@ -300,12 +292,14 @@ new WebAuthnClient(
     });
 ```
 
-Choose and implement the complete binding policy, rather than merely inverting the old suffix checker.
+Choose and implement RP syntax validity and the complete binding policy, rather than merely inverting the old suffix checker.
 If retaining earlier browser-style behavior or enterprise overrides, move both decisions into your
 application validator and test them together; scope overrides to trusted origin/RP pairs. Both constructor
 and device factory require `new WebAuthnClientOptions { RpIdValidator = ... }`; carry forward optional
 `CredentialPrompt` and `MaxPromptAttempts` settings. Authorization failures now use `Security` rather
-than the old domain policy's `InvalidRequest`; malformed protocol values still use `InvalidRequest`.
+than the old domain policy's `InvalidRequest`; null/empty RP IDs and invalid UTF-16 still use
+`InvalidRequest`. A callback that previously checked only authorization must now also own RP validity.
+The SDK no longer provides an independent domain/URI syntax gate or IDNA checks.
 
 The operations dependency is now `Yubico.YubiKit.Ctap2`: migrate session types to `Ctap2Session` /
 `ICtap2Session` and device factories to `CreateCtap2SessionAsync`. The public `WebAuthnClient`

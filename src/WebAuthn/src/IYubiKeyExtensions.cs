@@ -32,7 +32,7 @@ public static class IYubiKeyExtensions
         /// </summary>
         /// <param name="origin">The WebAuthn origin for client data JSON.</param>
         /// <param name="clientOptions">
-        /// Required configuration for the client itself (application RP authorization,
+        /// Required configuration for the client itself (application RP validity and authorization,
         /// credential prompt, prompt-attempt limit), forwarded to the created
         /// <see cref="WebAuthnClient"/>. Unrelated to <paramref name="sessionOptions"/>, which
         /// configures the session rather than the client.
@@ -48,9 +48,9 @@ public static class IYubiKeyExtensions
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying CTAP2 session.</returns>
         /// <remarks>
-        /// <see cref="WebAuthnClientOptions.RpIdValidator"/> owns origin/RP authorization and is invoked
+        /// <see cref="WebAuthnClientOptions.RpIdValidator"/> owns RP syntax validity and origin/RP authorization and is invoked
         /// before each ceremony's device I/O, not during session creation (which has no requested RP ID).
-        /// The SDK independently checks protocol syntax and encoding, not domain-suffix authorization.
+        /// The SDK checks only nonempty, faithfully UTF-8 encodable RP text, not domain/URI syntax or binding policy.
         /// This method adds no independent session-creation logic; <paramref name="sessionOptions"/> is
         /// validated and applied by the underlying CTAP2 <c>CreateCtap2SessionAsync</c>, while
         /// <paramref name="clientOptions"/> is forwarded to the returned <see cref="WebAuthnClient"/>.

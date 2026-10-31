@@ -15,11 +15,12 @@
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>
-///     Thrown when this process already holds the physical YubiKey or connection being requested.
+///     Thrown when a requested YubiKey connection or session conflicts with an existing holder, including
+///     another PC/SC client when opening with strict exclusive access.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Connection and session acquisition raise this at two scopes:
+///         Connection and session acquisition raise this for the following conflicts:
 ///     </para>
 ///     <list type="bullet">
 ///         <item>
@@ -30,16 +31,27 @@ namespace Yubico.YubiKit.Core.Devices;
 ///             Creating a second session on a connection that already hosts a live one. Same mechanism,
 ///             one level down: the new session's SELECT runs on the same card channel.
 ///         </item>
+///         <item>
+///             Opening a built-in PC/SC connection with
+///             <see cref="Transports.SmartCard.SmartCardSharing.Exclusive" /> when another smart-card client
+///             holds the card. The native <c>SCARD_E_SHARING_VIOLATION</c> is wrapped in this exception, with a
+///             <see cref="Native.Desktop.SCard.SCardException" /> as its <see cref="Exception.InnerException" />.
+///             The competing client may be in this process or another process; no shared retry occurs.
+///         </item>
 ///     </list>
 ///     <para>
-///         Both are refused at acquisition, before any command reaches the device, so the exception lands on
+///         Managed connection and session conflicts are refused at acquisition, before any command reaches
+///         the device, so the exception lands on
 ///         the call that would have caused the damage rather than on the victim's next operation. Dispose the
 ///         current holder first; a connection may host any number of sessions in sequence, and an exclusive
 ///         physical key any number of connections in sequence.
 ///     </para>
 ///     <para>
-///         In-process only. A different process holding the card surfaces as a PC/SC sharing violation
-///         instead.
+///         For native PC/SC contention, close the competing client before retrying. Applications that accept
+///         shared card-wide state may explicitly select <see cref="Transports.SmartCard.SmartCardSharing.Shared" />
+///         or <see cref="Transports.SmartCard.SmartCardSharing.ExclusiveWithSharedFallback" /> before factory
+///         construction. Those policies do not bypass managed ownership guards; a failed shared open surfaces
+///         as <see cref="Native.Desktop.SCard.SCardException" /> rather than this strict-exclusive mapping.
 ///     </para>
 /// </remarks>
 public sealed class ConnectionInUseException : InvalidOperationException

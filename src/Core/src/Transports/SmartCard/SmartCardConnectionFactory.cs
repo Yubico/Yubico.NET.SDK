@@ -44,6 +44,12 @@ internal interface IRegisteredSmartCardConnectionFactory
 ///     Without an explicit sharing policy, new factories snapshot <see cref="DefaultSharing" />, initially
 ///     <see cref="SmartCardSharing.Exclusive" />. Contention fails with <see cref="ConnectionInUseException" />
 ///     rather than retrying shared access. All built-in sharing modes request card power-off on release.
+///     Direct <see cref="CreateAsync" /> calls do not acquire the physical-device ownership guard used by
+///     <see cref="Abstractions.IYubiKey.ConnectAsync{TConnection}" />. Coordinate discovery, including background
+///     monitoring, and other connections to the key for the full direct connection lifetime. With shared
+///     access, a discovery metadata read or another handle can select a different applet and disturb a session.
+///     Prefer <c>device.ConnectAsync&lt;ISmartCardConnection&gt;()</c> for SDK-managed ownership; the sharing policy
+///     still determines whether other processes can open the card.
 /// </remarks>
 public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IRegisteredSmartCardConnectionFactory
 {
@@ -96,6 +102,7 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     /// <example>
     /// <code>
     /// // Explicitly accept shared access for this factory only:
+    /// // Coordinate discovery/monitoring and all other connections to this key before opening directly.
     /// var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);
     /// await using var connection = await factory.CreateAsync(reader, cancellationToken);
     /// </code>

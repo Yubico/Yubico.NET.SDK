@@ -284,21 +284,13 @@ jobs:
       - name: Apply documentation patches
         shell: bash
         run: |
-          for patch in patches/*/*.patch; do
-            [[ -e "$patch" ]] || continue
-            git apply --check --whitespace=error "$patch"
-            git apply --whitespace=error "$patch"
-          done
-          outside="$(git status --porcelain --untracked-files=all | while IFS= read -r line; do
-            path="${line#???}"
-            case "$path" in docs/migration/*|docs/architecture/*|patches/*) ;; *) printf '%s\n' "$path" ;; esac
-          done)"
-          if [[ -n "$outside" ]]; then
-            echo "Documentation patches contain paths outside docs/migration and docs/architecture:" >&2
-            printf '%s\n' "$outside" >&2
-            exit 1
+          if [[ -f patches/migration/migration.patch ]]; then
+            python3 scripts/docs/apply-docs-patch.py migration patches/migration/migration.patch
           fi
-          git diff --check
+          if [[ -f patches/architecture/architecture.patch ]]; then
+            python3 scripts/docs/apply-docs-patch.py architecture patches/architecture/architecture.patch
+          fi
+          git diff --cached --check
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:

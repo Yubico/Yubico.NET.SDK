@@ -112,21 +112,8 @@ jobs:
       - name: Apply migration patch
         shell: bash
         run: |
-          git apply --check --whitespace=error patches/migration.patch
-          git apply --whitespace=error patches/migration.patch
-          outside="$(git status --porcelain --untracked-files=all | while IFS= read -r line; do
-            path="${line#???}"
-            case "$path" in
-              docs/migration/v1-to-v2.md|docs/migration/v1-to-v2-map.yml|docs/migration/v1-to-v2-changelog.md|docs/migration/.state.yml|patches/*) ;;
-              *) printf '%s\n' "$path" ;;
-            esac
-          done)"
-          if [[ -n "$outside" ]]; then
-            echo "Migration patch contains paths outside its allowed artifacts:" >&2
-            printf '%s\n' "$outside" >&2
-            exit 1
-          fi
-          git diff --check
+          python3 scripts/docs/apply-docs-patch.py migration patches/migration.patch
+          git diff --cached --check
 
       - name: Create migration synthesis PR
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7

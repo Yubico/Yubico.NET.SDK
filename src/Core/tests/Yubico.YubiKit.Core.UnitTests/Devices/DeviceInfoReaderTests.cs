@@ -11,6 +11,20 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 public class DeviceInfoReaderTests
 {
     [Fact]
+    public async Task ReadAsync_EmptyConfigLockedValue_ThrowsFieldAwareBadResponse()
+    {
+        // Audit 21: a valid two-byte TLV container with an empty config-locked field.
+        var protocol = new FakeSmartCardProtocol([0x02, 0x0A, 0x00]);
+
+        var ex = await Assert.ThrowsAsync<BadResponseException>(() =>
+            DeviceInfoReader.ReadAsync(protocol, new FirmwareVersion(5, 7, 2), TestContext.Current.CancellationToken));
+
+        Assert.Contains("tag 0x0A", ex.Message);
+        Assert.Contains("length 0", ex.Message);
+        Assert.Equal([0], protocol.RequestedPages);
+    }
+
+    [Fact]
     public async Task ProtocolDeviceInfo_ReadAsync_Success_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = new FakeSmartCardConnection();

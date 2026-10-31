@@ -473,6 +473,75 @@ public class YubiOtpSessionTests
         }
     }
 
+    public class HmacChallengeSemantics
+    {
+        [Theory]
+        [InlineData(new byte[0], (byte)0x00)]
+        [InlineData(new byte[] { 0x41 }, (byte)0x00)]
+        [InlineData(new byte[] { 0x41, 0x00 }, (byte)0x01)]
+        [InlineData(new byte[] { 0x00 }, (byte)0x01)]
+        [Trait("Audit", "YESDK-1659")]
+        public async Task CalculateHmacSha1Async_ShortAndExplicitlyPaddedChallenges_SendIdenticalRequests(
+            byte[] challenge, byte padByte)
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            using var sessionLease = session;
+            List<byte[]> commands = [];
+            connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+                .Returns(call =>
+                {
+                    // Capture during transmission: the session clears its encoded challenge on return.
+                    commands.Add(call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray());
+                    return Task.FromResult((ReadOnlyMemory<byte>)CreateApduResponseData(20));
+                });
+            byte[] explicitChallenge = [.. challenge, .. Enumerable.Repeat(padByte, 64 - challenge.Length)];
+
+            _ = await session.CalculateHmacSha1Async(Slot.Two, challenge, TestContext.Current.CancellationToken);
+            _ = await session.CalculateHmacSha1Async(Slot.Two, explicitChallenge, TestContext.Current.CancellationToken);
+
+            Assert.Equal(2, commands.Count);
+            Assert.Equal(commands[0], commands[1]);
+            byte[] expectedCommand = [0x00, 0x01, 0x38, 0x00, 0x40, .. explicitChallenge, 0x00];
+            Assert.Equal(expectedCommand, commands[0]);
+            Assert.Equal(challenge, explicitChallenge[..challenge.Length]);
+        }
+
+        [Theory]
+        [InlineData(63, (byte)0x00)]
+        [InlineData(63, (byte)0x01)]
+        [InlineData(64, (byte)0x00)]
+        [InlineData(64, (byte)0x01)]
+        [Trait("Audit", "YESDK-1659")]
+        public async Task CalculateHmacSha1Async_AtShortAndFixedLengthBoundary_PreservesInputBytes(
+            int length, byte lastByte)
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            using var sessionLease = session;
+            byte[]? command = null;
+            connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+                .Returns(call =>
+                {
+                    command = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                    return Task.FromResult((ReadOnlyMemory<byte>)CreateApduResponseData(20));
+                });
+            byte[] challenge = [.. Enumerable.Range(1, length - 1).Select(i => (byte)i), lastByte];
+            byte[] originalChallenge = [.. challenge];
+
+            _ = await session.CalculateHmacSha1Async(Slot.One, challenge, TestContext.Current.CancellationToken);
+
+            Assert.NotNull(command);
+            Assert.Equal(70, command.Length);
+            Assert.Equal(new byte[] { 0x00, 0x01, 0x30, 0x00, 0x40 }, command[..5]);
+            Assert.Equal(originalChallenge, command[5..(5 + length)]);
+            if (length == 63)
+            {
+                Assert.Equal(lastByte == 0x00 ? 0x01 : 0x00, command[68]);
+            }
+            Assert.Equal(0x00, command[69]);
+            Assert.Equal(originalChallenge, challenge);
+        }
+    }
+
     public class HmacChallengePadding
     {
         [Fact]

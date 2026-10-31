@@ -61,9 +61,11 @@ public sealed class HmacSha1SlotConfiguration : SlotConfiguration
     /// <summary>
     /// Allows challenges shorter than 64 bytes (on by default). The YubiKey treats the last of the 64
     /// bytes it receives as an end-of-input marker and discards the run of equal bytes before it, so a
-    /// challenge of 0 to 63 bytes is hashed as given once it is padded with a different byte; a 64-byte
-    /// challenge loses at least its last byte. With <paramref name="enable"/> false the slot hashes all
-    /// 64 bytes as sent. See <see cref="IYubiOtpSession.CalculateHmacSha1Async"/>.
+    /// nonempty challenge of 1 to 63 bytes is hashed as given once it is padded with a different byte;
+    /// a 64-byte challenge loses at least its last byte. The device retains at least one byte, so empty
+    /// input is hashed as one 0x00, not as an empty message. With <paramref name="enable"/> false the
+    /// slot hashes all 64 bytes as sent. The session does not enforce this mode; use one length
+    /// convention per slot. See <see cref="IYubiOtpSession.CalculateHmacSha1Async"/>.
     /// </summary>
     public HmacSha1SlotConfiguration UseShortChallenge(bool enable = true)
     {

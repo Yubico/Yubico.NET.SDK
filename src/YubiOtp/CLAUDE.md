@@ -93,11 +93,28 @@ Configuration hierarchy:
 
 ## HMAC-SHA1 Challenge Padding
 
-Challenges are padded to 64 bytes. The pad byte must differ from the last byte
-of the challenge so the YubiKey can detect actual data length:
+Challenges are padded to 64 bytes using the same encoding as yubikey-manager (ykman).
+For a nonempty short challenge, the pad byte differs from its last byte:
 - Last byte non-zero → pad with `0x00`
 - Last byte zero → pad with `0x01`
-- Empty challenge → pad with `0x01`
+- Empty challenge → pad with `0x00`
+- Exactly 64 bytes → send unchanged
+
+`UseShortChallenge` is enabled by default. In that mode, the device uses the final
+transmitted byte as a marker and removes the trailing run of that value, retaining at
+least one byte. Inputs of 1–63 bytes hash as given; a 64-byte input loses at least its
+last byte. An all-equal **transmitted payload** hashes as one byte, so empty input
+produces HMAC of one `0x00`, not HMAC of an empty message. Repeated bytes in a nonempty
+short input are preserved because the padding differs from its last byte.
+
+With `UseShortChallenge(false)`, the device hashes all 64 transmitted bytes. Callers
+should pass exactly 64 bytes using their verifier's padding convention. The session
+does not know or enforce the slot mode. In either mode, a short input and its explicit
+64-byte padded form produce identical requests; use one length convention per slot.
+
+Unit tests in `YubiOtpSessionTests.HmacChallengeSemantics` pin both zero- and one-padding
+collisions through the public SmartCard session and the 63/64-byte boundary. Device
+marker behavior is covered by `YubiOtpHmacChallengeKnownAnswerTests` in integration tests.
 
 ## Security Considerations
 

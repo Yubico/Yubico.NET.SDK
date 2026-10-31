@@ -7,6 +7,35 @@ namespace Yubico.YubiKit.Ctap2.UnitTests;
 public class AuthenticatorInfoTests
 {
     [Fact]
+    [Trait("Audit", "YESDK-1608")]
+    public void Decode_WithKnownAndFutureTransports_PreservesExactStringList()
+    {
+        string[] advertised = ["usb", "future-link", "nfc", "USB", "usb"];
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+        writer.WriteInt32(0x01);
+        writer.WriteStartArray(1);
+        writer.WriteTextString("FIDO_2_1");
+        writer.WriteEndArray();
+        writer.WriteInt32(0x03);
+        writer.WriteByteString(new byte[16]);
+        writer.WriteInt32(0x09); // GetInfo transports: optional CBOR array of text strings.
+        writer.WriteStartArray(advertised.Length);
+        foreach (string transport in advertised)
+        {
+            writer.WriteTextString(transport);
+        }
+        writer.WriteEndArray();
+        writer.WriteEndMap();
+
+        var info = AuthenticatorInfo.Decode(writer.Encode());
+
+        // CTAP preserves the wire list, including unknown names, case, order and duplicates.
+        // WebAuthn performs its own response-side sorting and deduplication.
+        Assert.Equal(advertised, info.Transports);
+    }
+
+    [Fact]
     public void Decode_MinimalGetInfoResponse_ParsesVersions()
     {
         // Arrange - Minimal GetInfo response with just versions

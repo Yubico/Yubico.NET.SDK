@@ -91,6 +91,24 @@ finally
 }
 ```
 
+### Registration transport hints
+
+`RegistrationResponse.Transports` is a non-null, ordinal-sorted, unique snapshot of the authenticator's
+advertised GetInfo transport names. It is empty when that metadata is unavailable. The client reuses
+the ceremony's cached GetInfo response: it does not make an extra query or infer names from the active
+connection. Unknown and future names are preserved by the string-backed `WebAuthnTransport` type.
+
+Store these hints alongside the credential ID for the relying party. They describe advertised
+authenticator support, not which transports this host can currently reach, and do not switch the
+session's connection. For example, an authenticator may advertise `nfc` while registration uses USB
+on a host with no NFC reader.
+
+```csharp
+var registration = await client.MakeCredentialAsync(registrationOptions, pinBytes: null);
+string[] transportNames = [.. registration.Transports.Select(transport => transport.Value)];
+var futureTransport = WebAuthnTransport.FromValue("future-link");
+```
+
 ### Authenticate with an allow list
 
 ```csharp
@@ -190,6 +208,12 @@ credential is excluded.
 ## Migration from earlier v2 development builds
 
 Migration from the earlier v2 development contract is mechanical (there was no shipped v1 WebAuthn package):
+
+- `RegistrationResponse.Transports` is now non-nullable and defaults to an empty list rather than null.
+  Use `registration.Transports.Count == 0` for unavailable metadata; remove null initializers and
+  null-based checks. Descriptor input transports retain their existing optional semantics.
+- Replace `WebAuthnTransport.Unknown(value)` with `WebAuthnTransport.FromValue(value)`. The factory
+  accepts both known and arbitrary future names without normalization; the known constants are unchanged.
 
 ```csharp
 // Before

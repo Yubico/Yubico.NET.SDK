@@ -21,11 +21,11 @@ Creation selects Management over SmartCard, reads status over OTP HID, or uses t
 version before resolving DeviceInfo. Device reset is available only over SmartCard; HID reset requests are
 rejected without sending a reset command.
 
-| Feature | Minimum firmware |
-|---------|------------------|
-| Read device information | 4.1.0 |
-| Write device configuration | 5.0.0 |
-| Factory reset (`ResetDeviceAsync`) | 5.6.0 |
+| Feature | Minimum firmware | Transport |
+|---------|------------------|-----------|
+| Read device information | 4.1.0 | SmartCard, HID FIDO, HID OTP |
+| Write device configuration | 5.0.0 | SmartCard, HID FIDO, HID OTP |
+| Factory reset (`ResetDeviceAsync`) | 5.6.0 | SmartCard (CCID) only |
 
 ## Installation
 
@@ -112,6 +112,26 @@ finally
 
 While locked, every later `SetDeviceConfigAsync` must supply `CurrentLockCode`. Passing `NewLockCode` again
 replaces the code; there is no unlock without the current one.
+
+### Factory reset
+
+Whole-device reset erases credentials, keys, and configuration and cannot be undone. It requires firmware
+5.6.0 or later and SmartCard (CCID); select that transport explicitly rather than allowing a HID session:
+
+```csharp
+await using var session = await device.CreateManagementSessionAsync(
+    new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
+
+// Destructive: only call after confirming that all device data may be erased.
+await session.ResetDeviceAsync();
+```
+
+If SmartCard is not exposed, session creation throws `NotSupportedException`. On an existing session,
+`ResetDeviceAsync` throws `NotSupportedException` if the effective session firmware is a release version below
+5.6.0 or the session uses either HID transport, without sending a reset command.
+`SessionCreationOptions.FirmwareVersionOverride` applies to this check; alpha/beta versions bypass it.
+Passing the check does not guarantee that the device implements whole-device reset; a device rejection
+propagates as `ApduException` rather than `NotSupportedException`.
 
 ## User interaction
 

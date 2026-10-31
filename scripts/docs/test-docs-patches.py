@@ -38,7 +38,7 @@ def writer_block(workflow, step):
 
 
 class WriterPatchTests(unittest.TestCase):
-    def run_fixture(self, writer, fixture):
+    def run_fixture(self, writer, fixture, second_fixture=None):
         workflow, step, artifact, policy = writer
         with tempfile.TemporaryDirectory(prefix="docs-patches-") as tmp:
             base = Path(tmp) / "base"
@@ -59,6 +59,11 @@ class WriterPatchTests(unittest.TestCase):
             (directory / executable).chmod(0o755)
             (directory / deleted).write_text("obsolete\n")
             (base / "outside.txt").write_text("must not change\n")
+            architecture_doc = "docs/architecture/guide.md"
+            architecture_image = "docs/architecture/new-image.png"
+            if second_fixture is not None:
+                (base / architecture_doc).parent.mkdir(parents=True)
+                (base / architecture_doc).write_text("architecture before\n")
             script = ROOT / "scripts/docs/apply-docs-patch.py"
             if script.exists():
                 target = base / "scripts/docs/apply-docs-patch.py"
@@ -118,6 +123,20 @@ class WriterPatchTests(unittest.TestCase):
             artifact_path = writer_repo / artifact
             artifact_path.parent.mkdir(parents=True)
             artifact_path.write_bytes(patch)
+            if second_fixture is not None:
+                second_doc = base / architecture_doc
+                if second_fixture == "symlink-replacement":
+                    second_doc.unlink()
+                    second_doc.symlink_to("../../outside.txt")
+                else:
+                    second_doc.write_text("architecture after\n")
+                    if second_fixture == "mode-change":
+                        second_doc.chmod(0o755)
+                (base / architecture_image).write_bytes(b"\x00second artifact\xff")
+                git(base, "add", "-N", "docs/architecture")
+                second_artifact = writer_repo / WRITERS[1][2]
+                second_artifact.parent.mkdir(parents=True)
+                second_artifact.write_bytes(git(base, "diff", "HEAD", "--binary", "--", "docs/architecture"))
             status_args = ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--", ".", ":(exclude)patches")
             before_status = git(writer_repo, *status_args)
             result = subprocess.run(
@@ -127,7 +146,12 @@ class WriterPatchTests(unittest.TestCase):
             )
             output = result.stdout + result.stderr
             if fixture in ("ordinary", "quoted-path"):
-                self.assertEqual(result.returncode, 0, output)
+                if second_fixture in (None, "ordinary"):
+                    self.assertEqual(result.returncode, 0, output)
+                    self.assertEqual(result.stdout, "", output)
+                else:
+                    self.assertNotEqual(result.returncode, 0, f"Unsafe second artifact was accepted\n{output}")
+                    self.assertIn("Unsafe or invalid documentation patch:", result.stderr)
                 output_dir = writer_repo / "docs" / policy
                 self.assertEqual((output_dir / doc).read_text(), "after\n")
                 self.assertEqual((output_dir / executable).read_text(), "updated executable\n")
@@ -136,6 +160,24 @@ class WriterPatchTests(unittest.TestCase):
                 self.assertEqual((output_dir / added).read_bytes(), (directory / added).read_bytes())
                 if fixture == "quoted-path":
                     self.assertEqual((output_dir / 'quoted "name"\twith\nnewline.md').read_text(), "ordinary documentation\n")
+                if second_fixture is not None:
+                    expected_staged = {f"docs/migration/{name}".encode() for name in (doc, executable, deleted, added)}
+                    self.assertEqual(git(writer_repo, "show", f":docs/migration/{doc}"), b"after\n")
+                    self.assertEqual(git(writer_repo, "show", f":docs/migration/{executable}"), b"updated executable\n")
+                    self.assertEqual(git(writer_repo, "show", f":docs/migration/{added}"), b"state: updated\n")
+                    if second_fixture == "ordinary":
+                        expected_staged.update(path.encode() for path in (architecture_doc, architecture_image))
+                        for path in (architecture_doc, architecture_image):
+                            expected = (base / path).read_bytes()
+                            self.assertEqual((writer_repo / path).read_bytes(), expected)
+                            self.assertEqual(git(writer_repo, "show", f":{path}"), expected)
+                    else:
+                        self.assertEqual(git(writer_repo, "status", "--porcelain", "--untracked-files=all", "--", "docs/architecture"), b"", output)
+                        self.assertEqual((writer_repo / architecture_doc).read_text(), "architecture before\n")
+                        self.assertEqual((writer_repo / "outside.txt").read_text(), "must not change\n")
+                    self.assertEqual(set(git(writer_repo, "diff", "--cached", "--name-only", "-z").split(b"\0")[:-1]), expected_staged)
+                    self.assertEqual(git(writer_repo, "diff", "--binary"), b"", output)
+                    self.assertEqual(git(writer_repo, "diff", "--cached", "--check"), b"", output)
             else:
                 self.assertNotEqual(result.returncode, 0, f"{fixture} patch was accepted\n{output}")
                 # Rejection must precede ANY working-tree or real-index changes.
@@ -171,6 +213,14 @@ class WriterPatchTests(unittest.TestCase):
             if writer[3] == "migration":
                 with self.subTest(writer=writer[0]):
                     self.run_fixture(writer, "unexpected-migration-file")
+
+    def test_docs_update_preserves_both_valid_artifacts_in_index_and_working_tree(self):
+        self.run_fixture(WRITERS[0], "ordinary", second_fixture="ordinary")
+
+    def test_docs_update_rejects_second_artifact_without_reverting_first(self):
+        for second_fixture in ("symlink-replacement", "mode-change"):
+            with self.subTest(second_fixture=second_fixture):
+                self.run_fixture(WRITERS[0], "ordinary", second_fixture=second_fixture)
 
 
 if __name__ == "__main__":

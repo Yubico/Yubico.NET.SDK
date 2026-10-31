@@ -152,15 +152,8 @@ public class OathAuthenticationTests
         await using var session = await OathSession.CreateAsync(
             connection, cancellationToken: TestContext.Current.CancellationToken);
 
-        using var credentialData = new CredentialData
-        {
-            Name = "alice",
-            Issuer = "issuer",
-            OathType = OathType.Totp,
-            HashAlgorithm = OathHashAlgorithm.Sha1,
-            Secret = [0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34],
-            Digits = 6
-        };
+        using var credentialData = CredentialData.ParseUri(
+            "otpauth://totp/issuer:alice?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY&digits=6");
 
         var ex = await Assert.ThrowsAsync<OathException>(() =>
             session.PutCredentialAsync(credentialData, cancellationToken: TestContext.Current.CancellationToken));
@@ -191,6 +184,103 @@ public class OathAuthenticationTests
     }
 
     // --- ISC-24/26/26.1: authenticate-and-retry helper ---
+
+    [Theory]
+    [InlineData(OathHashAlgorithm.Sha1, 14)]
+    [InlineData(OathHashAlgorithm.Sha1, 20)]
+    [InlineData(OathHashAlgorithm.Sha1, 64)]
+    [InlineData(OathHashAlgorithm.Sha256, 64)]
+    [InlineData(OathHashAlgorithm.Sha512, 128)]
+    [InlineData(OathHashAlgorithm.Sha1, 13)]
+    [InlineData(OathHashAlgorithm.Sha1, 65)]
+    [InlineData(OathHashAlgorithm.Sha512, 129)]
+    public async Task AuthenticateAndRetryAsync_PutLocked_PreservesSeedThroughValidateAndRetry(
+        OathHashAlgorithm algorithm, int seedLength)
+    {
+        byte[] password = "correct horse"u8.ToArray();
+        byte[] accessKey = Rfc2898DeriveBytes.Pbkdf2(
+            password, Salt, iterations: 1000, HashAlgorithmName.SHA1, outputLength: 16);
+        byte[] seed = new byte[seedLength];
+        Array.Fill(seed, (byte)0xA5);
+        int blockSize = algorithm == OathHashAlgorithm.Sha512 ? 128 : 64;
+        int processedLength = seedLength > blockSize
+            ? algorithm switch
+            {
+                OathHashAlgorithm.Sha1 => 20,
+                OathHashAlgorithm.Sha256 => 32,
+                OathHashAlgorithm.Sha512 => 64,
+                _ => throw new InvalidOperationException()
+            }
+            : Math.Max(14, seedLength);
+        byte[] expectedSeed = new byte[processedLength];
+        byte[] expectedPayload = [];
+        using var connection = new ValidatingConnection(ServerChallenge, accessKey);
+        try
+        {
+            if (seedLength > blockSize)
+            {
+                _ = algorithm switch
+                {
+                    OathHashAlgorithm.Sha1 => SHA1.HashData(seed, expectedSeed),
+                    OathHashAlgorithm.Sha256 => SHA256.HashData(seed, expectedSeed),
+                    OathHashAlgorithm.Sha512 => SHA512.HashData(seed, expectedSeed),
+                    _ => throw new InvalidOperationException()
+                };
+            }
+            else
+            {
+                seed.CopyTo(expectedSeed.AsSpan());
+            }
+
+            // Exact TAG_NAME("seed") + TAG_KEY([type, digits, processed seed]). The 128-byte
+            // SHA-512 seed makes TAG_KEY's value 130 bytes, requiring BER length 81 82.
+            byte type = (byte)((byte)OathType.Totp | (byte)algorithm);
+            expectedPayload = processedLength + 2 < 128
+                ? [0x71, 0x04, 0x73, 0x65, 0x65, 0x64, 0x73, (byte)(processedLength + 2), type, 0x06, .. expectedSeed]
+                : [0x71, 0x04, 0x73, 0x65, 0x65, 0x64, 0x73, 0x81, (byte)(processedLength + 2), type, 0x06, .. expectedSeed];
+
+            await using var session = await OathSession.CreateAsync(
+                connection, cancellationToken: TestContext.Current.CancellationToken);
+            using var credential = new CredentialData
+            {
+                Name = "seed",
+                OathType = OathType.Totp,
+                HashAlgorithm = algorithm,
+                Secret = seed
+            };
+            int passwordRequests = 0;
+
+            await session.AuthenticateAndRetryAsync(
+                token => session.PutCredentialAsync(credential, token),
+                _ =>
+                {
+                    passwordRequests++;
+                    return Task.FromResult((ReadOnlyMemory<byte>)password);
+                },
+                TestContext.Current.CancellationToken);
+
+            Assert.False(session.IsLocked);
+            Assert.Equal(1, passwordRequests);
+            Assert.Equal([OathConstants.InsPut, OathConstants.InsValidate, OathConstants.InsPut],
+                connection.Instructions);
+            Assert.Equal(2, connection.PutPayloads.Count);
+            Assert.True(CryptographicOperations.FixedTimeEquals(expectedPayload, connection.PutPayloads[0]));
+            Assert.True(CryptographicOperations.FixedTimeEquals(
+                expectedPayload, connection.PutPayloads[1]),
+                "The PUT after successful VALIDATE must carry the same seed as the rejected PUT.");
+            ReadOnlyMemory<byte> borrowed = credential.Secret;
+            Assert.True(CryptographicOperations.FixedTimeEquals(seed, borrowed.Span));
+            Assert.All(seed, value => Assert.Equal(0xA5, value));
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(seed);
+            CryptographicOperations.ZeroMemory(password);
+            CryptographicOperations.ZeroMemory(accessKey);
+            CryptographicOperations.ZeroMemory(expectedSeed);
+            CryptographicOperations.ZeroMemory(expectedPayload);
+        }
+    }
 
     [Fact]
     public async Task AuthenticateAndRetryAsync_OperationSucceedsImmediately_DoesNotInvokePasswordProvider()
@@ -283,8 +373,8 @@ public class OathAuthenticationTests
     {
         // AuthenticateAndRetryAsync's Locked-catch delegates the derive+validate+zero sequence to
         // this internal helper; exercising it directly with a caller-owned array lets the test
-        // assert zeroing by reference, the same pattern already used for PutCredentialAsync's
-        // caller-owned secret buffer.
+        // assert zeroing by reference. This tests the authentication key, not the credential seed;
+        // the real PUT/VALIDATE/retry regression above covers seed ownership independently.
         byte[] deviceKey = Rfc2898DeriveBytes.Pbkdf2(
             "correct horse"u8, Salt, iterations: 1000, HashAlgorithmName.SHA1, outputLength: 16);
         var connection = new ValidatingConnection(ServerChallenge, deviceKey);
@@ -441,6 +531,11 @@ public class OathAuthenticationTests
     private sealed class ValidatingConnection(byte[] serverChallenge, byte[] accessKey) : ISmartCardConnection
     {
         private bool _selected;
+        private bool _validated;
+        private readonly List<byte[]> _validationResponses = [];
+
+        public List<byte> Instructions { get; } = [];
+        public List<byte[]> PutPayloads { get; } = [];
 
         public Transport Transport => Transport.Usb;
 
@@ -467,6 +562,15 @@ public class OathAuthenticationTests
             }
 
             byte ins = bytes[1];
+            Instructions.Add(ins);
+            if (ins == OathConstants.InsPut)
+            {
+                // Snapshot at the transport boundary, before SDK cleanup clears its temporary APDU.
+                PutPayloads.Add(bytes.Slice(5, bytes[4]).ToArray());
+                return Task.FromResult((ReadOnlyMemory<byte>)(byte[])
+                    (_validated ? [0x90, 0x00] : [0x69, 0x82]));
+            }
+
             if (ins == OathConstants.InsSetCode)
             {
                 // SET CODE (used by SetKeyAsync/UnsetKeyAsync) always succeeds in this fake;
@@ -480,27 +584,38 @@ public class OathAuthenticationTests
             int offset = 5;
             byte responseTag = bytes[offset]; offset++;
             byte responseLen = bytes[offset]; offset++;
-            byte[] clientResponse = bytes.Slice(offset, responseLen).ToArray();
+            ReadOnlySpan<byte> clientResponse = bytes.Slice(offset, responseLen);
             offset += responseLen;
 
             byte challengeTag = bytes[offset]; offset++;
             byte challengeLen = bytes[offset]; offset++;
-            byte[] clientChallenge = bytes.Slice(offset, challengeLen).ToArray();
+            ReadOnlySpan<byte> clientChallenge = bytes.Slice(offset, challengeLen);
 
             Assert.Equal(OathConstants.TagResponse, responseTag);
             Assert.Equal(OathConstants.TagChallenge, challengeTag);
 
-            byte[] expectedClientResponse = HMACSHA1.HashData(accessKey, serverChallenge);
-
-            if (!CryptographicOperations.FixedTimeEquals(expectedClientResponse, clientResponse))
+            Span<byte> expectedClientResponse = stackalloc byte[20];
+            Span<byte> deviceResponse = stackalloc byte[20];
+            try
             {
-                // Wrong key: device rejects with "reference data not usable".
-                return Task.FromResult((ReadOnlyMemory<byte>)(byte[])[0x69, 0x84]);
-            }
+                HMACSHA1.HashData(accessKey, serverChallenge, expectedClientResponse);
+                if (!CryptographicOperations.FixedTimeEquals(expectedClientResponse, clientResponse))
+                {
+                    // Wrong key: device rejects with "reference data not usable".
+                    return Task.FromResult((ReadOnlyMemory<byte>)(byte[])[0x69, 0x84]);
+                }
 
-            byte[] deviceResponse = HMACSHA1.HashData(accessKey, clientChallenge);
-            byte[] okResponse = [OathConstants.TagResponse, (byte)deviceResponse.Length, .. deviceResponse, 0x90, 0x00];
-            return Task.FromResult((ReadOnlyMemory<byte>)okResponse);
+                HMACSHA1.HashData(accessKey, clientChallenge, deviceResponse);
+                byte[] okResponse = [OathConstants.TagResponse, (byte)deviceResponse.Length, .. deviceResponse, 0x90, 0x00];
+                _validationResponses.Add(okResponse);
+                _validated = true;
+                return Task.FromResult((ReadOnlyMemory<byte>)okResponse);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(expectedClientResponse);
+                CryptographicOperations.ZeroMemory(deviceResponse);
+            }
         }
 
         public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => NullDisposable.Instance;
@@ -509,9 +624,17 @@ public class OathAuthenticationTests
 
         public void Dispose()
         {
+            foreach (byte[] payload in PutPayloads)
+                CryptographicOperations.ZeroMemory(payload);
+            foreach (byte[] response in _validationResponses)
+                CryptographicOperations.ZeroMemory(response);
         }
 
-        public ValueTask DisposeAsync() => default;
+        public ValueTask DisposeAsync()
+        {
+            Dispose();
+            return default;
+        }
 
         private sealed class NullDisposable : IDisposable
         {

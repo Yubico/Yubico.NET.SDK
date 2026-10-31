@@ -153,6 +153,9 @@ than other operations.
   bytes are zeroed; `Scp03KeyParameters` and `Scp11KeyParameters` do the same for what they own.
 - Session creation borrows the key parameters you pass. You keep ownership and remain responsible for
   disposing them after the session is gone.
+- `GetCertificatesAsync` returns caller-owned certificates. Dispose each certificate when no longer needed;
+  disposing the session does not dispose them. If any certificate cannot be loaded, the SDK disposes those
+  already loaded and throws instead of returning a partial bundle.
 - Zero any caller-owned key buffer with `CryptographicOperations.ZeroMemory` in a `finally`. The SDK does not
   zero buffers it did not allocate.
 - The factory SCP03 key set is a public value. Treat a device that still has it as unprotected, and rotate

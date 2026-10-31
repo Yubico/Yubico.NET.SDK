@@ -29,6 +29,10 @@ public class RpAuthorizationTests
     [InlineData("partner.test")]
     [InlineData("https://partner.test/native-client")]
     [InlineData("com")]
+    [InlineData("x:credential")]
+    [InlineData("x:/credential")]
+    [InlineData("x://partner.test/credential")]
+    [InlineData("x:")]
     public async Task Ceremonies_ApplicationAuthorizesNonSuffix_PreserveRpIdAndOrigin(string rpId)
     {
         var backend = CreateBackend();
@@ -86,6 +90,19 @@ public class RpAuthorizationTests
     [InlineData("example.com/invalid")]
     [InlineData("example..com")]
     [InlineData("example.com\0")]
+    [InlineData("example-.com")]
+    [InlineData("example_foo.com")]
+    [InlineData("ab--cd.com")]
+    [InlineData("example.123")]
+    [InlineData("example.0x")]
+    [InlineData("example.0xdead")]
+    [InlineData("x:bad%GG")]
+    [InlineData("x:bad%")]
+    [InlineData("x:bad value")]
+    [InlineData("x:\\credential")]
+    [InlineData("x://[bad]/credential")]
+    [InlineData("x:credential[bad]")]
+    [InlineData("x://partner.test:invalid/credential")]
     public async Task Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend(string rpId)
     {
         var backend = CreateBackend();
@@ -129,6 +146,28 @@ public class RpAuthorizationTests
         // Build at runtime: runner serialization can replace unpaired UTF-16 surrogates in theory data.
         await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend(new string('\ud800', 1));
         await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend("https://partner.test/" + new string('\udc00', 1));
+    }
+
+    [Fact]
+    public async Task Ceremonies_ValidIdn_UsesActualAsciiLabelLengthButPreservesInput()
+    {
+        // 32 Unicode characters encode to a 38-byte ASCII label, not Uri's estimated 68 bytes.
+        await Ceremonies_ApplicationAuthorizesNonSuffix_PreserveRpIdAndOrigin(new string('例', 32) + ".com");
+    }
+
+    [Fact]
+    public async Task Ceremonies_DomainLabelAndNameLengthLimits_CannotBeOverridden()
+    {
+        await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend(new string('a', 64) + ".com");
+        await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend(
+            string.Join('.', Enumerable.Repeat(new string('a', 63), 4)));
+    }
+
+    [Fact]
+    public async Task Ceremonies_DocumentedUriSubset_RejectsUnsupportedSchemeSpecificForm()
+    {
+        // Valid generic RFC3986 syntax, but not supported by System.Uri's HTTP parser.
+        await Ceremonies_MalformedProtocolRpId_EvenPermissiveCallbackCannotReachBackend("http:credential");
     }
 
     private static WebAuthnClientOptions Options(Func<WebAuthnOrigin, string, bool> validator)

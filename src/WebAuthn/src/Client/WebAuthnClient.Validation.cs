@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Globalization;
 using System.Text;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
@@ -23,14 +24,15 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 public sealed partial class WebAuthnClient
 {
     private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+    private static readonly IdnMapping StrictIdn = new() { UseStd3AsciiRules = true };
 
     private void EnsureRpIdAuthorized(string rpId)
     {
         // WebAuthn L3 #rp-id allows domain strings or URIs for native binding models.
         // This is syntax only: public-suffix/domain binding belongs entirely to the application.
-        if (Uri.CheckHostName(rpId) != UriHostNameType.Dns && !Uri.IsWellFormedUriString(rpId, UriKind.Absolute))
+        if (!IsValidRpDomain(rpId) && !IsSupportedRpUri(rpId))
         {
-            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidRequest, "RP ID must have domain-string or absolute-URI syntax.");
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidRequest, "RP ID must have supported domain-string or absolute-URI syntax.");
         }
 
         try
@@ -58,6 +60,63 @@ public sealed partial class WebAuthnClient
         {
             throw new WebAuthnClientError(WebAuthnClientErrorCode.Security, "The application did not authorize this origin/RP pair.");
         }
+    }
+
+    private static bool IsValidRpDomain(string rpId)
+    {
+        string ascii;
+        try
+        {
+            // Use real IDN conversion, not Uri.CheckHostName's estimated label lengths.
+            // GetUnicode also validates existing ACE labels instead of trusting an xn-- prefix.
+            ascii = StrictIdn.GetAscii(rpId);
+            _ = StrictIdn.GetUnicode(ascii);
+        }
+        catch (ArgumentException)
+        {
+            // IdnMapping has no Try conversion; invalid IDN input is reported by this exception.
+            return false;
+        }
+
+        // WHATWG valid-domain / UTS46 VerifyDnsLength: 253 characters without the root dot.
+        var domain = ascii.AsSpan().TrimEnd('.');
+        if (domain.Length is 0 or > 253)
+        {
+            return false;
+        }
+
+        foreach (var range in domain.Split('.'))
+        {
+            if (!IsValidRpDomainLabel(domain[range]))
+            {
+                return false;
+            }
+        }
+
+        // WHATWG valid-domain excludes names that end in an IPv4 number, not only dotted IPs.
+        var lastLabel = domain[(domain.LastIndexOf('.') + 1)..];
+        return lastLabel.IndexOfAnyExceptInRange('0', '9') >= 0
+            && !(lastLabel.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+                && lastLabel[2..].IndexOfAnyExcept("0123456789abcdefABCDEF") < 0);
+    }
+
+    private static bool IsValidRpDomainLabel(ReadOnlySpan<char> label) =>
+        label.Length is > 0 and <= 63
+        && label[0] != '-' && label[^1] != '-'
+        // .NET masks UTS46 HYPHEN_3_4 for compatibility; strict valid-domain does not.
+        && (label.Length < 4 || label[2] != '-' || label[3] != '-'
+            || label.StartsWith("xn--", StringComparison.OrdinalIgnoreCase));
+
+    private static bool IsSupportedRpUri(string rpId)
+    {
+        // RFC3986 scheme = ALPHA *(ALPHA / DIGIT / "+" / "-" / "."). Uri treats a
+        // one-letter scheme as a DOS drive. Prefix only the validation copy's scheme
+        // to invoke the standard generic parser; never normalize the actual RP ID.
+        var candidate = rpId.Length >= 2 && rpId[1] == ':' && char.IsAsciiLetter(rpId[0])
+            ? "rpid-syntax-" + rpId
+            : rpId;
+        // This remains the documented System.Uri syntax subset, not a new RFC3986 parser.
+        return Uri.IsWellFormedUriString(candidate, UriKind.Absolute);
     }
 
     private static void ValidateRegistrationOptions(PublicKeyCredentialCreationOptions options)

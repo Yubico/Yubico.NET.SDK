@@ -176,9 +176,28 @@ keep it prompt, local, and thread-safe if clients share it; do not block on netw
 
 The SDK does **not** add a public-suffix or origin/domain-binding policy after approval. It still
 rejects malformed RP IDs with `InvalidRequest`, before invoking the callback: RP IDs must be nonempty,
-well-formed Unicode encodable as UTF-8 and have domain-string or absolute-URI syntax. It sends the
+well-formed Unicode encodable as UTF-8 and have supported domain-string or absolute-URI syntax. It sends the
 original RP ID unchanged (no case folding, IDNA conversion, or URI normalization). CTAP encodes it as
 a CBOR text string; authenticator message/credential limits remain in the CTAP2 layer.
+
+**Supported syntax boundary:** standalone domains use .NET `IdnMapping` with
+[`UseStd3AsciiRules = true`](https://learn.microsoft.com/en-us/dotnet/api/system.globalization.idnmapping.usestd3asciirules?view=net-10.0),
+ACE-label validation, explicit 1–63-byte ASCII label and 253-byte name limits (excluding a root dot),
+hyphen checks, and the [WHATWG valid-domain](https://url.spec.whatwg.org/#valid-domain) numeric-ending
+exclusion. Length checks use the actual IDN conversion, not `Uri.CheckHostName` estimates. All conversion
+is validation-only: the callback and authenticator still receive the exact input string.
+
+URI RP IDs use the
+[.NET well-formed absolute URI parser](https://learn.microsoft.com/en-us/dotnet/api/system.uri.iswellformeduristring?view=net-10.0).
+For a one-letter scheme, only a validation copy receives a longer generic scheme prefix, avoiding
+.NET's DOS-drive interpretation: `x:credential`, `x:/credential`, and `x://partner.test/credential`
+are supported; malformed escapes, whitespace, and backslashes are still rejected. This is **not a
+general RFC3986 parser**: .NET scheme-specific and authority restrictions remain (for example,
+`http:credential` is not supported although it matches the generic RFC3986 grammar). Likewise,
+non-ASCII IDN behavior depends on .NET's ICU/NLS/invariant globalization backend and Unicode tables;
+these checks do not claim complete WHATWG URL/UTS46 conformance, including identical bidi behavior
+across backends. Applications needing full browser conformance must use an authoritative browser
+validator. This boundary does not change RP authorization ownership or supported origin schemes.
 
 ### Explicit origin/RP allowlist
 

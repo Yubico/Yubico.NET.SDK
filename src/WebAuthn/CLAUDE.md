@@ -235,7 +235,7 @@ A PIN still comes only from `pinBytes` or `WebAuthnClientOptions.CredentialPromp
 
 ### RP ID Validation
 
-`WebAuthnClient.Validation.cs` independently checks RP syntax (domain string or absolute URI) and
+`WebAuthnClient.Validation.cs` independently checks supported RP syntax (domain string or absolute URI) and
 strict UTF-8 encodability, then invokes the required synchronous `Client/RpIdValidator.cs` delegate
 with the configured origin and unchanged RP ID. Both ceremonies do this once before any backend
 call, including GetInfo, PIN/UV, extensions, and credential probing. Approval is not overridden by
@@ -243,6 +243,23 @@ SDK domain-suffix or Public Suffix List policy. False and non-cancellation excep
 `Security` (exception retained); callback cancellation propagates and blocks device I/O. Malformed
 protocol values map to `InvalidRequest` without invoking the callback. The callback executes before
 the deadline starts and must be prompt/local; shared callbacks must handle concurrency.
+
+Domain checks use `IdnMapping` with STD3, `GetUnicode` to validate ACE labels, explicit 63-byte
+label / 253-byte unrooted name limits, strict hyphens, and WHATWG's numeric-ending exclusion.
+Do not use `Uri.CheckHostName`: its [DomainNameHelper](https://github.com/dotnet/runtime/blob/v10.0.0/src/libraries/System.Private.Uri/src/System/DomainNameHelper.cs)
+permits underscores/trailing hyphens and estimates IDN label sizes. .NET's
+[IDNA backend](https://github.com/dotnet/runtime/blob/v10.0.0/src/native/libs/System.Globalization.Native/pal_idna.c)
+masks HYPHEN_3_4 errors and does not provide every strict WHATWG UTS46 switch (including CheckBidi).
+The explicit checks close the reviewed gaps; IDN behavior still depends on ICU/NLS/invariant mode
+and Unicode tables, and full cross-backend browser URL/UTS46 conformance is not claimed.
+
+URI checks retain `Uri.IsWellFormedUriString`'s documented syntax subset. A one-letter scheme is
+prefixed in a validation copy only, so RFC3986 `x:credential` is not misclassified as a DOS drive.
+Malformed percent escapes/backslashes/authority still fail. Scheme-specific restrictions remain:
+`http:credential` is not supported despite matching generic RFC3986 syntax. No generic URI parser,
+global parser registration, or origin parsing change is introduced; approved RP inputs remain exact.
+See [RFC3986 §3.1 / Appendix A](https://www.rfc-editor.org/rfc/rfc3986#appendix-A) and
+[WHATWG valid-domain](https://url.spec.whatwg.org/#valid-domain).
 
 **YESDK-1623 / audit 15 migration:** `PublicSuffixChecker`, `EnterpriseRpIds`, and
 `WebAuthnOrigin.IsRpIdValid` are removed. Applications must provide their complete binding policy

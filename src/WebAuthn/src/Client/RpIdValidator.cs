@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// Authorizes a relying party identifier for the application's configured origin.
 /// </summary>
 /// <param name="origin">The configured origin, also serialized into client data.</param>
-/// <param name="rpId">The requested RP ID, unchanged and already checked for protocol syntax and encoding.</param>
+/// <param name="rpId">The requested RP ID, unchanged and already checked for supported protocol syntax and encoding.</param>
 /// <returns><see langword="true"/> only if the application authorizes this exact origin/RP pair.</returns>
 /// <remarks>
 /// <para>
@@ -26,6 +26,11 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// rules for browser-compatible use, or trusted native bindings where appropriate. The SDK does
 /// not impose additional domain-suffix authorization after approval. WebAuthn Level 3's RP ID
 /// definition permits other native binding models, but still requires domain-string or URI syntax.
+/// </para>
+/// <para>
+/// SDK syntax checks use .NET IDN conversion with STD3 and explicit DNS label/name checks,
+/// and the <see cref="Uri.IsWellFormedUriString"/> URI syntax subset (including one-letter schemes).
+/// These checks are not a complete browser URL/UTS46 implementation or a general RFC3986 parser.
 /// </para>
 /// <para>
 /// Invoked synchronously once per registration or authentication before ceremony device I/O,

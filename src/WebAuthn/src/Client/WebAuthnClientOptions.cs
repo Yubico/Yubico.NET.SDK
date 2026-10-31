@@ -40,7 +40,7 @@ public sealed record WebAuthnClientOptions
     /// </summary>
     /// <remarks>
     /// The application owns the complete RP binding policy. The SDK independently checks protocol
-    /// syntax and encoding, not browser domain-suffix authorization. See <see cref="Client.RpIdValidator"/>
+    /// supported syntax and encoding, not browser domain-suffix authorization. See <see cref="Client.RpIdValidator"/>
     /// for responsibilities, synchronous execution, failure behavior, and RP-server checks.
     /// </remarks>
     /// <exception cref="ArgumentNullException">The property is initialized with <see langword="null"/>.</exception>

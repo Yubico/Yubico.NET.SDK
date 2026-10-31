@@ -65,7 +65,8 @@ below firmware 2.1.0; the one-shot `device.GetConfigStateAsync()` extension owns
 
 ### Program a slot for HMAC-SHA1 challenge-response
 
-The key must be exactly 20 bytes. `UseShortChallenge` permits challenges below 64 bytes.
+The key must be exactly 20 bytes. Short-challenge mode is enabled by default;
+`UseShortChallenge(false)` selects fixed 64-byte mode.
 
 ```csharp
 byte[] hmacKey = RandomNumberGenerator.GetBytes(20);
@@ -91,6 +92,21 @@ The response is 20 bytes. This one-shot extension opens and disposes its own ses
 byte[] challenge = Encoding.UTF8.GetBytes("some-challenge");
 ReadOnlyMemory<byte> response = await device.CalculateHmacSha1Async(Slot.Two, challenge);
 ```
+
+The SDK always sends 64 bytes: shorter inputs are padded with `0x01` after a trailing
+`0x00`, otherwise with `0x00` (including empty input). Exactly 64 bytes are sent unchanged.
+
+- **Short-challenge slot (default):** use 1–63 bytes to hash the input as given. The device
+  treats the final transmitted byte as a marker and removes the trailing run of that
+  value, retaining at least one byte. A 64-byte input loses at least its last byte;
+  empty input hashes as one `0x00`, not as an empty message.
+- **Fixed-challenge slot:** pass exactly 64 bytes, padded according to your verifier's
+  convention; the device hashes all 64 bytes as sent.
+
+The session does not know or enforce the slot mode. Use one challenge-length convention
+per slot and agree with your verifier: `[0x41]` and `[0x41, 0x00 × 63]` send the same
+request, as do `[0x41, 0x00]` and `[0x41, 0x00, 0x01 × 62]`. The device cannot distinguish
+these input lengths, in either mode.
 
 ### Program a static password
 

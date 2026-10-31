@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Text;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -21,6 +22,44 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <content>Request validation and the mapping from CTAP statuses to WebAuthn errors.</content>
 public sealed partial class WebAuthnClient
 {
+    private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+
+    private void EnsureRpIdAuthorized(string rpId)
+    {
+        // WebAuthn L3 #rp-id allows domain strings or URIs for native binding models.
+        // This is syntax only: public-suffix/domain binding belongs entirely to the application.
+        if (Uri.CheckHostName(rpId) != UriHostNameType.Dns && !Uri.IsWellFormedUriString(rpId, UriKind.Absolute))
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidRequest, "RP ID must have domain-string or absolute-URI syntax.");
+        }
+
+        try
+        {
+            // CTAP text strings are UTF-8 (CBOR major type 3); never replace invalid UTF-16
+            // while encoding/hashing an identifier, which would silently change its credential scope.
+            _ = StrictUtf8.GetByteCount(rpId);
+        }
+        catch (EncoderFallbackException ex)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidRequest, "RP ID must be encodable as UTF-8 without replacement.", ex);
+        }
+
+        bool authorized;
+        try
+        {
+            authorized = _rpIdValidator(_origin, rpId);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.Security, "Application RP authorization failed.", ex);
+        }
+
+        if (!authorized)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.Security, "The application did not authorize this origin/RP pair.");
+        }
+    }
+
     private static void ValidateRegistrationOptions(PublicKeyCredentialCreationOptions options)
     {
         if (options.Challenge.Length == 0)

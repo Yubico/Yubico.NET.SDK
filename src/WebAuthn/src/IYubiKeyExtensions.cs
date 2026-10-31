@@ -32,7 +32,7 @@ public static class IYubiKeyExtensions
         /// </summary>
         /// <param name="origin">The WebAuthn origin for client data JSON.</param>
         /// <param name="clientOptions">
-        /// Required configuration for the client itself (public suffix checker, enterprise RP IDs,
+        /// Required configuration for the client itself (application RP authorization,
         /// credential prompt, prompt-attempt limit), forwarded to the created
         /// <see cref="WebAuthnClient"/>. Unrelated to <paramref name="sessionOptions"/>, which
         /// configures the session rather than the client.
@@ -48,8 +48,9 @@ public static class IYubiKeyExtensions
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying CTAP2 session.</returns>
         /// <remarks>
-        /// The public suffix checker should be backed by Public Suffix List data. RP ID validation
-        /// rejects public suffixes such as <c>com</c> and <c>co.uk</c> before any CTAP operation runs.
+        /// <see cref="WebAuthnClientOptions.RpIdValidator"/> owns origin/RP authorization and is invoked
+        /// before each ceremony's device I/O, not during session creation (which has no requested RP ID).
+        /// The SDK independently checks protocol syntax and encoding, not domain-suffix authorization.
         /// This method adds no independent session-creation logic; <paramref name="sessionOptions"/> is
         /// validated and applied by the underlying CTAP2 <c>CreateCtap2SessionAsync</c>, while
         /// <paramref name="clientOptions"/> is forwarded to the returned <see cref="WebAuthnClient"/>.
@@ -63,7 +64,7 @@ public static class IYubiKeyExtensions
             ArgumentNullException.ThrowIfNull(origin);
             ArgumentNullException.ThrowIfNull(clientOptions);
             // Force the runtime guard before session creation can open a device connection.
-            _ = clientOptions.PublicSuffixChecker;
+            _ = clientOptions.RpIdValidator;
 
             var ctap2Session = await yubiKey.CreateCtap2SessionAsync(sessionOptions, cancellationToken)
                 .ConfigureAwait(false);

@@ -3,10 +3,10 @@
 This package is a W3C Web Authentication client over `Yubico.YubiKit.Ctap2`. It reduces registration and
 authentication to two calls, handling client data JSON, RP ID validation, and PIN/UV token acquisition on the way to
 CTAP2; every ceremony runs over an `ICtap2Session` that the client owns and disposes. It requires a WebAuthn origin and
-client options containing a public-suffix checker backed by Public Suffix List data, because RP ID validation is what stops one site from
-claiming another site's credentials.
+client options containing a required application-supplied `RpIdValidator`. The application owns authorization
+of the RP ID for the configured origin; the SDK independently checks protocol syntax and encoding.
 
-WebAuthn owns client ceremonies and origin/RP validation; `Yubico.YubiKit.Ctap2` owns direct
+WebAuthn owns client ceremonies and origin parsing; `Yubico.YubiKit.Ctap2` owns direct
 authenticator operations. FIDO2 remains the authenticator application identity, and FIDO HID remains
 the transport name.
 
@@ -53,10 +53,11 @@ IYubiKey device = await YubiKeyManager.FindFirstAsync();
 if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
     throw new InvalidOperationException("The origin is not a secure context.");
 
-// Back this with Public Suffix List data in production.
+// A deliberately narrow application policy: this origin may use exactly this RP ID.
 var clientOptions = new WebAuthnClientOptions
 {
-    PublicSuffixChecker = domain => domain is "com" or "net" or "org" or "co.uk"
+    RpIdValidator = (requestOrigin, rpId) =>
+        requestOrigin.StringValue == "https://example.com" && rpId == "example.com"
 };
 await using var client = await device.CreateWebAuthnClientAsync(origin, clientOptions);
 ```
@@ -163,12 +164,80 @@ Registration checks nonempty `ExcludeCredentials` lists in device-sized batches,
 discouraged and no PIN token is used. The final registration still requires touch before reporting that a
 credential is excluded.
 
+## RP authorization belongs to the application
+
+`RpIdValidator(WebAuthnOrigin origin, string rpId)` is synchronous and required. It is called once
+for each registration and authentication, before any ceremony device I/O (including capability reads,
+credential probes, and PIN/UV acquisition). Return `true` only when the application authorizes that
+exact origin/RP pair. Returning `false` or throwing fails with `WebAuthnClientErrorCode.Security`;
+exceptions are retained as `InnerException`. Cancellation exceptions thrown by the callback propagate
+as cancellation, but also block the operation. The callback runs before the ceremony timeout starts:
+keep it prompt, local, and thread-safe if clients share it; do not block on network lookups.
+
+The SDK does **not** add a public-suffix or origin/domain-binding policy after approval. It still
+rejects malformed RP IDs with `InvalidRequest`, before invoking the callback: RP IDs must be nonempty,
+well-formed Unicode encodable as UTF-8 and have domain-string or absolute-URI syntax. It sends the
+original RP ID unchanged (no case folding, IDNA conversion, or URI normalization). CTAP encodes it as
+a CBOR text string; authenticator message/credential limits remain in the CTAP2 layer.
+
+### Explicit origin/RP allowlist
+
+```csharp
+var allowedPairs = new HashSet<(string Origin, string RpId)>
+{
+    ("https://login.example.com", "example.com"),
+    ("https://login.example.com", "partner.test")
+};
+var allowlistOptions = new WebAuthnClientOptions
+{
+    RpIdValidator = (requestOrigin, rpId) => allowedPairs.Contains((requestOrigin.StringValue, rpId))
+};
+```
+
+Load trusted configuration before constructing the client; do not mutate the set during ceremonies.
+This authorizes only the listed pairs. An unrelated RP ID such as `partner.test` requires an intentional
+application binding decision and a corresponding RP-server origin policy. It is not automatic browser
+related-origin validation, and an allowlist is not a blanket claim of browser-WebAuthn conformance.
+
+### Application-service validator
+
+Bind your existing application authorization method directly; no SDK policy service is needed:
+
+```csharp
+// authorizationService is your application's service. Its synchronous method returns bool
+// and takes (WebAuthnOrigin origin, string rpId), using trusted, already-loaded bindings.
+var serviceOptions = new WebAuthnClientOptions
+{
+    RpIdValidator = authorizationService.IsRpAuthorized
+};
+```
+
+For browser-compatible use, the application must implement the browser RP/origin binding rules,
+including public-suffix handling, through its validator. Other native binding models are permitted by
+[WebAuthn Level 3, RP ID](https://www.w3.org/TR/webauthn-3/#rp-id), whose syntax requirement remains
+domain strings or URIs. The delegation also follows python-fido2's
+[`ClientDataCollector` / `DefaultClientDataCollector`](https://github.com/Yubico/python-fido2/blob/9d5991d6785e20bd487c8b6c996df6ce2226642a/fido2/client/__init__.py):
+client-data collection delegates RP authorization to application-supplied logic. This SDK does not
+implement a policy framework or fetch a Public Suffix List or related-origin resources.
+
+**Origin representation limit:** `WebAuthnOrigin` remains a serialized `https://host[:port]` origin,
+or `http` for `localhost` / `*.localhost`, stripping path/query/fragment. Arbitrary native-app,
+opaque, or custom-scheme origins are not representable. Authorizing a URI RP ID does not extend
+origin support or establish a new native binding specification.
+
+### Client checks do not replace RP-server checks
+
+The client callback authorizes use of a credential scope locally. The RP server must independently
+validate the challenge and ceremony type, expected signed client-data origin (and cross-origin context),
+RP ID hash, signature/attestation policy, UP/UV requirements, and credential/account binding. Approval
+does not change the origin in client data or make an assertion acceptable to the server.
+
 ## Constraints
 
 - The client owns the `ICtap2Session` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself.
 - A physical YubiKey admits one live connection across all of its interfaces, and one session per connection; a second session throws `ConnectionInUseException` until the first is disposed.
 - Transport is fixed when the CTAP2 session is created and is never renegotiated after a failure. Override it with `SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }`, which is also how to reach SCP.
-- The RP ID must be a registrable suffix of the origin's effective domain, and public suffixes such as `com` and `co.uk` are rejected before any CTAP command. `WebAuthnClientOptions.EnterpriseRpIds` exempts only the IDs it names.
+- RP/origin authorization is mandatory application policy through `WebAuthnClientOptions.RpIdValidator`; there is no built-in domain-suffix policy or enterprise bypass.
 - The client asks for nothing but a PIN, supplied as `pinBytes` or by the prompt. A ceremony that needs one and has neither fails with `NotAllowed` rather than prompting.
 - `ResidentKeyPreference.Required` consumes persistent credential slots. This package deletes nothing, and firmware gates live in the CTAP2 layer, which throws `NotSupportedException`. The experimental `previewSign` extension is reachable through `Extensions` on either options record and is not covered here.
 
@@ -189,11 +258,17 @@ credential is excluded.
 
 ## Migration from earlier v2 development builds
 
-Migration from the earlier v2 development contract is mechanical (there was no shipped v1 WebAuthn package):
+This is a breaking authorization-policy change (YESDK-1623, audit 15); there was no shipped v1
+WebAuthn package. `PublicSuffixChecker`, `WebAuthnClientOptions.EnterpriseRpIds`, and
+`WebAuthnOrigin.IsRpIdValid` were removed, not deprecated. Replace them with one required callback:
 
 ```csharp
 // Before
-new WebAuthnClient(session, origin, isPublicSuffix);
+new WebAuthnClient(session, origin, new WebAuthnClientOptions
+{
+    PublicSuffixChecker = isPublicSuffix,
+    EnterpriseRpIds = enterpriseRpIds
+});
 
 // After
 new WebAuthnClient(
@@ -201,12 +276,17 @@ new WebAuthnClient(
     origin,
     new WebAuthnClientOptions
     {
-        PublicSuffixChecker = isPublicSuffix
+        RpIdValidator = (requestOrigin, rpId) =>
+            requestOrigin.StringValue == "https://example.com" && rpId == "example.com"
     });
 ```
 
-If an earlier `clientOptions` instance is known to be non-null, use
-`clientOptions with { PublicSuffixChecker = isPublicSuffix }` to preserve its configured settings.
+Choose and implement the complete binding policy, rather than merely inverting the old suffix checker.
+If retaining earlier browser-style behavior or enterprise overrides, move both decisions into your
+application validator and test them together; scope overrides to trusted origin/RP pairs. Both constructor
+and device factory require `new WebAuthnClientOptions { RpIdValidator = ... }`; carry forward optional
+`CredentialPrompt` and `MaxPromptAttempts` settings. Authorization failures now use `Security` rather
+than the old domain policy's `InvalidRequest`; malformed protocol values still use `InvalidRequest`.
 
 The operations dependency is now `Yubico.YubiKit.Ctap2`: migrate session types to `Ctap2Session` /
 `ICtap2Session` and device factories to `CreateCtap2SessionAsync`. The public `WebAuthnClient`

@@ -112,7 +112,7 @@ public class WebAuthnExtensionAuditReproTests
             .Returns(MakeCredentialResponse.Decode(MockCtap2Responses.BuildMakeCredentialResponseCbor([.. authData], "none")));
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
 
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
         {
@@ -191,7 +191,7 @@ public class WebAuthnExtensionAuditReproTests
             .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(authDataExtensionsCbor: outputExtensions.Encode()));
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
 
         var matches = await client.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {

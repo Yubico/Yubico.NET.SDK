@@ -21,7 +21,6 @@ using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Attestation;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
-using Yubico.YubiKit.WebAuthn.Client.Validation;
 using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 
@@ -53,7 +52,7 @@ public sealed partial class WebAuthnClient
 
         // Validate before the timer starts (WebAuthn L3 §5.1.3 orders the checks before lifetimeTimer).
         ValidateRegistrationOptions(options);
-        RpIdValidator.EnsureValid(options.Rp.Id, _origin, _options.EnterpriseRpIds, _isPublicSuffix);
+        EnsureRpIdAuthorized(options.Rp.Id);
 
         using var deadline = CeremonyDeadline.Start(options.Timeout, cancellationToken);
         try

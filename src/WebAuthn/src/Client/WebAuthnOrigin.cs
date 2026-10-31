@@ -26,6 +26,11 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// context (https:// or http://localhost).
 /// </para>
 /// <para>
+/// Origin parsing is independent of application RP authorization. Arbitrary native-app,
+/// opaque, and custom-scheme origins are not representable by this type; configuring
+/// <see cref="WebAuthnClientOptions.RpIdValidator"/> does not extend its supported origins.
+/// </para>
+/// <para>
 /// See: https://tools.ietf.org/html/rfc6454 (The Web Origin Concept)
 /// See: https://w3c.github.io/webappsec-secure-contexts/ (Secure Contexts)
 /// </para>
@@ -124,70 +129,6 @@ public sealed class WebAuthnOrigin : IEquatable<WebAuthnOrigin>
     }
 
     /// <summary>
-    /// Validates if the given RP ID is valid for this origin.
-    /// </summary>
-    /// <param name="rpId">The relying party identifier to validate.</param>
-    /// <param name="isPublicSuffix">
-    /// A predicate that returns true if a given domain is a public suffix
-    /// (e.g., "com", "co.uk"). This is used for effective domain calculation.
-    /// </param>
-    /// <param name="enterpriseRpIds">
-    /// Optional set of enterprise RP IDs that bypass the suffix check.
-    /// </param>
-    /// <returns>True if the RP ID is valid for this origin; false otherwise.</returns>
-    /// <remarks>
-    /// <para>
-    /// Per WebAuthn §5.1.3, the RP ID must be a registrable suffix of the origin's
-    /// effective domain. The effective domain is computed using the Public Suffix List
-    /// to avoid allowing RPs to claim credentials across unrelated domains.
-    /// </para>
-    /// <para>
-    /// Enterprise allow-list: If rpId appears in enterpriseRpIds, the suffix check
-    /// is bypassed (useful for internal deployments).
-    /// </para>
-    /// </remarks>
-    public bool IsRpIdValid(
-        string rpId,
-        Func<string, bool> isPublicSuffix,
-        IReadOnlySet<string>? enterpriseRpIds = null)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(rpId);
-        ArgumentNullException.ThrowIfNull(isPublicSuffix);
-
-        // Enterprise allow-list bypass
-        if (enterpriseRpIds?.Contains(rpId) == true)
-        {
-            return true;
-        }
-
-        // RP ID must be a suffix of the origin host (case-insensitive)
-        var host = Host.ToLowerInvariant();
-        var rpIdLower = rpId.ToLowerInvariant();
-
-        if (!IsSuffixOf(rpIdLower, host))
-        {
-            return false;
-        }
-
-        // Exact match is always valid
-        if (rpIdLower == host)
-        {
-            return true;
-        }
-
-        // For subdomain matches, ensure rpId is a registrable domain
-        // (i.e., not a public suffix itself)
-        if (isPublicSuffix(rpIdLower))
-        {
-            return false;
-        }
-
-        // Ensure the origin host's effective domain matches or is a subdomain of rpId
-        var effectiveDomain = GetEffectiveDomain(host, isPublicSuffix);
-        return rpIdLower == effectiveDomain || IsSuffixOf(rpIdLower, effectiveDomain);
-    }
-
-    /// <summary>
     /// Checks if the host is localhost per W3C Secure Contexts spec.
     /// </summary>
     private static bool IsLoopback(string host)
@@ -206,53 +147,6 @@ public sealed class WebAuthnOrigin : IEquatable<WebAuthnOrigin>
             "https" => port == 443,
             _ => false
         };
-
-    /// <summary>
-    /// Checks if needle is a DNS suffix of haystack (including exact match).
-    /// </summary>
-    private static bool IsSuffixOf(string needle, string haystack)
-    {
-        if (needle == haystack)
-        {
-            return true;
-        }
-
-        // haystack must end with ".{needle}"
-        if (haystack.Length <= needle.Length)
-        {
-            return false;
-        }
-
-        return haystack.EndsWith(needle) && haystack[haystack.Length - needle.Length - 1] == '.';
-    }
-
-    /// <summary>
-    /// Computes the effective (registrable) domain using the Public Suffix List predicate.
-    /// </summary>
-    private static string GetEffectiveDomain(string host, Func<string, bool> isPublicSuffix)
-    {
-        var labels = host.Split('.');
-
-        // Walk from right to left: find the longest public suffix, then take one more label
-        for (var i = labels.Length - 1; i >= 0; i--)
-        {
-            var candidate = string.Join(".", labels[i..]);
-            if (isPublicSuffix(candidate))
-            {
-                // Take one label before the public suffix
-                if (i > 0)
-                {
-                    return string.Join(".", labels[(i - 1)..]);
-                }
-
-                // Host itself is a public suffix (rare, but possible)
-                return host;
-            }
-        }
-
-        // No public suffix matched - treat the whole host as effective domain
-        return host;
-    }
 
     public override bool Equals(object? obj) =>
         obj is WebAuthnOrigin other && Equals(other);

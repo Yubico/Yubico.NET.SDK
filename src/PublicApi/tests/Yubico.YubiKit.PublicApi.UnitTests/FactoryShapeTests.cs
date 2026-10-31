@@ -139,10 +139,10 @@ public sealed class FactoryShapeTests
     }
 
     [Fact]
-    public void WebAuthnClientOptions_PublicSuffixChecker_IsRequiredAndNonNullable()
+    public void WebAuthnClientOptions_RpIdValidator_IsRequiredAndNonNullable()
     {
-        PropertyInfo checker = typeof(WebAuthnClientOptions).GetProperty(nameof(WebAuthnClientOptions.PublicSuffixChecker))
-            ?? throw new InvalidOperationException("WebAuthnClientOptions.PublicSuffixChecker is missing.");
+        PropertyInfo checker = typeof(WebAuthnClientOptions).GetProperty(nameof(WebAuthnClientOptions.RpIdValidator))
+            ?? throw new InvalidOperationException("WebAuthnClientOptions.RpIdValidator is missing.");
         var nullability = new NullabilityInfoContext();
 
         Assert.NotNull(checker.GetCustomAttribute<RequiredMemberAttribute>());

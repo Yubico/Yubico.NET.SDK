@@ -33,7 +33,7 @@ src/
 │   ├── WebAuthnClient.PinUvAuth.cs       # PIN/UV token acquisition and prompting
 │   ├── WebAuthnClient.Validation.cs      # option validation and CTAP error mapping
 │   ├── WebAuthnClientOptions.cs
-│   ├── PublicSuffixChecker.cs
+│   ├── RpIdValidator.cs          # public application-authorization delegate
 │   ├── WebAuthnBackend.cs        # internal
 │   ├── IWebAuthnBackend.cs       # internal
 │   ├── PinUvAuthTokenSession.cs  # internal
@@ -41,8 +41,6 @@ src/
 │   ├── WebAuthnOrigin.cs
 │   ├── UserVerification/         # UV/PIN decision logic
 │   │   └── UvDecision.cs
-│   ├── Validation/
-│   │   └── RpIdValidator.cs
 │   ├── Registration/             # Registration options and responses
 │   │   ├── PublicKeyCredentialCreationOptions.cs
 │   │   └── RegistrationResponse.cs
@@ -90,16 +88,16 @@ Logger.LogError(ex, "PreviewSign authentication failed");
 
 ```csharp
 // Create client from an existing FIDO2 session.
-// The PublicSuffixChecker should be backed by Public Suffix List data.
-// WebAuthnClientOptions and its PublicSuffixChecker are required. CredentialPrompt remains optional.
+// The application owns authorization of each origin/RP pair.
+// WebAuthnClientOptions and its RpIdValidator are required. CredentialPrompt remains optional.
 await using var client = new WebAuthnClient(
     ctap2Session,
     origin,
     new WebAuthnClientOptions
     {
-        PublicSuffixChecker = domain => publicSuffixList.Contains(domain),
+        RpIdValidator = (requestOrigin, rpId) =>
+            requestOrigin.StringValue == "https://example.com" && rpId == "example.com",
         CredentialPrompt = myCredentialPrompt,
-        EnterpriseRpIds = enterpriseRpIds,
         MaxPromptAttempts = 3
     });
 
@@ -108,7 +106,7 @@ await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
     origin,
     clientOptions: new WebAuthnClientOptions
     {
-        PublicSuffixChecker = domain => publicSuffixList.Contains(domain),
+        RpIdValidator = authorizationService.IsRpAuthorized,
         CredentialPrompt = myCredentialPrompt
     },
     sessionOptions: new SessionCreationOptions
@@ -151,7 +149,7 @@ authentication extension outputs are non-positional records with optional init p
 The device factory takes two independent configuration carriers, and mixing them up is the easy mistake:
 required `clientOptions` (`WebAuthnClientOptions`) is forwarded to the created `WebAuthnClient`, while optional
 `sessionOptions` (`SessionCreationOptions`) is forwarded unchanged to `CreateCtap2SessionAsync`.
-The origin and client options are required; `PublicSuffixChecker` is required within the client options,
+The origin and client options are required; `RpIdValidator` is required within the client options,
 while `CredentialPrompt` remains optional. The earlier standalone public-suffix checker and overload ending
 in `scpKeyParams`, `configuration`, and `cancellationToken` were removed during the coordinated 2.0 breaking window.
 
@@ -237,10 +235,32 @@ A PIN still comes only from `pinBytes` or `WebAuthnClientOptions.CredentialPromp
 
 ### RP ID Validation
 
-`WebAuthnClient` enforces RP ID validity through `Client/Validation/RpIdValidator.cs` before CTAP
-operations. Public suffixes such as `com` and `co.uk` must be rejected for suffix matches, so
-production callers must provide a `PublicSuffixChecker` backed by Public Suffix List data. The
-explicit suffix checker is required; a caller-supplied effective-domain shortcut is not a substitute.
+`WebAuthnClient.Validation.cs` independently checks RP syntax (domain string or absolute URI) and
+strict UTF-8 encodability, then invokes the required synchronous `Client/RpIdValidator.cs` delegate
+with the configured origin and unchanged RP ID. Both ceremonies do this once before any backend
+call, including GetInfo, PIN/UV, extensions, and credential probing. Approval is not overridden by
+SDK domain-suffix or Public Suffix List policy. False and non-cancellation exceptions map to
+`Security` (exception retained); callback cancellation propagates and blocks device I/O. Malformed
+protocol values map to `InvalidRequest` without invoking the callback. The callback executes before
+the deadline starts and must be prompt/local; shared callbacks must handle concurrency.
+
+**YESDK-1623 / audit 15 migration:** `PublicSuffixChecker`, `EnterpriseRpIds`, and
+`WebAuthnOrigin.IsRpIdValid` are removed. Applications must provide their complete binding policy
+through `WebAuthnClientOptions.RpIdValidator`, including browser public-suffix/related-origin rules
+if applicable. Carry existing PIN prompt/attempt settings forward; do not just invert the old checker.
+Exact-RP, origin/RP allowlist, and existing application-service examples are in [README.md](README.md#rp-authorization-belongs-to-the-application).
+
+WebAuthn L3 [RP ID](https://www.w3.org/TR/webauthn-3/#rp-id) permits other native binding models but
+still requires domain-string or URI RP syntax. python-fido2's pinned
+[`ClientDataCollector`](https://github.com/Yubico/python-fido2/blob/9d5991d6785e20bd487c8b6c996df6ce2226642a/fido2/client/__init__.py)
+delegates authorization to application logic. No SDK policy framework or network lookups are added.
+`WebAuthnOrigin.TryParse` is unchanged: HTTPS or HTTP localhost / *.localhost only, serialized as
+scheme://host[:port], stripping path/query/fragment. Native/opaque/custom-scheme origins remain
+unrepresentable; accepting a URI RP ID does not expand this origin boundary.
+
+The callback is a client-side authorization boundary, not RP-server verification. The configured
+origin still enters signed client data; servers independently check origin, challenge/type, RP ID hash,
+signature/attestation policy, UP/UV, cross-origin context, and credential/account binding.
 
 ### Extension Processing
 
@@ -369,7 +389,8 @@ public async Task Registration_WithPreviewSign_ReturnsGeneratedSigningKey(YubiKe
         origin!,
         new WebAuthnClientOptions
         {
-            PublicSuffixChecker = domain => domain is "com" or "org" or "net" or "co.uk"
+            RpIdValidator = (requestOrigin, rpId) =>
+                requestOrigin.StringValue == TestOriginUrl && rpId == TestRpId
         });
 
     

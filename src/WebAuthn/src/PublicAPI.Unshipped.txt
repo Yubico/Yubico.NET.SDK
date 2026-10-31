@@ -103,7 +103,7 @@ Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.RawAuthenticato
 Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.RegistrationResponse() -> void
 Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.SignCount.get -> uint
 Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.SignCount.init -> void
-Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.Transports.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.WebAuthn.WebAuthnTransport>?
+Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.Transports.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.WebAuthn.WebAuthnTransport>!
 Yubico.YubiKit.WebAuthn.Client.Registration.RegistrationResponse.Transports.init -> void
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClient
 Yubico.YubiKit.WebAuthn.Client.WebAuthnClient.DisposeAsync() -> System.Threading.Tasks.ValueTask
@@ -500,7 +500,7 @@ static Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.operator 
 static Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.operator ==(Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs? left, Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs? right) -> bool
 static Yubico.YubiKit.WebAuthn.IYubiKeyExtensions.CreateWebAuthnClientAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin! origin, Yubico.YubiKit.WebAuthn.Client.WebAuthnClientOptions! clientOptions, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? sessionOptions = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.WebAuthn.Client.WebAuthnClient!>!
 static Yubico.YubiKit.WebAuthn.WebAuthnAuthenticatorData.Decode(System.ReadOnlyMemory<byte> rawAuthData) -> Yubico.YubiKit.WebAuthn.WebAuthnAuthenticatorData!
-static Yubico.YubiKit.WebAuthn.WebAuthnTransport.Unknown(string! value) -> Yubico.YubiKit.WebAuthn.WebAuthnTransport
+static Yubico.YubiKit.WebAuthn.WebAuthnTransport.FromValue(string! value) -> Yubico.YubiKit.WebAuthn.WebAuthnTransport
 static Yubico.YubiKit.WebAuthn.WebAuthnTransport.operator !=(Yubico.YubiKit.WebAuthn.WebAuthnTransport left, Yubico.YubiKit.WebAuthn.WebAuthnTransport right) -> bool
 static Yubico.YubiKit.WebAuthn.WebAuthnTransport.operator ==(Yubico.YubiKit.WebAuthn.WebAuthnTransport left, Yubico.YubiKit.WebAuthn.WebAuthnTransport right) -> bool
 static readonly Yubico.YubiKit.WebAuthn.WebAuthnTransport.Ble -> Yubico.YubiKit.WebAuthn.WebAuthnTransport

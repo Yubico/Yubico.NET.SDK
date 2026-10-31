@@ -155,6 +155,29 @@ The origin and client options are required; `PublicSuffixChecker` is required wi
 while `CredentialPrompt` remains optional. The earlier standalone public-suffix checker and overload ending
 in `scpKeyParams`, `configuration`, and `cancellationToken` were removed during the coordinated 2.0 breaking window.
 
+### Registration transport metadata
+
+`MakeCredentialCoreAsync` already obtains `AuthenticatorInfo` through `GetCachedInfoAsync`. Pass that
+same info into response construction and snapshot its string transport list as `WebAuthnTransport`
+values, deduplicated and sorted with `StringComparer.Ordinal`, in independently owned read-only storage.
+Do not query GetInfo again, infer transports from the live connection, or introduce a CTAP2 dependency
+on WebAuthn. CTAP2's transport model stays a string list, preserving unknown names.
+
+`RegistrationResponse.Transports` is non-nullable and defaults to `[]`; absent GetInfo metadata yields
+an empty response list. These are advertised authenticator hints for the relying party, not a host
+reachability check or session transport-selection policy. The public client/fake-session regression
+tests in `Client/RegistrationTransportTests.cs` cover cached-info reuse, all known and future names,
+missing metadata, ordinal deduplication, and snapshot independence.
+
+Migration: replace `WebAuthnTransport.Unknown(value)` with `WebAuthnTransport.FromValue(value)` for both
+known and unknown strings; constants and exact string equality are unchanged. Replace response null
+checks/initializers with empty-list handling. Descriptor input optional semantics are unchanged.
+
+Reference precedent: [Android cached-info forwarding](https://github.com/Yubico/yubikit-android/blob/76b89d35142d9a4937b6b72e5c840e057a280620/fido/src/main/java/com/yubico/yubikit/fido/client/Ctap2Client.java#L240-L244).
+The [WebAuthn response contract](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#dom-authenticatorattestationresponse-gettransports)
+requires unique, lexicographically ordered names, empty when unavailable; [CTAP GetInfo transports](https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#getinfo-transports)
+requires tolerance of unknown values. This is YESDK-1608, original audit consideration 4, not original finding #4.
+
 ### Credential Prompting
 
 A PIN reaches the client one of two ways: the caller passes `pinBytes`, or the client was

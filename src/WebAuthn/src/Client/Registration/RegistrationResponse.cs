@@ -55,9 +55,14 @@ public sealed record class RegistrationResponse
     public required AttestationStatement AttestationStatement { get; init; }
 
     /// <summary>
-    /// Gets the available transports for this credential.
+    /// Gets an ordinal-sorted, unique snapshot of the authenticator's advertised transport hints.
     /// </summary>
-    public IReadOnlyList<WebAuthnTransport>? Transports { get; init; }
+    /// <remarks>
+    /// Populated from the ceremony's cached GetInfo metadata without an additional query. Unknown
+    /// transport names are preserved; the list is empty when the metadata is unavailable. These
+    /// hints describe authenticator support, not current host reachability or the active connection.
+    /// </remarks>
+    public IReadOnlyList<WebAuthnTransport> Transports { get; init; } = [];
 
     /// <summary>
     /// Gets the public key for the created credential.

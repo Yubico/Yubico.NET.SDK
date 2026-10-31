@@ -15,11 +15,13 @@
 namespace Yubico.YubiKit.WebAuthn;
 
 /// <summary>
-/// Represents an authenticator transport hint for WebAuthn credential descriptors.
+/// Represents an authenticator transport hint for WebAuthn registration results and credential descriptors.
 /// </summary>
 /// <remarks>
 /// See <see href="https://www.w3.org/TR/webauthn-3/#enum-transport">
 /// WebAuthn AuthenticatorTransport</see>.
+/// Known constants and arbitrary future strings are supported. A hint does not establish current
+/// host reachability or identify the active connection.
 /// </remarks>
 public readonly record struct WebAuthnTransport
 {
@@ -64,11 +66,11 @@ public readonly record struct WebAuthnTransport
     }
 
     /// <summary>
-    /// Creates a transport from an unknown string value.
+    /// Creates a transport from a known or arbitrary future string value, preserving it unchanged.
     /// </summary>
     /// <param name="value">The transport string.</param>
     /// <returns>A <see cref="WebAuthnTransport"/> with the specified value.</returns>
-    public static WebAuthnTransport Unknown(string value) => new(value);
+    public static WebAuthnTransport FromValue(string value) => new(value);
 
     /// <summary>
     /// Returns the transport value as a string.

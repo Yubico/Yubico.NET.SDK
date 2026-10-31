@@ -116,7 +116,7 @@ public sealed partial class WebAuthnClient
         // Outputs are prepared outside the escalation scope, while the token is still live.
         using (extensions)
         {
-            return await BuildRegistrationResponseAsync(ctapResponse, clientData, options, extensions, auth.Token, cancellationToken)
+            return await BuildRegistrationResponseAsync(ctapResponse, info, clientData, options, extensions, auth.Token, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -196,6 +196,7 @@ public sealed partial class WebAuthnClient
 
     private static async Task<RegistrationResponse> BuildRegistrationResponseAsync(
         MakeCredentialResponse ctapResponse,
+        AuthenticatorInfo info,
         WebAuthnClientData clientData,
         PublicKeyCredentialCreationOptions options,
         RegistrationExtensionSession extensions,
@@ -239,7 +240,12 @@ public sealed partial class WebAuthnClient
             AuthenticatorData = webAuthnAuthData,
             RawAuthenticatorData = ctapResponse.AuthenticatorDataRaw,
             AttestationStatement = webAuthnStatement,
-            Transports = null, // TODO Phase 6+
+            // Advertised hints, not the live connection: reuse the ceremony's cached GetInfo.
+            Transports = Array.AsReadOnly(info.Transports
+                .Distinct(StringComparer.Ordinal)
+                .Order(StringComparer.Ordinal)
+                .Select(WebAuthnTransport.FromValue)
+                .ToArray()),
             PublicKey = publicKey,
             Aaguid = new Aaguid(attestedCred.Aaguid),
             SignCount = ctapResponse.AuthenticatorData.SignCount,

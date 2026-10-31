@@ -145,7 +145,11 @@ public class RegistrationTransportTests
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         Assert.NotNull(origin);
         return new WebAuthnClient(session, origin,
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions
+            {
+                RpIdValidator = (requestOrigin, rpId) =>
+                    requestOrigin.StringValue == "https://example.com" && rpId == "example.com"
+            });
     }
 
     private static PublicKeyCredentialCreationOptions CreateOptions() => new()

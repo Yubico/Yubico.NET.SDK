@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 
@@ -20,16 +21,25 @@ public class FindPcscDevices : IFindPcscDevices
 
     private readonly ILogger<FindPcscDevices> _logger;
     private readonly ISCardApi _sCardApi;
+    private readonly Func<string, IntPtr> _allocateReaderName;
+    private readonly Action<IntPtr> _freeReaderName;
 
     public FindPcscDevices(ILogger<FindPcscDevices> logger)
         : this(logger, NativeSCardApi.Instance)
     {
     }
 
-    internal FindPcscDevices(ILogger<FindPcscDevices> logger, ISCardApi sCardApi)
+    internal FindPcscDevices(
+        ILogger<FindPcscDevices> logger,
+        ISCardApi sCardApi,
+        Func<string, IntPtr>? allocateReaderName = null,
+        Action<IntPtr>? freeReaderName = null)
     {
+        // Per-instance native allocation observation/failure seam; release must match allocation and not throw.
         _logger = logger;
         _sCardApi = sCardApi;
+        _allocateReaderName = allocateReaderName ?? Marshal.StringToHGlobalAnsi;
+        _freeReaderName = freeReaderName ?? Marshal.FreeHGlobal;
     }
 
     public async Task<IReadOnlyList<IPcscDevice>> FindAllAsync(CancellationToken cancellationToken = default)
@@ -88,6 +98,7 @@ public class FindPcscDevices : IFindPcscDevices
         var result = _sCardApi.SCardListReaders(context, null, out var readerNames);
         if (result != ErrorCode.SCARD_S_SUCCESS || readerNames.Length == 0) return [];
 
+        SCARD_READER_STATE[] readerStates = [];
         try
         {
             // A USB YubiKey's integrated CCID reader disappears with the device and its name encodes a
@@ -109,7 +120,7 @@ public class FindPcscDevices : IFindPcscDevices
             if (readersRequiringStatus.Length == 0)
                 return devices;
 
-            var readerStates = SCARD_READER_STATE.CreateMany(readersRequiringStatus);
+            readerStates = SCARD_READER_STATE.CreateMany(readersRequiringStatus, _allocateReaderName, _freeReaderName);
             result = _sCardApi.SCardGetStatusChange(
                 context,
                 0,
@@ -134,6 +145,7 @@ public class FindPcscDevices : IFindPcscDevices
         }
         finally
         {
+            SCARD_READER_STATE.FreeReaderNames(readerStates, _freeReaderName);
             context.Dispose();
         }
     }

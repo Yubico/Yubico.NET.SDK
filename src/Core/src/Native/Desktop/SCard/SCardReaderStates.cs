@@ -37,8 +37,49 @@ internal unsafe struct SCARD_READER_STATE
 
     public static SCARD_READER_STATE Create(string readerName) => new(Marshal.StringToHGlobalAnsi(readerName));
 
-    public static SCARD_READER_STATE[] CreateMany(IEnumerable<string> readerNames) =>
-    [
-        .. readerNames.Select(name => new SCARD_READER_STATE(Marshal.StringToHGlobalAnsi(name)))
-    ];
+    /// <summary>
+    ///     Allocates reader names, releasing earlier allocations if construction fails.
+    ///     On success, the caller owns the names and must call <see cref="FreeReaderNames" /> in finally.
+    /// </summary>
+    /// <remarks>
+    ///     Struct copies borrow the same pointers; release only through one owning array.
+    ///     Optional allocation/release delegates must be paired, and release must not throw.
+    /// </remarks>
+    public static SCARD_READER_STATE[] CreateMany(
+        IEnumerable<string> readerNames,
+        Func<string, IntPtr>? allocateReaderName = null,
+        Action<IntPtr>? freeReaderName = null)
+    {
+        // Complete managed enumeration and storage allocation before owning any native names.
+        string[] names = readerNames.ToArray();
+        var states = new SCARD_READER_STATE[names.Length];
+        allocateReaderName ??= Marshal.StringToHGlobalAnsi;
+        try
+        {
+            for (int i = 0; i < names.Length; i++)
+                states[i] = new SCARD_READER_STATE(allocateReaderName(names[i]));
+            return states;
+        }
+        catch
+        {
+            FreeReaderNames(states, freeReaderName);
+            throw;
+        }
+    }
+
+    /// <summary>
+    ///     Releases owned reader names and clears their pointers in the supplied storage.
+    ///     Clearing permits repeated cleanup of that storage, not cleanup of borrowed struct copies.
+    /// </summary>
+    public static void FreeReaderNames(Span<SCARD_READER_STATE> states, Action<IntPtr>? freeReaderName = null)
+    {
+        freeReaderName ??= Marshal.FreeHGlobal;
+        foreach (ref SCARD_READER_STATE state in states)
+        {
+            if (state.ReaderName == IntPtr.Zero)
+                continue;
+            freeReaderName(state.ReaderName);
+            state.ReaderName = IntPtr.Zero;
+        }
+    }
 }

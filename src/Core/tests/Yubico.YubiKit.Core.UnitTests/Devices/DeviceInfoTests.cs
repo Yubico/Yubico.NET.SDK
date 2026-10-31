@@ -8,7 +8,8 @@ public class DeviceInfoTests
     [Fact]
     public void CreateFromTlvs_RequiredTlvs_ParsesDeviceMetadata()
     {
-        var info = DeviceInfo.CreateFromTlvs(CreateRequiredDeviceInfoTlvs(), defaultVersion: null);
+        using var tlvs = CreateRequiredDeviceInfoTlvs();
+        var info = DeviceInfo.CreateFromTlvs(tlvs, defaultVersion: null);
 
         Assert.False(info.IsLocked);
         Assert.False(info.IsFips);
@@ -33,7 +34,7 @@ public class DeviceInfoTests
     [Fact]
     public void CreateFromTlvs_AlphaVersionQualifier_UsesQualifiedVersionName()
     {
-        var tlvs = CreateRequiredDeviceInfoTlvs([
+        using var tlvs = CreateRequiredDeviceInfoTlvs([
             new Tlv(0x19,
             [
                 0x01, 0x03, 0x06, 0x02, 0x01,
@@ -52,20 +53,21 @@ public class DeviceInfoTests
     }
 
     [Fact]
-    public void CreateFromTlvs_InvalidVersionQualifierLength_ThrowsArgumentException()
+    public void CreateFromTlvs_InvalidVersionQualifierLength_ThrowsBadResponseException()
     {
-        var tlvs = CreateRequiredDeviceInfoTlvs([new Tlv(0x19, [0x01, 0x03, 0x05])]);
+        using var tlvs = CreateRequiredDeviceInfoTlvs([new Tlv(0x19, [0x01, 0x03, 0x05])]);
 
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<BadResponseException>(() =>
             DeviceInfo.CreateFromTlvs(tlvs, new FirmwareVersion(5, 7, 2)));
 
-        Assert.Contains("Invalid data length", ex.Message);
+        Assert.Contains("tag 0x19", ex.Message);
+        Assert.Contains("length 3", ex.Message);
     }
 
     [Fact]
-    public void CreateFromTlvs_VersionQualifierMissingType_ThrowsArgumentException()
+    public void CreateFromTlvs_VersionQualifierMissingType_ThrowsBadResponseException()
     {
-        var tlvs = CreateRequiredDeviceInfoTlvs([
+        using var tlvs = CreateRequiredDeviceInfoTlvs([
             new Tlv(0x19,
             [
                 0x01, 0x03, 0x05, 0x07, 0x02,
@@ -74,23 +76,23 @@ public class DeviceInfoTests
             ])
         ]);
 
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<BadResponseException>(() =>
             DeviceInfo.CreateFromTlvs(tlvs, new FirmwareVersion(5, 7, 2)));
 
-        Assert.Contains("TAG_TYPE", ex.Message);
+        Assert.Contains("tag 0x02", ex.Message);
     }
 
     [Fact]
     public void CreateFromTlvs_InvalidPartNumberUtf8_ReturnsNullPartNumber()
     {
-        var tlvs = CreateRequiredDeviceInfoTlvs([new Tlv(0x13, [0xC3, 0x28])]);
+        using var tlvs = CreateRequiredDeviceInfoTlvs([new Tlv(0x13, [0xC3, 0x28])]);
 
         var info = DeviceInfo.CreateFromTlvs(tlvs, defaultVersion: null);
 
         Assert.Null(info.PartNumber);
     }
 
-    private static Tlv[] CreateRequiredDeviceInfoTlvs(params Tlv[] additionalTlvs) =>
+    private static DisposableTlvList CreateRequiredDeviceInfoTlvs(params Tlv[] additionalTlvs) => new(
     [
         new(0x0A, [0x00]),
         new(0x04, [(byte)FormFactor.UsbAKeychain]),
@@ -107,5 +109,5 @@ public class DeviceInfoTests
         new(0x05, [0x05, 0x07, 0x02]),
         new(0x02, [0x01, 0x02, 0x03, 0x04]),
         .. additionalTlvs
-    ];
+    ]);
 }

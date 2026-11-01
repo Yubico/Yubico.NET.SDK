@@ -297,6 +297,17 @@ an error in `.editorconfig`. A clean build does not mean you used `LibraryImport
 
 ### Connection Factory Pattern
 
+Built-in PC/SC creation defaults to strict `SmartCardSharing.Exclusive`: sharing violations throw
+`ConnectionInUseException` without a shared retry. Keep the `UsbSmartCardConnection`,
+`PcscConnectionNativeState`, and `PcscNativeResources` constructor defaults consistent with the initial
+`SmartCardConnectionFactory.DefaultSharing`. Parameterless factories (including `CreateDefault` behind
+`FindYubiKeys.Create` / `YubiKeyManager`) snapshot the process-wide policy at construction; changing it
+does not reconfigure existing factories. Migration/coexistence requires an explicit `Shared` or
+`ExclusiveWithSharedFallback` selection at startup before discovery/monitoring, or on one factory.
+Preserve `SCARD_UNPOWER_CARD` on release in every mode. `SmartCardSharingTests` covers selection,
+contention/no-retry, opt-ins, policy snapshots, and release disposition without hardware; it does not
+prove physical card isolation. See [Core usage and migration](README.md#pcsc-sharing-policy-and-migration).
+
 Connections are created via factories:
 
 ```csharp

@@ -47,7 +47,7 @@ internal sealed class PcscConnectionNativeState
     public PcscConnectionNativeState(
         string readerName,
         ISCardConnectionApi api,
-        SmartCardSharing sharing = SmartCardSharing.ExclusiveWithSharedFallback,
+        SmartCardSharing sharing = SmartCardSharing.Exclusive,
         Action? released = null,
         Action<Exception>? unrecovered = null,
         Action<Thread>? startWorker = null,

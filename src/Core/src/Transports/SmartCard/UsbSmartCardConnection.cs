@@ -31,7 +31,7 @@ internal class UsbSmartCardConnection : ISmartCardConnection
     internal UsbSmartCardConnection(
         IPcscDevice smartCardDevice,
         ISCardConnectionApi? api = null,
-        SmartCardSharing sharing = SmartCardSharing.ExclusiveWithSharedFallback,
+        SmartCardSharing sharing = SmartCardSharing.Exclusive,
         Action? released = null,
         Action<Exception>? unrecovered = null,
         Action<Thread>? startWorker = null,

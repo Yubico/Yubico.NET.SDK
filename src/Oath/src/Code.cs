@@ -20,8 +20,18 @@ namespace Yubico.YubiKit.Oath;
 ///     Represents a calculated OATH one-time password code.
 /// </summary>
 /// <param name="Value">The formatted OTP code string, zero-padded to the required digit count.</param>
-/// <param name="ValidFrom">Unix timestamp indicating when the code becomes valid.</param>
-/// <param name="ValidTo">Unix timestamp indicating when the code expires.</param>
+/// <param name="ValidFrom">
+///     Unix time in seconds: the inclusive start of the nominal TOTP generation window, or the
+///     requested/current calculation timestamp for HOTP.
+/// </param>
+/// <param name="ValidTo">
+///     Unix time in seconds: the exclusive end of the nominal TOTP generation window, or
+///     <see cref="long.MaxValue" /> for HOTP as a no-time-expiry sentinel, not a date to format.
+/// </param>
+/// <remarks>
+///     These bounds describe generation metadata, not a verifier's acceptance policy. TOTP acceptance
+///     depends on the verifier's time window and replay rules; HOTP acceptance depends on its counter state.
+/// </remarks>
 public sealed record Code(string Value, long ValidFrom, long ValidTo)
 {
     internal readonly record struct ParsedCode(int Digits, int Value);
@@ -30,12 +40,12 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
     ///     Formats a truncated OATH response into a <see cref="Code" />.
     /// </summary>
     /// <param name="credential">The credential that produced the response.</param>
-    /// <param name="timestamp">The Unix timestamp used for calculation.</param>
+    /// <param name="timestamp">The Unix time in seconds used for calculation.</param>
     /// <param name="truncated">
     ///     The truncated response bytes. The first byte is the digit count,
     ///     followed by the truncated HMAC value.
     /// </param>
-    /// <returns>A formatted <see cref="Code" /> with validity window.</returns>
+    /// <returns>A formatted <see cref="Code" /> with generation-time metadata.</returns>
     internal static Code FormatCode(Credential credential, long timestamp, ReadOnlySpan<byte> truncated)
     {
         ParsedCode parsedCode = ParseCode(credential, truncated);

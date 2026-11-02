@@ -14,8 +14,6 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -31,11 +29,20 @@ public static class IYubiKeyExtensions
         /// <summary>
         ///     Creates a new OATH session for the specified YubiKey.
         /// </summary>
-        /// <param name="options">Optional cross-cutting session creation settings.</param>
+        /// <param name="options">
+        ///     Optional session creation settings. <see cref="SessionCreationOptions.PreferredConnectionType" />
+        ///     may be omitted or set to <see cref="ConnectionType.SmartCard" />; OATH has no alternative transport.
+        /// </param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>
-        ///     A new <see cref="OathSession" /> instance. The caller owns the session and must dispose it.
+        ///     A new <see cref="OathSession" /> that owns the connection opened by this method.
+        ///     The caller must dispose the session with <c>await using</c> to close that connection.
         /// </returns>
+        /// <remarks>
+        ///     A physical YubiKey admits one live connection, and each connection admits one live session.
+        ///     To use a connection you already own, call <see cref="OathSession.CreateAsync" /> instead;
+        ///     that factory borrows the connection and leaves its disposal to you.
+        /// </remarks>
         public async Task<OathSession> CreateOathSessionAsync(
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
@@ -83,7 +90,7 @@ public static class IYubiKeyExtensions
         ///     Calculates OTP codes for all OATH credentials stored on the YubiKey.
         ///     HOTP and touch-required credentials return <c>null</c> codes.
         /// </summary>
-        /// <param name="timestamp">Optional Unix timestamp. Defaults to current time.</param>
+        /// <param name="timestamp">Unix time in seconds for TOTP calculation. Defaults to the current UTC time.</param>
         /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A dictionary mapping each credential to its calculated code (or null).</returns>

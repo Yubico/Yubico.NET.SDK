@@ -154,18 +154,19 @@ machinery.
 
 Applet session-entry extensions keep their ergonomic one-call shape while selecting a transport
 intentionally on a composite device. Each multi-transport applet documents a default order and accepts an
-optional explicit `preferredConnection` override. When SCP parameters are supplied without an override,
-the SCP-capable SmartCard transport is selected instead of the normal default:
+optional explicit `SessionCreationOptions.PreferredConnectionType` override. When SCP parameters are supplied
+without an override, the SCP-capable SmartCard transport is selected instead of the normal default:
 
-| Applet | Default order | Override (`preferredConnection`) |
+| Applet | Default order | `PreferredConnectionType` values |
 | --- | --- | --- |
 | Management (`CreateManagementSessionAsync`) | `SmartCard → HidFido → HidOtp` | any of those three |
 | YubiOTP (`CreateYubiOtpSessionAsync`) | `SmartCard → HidOtp` | `SmartCard` or `HidOtp` |
 | CTAP2 (`CreateCtap2SessionAsync`) | `HidFido → SmartCard` | `HidFido` or `SmartCard` |
 | WebAuthn (`CreateWebAuthnClientAsync`) | `HidFido → SmartCard` (forwards to CTAP2) | `HidFido` or `SmartCard` |
+| OATH (`CreateOathSessionAsync`) | `SmartCard` only | `SmartCard` |
 
-Single-transport applets (PIV, OATH, OpenPGP, Security Domain, YubiHSM) are SmartCard-only and take no
-override.
+Single-transport applets (PIV, OATH, OpenPGP, Security Domain, YubiHSM) are SmartCard-only. OATH accepts an
+explicit `PreferredConnectionType` of `SmartCard`; that is an accepted setting, not an alternative transport.
 
 ```csharp
 // Default order (no override): Management prefers SmartCard.
@@ -173,13 +174,13 @@ await using var mgmt = await device.CreateManagementSessionAsync();
 
 // Explicit override: force HID OTP for this session.
 await using var otpMgmt = await device.CreateManagementSessionAsync(
-    preferredConnection: ConnectionType.HidOtp);
+    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
 ```
 
 Override semantics, validated before any connect:
 
-- Explicit valid `preferredConnection` → use it exactly.
-- Otherwise, non-null `scpKeyParams` → select SmartCard.
+- Explicit valid `options.PreferredConnectionType` → use it exactly.
+- Otherwise, non-null `options.ScpKeyParameters` → select SmartCard.
 - Otherwise → use the applet's documented default order.
 - Not exactly one concrete transport (a group/combined/`Unknown` value) → `ArgumentException`.
 - A concrete transport that is not valid for the applet (even if the device exposes it) → `ArgumentException`.
@@ -239,9 +240,9 @@ yubikit implementations open non-seizing on macOS: Rust enables hidapi's `macos-
 
 ## SCP Note
 
-Secure Channel Protocol is valid only on SmartCard. Supplying `scpKeyParams` without an explicit override
-selects SmartCard automatically. Explicitly selecting a non-SmartCard transport with SCP parameters throws
-`NotSupportedException` during session initialization.
+Secure Channel Protocol is valid only on SmartCard. Supplying `SessionCreationOptions.ScpKeyParameters`
+without an explicit override selects SmartCard automatically. Explicitly selecting a non-SmartCard transport
+with SCP parameters throws `NotSupportedException` during session initialization.
 
 ## Migration From The Per-Interface Handle Model
 
@@ -254,7 +255,7 @@ connection type and enumerated one row per interface. In v2:
 | Scalar `yubiKey.ConnectionType` to decide routing | `yubiKey.AvailableConnections` + `yubiKey.SupportsConnection(...)` |
 | Parameterless `ConnectAsync()` picks "the" transport | `ConnectAsync<TConnection>()` for a specific interface; parameterless throws on multi-interface devices |
 | Reaching for Management types to read metadata | Read-only metadata types now in `Yubico.YubiKit.Core.Devices`; read via `GetDeviceInfoAsync()` |
-| Applet extension assumed a single transport | Applet extensions select via documented default order + optional `preferredConnection` |
+| Applet extension assumed a single transport | Applet extensions select via documented default order + optional `SessionCreationOptions.PreferredConnectionType` |
 
 Practical steps:
 
@@ -262,8 +263,8 @@ Practical steps:
    `AvailableConnections` / `SupportsConnection(...)`.
 2. Replace any scalar connection-type routing with typed `ConnectAsync<TConnection>()` or an applet session
    extension.
-3. Where you need a specific transport, pass `preferredConnection`; otherwise rely on the documented default
-   order. Connection failures do not select another interface.
+3. Where you need a specific transport, set `SessionCreationOptions.PreferredConnectionType`; otherwise rely
+   on the documented default order. Connection failures do not select another interface.
 4. Update metadata type references to `Yubico.YubiKit.Core.Devices`.
 5. Dispose every connection at the scope that created it. If you create a connection and pass it to
    `Session.CreateAsync(connection)`, keep the connection in its own `await using`; the session will not

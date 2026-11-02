@@ -134,15 +134,18 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
     ///     Parses a credential ID from the OATH applet wire protocol.
     /// </summary>
     /// <remarks>
-    ///     For TOTP the optional <c>period/</c> prefix is the RFC 6238 §4.1 time step X in seconds, the
-    ///     divisor in <c>T = (Current Unix time - T0) / X</c> (§4.2). A prefix that is not a positive
-    ///     integer is malformed. HOTP has no period and reports 0.
+    ///     The host-side TOTP naming convention recognizes an optional prefix of ASCII digits followed
+    ///     by <c>/</c>. Its value must fit a positive <see cref="int" /> and represents the RFC 6238 §4.1
+    ///     time step X in seconds, the divisor in <c>T = (Current Unix time - T0) / X</c> (§4.2).
+    ///     A name such as <c>-30/name</c> has no recognized period prefix. YKOATH does not define this
+    ///     naming convention. HOTP has no period and reports 0.
     /// </remarks>
     /// <param name="credentialId">The raw credential ID bytes.</param>
     /// <param name="oathType">The OATH type (TOTP or HOTP).</param>
     /// <returns>A tuple of (issuer, name, period).</returns>
     /// <exception cref="ArgumentException">
-    ///     <paramref name="oathType" /> is TOTP and the period prefix is zero, negative or out of range.
+    ///     <paramref name="oathType" /> is TOTP and a recognized ASCII-digit period prefix is zero or
+    ///     exceeds <see cref="int.MaxValue" />.
     /// </exception>
     internal static (string? Issuer, string Name, int Period) ParseCredentialId(
         ReadOnlySpan<byte> credentialId,

@@ -33,16 +33,15 @@ public interface IOathSession : IApplicationSession
     ReadOnlyMemory<byte> Salt { get; }
 
     /// <summary>
-    ///     Gets whether the <b>current session</b> is locked and must call <see cref="ValidateAsync" />
-    ///     before protected operations can be performed.
+    ///     Gets whether the current session must be unlocked before performing protected operations.
     /// </summary>
     /// <remarks>
-    ///     This reflects only the current session's unlock state, not whether the device has a
-    ///     password configured at all: it starts <see langword="true" /> when the device has a
-    ///     password configured, and becomes <see langword="false" /> once <see cref="ValidateAsync" />
-    ///     succeeds — even though the device remains password-protected for the next session. To
-    ///     check whether the device has a password configured, independent of this session's unlock
-    ///     state, use <see cref="IsPasswordProtected" /> instead.
+    ///     <para>
+    ///         When a password is configured, the session starts locked. Call <see cref="ValidateAsync" />
+    ///         to unlock it. Successful validation sets this property to <see langword="false" />
+    ///         without removing the password.
+    ///     </para>
+    ///     <para>To check whether a password is configured, use <see cref="IsPasswordProtected" />.</para>
     /// </remarks>
     bool IsLocked { get; }
 
@@ -64,14 +63,19 @@ public interface IOathSession : IApplicationSession
     ///     Lists all credentials stored on the device.
     /// </summary>
     /// <remarks>
-    ///     A credential whose ID is malformed (for example a TOTP period prefix of 0 written by another
-    ///     client; RFC 6238 §4.1 requires a positive time step) is omitted and logged at warning level.
+    ///     A TOTP credential with a recognized ASCII-digit period prefix that is zero or exceeds
+    ///     <see cref="int.MaxValue" /> is omitted and logged at warning level. This does not imply
+    ///     general validation of raw credential IDs.
     /// </remarks>
     Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Stores a new credential on the device.
+    ///     Adds a credential or replaces an existing credential with the same raw credential ID.
     /// </summary>
+    /// <remarks>
+    ///     The raw ID is produced by <see cref="CredentialData.GetId" />. The SDK sends PUT without
+    ///     checking whether that ID already exists on the device.
+    /// </remarks>
     Task PutCredentialAsync(CredentialData credentialData,
         CancellationToken cancellationToken = default);
 
@@ -107,6 +111,13 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Calculates a formatted OTP code for a single credential (RFC 4226 for HOTP, RFC 6238 for TOTP).
     /// </summary>
+    /// <param name="credential">The credential to calculate.</param>
+    /// <param name="timestamp">
+    ///     Unix time in seconds, defaulting to the current UTC time. For TOTP, this determines the
+    ///     time-step challenge and nominal generation window. For HOTP, it only sets <see cref="Code.ValidFrom" />;
+    ///     the device uses its stored counter, not this timestamp, to calculate the code.
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token for the operation.</param>
     /// <exception cref="ArgumentException">
     ///     <paramref name="credential" /> is TOTP with a period that is not positive, or was read from a
     ///     different device (its <see cref="Credential.DeviceId" /> is not this session's <see cref="DeviceId" />).
@@ -119,10 +130,15 @@ public interface IOathSession : IApplicationSession
     ///     Calculates codes for all credentials on the device (YKOATH CALCULATE ALL).
     ///     HOTP and touch-required credentials return <c>null</c> codes.
     /// </summary>
+    /// <param name="timestamp">
+    ///     Unix time in seconds, defaulting to the current UTC time. Determines the TOTP time-step
+    ///     challenges and nominal generation windows.
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token for the operation.</param>
     /// <remarks>
     ///     The device computes every TOTP response with the default 30-second time step; credentials with
-    ///     another period are recalculated individually. A credential whose ID is malformed is omitted
-    ///     and logged at warning level, as in <see cref="ListCredentialsAsync" />.
+    ///     another period are recalculated individually. Entries with invalid recognized TOTP period
+    ///     prefixes are omitted and logged at warning level, as described in <see cref="ListCredentialsAsync" />.
     /// </remarks>
     Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null,
         CancellationToken cancellationToken = default);
@@ -130,40 +146,81 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Resets the OATH application, removing all credentials and the access key.
     /// </summary>
+    /// <remarks>
+    ///     Reset and the subsequent session-state refresh are separate exchanges. If the refresh fails
+    ///     or is cancelled, the device may already have erased the data. Do not assume rollback;
+    ///     dispose the session and reopen it rather than relying on its cached state.
+    /// </remarks>
     Task ResetAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Derives a key from a password using PBKDF2-HMAC-SHA1 with the device salt.
     /// </summary>
     /// <param name="password">
-    ///     The borrowed UTF-8 encoded password. The caller owns the buffer and must clear it
-    ///     after use.
+    ///     The borrowed UTF-8-encoded password, not a derived access key. The caller owns the buffer
+    ///     and must keep it unchanged until this method returns.
     /// </param>
     /// <returns>
     ///     The derived 16-byte access key. The caller owns the returned array and must clear it
     ///     after use.
     /// </returns>
     /// <remarks>
-    ///     <b>Breaking change:</b> The <c>password</c> parameter changed from <c>string</c>
-    ///     to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers to zero
-    ///     sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c> and
-    ///     zero the resulting array when finished.
+    ///     Clear the password buffer and returned key with
+    ///     <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" /> when each
+    ///     is no longer needed, including when an operation fails. Wait for any operation borrowing
+    ///     the key to complete before clearing it.
     /// </remarks>
     byte[] DeriveKey(ReadOnlyMemory<byte> password);
 
     /// <summary>
     ///     Validates the access key using mutual HMAC-SHA1 challenge-response authentication.
     /// </summary>
+    /// <param name="key">The borrowed access key, normally obtained from <see cref="DeriveKey" />.</param>
+    /// <param name="cancellationToken">The cancellation token for the operation.</param>
+    /// <remarks>
+    ///     <para>
+    ///         Requires an outstanding challenge from the OATH applet SELECT response. Call this method
+    ///         only while <see cref="IsLocked" /> is <see langword="true" />, not for an already unlocked
+    ///         or unprotected session. Successful validation consumes the challenge and unlocks the session.
+    ///     </para>
+    ///     <para>
+    ///         Pass the access key, not raw password bytes. The caller retains ownership of <paramref name="key" />;
+    ///         keep its buffer unchanged until the operation completes, then clear it with
+    ///         <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" /> when no longer
+    ///         needed, including if validation fails.
+    ///     </para>
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">The session has no outstanding challenge.</exception>
     Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Sets or changes the access key for the OATH applet.
     /// </summary>
+    /// <param name="key">The borrowed new access key, normally obtained from <see cref="DeriveKey" />.</param>
+    /// <param name="cancellationToken">The cancellation token for the operation.</param>
+    /// <remarks>
+    ///     <para>
+    ///         If <see cref="IsLocked" /> is <see langword="true" />, first unlock the session with
+    ///         <see cref="ValidateAsync" /> using the current access key. Then derive the new access key
+    ///         from the new UTF-8-encoded password and pass it here, not the raw password bytes.
+    ///     </para>
+    ///     <para>
+    ///         The caller retains ownership of <paramref name="key" />. Keep its buffer unchanged until
+    ///         the operation completes, then clear it with
+    ///         <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" /> when no longer
+    ///         needed, including if setting the key fails.
+    ///     </para>
+    /// </remarks>
     Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Removes the access key from the OATH applet.
     /// </summary>
+    /// <remarks>
+    ///     If <see cref="IsLocked" /> is <see langword="true" />, first unlock the session with
+    ///     <see cref="ValidateAsync" /> using the current access key. Removing the access key removes
+    ///     password protection without deleting stored credentials.
+    /// </remarks>
     Task UnsetKeyAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -178,9 +235,11 @@ public interface IOathSession : IApplicationSession
     /// <param name="passwordProvider">
     ///     Invoked only if <paramref name="operation" /> fails with an <see cref="OathException" /> whose
     ///     <see cref="OathException.Reason" /> is <see cref="OathFailureReason.Locked" />. Must return the raw
-    ///     (not yet PBKDF2-derived) password bytes; this method derives the access key internally via
+    ///     UTF-8-encoded password bytes, not a derived access key; this method derives the access key internally via
     ///     <see cref="DeriveKey" /> and zeroes the derived key after the authentication attempt completes.
-    ///     The caller remains responsible for the lifetime of the bytes it returns.
+    ///     The caller owns the returned password buffer and must keep it unchanged until this method completes,
+    ///     then clear it with <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" />
+    ///     when no longer needed, including if authentication or the retried operation fails.
     /// </param>
     /// <param name="cancellationToken">
     ///     Propagated to <paramref name="operation" />, <paramref name="passwordProvider" />, and the
@@ -188,6 +247,9 @@ public interface IOathSession : IApplicationSession
     ///     requested between the locked failure and the retry stops promptly.
     /// </param>
     /// <returns>The result of the (possibly retried) <paramref name="operation" /> call.</returns>
+    /// <remarks>
+    ///     Authentication uses this session's outstanding challenge, as required by <see cref="ValidateAsync" />.
+    /// </remarks>
     /// <exception cref="OathException">
     ///     <paramref name="passwordProvider" /> supplied a password that failed validation
     ///     (<see cref="OathFailureReason.WrongPassword" />), or <paramref name="operation" /> failed

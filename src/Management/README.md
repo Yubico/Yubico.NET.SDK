@@ -135,7 +135,8 @@ device does not expose throws `NotSupportedException`.
 | Management | SmartCard, HID FIDO, HID OTP | yes |
 | YubiOTP | SmartCard, HID OTP | yes |
 | FIDO2 and WebAuthn | HID FIDO, SmartCard | yes |
-| PIV, OATH, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no |
+| OATH | SmartCard only | `SmartCard` only; no alternative transport |
+| PIV, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no |
 
 - Supplying `ScpKeyParameters` without an explicit preference selects SmartCard, because SCP does not run over
   HID.

@@ -195,7 +195,7 @@ public static async Task WithOathAsync(
 
     await using var session = await OathSession.CreateAsync(
         connection,
-        scpKeyParams: scpKeyParams,
+        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
         cancellationToken: cancellationToken);
 
     await action(session, state.DeviceInfo);

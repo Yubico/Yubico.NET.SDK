@@ -26,8 +26,10 @@ public concrete-session operations. They are implemented by the SDK and are not 
   ambiguous booleans. A single intrinsic boolean may remain when it reads naturally.
 - Device input/output methods return `Task` or `Task<T>`, end in `Async`, and take a final defaulted cancellation
   token.
-- Borrowed asynchronous bytes use `ReadOnlyMemory<byte>`. Textual secret bytes use an `Utf8` parameter suffix.
-  The caller owns and clears borrowed secrets. The SDK clears every sensitive buffer it allocates.
+- Borrowed asynchronous bytes use `ReadOnlyMemory<byte>`. Textual-secret contracts must explicitly state UTF-8
+  encoding; an `Utf8` parameter suffix can reinforce this, but OATH `DeriveKey.password` intentionally has no suffix.
+  The caller owns and clears borrowed secrets. The SDK must clear SDK-owned sensitive temporary buffers on both
+  success and failure; sensitive buffers returned to the caller follow the documented ownership contract.
 - Public collections use read-only interfaces unless mutation is the explicit contract. OATH `DeriveKey` remains
   the deliberate `byte[]` output exception because the caller owns and must clear that derived secret.
 - Preserve protocol vocabulary where semantics differ. Normalize only equivalent concepts.

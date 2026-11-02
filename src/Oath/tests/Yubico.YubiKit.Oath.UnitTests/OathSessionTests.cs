@@ -36,8 +36,7 @@ public class OathSessionTests
             OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
         // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // Initialization failure must not transfer ownership (see ProtocolConnectionOwnershipTests).
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -556,10 +555,9 @@ public class OathSessionTests
     // ------------------------------------------------------------------------------------------------
 
     /// <summary>
-    ///     INVARIANT PIN (must hold before and after the ownership change). The convenience entry point opens
-    ///     a connection the caller never sees, so disposing the session it returned must close that connection.
-    ///     If this ever regresses, every <c>CreateOathSessionAsync</c> call leaks a PC/SC handle and the
-    ///     interface stays locked for the process lifetime.
+    ///     The convenience entry point opens a connection the caller never sees, so disposing the returned
+    ///     session must close it. This guards against retaining the PC/SC handle and physical-device lease
+    ///     after session disposal.
     /// </summary>
     [Fact]
     public async Task CreateOathSessionAsync_DisposingSession_DisposesTheConnectionItOpened()

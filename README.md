@@ -75,7 +75,7 @@ secure channel. Interactive sample tools live under `src/<Module>/examples/`.
 - [User interaction](docs/usage/user-interaction.md): touch notification and credential prompting across applications.
 - [Migrating from v1](docs/migration/v1-to-v2.md) and [what changed in v2](docs/v2-highlights.md).
 - [Native AOT](docs/NATIVE-AOT.md): every library package publishes AOT compatibility metadata.
-- [API reference](https://docs.yubico.com/yesdk/).
+- [v1 API reference](https://docs.yubico.com/yesdk/). For v2, start with the [module guides](#packages).
 
 ## Contributing
 

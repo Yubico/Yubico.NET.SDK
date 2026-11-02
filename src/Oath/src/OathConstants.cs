@@ -56,5 +56,6 @@ internal static class OathConstants
     internal const int DefaultDigits = 6;
     internal const int DefaultImf = 0;
     internal const int ChallengeLength = 8;
+    // SDK storage-padding threshold, not an HMAC minimum key length or entropy requirement.
     internal const int HmacMinimumKeySize = 14;
 }

@@ -430,7 +430,7 @@ public static class AccountsCommand
     }
 
     /// <summary>
-    /// Decodes a Base32-encoded string (RFC 4648), tolerating missing padding and whitespace.
+    /// Decodes a Base32-encoded string (RFC 4648), tolerating missing padding and literal spaces.
     /// </summary>
     private static byte[] Base32Decode(string input)
     {

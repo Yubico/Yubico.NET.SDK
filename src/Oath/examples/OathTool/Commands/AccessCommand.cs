@@ -12,7 +12,7 @@ using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
 namespace Yubico.YubiKit.Oath.Examples.OathTool.Commands;
 
 /// <summary>
-/// Implements 'oath access' subcommands: change, remember, forget.
+/// Implements 'oath access change' for setting, changing, or clearing the OATH access password.
 /// </summary>
 public static class AccessCommand
 {

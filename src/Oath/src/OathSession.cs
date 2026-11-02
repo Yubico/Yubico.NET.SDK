@@ -67,6 +67,18 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <summary>
     ///     Creates and initializes an OATH session.
     /// </summary>
+    /// <param name="connection">The caller-owned SmartCard connection to borrow for the session lifetime.</param>
+    /// <param name="options">
+    ///     Optional session creation settings. If specified, <see cref="SessionCreationOptions.PreferredConnectionType" />
+    ///     must match the supplied SmartCard connection; it does not select another connection.
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token for initialization.</param>
+    /// <returns>An initialized session that the caller must dispose with <c>await using</c>.</returns>
+    /// <remarks>
+    ///     Disposing the session leaves the borrowed connection open. Dispose the connection separately with
+    ///     <c>await using</c>, after the session. Only one live session may use a connection; dispose it before
+    ///     creating the next session on that connection.
+    /// </remarks>
     public static Task<OathSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
@@ -517,9 +529,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <summary>
-    ///     Parses a credential ID from a device response. A malformed ID (for example a TOTP period
-    ///     prefix of 0, written by another client) is logged by length and skipped, so one bad entry
-    ///     does not hide the rest of the device's credentials.
+    ///     Parses a credential ID from a device response. A recognized ASCII-digit TOTP period prefix
+    ///     that is zero or exceeds Int32.MaxValue is logged by ID length and skipped, so that entry
+    ///     does not hide the rest of the device's credentials. This is not general raw-ID validation.
     /// </summary>
     private bool TryParseCredentialId(
         byte[] credentialId,
@@ -583,9 +595,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 continue;
 
             // In CALCULATE_ALL, TAG_NAME (0x71) contains the raw credential ID directly.
-            // The oath type is derived from the response TLV tag (TAG_HOTP/TAG_TOUCH = HOTP,
-            // TAG_TRUNCATED = TOTP). This differs from LIST where TAG_NAME_LIST (0x72) prepends
-            // a type byte before the credential ID.
+            // TAG_HOTP identifies HOTP; TAG_TOUCH marks a touch-required entry without a code.
+            // The SDK treats entries without TAG_HOTP as TOTP. Unlike CALCULATE_ALL, LIST uses
+            // TAG_NAME_LIST (0x72) and prepends a type/algorithm byte to the credential ID.
             var credentialId = nameTlv.Value.ToArray();
             var oathType = responseTlv.Tag == OathConstants.TagHotp ? OathType.Hotp : OathType.Totp;
             if (!TryParseCredentialId(credentialId, oathType, "CALCULATE ALL", out var issuer, out var name, out var period))

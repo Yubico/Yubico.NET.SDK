@@ -20,49 +20,61 @@ namespace Yubico.YubiKit.Oath;
 /// <summary>
 ///     Holds the data needed to create an OATH credential on a YubiKey.
 /// </summary>
+/// <remarks>
+///     Properties can be assigned only during initialization. The <see cref="Secret" /> array remains
+///     mutable and is cleared by <see cref="Dispose" />.
+/// </remarks>
 public sealed class CredentialData : IDisposable
 {
     /// <summary>
-    ///     Gets or sets the account name.
+    ///     Gets the account name, assigned during initialization.
     /// </summary>
     public required string Name { get; init; }
 
     /// <summary>
-    ///     Gets or sets the OATH credential type.
+    ///     Gets the OATH credential type, assigned during initialization.
     /// </summary>
     public required OathType OathType { get; init; }
 
     /// <summary>
-    ///     Gets or sets the hash algorithm for HMAC computation.
+    ///     Gets the hash algorithm for HMAC computation, assigned during initialization.
     /// </summary>
     public required OathHashAlgorithm HashAlgorithm { get; init; }
 
     /// <summary>
-    ///     Gets or sets the shared secret key.
+    ///     Gets the shared secret key, assigned during initialization.
     /// </summary>
+    /// <remarks>
+    ///     Direct initialization retains the supplied array without copying it, and this property
+    ///     exposes that same array. Disposing this instance clears it, including any caller-held alias.
+    ///     <see cref="ParseUri(string)" /> instead creates a new array from the encoded secret.
+    /// </remarks>
     public required byte[] Secret { get; init; }
 
     /// <summary>
-    ///     Gets or sets the number of digits in the OTP code. Defaults to 6.
+    ///     Gets the number of digits in the OTP code, assigned during initialization. Defaults to 6.
     /// </summary>
     public int Digits { get; init; } = OathConstants.DefaultDigits;
 
     /// <summary>
-    ///     Gets or sets the TOTP time step period in seconds. Defaults to 30.
+    ///     Gets the TOTP time step period in seconds, assigned during initialization. Defaults to 30.
     /// </summary>
     public int Period { get; init; } = OathConstants.DefaultPeriod;
 
     /// <summary>
-    ///     Gets or sets the HOTP initial moving factor (counter). Defaults to 0.
+    ///     Gets the HOTP initial moving factor (counter), assigned during initialization. Defaults to 0.
     /// </summary>
     public int Counter { get; init; } = OathConstants.DefaultImf;
 
     /// <summary>
-    ///     Gets or sets the credential issuer.
+    ///     Gets the credential issuer, assigned during initialization.
     /// </summary>
     public string? Issuer { get; init; }
 
-    /// <summary>Gets whether using this credential requires physical touch.</summary>
+    /// <summary>
+    ///     Gets whether individual calculations require physical touch, assigned during initialization.
+    ///     Enabling this policy requires YubiKey firmware 4.2.4 or later.
+    /// </summary>
     public bool RequireTouch { get; init; }
 
     /// <summary>
@@ -72,7 +84,7 @@ public sealed class CredentialData : IDisposable
     ///     An otpauth URI as defined by the Google Authenticator Key URI Format,
     ///     e.g., <c>otpauth://totp/GitHub:user@example.com?secret=JBSWY3DPEHPK3PXP&amp;issuer=GitHub</c>.
     /// </param>
-    /// <returns>A populated <see cref="CredentialData" /> instance.</returns>
+    /// <returns>A populated <see cref="CredentialData" /> instance with a newly decoded secret array.</returns>
     /// <exception cref="ArgumentException">
     ///     Thrown when the URI scheme is not <c>otpauth</c>, the OATH type is missing or invalid,
     ///     or the <c>secret</c> query parameter is missing.
@@ -83,8 +95,11 @@ public sealed class CredentialData : IDisposable
     ///     Parses an <c>otpauth://</c> URI and applies the credential's physical-touch policy.
     /// </summary>
     /// <param name="uri">The otpauth URI to parse.</param>
-    /// <param name="requireTouch">Whether using the credential requires physical touch.</param>
-    /// <returns>A populated <see cref="CredentialData" /> instance that exclusively owns its secret.</returns>
+    /// <param name="requireTouch">
+    ///     Whether individual calculations require physical touch. Setting this to <see langword="true" />
+    ///     requires YubiKey firmware 4.2.4 or later.
+    /// </param>
+    /// <returns>A populated <see cref="CredentialData" /> instance with a newly decoded secret array.</returns>
     public static CredentialData ParseUri(string uri, bool requireTouch)
     {
         var parsed = new Uri(uri.Trim());
@@ -195,7 +210,7 @@ public sealed class CredentialData : IDisposable
     public byte[] GetId() => Credential.FormatCredentialId(Issuer, Name, OathType, Period);
 
     /// <summary>
-    ///     Zeros the shared secret to prevent sensitive key material from lingering in memory.
+    ///     Clears the <see cref="Secret" /> array. Does not clear the input URI or encoded secret strings.
     /// </summary>
     public void Dispose()
     {
@@ -237,10 +252,10 @@ public sealed class CredentialData : IDisposable
     }
 
     /// <summary>
-    ///     Pads a secret to the minimum HMAC key size (14 bytes) by appending zero bytes.
+    ///     Appends zero bytes to secrets shorter than the SDK's 14-byte storage-padding threshold.
     /// </summary>
     /// <param name="secret">The original secret bytes.</param>
-    /// <returns>The padded secret, or the original if already at or above minimum size.</returns>
+    /// <returns>The padded secret, or the original if already at or above the storage-padding threshold.</returns>
     internal static byte[] PadSecret(byte[] secret)
     {
         if (secret.Length >= OathConstants.HmacMinimumKeySize)
@@ -254,7 +269,8 @@ public sealed class CredentialData : IDisposable
     }
 
     /// <summary>
-    ///     Processes the secret for storage: shortens per RFC 2104, then pads to minimum size.
+    ///     Processes the secret for storage: shortens keys exceeding the hash block size per RFC 2104,
+    ///     then applies the SDK's 14-byte storage padding.
     /// </summary>
     /// <returns>The processed secret ready for the PUT command.</returns>
     internal byte[] GetProcessedSecret()
@@ -263,7 +279,7 @@ public sealed class CredentialData : IDisposable
         byte[] padded = PadSecret(shortened);
 
         // If HmacShortenKey produced a new array (key was longer than block size)
-        // and PadSecret produced yet another array (shortened was under minimum size),
+        // and PadSecret produced yet another array (shortened was under the storage-padding threshold),
         // the intermediate must be zeroed to avoid leaking key material.
         if (!ReferenceEquals(shortened, Secret) && !ReferenceEquals(shortened, padded))
         {
@@ -274,7 +290,7 @@ public sealed class CredentialData : IDisposable
     }
 
     /// <summary>
-    ///     Parses a Base32-encoded key string, supporting unpadded input and whitespace.
+    ///     Parses a Base32-encoded key string, supporting unpadded input and literal spaces.
     /// </summary>
     /// <param name="key">The Base32-encoded string.</param>
     /// <returns>The decoded bytes.</returns>

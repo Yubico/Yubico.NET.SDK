@@ -302,17 +302,6 @@ public sealed class OathAccountsAddCommand : YkCommandBase<OathAccountsAddSettin
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, OathAccountsAddSettings settings, YkDeviceContext deviceContext)
     {
-        byte[] secretBytes;
-        try
-        {
-            secretBytes = Base32Decode(settings.Secret);
-        }
-        catch (Exception ex)
-        {
-            OutputHelpers.WriteError($"Invalid Base32 secret: {ex.Message}");
-            return ExitCode.GenericError;
-        }
-
         var oathType = settings.OathTypeStr.ToUpperInvariant() switch
         {
             "HOTP" => OathType.Hotp,
@@ -328,39 +317,61 @@ public sealed class OathAccountsAddCommand : YkCommandBase<OathAccountsAddSettin
             _ => throw new ArgumentException($"Invalid algorithm: '{settings.AlgorithmStr}'.")
         };
 
-        using var credentialData = new CredentialData
+        byte[] secretBytes;
+        try
         {
-            Name = settings.Name,
-            OathType = oathType,
-            HashAlgorithm = algorithm,
-            Secret = secretBytes,
-            Digits = settings.Digits,
-            Period = settings.Period,
-            Issuer = settings.Issuer,
-            RequireTouch = settings.Touch
-        };
-
-        var displayName = FormatCredentialName(credentialData.Issuer, credentialData.Name);
-
-        if (!settings.Force)
+            secretBytes = Base32Decode(settings.Secret);
+        }
+        catch (Exception ex)
         {
-            if (!ConfirmationPrompts.ConfirmDangerous($"add credential {displayName}"))
+            OutputHelpers.WriteError($"Invalid Base32 secret: {ex.Message}");
+            return ExitCode.GenericError;
+        }
+
+        CredentialData credentialData;
+        try
+        {
+            credentialData = new CredentialData
             {
-                OutputHelpers.WriteInfo("Add cancelled.");
-                return ExitCode.UserCancelled;
-            }
+                Name = settings.Name,
+                OathType = oathType,
+                HashAlgorithm = algorithm,
+                Secret = secretBytes,
+                Digits = settings.Digits,
+                Period = settings.Period,
+                Issuer = settings.Issuer,
+                RequireTouch = settings.Touch
+            };
         }
-
-        await using var session = await deviceContext.Device.CreateOathSessionAsync();
-
-        if (!await UnlockIfNeededAsync(session, settings.Password))
+        finally
         {
-            return ExitCode.AuthenticationFailed;
+            CryptographicOperations.ZeroMemory(secretBytes);
         }
 
-        await session.PutCredentialAsync(credentialData);
-        OutputHelpers.WriteSuccess($"Credential added: {displayName}");
-        return ExitCode.Success;
+        using (credentialData)
+        {
+            var displayName = FormatCredentialName(credentialData.Issuer, credentialData.Name);
+
+            if (!settings.Force)
+            {
+                if (!ConfirmationPrompts.ConfirmDangerous($"add credential {displayName}"))
+                {
+                    OutputHelpers.WriteInfo("Add cancelled.");
+                    return ExitCode.UserCancelled;
+                }
+            }
+
+            await using var session = await deviceContext.Device.CreateOathSessionAsync();
+
+            if (!await UnlockIfNeededAsync(session, settings.Password))
+            {
+                return ExitCode.AuthenticationFailed;
+            }
+
+            await session.PutCredentialAsync(credentialData);
+            OutputHelpers.WriteSuccess($"Credential added: {displayName}");
+            return ExitCode.Success;
+        }
     }
 }
 

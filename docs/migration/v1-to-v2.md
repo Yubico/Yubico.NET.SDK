@@ -434,9 +434,37 @@ var codes = await oath.CalculateAllAsync(cancellationToken: cancellationToken);
 
 Migration notes:
 
-- `CredentialData.ParseUri(...)` decodes the OATH URI into v2 credential data. If you construct `CredentialData` manually, v2 expects decoded secret bytes in `CredentialData.Secret`; decode and zero caller-owned secret material when appropriate.
+- `CredentialData.ParseUri(...)` decodes the OATH URI into v2 credential data and clears its temporary decoded bytes. Dispose the returned instance after use. URI/Base32 strings are immutable and cannot be cleared.
+- If you construct `CredentialData` manually, supply decoded bytes to `Secret`. Initialization makes a private owned copy; always clear the original input in a `finally`, including construction and PUT failure paths.
 - If the OATH applet is password-protected, derive and validate the access key explicitly with byte buffers that can be zeroed.
 - Adding, deleting, renaming, or setting keys mutates persistent OATH state and should be reviewed manually.
+
+#### Credential secret ownership (v2 alpha breaking change)
+
+`CredentialData.Secret` changed from `byte[]` to `ReadOnlyMemory<byte>`. Existing assignments from byte arrays still
+work, but no longer transfer ownership: mutating or clearing that input does not change the credential's private seed.
+Do not rely on PUT or credential disposal to clear your input array. PUT now preserves the owned seed on both success
+and failure, allowing the same `CredentialData` to be used by `AuthenticateAndRetryAsync`.
+
+For reads, replace array indexing with `credentialData.Secret.Span[index]` and pass `Secret` directly to consumers
+accepting `ReadOnlyMemory<byte>`. The getter returns a borrowed view without allocating. Keep the credential alive
+until all consumers and async operations complete; do not use it or its views after disposal, or mutate extracted
+backing storage. Disposal clears all borrowed views. If an API truly requires an independent array, explicitly copy
+and clear it yourself:
+
+```csharp
+byte[] copy = credentialData.Secret.ToArray();
+try
+{
+    // Pass copy to the array-only consumer; await completion before clearing it.
+}
+finally
+{
+    System.Security.Cryptography.CryptographicOperations.ZeroMemory(copy);
+}
+```
+
+See the [decoded-byte example](../../src/Oath/README.md#add-a-credential-from-decoded-bytes) for input-buffer cleanup.
 
 ### YubiOTP: HMAC-SHA1 Challenge-Response
 

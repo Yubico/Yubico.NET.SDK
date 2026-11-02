@@ -66,6 +66,31 @@ await using var session = await device.CreateOathSessionAsync();
 await session.PutCredentialAsync(credentialData);
 ```
 
+### Add a credential from decoded bytes
+
+Initialization copies the seed. You still own the input array; clear it in a `finally`, even if construction or PUT
+fails. PUT does not consume the credential's seed, so the same instance can be reused for authentication retry.
+
+```csharp
+byte[] seed = "12345678901234567890"u8.ToArray(); // Example seed only; obtain real input securely.
+try
+{
+    using var credentialData = new CredentialData
+    {
+        Name = "alice@example.com",
+        OathType = OathType.Totp,
+        HashAlgorithm = OathHashAlgorithm.Sha1,
+        Secret = seed
+    };
+    await using var session = await device.CreateOathSessionAsync();
+    await session.PutCredentialAsync(credentialData);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(seed);
+}
+```
+
 ### Calculate codes
 
 `CalculateAllAsync` returns a `null` code for HOTP and touch-requiring credentials; get those individually. A TOTP
@@ -153,7 +178,14 @@ does not interrupt the device or necessarily change the notification outcome.
 ## Security notes
 
 - Secrets cross the API as `byte[]` or `ReadOnlyMemory<byte>`. You own the input buffers: zero them with `CryptographicOperations.ZeroMemory` in a `finally`.
-- `CredentialData` is `IDisposable` and zeroes its `Secret` on disposal. Always `using` it.
+- `CredentialData.Secret` is a borrowed `ReadOnlyMemory<byte>` view over private owned storage, not a fresh copy
+  on each read. Initialization copies the input; clearing or modifying your input does not change the stored seed.
+- Always `using` a `CredentialData`. Disposal clears private storage and all previously borrowed views, but not
+  your original input or copies made with `Secret.ToArray()`. Those copies are yours to clear. Read bytes through
+  `Secret.Span`; do not mutate storage via array extraction or use the credential/view after disposal. Wait for all
+  operations using it to complete before disposing; concurrent disposal/use is unsupported.
+- `ParseUri` clears decoded temporary buffers on success and failure. Immutable URI/Base32 strings and literal
+  demo seeds cannot be erased; avoid retaining or logging them and prefer securely acquired byte input in production.
 - `DeriveKey` takes a borrowed UTF-8 password and returns a 16-byte key you own and must zero; `AuthenticateAndRetryAsync` zeroes the key it derives, not the bytes your callback returned.
 - Never log secrets, passwords, derived access keys, or calculated codes.
 

@@ -124,25 +124,33 @@ public static class OathHelpers
         int bitsInBuffer = 0;
         int index = 0;
 
-        foreach (char c in input)
+        try
         {
-            int val = alphabet.IndexOf(c);
-            if (val < 0)
+            foreach (char c in input)
             {
-                throw new ArgumentException($"Invalid Base32 character: '{c}'.");
+                int val = alphabet.IndexOf(c);
+                if (val < 0)
+                {
+                    throw new ArgumentException($"Invalid Base32 character: '{c}'.");
+                }
+
+                buffer = (buffer << 5) | val;
+                bitsInBuffer += 5;
+
+                if (bitsInBuffer >= 8)
+                {
+                    bitsInBuffer -= 8;
+                    result[index++] = (byte)(buffer >> bitsInBuffer);
+                    buffer &= (1 << bitsInBuffer) - 1;
+                }
             }
 
-            buffer = (buffer << 5) | val;
-            bitsInBuffer += 5;
-
-            if (bitsInBuffer >= 8)
-            {
-                bitsInBuffer -= 8;
-                result[index++] = (byte)(buffer >> bitsInBuffer);
-                buffer &= (1 << bitsInBuffer) - 1;
-            }
+            return result;
         }
-
-        return result;
+        catch
+        {
+            CryptographicOperations.ZeroMemory(result);
+            throw;
+        }
     }
 }

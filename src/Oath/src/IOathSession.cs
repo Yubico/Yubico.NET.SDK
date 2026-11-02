@@ -72,6 +72,11 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Stores a new credential on the device.
     /// </summary>
+    /// <remarks>
+    ///     Borrows <paramref name="credentialData" /> until the operation completes. PUT uses independent
+    ///     temporary secret storage and does not clear the credential's owned seed, including on failure.
+    ///     The same instance can be used for authentication retry; dispose it only after all uses complete.
+    /// </remarks>
     Task PutCredentialAsync(CredentialData credentialData,
         CancellationToken cancellationToken = default);
 

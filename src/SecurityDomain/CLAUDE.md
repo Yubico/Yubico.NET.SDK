@@ -329,6 +329,10 @@ Assert.Equal(
 3. **SCP11 requires 5.7.2+**: Don't test SCP11 features on older firmware.
 4. **Certificate chain order matters**: For SCP11a/c, leaf cert goes last in the chain.
 5. **ArrayPool buffer sizes**: Always rent exact or larger size, never assume exact size returned.
+6. **Certificate bundle ownership**: `GetCertificatesAsync` accumulates locally and disposes every loaded
+   certificate before rethrowing a later load failure. Never skip corrupt entries. Successful results belong
+   to the caller, not the session. `SecurityDomainCertificateBundleTests` observes real loaded certificates
+   through the internal per-session `CertificateLoadedObserver` and checks native handles on failure/success.
 
 ## Related Modules
 

@@ -3,11 +3,10 @@
 
 using System.Buffers;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Oath.Credentials;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
-using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts;
 
 namespace Yubico.YubiKit.Oath.Examples.OathTool.Commands;
 
@@ -27,25 +26,26 @@ public static class AccessCommand
     /// </param>
     /// <param name="clear">If true, removes the password instead of setting a new one.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <param name="services">Application I/O dependencies; null uses the console and device selector.</param>
     public static async Task<int> ChangeAsync(
         IMemoryOwner<byte>? passwordBytes = null,
         IMemoryOwner<byte>? newPasswordBytes = null,
         bool clear = false,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        OathToolServices? services = null)
     {
-        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-        if (selection is null)
+        services ??= OathToolServices.Default;
+        cancellationToken.ThrowIfCancellationRequested();
+        await using var session = await services.OpenSession(cancellationToken);
+        if (session is null)
         {
             return 1;
         }
 
-        await using var session = await selection.Device.CreateOathSessionAsync(
-            cancellationToken: cancellationToken);
-
         // Unlock if currently locked
         if (session.IsLocked)
         {
-            if (!await OathSessionHelper.UnlockSessionAsync(session, passwordBytes))
+            if (!await OathSessionHelper.UnlockSessionAsync(session, passwordBytes, cancellationToken, services.CredentialReader))
             {
                 return 1;
             }
@@ -59,7 +59,7 @@ public static class AccessCommand
                 OutputHelpers.WriteSuccess("OATH access password cleared.");
                 return 0;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 OutputHelpers.WriteError($"Failed to clear password: {ex.Message}");
                 return 1;
@@ -72,32 +72,35 @@ public static class AccessCommand
 
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (newPasswordBytes is null)
             {
-                var reader = new ConsoleCredentialReader();
+                var reader = services.CredentialReader;
                 var options = OathCredentialOptions.ForOathPassword() with
                 {
                     Prompt = "Enter new OATH password: ",
                     ConfirmPrompt = "Confirm new OATH password: "
                 };
 
-                prompted = reader.ReadCredentialWithConfirmation(options);
+                prompted = reader.ReadCredentialWithConfirmation(options, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
                 if (prompted is null)
                 {
-                    OutputHelpers.WriteError(
-                        "New password cannot be empty. Use --clear to remove password protection.");
-                    return 1;
+                    OutputHelpers.WriteInfo(
+                        "Password entry cancelled or not confirmed. Use --clear to remove password protection.");
+                    return ExitCode.UserCancelled;
                 }
 
                 newPasswordBytes = prompted;
             }
 
             key = session.DeriveKey(newPasswordBytes.Memory);
+            cancellationToken.ThrowIfCancellationRequested();
             await session.SetKeyAsync(key, cancellationToken);
             OutputHelpers.WriteSuccess("OATH access password set.");
             return 0;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             OutputHelpers.WriteError($"Failed to set password: {ex.Message}");
             return 1;

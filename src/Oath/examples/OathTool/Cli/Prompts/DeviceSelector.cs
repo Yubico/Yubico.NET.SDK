@@ -30,9 +30,13 @@ public static class DeviceSelector
     /// Finds all connected YubiKeys and allows user to select one.
     /// </summary>
     public static async Task<DeviceSelection?> SelectDeviceAsync(
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IAnsiConsole? console = null,
+        Func<CancellationToken, Task<IReadOnlyList<IYubiKey>>>? discover = null)
     {
-        var devices = await FindDevicesWithRetryAsync(cancellationToken);
+        console ??= AnsiConsole.Console;
+        var devices = await FindDevicesWithRetryAsync(cancellationToken, console, discover);
+        cancellationToken.ThrowIfCancellationRequested();
         if (devices.Count == 0)
         {
             return null;
@@ -41,7 +45,8 @@ public static class DeviceSelector
         if (devices.Count == 1)
         {
             var device = devices[0];
-            var info = await GetDeviceInfoAsync(device, cancellationToken);
+            var info = await GetDeviceInfoAsync(device, console, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             return new DeviceSelection(
                 device,
                 info?.SerialNumber,
@@ -51,10 +56,11 @@ public static class DeviceSelector
         }
 
         // Multiple devices - auto-select first in non-interactive mode
-        if (!AnsiConsole.Profile.Capabilities.Interactive)
+        if (!console.Profile.Capabilities.Interactive)
         {
             var first = devices[0];
-            var info = await GetDeviceInfoAsync(first, cancellationToken);
+            var info = await GetDeviceInfoAsync(first, console, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             return new DeviceSelection(
                 first,
                 info?.SerialNumber,
@@ -63,7 +69,7 @@ public static class DeviceSelector
                 first.AvailableConnections);
         }
 
-        return await PromptForDeviceSelectionAsync(devices, cancellationToken);
+        return await PromptForDeviceSelectionAsync(devices, console, cancellationToken);
     }
 
     /// <summary>
@@ -71,12 +77,17 @@ public static class DeviceSelector
     /// OATH only supports SmartCard transport.
     /// </summary>
     public static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IAnsiConsole? console = null,
+        Func<CancellationToken, Task<IReadOnlyList<IYubiKey>>>? discover = null)
     {
-        while (!cancellationToken.IsCancellationRequested)
+        console ??= AnsiConsole.Console;
+        discover ??= token => YubiKeyManager.FindAllAsync(ConnectionType.SmartCard, cancellationToken: token);
+        while (true)
         {
-            var allDevices = await YubiKeyManager.FindAllAsync(
-                ConnectionType.SmartCard, cancellationToken: cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            var allDevices = await discover(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
 
             var devices = allDevices
                 .Where(d => d.SupportsConnection(ConnectionType.SmartCard))
@@ -87,17 +98,22 @@ public static class DeviceSelector
                 return devices;
             }
 
-            AnsiConsole.MarkupLine("[red]No YubiKey detected. Please insert a YubiKey and try again.[/]");
-            AnsiConsole.MarkupLine("[grey]OATH requires SmartCard (CCID) transport.[/]");
+            console.MarkupLine("[red]No YubiKey detected. Please insert a YubiKey and try again.[/]");
+            console.MarkupLine("[grey]OATH requires SmartCard (CCID) transport.[/]");
 
-            if (!AnsiConsole.Profile.Capabilities.Interactive ||
-                !AnsiConsole.Confirm("Retry?", defaultValue: true))
+            if (!console.Profile.Capabilities.Interactive)
+            {
+                return [];
+            }
+
+            bool retry = await new ConfirmationPrompt("Retry?") { DefaultValue = true }
+                .ShowAsync(console, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!retry)
             {
                 return [];
             }
         }
-
-        return [];
     }
 
     /// <summary>Formats form factor for display.</summary>
@@ -108,15 +124,16 @@ public static class DeviceSelector
 
     private static async Task<DeviceInfo?> GetDeviceInfoAsync(
         IYubiKey device,
+        IAnsiConsole console,
         CancellationToken cancellationToken)
     {
         try
         {
             return await device.GetDeviceInfoAsync(cancellationToken: cancellationToken);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            AnsiConsole.MarkupLine(
+            console.MarkupLine(
                 $"[grey]Debug: {device.AvailableConnections} device info failed: " +
                 $"{Markup.Escape(ex.GetType().Name)}: {Markup.Escape(ex.Message)}[/]");
             return null;
@@ -125,15 +142,16 @@ public static class DeviceSelector
 
     private static async Task<DeviceSelection?> PromptForDeviceSelectionAsync(
         IReadOnlyList<IYubiKey> devices,
+        IAnsiConsole console,
         CancellationToken cancellationToken)
     {
         var deviceInfos = new List<(IYubiKey Device, DeviceInfo? Info)>();
 
-        await AnsiConsole.Status()
+        await console.Status()
             .StartAsync("Querying device information...", async _ =>
             {
                 var tasks = devices
-                    .Select(device => GetDeviceInfoAsync(device, cancellationToken))
+                    .Select(device => GetDeviceInfoAsync(device, console, cancellationToken))
                     .ToArray();
 
                 var infos = await Task.WhenAll(tasks);
@@ -152,11 +170,13 @@ public static class DeviceSelector
         var choices = indexedChoices.Select(x => x.Choice).ToList();
         choices.Add("Cancel");
 
-        var selection = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
+        cancellationToken.ThrowIfCancellationRequested();
+        var selection = await new SelectionPrompt<string>()
                 .Title("Multiple YubiKeys detected. Select one:")
                 .PageSize(10)
-                .AddChoices(choices));
+                .AddChoices(choices)
+                .ShowAsync(console, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (selection == "Cancel")
         {

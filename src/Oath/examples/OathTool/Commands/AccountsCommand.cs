@@ -3,6 +3,7 @@
 
 using System.Buffers;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 
@@ -18,15 +19,16 @@ public static class AccountsCommand
     /// </summary>
     public static async Task<int> ListAsync(
         IMemoryOwner<byte>? passwordBytes = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        OathToolServices? services = null)
     {
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken, services);
         if (result is null)
         {
             return 1;
         }
 
-        var (_, session) = result.Value;
+        var session = result;
         await using (session)
         {
             var credentials = await session.ListCredentialsAsync(cancellationToken);
@@ -61,8 +63,11 @@ public static class AccountsCommand
         bool touch = false,
         bool force = false,
         IMemoryOwner<byte>? passwordBytes = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        OathToolServices? services = null)
     {
+        services ??= OathToolServices.Default;
+        cancellationToken.ThrowIfCancellationRequested();
         byte[] secretBytes;
         try
         {
@@ -100,22 +105,20 @@ public static class AccountsCommand
 
             if (!force)
             {
-                Console.Error.Write($"Add credential {displayName}? [y/N] ");
-                var response = Console.ReadLine();
-                if (!string.Equals(response, "y", StringComparison.OrdinalIgnoreCase))
+                if (!await services.Confirm($"Add credential {displayName}?", cancellationToken))
                 {
                     OutputHelpers.WriteInfo("Add cancelled.");
-                    return 1;
+                    return ExitCode.UserCancelled;
                 }
             }
 
-            var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
+            var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken, services);
             if (result is null)
             {
                 return 1;
             }
 
-            var (_, session) = result.Value;
+            var session = result;
             await using (session)
             {
                 try
@@ -124,7 +127,7 @@ public static class AccountsCommand
                     OutputHelpers.WriteSuccess($"Credential added: {displayName}");
                     return 0;
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     OutputHelpers.WriteError($"Failed to add credential: {ex.Message}");
                     return 1;
@@ -140,15 +143,16 @@ public static class AccountsCommand
     public static async Task<int> CodeAsync(
         string? query = null,
         IMemoryOwner<byte>? passwordBytes = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        OathToolServices? services = null)
     {
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken, services);
         if (result is null)
         {
             return 1;
         }
 
-        var (_, session) = result.Value;
+        var session = result;
         await using (session)
         {
             if (query is not null)
@@ -167,15 +171,17 @@ public static class AccountsCommand
         string name,
         bool force = false,
         IMemoryOwner<byte>? passwordBytes = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        OathToolServices? services = null)
     {
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
+        services ??= OathToolServices.Default;
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken, services);
         if (result is null)
         {
             return 1;
         }
 
-        var (_, session) = result.Value;
+        var session = result;
         await using (session)
         {
             var credential = await FindCredentialAsync(session, name, cancellationToken);
@@ -188,12 +194,10 @@ public static class AccountsCommand
 
             if (!force)
             {
-                Console.Error.Write($"Delete credential {displayName}? [y/N] ");
-                var response = Console.ReadLine();
-                if (!string.Equals(response, "y", StringComparison.OrdinalIgnoreCase))
+                if (!await services.Confirm($"Delete credential {displayName}?", cancellationToken))
                 {
                     OutputHelpers.WriteInfo("Delete cancelled.");
-                    return 1;
+                    return ExitCode.UserCancelled;
                 }
             }
 
@@ -203,7 +207,7 @@ public static class AccountsCommand
                 OutputHelpers.WriteSuccess($"Credential deleted: {displayName}");
                 return 0;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 OutputHelpers.WriteError($"Failed to delete credential: {ex.Message}");
                 return 1;
@@ -219,15 +223,17 @@ public static class AccountsCommand
         string newName,
         bool force = false,
         IMemoryOwner<byte>? passwordBytes = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        OathToolServices? services = null)
     {
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
+        services ??= OathToolServices.Default;
+        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken, services);
         if (result is null)
         {
             return 1;
         }
 
-        var (_, session) = result.Value;
+        var session = result;
         await using (session)
         {
             var credential = await FindCredentialAsync(session, name, cancellationToken);
@@ -240,12 +246,10 @@ public static class AccountsCommand
 
             if (!force)
             {
-                Console.Error.Write($"Rename {displayName} to {newName}? [y/N] ");
-                var response = Console.ReadLine();
-                if (!string.Equals(response, "y", StringComparison.OrdinalIgnoreCase))
+                if (!await services.Confirm($"Rename {displayName} to {newName}?", cancellationToken))
                 {
                     OutputHelpers.WriteInfo("Rename cancelled.");
-                    return 1;
+                    return ExitCode.UserCancelled;
                 }
             }
 
@@ -272,7 +276,7 @@ public static class AccountsCommand
                 OutputHelpers.WriteError("Rename requires firmware 5.3.1 or later.");
                 return 1;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 OutputHelpers.WriteError($"Failed to rename credential: {ex.Message}");
                 return 1;
@@ -288,8 +292,11 @@ public static class AccountsCommand
         bool touch = false,
         bool force = false,
         IMemoryOwner<byte>? passwordBytes = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        OathToolServices? services = null)
     {
+        services ??= OathToolServices.Default;
+        cancellationToken.ThrowIfCancellationRequested();
         CredentialData parsedCredentialData;
         try
         {
@@ -307,22 +314,20 @@ public static class AccountsCommand
 
             if (!force)
             {
-                Console.Error.Write($"Add credential {displayName} ({parsedCredentialData.OathType})? [y/N] ");
-                var response = Console.ReadLine();
-                if (!string.Equals(response, "y", StringComparison.OrdinalIgnoreCase))
+                if (!await services.Confirm($"Add credential {displayName} ({parsedCredentialData.OathType})?", cancellationToken))
                 {
                     OutputHelpers.WriteInfo("Add cancelled.");
-                    return 1;
+                    return ExitCode.UserCancelled;
                 }
             }
 
-            var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
+            var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken, services);
             if (result is null)
             {
                 return 1;
             }
 
-            var (_, session) = result.Value;
+            var session = result;
             await using (session)
             {
                 try
@@ -331,7 +336,7 @@ public static class AccountsCommand
                     OutputHelpers.WriteSuccess($"Credential added: {displayName}");
                     return 0;
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     OutputHelpers.WriteError($"Failed to add credential: {ex.Message}");
                     return 1;
@@ -361,7 +366,7 @@ public static class AccountsCommand
             Console.WriteLine($"{displayName}  {code.Value}");
             return 0;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             OutputHelpers.WriteError($"Failed to calculate code: {ex.Message}");
             return 1;

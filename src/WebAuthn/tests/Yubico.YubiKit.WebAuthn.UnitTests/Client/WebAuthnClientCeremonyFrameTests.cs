@@ -54,7 +54,7 @@ public class WebAuthnClientCeremonyFrameTests
                 Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), (byte[])TokenBytes.Clone()));
         _client = new WebAuthnClient(_backend, Assert.IsType<WebAuthnOrigin>(origin),
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
     }
 
     private static PublicKeyCredentialCreationOptions Registration(UserVerificationPreference uv = UserVerificationPreference.Preferred) => new()

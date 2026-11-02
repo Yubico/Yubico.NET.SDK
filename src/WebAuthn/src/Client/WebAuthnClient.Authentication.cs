@@ -16,7 +16,6 @@ using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
-using Yubico.YubiKit.WebAuthn.Client.Validation;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
@@ -55,7 +54,7 @@ public sealed partial class WebAuthnClient
 
         // Validate before the timer starts (WebAuthn L3 §5.1.4 orders the checks before lifetimeTimer).
         ValidateAuthenticationOptions(options);
-        RpIdValidator.EnsureValid(options.RpId, _origin, _options.EnterpriseRpIds, _isPublicSuffix);
+        EnsureRpIdAuthorized(options.RpId);
 
         // The deadline covers everything up to the returned matches. MatchedCredential.SelectAsync does
         // no further authenticator work (its response is already computed), so nothing is left to bound.

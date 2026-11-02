@@ -76,7 +76,7 @@ public sealed class UserPresenceIntentTests
         return new WebAuthnClient(
             session,
             origin,
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
     }
 
     private static PublicKeyCredentialCreationOptions CreateRegistration() => new()

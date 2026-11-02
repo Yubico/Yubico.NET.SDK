@@ -37,7 +37,7 @@ internal static class WebAuthnTestHelpers
             origin!,
             new WebAuthnClientOptions
             {
-                PublicSuffixChecker = domain => domain is "com" or "org" or "net" or "co.uk"
+                RpIdValidator = (requestOrigin, rpId) => requestOrigin.StringValue == TestOriginUrl && rpId == TestRpId
             });
     }
 

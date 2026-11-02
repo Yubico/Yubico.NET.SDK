@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Text;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -21,6 +22,37 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <content>Request validation and the mapping from CTAP statuses to WebAuthn errors.</content>
 public sealed partial class WebAuthnClient
 {
+    private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+
+    private void EnsureRpIdAuthorized(string rpId)
+    {
+        try
+        {
+            // CTAP text strings are UTF-8 (CBOR major type 3); never replace invalid UTF-16
+            // while encoding/hashing an identifier, which would silently change its credential scope.
+            _ = StrictUtf8.GetByteCount(rpId);
+        }
+        catch (EncoderFallbackException ex)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidRequest, "RP ID must be encodable as UTF-8 without replacement.", ex);
+        }
+
+        bool authorized;
+        try
+        {
+            authorized = _rpIdValidator(_origin, rpId);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.Security, "Application RP validation failed.", ex);
+        }
+
+        if (!authorized)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.Security, "The application did not approve this origin/RP pair.");
+        }
+    }
+
     private static void ValidateRegistrationOptions(PublicKeyCredentialCreationOptions options)
     {
         if (options.Challenge.Length == 0)
@@ -30,7 +62,7 @@ public sealed partial class WebAuthnClient
                 "Challenge cannot be empty");
         }
 
-        if (string.IsNullOrWhiteSpace(options.Rp.Id))
+        if (string.IsNullOrEmpty(options.Rp.Id))
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,
@@ -87,7 +119,7 @@ public sealed partial class WebAuthnClient
                 "Challenge cannot be empty");
         }
 
-        if (string.IsNullOrWhiteSpace(options.RpId))
+        if (string.IsNullOrEmpty(options.RpId))
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,

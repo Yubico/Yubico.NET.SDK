@@ -1,5 +1,11 @@
 # V1 to V2 Migration Documentation Changelog
 
+## 2026-10-31 - Application-owned WebAuthn RP authorization
+
+- YESDK-1623 / audit 15 replaces `PublicSuffixChecker`, `EnterpriseRpIds`, and `WebAuthnOrigin.IsRpIdValid` with required synchronous `WebAuthnClientOptions.RpIdValidator(WebAuthnOrigin origin, string rpId)` returning bool. Applications own RP validity (including domain/URI syntax) AND caller/RP binding. The SDK checks only nonempty RP text that can be encoded faithfully as UTF-8, and adds no independent domain/URI parser, IDNA, PSL, or browser syntax/binding policy. The approved callback-owned validity boundary supersedes the earlier independent syntax gate.
+- Both ceremonies present wire-valid RP text unchanged to the callback before device I/O. False/non-cancellation exceptions map to `Security`; cancellation propagates; null/empty RP IDs and invalid UTF-16 use `InvalidRequest` without callback invocation. Callbacks from earlier development builds that checked only authorization must also own RP validity. Origin parsing is unchanged and still cannot represent arbitrary native origins. The module README includes exact-RP, origin/RP allowlist, application-service, migration, and independent RP-server checks, without a blanket browser-conformance claim.
+- Updated current guide/map signatures and added `webauthn-application-rp-authorization`. Earlier changelog/construction entries remain historical; this update does not advance `.state.yml` or claim a merged commit.
+
 ## 2026-10-14 - CTAP2 semantic naming
 
 - Added `ctap2-semantic-rename` to the map for the current package/namespace rename from `Yubico.YubiKit.Fido2` to `Yubico.YubiKit.Ctap2`, and the `Ctap2Session`/`ICtap2Session`, `CreateCtap2SessionAsync`, `GetCtap2InfoAsync`, and `Ctap2CredentialOptions.ForCtap2Pin` names. This documentation update does not advance `.state.yml` or claim a merged commit.

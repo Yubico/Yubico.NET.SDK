@@ -9,8 +9,8 @@ password protecting them. The programmable OTP slots belong to [Yubico.YubiKit.Y
 
 ## Requirements
 
-- .NET 10. On Linux, a working PC/SC service and reader support must make the YubiKey available over
-  USB CCID or an NFC reader. The [Linux HID setup guide](../../docs/linux-setup.md) does not cover PC/SC setup.
+- .NET 10. On Linux, configure [PC/SC and reader support](../../docs/linux-setup.md#pcsc-for-smartcard-access)
+  for USB CCID or an NFC reader.
 - A YubiKey 4 or 5 series device with OATH enabled. Feature requirements and SDK gates are:
 
   | Feature | Firmware condition |

@@ -2,6 +2,41 @@
 
 This guide covers the system configuration required to use the Yubico.NET.SDK on Linux.
 
+## PC/SC for SmartCard Access
+
+OATH, PIV, and other SmartCard operations use the PC/SC client library and `pcscd` service. USB CCID and
+NFC readers also need a compatible reader driver. HID permissions are configured separately below.
+
+Install the runtime packages for your distribution:
+
+| Distribution | Packages |
+|---|---|
+| Ubuntu | `pcscd`, `libccid` |
+| Fedora | `pcsc-lite`, `pcsc-lite-ccid` |
+| Arch Linux | `pcsclite`, `ccid` |
+
+The PC/SC package supplies or depends on the client library. The CCID package supports the YubiKey's USB
+reader interface; an external NFC reader may require its own driver.
+
+On systemd-based installations that provide `pcscd.socket`, enable on-demand startup:
+
+```bash
+sudo systemctl enable --now pcscd.socket
+systemctl status pcscd.socket
+```
+
+The socket should report `active (listening)`. The daemon can be inactive while idle and start when an
+application connects. On other service managers, start `pcscd` according to your distribution's instructions.
+
+If no SmartCard reader is found, check the service and reader driver first. The optional `pcsc_scan` utility
+from `pcsc-tools` can check reader/card detection; run it when no SDK session is open. Detection does not
+prove that an OATH operation or a particular firmware feature works.
+
+References: [Yubico's Smart Card access guidance](https://github.com/Yubico/yubikey-manager/blob/main/doc/Device_Permissions.adoc),
+[Ubuntu PC/SC packages](https://packages.ubuntu.com/noble/pcscd),
+[Fedora PC/SC packages](https://packages.fedoraproject.org/pkgs/pcsc-lite/pcsc-lite/), and
+[Arch Smartcards](https://wiki.archlinux.org/title/Smartcards).
+
 ## udev Rules for HID Device Access
 
 On Linux, HID devices (`/dev/hidraw*`) are typically only accessible by root. To allow non-root users to access YubiKey HID interfaces, you need to install udev rules.

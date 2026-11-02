@@ -15,6 +15,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -108,6 +109,125 @@ public sealed class OpenPgpSessionWireTests
         var mutableView = Assert.IsAssignableFrom<IList<SupportedAlgorithm>>(algorithms);
         Assert.True(mutableView.IsReadOnly);
         Assert.Throws<NotSupportedException>(() => mutableView.Add(algorithms[0]));
+    }
+
+    [Theory]
+    [InlineData(KeyRef.Sig)]
+    [InlineData(KeyRef.Dec)]
+    [InlineData(KeyRef.Aut)]
+    [InlineData(KeyRef.Att)]
+    public async Task GetCertificateAsync_EmptySuccessfulRead_ReturnsNull(KeyRef keyRef)
+    {
+        var connection = CreateCertificateReadConnection(keyRef, OkResponse());
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        using var certificate = await session.GetCertificateAsync(keyRef, TestContext.Current.CancellationToken);
+
+        Assert.Null(certificate);
+        AssertCertificateReadCommands(connection, keyRef);
+    }
+
+    [Theory]
+    [InlineData(KeyRef.Sig)]
+    [InlineData(KeyRef.Dec)]
+    [InlineData(KeyRef.Aut)]
+    public async Task GetCertificateAsync_CardholderDataNotFound_ReturnsNull(KeyRef keyRef)
+    {
+        // OpenPGP card v3.4.1 section 7.9: referenced data, reference data or DO not found.
+        var connection = CreateCertificateReadConnection(keyRef, [0x6A, 0x88]);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        using var certificate = await session.GetCertificateAsync(keyRef, TestContext.Current.CancellationToken);
+
+        Assert.Null(certificate);
+        AssertCertificateReadCommands(connection, keyRef);
+    }
+
+    [Theory]
+    [InlineData(KeyRef.Sig)]
+    [InlineData(KeyRef.Dec)]
+    [InlineData(KeyRef.Aut)]
+    [InlineData(KeyRef.Att)]
+    public async Task GetCertificateAsync_ValidDer_ReadsCertificate(KeyRef keyRef)
+    {
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var request = new CertificateRequest("CN=OpenPGP certificate read", key, HashAlgorithmName.SHA256);
+        using var expected = request.CreateSelfSigned(
+            new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2027, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        byte[] certificateData = expected.RawData;
+        var connection = CreateCertificateReadConnection(keyRef, [.. certificateData, 0x90, 0x00]);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        using var actual = await session.GetCertificateAsync(keyRef, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(actual);
+        Assert.Equal(certificateData, actual.RawData);
+        Assert.False(actual.HasPrivateKey);
+        AssertCertificateReadCommands(connection, keyRef);
+    }
+
+    [Theory]
+    [InlineData(KeyRef.Sig, 0x6982)]
+    [InlineData(KeyRef.Dec, 0x6985)]
+    [InlineData(KeyRef.Aut, 0x6581)]
+    [InlineData(KeyRef.Sig, 0x6A82)]
+    [InlineData(KeyRef.Sig, 0x6F00)]
+    [InlineData(KeyRef.Att, 0x6982)]
+    [InlineData(KeyRef.Att, 0x6A88)]
+    public async Task GetCertificateAsync_ReadFailure_PropagatesExactStatus(KeyRef keyRef, int status)
+    {
+        var connection = CreateCertificateReadConnection(keyRef, [(byte)(status >> 8), (byte)status]);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var exception = await Assert.ThrowsAsync<ApduException>(() =>
+            session.GetCertificateAsync(keyRef, TestContext.Current.CancellationToken));
+
+        Assert.Equal((short)status, exception.SW);
+        Assert.Equal((byte)Ins.GetData, exception.Ins);
+        AssertCertificateReadCommands(connection, keyRef);
+    }
+
+    [Theory]
+    [InlineData(0x6A88)]
+    [InlineData(0x6982)]
+    public async Task GetCertificateAsync_SelectionFailure_PropagatesWithoutReading(int status)
+    {
+        var connection = CreateInitializedConnection([(byte)(status >> 8), (byte)status]);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var exception = await Assert.ThrowsAsync<ApduException>(() =>
+            session.GetCertificateAsync(KeyRef.Sig, TestContext.Current.CancellationToken));
+
+        Assert.Equal((short)status, exception.SW);
+        var command = Assert.Single(connection.TransmittedCommands.Skip(3));
+        Assert.Equal((byte)Ins.SelectData, command[1]);
+    }
+
+    [Theory]
+    [InlineData(KeyRef.Sig)]
+    [InlineData(KeyRef.Att)]
+    public async Task GetCertificateAsync_MalformedCertificate_PropagatesParsingFailure(KeyRef keyRef)
+    {
+        var connection = CreateCertificateReadConnection(keyRef, [0x30, 0x01, 0x00, 0x90, 0x00]);
+        await using var session = await OpenPgpSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        _ = await Assert.ThrowsAsync<CryptographicException>(() =>
+            session.GetCertificateAsync(keyRef, TestContext.Current.CancellationToken));
+
+        AssertCertificateReadCommands(connection, keyRef);
     }
 
     [Fact]
@@ -709,6 +829,27 @@ public sealed class OpenPgpSessionWireTests
 
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(), .. trailingResponses]);
+
+    private static RecordingSmartCardConnection CreateCertificateReadConnection(KeyRef keyRef, byte[] response) =>
+        keyRef is KeyRef.Att
+            ? CreateInitializedConnection(response)
+            : CreateInitializedConnection(OkResponse(), response);
+
+    private static void AssertCertificateReadCommands(RecordingSmartCardConnection connection, KeyRef keyRef)
+    {
+        byte[][] commands = connection.TransmittedCommands.Skip(3).ToArray();
+        Assert.Equal(keyRef is KeyRef.Att ? 1 : 2, commands.Length);
+        if (keyRef is not KeyRef.Att)
+        {
+            Assert.Equal([0x00, 0xA5, (byte)(3 - (byte)keyRef), 0x04], commands[0][..4]);
+            Assert.Equal([0x60, 0x04, 0x5C, 0x02, 0x7F, 0x21], CommandData(commands[0]).ToArray());
+        }
+
+        byte[] expectedReadHeader = keyRef is KeyRef.Att
+            ? [0x00, 0xCA, 0x00, 0xFC]
+            : [0x00, 0xCA, 0x7F, 0x21];
+        Assert.Equal(expectedReadHeader, commands[^1][..4]);
+    }
 
     private static RecordingSmartCardConnection CreateInitializedConnectionWithUifs(
         Uif? sig,

@@ -57,6 +57,18 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
     /// </summary>
     internal static ParsedCode ParseCode(Credential credential, ReadOnlySpan<byte> truncated)
     {
+        ParsedCode parsedCode = ParseTruncatedResponse(truncated);
+        if (credential.OathType == OathType.Totp && credential.Period <= 0)
+        {
+            throw new BadResponseException("A TOTP credential must have a positive period.");
+        }
+
+        return parsedCode;
+    }
+
+    /// <summary>Parses the wire value independently of host-side credential naming.</summary>
+    internal static ParsedCode ParseTruncatedResponse(ReadOnlySpan<byte> truncated)
+    {
         if (truncated.Length != 5)
         {
             throw new BadResponseException(
@@ -68,11 +80,6 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
         {
             throw new BadResponseException(
                 $"Invalid OATH code digit count {digits}. Expected a value from 6 through 8.");
-        }
-
-        if (credential.OathType == OathType.Totp && credential.Period <= 0)
-        {
-            throw new BadResponseException("A TOTP credential must have a positive period.");
         }
 
         int rawCode = (truncated[1] << 24) | (truncated[2] << 16) | (truncated[3] << 8) | truncated[4];

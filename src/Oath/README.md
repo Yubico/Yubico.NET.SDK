@@ -123,6 +123,17 @@ Code hotpCode = await session.CalculateCodeAsync(hotp);
 Console.WriteLine($"HOTP code {hotpCode.Value}");
 ```
 
+For a full HMAC rather than a formatted OTP, use `CalculateAsync` with your challenge. It returns independent
+caller-owned storage containing only the HMAC, without the protocol's digit-count header. The SDK borrows the
+credential and challenge without modifying them; keep the challenge unchanged until the call completes.
+Clear a returned result named `hmac` in a `finally` block with
+`CryptographicOperations.ZeroMemory(System.Runtime.InteropServices.MemoryMarshal.AsMemory(hmac).Span)`.
+You also remain responsible for clearing your challenge storage when appropriate, after the call completes.
+
+After TLV decoding, known responses must contain the structure required by the operation. Missing full-response
+header/payload, incomplete LIST or aggregate entries, and invalid truncated values produce `BadResponseException`.
+Aggregate wire validation runs before invalid-period entries are omitted or custom-period values recalculated.
+
 ### Protect the application with a password
 
 Use `DeriveKey` on an open OATH session to derive an access key from a UTF-8-encoded password. The method uses

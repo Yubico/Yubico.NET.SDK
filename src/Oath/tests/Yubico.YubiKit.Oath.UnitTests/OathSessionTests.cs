@@ -324,7 +324,7 @@ public class OathSessionTests
             new byte[8],
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(new byte[] { 0x01, 0x02, 0x03, 0x04 }, result.ToArray());
+        Assert.Equal(Enumerable.Range(1, 20).Select(value => (byte)value).ToArray(), result.ToArray());
         Assert.Empty(prompt.Requested);
         Assert.Empty(prompt.Resolved);
         Assert.Contains(connection.TransmittedCommands, command => command[1] == OathConstants.InsCalculate);
@@ -669,7 +669,8 @@ public class OathSessionTests
         [OathConstants.TagTruncated, 0x05, 0x06, 0x00, 0x00, 0x00, 0x01, 0x90, 0x00];
 
     private static byte[] FullResponse() =>
-        [OathConstants.TagResponse, 0x04, 0x01, 0x02, 0x03, 0x04, 0x90, 0x00];
+        [OathConstants.TagResponse, 0x15, 0x06,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 0x90, 0x00];
 
     private sealed class RecordingUserPresencePrompt(
         RecordingSmartCardConnection connection,

@@ -122,7 +122,16 @@ issue `PolicyRequires` immediately before CALCULATE only for credentials whose `
 `true`. The scope is the public display identity (`issuer:name` or `name`); secret material is never included.
 Successful, cancelled, and failed operations resolve as `Completed`, `Cancelled`, and `Failed`. OATH status
 words do not currently provide verified evidence for mapping a failure to `TimedOut`. `CalculateCodeAsync`
-validates the truncated response before successful resolution; `CalculateAsync` currently checks only that
-the required response tag is present, not the full response value's structure. Sensitive response copies
-from these individual calculations are cleared if resolution fails, and the immutable `Code.Value` string
-is not formatted until the callback succeeds.
+validates the truncated response before successful resolution; `CalculateAsync` requires the full-response
+tag, a digit header, and a nonempty HMAC payload. This is structural validation, not verification of a
+particular digest length. It returns an independent copy of the HMAC only, without the digit header,
+after the callback succeeds. The caller owns and clears that returned storage; caller inputs remain unchanged.
+Raw VALIDATE and calculation response buffers are cleared in `finally`, and decoded TLV copies are disposed.
+The immutable `Code.Value` string is not formatted until the individual-calculation callback succeeds.
+
+CALCULATE ALL requests truncated responses. Validate known wire values before applying the host-side
+credential-name omission policy or recalculating a custom period. Known metadata and full-response tags
+are not future result markers. Do not require HOTP/touch marker values to be empty: the
+[official legacy APDU example](https://docs.yubico.com/yesdk/users-manual/application-oath/oath-commands.html)
+includes the digit-bearing HOTP marker `77 01 06`. Unknown named markers and standalone extensions retain their existing handling;
+this does not establish a broader semantic policy for them or for duplicate entries.

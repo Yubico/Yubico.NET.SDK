@@ -67,6 +67,9 @@ public interface IOathSession : IApplicationSession
     ///     <see cref="int.MaxValue" /> is omitted and logged at warning level. This does not imply
     ///     general validation of raw credential IDs.
     /// </remarks>
+    /// <exception cref="Core.BadResponseException">
+    ///     A recognized LIST entry lacks its type/algorithm byte or a nonempty credential ID.
+    /// </exception>
     Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -108,9 +111,32 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Calculates the full HMAC response for a single credential.
     /// </summary>
+    /// <param name="credential">The borrowed credential identifying the device entry to calculate.</param>
+    /// <param name="challenge">
+    ///     The caller-owned challenge, borrowed until the operation completes. Keep its storage unchanged
+    ///     during the operation; the SDK does not modify or clear it.
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token for the operation.</param>
+    /// <returns>
+    ///     Independent, caller-owned HMAC storage, excluding the protocol's leading digit-count byte.
+    ///     The returned memory remains valid after session disposal.
+    /// </returns>
+    /// <remarks>
+    ///     The SDK does not modify the credential or its ID. It requires a response tag whose value
+    ///     contains a digit header and a nonempty HMAC payload before reporting successful user presence;
+    ///     this structural check does not verify a particular digest length. Clear the returned bytes
+    ///     when no longer needed, including when later processing fails. For a result named <c>hmac</c>,
+    ///     use <c>CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(hmac).Span)</c> in a
+    ///     <c>finally</c> block. These types are in <c>System.Security.Cryptography</c> and
+    ///     <c>System.Runtime.InteropServices</c>, respectively. The caller also remains responsible
+    ///     for clearing its challenge storage when appropriate, after the operation completes.
+    /// </remarks>
     /// <exception cref="ArgumentException">
     ///     <paramref name="credential" /> was read from a different device (its <see cref="Credential.DeviceId" />
     ///     is not this session's <see cref="DeviceId" />). Nothing is sent.
+    /// </exception>
+    /// <exception cref="Core.BadResponseException">
+    ///     The required full-response tag is missing, or its value lacks the digit header or HMAC payload.
     /// </exception>
     Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default);
@@ -130,6 +156,10 @@ public interface IOathSession : IApplicationSession
     ///     different device (its <see cref="Credential.DeviceId" /> is not this session's <see cref="DeviceId" />).
     ///     Nothing is sent.
     /// </exception>
+    /// <exception cref="Core.BadResponseException">
+    ///     The required truncated-response tag is missing, or its value does not contain five bytes
+    ///     with a digit count from six through eight.
+    /// </exception>
     Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
         CancellationToken cancellationToken = default);
 
@@ -146,7 +176,13 @@ public interface IOathSession : IApplicationSession
     ///     The device computes every TOTP response with the default 30-second time step; credentials with
     ///     another period are recalculated individually. Entries with invalid recognized TOTP period
     ///     prefixes are omitted and logged at warning level, as described in <see cref="ListCredentialsAsync" />.
+    ///     Known response values are validated before that host-side omission policy or any recalculation.
     /// </remarks>
+    /// <exception cref="Core.BadResponseException">
+    ///     An entry lacks required name/response structure, uses a known non-result tag or a full-response
+    ///     tag for the truncated request, or has a truncated value other than five bytes with a digit count
+    ///     from six through eight.
+    /// </exception>
     Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null,
         CancellationToken cancellationToken = default);
 

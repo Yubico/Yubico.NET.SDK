@@ -28,8 +28,25 @@ namespace Yubico.YubiKit.Oath;
 ///         share the same device ID and raw credential ID bytes.
 ///     </para>
 ///     <para>
-///         Credentials are naturally ordered by issuer/name for display purposes,
-///         matching the canonical Python implementation's ordering.
+///         Natural ordering compares <see cref="DeviceId" /> ordinally, then compares
+///         <see cref="Id" /> lexicographically as unsigned bytes. Comparison returns zero
+///         exactly for equal identities, regardless of display metadata, OATH type, period,
+///         or touch policy. This replaces the previous case-insensitive issuer/name ordering.
+///     </para>
+///     <para>
+///         For UI display, sort explicitly by issuer (or name when there is no issuer), then
+///         by name, ignoring case. An identity tie-breaker makes matching display names deterministic
+///         without dropping distinct credentials:
+///     </para>
+///     <code>
+/// var displayOrder = credentials
+///     .OrderBy(credential =&gt; credential.Issuer ?? credential.Name, StringComparer.OrdinalIgnoreCase)
+///     .ThenBy(credential =&gt; credential.Name, StringComparer.OrdinalIgnoreCase)
+///     .ThenBy(credential =&gt; credential);
+///     </code>
+///     <para>
+///         Do not modify credential ID storage while the credential is used as a key in a
+///         hash-based or sorted collection.
 ///     </para>
 /// </remarks>
 public sealed partial class Credential : IEquatable<Credential>, IComparable<Credential>
@@ -89,7 +106,7 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
         bool? touchRequired)
     {
         DeviceId = deviceId;
-        Id = id.ToArray(); // Defensive copy to prevent external mutation
+        Id = id.ToArray(); // Defensive copy to isolate the caller's input storage
         Issuer = issuer;
         Name = name;
         OathType = oathType;
@@ -211,7 +228,15 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
         return hash.ToHashCode();
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Compares identities by ordinal device ID, then lexicographically by raw credential ID bytes.
+    /// </summary>
+    /// <param name="other">The credential to compare with, or <c>null</c>.</param>
+    /// <returns>
+    ///     A negative value if this identity sorts before <paramref name="other" />, zero if the
+    ///     identities are equal, or a positive value if it sorts after <paramref name="other" />
+    ///     or <paramref name="other" /> is <c>null</c>.
+    /// </returns>
     public int CompareTo(Credential? other)
     {
         if (other is null)
@@ -219,13 +244,13 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
             return 1;
         }
 
-        int cmp = string.Compare(Issuer ?? Name, other.Issuer ?? other.Name, StringComparison.OrdinalIgnoreCase);
+        int cmp = string.CompareOrdinal(DeviceId, other.DeviceId);
         if (cmp != 0)
         {
             return cmp;
         }
 
-        return string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
+        return Id.Span.SequenceCompareTo(other.Id.Span);
     }
 
     /// <summary>

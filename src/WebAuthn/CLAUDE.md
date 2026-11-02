@@ -33,7 +33,7 @@ src/
 │   ├── WebAuthnClient.PinUvAuth.cs       # PIN/UV token acquisition and prompting
 │   ├── WebAuthnClient.Validation.cs      # option validation and CTAP error mapping
 │   ├── WebAuthnClientOptions.cs
-│   ├── PublicSuffixChecker.cs
+│   ├── RpIdValidator.cs          # public application-authorization delegate
 │   ├── WebAuthnBackend.cs        # internal
 │   ├── IWebAuthnBackend.cs       # internal
 │   ├── PinUvAuthTokenSession.cs  # internal
@@ -41,8 +41,6 @@ src/
 │   ├── WebAuthnOrigin.cs
 │   ├── UserVerification/         # UV/PIN decision logic
 │   │   └── UvDecision.cs
-│   ├── Validation/
-│   │   └── RpIdValidator.cs
 │   ├── Registration/             # Registration options and responses
 │   │   ├── PublicKeyCredentialCreationOptions.cs
 │   │   └── RegistrationResponse.cs
@@ -90,16 +88,16 @@ Logger.LogError(ex, "PreviewSign authentication failed");
 
 ```csharp
 // Create client from an existing FIDO2 session.
-// The PublicSuffixChecker should be backed by Public Suffix List data.
-// WebAuthnClientOptions and its PublicSuffixChecker are required. CredentialPrompt remains optional.
+// The application owns RP validity and authorization of each origin/RP pair.
+// WebAuthnClientOptions and its RpIdValidator are required. CredentialPrompt remains optional.
 await using var client = new WebAuthnClient(
     ctap2Session,
     origin,
     new WebAuthnClientOptions
     {
-        PublicSuffixChecker = domain => publicSuffixList.Contains(domain),
+        RpIdValidator = (requestOrigin, rpId) =>
+            requestOrigin.StringValue == "https://example.com" && rpId == "example.com",
         CredentialPrompt = myCredentialPrompt,
-        EnterpriseRpIds = enterpriseRpIds,
         MaxPromptAttempts = 3
     });
 
@@ -108,7 +106,7 @@ await using var clientFromDevice = await yubiKey.CreateWebAuthnClientAsync(
     origin,
     clientOptions: new WebAuthnClientOptions
     {
-        PublicSuffixChecker = domain => publicSuffixList.Contains(domain),
+        RpIdValidator = rpValidationService.IsRpValidForOrigin,
         CredentialPrompt = myCredentialPrompt
     },
     sessionOptions: new SessionCreationOptions
@@ -151,9 +149,32 @@ authentication extension outputs are non-positional records with optional init p
 The device factory takes two independent configuration carriers, and mixing them up is the easy mistake:
 required `clientOptions` (`WebAuthnClientOptions`) is forwarded to the created `WebAuthnClient`, while optional
 `sessionOptions` (`SessionCreationOptions`) is forwarded unchanged to `CreateCtap2SessionAsync`.
-The origin and client options are required; `PublicSuffixChecker` is required within the client options,
+The origin and client options are required; `RpIdValidator` is required within the client options,
 while `CredentialPrompt` remains optional. The earlier standalone public-suffix checker and overload ending
 in `scpKeyParams`, `configuration`, and `cancellationToken` were removed during the coordinated 2.0 breaking window.
+
+### Registration transport metadata
+
+`MakeCredentialCoreAsync` already obtains `AuthenticatorInfo` through `GetCachedInfoAsync`. Pass that
+same info into response construction and snapshot its string transport list as `WebAuthnTransport`
+values, deduplicated and sorted with `StringComparer.Ordinal`, in independently owned read-only storage.
+Do not query GetInfo again, infer transports from the live connection, or introduce a CTAP2 dependency
+on WebAuthn. CTAP2's transport model stays a string list, preserving unknown names.
+
+`RegistrationResponse.Transports` is non-nullable and defaults to `[]`; absent GetInfo metadata yields
+an empty response list. These are advertised authenticator hints for the relying party, not a host
+reachability check or session transport-selection policy. The public client/fake-session regression
+tests in `Client/RegistrationTransportTests.cs` cover cached-info reuse, all known and future names,
+missing metadata, ordinal deduplication, and snapshot independence.
+
+Migration: replace `WebAuthnTransport.Unknown(value)` with `WebAuthnTransport.FromValue(value)` for both
+known and unknown strings; constants and exact string equality are unchanged. Replace response null
+checks/initializers with empty-list handling. Descriptor input optional semantics are unchanged.
+
+Reference precedent: [Android cached-info forwarding](https://github.com/Yubico/yubikit-android/blob/76b89d35142d9a4937b6b72e5c840e057a280620/fido/src/main/java/com/yubico/yubikit/fido/client/Ctap2Client.java#L240-L244).
+The [WebAuthn response contract](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#dom-authenticatorattestationresponse-gettransports)
+requires unique, lexicographically ordered names, empty when unavailable; [CTAP GetInfo transports](https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#getinfo-transports)
+requires tolerance of unknown values. This is YESDK-1608, original audit consideration 4, not original finding #4.
 
 ### Credential Prompting
 
@@ -237,10 +258,42 @@ A PIN still comes only from `pinBytes` or `WebAuthnClientOptions.CredentialPromp
 
 ### RP ID Validation
 
-`WebAuthnClient` enforces RP ID validity through `Client/Validation/RpIdValidator.cs` before CTAP
-operations. Public suffixes such as `com` and `co.uk` must be rejected for suffix matches, so
-production callers must provide a `PublicSuffixChecker` backed by Public Suffix List data. The
-explicit suffix checker is required; a caller-supplied effective-domain shortcut is not a substitute.
+`WebAuthnClient.Validation.cs` checks only nonempty, faithfully UTF-8 encodable RP text,
+then invokes the required synchronous `Client/RpIdValidator.cs` delegate
+with the configured origin and unchanged RP ID. Both ceremonies do this once before any backend
+call, including GetInfo, PIN/UV, extensions, and credential probing. Approval is not overridden by
+SDK domain/URI syntax, IDNA, domain-suffix, or Public Suffix List policy. The callback owns RP validity
+(including syntax) AND caller/RP authorization. False and non-cancellation exceptions map to
+`Security` (exception retained); callback cancellation propagates and blocks device I/O. Null/empty
+RP IDs and invalid UTF-16 map to `InvalidRequest` without invoking the callback. The callback executes before
+the deadline starts and must be prompt/local; shared callbacks must handle concurrency.
+
+**Approved boundary:** callback owns RP validity. Do not add a domain/URI parser, IDNA converter,
+PSL check, or hidden browser syntax policy. Every RP ID passing the wire checks reaches the callback
+unchanged, including `x:credential`, `http:credential`, IDNs, and malformed domain strings. A permissive
+callback does not establish browser conformance. Exact-RP and origin/RP allowlists are complete policies
+when their trusted entries are validated; an application-service validator must validate both RP syntax
+and caller/RP binding under the applicable specification. CTAP message/credential limits remain in CTAP2.
+
+**YESDK-1623 / audit 15 migration:** `PublicSuffixChecker`, `EnterpriseRpIds`, and
+`WebAuthnOrigin.IsRpIdValid` are removed. Applications must provide RP validity and their complete binding policy
+through `WebAuthnClientOptions.RpIdValidator`, including browser public-suffix/related-origin rules
+if applicable. Carry existing PIN prompt/attempt settings forward; do not just invert the old checker.
+Callbacks from an earlier development build that checked only authorization must also own RP syntax
+validity; the SDK's former independent syntax gate was removed.
+Exact-RP, origin/RP allowlist, and existing application-service examples are in [README.md](README.md#rp-authorization-belongs-to-the-application).
+
+WebAuthn L3 [RP ID](https://www.w3.org/TR/webauthn-3/#rp-id) permits other native binding models but
+still requires domain-string or URI RP syntax. python-fido2's pinned
+[`ClientDataCollector`](https://github.com/Yubico/python-fido2/blob/9d5991d6785e20bd487c8b6c996df6ce2226642a/fido2/client/__init__.py)
+delegates authorization to application logic. No SDK policy framework or network lookups are added.
+`WebAuthnOrigin.TryParse` is unchanged: HTTPS or HTTP localhost / *.localhost only, serialized as
+scheme://host[:port], stripping path/query/fragment. Native/opaque/custom-scheme origins remain
+unrepresentable; accepting a URI RP ID does not expand this origin boundary.
+
+The callback is a client-side authorization boundary, not RP-server verification. The configured
+origin still enters signed client data; servers independently check origin, challenge/type, RP ID hash,
+signature/attestation policy, UP/UV, cross-origin context, and credential/account binding.
 
 ### Extension Processing
 
@@ -369,7 +422,8 @@ public async Task Registration_WithPreviewSign_ReturnsGeneratedSigningKey(YubiKe
         origin!,
         new WebAuthnClientOptions
         {
-            PublicSuffixChecker = domain => domain is "com" or "org" or "net" or "co.uk"
+            RpIdValidator = (requestOrigin, rpId) =>
+                requestOrigin.StringValue == TestOriginUrl && rpId == TestRpId
         });
 
     

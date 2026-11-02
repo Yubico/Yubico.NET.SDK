@@ -65,32 +65,51 @@ public class CredentialTests
     }
 
     [Fact]
-    public void CompareTo_IssuerBasedSorting_OrdersCorrectly()
+    public void CompareTo_DeviceIdTakesPrecedenceOverRawIdAndDisplay()
     {
-        var alpha = new Credential("d", "Alpha:user"u8.ToArray(), "Alpha", "user", OathType.Totp, 30, null);
-        var beta = new Credential("d", "Beta:user"u8.ToArray(), "Beta", "user", OathType.Totp, 30, null);
+        var alpha = new Credential("a", "Zulu:user"u8.ToArray(), "Zulu", "user", OathType.Totp, 30, null);
+        var beta = new Credential("b", "Alpha:user"u8.ToArray(), "Alpha", "user", OathType.Totp, 30, null);
 
         Assert.True(alpha.CompareTo(beta) < 0);
         Assert.True(beta.CompareTo(alpha) > 0);
     }
 
     [Fact]
-    public void CompareTo_NoIssuerUsesNameForSortKey()
+    public void CompareTo_RawIdsUseOrdinalRatherThanDisplayCase()
     {
         var withIssuer = new Credential("d", "Zebra:a"u8.ToArray(), "Zebra", "a", OathType.Totp, 30, null);
         var noIssuer = new Credential("d", "alpha"u8.ToArray(), null, "alpha", OathType.Totp, 30, null);
 
-        // withIssuer sorts by "zebra" (issuer), noIssuer sorts by "alpha" (name)
-        Assert.True(noIssuer.CompareTo(withIssuer) < 0);
+        // Raw UTF-8 bytes are compared without case folding: uppercase Z precedes lowercase a.
+        Assert.True(withIssuer.CompareTo(noIssuer) < 0);
+        Assert.True(noIssuer.CompareTo(withIssuer) > 0);
     }
 
     [Fact]
-    public void CompareTo_SameIssuer_SortsByName()
+    public void CompareTo_SameDevice_SortsByRawIdNotDisplayMetadata()
     {
-        var a = new Credential("d", "GitHub:alice"u8.ToArray(), "GitHub", "alice", OathType.Totp, 30, null);
-        var b = new Credential("d", "GitHub:bob"u8.ToArray(), "GitHub", "bob", OathType.Totp, 30, null);
+        var a = new Credential("d", "GitHub:alice"u8.ToArray(), "GitHub", "bob", OathType.Totp, 30, null);
+        var b = new Credential("d", "GitHub:bob"u8.ToArray(), "GitHub", "alice", OathType.Totp, 30, null);
 
         Assert.True(a.CompareTo(b) < 0);
+    }
+
+    [Fact]
+    public void ExplicitDisplaySorting_OrdersByIssuerOrNameThenName_RetainsDistinctIdentities()
+    {
+        var alpha = new Credential("z", "alpha"u8.ToArray(), null, "alpha", OathType.Totp, 30, null);
+        var alice = new Credential("y", "GitHub:alice"u8.ToArray(), "GitHub", "alice", OathType.Totp, 30, null);
+        var bob = new Credential("x", "GitHub:bob"u8.ToArray(), "GitHub", "bob", OathType.Totp, 30, null);
+        var otherBob = new Credential("w", "GitHub:bob"u8.ToArray(), "github", "BOB", OathType.Totp, 30, null);
+        var zebra = new Credential("v", "Zebra:a"u8.ToArray(), "Zebra", "a", OathType.Totp, 30, null);
+        Credential[] credentials = [zebra, bob, alice, otherBob, alpha];
+
+        var displayOrder = credentials
+            .OrderBy(credential => credential.Issuer ?? credential.Name, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(credential => credential.Name, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(credential => credential);
+
+        Assert.Equal([alpha, alice, otherBob, bob, zebra], displayOrder);
     }
 
     [Fact]

@@ -63,7 +63,7 @@ Later snippets assume these directives and a `device` obtained the same way. The
 
 ### Add a TOTP credential from an otpauth URI
 
-`ParseUri` creates a new decoded secret array; dispose the returned `CredentialData` to clear that array.
+`ParseUri` returns a `CredentialData` that owns its decoded secret bytes. Dispose it after use.
 `PutCredentialAsync` adds the credential or replaces one with the same raw credential ID, produced by `GetId()`.
 Set `requireTouch: true` to require touch for individual calculations (firmware 4.2.4+). Bulk calculations return
 `null` for these entries, as described below.
@@ -73,6 +73,31 @@ using var credentialData = CredentialData.ParseUri(
     "otpauth://totp/GitHub:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=GitHub", requireTouch: false);
 await using var session = await device.CreateOathSessionAsync();
 await session.PutCredentialAsync(credentialData);
+```
+
+### Add a credential from decoded bytes
+
+Initialization copies the seed. You still own the input array; clear it in a `finally`, even if construction or PUT
+fails. PUT does not consume the credential's seed, so the same instance can be reused for authentication retry.
+
+```csharp
+byte[] seed = "12345678901234567890"u8.ToArray(); // Example seed only; obtain real input securely.
+try
+{
+    using var credentialData = new CredentialData
+    {
+        Name = "alice@example.com",
+        OathType = OathType.Totp,
+        HashAlgorithm = OathHashAlgorithm.Sha1,
+        Secret = seed
+    };
+    await using var session = await device.CreateOathSessionAsync();
+    await session.PutCredentialAsync(credentialData);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(seed);
+}
 ```
 
 ### Calculate codes
@@ -175,9 +200,14 @@ does not interrupt the device or necessarily change the notification outcome.
 ## Security notes
 
 - Secrets cross the API as `byte[]` or `ReadOnlyMemory<byte>`. You own the input buffers: zero them with `CryptographicOperations.ZeroMemory` in a `finally`.
-- `CredentialData` properties are assigned only during initialization. Directly assigning `Secret` retains the
-  supplied array without copying it; the property exposes the same mutable array. `ParseUri` creates a new decoded
-  array instead. Use `using` to clear `Secret` on disposal; this does not clear the URI or encoded secret strings.
+- `CredentialData.Secret` is a borrowed `ReadOnlyMemory<byte>` view over private owned storage, not a fresh copy
+  on each read. Initialization copies the input; clearing or modifying your input does not change the stored seed.
+- Always `using` a `CredentialData`. Disposal clears private storage and all previously borrowed views, but not
+  your original input or copies made with `Secret.ToArray()`. Those copies are yours to clear. Read bytes through
+  `Secret.Span`; do not mutate storage via array extraction or use the credential/view after disposal. Wait for all
+  operations using it to complete before disposing; concurrent disposal/use is unsupported.
+- `ParseUri` clears decoded temporary buffers on success and failure. Immutable URI/Base32 strings and literal
+  demo seeds cannot be erased; avoid retaining or logging them and prefer securely acquired byte input in production.
 - `DeriveKey` takes a borrowed UTF-8 password and returns a 16-byte key you own and must zero; `AuthenticateAndRetryAsync` zeroes the key it derives, not the bytes your callback returned.
 - Never log secrets, passwords, derived access keys, or calculated codes.
 

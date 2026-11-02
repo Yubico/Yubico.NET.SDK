@@ -73,8 +73,15 @@ public interface IOathSession : IApplicationSession
     ///     Adds a credential or replaces an existing credential with the same raw credential ID.
     /// </summary>
     /// <remarks>
-    ///     The raw ID is produced by <see cref="CredentialData.GetId" />. The SDK sends PUT without
-    ///     checking whether that ID already exists on the device.
+    ///     <para>
+    ///         The raw ID is produced by <see cref="CredentialData.GetId" />. The SDK sends PUT without
+    ///         checking whether that ID already exists on the device.
+    ///     </para>
+    ///     <para>
+    ///         Borrows <paramref name="credentialData" /> until the operation completes. PUT uses independent
+    ///         temporary secret storage and does not clear the credential's owned seed, including on failure.
+    ///         The same instance can be used for authentication retry; dispose it only after all uses complete.
+    ///     </para>
     /// </remarks>
     Task PutCredentialAsync(CredentialData credentialData,
         CancellationToken cancellationToken = default);

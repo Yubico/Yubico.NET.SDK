@@ -43,7 +43,7 @@ public class WebAuthnClientFactoryTests
                 origin,
                 new WebAuthnClientOptions
                 {
-                    PublicSuffixChecker = domain => domain is "com" or "org" or "net" or "co.uk"
+                    RpIdValidator = (requestOrigin, rpId) => requestOrigin.StringValue == TestOriginUrl && rpId == TestRpId
                 },
                 sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 
@@ -84,7 +84,7 @@ public class WebAuthnClientFactoryTests
             origin,
             new WebAuthnClientOptions
             {
-                PublicSuffixChecker = domain => domain is "com" or "org" or "net" or "co.uk"
+                RpIdValidator = (requestOrigin, rpId) => requestOrigin.StringValue == TestOriginUrl && rpId == TestRpId
             },
             sessionOptions: new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 

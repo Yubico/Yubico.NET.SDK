@@ -15,8 +15,8 @@
 using NSubstitute;
 using System.Security.Cryptography;
 using System.Text;
-using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
@@ -47,7 +47,7 @@ public class WebAuthnClientGetAssertionTests
         _client = new WebAuthnClient(
             _mockBackend,
             _origin,
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class WebAuthnClientGetAssertionTests
     }
 
     [Fact]
-    public async Task GetAssertion_RpIdMismatch_ThrowsInvalidRequest()
+    public async Task GetAssertion_ApplicationRejectsRpId_ThrowsSecurity()
     {
         // Arrange
         var options = new PublicKeyCredentialRequestOptions
@@ -91,7 +91,7 @@ public class WebAuthnClientGetAssertionTests
         var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             _client.GetAssertionAsync(options, pinBytes: null, CancellationToken.None));
 
-        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
+        Assert.Equal(WebAuthnClientErrorCode.Security, ex.Code);
     }
 
     [Fact]

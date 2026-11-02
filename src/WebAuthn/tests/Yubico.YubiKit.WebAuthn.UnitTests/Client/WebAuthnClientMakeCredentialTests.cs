@@ -16,9 +16,9 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -49,7 +49,7 @@ public class WebAuthnClientMakeCredentialTests
         _client = new WebAuthnClient(
             _mockBackend,
             _origin,
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     [Fact]
-    public async Task MakeCredential_RpIdMismatch_ThrowsInvalidRequest()
+    public async Task MakeCredential_ApplicationRejectsRpId_ThrowsSecurity()
     {
         // Arrange
         var options = new PublicKeyCredentialCreationOptions
@@ -96,18 +96,18 @@ public class WebAuthnClientMakeCredentialTests
         var ex = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             _client.MakeCredentialAsync(options, pinBytes: null, CancellationToken.None));
 
-        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
+        Assert.Equal(WebAuthnClientErrorCode.Security, ex.Code);
     }
 
     [Fact]
-    public async Task MakeCredential_RpIdSuffix_Allowed()
+    public async Task MakeCredential_ApplicationAuthorizesParentRpId_Allowed()
     {
         // Arrange
         WebAuthnOrigin.TryParse("https://login.example.com", out var origin);
         var client = new WebAuthnClient(
             _mockBackend,
             origin!,
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
 
         var options = new PublicKeyCredentialCreationOptions
         {
@@ -132,7 +132,7 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     [Fact]
-    public async Task MakeCredential_EnterpriseRpId_Bypasses_SuffixCheck()
+    public async Task MakeCredential_ApplicationAuthorizesPartnerRpId_Allowed()
     {
         // Arrange
         var client = new WebAuthnClient(
@@ -140,8 +140,7 @@ public class WebAuthnClientMakeCredentialTests
             _origin,
             new WebAuthnClientOptions
             {
-                PublicSuffixChecker = domain => domain == "com",
-                EnterpriseRpIds = new HashSet<string> { "partner.test" }
+                RpIdValidator = (_, rpId) => rpId == "partner.test"
             });
 
         var options = new PublicKeyCredentialCreationOptions
@@ -618,7 +617,7 @@ public class WebAuthnClientMakeCredentialTests
         var client = new WebAuthnClient(
             mockBackend,
             _origin,
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
 
         // Act
         await client.DisposeAsync();

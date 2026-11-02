@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Buffers;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
 using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 
@@ -73,50 +74,61 @@ public static class AccountsCommand
             return 1;
         }
 
-        using var credentialData = new CredentialData
+        CredentialData credentialData;
+        try
         {
-            Name = name,
-            OathType = oathType,
-            HashAlgorithm = algorithm,
-            Secret = secretBytes,
-            Digits = digits,
-            Period = period,
-            Issuer = issuer,
-            RequireTouch = touch
-        };
-
-        var displayName = OutputHelpers.FormatCredentialName(credentialData.Issuer, credentialData.Name);
-
-        if (!force)
-        {
-            Console.Error.Write($"Add credential {displayName}? [y/N] ");
-            var response = Console.ReadLine();
-            if (!string.Equals(response, "y", StringComparison.OrdinalIgnoreCase))
+            credentialData = new CredentialData
             {
-                OutputHelpers.WriteInfo("Add cancelled.");
-                return 1;
-            }
+                Name = name,
+                OathType = oathType,
+                HashAlgorithm = algorithm,
+                Secret = secretBytes,
+                Digits = digits,
+                Period = period,
+                Issuer = issuer,
+                RequireTouch = touch
+            };
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(secretBytes);
         }
 
-        var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
-        if (result is null)
+        using (credentialData)
         {
-            return 1;
-        }
+            var displayName = OutputHelpers.FormatCredentialName(credentialData.Issuer, credentialData.Name);
 
-        var (_, session) = result.Value;
-        await using (session)
-        {
-            try
+            if (!force)
             {
-                await session.PutCredentialAsync(credentialData, cancellationToken);
-                OutputHelpers.WriteSuccess($"Credential added: {displayName}");
-                return 0;
+                Console.Error.Write($"Add credential {displayName}? [y/N] ");
+                var response = Console.ReadLine();
+                if (!string.Equals(response, "y", StringComparison.OrdinalIgnoreCase))
+                {
+                    OutputHelpers.WriteInfo("Add cancelled.");
+                    return 1;
+                }
             }
-            catch (Exception ex)
+
+            var result = await OathSessionHelper.CreateUnlockedSessionAsync(passwordBytes, cancellationToken);
+            if (result is null)
             {
-                OutputHelpers.WriteError($"Failed to add credential: {ex.Message}");
                 return 1;
+            }
+
+            var (_, session) = result.Value;
+            await using (session)
+            {
+                try
+                {
+                    await session.PutCredentialAsync(credentialData, cancellationToken);
+                    OutputHelpers.WriteSuccess($"Credential added: {displayName}");
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    OutputHelpers.WriteError($"Failed to add credential: {ex.Message}");
+                    return 1;
+                }
             }
         }
     }
@@ -450,25 +462,33 @@ public static class AccountsCommand
         int bitsInBuffer = 0;
         int index = 0;
 
-        foreach (char c in input)
+        try
         {
-            int val = alphabet.IndexOf(c);
-            if (val < 0)
+            foreach (char c in input)
             {
-                throw new ArgumentException($"Invalid Base32 character: '{c}'.");
+                int val = alphabet.IndexOf(c);
+                if (val < 0)
+                {
+                    throw new ArgumentException($"Invalid Base32 character: '{c}'.");
+                }
+
+                buffer = (buffer << 5) | val;
+                bitsInBuffer += 5;
+
+                if (bitsInBuffer >= 8)
+                {
+                    bitsInBuffer -= 8;
+                    result[index++] = (byte)(buffer >> bitsInBuffer);
+                    buffer &= (1 << bitsInBuffer) - 1;
+                }
             }
 
-            buffer = (buffer << 5) | val;
-            bitsInBuffer += 5;
-
-            if (bitsInBuffer >= 8)
-            {
-                bitsInBuffer -= 8;
-                result[index++] = (byte)(buffer >> bitsInBuffer);
-                buffer &= (1 << bitsInBuffer) - 1;
-            }
+            return result;
         }
-
-        return result;
+        catch
+        {
+            CryptographicOperations.ZeroMemory(result);
+            throw;
+        }
     }
 }

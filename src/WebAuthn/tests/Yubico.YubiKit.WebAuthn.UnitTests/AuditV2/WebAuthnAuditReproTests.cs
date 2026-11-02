@@ -24,7 +24,7 @@ public class WebAuthnAuditReproTests
     {
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         return new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
     }
 
     private static PublicKeyCredentialCreationOptions Registration() => new()
@@ -552,7 +552,7 @@ public class WebAuthnAuditReproTests
         var prompt = new HangingPrompt();
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain is "com", CredentialPrompt = prompt });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com", CredentialPrompt = prompt });
         using var guard = new CancellationTokenSource(TestGuard);
 
         var operation = client.MakeCredentialAsync(

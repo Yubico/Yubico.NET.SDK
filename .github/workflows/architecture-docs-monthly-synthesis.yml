@@ -133,15 +133,8 @@ jobs:
       - name: Apply architecture patch
         shell: bash
         run: |
-          git apply --check --whitespace=error patches/architecture.patch
-          git apply --whitespace=error patches/architecture.patch
-          outside="$(git status --porcelain --untracked-files=all | while IFS= read -r line; do path="${line#???}"; case "$path" in docs/architecture/*|patches/*) ;; *) printf '%s\n' "$path" ;; esac; done)"
-          if [[ -n "$outside" ]]; then
-            echo "Architecture patch contains paths outside docs/architecture:" >&2
-            printf '%s\n' "$outside" >&2
-            exit 1
-          fi
-          git diff --check
+          python3 scripts/docs/apply-docs-patch.py architecture patches/architecture.patch
+          git diff --cached --check
 
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0

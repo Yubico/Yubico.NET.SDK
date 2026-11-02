@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -32,32 +33,35 @@ public class OathSessionTests
     private static CredentialData CreateTotpCredential(
         string name = "user@example.com",
         string? issuer = "TestIssuer",
-        bool requireTouch = false) =>
-        new()
-        {
-            Name = name,
-            OathType = OathType.Totp,
-            HashAlgorithm = OathHashAlgorithm.Sha1,
-            Secret = [0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
-                      0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30],
-            Issuer = issuer,
-            RequireTouch = requireTouch
-        };
+        bool requireTouch = false) => CreateCredential(name, issuer, OathType.Totp, requireTouch: requireTouch);
 
     private static CredentialData CreateHotpCredential(
         string name = "hotp-user@example.com",
         string? issuer = "HotpIssuer",
-        int counter = 0) =>
-        new()
+        int counter = 0) => CreateCredential(name, issuer, OathType.Hotp, counter: counter);
+
+    private static CredentialData CreateCredential(
+        string name, string? issuer, OathType oathType, bool requireTouch = false, int counter = 0)
+    {
+        byte[] secret = "12345678901234567890"u8.ToArray();
+        try
         {
-            Name = name,
-            OathType = OathType.Hotp,
-            HashAlgorithm = OathHashAlgorithm.Sha1,
-            Secret = [0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
-                      0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30],
-            Issuer = issuer,
-            Counter = counter
-        };
+            return new CredentialData
+            {
+                Name = name,
+                OathType = oathType,
+                HashAlgorithm = OathHashAlgorithm.Sha1,
+                Secret = secret,
+                Issuer = issuer,
+                RequireTouch = requireTouch,
+                Counter = counter
+            };
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(secret);
+        }
+    }
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0", CustomFilter = typeof(BetaSerial103Filter))]
@@ -109,7 +113,7 @@ public class OathSessionTests
             Assert.Empty(credentials);
 
             // Put a TOTP credential
-            var credData = CreateTotpCredential();
+            using var credData = CreateTotpCredential();
             await session.PutCredentialAsync(credData, cancellationToken: NewToken());
 
             // List should now contain the credential
@@ -194,7 +198,7 @@ public class OathSessionTests
         await state.WithOathSessionAsync(async session =>
         {
             // Put a credential
-            var credData = CreateTotpCredential("original@example.com", "OriginalIssuer");
+            using var credData = CreateTotpCredential("original@example.com", "OriginalIssuer");
             await session.PutCredentialAsync(credData, cancellationToken: NewToken());
 
             var credentials = await session.ListCredentialsAsync(NewToken());
@@ -223,8 +227,8 @@ public class OathSessionTests
         await state.WithOathSessionAsync(async session =>
         {
             // Put multiple TOTP credentials
-            var cred1 = CreateTotpCredential("alice@example.com", "ServiceA");
-            var cred2 = CreateTotpCredential("bob@example.com", "ServiceB");
+            using var cred1 = CreateTotpCredential("alice@example.com", "ServiceA");
+            using var cred2 = CreateTotpCredential("bob@example.com", "ServiceB");
 
             await session.PutCredentialAsync(cred1, cancellationToken: NewToken());
             await session.PutCredentialAsync(cred2, cancellationToken: NewToken());
@@ -250,8 +254,8 @@ public class OathSessionTests
         await state.WithOathSessionAsync(async session =>
         {
             // Put a TOTP and an HOTP credential
-            var totpCred = CreateTotpCredential("totp@example.com", "TotpService");
-            var hotpCred = CreateHotpCredential();
+            using var totpCred = CreateTotpCredential("totp@example.com", "TotpService");
+            using var hotpCred = CreateHotpCredential();
 
             await session.PutCredentialAsync(totpCred, cancellationToken: NewToken());
             await session.PutCredentialAsync(hotpCred, cancellationToken: NewToken());
@@ -274,7 +278,7 @@ public class OathSessionTests
     public async Task HotpCredential_PutAndCalculate_Succeeds(YubiKeyTestState state) =>
         await state.WithOathSessionAsync(async session =>
         {
-            var credData = CreateHotpCredential();
+            using var credData = CreateHotpCredential();
             await session.PutCredentialAsync(credData, cancellationToken: NewToken());
 
             var credentials = await session.ListCredentialsAsync(NewToken());
@@ -302,7 +306,7 @@ public class OathSessionTests
         await state.WithOathSessionAsync(async session =>
         {
             // Put a credential
-            var credData = CreateTotpCredential();
+            using var credData = CreateTotpCredential();
             await session.PutCredentialAsync(credData, cancellationToken: NewToken());
 
             var credentials = await session.ListCredentialsAsync(NewToken());
@@ -329,7 +333,7 @@ public class OathSessionTests
         await state.WithOathSessionAsync(async session =>
         {
             // Put a touch-required credential
-            var credData = CreateTotpCredential("touch@example.com", "TouchService", requireTouch: true);
+            using var credData = CreateTotpCredential("touch@example.com", "TouchService", requireTouch: true);
             await session.PutCredentialAsync(credData, NewToken());
 
             // CalculateAll should return null code for touch-required credentials

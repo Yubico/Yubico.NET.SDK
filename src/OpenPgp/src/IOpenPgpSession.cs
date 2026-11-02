@@ -17,6 +17,7 @@ using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Abstractions;
 
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 namespace Yubico.YubiKit.OpenPgp;
 
@@ -310,6 +311,23 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>
     ///     Gets the certificate stored for the specified key slot.
     /// </summary>
+    /// <returns>
+    ///     The certificate, which the caller must dispose, or <see langword="null" /> when a successful
+    ///     read returns empty data. For the Sig, Dec, and Aut cardholder slots, a GET DATA response of
+    ///     0x6A88 (referenced data or DO not found) also returns <see langword="null" />.
+    /// </returns>
+    /// <remarks>
+    ///     Certificate-slot selection failures and other read failures are propagated, not treated as
+    ///     certificate absence. For the attestation certificate (Att, DO 0xFC), all APDU failures are
+    ///     propagated; only a successful empty read returns <see langword="null" />.
+    /// </remarks>
+    /// <exception cref="ApduException">
+    ///     Certificate-slot selection failed, or the certificate read failed with a status other than
+    ///     the cardholder-slot absence response described above.
+    /// </exception>
+    /// <exception cref="CryptographicException">
+    ///     The returned non-empty data cannot be decoded as an X.509 certificate.
+    /// </exception>
     Task<X509Certificate2?> GetCertificateAsync(
         KeyRef keyRef,
         CancellationToken cancellationToken = default);

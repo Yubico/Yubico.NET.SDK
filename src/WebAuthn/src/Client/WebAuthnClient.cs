@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <remarks>
 /// <para>
 /// This client wraps CTAP2 operations and handles WebAuthn protocol details like
-/// clientDataJSON construction, RP ID validation, UV/PIN token acquisition, and retry logic.
+/// clientDataJSON construction, application-supplied RP validation, UV/PIN token acquisition, and retry logic.
 /// </para>
 /// <para>
 /// The implementation is split across partial files by concern: this file holds construction,
@@ -38,7 +38,7 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
 {
     private readonly IWebAuthnBackend _backend;
     private readonly WebAuthnOrigin _origin;
-    private readonly Func<string, bool> _isPublicSuffix;
+    private readonly RpIdValidator _rpIdValidator;
     private readonly WebAuthnClientOptions _options;
     private bool _disposed;
 
@@ -48,8 +48,8 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
     /// <param name="ctap2Session">The CTAP2 session that performs authenticator operations (ownership transferred).</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
     /// <param name="options">
-    /// Required client configuration, including the public suffix checker. Defaults remain no
-    /// enterprise RP IDs, no credential prompt, and
+    /// Required client configuration, including application-owned RP validity and authorization. Defaults remain
+    /// no credential prompt and
     /// <see cref="WebAuthnClientOptions.DefaultMaxPromptAttempts"/> prompt attempts.
     /// </param>
     public WebAuthnClient(
@@ -60,7 +60,7 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(ctap2Session);
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _isPublicSuffix = options.PublicSuffixChecker.Invoke;
+        _rpIdValidator = options.RpIdValidator;
         _backend = new WebAuthnBackend(ctap2Session);
     }
 
@@ -69,7 +69,7 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
     /// </summary>
     /// <param name="backend">The backend that performs CTAP2 operations (ownership transferred).</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
-    /// <param name="options">Required client configuration, including the public suffix checker.</param>
+    /// <param name="options">Required client configuration, including application-owned RP validity and authorization.</param>
     internal WebAuthnClient(
         IWebAuthnBackend backend,
         WebAuthnOrigin origin,
@@ -78,7 +78,7 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
         _backend = backend ?? throw new ArgumentNullException(nameof(backend));
         _origin = origin ?? throw new ArgumentNullException(nameof(origin));
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _isPublicSuffix = options.PublicSuffixChecker.Invoke;
+        _rpIdValidator = options.RpIdValidator;
     }
 
     /// <inheritdoc/>

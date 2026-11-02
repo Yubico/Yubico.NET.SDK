@@ -33,6 +33,11 @@ public sealed record class PublicKeyCredentialCreationOptions
     /// <summary>
     /// Gets the relying party information.
     /// </summary>
+    /// <remarks>
+    /// The application must validate the RP ID's syntax and authorize it for the configured origin
+    /// through <see cref="WebAuthnClientOptions.RpIdValidator"/> before registration device I/O.
+    /// The SDK checks only nonempty, faithfully UTF-8 encodable RP text and transmits the approved ID unchanged.
+    /// </remarks>
     public required PublicKeyCredentialRpEntity Rp { get; init; }
 
     /// <summary>

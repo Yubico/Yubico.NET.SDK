@@ -36,8 +36,10 @@ public sealed record class PublicKeyCredentialRequestOptions
     /// Gets the relying party identifier.
     /// </summary>
     /// <remarks>
-    /// Must be a registrable domain suffix of the origin's effective domain,
-    /// or match an entry in the enterprise allow-list.
+    /// The application must validate this RP ID's syntax and authorize it for the configured origin through
+    /// <see cref="WebAuthnClientOptions.RpIdValidator"/> before authentication device I/O.
+    /// The SDK checks only nonempty, faithfully UTF-8 encodable RP text; it imposes no domain/URI
+    /// syntax or domain-suffix policy. Approval is an application decision, and the RP ID is transmitted unchanged.
     /// </remarks>
     public required string RpId { get; init; }
 

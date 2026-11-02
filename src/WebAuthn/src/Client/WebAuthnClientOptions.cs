@@ -32,28 +32,27 @@ public sealed record WebAuthnClientOptions
     /// </summary>
     public const int DefaultMaxPromptAttempts = 3;
 
-    private static readonly IReadOnlySet<string> NoEnterpriseRpIds = new HashSet<string>();
-
     private readonly int _maxPromptAttempts = DefaultMaxPromptAttempts;
-    private readonly IReadOnlySet<string> _enterpriseRpIds = NoEnterpriseRpIds;
-    private readonly PublicSuffixChecker? _publicSuffixChecker;
+    private readonly RpIdValidator? _rpIdValidator;
 
     /// <summary>
-    /// Gets the checker used to reject public-suffix RP IDs.
+    /// Gets the required application callback checking RP validity and origin/RP authorization before ceremony device I/O.
     /// </summary>
     /// <remarks>
-    /// Production callers should use a checker backed by Public Suffix List data.
+    /// The application owns RP syntax validity and the complete RP binding policy. The SDK checks
+    /// only nonempty, faithfully UTF-8 encodable RP text. See <see cref="Client.RpIdValidator"/>
+    /// for responsibilities, synchronous execution, failure behavior, and RP-server checks.
     /// </remarks>
     /// <exception cref="ArgumentNullException">The property is initialized with <see langword="null"/>.</exception>
     /// <exception cref="InvalidOperationException">The property was not configured.</exception>
-    public required PublicSuffixChecker PublicSuffixChecker
+    public required RpIdValidator RpIdValidator
     {
-        get => _publicSuffixChecker ?? throw new InvalidOperationException(
-            "PublicSuffixChecker must be configured before creating a WebAuthn client.");
+        get => _rpIdValidator ?? throw new InvalidOperationException(
+            "RpIdValidator must be configured before creating a WebAuthn client.");
         init
         {
             ArgumentNullException.ThrowIfNull(value);
-            _publicSuffixChecker = value;
+            _rpIdValidator = value;
         }
     }
 
@@ -82,18 +81,4 @@ public sealed record WebAuthnClientOptions
     /// <see cref="WebAuthnClientErrorCode.NotAllowed"/> rather than prompting.
     /// </summary>
     public ICredentialPrompt? CredentialPrompt { get; init; }
-
-    /// <summary>
-    /// Gets the RP IDs that are permitted to bypass the same-origin suffix check. Defaults to empty.
-    /// </summary>
-    /// <exception cref="ArgumentNullException">The value is <see langword="null"/>.</exception>
-    public IReadOnlySet<string> EnterpriseRpIds
-    {
-        get => _enterpriseRpIds;
-        init
-        {
-            ArgumentNullException.ThrowIfNull(value);
-            _enterpriseRpIds = value;
-        }
-    }
 }

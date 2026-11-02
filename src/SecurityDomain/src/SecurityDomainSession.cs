@@ -82,6 +82,9 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     private ISecurityDomainBackend? _backend;
     private bool _hasExplicitFirmwareVersion;
 
+    // Per-session test seam for observing real certificate lifetimes without replacing the loader.
+    internal Action<X509Certificate2>? CertificateLoadedObserver { get; set; }
+
     /// <summary>
     ///     Entry point for interacting with the YubiKey Security Domain application.
     ///     Provides lifecycle management for SCP (Secure Channel Protocol) sessions and will
@@ -305,7 +308,13 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// </summary>
     /// <param name="keyReference">Key reference identifying the certificate store.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A list of certificates where the leaf certificate appears last.</returns>
+    /// <returns>
+    ///     A list of certificates where the leaf certificate appears last. The caller owns each
+    ///     returned certificate and must dispose it when no longer needed, independently of the session.
+    /// </returns>
+    /// <exception cref="CryptographicException">
+    ///     A certificate cannot be loaded. Already-loaded certificates are disposed and no partial bundle is returned.
+    /// </exception>
     public async Task<IReadOnlyList<X509Certificate2>> GetCertificatesAsync(
         KeyReference keyReference,
         CancellationToken cancellationToken = default)
@@ -323,7 +332,26 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
         _logger.LogDebug("Certificates retrieved (KeyReference: {KeyReference})", keyReference);
         using var tlvList = TlvHelper.DecodeList(certificateTlvData);
-        return tlvList.Select(tlv => X509CertificateLoader.LoadCertificate(tlv.AsSpan())).ToList();
+        // Reserve capacity before loading so adding a certificate cannot require another allocation.
+        var certificates = new List<X509Certificate2>(tlvList.Count);
+        try
+        {
+            foreach (var tlv in tlvList)
+            {
+                var certificate = X509CertificateLoader.LoadCertificate(tlv.AsSpan());
+                certificates.Add(certificate);
+                CertificateLoadedObserver?.Invoke(certificate);
+            }
+
+            return certificates;
+        }
+        catch
+        {
+            foreach (var certificate in certificates)
+                certificate.Dispose();
+
+            throw;
+        }
     }
 
     /// <summary>

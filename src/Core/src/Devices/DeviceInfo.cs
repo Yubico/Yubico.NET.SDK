@@ -68,65 +68,50 @@ public readonly record struct DeviceInfo
         ? FirmwareVersion.ToString()
         : VersionQualifier.ToString();
 
+    /// <summary>Decodes device-information TLVs, ignoring unknown tags.</summary>
+    /// <remarks>
+    ///     Absent optional fields use zero or null defaults. A supplied firmware version takes precedence
+    ///     over tag 0x05, but a present firmware field must still have a valid encoding.
+    /// </remarks>
+    /// <exception cref="BadResponseException">A known field is malformed or no firmware version is available.</exception>
     public static DeviceInfo CreateFromTlvs(IReadOnlyCollection<Tlv> tlvs, FirmwareVersion? defaultVersion)
     {
         var tlvDict = tlvs.ToDictionary(tlv => tlv.Tag, tlv => tlv.Value);
 
-        int? serialNumber = null;
-        if (tlvDict.TryGetValue(TAG_SERIAL_NUMBER, out var snBytes))
-            serialNumber = BinaryPrimitives.ReadInt32BigEndian(snBytes.Span);
+        var snBytes = ReadFixedField(tlvDict, TAG_SERIAL_NUMBER, 4);
+        int? serialNumber = snBytes.IsEmpty ? null : BinaryPrimitives.ReadInt32BigEndian(snBytes.Span);
 
-        var isLocked = tlvDict.GetSpan(TAG_CONFIG_LOCKED)[0] == 1;
-        int formFactorTagData = tlvDict.GetSpan(TAG_FORMFACTOR)[0];
+        var isLocked = ReadByte(tlvDict, TAG_CONFIG_LOCKED) == 1;
+        int formFactorTagData = ReadByte(tlvDict, TAG_FORMFACTOR);
         var isFips = (formFactorTagData & 0x80) != 0;
         var isSky = (formFactorTagData & 0x40) != 0;
         var formFactor = (FormFactor)formFactorTagData;
 
-        var resetBlocked = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_RESET_BLOCKED));
-        var usbEnabled = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_USB_ENABLED));
-        var usbSupported = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_USB_SUPPORTED));
-        var nfcEnabled = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_NFC_ENABLED));
-        var nfcSupported = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_NFC_SUPPORTED));
-        var fipsCapabilities = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_FIPS_CAPABLE));
-        var fipsApprovedCapabilities = CapabilityMapper.FromApp(tlvDict.GetMemory(TAG_FIPS_APPROVED));
+        var resetBlocked = ReadCapabilities(tlvDict, TAG_RESET_BLOCKED);
+        var usbEnabled = ReadCapabilities(tlvDict, TAG_USB_ENABLED);
+        var usbSupported = ReadCapabilities(tlvDict, TAG_USB_SUPPORTED);
+        var nfcEnabled = ReadCapabilities(tlvDict, TAG_NFC_ENABLED);
+        var nfcSupported = ReadCapabilities(tlvDict, TAG_NFC_SUPPORTED);
+        var fipsCapabilities = ReadCapabilities(tlvDict, TAG_FIPS_CAPABLE);
+        var fipsApprovedCapabilities = ReadCapabilities(tlvDict, TAG_FIPS_APPROVED);
 
-        var isNfcRestricted = tlvDict.TryGetValue(TAG_NFC_RESTRICTED, out var nfcRestrictedBytes) &&
-                              nfcRestrictedBytes.Span[0] == 1;
-        var hasPinComplexity = tlvDict.TryGetValue(TAG_PIN_COMPLEXITY, out var hasPinComplexityBytes) &&
-                               hasPinComplexityBytes.Span[0] == 1;
+        var isNfcRestricted = ReadByte(tlvDict, TAG_NFC_RESTRICTED) == 1;
+        var hasPinComplexity = ReadByte(tlvDict, TAG_PIN_COMPLEXITY) == 1;
 
         string? partNumber = null;
         if (tlvDict.TryGetSpan(TAG_PART_NUMBER, out var partNumberBytes))
             partNumber = GetPartNumber(partNumberBytes);
 
-        var autoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tlvDict.GetSpan(TAG_AUTO_EJECT_TIMEOUT));
-        var challengeResponseTimeout = tlvDict.GetMemory(TAG_CHALLENGE_RESPONSE_TIMEOUT);
-        var deviceFlags = (DeviceFlags)tlvDict.GetSpan(TAG_DEVICE_FLAGS)[0];
+        var autoEjectBytes = ReadFixedField(tlvDict, TAG_AUTO_EJECT_TIMEOUT, 2);
+        var autoEjectTimeout = autoEjectBytes.IsEmpty ? (ushort)0 : BinaryPrimitives.ReadUInt16BigEndian(autoEjectBytes.Span);
+        var challengeResponseTimeout = ReadFixedField(tlvDict, TAG_CHALLENGE_RESPONSE_TIMEOUT, 1);
+        var deviceFlags = (DeviceFlags)ReadByte(tlvDict, TAG_DEVICE_FLAGS);
 
-        FirmwareVersion? fpsVersion = null;
-        if (tlvDict.TryGetSpan(TAG_FPS_VERSION, out var fpsVersionBytes) &&
-            !fpsVersionBytes.SequenceEqual(new byte[3]))
-        {
-            var fpsVersionMajor = fpsVersionBytes[0];
-            var fpsVersionMinor = fpsVersionBytes[1];
-            var fpsVersionMPatch = fpsVersionBytes[2];
-            fpsVersion = new FirmwareVersion(fpsVersionMajor, fpsVersionMinor, fpsVersionMPatch);
-        }
+        var fpsVersion = ReadComponentVersion(tlvDict, TAG_FPS_VERSION);
+        var stmVersion = ReadComponentVersion(tlvDict, TAG_STM_VERSION);
 
-        FirmwareVersion? stmVersion = null;
-        if (tlvDict.TryGetSpan(TAG_STM_VERSION, out var stmVersionBytes) &&
-            !stmVersionBytes.SequenceEqual(new byte[3]))
-        {
-            var stmVersionMajor = stmVersionBytes[0];
-            var stmVersionMinor = stmVersionBytes[1];
-            var stmVersionMPatch = stmVersionBytes[2];
-            stmVersion = new FirmwareVersion(stmVersionMajor, stmVersionMinor, stmVersionMPatch);
-        }
-
-        var firmwareVersionMajor = tlvDict.GetSpan(TAG_FIRMWARE_VERSION)[0];
-        var firmwareVersionMinor = tlvDict.GetSpan(TAG_FIRMWARE_VERSION)[1];
-        var firmwareVersionMPatch = tlvDict.GetSpan(TAG_FIRMWARE_VERSION)[2];
-        defaultVersion ??= new FirmwareVersion(firmwareVersionMajor, firmwareVersionMinor, firmwareVersionMPatch);
+        var reportedVersion = ReadFirmwareVersion(tlvDict, TAG_FIRMWARE_VERSION);
+        defaultVersion ??= reportedVersion ?? throw new BadResponseException($"Missing device info tag 0x{TAG_FIRMWARE_VERSION:X2}.");
         var (firmwareVersion, versionQualifier) = DetermineFirmwareVersion(tlvDict, defaultVersion);
 
         return new DeviceInfo
@@ -156,6 +141,46 @@ public readonly record struct DeviceInfo
         };
     }
 
+    // Fixed widths follow the YubiKey configuration reference (serial/version/timeout/scalars).
+    // Absence is not a malformed value: older firmware and non-NFC devices omit optional metadata.
+    private static ReadOnlyMemory<byte> ReadFixedField(
+        IDictionary<int, ReadOnlyMemory<byte>> data, int tag, int expectedLength)
+    {
+        if (!data.TryGetValue(tag, out var value))
+            return default;
+        if (value.Length != expectedLength)
+            throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length {value.Length}; expected {expectedLength}.");
+        return value;
+    }
+
+    private static byte ReadByte(IDictionary<int, ReadOnlyMemory<byte>> data, int tag)
+    {
+        var value = ReadFixedField(data, tag, 1);
+        return value.IsEmpty ? (byte)0 : value.Span[0];
+    }
+
+    private static FirmwareVersion? ReadFirmwareVersion(IDictionary<int, ReadOnlyMemory<byte>> data, int tag)
+    {
+        var value = ReadFixedField(data, tag, 3);
+        return value.IsEmpty ? null : FirmwareVersion.FromBytes(value.Span);
+    }
+
+    private static FirmwareVersion? ReadComponentVersion(IDictionary<int, ReadOnlyMemory<byte>> data, int tag)
+    {
+        var version = ReadFirmwareVersion(data, tag);
+        return version is { Major: 0, Minor: 0, Patch: 0 } ? null : version;
+    }
+
+    private static DeviceCapabilities ReadCapabilities(IDictionary<int, ReadOnlyMemory<byte>> data, int tag)
+    {
+        if (!data.TryGetValue(tag, out var value))
+            return DeviceCapabilities.None;
+        // Siblings accept variable-width capability integers; do not impose a two-byte maximum.
+        if (value.IsEmpty)
+            throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length 0; expected a capability value.");
+        return CapabilityMapper.FromApp(value);
+    }
+
     private static (FirmwareVersion, VersionQualifier) DetermineFirmwareVersion(
         Dictionary<int, ReadOnlyMemory<byte>> dict,
         FirmwareVersion defaultFirmwareVersion)
@@ -164,24 +189,34 @@ public readonly record struct DeviceInfo
             return (defaultFirmwareVersion,
                 new VersionQualifier(defaultFirmwareVersion, VersionQualifierType.Final, 0));
 
-        if (versionQualifierBytes.Length != 0x0E)
-            throw new ArgumentException("Invalid data length.");
-
         const byte tagVersion = 0x01;
         const byte tagType = 0x02;
         const byte tagIteration = 0x03;
 
-        var data = TlvHelper.DecodeDictionary(versionQualifierBytes.Span);
-        if (!data.TryGetSpan(tagVersion, out var firmwareVersionBytes))
-            throw new ArgumentException("Missing TLV field: TAG_VERSION.");
-        if (!data.TryGetSpan(tagType, out var versionTypeBytes))
-            throw new ArgumentException("Missing TLV field: TAG_TYPE.");
-        if (!data.TryGetSpan(tagIteration, out var iterationBytes))
-            throw new ArgumentException("Missing TLV field: TAG_ITERATION.");
+        IDictionary<int, ReadOnlyMemory<byte>> data;
+        try
+        {
+            // The container is extensible. Validate its children, not the original 14-byte total.
+            data = TlvHelper.DecodeDictionary(versionQualifierBytes.Span);
+        }
+        catch (ArgumentException)
+        {
+            throw new BadResponseException($"Invalid device info tag 0x{TAG_VERSION_QUALIFIER:X2} length {versionQualifierBytes.Length}; malformed qualifier TLVs.");
+        }
 
-        var qualifierVersion = FirmwareVersion.FromBytes(firmwareVersionBytes);
-        var versionType = (VersionQualifierType)versionTypeBytes[0];
-        long iteration = BinaryPrimitives.ReadUInt32BigEndian(iterationBytes);
+        if (versionQualifierBytes.IsEmpty)
+            throw new BadResponseException($"Invalid device info tag 0x{TAG_VERSION_QUALIFIER:X2} length 0; expected qualifier TLVs.");
+        if (!data.ContainsKey(tagVersion))
+            throw new BadResponseException($"Missing version qualifier tag 0x{tagVersion:X2}.");
+        if (!data.ContainsKey(tagType))
+            throw new BadResponseException($"Missing version qualifier tag 0x{tagType:X2}.");
+        if (!data.TryGetValue(tagIteration, out var iterationBytes))
+            throw new BadResponseException($"Missing version qualifier tag 0x{tagIteration:X2}.");
+
+        var qualifierVersion = ReadFirmwareVersion(data, tagVersion)
+            ?? throw new BadResponseException($"Missing version qualifier tag 0x{tagVersion:X2}.");
+        var versionType = (VersionQualifierType)ReadByte(data, tagType);
+        long iteration = ReadQualifierIteration(iterationBytes.Span, tagIteration);
 
         var versionQualifier = new VersionQualifier(
             qualifierVersion,
@@ -194,6 +229,23 @@ public readonly record struct DeviceInfo
             : versionQualifier.FirmwareVersion;
 
         return (finalVersion, versionQualifier);
+    }
+
+    private static uint ReadQualifierIteration(ReadOnlySpan<byte> value, int tag)
+    {
+        if (value.IsEmpty)
+            throw new BadResponseException($"Invalid version qualifier tag 0x{tag:X2} length 0; expected an iteration value.");
+
+        // Python uses an integer, Rust fixtures also encode this in one byte. Accept leading-zero
+        // extensions while retaining VersionQualifier's existing unsigned 32-bit numeric range.
+        uint iteration = 0;
+        foreach (var b in value)
+        {
+            if (iteration > (uint.MaxValue >> 8))
+                throw new BadResponseException($"Invalid version qualifier tag 0x{tag:X2} length {value.Length}; iteration exceeds the supported numeric range.");
+            iteration = (iteration << 8) | b;
+        }
+        return iteration;
     }
 
     private static string? GetPartNumber(ReadOnlySpan<byte> valueSpan)

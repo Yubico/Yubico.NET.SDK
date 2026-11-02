@@ -50,8 +50,9 @@ public sealed partial class OpenPgpSession
                 .ConfigureAwait(false);
             return certData.Length > 0 ? X509CertificateLoader.LoadCertificate(certData.Span) : null;
         }
-        catch (ApduException)
+        catch (ApduException ex) when (ex.SW is SWConstants.DataNotFound)
         {
+            // OpenPGP card v3.4.1 section 7.9: referenced data or DO not found (0x6A88).
             return null;
         }
     }

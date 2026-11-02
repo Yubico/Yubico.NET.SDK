@@ -54,7 +54,13 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="keyReference">Key reference identifying the certificate store.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A list of certificates where the leaf certificate appears last.</returns>
+    /// <returns>
+    ///     A list of certificates where the leaf certificate appears last. The caller owns each
+    ///     returned certificate and must dispose it when no longer needed, independently of the session.
+    /// </returns>
+    /// <exception cref="System.Security.Cryptography.CryptographicException">
+    ///     A certificate cannot be loaded. Already-loaded certificates are disposed and no partial bundle is returned.
+    /// </exception>
     Task<IReadOnlyList<X509Certificate2>> GetCertificatesAsync(
         KeyReference keyReference,
         CancellationToken cancellationToken = default);

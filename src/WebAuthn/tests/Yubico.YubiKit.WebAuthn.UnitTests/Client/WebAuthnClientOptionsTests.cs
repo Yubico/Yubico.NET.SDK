@@ -20,7 +20,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
 /// <summary>
 /// <see cref="WebAuthnClientOptions"/> carries the client's ceremony-independent configuration.
-/// A null public suffix checker or bad prompt-attempt limit is rejected when the options are built,
+/// A null RP validator or bad prompt-attempt limit is rejected when the options are built,
 /// not part-way through a ceremony that has already touched the authenticator.
 /// </summary>
 public class WebAuthnClientOptionsTests
@@ -34,7 +34,7 @@ public class WebAuthnClientOptionsTests
 
     [Fact]
     public void MaxPromptAttempts_DefaultsToThree() =>
-        Assert.Equal(3, new WebAuthnClientOptions { PublicSuffixChecker = _ => false }.MaxPromptAttempts);
+        Assert.Equal(3, new WebAuthnClientOptions { RpIdValidator = (_, _) => false }.MaxPromptAttempts);
 
     [Theory]
     [InlineData(0)]
@@ -42,34 +42,22 @@ public class WebAuthnClientOptionsTests
     [InlineData(int.MinValue)]
     public void MaxPromptAttempts_NonPositive_RejectedAtConstruction(int attempts) =>
         Assert.Throws<ArgumentOutOfRangeException>(
-            () => new WebAuthnClientOptions { PublicSuffixChecker = _ => false, MaxPromptAttempts = attempts });
+            () => new WebAuthnClientOptions { RpIdValidator = (_, _) => false, MaxPromptAttempts = attempts });
 
     [Fact]
-    public void PublicSuffixChecker_Null_RejectedAtConstruction() =>
+    public void RpIdValidator_Null_RejectedAtConstruction() =>
         Assert.Throws<ArgumentNullException>(
-            () => new WebAuthnClientOptions { PublicSuffixChecker = null! });
+            () => new WebAuthnClientOptions { RpIdValidator = null! });
 
     [Fact]
     public void CredentialPrompt_DefaultsToNull_AndCanCarryAPrompt()
     {
-        Assert.Null(new WebAuthnClientOptions { PublicSuffixChecker = _ => false }.CredentialPrompt);
+        Assert.Null(new WebAuthnClientOptions { RpIdValidator = (_, _) => false }.CredentialPrompt);
 
         var prompt = new NullPrompt();
         Assert.Same(
             prompt,
-            new WebAuthnClientOptions { PublicSuffixChecker = _ => false, CredentialPrompt = prompt }.CredentialPrompt);
+            new WebAuthnClientOptions { RpIdValidator = (_, _) => false, CredentialPrompt = prompt }.CredentialPrompt);
     }
 
-    [Fact]
-    public void EnterpriseRpIds_DefaultsToEmpty_AndCanCarryIds()
-    {
-        Assert.Empty(new WebAuthnClientOptions { PublicSuffixChecker = _ => false }.EnterpriseRpIds);
-
-        var options = new WebAuthnClientOptions
-        {
-            PublicSuffixChecker = _ => false,
-            EnterpriseRpIds = new HashSet<string> { "partner.test" }
-        };
-        Assert.Contains("partner.test", options.EnterpriseRpIds);
-    }
 }

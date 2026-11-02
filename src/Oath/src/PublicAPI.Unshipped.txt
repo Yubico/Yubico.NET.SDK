@@ -41,7 +41,7 @@ Yubico.YubiKit.Oath.CredentialData.Period.get -> int
 Yubico.YubiKit.Oath.CredentialData.Period.init -> void
 Yubico.YubiKit.Oath.CredentialData.RequireTouch.get -> bool
 Yubico.YubiKit.Oath.CredentialData.RequireTouch.init -> void
-Yubico.YubiKit.Oath.CredentialData.Secret.get -> byte[]!
+Yubico.YubiKit.Oath.CredentialData.Secret.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Oath.CredentialData.Secret.init -> void
 Yubico.YubiKit.Oath.Credentials.OathCredentialOptions
 Yubico.YubiKit.Oath.IOathSession

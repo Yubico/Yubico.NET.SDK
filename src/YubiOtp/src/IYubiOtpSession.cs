@@ -210,17 +210,25 @@ public interface IYubiOtpSession : IApplicationSession
     /// <remarks>
     /// <para>
     /// The YubiKey always receives 64 bytes. A shorter challenge is padded with a byte that differs
-    /// from its last byte (0x01 after a trailing 0x00, otherwise 0x00), the same encoding ykman uses.
+    /// from its last byte (0x01 after a trailing 0x00, otherwise 0x00, including empty input), the same
+    /// encoding ykman uses. A challenge of exactly 64 bytes is sent unchanged.
     /// </para>
     /// <para>
     /// What the YubiKey then hashes depends on how the slot was programmed. In short-challenge mode
     /// (<see cref="HmacSha1SlotConfiguration.UseShortChallenge"/>, the default, and the only mode ykman
     /// programs) the final byte of the 64 is the end-of-input marker: the YubiKey discards it together
-    /// with the run of equal bytes before it, so the HMAC covers exactly the challenge given, at most
-    /// 63 bytes. A 64-byte challenge to such a slot therefore loses at least its last byte, and a
-    /// challenge whose bytes are all equal (including an empty one, sent as 64 × 0x00) is hashed as a
-    /// single byte of that value. In fixed mode (<c>UseShortChallenge(false)</c>) all 64 bytes are
-    /// hashed as sent; pass exactly 64 bytes, padded as your verifier expects.
+    /// with the run of equal bytes before it, retaining at least one byte. Inputs of 1 to 63 bytes
+    /// are hashed exactly as given. A 64-byte challenge to such a slot loses at least its last byte.
+    /// An all-equal transmitted payload is hashed as a single byte of that value; empty input, sent
+    /// as 64 × 0x00, therefore produces HMAC of one 0x00, not HMAC of an empty message. In fixed mode
+    /// (<c>UseShortChallenge(false)</c>) all 64 bytes are hashed as sent; pass exactly 64 bytes, padded
+    /// as your verifier expects.
+    /// </para>
+    /// <para>
+    /// The session does not know or enforce the slot's challenge mode. Use one challenge-length
+    /// convention per slot and agree with your verifier. A short challenge and its explicitly padded
+    /// 64-byte form produce identical requests and responses in either mode: for example, [0x41] and
+    /// [0x41, 0x00 × 63], or [0x41, 0x00] and [0x41, 0x00, 0x01 × 62].
     /// </para>
     /// </remarks>
     /// <param name="slot">The slot configured for HMAC-SHA1.</param>

@@ -161,6 +161,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         }
     }
 
+    /// <inheritdoc cref="IManagementSession.ResetDeviceAsync" />
     public Task ResetDeviceAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();

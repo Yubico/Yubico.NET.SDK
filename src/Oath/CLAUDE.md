@@ -67,6 +67,16 @@ parsing would reject.
 2. **SDK storage padding**: Append zeroes to secrets shorter than 14 bytes. This threshold is not an HMAC minimum key length or entropy requirement.
 3. **TAG_KEY format**: `[type_byte][digits_byte][secret...]` where type_byte = `oath_type | hash_algorithm`
 
+### Credential secret ownership
+
+`CredentialData.Secret` initialization copies a `ReadOnlyMemory<byte>` input into private owned storage. Its getter
+borrows the same read-only view without allocating per read. Callers clear their original input buffers; disposal
+clears private storage and existing views, not independent copies. Do not dispose concurrently with consumers.
+
+`GetProcessedSecret` always returns independent owned storage, including the 14..block-size range that needs neither
+padding nor hashing. PUT clears only that temporary and its payloads, never the credential seed, so Locked → VALIDATE
+→ PUT can reuse the object. `ParseUri` and CLI decoders clear temporary decoded bytes on all relevant paths.
+
 ### Access Key Derivation
 
 The SDK derives access keys on the host using

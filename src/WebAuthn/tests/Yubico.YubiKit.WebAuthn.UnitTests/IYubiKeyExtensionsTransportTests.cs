@@ -40,8 +40,7 @@ public class IYubiKeyExtensionsTransportTests
         }
     }
 
-    private static bool NeverPublicSuffix(string domain) => false;
-    private static WebAuthnClientOptions ClientOptions => new() { PublicSuffixChecker = NeverPublicSuffix };
+    private static WebAuthnClientOptions ClientOptions => new() { RpIdValidator = (_, rpId) => rpId == "example.com" };
 
     [Fact]
     public async Task CreateWebAuthnClientAsync_NullClientOptions_ThrowsBeforeConnection()
@@ -55,7 +54,7 @@ public class IYubiKeyExtensionsTransportTests
     }
 
     [Fact]
-    public async Task CreateWebAuthnClientAsync_UnconfiguredPublicSuffixChecker_ThrowsBeforeConnection()
+    public async Task CreateWebAuthnClientAsync_UnconfiguredRpIdValidator_ThrowsBeforeConnection()
     {
         var device = new SelectionProbeYubiKey(ConnectionType.HidFido);
         WebAuthnClientOptions clientOptions = Activator.CreateInstance<WebAuthnClientOptions>();
@@ -63,7 +62,7 @@ public class IYubiKeyExtensionsTransportTests
         InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => device.CreateWebAuthnClientAsync(Origin, clientOptions, cancellationToken: Ct));
 
-        Assert.Contains("PublicSuffixChecker must be configured", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("RpIdValidator must be configured", exception.Message, StringComparison.Ordinal);
         Assert.Null(device.RequestedConnection);
     }
 

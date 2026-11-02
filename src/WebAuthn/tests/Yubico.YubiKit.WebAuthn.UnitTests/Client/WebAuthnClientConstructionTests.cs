@@ -44,7 +44,7 @@ public class WebAuthnClientConstructionTests
         var client = new WebAuthnClient(
             ctap2Session,
             ParseOrigin("https://example.com"),
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
 
         var options = new PublicKeyCredentialCreationOptions
         {
@@ -72,7 +72,7 @@ public class WebAuthnClientConstructionTests
         var client = new WebAuthnClient(
             ctap2Session,
             ParseOrigin("https://example.com"),
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
 
         await client.DisposeAsync();
 
@@ -88,7 +88,7 @@ public class WebAuthnClientConstructionTests
             () => new WebAuthnClient(
                 ctap2Session,
                 origin: null!,
-                new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" }));
+                new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" }));
 
         await ctap2Session.DidNotReceive().DisposeAsync();
     }
@@ -108,13 +108,13 @@ public class WebAuthnClientConstructionTests
     }
 
     [Fact]
-    public async Task GetAssertion_WithCtap2SessionConstructor_RejectsPublicSuffixRpId()
+    public async Task GetAssertion_WithCtap2SessionConstructor_HonorsApplicationRejection()
     {
         var ctap2Session = Substitute.For<ICtap2Session>();
         var client = new WebAuthnClient(
             ctap2Session,
             ParseOrigin("https://login.example.com"),
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
 
         var options = new PublicKeyCredentialRequestOptions
         {
@@ -125,21 +125,21 @@ public class WebAuthnClientConstructionTests
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(
             () => client.GetAssertionAsync(options, pinBytes: null, TestContext.Current.CancellationToken));
 
-        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
+        Assert.Equal(WebAuthnClientErrorCode.Security, error.Code);
         await ctap2Session.DidNotReceive().GetInfoAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Ceremonies_WithReusedOptions_InvokeCheckerAndRejectBeforeBackendCalls()
+    public async Task Ceremonies_WithReusedOptions_InvokeValidatorAndRejectBeforeBackendCalls()
     {
         var backend = Substitute.For<IWebAuthnBackend>();
         var checkedDomains = new List<string>();
         var clientOptions = new WebAuthnClientOptions
         {
-            PublicSuffixChecker = domain =>
+            RpIdValidator = (_, rpId) =>
             {
-                checkedDomains.Add(domain);
-                return domain == "com";
+                checkedDomains.Add(rpId);
+                return false;
             }
         };
         await using var client = new WebAuthnClient(
@@ -165,8 +165,8 @@ public class WebAuthnClientConstructionTests
         WebAuthnClientError authenticationError = await Assert.ThrowsAsync<WebAuthnClientError>(
             () => client.GetAssertionAsync(authenticationOptions, cancellationToken: TestContext.Current.CancellationToken));
 
-        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, registrationError.Code);
-        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, authenticationError.Code);
+        Assert.Equal(WebAuthnClientErrorCode.Security, registrationError.Code);
+        Assert.Equal(WebAuthnClientErrorCode.Security, authenticationError.Code);
         Assert.Equal(["com", "com"], checkedDomains);
         await backend.DidNotReceive().GetCachedInfoAsync(Arg.Any<CancellationToken>());
         await backend.DidNotReceive().MakeCredentialAsync(
@@ -178,7 +178,7 @@ public class WebAuthnClientConstructionTests
     }
 
     [Fact]
-    public async Task MakeCredential_WithCtap2SessionConstructor_AllowsEnterpriseRpId()
+    public async Task MakeCredential_WithCtap2SessionConstructor_HonorsApplicationAuthorization()
     {
         var ctap2Session = Substitute.For<ICtap2Session>();
         ctap2Session.GetInfoAsync(Arg.Any<CancellationToken>())
@@ -197,8 +197,7 @@ public class WebAuthnClientConstructionTests
             ParseOrigin("https://example.com"),
             new WebAuthnClientOptions
             {
-                PublicSuffixChecker = domain => domain == "com" || domain == "test",
-                EnterpriseRpIds = new HashSet<string> { "partner.test" }
+                RpIdValidator = (_, rpId) => rpId == "partner.test"
             });
 
         var options = new PublicKeyCredentialCreationOptions

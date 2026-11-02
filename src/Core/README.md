@@ -54,6 +54,67 @@ Discovery needs no PIN, touch, or open session. Later snippets assume these dire
 
 ## Common operations
 
+### PC/SC sharing policy and migration
+
+Built-in PC/SC connections default to strict `SmartCardSharing.Exclusive`. If another smart-card client
+holds the card, opening fails with `ConnectionInUseException`; it does not retry shared access. Close
+the competing client before retrying, or explicitly accept a coexistence policy. This replaces the former
+`ExclusiveWithSharedFallback` default and can affect applications running alongside gpg-agent, browsers,
+or OS smart-card services.
+
+If discovery ran during contention, a PC/SC-only key may be cached with a `null` `SerialNumber` because
+its metadata could not be read. Closing the competing client does not itself refresh that cache:
+`FindFirstAsync` and `FindFirstOrDefaultAsync` still query cached results. Force a scan before retrying
+a serial predicate:
+
+```csharp
+// After closing the competing client; expectedSerialNumber is the serial you want to find.
+await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken: cancellationToken);
+IYubiKey? matchingDevice = await YubiKeyManager.FindFirstOrDefaultAsync(
+    key => key.SerialNumber == expectedSerialNumber, cancellationToken);
+```
+
+A forced scan retries failed metadata reads; it does not guarantee a serial if the key remains busy,
+unavailable, or does not report one. With monitoring active, a later successful scan can also refresh
+the metadata.
+
+Without topology evidence, contention on multiple same-model keys can leave PC/SC interfaces separate
+from serial-bearing HID interfaces. A serial match may then lack SmartCard support; a PIV-opening
+`NotSupportedException` can mean incomplete discovery, not that the hardware lacks PIV. After closing
+the competing clients, force a scan as above and reacquire the device by serial before retrying; check
+`SupportsConnection(ConnectionType.SmartCard)`. Previously returned `IYubiKey` objects have immutable
+`AvailableConnections` and do not gain the remerged interfaces.
+
+To retain the former fallback behavior for device-manager connections, configure once at startup,
+**before discovery or monitoring**:
+
+```csharp
+SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;
+IYubiKey device = await YubiKeyManager.FindFirstAsync();
+```
+
+Use `SmartCardSharing.Shared` instead to open shared without first attempting exclusive access, or select
+a policy for one raw factory:
+
+```csharp
+// Coordinate discovery/monitoring and all other connections to this key before opening directly.
+var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);
+await using ISmartCardConnection connection = await factory.CreateAsync(reader, cancellationToken);
+```
+
+Direct `factory.CreateAsync` opens do not acquire the physical-device ownership guard used by
+`IYubiKey.ConnectAsync`. Callers must coordinate discovery (including background monitoring) and other
+connections for the full direct connection lifetime. With shared access, a discovery metadata read or
+another handle can select a different applet and disturb the active session. Prefer
+`device.ConnectAsync<ISmartCardConnection>()` for SDK-managed ownership; the selected PC/SC sharing
+policy still determines whether other processes can open the card.
+
+Factories snapshot `DefaultSharing` when constructed; changing it does not reconfigure existing factories
+or connections. Shared and fallback policies permit other PC/SC handles to use card-wide security state,
+including verified PIV PIN state. `connection.IsExclusive` reports the acquired mode. All built-in modes
+still request `SCARD_UNPOWER_CARD` on release. PC/SC exclusivity is not an isolation guarantee for HID or
+custom transports; no-hardware policy tests do not independently prove physical card isolation.
+
 ### Open an application session
 
 Application sessions are the intended path. Each module adds a `Create<Application>SessionAsync`

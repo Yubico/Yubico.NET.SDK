@@ -52,7 +52,7 @@ public sealed class WebAuthnClientPinRetryTests
         _client = new WebAuthnClient(
             _mockBackend,
             _origin,
-            new WebAuthnClientOptions { PublicSuffixChecker = domain => domain == "com" });
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
     }
 
     [Fact(Timeout = 5000)]

@@ -21,11 +21,14 @@ namespace Yubico.YubiKit.Oath;
 ///     Holds the data needed to create an OATH credential on a YubiKey.
 /// </summary>
 /// <remarks>
-///     Properties can be assigned only during initialization. The <see cref="Secret" /> array remains
-///     mutable and is cleared by <see cref="Dispose" />.
+///     Properties can be assigned only during initialization. This instance owns a copy of the supplied
+///     secret. Dispose it after all operations using it have completed; do not dispose concurrently with
+///     an operation or a consumer of its secret view.
 /// </remarks>
 public sealed class CredentialData : IDisposable
 {
+    private readonly byte[] _secret = [];
+
     /// <summary>
     ///     Gets the account name, assigned during initialization.
     /// </summary>
@@ -42,14 +45,20 @@ public sealed class CredentialData : IDisposable
     public required OathHashAlgorithm HashAlgorithm { get; init; }
 
     /// <summary>
-    ///     Gets the shared secret key, assigned during initialization.
+    ///     Gets a borrowed read-only view of the owned shared secret key, or initializes it by copying input.
     /// </summary>
     /// <remarks>
-    ///     Direct initialization retains the supplied array without copying it, and this property
-    ///     exposes that same array. Disposing this instance clears it, including any caller-held alias.
-    ///     <see cref="ParseUri(string)" /> instead creates a new array from the encoded secret.
+    ///     Initialization copies the supplied bytes; the caller still owns and must clear the input buffer.
+    ///     Reading this property does not allocate or transfer ownership. The view is valid only until this
+    ///     instance is disposed, which clears its backing storage and all existing views. Do not modify the
+    ///     backing storage through array-extraction APIs. If an independent copy is needed, the caller owns
+    ///     that copy and must clear it separately.
     /// </remarks>
-    public required byte[] Secret { get; init; }
+    public required ReadOnlyMemory<byte> Secret
+    {
+        get => _secret;
+        init => _secret = value.ToArray();
+    }
 
     /// <summary>
     ///     Gets the number of digits in the OTP code, assigned during initialization. Defaults to 6.
@@ -84,7 +93,8 @@ public sealed class CredentialData : IDisposable
     ///     An otpauth URI as defined by the Google Authenticator Key URI Format,
     ///     e.g., <c>otpauth://totp/GitHub:user@example.com?secret=JBSWY3DPEHPK3PXP&amp;issuer=GitHub</c>.
     /// </param>
-    /// <returns>A populated <see cref="CredentialData" /> instance with a newly decoded secret array.</returns>
+    /// <returns>A populated <see cref="CredentialData" /> instance whose owned secret must be disposed.</returns>
+    /// <remarks>The URI string contains secret material and cannot be cleared by this method.</remarks>
     /// <exception cref="ArgumentException">
     ///     Thrown when the URI scheme is not <c>otpauth</c>, the OATH type is missing or invalid,
     ///     or the <c>secret</c> query parameter is missing.
@@ -99,7 +109,11 @@ public sealed class CredentialData : IDisposable
     ///     Whether individual calculations require physical touch. Setting this to <see langword="true" />
     ///     requires YubiKey firmware 4.2.4 or later.
     /// </param>
-    /// <returns>A populated <see cref="CredentialData" /> instance with a newly decoded secret array.</returns>
+    /// <returns>A populated <see cref="CredentialData" /> instance that owns its decoded secret.</returns>
+    /// <remarks>
+    ///     Dispose the returned instance after use. Decoded temporary bytes are cleared on success and failure;
+    ///     the URI string and encoded secret strings cannot be cleared by this method.
+    /// </remarks>
     public static CredentialData ParseUri(string uri, bool requireTouch)
     {
         var parsed = new Uri(uri.Trim());
@@ -157,8 +171,6 @@ public sealed class CredentialData : IDisposable
             throw new ArgumentException("Missing 'secret' parameter in URI.", nameof(uri));
         }
 
-        byte[] secret = ParseBase32Key(secretParam);
-
         string? algorithmParam = queryParams["algorithm"];
         OathHashAlgorithm hashAlgorithm = (algorithmParam?.ToUpperInvariant()) switch
         {
@@ -189,18 +201,26 @@ public sealed class CredentialData : IDisposable
             ? int.Parse(counterParam, System.Globalization.CultureInfo.InvariantCulture)
             : OathConstants.DefaultImf;
 
-        return new CredentialData
+        byte[] secret = ParseBase32Key(secretParam);
+        try
         {
-            Name = name,
-            OathType = oathType,
-            HashAlgorithm = hashAlgorithm,
-            Secret = secret,
-            Digits = digits,
-            Period = period,
-            Counter = counter,
-            Issuer = issuer,
-            RequireTouch = requireTouch
-        };
+            return new CredentialData
+            {
+                Name = name,
+                OathType = oathType,
+                HashAlgorithm = hashAlgorithm,
+                Secret = secret,
+                Digits = digits,
+                Period = period,
+                Counter = counter,
+                Issuer = issuer,
+                RequireTouch = requireTouch
+            };
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(secret);
+        }
     }
 
     /// <summary>
@@ -210,24 +230,19 @@ public sealed class CredentialData : IDisposable
     public byte[] GetId() => Credential.FormatCredentialId(Issuer, Name, OathType, Period);
 
     /// <summary>
-    ///     Clears the <see cref="Secret" /> array. Does not clear the input URI or encoded secret strings.
+    ///     Clears the owned shared secret, including any previously borrowed views. Safe to call repeatedly.
     /// </summary>
-    public void Dispose()
-    {
-        if (Secret is not null)
-        {
-            CryptographicOperations.ZeroMemory(Secret);
-        }
-    }
+    /// <remarks>Does not clear caller-owned input buffers or independently allocated copies.</remarks>
+    public void Dispose() => CryptographicOperations.ZeroMemory(_secret);
 
     /// <summary>
     ///     Shortens an HMAC key per RFC 2104: if the key is longer than the hash
     ///     algorithm's block size, it is hashed to the digest size.
     /// </summary>
-    /// <param name="key">The original key bytes.</param>
+    /// <param name="key">The borrowed original key bytes.</param>
     /// <param name="algorithm">The hash algorithm to use.</param>
-    /// <returns>The shortened key, or the original key if already within block size.</returns>
-    internal static byte[] HmacShortenKey(byte[] key, OathHashAlgorithm algorithm)
+    /// <returns>An independently owned copy or hash, which the caller must clear.</returns>
+    internal static byte[] HmacShortenKey(ReadOnlySpan<byte> key, OathHashAlgorithm algorithm)
     {
         int blockSize = algorithm switch
         {
@@ -239,7 +254,7 @@ public sealed class CredentialData : IDisposable
 
         if (key.Length <= blockSize)
         {
-            return key;
+            return key.ToArray();
         }
 
         return algorithm switch
@@ -272,21 +287,23 @@ public sealed class CredentialData : IDisposable
     ///     Processes the secret for storage: shortens keys exceeding the hash block size per RFC 2104,
     ///     then applies the SDK's 14-byte storage padding.
     /// </summary>
-    /// <returns>The processed secret ready for the PUT command.</returns>
+    /// <returns>An independently owned processed secret ready for PUT, which the caller must clear.</returns>
     internal byte[] GetProcessedSecret()
     {
-        byte[] shortened = HmacShortenKey(Secret, HashAlgorithm);
-        byte[] padded = PadSecret(shortened);
+        byte[] shortened = HmacShortenKey(_secret, HashAlgorithm);
+        if (shortened.Length >= OathConstants.HmacMinimumKeySize)
+        {
+            return shortened;
+        }
 
-        // If HmacShortenKey produced a new array (key was longer than block size)
-        // and PadSecret produced yet another array (shortened was under the storage-padding threshold),
-        // the intermediate must be zeroed to avoid leaking key material.
-        if (!ReferenceEquals(shortened, Secret) && !ReferenceEquals(shortened, padded))
+        try
+        {
+            return PadSecret(shortened);
+        }
+        finally
         {
             CryptographicOperations.ZeroMemory(shortened);
         }
-
-        return padded;
     }
 
     /// <summary>
@@ -327,25 +344,33 @@ public sealed class CredentialData : IDisposable
         int bitsInBuffer = 0;
         int index = 0;
 
-        foreach (char c in base32)
+        try
         {
-            int val = alphabet.IndexOf(c);
-            if (val < 0)
+            foreach (char c in base32)
             {
-                throw new ArgumentException($"Invalid Base32 character: '{c}'.");
+                int val = alphabet.IndexOf(c);
+                if (val < 0)
+                {
+                    throw new ArgumentException($"Invalid Base32 character: '{c}'.");
+                }
+
+                buffer = (buffer << 5) | val;
+                bitsInBuffer += 5;
+
+                if (bitsInBuffer >= 8)
+                {
+                    bitsInBuffer -= 8;
+                    result[index++] = (byte)(buffer >> bitsInBuffer);
+                    buffer &= (1 << bitsInBuffer) - 1;
+                }
             }
 
-            buffer = (buffer << 5) | val;
-            bitsInBuffer += 5;
-
-            if (bitsInBuffer >= 8)
-            {
-                bitsInBuffer -= 8;
-                result[index++] = (byte)(buffer >> bitsInBuffer);
-                buffer &= (1 << bitsInBuffer) - 1;
-            }
+            return result;
         }
-
-        return result;
+        catch
+        {
+            CryptographicOperations.ZeroMemory(result);
+            throw;
+        }
     }
 }

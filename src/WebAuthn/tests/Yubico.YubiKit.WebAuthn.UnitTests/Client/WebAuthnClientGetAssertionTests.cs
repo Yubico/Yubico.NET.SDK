@@ -380,7 +380,7 @@ public class WebAuthnClientGetAssertionTests
     }
 
     /// <summary>
-    /// Control for <see cref="GetAssertion_WhenExtensionBuildFails_NeverComputesPinUvAuthParam"/>:
+    /// Control for <see cref="GetAssertion_InvalidExtensionInput_IsRejectedBeforeAnyTokenIsMinted"/>:
     /// proves the protocol double actually records the tags it issues.
     /// </summary>
     /// <remarks>
@@ -495,7 +495,7 @@ public class WebAuthnClientGetAssertionTests
     [Fact(Timeout = 5000)]
     public async Task MatchedCredential_SelectAsync_HonorsCancellationToken()
     {
-        // Arrange - Create a MatchedCredential with a slow-completing factory
+        // An internal slow factory tests waiting semantics; production matches already hold built responses.
         var credentialId = RandomNumberGenerator.GetBytes(32);
         var tcs = new TaskCompletionSource<AuthenticationResponse>();
 
@@ -512,7 +512,6 @@ public class WebAuthnClientGetAssertionTests
             User = null
         };
 
-        // Use reflection or create via internal constructor pattern
         var match = new MatchedCredential(
             credentialId,
             user: null,

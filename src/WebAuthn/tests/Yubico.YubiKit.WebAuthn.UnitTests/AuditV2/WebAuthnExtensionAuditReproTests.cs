@@ -85,9 +85,10 @@ public class WebAuthnExtensionAuditReproTests
     }
 
     /// <summary>
-    ///     The adapter's InvalidState must reach the caller: ExtensionPipeline only swallows CborContentException, so a
-    ///     registration whose previewSign output lacks the inner attestation fails instead of returning the WebAuthn
-    ///     credential's key as the signing key.
+    ///     The codec's explicit InvalidState reaches the caller: RegistrationExtensionSession catches
+    ///     CborContentException and InvalidOperationException, not WebAuthnClientError. This missing unsigned
+    ///     previewSign output fails instead of substituting the outer credential's key as the signing key.
+    ///     Other malformed shapes can take the session's output-omission path instead.
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]

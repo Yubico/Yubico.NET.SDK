@@ -46,6 +46,11 @@ public sealed class WebAuthnAttestationObject
     /// <summary>
     /// Gets the raw CBOR representation of the attestation object.
     /// </summary>
+    /// <remarks>
+    /// For an object returned by <see cref="Decode"/>, this is the caller's original memory, not a copy.
+    /// Keep that input unchanged for the lifetime of this object and any retained statement views.
+    /// <see cref="Create"/> instead allocates an encoded representation from the supplied components.
+    /// </remarks>
     public ReadOnlyMemory<byte> RawCbor { get; }
 
     private WebAuthnAttestationObject(
@@ -63,6 +68,12 @@ public sealed class WebAuthnAttestationObject
     /// </summary>
     /// <param name="cbor">The CBOR-encoded attestation object.</param>
     /// <returns>The decoded attestation object.</returns>
+    /// <remarks>
+    /// Borrows <paramref name="cbor"/> for <see cref="RawCbor"/> and attestation-statement slices;
+    /// authenticator data is materialized separately. Mutating the input can make raw bytes disagree
+    /// with parsed fields. Keep it unchanged while the object or its statement views are in use.
+    /// Decoding parses the structure; it does not verify attestation trust, signatures, or RP policy.
+    /// </remarks>
     public static WebAuthnAttestationObject Decode(ReadOnlyMemory<byte> cbor)
     {
         var reader = new CborReader(cbor, CborConformanceMode.Lax);
@@ -118,6 +129,10 @@ public sealed class WebAuthnAttestationObject
     /// <param name="authenticatorData">The decoded authenticator data.</param>
     /// <param name="statement">The decoded attestation statement.</param>
     /// <returns>The attestation object with encoded raw CBOR.</returns>
+    /// <remarks>
+    /// Allocates new raw CBOR but retains the supplied authenticator-data and statement objects.
+    /// It does not cryptographically verify either component.
+    /// </remarks>
     public static WebAuthnAttestationObject Create(
         WebAuthnAuthenticatorData authenticatorData,
         AttestationStatement statement)
@@ -134,6 +149,11 @@ public sealed class WebAuthnAttestationObject
     /// Encodes the attestation object to CBOR bytes.
     /// </summary>
     /// <returns>The CBOR-encoded attestation object.</returns>
+    /// <remarks>
+    /// Returns a new encoding of the modeled fmt, attStmt, and authData components, not the original
+    /// <see cref="RawCbor"/> buffer. Unknown outer fields and the original map order or encoding need
+    /// not be preserved.
+    /// </remarks>
     public byte[] Encode()
     {
         return EncodeAttestationObject(
@@ -158,7 +178,7 @@ public sealed class WebAuthnAttestationObject
 
         writer.WriteStartMap(3);
 
-        // "authData" key (CBOR text string keys are sorted lexicographically in canonical mode)
+        // The writer emits CTAP2 canonical encoded-key order, not plain text lexicographic order.
         writer.WriteTextString("authData");
         writer.WriteByteString(authData.Span);
 

@@ -25,9 +25,10 @@ using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.Prf;
 
 /// <summary>
-///     PRF through the extension sessions: WebAuthn L3 §10.1.4 client processing on top of CTAP 2.1-2.3 §12.7
-///     hmac-secret, as python-fido2's HmacSecretExtension and yubikit-android's HmacSecretExtension do it.
-///     The shared secret is the L3 §16.17.1.2 vector so the wire bytes are checkable.
+///     PRF through the extension sessions: WebAuthn L3 REC 2026-08-25 §10.1.4 translation over CTAP
+///     hmac-secret (2.1 §12.5; 2.2–2.3 §12.7). The shared secret is the L3 §16.17.1.2 vector so the wire
+///     bytes are checkable. These processor tests do not establish verified-PRF enforcement, which
+///     remains missing from the current client.
 /// </summary>
 public class PrfProcessorTests
 {
@@ -219,7 +220,7 @@ public class PrfProcessorTests
         await _backend.DidNotReceive().EncapsulateAsync(Arg.Any<CancellationToken>());
     }
 
-    /// <summary>Undecryptable output: the PRF result is omitted, the assertion is not failed (android parity, L3 §9.4).</summary>
+    /// <summary>This undecryptable output is omitted under the SDK's current policy, not a §9.4 malformed-output mandate.</summary>
     [Fact]
     public async Task Authentication_UndecryptableOutput_OmitsPrfResult()
     {
@@ -242,7 +243,7 @@ public class PrfProcessorTests
         Assert.Null(result.Prf);
     }
 
-    // ---- 26a: L3 §10.1.4 validation of evalByCredential ----
+    // ---- L3 §10.1.4 validation of evalByCredential ----
 
     /// <summary>L3 §10.1.4 registration: "If evalByCredential is present, return a DOMException whose name is NotSupportedError".</summary>
     [Fact]
@@ -314,7 +315,7 @@ public class PrfProcessorTests
         Assert.Equal(Salt1, _protocol.Decrypt(SharedSecretV2, saltEnc));
     }
 
-    // ---- 26b: enabled and registration-time evaluation ----
+    // ---- enabled and registration-time evaluation ----
 
     /// <summary>L3 §10.1.4: enabled "If not present, set enabled to false" — the output is present, not null.</summary>
     [Fact]

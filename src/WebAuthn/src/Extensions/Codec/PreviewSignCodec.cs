@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 /// algorithm-specific signing inputs.
 /// </para>
 /// <para>
-/// WebAuthn-level previewSign inputs are translated to the Fido2 extension encoder, and extension
+/// WebAuthn-level previewSign inputs are translated to the CTAP2 extension encoder, and extension
 /// outputs are translated back into WebAuthn-level previewSign outputs.
 /// </para>
 /// </remarks>
@@ -65,7 +65,7 @@ internal static class PreviewSignCodec
             ? (byte)PreviewSignFlags.RequireUserVerification
             : (byte)PreviewSignFlags.RequireUserPresence;
 
-        // Translate WebAuthn input to Fido2 input
+        // Translate WebAuthn input to CTAP2 input.
         var fido2Input = new Ctap2.Extensions.PreviewSignRegistrationInput(
             algorithms: input.Algorithms.Select(a => a.Value).ToList(),
             flags: resolvedFlags);
@@ -86,19 +86,25 @@ internal static class PreviewSignCodec
     /// <param name="authData">The authenticator data with parsed extensions.</param>
     /// <param name="unsignedExtensionOutputs">Top-level unsigned extension outputs (CTAP key 8).</param>
     /// <returns>
-    /// A <see cref="PreviewSignRegistrationOutput"/> if the extension output is present and valid;
-    /// otherwise null.
+    /// A <see cref="PreviewSignRegistrationOutput"/> when decoding succeeds, or null when the signed
+    /// previewSign output is absent. Attestation decoding does not verify its signature or trust.
     /// </returns>
     /// <exception cref="WebAuthnClientError">
-    /// Thrown when the extension output is present but malformed, or when the generated-key attestation
-    /// object is missing from the unsigned extension outputs (InvalidState).
+    /// Thrown with InvalidState when signed previewSign output is present but the unsigned
+    /// previewSign output is absent, or the decoded inner authenticator data has no attested credential data.
     /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// A delegated decoder cannot process the output, including an unsigned map missing key 7.
+    /// </exception>
+    /// <exception cref="System.Formats.Cbor.CborContentException">The output contains invalid CBOR.</exception>
     /// <remarks>
     /// Reads the algorithm from <c>authData.extensions["previewSign"]</c> and the generated signing
     /// key attestation object from <c>unsignedExtensionOutputs["previewSign"][7]</c>. The key handle and
     /// public key come from the attested credential data of that <em>inner</em> attestation object
     /// (previewSign draft v4 §10.2.1); the outer WebAuthn credential is never a substitute, so a missing
     /// unsigned output fails the parse rather than returning the wrong key.
+    /// The extension session suppresses CborContentException and InvalidOperationException from this
+    /// path, omitting the extension result, but explicit WebAuthnClientError failures propagate.
     /// </remarks>
     public static PreviewSign.PreviewSignRegistrationOutput? ParseRegistrationOutput(
         WebAuthnAuthenticatorData authData,
@@ -109,7 +115,7 @@ internal static class PreviewSignCodec
             return null;
         }
 
-        // Decode algorithm + flags from authData.extensions["previewSign"] via Fido2 decoder
+        // Decode algorithm + flags from authData.extensions["previewSign"] via the CTAP2 decoder.
         var reader = new System.Formats.Cbor.CborReader(rawCbor, System.Formats.Cbor.CborConformanceMode.Ctap2Canonical);
 
         (int algorithmInt, int? flagsInt) = Ctap2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(reader);
@@ -130,7 +136,7 @@ internal static class PreviewSignCodec
                 "previewSign output is present in the authenticator data but the generated-key attestation object is missing from unsignedExtensionOutputs (previewSign draft v4 §10.2.1)");
         }
 
-        // Decode the CTAP-shaped inner attestation object via the Fido2 decoder. The wire
+        // Decode the CTAP-shaped inner attestation object via the CTAP2 decoder. The wire
         // payload uses integer keys ({1:fmt, 2:authData, 3:attStmt}), so WebAuthn rebuilds
         // the attestation object from the decoded components.
         Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject inner =
@@ -164,12 +170,17 @@ internal static class PreviewSignCodec
     /// </summary>
     /// <param name="authData">The authenticator data with parsed extensions.</param>
     /// <returns>
-    /// A <see cref="PreviewSignAuthenticationOutput"/> if the extension output is present and valid;
-    /// otherwise null.
+    /// A <see cref="PreviewSignAuthenticationOutput"/> when decoding succeeds, or null when the output
+    /// is absent.
     /// </returns>
-    /// <exception cref="WebAuthnClientError">
-    /// Thrown when the extension output is present but malformed (InvalidState).
+    /// <exception cref="InvalidOperationException">
+    /// The delegated decoder cannot process the output, including a missing signature member.
     /// </exception>
+    /// <exception cref="System.Formats.Cbor.CborContentException">The output contains invalid CBOR.</exception>
+    /// <remarks>
+    /// The extension session suppresses these two exception categories and omits the extension
+    /// result. This codec does not translate malformed authentication output into a typed client error.
+    /// </remarks>
     public static PreviewSign.PreviewSignAuthenticationOutput? ParseAuthenticationOutput(
         WebAuthnAuthenticatorData authData)
     {
@@ -178,7 +189,7 @@ internal static class PreviewSignCodec
             return null;
         }
 
-        // Decode signature via Fido2 decoder
+        // Decode signature via the CTAP2 decoder.
         ReadOnlyMemory<byte> signature = Ctap2.Extensions.PreviewSignCbor.DecodeAuthenticationOutput(rawCbor);
 
         return new PreviewSign.PreviewSignAuthenticationOutput(signature);

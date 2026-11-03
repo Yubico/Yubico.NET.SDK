@@ -25,6 +25,7 @@ internal static class MinPinLengthCodec
     /// <summary>
     /// Applies minPinLength input to the CTAP extension builder.
     /// </summary>
+    /// <remarks>The WebAuthn path always requests true; it currently does not inspect the input's Requested property.</remarks>
     public static void ApplyToBuilder(ExtensionBuilder builder)
     {
         builder.WithMinPinLength();

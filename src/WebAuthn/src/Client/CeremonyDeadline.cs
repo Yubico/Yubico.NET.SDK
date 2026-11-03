@@ -15,14 +15,15 @@
 namespace Yubico.YubiKit.WebAuthn.Client;
 
 /// <summary>
-/// The WebAuthn L3 §5.1.3 / §5.1.4 <c>lifetimeTimer</c>: a cancellation token that fires when the
-/// ceremony's <c>timeout</c> elapses or when the caller cancels, and remembers which one happened.
+/// Links the ceremony timeout signal with caller cancellation, tracking whether only the timer expired.
 /// </summary>
 /// <remarks>
 /// The deadline is a signal, not a hard stop: the transport decides when it can act on it (FIDO HID
 /// sends <c>CTAPHID_CANCEL</c> at the next keep-alive; PC/SC exchanges run to their answer). A
 /// <c>null</c> timeout starts no timer; the 300 s default WebAuthn L3 §15.1 recommends is not applied.
-/// Values are not clamped to the L3 range.
+/// Values are not clamped to the L3 range and must fit the framework's supported delay.
+/// The timer starts after validation/RP authorization. Unlike a full WebAuthn L3 §5.1.3 / §5.1.4
+/// lifetime timer, this helper does not reject success that races cancellation.
 /// </remarks>
 internal sealed class CeremonyDeadline : IDisposable
 {
@@ -52,8 +53,8 @@ internal sealed class CeremonyDeadline : IDisposable
     public CancellationToken Token { get; }
 
     /// <summary>
-    /// True when the timeout elapsed and the caller did not cancel. Caller cancellation always wins,
-    /// so a caller who cancels keeps getting <see cref="OperationCanceledException"/>.
+    /// True when the timeout elapsed and the caller did not cancel. Caller cancellation prevents
+    /// timeout wrapping of a resulting <see cref="OperationCanceledException"/>.
     /// </summary>
     public bool Expired => _timer?.IsCancellationRequested == true && !_caller.IsCancellationRequested;
 

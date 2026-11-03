@@ -27,11 +27,21 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// clientDataJSON construction, application-supplied RP validation, UV/PIN token acquisition, and retry logic.
 /// </para>
 /// <para>
-/// The implementation is split across partial files by concern: this file holds construction,
-/// disposal, and shared secret hygiene; <c>WebAuthnClient.Registration.cs</c> and
-/// <c>WebAuthnClient.Authentication.cs</c> hold the two ceremonies;
-/// <c>WebAuthnClient.PinUvAuth.cs</c> holds PIN/UV token acquisition and prompting; and
-/// <c>WebAuthnClient.Validation.cs</c> holds request validation and CTAP error mapping.
+/// Successful construction transfers ownership of the supplied CTAP2 session to this client.
+/// Dispose the client to release that session. If construction throws, the caller retains ownership.
+/// The configured credential prompt is retained but is not disposed by the client.
+/// Disposing the client does not clear returned response or extension-result buffers.
+/// </para>
+/// <para>
+/// The concrete backend uses PIN/UV auth protocol 2 without negotiating protocol 1. PIN/UV token
+/// acquisition and extensions that use key agreement therefore need compatible authenticator support;
+/// ceremonies that need neither may still work without it. Built-in UV token support also depends on
+/// authenticator capabilities and is not fully checked before token acquisition.
+/// </para>
+/// <para>
+/// The relying party server must verify returned responses, including the challenge, operation type,
+/// origin and cross-origin context, RP ID hash, signature or attestation policy, UP/UV flags, and
+/// credential/account binding. Constructing client data and parsing a response do not perform those checks.
 /// </para>
 /// </remarks>
 public sealed partial class WebAuthnClient : IAsyncDisposable
@@ -45,7 +55,7 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
     /// <summary>
     /// Initializes a new instance of <see cref="WebAuthnClient"/>.
     /// </summary>
-    /// <param name="ctap2Session">The CTAP2 session that performs authenticator operations (ownership transferred).</param>
+    /// <param name="ctap2Session">The CTAP2 session that performs authenticator operations. Ownership transfers only if construction succeeds.</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
     /// <param name="options">
     /// Required client configuration, including application-owned RP validity and authorization. Defaults remain
@@ -67,7 +77,7 @@ public sealed partial class WebAuthnClient : IAsyncDisposable
     /// <summary>
     /// Initializes a new instance of <see cref="WebAuthnClient"/> over an explicit backend.
     /// </summary>
-    /// <param name="backend">The backend that performs CTAP2 operations (ownership transferred).</param>
+    /// <param name="backend">The backend that performs CTAP2 operations. Ownership transfers only if construction succeeds.</param>
     /// <param name="origin">The WebAuthn origin for this client.</param>
     /// <param name="options">Required client configuration, including application-owned RP validity and authorization.</param>
     internal WebAuthnClient(

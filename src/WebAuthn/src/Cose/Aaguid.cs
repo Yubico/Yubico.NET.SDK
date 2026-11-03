@@ -23,11 +23,13 @@ namespace Yubico.YubiKit.WebAuthn.Cose;
 /// <remarks>
 /// WebAuthn AAGUID is a 16-byte big-endian UUID. See
 /// <see href="https://www.w3.org/TR/webauthn-3/#aaguid">WebAuthn AAGUID</see>.
+/// Construct values from a Guid or 16 bytes. The uninitialized default currently has an empty byte
+/// span and reports Guid.Empty, but does not compare equal even to itself or to a constructed zero
+/// AAGUID. This is a known default-value/equality limitation; use a constructor for usable values.
 /// </remarks>
 public readonly struct Aaguid : IEquatable<Aaguid>
 {
-    // NOTE: AAGUID is a public identifier per WebAuthn spec, not sensitive —
-    // byte[] storage in struct is intentional and safe per CLAUDE.md exception.
+    // AAGUID is a public identifier, so its byte storage does not require secret zeroing.
     private readonly byte[] _bytes;
 
     /// <summary>
@@ -57,9 +59,9 @@ public readonly struct Aaguid : IEquatable<Aaguid>
     }
 
     /// <summary>
-    /// Gets the AAGUID as a span of bytes (big-endian, 16 bytes).
+    /// Gets the AAGUID bytes in big-endian order.
     /// </summary>
-    /// <returns>A read-only span containing the 16-byte AAGUID.</returns>
+    /// <returns>16 bytes for a constructed value; currently an empty span for the uninitialized default.</returns>
     public ReadOnlySpan<byte> AsSpan() => _bytes ?? [];
 
     /// <summary>
@@ -84,6 +86,10 @@ public readonly struct Aaguid : IEquatable<Aaguid>
     /// <summary>
     /// Determines whether two <see cref="Aaguid"/> instances are equal.
     /// </summary>
+    /// <remarks>
+    /// Known limitation: comparison involving an uninitialized default returns false, including
+    /// comparison of that value with itself. Construct values explicitly rather than relying on default equality.
+    /// </remarks>
     public bool Equals(Aaguid other) =>
         _bytes is not null && other._bytes is not null && _bytes.AsSpan().SequenceEqual(other._bytes);
 

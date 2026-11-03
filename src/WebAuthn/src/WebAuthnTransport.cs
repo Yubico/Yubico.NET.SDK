@@ -18,7 +18,7 @@ namespace Yubico.YubiKit.WebAuthn;
 /// Represents an authenticator transport hint for WebAuthn registration results and credential descriptors.
 /// </summary>
 /// <remarks>
-/// See <see href="https://www.w3.org/TR/webauthn-3/#enum-transport">
+/// See <see href="https://www.w3.org/TR/webauthn-3/#enumdef-authenticatortransport">
 /// WebAuthn AuthenticatorTransport</see>.
 /// Known constants and arbitrary future strings are supported. A hint does not establish current
 /// host reachability or identify the active connection.
@@ -41,12 +41,12 @@ public readonly record struct WebAuthnTransport
     public static readonly WebAuthnTransport Ble = new("ble");
 
     /// <summary>
-    /// Smart card transport.
+    /// Contact ISO 7816 smart-card transport hint, not a declaration of the SDK's selected SmartCard connection.
     /// </summary>
     public static readonly WebAuthnTransport SmartCard = new("smart-card");
 
     /// <summary>
-    /// Hybrid transport (QR code + BLE).
+    /// Hybrid transport combining data communication and proximity mechanisms, such as a QR/BLE-based flow.
     /// </summary>
     public static readonly WebAuthnTransport Hybrid = new("hybrid");
 

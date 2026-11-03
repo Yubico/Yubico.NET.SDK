@@ -1,11 +1,15 @@
 # Yubico.YubiKit.WebAuthn
 
-W3C Web Authentication client for YubiKey devices, built on `Yubico.YubiKit.Ctap2`. It reduces
-registration and authentication to two calls and requires a WebAuthn origin and a Public Suffix List
-backed checker.
+Client-side WebAuthn registration and authentication for YubiKey devices, built on
+`Yubico.YubiKit.Ctap2`. The client builds client data, orchestrates CTAP2 operations and typed
+extensions, and handles PIN/UV token acquisition. It requires a supported WebAuthn origin and
+`WebAuthnClientOptions` with an application-supplied `RpIdValidator`.
 
-WebAuthn handles client ceremonies and origin/RP validation; CTAP2 handles authenticator operations.
-FIDO2 remains the authenticator application identity.
+The validator owns RP validity, including syntax, and authorization of the exact origin/RP pair; a
+Public Suffix List is not required for a narrow trusted allowlist. The RP supplies production ceremony
+options and independently verifies responses before completing registration or sign-in. CTAP2 owns
+direct authenticator operations, including credential administration; FIDO2 remains the application
+identity. See the module guide for supported origins and current extension/protocol limitations.
 
 > ## Alpha - not for production
 >

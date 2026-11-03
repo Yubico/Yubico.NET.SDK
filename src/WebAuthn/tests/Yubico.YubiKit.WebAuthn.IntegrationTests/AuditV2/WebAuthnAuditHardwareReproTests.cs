@@ -19,10 +19,11 @@ namespace Yubico.YubiKit.WebAuthn.IntegrationTests.AuditV2;
 public class WebAuthnAuditHardwareReproTests
 {
     /// <summary>
-    ///     WebAuthn L3 §5.1.3 lifetimeTimer on real hardware. DO NOT TOUCH the key: the registration must
-    ///     time out while the authenticator waits for user presence. The deadline is a signal acted on at the
-    ///     next keep-alive (CTAP 2.3 §11.2.9.1.7: at least every 100 ms), so the call returns shortly after
-    ///     the deadline, and the session stays usable because CTAPHID_CANCEL was sent and drained.
+    ///     Exercises the cooperative registration timer on HID hardware. DO NOT TOUCH the key: this test
+    ///     expects cancellation while the authenticator waits for user presence, then checks session reuse.
+    ///     HID acts on the signal at a keep-alive; CTAP2.3 §11.2.9.1.7 says keep-alives SHOULD be sent at
+    ///     least every 100 ms, not that SDK return latency is guaranteed. The two-second slack below is a
+    ///     test assumption. Success racing cancellation is possible in general, but is not the case tested here.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -79,8 +80,7 @@ public class WebAuthnAuditHardwareReproTests
                 User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "audit", "Audit"),
                 PubKeyCredParams = [CoseAlgorithm.Es256],
                 ResidentKey = ResidentKeyPreference.Preferred,
-                // Preferred (not Required) isolates #7 from #2: UV=Required currently fails on a
-                // PIN-only YubiKey with CTAP2_ERR_INVALID_OPTION (see YESDK1610 test below).
+                // Exercise Preferred resident-key discovery; Required UV is covered separately below.
                 UserVerification = UserVerificationPreference.Preferred
             }, KnownTestPin);
             credentialId = registration.CredentialId;
@@ -105,8 +105,8 @@ public class WebAuthnAuditHardwareReproTests
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
     public async Task YESDK1610_RequiredUvRegistrationWithPinSucceeds(YubiKeyTestState state)
     {
-        // Spec-correct behaviour: UV=Required with a PIN obtains a pinUvAuthToken and omits the
-        // "uv" option key (CTAP 2.3 §6.1). Today the SDK sends both and the device rejects it.
+        // Required UV with a PIN uses a pinUvAuthToken and omits the "uv" option key, which
+        // CTAP2.3 §6.1 forbids alongside pinUvAuthParam.
         await using var session = await state.Device.CreateCtap2SessionAsync();
         await NormalizePinAsync(session);
         await using var client = CreateClient(session);

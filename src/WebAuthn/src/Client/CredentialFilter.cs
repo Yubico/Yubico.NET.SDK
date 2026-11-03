@@ -127,8 +127,8 @@ internal static class CredentialFilter
                     continue;
                 }
 
-                // A one-descriptor chunk is its own answer: the authenticator may omit the credential
-                // from the response when the allowList had a single entry (CTAP §6.2.2).
+                // A one-descriptor chunk is its own answer. CTAP2.0 §5.2 permits credential omission
+                // for a singleton allowList; CTAP2.1/2.3 §6.2.2 require the descriptor.
                 if (chunk.Count == 1)
                 {
                     return chunk[0];

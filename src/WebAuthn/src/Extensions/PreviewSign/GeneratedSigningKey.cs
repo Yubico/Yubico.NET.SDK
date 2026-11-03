@@ -28,10 +28,17 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// extension specification. The generated signing key is represented by an embedded attestation
 /// object whose attested credential data contains the signing key handle and public key.
 /// </para>
+/// <para>
+/// The SDK decodes this object; it does not verify its signature or trust chain. When generated-key
+/// attestation is required by RP policy, the relying party must verify it before trusting the key
+/// and handle. The attestation and public key do not expose the private signing key.
+/// </para>
 /// </remarks>
 /// <param name="KeyHandle">
 /// The key handle used to request signatures from this generated signing key. This is copied from
 /// the credential ID in the embedded attestation object's attested credential data and can be empty.
+/// The current <see cref="PreviewSignSigningParams"/> constructor rejects empty handles despite the
+/// draft permitting them, so such a generated key cannot currently be used through that constructor.
 /// </param>
 /// <param name="PublicKey">
 /// The COSE public key for the generated signing key. This is the
@@ -40,7 +47,8 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// extension output.
 /// </param>
 /// <param name="Algorithm">
-/// The signing algorithm chosen from the <c>algorithms</c> extension input.
+/// The signing algorithm chosen from the <c>algorithms</c> extension input. It can differ from the
+/// public key's algorithm identifier for algorithms that split signing and verification roles.
 /// </param>
 /// <param name="AttestationObject">
 /// The attestation object for the generated signing key pair. Always present: the previewSign draft

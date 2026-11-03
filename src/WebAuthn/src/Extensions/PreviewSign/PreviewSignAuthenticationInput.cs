@@ -22,6 +22,16 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// Maps credential IDs to their corresponding signing parameters. Each entry specifies the key
 /// handle, to-be-signed value, and optional algorithm-specific arguments for one credential.
 /// </para>
+/// <para>
+/// Supply a nonempty <c>AllowCredentials</c> list with exactly one mapping for every entry, including
+/// multi-credential lists. The client selects a credential and uses its matching signing parameters.
+/// Unsupported previewSign requests can be omitted; inspect the returned extension result.
+/// </para>
+/// <para>
+/// Credential IDs are compared by byte content. Construction normalizes dictionary comparison but
+/// does not copy the backing key buffers or signing-parameter memory. Keep those buffers unchanged
+/// until the ceremony completes; ownership remains with the caller.
+/// </para>
 /// </remarks>
 public sealed record class PreviewSignAuthenticationInput
 {
@@ -87,9 +97,18 @@ public sealed record class PreviewSignAuthenticationInput
     /// <param name="signByCredential">Dictionary mapping credential IDs to signing parameters.</param>
     /// <returns>A <see cref="PreviewSignAuthenticationInput"/> instance.</returns>
     /// <remarks>
-    /// Use <see cref="ByteArrayKeyComparer.Instance"/> when constructing the dictionary to ensure
-    /// correct equality semantics for byte array keys.
+    /// Pass an ordinary dictionary keyed by raw credential-ID bytes. The input normalizes key
+    /// comparison by byte content; no custom comparer is required. Backing buffers remain caller-owned.
     /// </remarks>
+    /// <example>
+    /// <code>
+    /// var input = PreviewSignAuthenticationInput.CreateSignByCredential(
+    ///     new Dictionary&lt;ReadOnlyMemory&lt;byte&gt;, PreviewSignSigningParams&gt;
+    ///     {
+    ///         [credentialId] = signingParams
+    ///     });
+    /// </code>
+    /// </example>
     public static PreviewSignAuthenticationInput CreateSignByCredential(
         IReadOnlyDictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams> signByCredential) =>
         new(signByCredential);

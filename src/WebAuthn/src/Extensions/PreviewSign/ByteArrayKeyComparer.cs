@@ -18,8 +18,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// Equality comparer for <see cref="ReadOnlyMemory{T}"/> of byte used as dictionary keys.
 /// </summary>
 /// <remarks>
-/// Uses sequence equality for comparison and a simple hash based on the first 4 bytes
-/// for hash code generation.
+/// Compares byte sequences by content and hashes the full sequence.
 /// </remarks>
 internal sealed class ByteArrayKeyComparer : IEqualityComparer<ReadOnlyMemory<byte>>
 {

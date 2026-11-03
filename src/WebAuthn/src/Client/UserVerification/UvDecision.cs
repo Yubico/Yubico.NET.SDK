@@ -106,6 +106,8 @@ internal static class UvDecisionLogic
 
         if (builtInUvConfigured)
         {
+            // Known gap: this checks uv but not pinUvAuthToken. CTAP2.3 §6.5.5.7 requires both
+            // for a built-in-UV permission token; backend failures can therefore still escape here.
             return new UvDecision(
                 UseToken: true,
                 UseUv: true,
@@ -143,10 +145,9 @@ internal static class UvDecisionLogic
         {
             UserVerificationPreference.Required => true,
 
-            // WebAuthn L2 5.4.2 allows Preferred to proceed without verification when none is
-            // available, so only enabled verification methods count as configured here. This
-            // intentionally differs from implementations that treat an advertised false option as
-            // available verification.
+            // WebAuthn L2 §5.8.6 (UserVerificationRequirement) prefers UV if possible without failing
+            // solely because UV is absent. This SDK first checks enabled methods, then chooses a
+            // usable PIN or built-in UV; a configured but unobtainable PIN can still yield no UV.
             UserVerificationPreference.Preferred => uvConfigured,
 
             UserVerificationPreference.Discouraged =>

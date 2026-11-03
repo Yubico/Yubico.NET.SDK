@@ -153,8 +153,8 @@ v2 can detect and recover an existing PIN-derived configuration.
 
 Not differences at all — v1 never had these:
 
-- **WebAuthn** (`Yubico.YubiKit.WebAuthn`) — a client package that runs the
-  full FIDO ceremony.
+- **WebAuthn** (`Yubico.YubiKit.WebAuthn`) — client-side registration and authentication
+  orchestration over CTAP2; the RP still supplies options and verifies responses.
 - **OpenPGP** (`Yubico.YubiKit.OpenPgp`) — OpenPGP applet support.
 
 [What's new in v2](v2-highlights.md) covers both in more detail.

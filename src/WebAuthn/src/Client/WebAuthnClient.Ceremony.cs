@@ -60,8 +60,9 @@ public sealed partial class WebAuthnClient
         }
 
         /// <summary>
-        /// Replaces the token with a fresh one. CTAP 2.1 §6.5.5.7 lets an authenticator consume
-        /// permissions on use, so a token spent on an up:false probe may be refused by the next command.
+        /// Replaces the token with a fresh one. CTAP 2.1 §6.5.2 token state and §6.1.2/§6.2.2 command
+        /// checks govern permission reuse; a token used for an up:false probe may be refused by the
+        /// following makeCredential. Token acquisition itself is described in §6.5.5.7.
         /// </summary>
         public async Task RemintAsync(UvDecision decision, PinUvAuthTokenPermissions permissions, CancellationToken cancellationToken)
         {
@@ -108,7 +109,8 @@ public sealed partial class WebAuthnClient
     /// <summary>
     /// Runs one ceremony attempt and, if the authenticator answers CTAP2_ERR_PUAT_REQUIRED to a
     /// request made without required verification, runs it once more with verification required.
-    /// Any other CTAP failure is mapped to a typed <see cref="WebAuthnClientError"/>.
+    /// Other CTAP failures from the attempt are mapped to a typed <see cref="WebAuthnClientError"/>.
+    /// Token acquisition happens outside that catch and can propagate its own failures.
     /// </summary>
     /// <remarks>
     /// The attempt must end at the authenticator's answer. Follow-up work that may itself fail with a
@@ -211,7 +213,7 @@ public sealed partial class WebAuthnClient
     }
 
     /// <summary>
-    /// Maps a CTAP failure of the main command to the typed error the module promises: CredentialExcluded
+    /// Maps a caught CTAP failure of the ceremony attempt: CredentialExcluded
     /// is WebAuthn L3 §5.1.3's InvalidStateError; previewSign requests use the previewSign mapper; the rest
     /// go through <see cref="MapCtapStatusToWebAuthnError"/>.
     /// </summary>

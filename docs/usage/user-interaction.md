@@ -92,10 +92,14 @@ approving a payment. Wrap the SDK call in `UserPresenceIntent.BeginScope`, and e
 call raises carries the text in `UserPresenceContext.Intent`. No per-call prompt state is needed, and the
 same prompt instance stays registered for the whole session:
 
+With an existing `WebAuthnClient`, `requestOptions` below is its
+`PublicKeyCredentialRequestOptions`, not the session-creation options. Configure the underlying
+CTAP2 session's `UserPresencePrompt` when creating the client or session.
+
 ```csharp
 using (UserPresenceIntent.BeginScope("approve the transfer of 500 EUR"))
 {
-    await client.GetAssertionAsync(options, cancellationToken);
+    await client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken);
 }
 ```
 

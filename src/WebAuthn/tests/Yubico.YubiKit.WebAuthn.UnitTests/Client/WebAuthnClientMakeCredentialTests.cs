@@ -482,8 +482,8 @@ public class WebAuthnClientMakeCredentialTests
     [Fact]
     public async Task MakeCredential_WithExcludeList_PuatRequiredRetry_ZeroesEveryIssuedTokenBuffer()
     {
-        // Arrange - the retry re-runs acquisition and pre-flight, so the ceremony holds four
-        // separate token buffers and each one has its own disposal site.
+        // The first attempt acquires and re-mints a token; escalation acquires a third token and
+        // reuses the cached probe result. All three owned buffers must be cleared.
         var issued = ArrangePinTokenAcquisition();
         ArrangePreflightMiss();
         var callCount = 0;
@@ -509,7 +509,7 @@ public class WebAuthnClientMakeCredentialTests
     }
 
     /// <summary>
-    /// Control for <see cref="MakeCredential_WhenExtensionBuildFails_NeverComputesPinUvAuthParam"/>:
+    /// Control for <see cref="MakeCredential_InvalidExtensionInput_IsRejectedBeforeAnyTokenIsMinted"/>:
     /// proves the protocol double actually records the tags it issues.
     /// </summary>
     /// <remarks>
@@ -564,7 +564,7 @@ public class WebAuthnClientMakeCredentialTests
     [Fact]
     public async Task MakeCredential_WhenBackendFails_ThrowsTypedWebAuthnClientError()
     {
-        // A raw CTAP status must never escape the client surface.
+        // The main makeCredential command's OperationDenied status is mapped to a client error.
         _mockBackend.MakeCredentialAsync(
             Arg.Any<BackendMakeCredentialRequest>(),
             Arg.Any<CancellationToken>())

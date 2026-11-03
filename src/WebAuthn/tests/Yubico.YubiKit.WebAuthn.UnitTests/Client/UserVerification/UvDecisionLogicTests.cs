@@ -256,7 +256,7 @@ public class UvDecisionLogicTests
         Assert.True(decision.UseToken);
         Assert.Equal(PinUvAuthMethod.Pin, decision.Method);
 
-        // Only Required pins the CTAP 'uv' option to true; Preferred leaves it unset.
+        // The token carries verification; the CTAP 'uv' option stays absent, including for Required.
         Assert.Null(decision.UvOption);
     }
 
@@ -302,7 +302,7 @@ public class UvDecisionLogicTests
     // ---------------------------------------------------------------------------------------
 
     /// <summary>
-    /// Required always verifies, and pins the CTAP <c>uv</c> option to true.
+    /// Required selects a PIN token and leaves the CTAP <c>uv</c> option absent.
     /// </summary>
     [Fact]
     public void Decide_RequiredWithPinSet_RequestsTokenWithoutUvOption()
@@ -325,8 +325,8 @@ public class UvDecisionLogicTests
     /// asked for a guarantee the authenticator cannot give.
     /// </summary>
     [Theory]
-    [InlineData(false, false, true)]  // PIN set but unobtainable
-    [InlineData(false, true, false)]  // no PIN configured at all
+    [InlineData(false, false, true)]  // no PIN configured at all
+    [InlineData(false, true, false)]  // PIN set but unobtainable
     public void Decide_RequiredWithNoUsableMethod_ThrowsNotAllowed(
         bool uv,
         bool clientPin,

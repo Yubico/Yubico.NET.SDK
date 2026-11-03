@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Core.Credentials;
 ///     <code>
 ///         using (UserPresenceIntent.BeginScope("approve the transfer"))
 ///         {
-///             await client.GetAssertionAsync(options, cancellationToken);
+///             await client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken);
 ///         }
 ///     </code>
 ///     <para>

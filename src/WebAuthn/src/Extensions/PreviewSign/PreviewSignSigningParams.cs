@@ -25,9 +25,21 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <see cref="AdditionalArgs"/> values are algorithm-specific signing inputs and are passed
 /// through unchanged.
 /// Pass <c>null</c> to omit <c>additionalArgs</c>. Passing an empty memory value emits key 7 with
-/// an empty byte string, matching the caller-supplied algorithm-specific value.
-/// Experimental CTAP2 typed helpers can be converted to raw bytes with
+/// an empty byte string, but pass-through does not make that value valid under the draft. When
+/// present, <c>additionalArgs</c> must encode a CBOR map containing the algorithm's COSE_Sign_Args
+/// object. Supply the selected algorithm's required TBS representation, including prehashing when
+/// required; generic previewSign does not mandate a 32-byte digest or ARKG.
+/// </para>
+/// <para>
+/// The CTAP2 ARKG typed helpers are experimental conveniences, not the generic previewSign contract
+/// or production cryptographic guidance. Their output can be converted to raw bytes with
 /// <see cref="Ctap2.Extensions.PreviewSignCbor.EncodeAdditionalArgs"/> before constructing this type.
+/// </para>
+/// <para>
+/// The constructor retains supplied memory without copying or taking ownership. Keep backing buffers
+/// unchanged until the ceremony completes, then clear any sensitive buffers you own when no longer
+/// needed. The current constructor rejects empty handles even though draft v4 permits them; it also
+/// requires nonempty TBS locally. Algorithms can impose additional requirements that this type does not validate.
 /// </para>
 /// </remarks>
 public sealed record class PreviewSignSigningParams
@@ -51,8 +63,8 @@ public sealed record class PreviewSignSigningParams
     /// Initializes a new instance of <see cref="PreviewSignSigningParams"/>.
     /// </summary>
     /// <param name="keyHandle">The key handle for the signing key.</param>
-    /// <param name="tbs">The to-be-signed value.</param>
-    /// <param name="additionalArgs">Optional algorithm-specific <c>additionalArgs</c> value.</param>
+    /// <param name="tbs">The nonempty, algorithm-specific to-be-signed representation.</param>
+    /// <param name="additionalArgs">Optional CBOR-encoded COSE_Sign_Args map, passed through without semantic validation.</param>
     /// <exception cref="WebAuthnClientError">
     /// Thrown when:
     /// - KeyHandle is empty (InvalidRequest)

@@ -21,8 +21,8 @@ using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 
 /// <summary>
-/// credProps (WebAuthn L3 §10.1.3): no authenticator input. The <c>rk</c> output is "the value of
-/// requireResidentKey that was used", which the client resolved against GetInfo before the request.
+/// credProps (WebAuthn L3 §10.1.3): no authenticator input. The <c>rk</c> output reports the value of
+/// the requireResidentKey parameter used for the authenticator request, resolved against GetInfo.
 /// </summary>
 internal sealed class CredPropsProcessor(bool requireResidentKey) : IRegistrationExtensionProcessor
 {

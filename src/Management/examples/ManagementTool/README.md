@@ -64,7 +64,7 @@ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.cspro
 
 The tool can connect to YubiKeys via:
 - **SmartCard (CCID)** - Standard smart card interface
-- **FIDO HID** - FIDO/WebAuthn HID interface  
+- **FIDO HID** - FIDO/CTAPHID transport (WebAuthn uses CTAP2 over this transport)
 - **OTP HID** - Yubico OTP HID interface
 
 ## Requirements

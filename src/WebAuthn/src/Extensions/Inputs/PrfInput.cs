@@ -27,14 +27,20 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 /// the PRF inputs via hashing.
 /// </para>
 /// <para>
-/// See: https://w3c.github.io/webauthn/#prf-extension
+/// See: https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension
 /// </para>
 /// <para>
-/// <b>Stable output needs user verification.</b> CTAP hmac-secret keeps two PRFs per credential, one for
-/// verified and one for unverified assertions (CTAP 2.1-2.3 §12.7), so the same input yields a different
-/// output depending on the <c>uv</c> flag. The client does not override the relying party's
-/// <c>UserVerification</c> for PRF. Send <c>UserVerification = Required</c> whenever the PRF output must
-/// be the same across ceremonies.
+/// WebAuthn requires the verified hmac-secret PRF, overriding the user-verification preference when
+/// necessary. The current client does not enforce that requirement. Request
+/// <c>UserVerification = Required</c> for PRF evaluation; otherwise the same credential and input can
+/// produce different results when actual user verification changes. CTAP defines separate verified
+/// and unverified PRFs (CTAP 2.1 §12.5; CTAP 2.2–2.3 §12.7). This workaround does not establish general
+/// conformance to WebAuthn's PRF requirement.
+/// </para>
+/// <para>
+/// Input memory remains caller-owned. Keep its contents unchanged until the ceremony completes,
+/// including output preparation, then clear caller-owned sensitive buffers when no longer needed.
+/// The SDK does not guarantee cleanup of every temporary copy of PRF inputs or derived salts.
 /// </para>
 /// </remarks>
 public sealed class PrfInput
@@ -43,6 +49,9 @@ public sealed class PrfInput
     /// Gets or sets the first PRF input for evaluation.
     /// </summary>
     /// <remarks>
+    /// Together with <see cref="Second"/>, supplies the default <c>eval</c> inputs. A matching
+    /// <see cref="EvalByCredential"/> entry takes precedence. Registration-time evaluation also needs
+    /// advertised <c>hmac-secret-mc</c> support; requesting evaluation does not guarantee results.
     /// Used to derive the first salt for hmac-secret.
     /// Salt is computed as: SHA-256("WebAuthn PRF" || 0x00 || first).
     /// </remarks>
@@ -52,7 +61,8 @@ public sealed class PrfInput
     /// Gets or sets the second PRF input for evaluation (optional).
     /// </summary>
     /// <remarks>
-    /// Used to derive the second salt for hmac-secret.
+    /// This default second input is evaluated only when <see cref="First"/> is present. A matching
+    /// credential-specific entry supplies its own inputs instead. Used to derive the second salt for hmac-secret.
     /// Salt is computed as: SHA-256("WebAuthn PRF" || 0x00 || second).
     /// </remarks>
     public ReadOnlyMemory<byte>? Second { get; init; }
@@ -61,8 +71,10 @@ public sealed class PrfInput
     /// Gets or sets per-credential PRF inputs.
     /// </summary>
     /// <remarks>
-    /// Maps credential IDs (base64url) to PRF inputs.
-    /// Used when different credentials should use different PRF inputs.
+    /// Maps unpadded base64url credential IDs to PRF inputs. A nonempty map requires a nonempty
+    /// <c>AllowCredentials</c> list, and every key must identify an entry in that list. A matching entry
+    /// overrides <see cref="First"/> and <see cref="Second"/> for the selected credential.
+    /// Registration rejects this property, including an empty map, when PRF processing is active.
     /// </remarks>
     public IReadOnlyDictionary<string, PrfInputValues>? EvalByCredential { get; init; }
 
@@ -71,6 +83,10 @@ public sealed class PrfInput
     /// </summary>
     /// <param name="input">The PRF input value.</param>
     /// <returns>The 32-byte salt for hmac-secret.</returns>
+    /// <remarks>
+    /// The caller owns the returned array. Clear it when no longer needed if the input is sensitive.
+    /// The current implementation does not clear the temporary concatenation containing the input.
+    /// </remarks>
     public static byte[] ComputeSalt(ReadOnlySpan<byte> input)
     {
         // "WebAuthn PRF" || 0x00 || input

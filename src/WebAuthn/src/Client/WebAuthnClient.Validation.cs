@@ -137,7 +137,7 @@ public sealed partial class WebAuthnClient
 
         if (options.Timeout is { } timeout && timeout <= TimeSpan.Zero)
         {
-            // WebAuthn L3 §5.1.3 corrects an out-of-range timeout; this client does not clamp, so a
+            // WebAuthn L3 §5.1.4 corrects an out-of-range timeout; this client does not clamp, so a
             // value that could never be waited for is a malformed request (null means no deadline).
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,
@@ -148,17 +148,19 @@ public sealed partial class WebAuthnClient
     /// <summary>
     /// WebAuthn L3 §5.1.3 / §5.1.4: "If lifetimeTimer expires ... invoke the authenticatorCancel operation
     /// ... Throw a "NotAllowedError" DOMException." The cancel was already signalled through the deadline
-    /// token; this turns the resulting cancellation into the typed error. Caller cancellation is not
-    /// wrapped (module rule: cancelling the token abandons the ceremony with OperationCanceledException).
+    /// token; this turns a resulting cancellation into the typed error. There is no final deadline check
+    /// that rejects a successful response racing cancellation. Caller cancellation is not
+    /// wrapped: an OperationCanceledException propagates unchanged when the caller's token is cancelled.
     /// </summary>
     private static WebAuthnClientError CeremonyTimedOut(TimeSpan? timeout, OperationCanceledException inner) =>
         new(WebAuthnClientErrorCode.NotAllowed, $"The ceremony did not complete within its timeout of {timeout}", inner);
 
     /// <summary>
-    /// Maps a raw <see cref="CtapException"/> to a typed <see cref="WebAuthnClientError"/> per
-    /// the WebAuthn module rule that low-level CTAP status codes never escape the public API.
-    /// CredentialExcluded and previewSign-specific statuses are handled by their own catch arms
-    /// upstream and never reach this mapper.
+    /// Maps a caught <see cref="CtapException"/> to a typed <see cref="WebAuthnClientError"/>, retaining
+    /// the original exception as its cause. This mapper does not cover the whole ceremony: discovery,
+    /// token acquisition, and extension output processing can propagate lower-level failures.
+    /// During ceremonies, MapCeremonyCtapException handles CredentialExcluded and previewSign-specific
+    /// mapping before delegating here.
     /// </summary>
     internal static WebAuthnClientError MapCtapStatusToWebAuthnError(CtapException ex) =>
         ex.Status switch

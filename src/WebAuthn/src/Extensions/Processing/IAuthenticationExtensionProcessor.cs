@@ -36,7 +36,8 @@ internal interface IAuthenticationExtensionProcessor
 
     /// <summary>
     /// Performs any authenticator round trip the inputs depend on (key agreement for hmac-secret). Called
-    /// once per attempt, after the token exists and before <c>PrepareInputs</c>. Default: nothing.
+    /// once per attempt, after any required token has been acquired and before <c>PrepareInputs</c>.
+    /// A ceremony may have no token. Default: nothing.
     /// </summary>
     ValueTask PrepareAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
 

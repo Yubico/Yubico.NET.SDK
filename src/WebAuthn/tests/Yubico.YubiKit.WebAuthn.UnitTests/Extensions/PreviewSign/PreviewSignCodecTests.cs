@@ -25,7 +25,7 @@ using WebAuthnPreviewSign = Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 
 /// <summary>
-/// Tests for PreviewSignCodec - validates extension input/output wire-up per Phase 8 spec.
+/// Tests previewSign draft v4 §10.2.1 input translation and output extraction through PreviewSignCodec.
 /// </summary>
 public class PreviewSignCodecTests
 {
@@ -90,7 +90,7 @@ public class PreviewSignCodecTests
     public void PreviewSign_Registration_OutputPopulatedFromUnsignedAttObj()
     {
         // Arrange - mock authenticator data with previewSign extension containing algorithm + flags in authData
-        // and attestation object in unsignedExtensionOutputs (per Fix #6b)
+        // and the inner generated-key attestation object in unsignedExtensionOutputs.
         var innerCredentialId = RandomNumberGenerator.GetBytes(32);
         var publicKeyBytes = BuildCoseEc2PublicKey(CoseAlgorithm.Es256);
         var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, innerCredentialId);
@@ -200,7 +200,7 @@ public class PreviewSignCodecTests
 
     private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags, byte[] credId)
     {
-        // Build a minimal inner attestation object with the previewSign extension in authData, in the
+        // Build an inner attestation fixture with the previewSign extension in authData, in the
         // on-the-wire shape: the previewSign unsigned-extension-output wraps an attestation object whose
         // keys are CTAP-style integers ({1: fmt, 2: authData, 3: attStmt}), not WebAuthn-style text
         // strings ({"fmt", "authData", "attStmt"}). A text-keyed fixture would not exercise the decoder.
@@ -230,7 +230,9 @@ public class PreviewSignCodecTests
         // publicKey (COSE_Key)
         authDataList.AddRange(publicKey);
 
-        // Extensions: previewSign with flags AND algorithm (both required per decoder)
+        // This inner fixture contains flags and an extra algorithm field. Draft v4 describes flags
+        // here and the algorithm in the outer registration output; both are not required here by the
+        // decoder. A minimal flags-only inner fixture remains a separate test-coverage gap.
         var extensionWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
         extensionWriter.WriteStartMap(1);
         extensionWriter.WriteTextString("previewSign");

@@ -19,5 +19,10 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 /// <summary>
 /// Output from the credProtect extension during registration.
 /// </summary>
+/// <remarks>
+/// Reports the authenticator's actual policy, which can differ from the request. The client does not
+/// currently enforce <c>EnforceCredentialProtectionPolicy</c>. Inspecting this output can detect an
+/// unsatisfactory result after creation; it is not equivalent to preventing credential creation.
+/// </remarks>
 /// <param name="Policy">The credential protection policy that was set.</param>
 public sealed record class CredProtectOutput(CredProtectPolicy Policy);

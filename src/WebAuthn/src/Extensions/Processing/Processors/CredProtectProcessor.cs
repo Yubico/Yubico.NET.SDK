@@ -22,6 +22,10 @@ using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 
 /// <summary>credProtect (CTAP 2.1-2.3 §12.1): registration only.</summary>
+/// <remarks>
+/// Forwards the request and parses the actual policy. It does not implement client-side enforcement
+/// or compare the returned policy against an enforced request; that remains a current limitation.
+/// </remarks>
 internal sealed class CredProtectProcessor(CredProtectInput input) : IRegistrationExtensionProcessor
 {
     public string Name => ExtensionIdentifiers.CredProtect;

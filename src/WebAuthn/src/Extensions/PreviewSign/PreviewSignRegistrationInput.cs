@@ -23,6 +23,9 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <para>
 /// The previewSign extension generates a separate signing key bound to the same authenticator.
 /// This input specifies the acceptable signing algorithms for registration (key generation).
+/// The ceremony derives the signing policy from <c>UserVerification</c>: <c>Required</c> requests
+/// UP and UV; every other preference requests UP. There is no public flag setter, so this API cannot
+/// request unattended signing. Unsupported previewSign requests can be omitted; inspect the result.
 /// </para>
 /// </remarks>
 public sealed record class PreviewSignRegistrationInput
@@ -33,10 +36,11 @@ public sealed record class PreviewSignRegistrationInput
     public IReadOnlyList<CoseAlgorithm> Algorithms { get; }
 
     /// <summary>
-    /// Gets the user presence (UP) and user verification (UV) policy for signing operations.
+    /// Gets the stored internal flag value.
     /// </summary>
     /// <remarks>
-    /// The WebAuthn adapter derives this value from the registration options.
+    /// The ceremony encoder derives a separate flags byte from the registration UV preference;
+    /// it does not read or overwrite this property.
     /// </remarks>
     internal PreviewSignFlags Flags { get; init; }
 
@@ -60,22 +64,23 @@ public sealed record class PreviewSignRegistrationInput
         }
 
         Algorithms = algorithms;
-        Flags = PreviewSignFlags.RequireUserPresence; // Default, overridden by adapter
+        Flags = PreviewSignFlags.RequireUserPresence; // Stored default; ceremony encoding derives its own flags.
     }
 
     /// <summary>
     /// Creates a registration input for generating a new signing key.
     /// </summary>
     /// <param name="algorithms">A list of acceptable signature algorithms, ordered from most preferred to least preferred.</param>
-    /// <returns>A <see cref="PreviewSignRegistrationInput"/> with default flags (RequireUserPresence).</returns>
+    /// <returns>A <see cref="PreviewSignRegistrationInput"/> with the requested algorithms.</returns>
     /// <remarks>
-    /// This factory method mirrors the WebAuthn previewSign generate-key input shape.
+    /// The ceremony derives signing policy from its UV preference: Required requests UP and UV;
+    /// other values request UP. The factory does not let the caller choose flags independently.
     /// </remarks>
     public static PreviewSignRegistrationInput GenerateKey(params CoseAlgorithm[] algorithms) =>
         new(algorithms);
 
     /// <summary>
-    /// Internal test helper to create input with explicit flags for encoder testing.
+    /// Creates an input with an explicit stored internal flag value; ceremony encoding does not use it.
     /// </summary>
     internal static PreviewSignRegistrationInput WithFlags(
         IReadOnlyList<CoseAlgorithm> algorithms,

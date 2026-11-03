@@ -27,6 +27,10 @@ internal static class CredProtectCodec
     /// <summary>
     /// Applies credProtect input to the CTAP extension builder.
     /// </summary>
+    /// <remarks>
+    /// Only the policy integer is encoded on the wire. The builder currently does not implement
+    /// client-side enforcement of EnforceCredentialProtectionPolicy.
+    /// </remarks>
     public static void ApplyToBuilder(ExtensionBuilder builder, CredProtectInput input)
     {
         builder.WithCredProtect(input.Policy, input.EnforceCredentialProtectionPolicy);

@@ -25,17 +25,17 @@ public enum WebAuthnClientErrorCode
     InvalidRequest,
 
     /// <summary>
-    /// The operation cannot be performed in the current state.
+    /// The operation cannot be performed in the current state (for example, an excluded credential exists).
     /// </summary>
     InvalidState,
 
     /// <summary>
-    /// The operation is not allowed (e.g., user verification failed, credential excluded).
+    /// The operation is not allowed (for example, a mapped PIN rejection or client ceremony timeout).
     /// </summary>
     NotAllowed,
 
     /// <summary>
-    /// A constraint was violated (e.g., timeout, credential limit).
+    /// A constraint was violated (for example, an authenticator-reported timeout or credential limit).
     /// </summary>
     Constraint,
 
@@ -45,12 +45,13 @@ public enum WebAuthnClientErrorCode
     NotSupported,
 
     /// <summary>
-    /// A security-related error occurred (e.g., PIN auth invalid, tampering detected).
+    /// A security requirement was not met (for example, the application rejected the origin/RP pair).
     /// </summary>
     Security,
 
     /// <summary>
-    /// The operation was cancelled by the caller (e.g., via CancellationToken).
+    /// A cancellation error code available to consumers. The client's ceremonies do not emit this code
+    /// for caller-token cancellation; they propagate <see cref="OperationCanceledException"/> instead.
     /// </summary>
     Cancelled,
 

@@ -19,9 +19,10 @@ using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.Prf;
 
 /// <summary>
-///     Known-answer tests from WebAuthn Level 3 §16.17.1.2 "CTAP2 hmac-secret extension" (test vectors for the prf
-///     extension). Every value below was taken from the W3C text and re-derived independently before use: the salts by
-///     SHA-256, the encryptions by AES-256-CBC under the vector's shared secret, output1 as HMAC-SHA-256(CredRandom, salt1).
+///     Known-answer tests from WebAuthn Level 3 REC 2026-08-25 §16.17.1.2 "CTAP2 hmac-secret extension".
+///     The vectors use SHA-256 salt derivation, AES-256-CBC under the shared secret, and
+///     HMAC-SHA-256(CredRandom, salt) outputs. Codec-level protocol-1 coverage does not establish
+///     protocol-1 negotiation by the current protocol-2-only WebAuthn backend or verified-PRF enforcement.
 /// </summary>
 public class PrfCodecTests
 {
@@ -78,7 +79,7 @@ public class PrfCodecTests
         Assert.Equal(twoInputs ? [.. Salt1, .. Salt2] : Salt1, plaintext);
     }
 
-    /// <summary>CTAP §12.7 output is AES-CBC(sharedSecret, output1 [|| output2]); the codec decrypts and splits into results.</summary>
+    /// <summary>CTAP 2.1 §12.5 / 2.2–2.3 §12.7 output is AES-CBC(sharedSecret, output1 [|| output2]); the codec decrypts and splits it.</summary>
     [Theory]
     [InlineData(2, false)]
     [InlineData(2, true)]
@@ -107,7 +108,7 @@ public class PrfCodecTests
         }
     }
 
-    /// <summary>Anything but one or two 32-byte blocks is not a PRF result (yubikit-android HmacSecretExtension: omit, don't fail).</summary>
+    /// <summary>The SDK omits a result whose decrypted length is not one or two 32-byte outputs.</summary>
     [Fact]
     public void DecryptResults_WrongLength_ReturnsNull()
     {

@@ -30,7 +30,7 @@ using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
 /// <summary>
-///     Pins the ceremony frame shared by MakeCredential and GetAssertion before it is refactored: UV
+///     Covers the ceremony frame shared by MakeCredential and GetAssertion: UV
 ///     escalation happens at most once, the exclude-list pre-flight probes with up:false and narrows the
 ///     exclude list, probe failures keep their wrapping, CTAP statuses keep their mapping, and extension
 ///     outputs come from the attempt that succeeded.
@@ -377,8 +377,11 @@ public class WebAuthnClientCeremonyFrameTests
         Assert.Equal(2, probes.Sum(probe => probe.AllowList!.Count)); // every candidate was probed once
     }
 
-    /// <summary>Nothing matched: a dummy descriptor still goes to the authenticator so user presence is requested
-    /// and the relying party cannot learn "credential absent" without a gesture; the result is empty as before.</summary>
+    /// <summary>
+    /// After a silent-probe miss, the final request carries a dummy descriptor with normal required-UP
+    /// policy rather than returning the probe miss directly. NoCredentials produces an empty match list.
+    /// This fake checks the request and result, not a gesture or a no-disclosure guarantee.
+    /// </summary>
     [Fact]
     public async Task GetAssertion_AllowList_NothingMatches_SendsDummyDescriptorAndReturnsEmpty()
     {

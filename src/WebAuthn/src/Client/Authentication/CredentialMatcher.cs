@@ -21,8 +21,8 @@ namespace Yubico.YubiKit.WebAuthn.Client.Authentication;
 /// Internal helper for matching credentials during authentication.
 /// </summary>
 /// <remarks>
-/// Handles both allow-list probing and discoverable credential enumeration
-/// via GetAssertion + GetNextAssertion.
+/// Collects final assertions via GetAssertion and GetNextAssertion. CredentialFilter performs
+/// allow-list probing before this helper receives the narrowed request.
 /// </remarks>
 internal sealed class CredentialMatcher
 {
@@ -56,7 +56,7 @@ internal sealed class CredentialMatcher
 
         var results = new List<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
 
-        // Add the first response
+        // Known limitation: an omitted descriptor is not recovered from the narrowed request.
         var firstCredId = firstResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
         results.Add((firstCredId, firstResponse.User, firstResponse));
 

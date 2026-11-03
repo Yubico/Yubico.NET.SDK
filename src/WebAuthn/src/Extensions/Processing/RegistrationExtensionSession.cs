@@ -24,7 +24,8 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing;
 
 /// <summary>
 /// The extension processors for one registration attempt. Created after GetInfo, consulted for the
-/// token permissions, asked for inputs once the token exists and for outputs once the response is in.
+/// token permissions, asked for inputs after any required token is acquired, and asked for outputs
+/// once the response is in.
 /// </summary>
 internal sealed class RegistrationExtensionSession : IDisposable
 {
@@ -39,8 +40,10 @@ internal sealed class RegistrationExtensionSession : IDisposable
 
     /// <summary>
     /// Creates the session for the extensions the relying party asked for and the authenticator
-    /// advertises. An extension GetInfo does not list produces no input and no output (WebAuthn L3 §9.4).
-    /// credProps is client-side and always honoured.
+    /// advertises. Most unadvertised requests, including previewSign, are omitted. credProps is
+    /// client-side; largeBlob uses separate capability checks and can report false or reject Required.
+    /// Current limitations: credProtect enforcement is not honored, and a nonnull minPinLength input
+    /// requests the extension regardless of its Requested value.
     /// </summary>
     /// <param name="inputs">The relying party's extension inputs, or null.</param>
     /// <param name="options">The registration options (previewSign derives its flags from the UV preference).</param>
@@ -95,7 +98,8 @@ internal sealed class RegistrationExtensionSession : IDisposable
 
     /// <summary>
     /// Derives the client extension outputs, or null when the relying party requested no extensions.
-    /// A malformed or wrong-typed output from one extension drops that extension's output only.
+    /// CborContentException or InvalidOperationException from a processor omits that processor's
+    /// output. Other errors, including explicit previewSign WebAuthnClientError failures, propagate.
     /// </summary>
     public async ValueTask<RegistrationExtensionOutputs?> PrepareOutputsAsync(
         MakeCredentialResponse response,
@@ -117,9 +121,9 @@ internal sealed class RegistrationExtensionSession : IDisposable
             }
             catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
             {
-                // Malformed or wrong-typed extension output: skip this extension only (WebAuthn L3 §9.4
-                // "ignore any extension output it ... cannot process"). System.Formats.Cbor reports bad
-                // encodings as CborContentException and a wrong major type as InvalidOperationException.
+                // SDK isolation policy: omit this processor's output for these exception categories.
+                // This covers malformed CBOR and wrong types, but can also catch other invalid-operation
+                // failures. WebAuthn §9.4 does not prescribe this catch policy. Other errors propagate.
             }
         }
 

@@ -41,7 +41,21 @@ public sealed partial class WebAuthnClient
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The registration response with credential details.</returns>
-    /// <exception cref="WebAuthnClientError">Thrown on validation or operation failure.</exception>
+    /// <remarks>
+    /// <para>
+    /// The response must be verified by the RP server before registration is accepted. A failure during
+    /// extension output processing can occur after the credential has been created; it does not roll
+    /// creation back. The timeout signals cooperative cancellation, not a hard completion deadline;
+    /// see <see cref="PublicKeyCredentialCreationOptions.Timeout"/>.
+    /// </para>
+    /// <para>
+    /// Capability discovery, PIN/UV token acquisition, transport operations, and extension output
+    /// processing can propagate lower-level exceptions; not every failure is normalized to
+    /// <see cref="WebAuthnClientError"/>.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="WebAuthnClientError">Request validation or a mapped ceremony failure occurred.</exception>
+    /// <exception cref="OperationCanceledException">The operation observed caller cancellation.</exception>
     public async Task<RegistrationResponse> MakeCredentialAsync(
         PublicKeyCredentialCreationOptions options,
         ReadOnlyMemory<byte>? pinBytes = null,
@@ -213,7 +227,8 @@ public sealed partial class WebAuthnClient
         // client replaces any statement that is not a self attestation with fmt "none" and an empty
         // attStmt, so the RP never sees the attestation certificate chain it declined. The AAGUID is
         // kept as the authenticator returned it, as L3 specifies. Indirect, Direct and
-        // Enterprise pass the authenticator's statement through.
+        // Enterprise pass the authenticator's statement through. Indirect has no anonymization service,
+        // and Enterprise does not send the CTAP enterpriseAttestation request parameter.
         var webAuthnStatement = ctapResponse.AttestationStatement;
         if (options.Attestation == Preferences.AttestationPreference.None
             && !IsSelfAttestation(attestedCred.Aaguid, webAuthnStatement))

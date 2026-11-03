@@ -21,13 +21,13 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 
 /// <summary>
 /// Pure translation between the WebAuthn prf extension (L3 §10.1.4) and the CTAP hmac-secret
-/// extension (CTAP 2.1-2.3 §12.7) it is built on. Salt derivation lives on
+/// extension (CTAP 2.1 §12.5; CTAP 2.2–2.3 §12.7) it is built on. Salt derivation lives on
 /// <see cref="Inputs.PrfInput.ComputeSalt"/>; the encrypted request map is produced by the CTAP2
 /// <see cref="ExtensionBuilder.WithHmacSecret(IPinUvAuthProtocol, ReadOnlySpan{byte}, IReadOnlyDictionary{int, object?}, ReadOnlySpan{byte}, ReadOnlySpan{byte})"/>.
 /// </summary>
 internal static class PrfCodec
 {
-    /// <summary>CTAP §12.7: each PRF output is a 32-byte HMAC-SHA-256 value.</summary>
+    /// <summary>CTAP 2.1 §12.5 / CTAP 2.2–2.3 §12.7: each PRF output is a 32-byte HMAC-SHA-256 value.</summary>
     public const int OutputLength = 32;
 
     /// <summary>
@@ -48,11 +48,15 @@ internal static class PrfCodec
     }
 
     /// <summary>
-    /// Decrypts a CTAP §12.7 hmac-secret getAssertion output (AES-256-CBC under the shared secret, no
+    /// Decrypts a CTAP hmac-secret getAssertion output (AES-256-CBC under the shared secret, no
     /// padding) and splits it into one or two 32-byte PRF results. Returns null when the plaintext is
-    /// not exactly one or two outputs long: the result is omitted rather than the assertion failed
-    /// (WebAuthn L3 §9.4).
+    /// not exactly one or two outputs long. Omitting that result is this SDK's processing policy,
+    /// not a malformed-output rule prescribed by WebAuthn §9.4.
     /// </summary>
+    /// <remarks>
+    /// The aggregate plaintext is cleared, but the array-range temporaries and returned result arrays
+    /// are not. Returned read-only views have no disposal or zeroing guarantee.
+    /// </remarks>
     public static PrfEvaluationResults? DecryptResults(
         IPinUvAuthProtocol protocol,
         ReadOnlySpan<byte> sharedSecret,

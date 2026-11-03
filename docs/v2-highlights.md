@@ -17,17 +17,17 @@ Two YubiKey applications the SDK simply didn't speak to before.
 
 ### WebAuthn
 
-If you've ever squinted at a WebAuthn spec trying to work out which field
-goes where, that part is over. `Yubico.YubiKit.WebAuthn` runs the whole FIDO
-ceremony for you — preparing payloads, building `clientDataJSON`, formatting
-requests, making credentials, and getting assertions.
+`Yubico.YubiKit.WebAuthn` orchestrates client-side registration and authentication
+over CTAP2. It builds `clientDataJSON`, prepares authenticator requests, handles
+PIN/UV acquisition, and processes typed extensions, so you do not have to assemble
+those client steps from individual CTAP commands.
 
-This was the single most common source of confusion in v1, so we designed the
-package to match how the Android, Python, and Rust SDKs already do it. If you
-know the ceremony on one platform, it transfers.
-
-It's a client-side package. Server-side validation isn't in scope, and we're
-not planning to add it.
+Your application supplies a supported origin and its RP-validity/authorization
+policy. In production, the relying party supplies ceremony options and challenges;
+the application sends the returned bytes to that RP for independent verification.
+Creating a credential or retrieving an assertion is not, by itself, completed account
+registration or sign-in. The [module guide](../src/WebAuthn/README.md) shows that
+boundary, the first-use flow, and current extension/protocol limitations.
 
 ### OpenPGP
 

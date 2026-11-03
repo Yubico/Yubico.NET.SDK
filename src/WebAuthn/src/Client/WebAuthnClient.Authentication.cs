@@ -30,20 +30,38 @@ public sealed partial class WebAuthnClient
     /// <param name="pinBytes">Optional PIN bytes (UTF-8 encoded). Caller owns and zeroes this memory.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
-    /// A list of matched credentials. Each credential exposes <see cref="MatchedCredential.SelectAsync"/>
-    /// to complete the authentication and retrieve the assertion response.
+    /// Zero, one, or multiple matched credentials. Use <see cref="MatchedCredential.SelectAsync"/>
+    /// to retrieve a match's already-built assertion response for relying party verification.
     /// </returns>
     /// <remarks>
     /// <para>
-    /// This method follows the deferred-selection pattern: the authenticator enumerates
-    /// all matching credentials, and the caller can present a credential picker UI before
-    /// calling <see cref="MatchedCredential.SelectAsync"/> to retrieve the assertion.
+    /// With a nonempty allow list, the client probes for a matching credential and narrows the final
+    /// request to one descriptor; it does not return every allowed credential held by the authenticator.
+    /// Without an allow list, the authenticator can return multiple discoverable credentials for the RP,
+    /// subject to its own selection behavior. No match produces an empty list rather than an exception.
     /// </para>
     /// <para>
-    /// If the allow list is empty, discoverable credentials for the RP ID are returned.
-    /// If no credentials match, an empty list is returned (not an exception).
+    /// Assertions and extension output processing, including extension writes, finish before this method
+    /// returns. A caller can present a picker for multiple matches, but selecting a match performs no
+    /// further device I/O. Cancelling selection does not undo an assertion or extension side effect.
+    /// </para>
+    /// <para>
+    /// CTAP2.0 §5.2 permits omission of the final credential descriptor for a singleton allow list;
+    /// CTAP2.1/2.3 §6.2.2 require the descriptor. The client currently exposes an empty credential ID
+    /// when it is omitted instead of recovering the selected ID.
+    /// Only an original single-entry allow list gives the application an unambiguous requested ID;
+    /// never infer the selected ID from the first of multiple allowed credentials. The RP must still
+    /// verify the response and its credential/account binding.
+    /// </para>
+    /// <para>
+    /// Capability discovery, PIN/UV token acquisition, transport operations, and extension output
+    /// processing can propagate lower-level exceptions; not every failure is normalized to
+    /// <see cref="WebAuthnClientError"/>. The timeout signals cooperative cancellation as described by
+    /// <see cref="PublicKeyCredentialRequestOptions.Timeout"/>; it is not a hard completion deadline.
     /// </para>
     /// </remarks>
+    /// <exception cref="WebAuthnClientError">Request validation or a mapped ceremony failure occurred.</exception>
+    /// <exception cref="OperationCanceledException">The operation observed caller cancellation.</exception>
     public async Task<IReadOnlyList<MatchedCredential>> GetAssertionAsync(
         PublicKeyCredentialRequestOptions options,
         ReadOnlyMemory<byte>? pinBytes = null,
@@ -139,8 +157,8 @@ public sealed partial class WebAuthnClient
 
             // Allow-list selection (WebAuthn L3 §5.1.4): find the credential with an up:false probe, then
             // assert with exactly that descriptor so per-credential extension inputs can name it. When
-            // nothing matched, a dummy descriptor still goes to the authenticator: user presence is
-            // requested either way, so "credential absent" is not observable without a gesture.
+            // nothing matched, a dummy descriptor still requests user presence rather than returning
+            // the silent probe's miss directly. This does not establish equal timing or prompts.
             PublicKeyCredentialDescriptor? selected = null;
             IReadOnlyList<PublicKeyCredentialDescriptor>? allowList = null;
             if (options.AllowCredentials is { Count: > 0 } candidates)
@@ -156,9 +174,8 @@ public sealed partial class WebAuthnClient
         }
     }
 
-    // Sent when the relying party gave an allow list and nothing in it matched: the authenticator still
-    // asks for user presence and answers CTAP2_ERR_NO_CREDENTIALS, so the ceremony takes the same time
-    // and gives the same prompt as a real attempt.
+    // On an allow-list probe miss, still request user presence in the final command instead of
+    // exposing the silent result directly. Exact timing and prompts depend on the authenticator.
     private static readonly byte[] DummyCredentialId = [0x00];
 
     private static BackendGetAssertionRequest BuildGetAssertionRequest(
@@ -196,7 +213,7 @@ public sealed partial class WebAuthnClient
         // Wrap authenticator data
         var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
 
-        // Extract credential ID from the response or use empty if not present
+        // Known limitation: descriptor omission (permitted by CTAP2.0 §5.2) loses the selected ID here.
         var credentialId = ctapResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
 
         // User from CTAP response can be used directly

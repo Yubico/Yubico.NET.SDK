@@ -5,7 +5,10 @@
 **Pass 1 is complete** in [management-001](modules/management/pass-1/management-001/closeout.md), based on
 `da61d2e6d754b4c155cbb2579202e910986f4b3a` on `yubikit-docs-audit`.
 The [final records/evidence review](modules/management/pass-1/management-001/review-closeout.md) passed.
-The source commit and verified remote checkpoint are added below after publication.
+Source commit and verified remote checkpoint:
+**`bac07ee76945c33b627f72c012b709d686690b6c`**, pushed to `origin/yubikit-docs-audit` on 2026-11-03.
+`git push origin yubikit-docs-audit` succeeded; `git ls-remote origin refs/heads/yubikit-docs-audit`
+returned that exact source commit. This publication entry is a later documentation-only checkpoint.
 Pass 2 is deferred until the remaining in-scope modules have completed Pass 1.
 
 Read the [status](modules/management/pass-1/management-001/status.md) for phase progression and current
@@ -27,6 +30,8 @@ Implementation, documentation-review and hardware-verification status remain sep
 - [Validation results and limits](modules/management/pass-1/management-001/validation.md), including the
   separate raw/compiler-project example contexts and preserved failures.
 - [Closeout and retrospective](modules/management/pass-1/management-001/closeout.md).
+- [Run record manifest](modules/management/pass-1/management-001/record-manifest.json): 402 retained
+  artifacts, 2,905,348 bytes, with byte lengths and SHA-256 values; the manifest excludes itself.
 - [Validation requirements](modules/management/pass-1/management-001/validation-plan.md) and
   [compile-only/token-check tooling](modules/management/pass-1/management-001/validation-tooling.md).
 

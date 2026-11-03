@@ -24,7 +24,7 @@ remains the editorial reference. Repository and module instructions still govern
 | --- | --- | --- | --- |
 | OATH | Complete; pilot followed by documentation-impact reviews | Explicitly approved fix waves complete within recorded scope; additional contract/device questions remain deferred | [OATH handoff](oath.md) |
 | WebAuthn | Complete, committed/pushed at `9399b94b` | Not started; 21 implementation/test follow-ups and one CTAP2 documentation dependency recorded | [WebAuthn handoff](webauthn.md) |
-| Management | Complete: cycle `management-001`; content, independent review and validation accepted | Deferred until the campaign's second sweep | [Management handoff](management.md) |
+| Management | Complete: cycle `management-001`, committed/pushed at `bac07ee7`; independent review and validation accepted | Deferred until the campaign's second sweep | [Management handoff](management.md) |
 | PIV, Security Domain and other applets | Not started by this campaign | Deferred until the campaign's second sweep | Apply the workflow when a module is selected |
 | Core | Deferred; only narrow dependencies and a WebAuthn example were touched | Discovery/SCP follow-ups retain their existing separate scope | Existing module checkpoints; no Core-wide audit is implied |
 

@@ -462,6 +462,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ThrowIfFromAnotherDevice(credential);
 
         long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        ArgumentOutOfRangeException.ThrowIfNegative(ts, nameof(timestamp));
         byte[] challenge;
 
         if (credential.OathType == OathType.Totp)
@@ -471,6 +472,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             if (credential.Period <= 0)
                 throw new ArgumentException("TOTP credential period must be positive (RFC 6238 §4.1).", nameof(credential));
 
+            _ = Code.GetTotpWindow(ts, credential.Period);
             long timeStep = ts / credential.Period;
             challenge = new byte[OathConstants.ChallengeLength];
             BinaryPrimitives.WriteInt64BigEndian(challenge, timeStep);
@@ -579,6 +581,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ThrowIfDisposed();
 
         long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        _ = Code.GetTotpWindow(ts, OathConstants.DefaultPeriod);
         long timeStep = ts / OathConstants.DefaultPeriod;
 
         byte[] challenge = new byte[OathConstants.ChallengeLength];
@@ -671,12 +674,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var command = new ApduCommand(0x00, OathConstants.InsReset, 0xDE, 0xAD);
         await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
-        // Re-select and re-parse to get new state
-        var initialization = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
-        // Preserve the effective version selected at creation; reset refreshes applet state, not caller policy.
-        ApplyInitialization(initialization, FirmwareVersion);
-
-        _logger.LogInformation("OATH application reset, new DeviceId={DeviceId}", DeviceId);
+        // Confirmed RESET success is terminal for plain and SCP sessions. DisposeAsync clears
+        // readiness immediately, then drains/disposes the protocol, derived keys and applet secrets.
+        // It intentionally does not observe caller cancellation after this destructive exchange.
+        // Cancellation/overlap refusal before admission never reaches this boundary.
+        await DisposeAsync().ConfigureAwait(false);
+        _logger.LogInformation("OATH application reset; session ended. Reopen the connection before creating a new session.");
     }
 
     /// <inheritdoc />
@@ -740,7 +743,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                         throw new BadResponseException("No TAG_RESPONSE in VALIDATE response.");
 
                     if (!CryptographicOperations.FixedTimeEquals(expectedResponse, deviceResponse))
-                        throw new OathException(OathFailureReason.WrongPassword);
+                        throw new BadResponseException("The OATH device authentication response did not match verification.");
 
                     IsLocked = false;
                     CryptographicOperations.ZeroMemory(_challenge);
@@ -758,8 +761,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 ex.SW == SWConstants.ReferenceDataUnusable ||
                 ex.SW == SWConstants.InvalidCommandDataParameter)
             {
-                // The device rejected the VALIDATE command itself because the supplied
-                // (wrong) key produced a client response it did not recognize.
+                // Preserve the existing rejection category and raw status. These statuses
+                // do not by themselves prove that a user supplied an incorrect password.
                 throw new OathException(OathFailureReason.WrongPassword, ex.SW, ex);
             }
             finally

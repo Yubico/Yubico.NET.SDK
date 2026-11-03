@@ -221,6 +221,11 @@ Pass the connection straight through. A session is a user of the connection it i
 
 One live session per connection: dispose the reset session before creating the test session, or the second construction throws `ConnectionInUseException`. Scope the reset session to its own `using` block.
 
+**OATH reset exception:** successful OATH RESET ends plain and SCP sessions. Close/reopen even a borrowed
+connection before creating the body session; the OATH module's `WithOathSessionAsync` uses separate owned
+reset/body connections. Do not copy same-connection reset setup into OATH. Other applets are unchanged;
+see [OATH reset boundaries](../Oath/CLAUDE.md#reset-and-timestamp-boundaries).
+
 ### Recording SmartCard APDUs In Unit Tests
 
 Use `RecordingSmartCardConnection` when a unit test needs to assert exact APDU bytes without hardware. The helper records every transmitted command and returns queued raw responses. Keep it narrow: do not turn it into an APDU DSL, protocol emulator, or replacement for `[WithYubiKey]` integration tests.

@@ -317,13 +317,18 @@ public class OathSessionTests
             // Reset
             await session.ResetAsync(NewToken());
 
-            // Credentials should be gone
-            credentials = await session.ListCredentialsAsync(NewToken());
-            Assert.Empty(credentials);
+            Assert.False(session.IsInitialized);
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListCredentialsAsync(NewToken()));
+            // RESET ended the convenience-owned connection; inspect through an explicit new open.
+            await state.WithOathSessionAsync(async reopened =>
+            {
+                credentials = await reopened.ListCredentialsAsync(NewToken());
+                Assert.Empty(credentials);
 
-            // DeviceId changes after reset (new salt)
-            Assert.NotEqual(oldDeviceId, session.DeviceId);
-            Assert.False(session.IsLocked);
+                // Query the new salt/identity only through the fresh session.
+                Assert.NotEqual(oldDeviceId, reopened.DeviceId);
+                Assert.False(reopened.IsLocked);
+            }, resetBeforeUse: false, cancellationToken: NewToken());
         }, cancellationToken: NewToken());
 
     [SkippableTheory]

@@ -30,27 +30,37 @@ public static class ResetCommand
             }
         }
 
-        await using var session = await services.OpenSession(cancellationToken);
+        var session = await services.OpenSession(cancellationToken);
         if (session is null)
         {
             return 1;
         }
 
+        Exception? resetFailure = null;
         try
         {
             await session.ResetAsync(cancellationToken);
             OutputHelpers.WriteSuccess("OATH application reset.");
             return 0;
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            OutputHelpers.WriteInfo("Reset cancelled. Device data may already have been erased; reopen the session to inspect its state.");
+            resetFailure = ex;
+            OutputHelpers.WriteInfo("Reset cancelled. Device data may already have been erased; close/reopen the connection and create a fresh session to inspect its state.");
             throw;
         }
         catch (Exception ex)
         {
+            resetFailure = ex;
             OutputHelpers.WriteError($"Reset failed: {ex.Message}. Device data may already have been erased.");
             return 1;
+        }
+        finally
+        {
+            // RESET disposes on success. Also close after a send failure, without replaying
+            // teardown over the original cancellation/error or the CLI's reported outcome.
+            try { await session.DisposeAsync(); }
+            catch when (resetFailure is not null) { }
         }
     }
 }

@@ -131,6 +131,11 @@ seed unchanged. A successful `RenameCredentialAsync` returns a new credential; t
 time. It determines the TOTP challenge and nominal generation window. For an individual HOTP calculation, the
 device uses its stored counter; the timestamp only sets `Code.ValidFrom`.
 
+Timestamps must be nonnegative; zero means the Unix epoch. For TOTP, the inclusive start and exclusive end
+of the generation window must fit in `long`. The SDK rejects an invalid timestamp before calculation when
+the period is known. In an aggregate calculation, a custom period is learned from the response and checked
+before individual recalculation. There is no calendar-year limit imposed by `DateTimeOffset`.
+
 For TOTP, `Code.ValidFrom` and `Code.ValidTo` are the inclusive start and exclusive end of the nominal generation
 window, in Unix seconds. For HOTP, `ValidTo` is `long.MaxValue`, a no-time-expiry sentinel, not a date to format.
 These values do not guarantee verifier acceptance: the verifier applies its own time-window, replay, or counter rules.
@@ -227,10 +232,35 @@ does not interrupt the device or necessarily change the notification outcome.
 - A session from `device.CreateOathSessionAsync(...)` owns the connection it opened; `OathSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
 - `ResetAsync` erases every credential and the access key. `DeleteCredentialAsync` erases the selected credential.
   `SetKeyAsync` sets or changes password protection; `UnsetKeyAsync` removes it. Neither changes stored credentials.
+  Successful RESET **ends the session**, both with and without SCP: it asynchronously disposes protocol/derived
+  keys and applet secrets, without SELECT, metadata refresh or a new handshake. Further operations are refused.
+  Close/reopen your connection and create a new session to query the new identity and state. A borrowed connection
+  remains yours to close; a convenience-created session disposes its owned connection. No creation keys are retained.
+  Teardown can fail after the device has already reset; that error propagates, but the session stays terminal.
+  Cancellation after the successful exchange does not cancel teardown. Cancellation/overlap refusal before
+  admission leaves the session intact; a transport/device error does not prove that no mutation occurred.
 - `RenameCredentialAsync` throws `NotSupportedException` through `EnsureSupports` below effective version 5.3.1,
   as does passing any non-null `ScpKeyParameters` below 5.6.3. Core additionally requires 5.7.2+ for SCP11.
   While the applet is locked, protected operations fail with an `OathException`
   whose `Reason` is `OathFailureReason.Locked` until `ValidateAsync` succeeds.
+
+### Migrating reset callers
+
+Do not call LIST, derive a key, or inspect a refreshed identity on the old session after `ResetAsync`.
+With the convenience factory, successful reset closes the hidden owned connection; explicitly open a new session:
+
+```csharp
+await using (var reset = await device.CreateOathSessionAsync(cancellationToken: ct))
+{
+    await reset.ResetAsync(ct);
+}
+await using var fresh = await device.CreateOathSessionAsync(cancellationToken: ct);
+var credentials = await fresh.ListCredentialsAsync(ct);
+```
+
+When using `OathSession.CreateAsync(connection, ...)`, also dispose your borrowed connection and open a new one
+before creating `fresh`. For SCP, supply live key parameters to the new factory call; reset never reuses or
+retains the original creation parameters. This terminal contract replaces same-session refresh/recovery.
 
 ## Security notes
 

@@ -91,6 +91,11 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
     /// <summary>Formats a validated response after successful user-presence resolution.</summary>
     internal static Code FormatCode(Credential credential, long timestamp, ParsedCode parsedCode)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(timestamp);
+        (long validFrom, long validTo) = credential.OathType == OathType.Totp
+            ? GetTotpWindow(timestamp, credential.Period)
+            : (timestamp, long.MaxValue);
+
         int modulus = parsedCode.Digits switch
         {
             6 => 1_000_000,
@@ -101,20 +106,19 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
 
         string value = (parsedCode.Value % modulus).ToString().PadLeft(parsedCode.Digits, '0');
 
-        long validFrom;
-        long validTo;
-        if (credential.OathType == OathType.Totp)
-        {
-            long timeStep = timestamp / credential.Period;
-            validFrom = timeStep * credential.Period;
-            validTo = (timeStep + 1) * credential.Period;
-        }
-        else
-        {
-            validFrom = timestamp;
-            validTo = long.MaxValue;
-        }
-
         return new Code(value, validFrom, validTo);
+    }
+
+    /// <summary>Validates the supported time domain without overflowing the exclusive window end.</summary>
+    internal static (long From, long To) GetTotpWindow(long timestamp, int period)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(timestamp);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(period);
+        long from = timestamp - timestamp % period;
+        if (from > long.MaxValue - period)
+            throw new ArgumentOutOfRangeException(nameof(timestamp), timestamp,
+                "The TOTP generation window must fit in Int64 Unix seconds.");
+
+        return (from, from + period);
     }
 }

@@ -202,6 +202,11 @@ public static async Task WithOathAsync(
 }
 ```
 
+For **OATH reset setup**, use the module's `WithOathSessionAsync`: successful RESET ends the old session,
+and setup closes its connection before opening a fresh body session/connection. Do not reset and continue
+using the session in the generic example above. See [OATH reset migration](../Oath/README.md#migrating-reset-callers).
+This is OATH-specific, not a change to other applets' helpers.
+
 ## Byte-Level Unit Test Recorder
 
 Use `RecordingSmartCardConnection` in module unit tests that need to verify exact SmartCard APDU bytes:

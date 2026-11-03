@@ -115,6 +115,33 @@ an SDK `NotSupportedException` for touch/SHA-512 credential options from these g
 - Integration tests: `tests/Yubico.YubiKit.Oath.IntegrationTests/`
 - **ALWAYS use `dotnet toolchain.cs test`** — never `dotnet test` directly
 
+## Reset and timestamp boundaries
+
+`ResetAsync` is always terminal after confirmed RESET success, for plain and SCP sessions. Keep the RESET
+APDU visible and await Core's `DisposeAsync` immediately after its successful exchange. Do not SELECT,
+refresh metadata, retain creation keys or rehandshake. Disposal clears readiness/authentication, protocol
+and derived SCP state, salt and challenge; it ignores later caller cancellation. Teardown errors propagate
+with the session still terminal and RESET already completed. Pre-admission cancellation/overlap refusal
+must not tear down a healthy session or another admitted operation. A send/device error is not confirmed
+success and does not prove no mutation. Borrowed connections remain caller-owned: callers close/reopen
+them before creating a fresh session; convenience-owned connections are disposed by Core. Do not poison
+connections globally. This deliberate OATH-only policy differs from Python's same-connection reselect/SCP
+rehandshake; it is not a request to change other applets.
+
+`WithOathSessionAsync` uses a separate reset session/owned connection, completes teardown, then opens a
+fresh session/connection for the body. Preserve the first failure if later disposal/independent cleanup
+also fails; do not combine explicit disposal with an implicit owner that can replay a failed completion.
+
+Formatted calculations use nonnegative Unix seconds, with zero preserved as the epoch. `Code.GetTotpWindow`
+checks that the exclusive end fits `Int64` before addition. Individual calculations validate before CALCULATE;
+aggregate calculations validate the default period before transmission and custom periods before followup
+CALCULATE, inside the existing raw-response cleanup. HOTP timestamps are metadata only and may reach `Int64.MaxValue`.
+No `DateTimeOffset` calendar bound is imposed.
+
+Failed verification of the device's VALIDATE HMAC is `BadResponseException`, not `WrongPassword`.
+The existing device-rejection category still preserves raw status words; neither its compatibility name nor
+the status alone proves that a user's password was incorrect. Post-verification-failure session policy is unchanged.
+
 ## User-presence notifications
 
 When `SessionCreationOptions.UserPresencePrompt` is supplied, `CalculateAsync` and `CalculateCodeAsync`

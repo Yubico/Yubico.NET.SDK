@@ -181,7 +181,7 @@ public sealed class OathProtocolResponseTests(ITestOutputHelper output)
         finally
         {
             // The operation may have expired after changing OATH. Teardown needs a separate
-            // finite cancellation budget; all operation sessions have already been disposed.
+            // admission timeout; admitted exchanges/disposal are not wall-clock bounded.
             using var cleanupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             try
             {
@@ -208,7 +208,7 @@ public sealed class OathProtocolResponseTests(ITestOutputHelper output)
             VerifySelectAndWrongKeyStatusAsync(state, operation.Token));
 
         Assert.Same(device.OperationFailure, failure);
-        Assert.Equal(3, device.ConnectCount);
+        Assert.Equal(cleanupFails ? 4 : 5, device.ConnectCount);
         Assert.True(device.CleanupToken.CanBeCanceled);
         Assert.False(device.CleanupToken.IsCancellationRequested);
         Assert.Contains(device.CleanupConnection.TransmittedCommands, command => command[1] == 0x04);
@@ -224,7 +224,7 @@ public sealed class OathProtocolResponseTests(ITestOutputHelper output)
         public OperationCanceledException? OperationFailure { get; private set; }
         public CancellationToken CleanupToken { get; private set; }
         public RecordingSmartCardConnection CleanupConnection { get; } = new(
-            SelectResponse(), cleanupFails ? [0x6A, 0x80] : [0x90, 0], SelectResponse());
+            SelectResponse(), cleanupFails ? [0x6A, 0x80] : [0x90, 0]);
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection
@@ -238,11 +238,13 @@ public sealed class OathProtocolResponseTests(ITestOutputHelper output)
 
             IConnection connection;
             if (ConnectCount == 1)
+                connection = new RecordingSmartCardConnection(SelectResponse(), [0x90, 0]);
+            else if (ConnectCount == 2)
                 connection = new CancelAfterSetCodeConnection(operation);
             else
             {
                 CleanupToken = cancellationToken;
-                connection = CleanupConnection;
+                connection = ConnectCount == 4 ? CleanupConnection : new RecordingSmartCardConnection(SelectResponse());
             }
             return Task.FromResult(Assert.IsAssignableFrom<TConnection>(connection));
         }
@@ -251,7 +253,7 @@ public sealed class OathProtocolResponseTests(ITestOutputHelper output)
     private sealed class CancelAfterSetCodeConnection(CancellationTokenSource operation) : ISmartCardConnection
     {
         private readonly RecordingSmartCardConnection _inner = new(
-            SelectResponse(), [0x90, 0], SelectResponse(), [0x90, 0]);
+            SelectResponse(), [0x90, 0]);
         public Transport Transport => Transport.Usb;
         public ConnectionType Type => ConnectionType.SmartCard;
         public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken = default)

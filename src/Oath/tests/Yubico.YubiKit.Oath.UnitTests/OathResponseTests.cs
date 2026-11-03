@@ -35,6 +35,31 @@ public sealed class OathResponseTests
     }
 
     [Theory]
+    [InlineData(0x6984)]
+    [InlineData(0x6A80)]
+    public async Task ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(int status)
+    {
+        var connection = new RecordingSmartCardConnection(
+            [.. Select()[..^2], 0x74, 8, 1, 2, 3, 4, 5, 6, 7, 8, 0x90, 0],
+            [(byte)(status >> 8), (byte)status]);
+        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        byte[] key = new byte[16];
+        try
+        {
+            var failure = await Assert.ThrowsAsync<OathException>(() => session.ValidateAsync(key, TestContext.Current.CancellationToken));
+            Assert.Equal(unchecked((short)status), failure.StatusWord);
+            Assert.Equal(unchecked((short)status), Assert.IsAssignableFrom<ApduException>(failure.InnerException).SW);
+            Assert.DoesNotContain("password is incorrect", failure.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+            foreach (byte[] command in connection.TransmittedCommands)
+                CryptographicOperations.ZeroMemory(command);
+        }
+    }
+
+    [Theory]
     [InlineData(20)]
     [InlineData(32)]
     [InlineData(64)]
@@ -109,6 +134,11 @@ public sealed class OathResponseTests
             {
                 await session.ValidateAsync(key, TestContext.Current.CancellationToken);
                 Assert.False(session.IsLocked);
+            }
+            else if (mode == "mismatch")
+            {
+                await Assert.ThrowsAsync<BadResponseException>(() => session.ValidateAsync(key, TestContext.Current.CancellationToken));
+                Assert.True(session.IsLocked);
             }
             else
             {

@@ -146,8 +146,9 @@ public interface IOathSession : IApplicationSession
     /// </summary>
     /// <param name="credential">The credential to calculate.</param>
     /// <param name="timestamp">
-    ///     Unix time in seconds, defaulting to the current UTC time. For TOTP, this determines the
-    ///     time-step challenge and nominal generation window. For HOTP, it only sets <see cref="Code.ValidFrom" />;
+    ///     Nonnegative Unix time in seconds, defaulting to the current UTC time. Zero means the Unix epoch.
+    ///     For TOTP, this determines the time-step challenge and nominal generation window.
+    ///     For HOTP, it only sets <see cref="Code.ValidFrom" />;
     ///     the device uses its stored counter, not this timestamp, to calculate the code.
     /// </param>
     /// <param name="cancellationToken">The cancellation token for the operation.</param>
@@ -155,6 +156,10 @@ public interface IOathSession : IApplicationSession
     ///     <paramref name="credential" /> is TOTP with a period that is not positive, or was read from a
     ///     different device (its <see cref="Credential.DeviceId" /> is not this session's <see cref="DeviceId" />).
     ///     Nothing is sent.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     <paramref name="timestamp" /> is negative, or the exclusive end of the TOTP generation window
+    ///     exceeds <see cref="long.MaxValue" />. Nothing is sent.
     /// </exception>
     /// <exception cref="Core.BadResponseException">
     ///     The required truncated-response tag is missing, or its value does not contain five bytes
@@ -168,8 +173,8 @@ public interface IOathSession : IApplicationSession
     ///     HOTP and touch-required credentials return <c>null</c> codes.
     /// </summary>
     /// <param name="timestamp">
-    ///     Unix time in seconds, defaulting to the current UTC time. Determines the TOTP time-step
-    ///     challenges and nominal generation windows.
+    ///     Nonnegative Unix time in seconds, defaulting to the current UTC time. Zero means the Unix epoch.
+    ///     Determines the TOTP time-step challenges and nominal generation windows.
     /// </param>
     /// <param name="cancellationToken">The cancellation token for the operation.</param>
     /// <remarks>
@@ -178,6 +183,11 @@ public interface IOathSession : IApplicationSession
     ///     prefixes are omitted and logged at warning level, as described in <see cref="ListCredentialsAsync" />.
     ///     Known response values are validated before that host-side omission policy or any recalculation.
     /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     <paramref name="timestamp" /> is negative, or a required TOTP generation window exceeds
+    ///     <see cref="long.MaxValue" />. The default 30-second window is checked before CALCULATE ALL;
+    ///     a custom period is checked after the response reveals it, before individual recalculation.
+    /// </exception>
     /// <exception cref="Core.BadResponseException">
     ///     An entry lacks required name/response structure, uses a known non-result tag or a full-response
     ///     tag for the truncated request, or has a truncated value other than five bytes with a digit count
@@ -187,12 +197,19 @@ public interface IOathSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Resets the OATH application, removing all credentials and the access key.
+    ///     Resets the OATH application, removing all credentials and the access key, and ends this session.
     /// </summary>
     /// <remarks>
-    ///     Reset and the subsequent session-state refresh are separate exchanges. If the refresh fails
-    ///     or is cancelled, the device may already have erased the data. Do not assume rollback;
-    ///     dispose the session and reopen it rather than relying on its cached state.
+    ///     Confirmed RESET success is terminal for both plain and secure-channel sessions. This method
+    ///     awaits asynchronous disposal of the protocol, derived secure-channel state and applet secrets;
+    ///     it does not SELECT, refresh metadata or re-establish SCP. Later caller cancellation does not
+    ///     interrupt that disposal. Further operations on this session throw <see cref="ObjectDisposedException" />.
+    ///     Dispose and reopen the connection, then create a new session to inspect or use the reset applet.
+    ///     A borrowed connection remains caller-owned and is not closed by this method; a connection opened
+    ///     by the convenience session factory is owned by the session and disposed normally.
+    ///     A disposal failure propagates even though RESET has already succeeded; the session remains terminal.
+    ///     Cancellation or overlap refusal before exchange admission leaves the session intact. A transport
+    ///     failure or device error is not confirmed RESET success and does not prove that no data changed.
     /// </remarks>
     Task ResetAsync(CancellationToken cancellationToken = default);
 
@@ -234,6 +251,10 @@ public interface IOathSession : IApplicationSession
     ///     </para>
     /// </remarks>
     /// <exception cref="InvalidOperationException">The session has no outstanding challenge.</exception>
+    /// <exception cref="Core.BadResponseException">
+    ///     The device's authentication HMAC does not match verification, or its required response is missing.
+    ///     A failed device verification is not reported as proof of an incorrect user password.
+    /// </exception>
     Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
 
     /// <summary>

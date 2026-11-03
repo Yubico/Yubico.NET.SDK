@@ -24,6 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Reuse the existing RFC-4493-validated SCP03 handshake fake; no new crypto emulator. -->
+    <Compile Include="..\..\..\SecurityDomain\tests\Yubico.YubiKit.SecurityDomain.UnitTests\Scp03HandshakeFakeConnection.cs" Link="TestSupport\Scp03HandshakeFakeConnection.cs"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKit.Oath.csproj"/>
     <ProjectReference Include="..\..\examples\OathTool\OathTool.csproj"/>
     <ProjectReference Include="..\..\..\Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj"/>

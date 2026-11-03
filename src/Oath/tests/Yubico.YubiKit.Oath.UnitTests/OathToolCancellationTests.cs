@@ -286,6 +286,26 @@ public class OathToolCancellationTests
     }
 
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ResetFailure_DisposalReplayDoesNotReplaceCliOutcome(bool cancel)
+    {
+        Exception failure = cancel ? new OperationCanceledException("Reset admission cancelled.") : new InvalidOperationException("Reset teardown failed after success.");
+        var session = new FakeSession
+        {
+            OnOperation = _ => Task.FromException(failure),
+            DisposeFailure = new InvalidOperationException("Disposal completion replay.")
+        };
+
+        if (cancel)
+            Assert.Same(failure, await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                ResetCommand.ExecuteAsync(true, TestContext.Current.CancellationToken, Services(session))));
+        else
+            Assert.Equal(1, await ResetCommand.ExecuteAsync(true, TestContext.Current.CancellationToken, Services(session)));
+        Assert.True(session.Disposed);
+    }
+
+    [Theory]
     [InlineData("add")]
     [InlineData("uri")]
     [InlineData("delete")]
@@ -359,6 +379,7 @@ public class OathToolCancellationTests
         public bool Disposed { get; private set; }
         public int Operations { get; private set; }
         public bool CancelList { get; init; }
+        public Exception? DisposeFailure { get; init; }
         public byte[] DerivedKey { get; private set; } = [];
         public Action OnDerive { get; set; } = () => { };
         public Func<CancellationToken, Task> OnOperation { get; set; } = _ => Task.CompletedTask;
@@ -371,7 +392,12 @@ public class OathToolCancellationTests
         public bool IsPasswordProtected => IsLocked;
         public bool IsSupported(Feature feature) => true;
         public void EnsureSupports(Feature feature) { }
-        public void Dispose() => Disposed = true;
+        public void Dispose()
+        {
+            Disposed = true;
+            if (DisposeFailure is { } failure)
+                throw failure;
+        }
         public ValueTask DisposeAsync() { Dispose(); return ValueTask.CompletedTask; }
         public byte[] DeriveKey(ReadOnlyMemory<byte> password) { OnDerive(); DerivedKey = [1, 2, 3]; return DerivedKey; }
         private Task Operate(CancellationToken token) { Operations++; return OnOperation(token); }

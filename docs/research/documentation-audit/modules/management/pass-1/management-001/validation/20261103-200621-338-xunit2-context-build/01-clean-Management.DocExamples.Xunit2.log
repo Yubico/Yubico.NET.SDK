@@ -1,0 +1,29 @@
+$ dotnet clean docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/src/Yubico.YubiKit.Management.DocExamples.Xunit2.csproj -c Release
+Build started 11/3/2026 8:06:21 PM.
+     1>Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/src/Yubico.YubiKit.Management.DocExamples.Xunit2.csproj" on node 1 (Clean target(s)).
+     1>CoreClean:
+         Deleting file "/tmp/opencode/management-001-xunit2-context/bin/Release/net10.0/xunit.abstractions.dll".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/bin/Release/net10.0/xunit.runner.visualstudio.testadapter.dll".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/bin/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.deps.json".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/bin/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.runtimeconfig.json".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/bin/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.dll".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/bin/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.pdb".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.csproj.AssemblyReference.cache".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.GeneratedMSBuildEditorConfig.editorconfig".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.AssemblyInfoInputs.cache".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.AssemblyInfo.cs".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.csproj.CoreCompileInputs.cache".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.sourcelink.json".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.Y.951EFC36.Up2Date".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.dll".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/refint/Yubico.YubiKit.Management.DocExamples.Xunit2.dll".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.pdb".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/Yubico.YubiKit.Management.DocExamples.Xunit2.genruntimeconfig.cache".
+         Deleting file "/tmp/opencode/management-001-xunit2-context/obj/Release/net10.0/ref/Yubico.YubiKit.Management.DocExamples.Xunit2.dll".
+     1>Done Building Project "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/src/Yubico.YubiKit.Management.DocExamples.Xunit2.csproj" (Clean target(s)).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.27

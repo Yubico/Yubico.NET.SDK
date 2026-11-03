@@ -282,6 +282,26 @@ Migration notes:
 - Configuration changes are persistent and may reboot the device; keep read-only device-info migrations separate from configuration migrations.
 - The snippet uses `YubiKeyManager.FindFirstAsync(...)`, the one-shot single-device discovery helper; see `core-find-first-discovery-helpers` in `v1-to-v2-map.yml`.
 
+Current Management qualifications matter when porting configuration and metadata consumers:
+
+- The supported read minimum is 4.1.0, but current read/factory paths do not enforce it before querying.
+  Write/reset checks use effective session firmware; NFC restriction additionally needs NFC-capable 5.7+
+  hardware, without field-specific SDK preflight. Use USB power for three seconds for documented recovery;
+  an encoded false restriction request is not a verified recovery route.
+- `DeviceConfig` uses nullable properties, not a builder. Null omits a field; non-null capability masks
+  and flags replace complete fields. Exact USB `None` is rejected, but supported-device mask validation
+  is not comprehensive. Keep a supported USB application and a recovery route.
+- Current-code authorization applies to each protected write. Remove a configuration lock by supplying
+  the current code and sixteen zero replacement bytes in the same command; do not assume Bio MPE reset
+  recovers a lost Management code. Combined reset applies to Bio MPE FIDO/PIV/shared PIN, retaining F9.
+- Current Core FIPS capability/approval decoding has a bit-mapping issue; derived masks/filters cannot
+  establish application approval. Product flag bits can remain in `FormFactor`, so exact base-enum filters
+  can miss flagged devices. `IsFips` is a distinct manufacturing indicator, not an active mode.
+
+See the [Management task guide](../../src/Management/README.md) for request options, source-buffer cleanup
+and reboot/reconnection responsibilities. The separate `v1-to-v2-gaps.md` is a historical baseline, not a
+current API reference.
+
 ### Applet Session Creation
 
 V1 applet sessions were commonly constructed directly from the v1 device object:

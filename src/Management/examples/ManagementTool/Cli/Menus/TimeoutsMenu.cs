@@ -10,6 +10,8 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 
 /// <summary>
 /// CLI menu for configuring device timeouts.
+/// The prompted ceilings are SDK limits, not firmware maxima. Auto-eject is a CCID inactivity timer
+/// requiring TouchEject in CCID-only mode; assigning the timeout does not set that flag.
 /// </summary>
 public static class TimeoutsMenu
 {

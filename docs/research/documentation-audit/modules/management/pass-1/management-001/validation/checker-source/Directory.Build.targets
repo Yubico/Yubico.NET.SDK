@@ -1,0 +1,3 @@
+<Project>
+  <!-- Deliberately standalone: no SDK packaging, public-API analyzer, or project references. -->
+</Project>

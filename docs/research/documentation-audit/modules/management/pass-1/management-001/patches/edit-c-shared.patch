@@ -1,0 +1,905 @@
+diff --git i/CLAUDE.md w/CLAUDE.md
+index b9cdeb56..dd9956bd 100644
+--- i/CLAUDE.md
++++ w/CLAUDE.md
+@@ -165,7 +165,7 @@ Valid device response data that the SDK does not yet model must not block users.
+ - **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
+ - **HID vocabulary** — `IYubiKey` is the physical key; `IHidInterface` is an operating-system-exposed report interface enumerated by `FindHidInterfaces`; `IHidConnection` is an opened report connection. Windows `IWindowsHidReportAccess` is the internal report-handle seam, not another physical device.
+ - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
+-- **Application sessions** — `ApplicationSession` base; protocol-specific sessions like `ManagementSession<TConnection>` are generic over connection type.
++- **Application sessions** — `ApplicationSession` base; the non-generic `ManagementSession` accepts supported SmartCard, FIDO HID or OTP HID connections through its `IConnection` factory parameter.
+ - **User interaction** — `ICredentialPrompt` acquires secret bytes where adopted; `IUserPresencePrompt`, supplied through `SessionCreationOptions.UserPresencePrompt`, is the cross-applet touch-notification contract. Sessions retain but do not own the prompt. See [User interaction](docs/usage/user-interaction.md).
+ - **Device discovery entry point** — static `YubiKeyManager`; Core no longer requires a DI registration.
+ 
+@@ -293,8 +293,8 @@ public readonly struct CommandApdu
+ - Represents entities or services
+ - Implements interfaces with mutable operations
+ ```csharp
+-// ✅ GOOD - Large data structure
+-public class DeviceInfo
++// ✅ GOOD - Illustrative application model, not Core's readonly record struct DeviceInfo
++public class DeviceMetadataExample
+ {
+     public string SerialNumber { get; init; }
+     public Version FirmwareVersion { get; init; }
+@@ -386,7 +386,7 @@ public readonly struct Timestamp
+ }
+ 
+ // ❌ 24+ bytes - Use class instead
+-public struct DeviceInfo  // BAD - too large, expensive to copy
++public struct DeviceMetadataExample  // Illustrative large value type, not the SDK DeviceInfo
+ {
+     public Guid Id { get; }              // 16 bytes
+     public long Timestamp { get; }        // 8 bytes
+@@ -395,7 +395,7 @@ public struct DeviceInfo  // BAD - too large, expensive to copy
+ }
+ 
+ // ✅ Convert to class
+-public sealed class DeviceInfo
++public sealed class DeviceMetadataExample
+ {
+     public Guid Id { get; init; }
+     public long Timestamp { get; init; }
+@@ -525,15 +525,21 @@ public void Configure_FirmwareBelow400_UsesNeoMaxSize()
+ [Fact]
+ public async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()
+ {
+-    var device = await YubiKeyManager.FindFirstAsync();
+-    using var session = await ManagementSession.CreateAsync(
+-        device, scpKeyParams: scp03Keys);
++    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);
++    using var scpKeyParams = Scp03KeyParameters.Default;
++    await using var session = await device.CreateManagementSessionAsync(
++        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
++        cancellationToken: TestContext.Current.CancellationToken);
+ 
+-    var deviceInfo = await session.GetDeviceInfoAsync();
+-    Assert.NotEqual(0, deviceInfo.SerialNumber);
++    var deviceInfo = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);
++    Assert.Equal(device.SerialNumber, deviceInfo.SerialNumber);
+ }
+ ```
+ 
++This example requires an authorized dedicated SmartCard key configured with the supplied SCP03 defaults.
++The caller owns the parameters: the session is disposed before their enclosing using scope clears the
++owned static key arrays.
++
+ #### When You Can't Write Meaningful Tests
+ 
+ If you can't test actual behavior due to:
+@@ -546,18 +552,20 @@ If you can't test actual behavior due to:
+ 2. **Point to integration tests** that exercise the code path
+ 3. **Don't create fake tests** just to have coverage
+ 
+-**Example:**
++**Example comment** (illustrative class shell, not the Core implementation):
+ ```csharp
+ /// <summary>
+-///     ScpInitializer routes SCP initialization requests.
+-///
+-///     LIMITATION: Cannot unit test actual SCP initialization because
+-///     ScpState.Scp03InitAsync is a static method. This is tested via
+-///     integration tests in ManagementTests.CreateManagementSession_with_SCP03_DefaultKeys.
++///     SCP initialization has a fakeable APDU-processor seam, even though Scp03InitAsync is static.
+ /// </summary>
++/// <remarks>
++///     CoreScpAuditReproTests.N2_Scp03InitializeUpdateShortResponse_ThrowsBadResponse supplies a fake
++///     INITIALIZE UPDATE response and checks rejection of malformed lengths. That unit test does not
++///     establish real-device interoperability. Device communication is exercised by integration tests
++///     such as ManagementSessionSimpleTests.CreateManagementSession_WithScp03DefaultKeys_CommunicatesSecurely.
++/// </remarks>
+ public class ScpInitializer
+ {
+-    // Only test the routing logic, not the static method calls
++    // Test fakeable wire behavior directly; use hardware integration tests for device interoperability.
+ }
+ ```
+ 
+diff --git i/docs/TESTING.md w/docs/TESTING.md
+index e5084c0d..fcc53858 100644
+--- i/docs/TESTING.md
++++ w/docs/TESTING.md
+@@ -280,19 +280,32 @@ Use the `ConnectionType` property to require that the bound device exposes a con
+ // One device row; state.ConnectionType may contain multiple flags.
+ [SkippableTheory]
+ [WithYubiKey]
+-public async Task DefaultSelection(YubiKeyTestState state) { }
++public async Task DefaultSelection(YubiKeyTestState state)
++{
++    var info = await state.Device.GetDeviceInfoAsync();
++    Assert.Equal(state.SerialNumber, info.SerialNumber);
++}
+ 
+ // One row whose device must expose SmartCard.
+ [SkippableTheory]
+ [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+-public async Task SmartCardOnly(YubiKeyTestState state) { }
++public async Task SmartCardOnly(YubiKeyTestState state)
++{
++    var info = await state.Device.GetDeviceInfoAsync();
++    Assert.Equal(state.SerialNumber, info.SerialNumber);
++}
+ 
+ // Three separate rows, one for each requested connection type.
+ [SkippableTheory]
+ [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+ [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+ [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+-public async Task EachManagementConnection(YubiKeyTestState state) { }
++public async Task EachManagementConnection(YubiKeyTestState state)
++{
++    // This demonstrates independent device-filter rows, not operation-transport coverage.
++    var info = await state.Device.GetDeviceInfoAsync();
++    Assert.Equal(state.SerialNumber, info.SerialNumber);
++}
+ ```
+ 
+ The filter alone does not pin Management to that connection. Pin the session explicitly when the test's meaning depends on the connection used.
+@@ -303,7 +316,10 @@ Test output includes `state.ConnectionType`. An unfiltered row can therefore dis
+ 
+ ### Default Management Selection
+ 
+-`WithManagementAsync` leaves `preferredConnection` as `null` unless the caller supplies it. Management then tries its default order: SmartCard, HID FIDO, and HID OTP. Use this form when the behavior under test is transport-independent:
++`WithManagementAsync` leaves `preferredConnection` as `null` unless the caller supplies it. Management
++selects the first exposed supported interface in its default order: SmartCard, HID FIDO, then HID OTP.
++Connection or initialization failure does not try another interface. The callback receives cached
++`state.DeviceInfo`, not a fresh query at helper entry. Use this form for transport-independent tests:
+ 
+ ```csharp
+ [SkippableTheory]
+@@ -322,7 +338,7 @@ Do not pass `preferredConnection: state.ConnectionType` from an unfiltered row.
+ 
+ ### Transport-Specific Testing
+ 
+-When behavior must be exercised over concrete connections, declare one row per connection, pass the row's concrete `state.ConnectionType` as `preferredConnection`, and assert the session's actual `Transport`:
++When behavior must be exercised over concrete connections, declare one row per connection, pass the row's concrete `state.ConnectionType` as `preferredConnection`, and assert the session's actual `ConnectionType`:
+ 
+ ```csharp
+ [SkippableTheory]
+@@ -336,7 +352,7 @@ public async Task GetDeviceInfo_UsesRequestedManagementConnection(YubiKeyTestSta
+ 
+     await state.WithManagementAsync(async (mgmt, _) =>
+     {
+-        Assert.Equal(state.ConnectionType, mgmt.Transport);
++        Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
+ 
+         var info = await mgmt.GetDeviceInfoAsync();
+         Assert.Equal(state.SerialNumber, info.SerialNumber);
+@@ -350,7 +366,7 @@ An explicit `preferredConnection` is a single-candidate request and does not fal
+ 
+ 1. **Use default selection for transport-independent tests**: Apply one unfiltered `[WithYubiKey]` and omit `preferredConnection`.
+ 2. **Create explicit rows for connection-specific tests**: Apply separate attributes with one concrete `ConnectionType` each.
+-3. **Pin and verify concrete connections**: Pass `preferredConnection: state.ConnectionType` and assert `mgmt.Transport` in those rows.
++3. **Pin and verify concrete connections**: Pass `preferredConnection: state.ConnectionType` and assert `mgmt.ConnectionType` in those rows.
+ 4. **Do not pin from unfiltered state**: Its `ConnectionType` can be a multi-flag set that is invalid as a preference.
+ 5. **Avoid DeviceId parsing**: Use `ConnectionType` filters instead of inferring interfaces from identifier strings.
+ 
+@@ -371,8 +387,9 @@ public async Task ManagementOverFido_Works(YubiKeyTestState state)
+ {
+     await state.WithManagementAsync(async (mgmt, _) =>
+     {
+-        Assert.Equal(ConnectionType.HidFido, mgmt.Transport);
+-        // Exercise HID FIDO-specific Management behavior.
++        Assert.Equal(ConnectionType.HidFido, mgmt.ConnectionType);
++        var info = await mgmt.GetDeviceInfoAsync();
++        Assert.Equal(state.SerialNumber, info.SerialNumber);
+     }, preferredConnection: state.ConnectionType);
+ }
+ ```
+diff --git i/docs/architecture/connection-ownership-and-contention.md w/docs/architecture/connection-ownership-and-contention.md
+index 9c0aa1df..e455ef22 100644
+--- i/docs/architecture/connection-ownership-and-contention.md
++++ w/docs/architecture/connection-ownership-and-contention.md
+@@ -2,7 +2,8 @@
+ 
+ This document defines the SDK's in-process ownership contract:
+ 
+-> A physical YubiKey has at most one live connection, which hosts at most one live session.
++> A grouped physical YubiKey has at most one live connection across its known member interfaces within
++> this process. A connection hosts at most one live session.
+ > Connections and sessions are reused sequentially; overlapping ownership attempts throw.
+ 
+ Cross-process contention is outside this registry's scope. Another process holding PC/SC may still
+@@ -82,8 +83,10 @@ a hidden connection and call `OwnConnection()`, transferring that connection's l
+ session.
+ 
+ `DisposalGate` tears down the physical connection before releasing its registry lease. Disposal runs
+-once; all sync and async disposal callers observe the same completion and exception. There is no
+-finalizer backstop. A leaked connection can retain the physical-device lease for the process lifetime.
++once; all sync and async disposal callers observe the same completion and exception. Sessions have no
++finalizer recovery. Some built-in connections request best-effort native finalizer cleanup; it is not a
++guarantee of timely teardown or lease release. A leaked connection can retain the physical-device lease
++for the process lifetime. Dispose deterministically to observe completion and failures.
+ 
+ ## Discovery coordination
+ 
+@@ -109,8 +112,8 @@ supported transport in the applet's documented order is selected. The SDK opens
+ propagate without trying another interface. If native open succeeds but session initialization fails,
+ the newly opened connection is disposed before the exception escapes.
+ 
+-`ManagementSession.Transport` reports the transport actually opened. Keep its constructor assignment
+-when resolving upstream changes; upstream does not expose an equivalent transport property.
++The inherited `ManagementSession.ConnectionType` reports the transport actually opened. Assert it when
++a test's meaning depends on exercising a specific interface; filtering the device alone does not pin it.
+ 
+ ## Protocol exchange overlap
+ 
+diff --git i/docs/architecture/physical-device-model.md w/docs/architecture/physical-device-model.md
+index f14999a1..33862574 100644
+--- i/docs/architecture/physical-device-model.md
++++ w/docs/architecture/physical-device-model.md
+@@ -170,11 +170,19 @@ explicit `PreferredConnectionType` of `SmartCard`; that is an accepted setting,
+ 
+ ```csharp
+ // Default order (no override): Management prefers SmartCard.
+-await using var mgmt = await device.CreateManagementSessionAsync();
++await using (var mgmt = await device.CreateManagementSessionAsync())
++{
++    var info = await mgmt.GetDeviceInfoAsync();
++    Console.WriteLine(info.FirmwareVersion);
++}
+ 
+ // Explicit override: force HID OTP for this session.
+-await using var otpMgmt = await device.CreateManagementSessionAsync(
+-    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
++await using (var otpMgmt = await device.CreateManagementSessionAsync(
++    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }))
++{
++    var info = await otpMgmt.GetDeviceInfoAsync();
++    Console.WriteLine(info.FirmwareVersion);
++}
+ ```
+ 
+ Override semantics, validated before any connect:
+@@ -225,11 +233,12 @@ methods open a connection the caller never sees, so the session they return owns
+ internal `ApplicationSession.OwnConnection()` path. A direct `Session.CreateAsync(connection)` borrows the
+ caller-created connection and does not dispose it. Use `await using` for both connections and sessions.
+ Missing connection disposal can retain the physical-device lease for the connection lifetime
+-(potentially the process lifetime), blocking later opens; there is intentionally no finalizer backstop,
+-because deterministic disposal is the only point at which native-handle teardown and lease release can be
+-ordered reliably.
++(potentially the process lifetime), blocking later opens. Sessions have no finalizer recovery. Some
++built-in connections request best-effort native cleanup from a finalizer, but that is not a guarantee of
++timely teardown or lease release. Use deterministic disposal to observe completion and failures.
+ 
+-Opening any grouped member claims all known stable member interface IDs. When conservative discovery cannot
++The registry is process-local; it does not exclude other processes' handles. Opening any grouped member
++claims all known stable member interface IDs. When conservative discovery cannot
+ prove grouping, a standalone record retains a one-element scope; the SDK does not guess associations.
+ 
+ macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. SDK
+diff --git i/docs/migration/v1-to-v2.md w/docs/migration/v1-to-v2.md
+index 69de1d19..fc4238ce 100644
+--- i/docs/migration/v1-to-v2.md
++++ w/docs/migration/v1-to-v2.md
+@@ -282,6 +282,26 @@ Migration notes:
+ - Configuration changes are persistent and may reboot the device; keep read-only device-info migrations separate from configuration migrations.
+ - The snippet uses `YubiKeyManager.FindFirstAsync(...)`, the one-shot single-device discovery helper; see `core-find-first-discovery-helpers` in `v1-to-v2-map.yml`.
+ 
++Current Management qualifications matter when porting configuration and metadata consumers:
++
++- The supported read minimum is 4.1.0, but current read/factory paths do not enforce it before querying.
++  Write/reset checks use effective session firmware; NFC restriction additionally needs NFC-capable 5.7+
++  hardware, without field-specific SDK preflight. Use USB power for three seconds for documented recovery;
++  an encoded false restriction request is not a verified recovery route.
++- `DeviceConfig` uses nullable properties, not a builder. Null omits a field; non-null capability masks
++  and flags replace complete fields. Exact USB `None` is rejected, but supported-device mask validation
++  is not comprehensive. Keep a supported USB application and a recovery route.
++- Current-code authorization applies to each protected write. Remove a configuration lock by supplying
++  the current code and sixteen zero replacement bytes in the same command; do not assume Bio MPE reset
++  recovers a lost Management code. Combined reset applies to Bio MPE FIDO/PIV/shared PIN, retaining F9.
++- Current Core FIPS capability/approval decoding has a bit-mapping issue; derived masks/filters cannot
++  establish application approval. Product flag bits can remain in `FormFactor`, so exact base-enum filters
++  can miss flagged devices. `IsFips` is a distinct manufacturing indicator, not an active mode.
++
++See the [Management task guide](../../src/Management/README.md) for request options, source-buffer cleanup
++and reboot/reconnection responsibilities. The separate `v1-to-v2-gaps.md` is a historical baseline, not a
++current API reference.
++
+ ### Applet Session Creation
+ 
+ V1 applet sessions were commonly constructed directly from the v1 device object:
+diff --git i/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs w/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs
+index a7bf7f82..660d1407 100644
+--- i/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs
++++ w/src/Cli.Commands/src/Infrastructure/YkCommandBase.cs
+@@ -60,7 +60,7 @@ public sealed override async Task<int> ExecuteAsync(CommandContext context, TSet
+                 return ExitCode.DeviceNotFound;
+             }
+ 
+-            // 2. Enrich with ManagementSession data (part number, capabilities, etc.)
++            // 2. Best-effort one-shot metadata query; its session/connection end before the command runs.
+             DeviceInfo? deviceInfo = null;
+             try
+             {
+@@ -68,8 +68,9 @@ public sealed override async Task<int> ExecuteAsync(CommandContext context, TSet
+             }
+             catch (Exception ex)
+             {
+-                // Non-fatal: log a debug warning and proceed without enriched info.
+-                // This can happen if SmartCard transport is unavailable for this connection.
++                // Non-fatal: display an informational message and continue without the snapshot.
++                // Default-selected transport open/query can fail; absent SmartCard alone is not the cause.
++                // This catch also treats cancellation as missing metadata.
+                 OutputHelpers.WriteInfo($"Could not retrieve full device info: {ex.Message}");
+             }
+ 
+@@ -131,4 +132,4 @@ private static bool TryParseTransport(string? value, out ConnectionType? transpo
+ 
+         return transport is not null;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs w/src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs
+index 5489abf4..e889bbcd 100644
+--- i/src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs
++++ w/src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs
+@@ -13,11 +13,9 @@ namespace Yubico.YubiKit.Cli.Commands.Infrastructure;
+ /// <summary>
+ ///     Enriched device context available to every <c>yk</c> command after device selection.
+ ///     <para>
+-///         Unlike the per-applet tools which only know about their own session type,
+-///         the monolith always opens a <see cref="ManagementSession" /> first to populate
+-///         <see cref="Info" /> with rich device metadata: part number, firmware, enabled
+-///         capabilities. Commands can use this for feature gating and display without
+-///         opening a second management session.
++///         After selection, a best-effort one-shot Management query populates <see cref="Info" />.
++///         Its temporary session and connection are closed before command execution; this context
++///         holds a metadata snapshot, not an open session. Selection may already have queried metadata.
+ ///     </para>
+ /// </summary>
+ public sealed class YkDeviceContext
+@@ -32,9 +30,10 @@ public sealed class YkDeviceContext
+     public required DeviceSelection Selection { get; init; }
+ 
+     /// <summary>
+-    ///     Full device information from <see cref="ManagementSession" />, including part number,
+-    ///     enabled/supported capabilities, FIPS status, and PIN complexity settings.
+-    ///     <c>null</c> if the ManagementSession could not be opened (e.g., SmartCard unavailable).
++///     Device-information snapshot, or <c>null</c> when enrichment fails, for example because the
++///     selected default transport is busy/unavailable or the query fails. Management also supports HID;
++///     absent SmartCard alone does not imply failure. Current Core FIPS masks have a mapping issue and
++///     flagged form factors can miss named enum values; do not infer approval or family eligibility from them.
+     /// </summary>
+     public DeviceInfo? Info { get; init; }
+ 
+@@ -61,4 +60,4 @@ public sealed class YkDeviceContext
+         Info?.PartNumber is { Length: > 0 } partNumber
+             ? $"{partNumber} — S/N: {Selection.SerialNumber?.ToString() ?? "N/A"} [{Selection.FirmwareVersion}]"
+             : Selection.DisplayName;
+-}
+\ No newline at end of file
++}
+diff --git i/src/Cli.Commands/src/Management/ManagementConfigCommand.cs w/src/Cli.Commands/src/Management/ManagementConfigCommand.cs
+index 3a7f238b..98fafb67 100644
+--- i/src/Cli.Commands/src/Management/ManagementConfigCommand.cs
++++ w/src/Cli.Commands/src/Management/ManagementConfigCommand.cs
+@@ -10,8 +10,8 @@
+ namespace Yubico.YubiKit.Cli.Commands.Management;
+ 
+ /// <summary>
+-///     Displays the current device configuration: USB/NFC enabled capabilities,
+-///     timeouts, device flags, lock status, and PIN complexity.
++///     Displays the context's device-information snapshot: USB/NFC enabled capabilities,
++///     auto-eject timeout, device flags, lock status, and PIN complexity. Does not refresh it in the command body.
+ /// </summary>
+ public sealed class ManagementConfigCommand : YkCommandBase<GlobalSettings>
+ {
+@@ -76,4 +76,4 @@ private static string FormatCapabilities(DeviceCapabilities capabilities) =>
+ 
+     private static string FormatDeviceFlags(DeviceFlags flags) =>
+         flags == DeviceFlags.None ? "None" : flags.ToString();
+-}
+\ No newline at end of file
++}
+diff --git i/src/Cli.Commands/src/Management/ManagementResetCommand.cs w/src/Cli.Commands/src/Management/ManagementResetCommand.cs
+index 3acc7e03..23931c2e 100644
+--- i/src/Cli.Commands/src/Management/ManagementResetCommand.cs
++++ w/src/Cli.Commands/src/Management/ManagementResetCommand.cs
+@@ -20,8 +20,10 @@ public sealed class ManagementResetSettings : GlobalSettings
+ }
+ 
+ /// <summary>
+-///     Factory resets the YubiKey, erasing all credentials, keys, and configuration.
+-///     Requires firmware 5.6.0 or later. Prompts for double confirmation unless --force is used.
++///     Requests Bio Multi-protocol Edition combined FIDO/PIV reset, retaining the F9 attestation slot.
++///     Checks firmware 5.6.0, not product eligibility; reset itself requires SmartCard. An advertised HID
++///     preference reaches SDK rejection rather than a reset. Prompts twice unless --force is used.
++///     Does not establish Management configuration-lock recovery.
+ /// </summary>
+ public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettings>
+ {
+@@ -66,4 +68,4 @@ protected override async Task<int> ExecuteCommandAsync(
+         OutputHelpers.WriteSuccess("Device has been factory reset.");
+         return ExitCode.Success;
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Core/CLAUDE.md w/src/Core/CLAUDE.md
+index eadbfc6d..5e4453dd 100644
+--- i/src/Core/CLAUDE.md
++++ w/src/Core/CLAUDE.md
+@@ -432,7 +432,8 @@ in `DeviceCapabilities.Fido2` (`0x200`) and `UserPresenceApplications.Fido2` (`"
+ `ApplicationSession` does not dispose a caller-created connection. Only internal convenience entry
+ points that created a hidden connection call `OwnConnection()`. Whoever creates a connection must use
+ `await using` to dispose it; otherwise the physical-device lease can remain held for the
+-connection/process lifetime and block later opens. There is no finalizer backstop. Dispose one session
++connection/process lifetime and block later opens. Sessions have no finalizer recovery; a built-in
++connection's best-effort native finalizer cleanup is not a lifetime guarantee. Dispose one session
+ before creating the next session over the same connection; sequential reuse is supported.
+ 
+ `IsInitialized` and `IsAuthenticated` become `false` when sync or async disposal is admitted, not
+@@ -602,7 +603,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
+ ## Known Gotchas
+ 
+ 1. **APDU Size Limits**: YubiKey Neo uses 254-byte max; YubiKey 4+ uses extended APDUs up to 2048 bytes
+-2. **Connection Ownership**: whoever CREATES a connection disposes it with `await using`. Protocols and sessions are pure users — `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol`, and direct `Session.CreateAsync(connection)` never dispose a connection they were handed. The one exception is deliberate and internal: an `IYubiKey.Create<App>SessionAsync` convenience entry point opens a connection the caller never sees, so it calls `ApplicationSession.OwnConnection()` to hand that connection's lifetime to the session it returns. A leaked connection can retain the physical-device lease and block later opens; no finalizer releases it
++2. **Connection Ownership**: whoever CREATES a connection disposes it with `await using`. Protocols and sessions are pure users — `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol`, and direct `Session.CreateAsync(connection)` never dispose a connection they were handed. The one exception is deliberate and internal: an `IYubiKey.Create<App>SessionAsync` convenience entry point opens a connection the caller never sees, so it calls `ApplicationSession.OwnConnection()` to hand that connection's lifetime to the session it returns. A leaked connection can retain the physical-device lease and block later opens; best-effort native finalization is not a substitute for deterministic disposal.
+ 3. **SCP Key Zeroing**: Always zero SCP keys after use; `StaticKeys` implements `IDisposable`
+ 4. **TLV Disposal**: `Tlv` and `DisposableTlvList` must be disposed
+ 5. **Platform-Specific Behavior**: PC/SC APIs behave differently across platforms; test on all three
+diff --git i/src/Piv/examples/PivTool/SDK_PAIN_POINTS.md w/src/Piv/examples/PivTool/SDK_PAIN_POINTS.md
+index b2f78c66..95d8a57c 100644
+--- i/src/Piv/examples/PivTool/SDK_PAIN_POINTS.md
++++ w/src/Piv/examples/PivTool/SDK_PAIN_POINTS.md
+@@ -80,10 +80,15 @@ The prompt receives request and resolution notifications. `TouchPolicy.Always` i
+ ### 6. Inconsistent Async Disposal ✅ FIXED
+ **Issue**: `ManagementSession` uses `IDisposable` while `PivSession` uses `IAsyncDisposable`, leading to mixed `using` and `await using` patterns.
+ 
+-**Resolution**: `ManagementSession` now implements `IAsyncDisposable`:
++**Resolution**: Both sessions support asynchronous disposal. A direct factory borrows the caller-owned
++SmartCard connection; dispose Management before creating PIV on that same connection:
+ 
+ ```csharp
+-await using var management = ManagementSession.Create(connection);
++await using (var management = await ManagementSession.CreateAsync(connection))
++{
++    var info = await management.GetDeviceInfoAsync();
++    Console.WriteLine(info.FirmwareVersion);
++}
+ await using var piv = await PivSession.CreateAsync(connection);
+ ```
+ 
+diff --git i/src/Tests.Shared/CLAUDE.md w/src/Tests.Shared/CLAUDE.md
+index ac78faa6..2779563b 100644
+--- i/src/Tests.Shared/CLAUDE.md
++++ w/src/Tests.Shared/CLAUDE.md
+@@ -67,7 +67,7 @@ public class WithYubiKeyAttribute : DataAttribute
+ **Execution phase** (when tests actually run):
+ - Test receives placeholder `YubiKeyTestState`
+ - Accessing `Device` property triggers `BindToRealDevice()`
+-- `YubiKeyTestInfrastructure.FilterDevices()` finds matching device
++- `YubiKeyTestInfrastructure.FilterDevices()` finds candidates; the placeholder binds to the first match
+ - Placeholder is replaced with real device state
+ 
+ ### 3. Lazy Static Device Cache
+@@ -270,7 +270,19 @@ Static cache eliminates per-test cost, making this worthwhile for test suites wi
+ 
+ 1. **Static device cache:** Devices must be connected before test runner starts
+ 2. **Environment.Exit:** Cannot recover from allow list violations
+-3. **Single device per test case:** Each `[WithYubiKey]` attribute produces one test case per matching device
++3. **Single device per attribute:** Each `[WithYubiKey]` attribute yields one placeholder bound to the
++   first matching authorized device at execution. Multiple attributes bind independently and may choose
++   the same key; this is not automatic execution over every matching device.
++4. **Cached callback metadata:** `WithManagementAsync` passes `state.DeviceInfo` without refreshing it.
++   A session initialization read is separate from the callback snapshot. Read explicitly for fresh settings.
++5. **Filtering versus pinning:** Connection filters select eligible devices; pass a concrete
++   `preferredConnection` and assert `mgmt.ConnectionType` when operation transport matters. The unfiltered
++   state's multi-flag set is not a valid preference. Helper argument order is `action`, `configuration`,
++   `scpKeyParams`, `preferredConnection`, `cancellationToken`; use names for policy options.
++6. **Metadata filters:** Malformed firmware strings are ignored; use three components. Capability checks
++   accept USB or NFC enabled bits independently of `RequireUsb`. Current Core FIPS-tag mapping is wrong,
++   so FIPS masks/filters cannot establish application approval. Product flag bits can remain in
++   `FormFactor`, causing exact base-enum filters to miss flagged devices.
+ 
+ ## Security Considerations
+ 
+diff --git i/src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs w/src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs
+index f2fd426d..06d7cc71 100644
+--- i/src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs
++++ w/src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs
+@@ -26,8 +26,9 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
+ ///     <para>
+ ///         This attribute works with [SkippableTheory] to provide YubiKey devices as test data and
+ ///         report unavailable hardware as a skipped test rather than a failure.
+-///         It automatically discovers, filters, and provides devices based on the specified criteria.
+-///         Multiple [WithYubiKey] attributes can be applied to run tests with different device configurations.
++///         Each attribute yields one placeholder that binds to the first matching authorized device at
++///         execution. Multiple attributes bind independently, not once per matching physical key.
++///         Connection filters select eligible devices; they do not pin an applet session's transport.
+ ///     </para>
+ ///     <para>
+ ///         Usage:
+@@ -35,19 +36,21 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
+ ///     // Single configuration
+ ///     [SkippableTheory]
+ ///     [WithYubiKey(MinFirmware = "5.7.2")]
+-///     public async Task TestName(YubiKeyTestState device)
++///     public async Task ReadModernDevice(YubiKeyTestState device)
+ ///     {
+-///         // Test runs on devices with firmware >= 5.7.2
++///         var info = await device.Device.GetDeviceInfoAsync();
++///         Assert.Equal(device.SerialNumber, info.SerialNumber);
+ ///     }
+ /// 
+ ///     // Multiple configurations
+ ///     [SkippableTheory]
+-///     [WithYubiKey(MinFirmware = "5.0")]
++///     [WithYubiKey(MinFirmware = "5.0.0")]
+ ///     [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
+ ///     [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
+-///     public async Task TestName(YubiKeyTestState device)
++///     public async Task ReadIndependentlyBoundRows(YubiKeyTestState device)
+ ///     {
+-///         // Test runs on devices matching ANY of the above criteria
++///         var info = await device.Device.GetDeviceInfoAsync();
++///         Assert.Equal(device.SerialNumber, info.SerialNumber);
+ ///     }
+ /// 
+ ///     // Custom filter example
+@@ -65,13 +68,15 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
+ {
+     /// <summary>
+     ///     Gets or sets the minimum firmware version required.
+-    ///     Format: "major.minor.patch" (e.g., "5.7.2")
++///     Format: "major.minor.patch" (e.g., "5.7.2")
++///     Malformed strings are currently ignored rather than rejected.
+     /// </summary>
+     public string? MinFirmware { get; set; }
+ 
+     /// <summary>
+     ///     Gets or sets the required form factor.
+-    ///     Use FormFactor.Unknown (default) to match any form factor.
++///     Use FormFactor.Unknown (default) to match any form factor.
++///     Current Core parsing can retain product flag bits, so exact base-value filters can miss flagged devices.
+     /// </summary>
+     public FormFactor FormFactor { get; set; } = FormFactor.Unknown;
+ 
+@@ -87,25 +92,28 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
+ 
+     /// <summary>
+     ///     Gets or sets the required connection type.
+-    ///     Use ConnectionType.Unknown (default) to match any connection type.
++///     Use ConnectionType.Unknown (default) to match any connection type.
++///     This filters device interfaces, not the transport selected by a later session.
+     /// </summary>
+     public ConnectionType ConnectionType { get; set; } = ConnectionType.Unknown;
+ 
+     /// <summary>
+-    ///     Gets or sets the required capability (must be enabled).
++///     Gets or sets the required capability (enabled over USB or NFC, independently of RequireUsb).
+     ///     Use DeviceCapabilities.None (default) to skip capability filtering.
+     /// </summary>
+     public DeviceCapabilities Capability { get; set; } = DeviceCapabilities.None;
+ 
+     /// <summary>
+     ///     Gets or sets whether FIPS-capable is required for the specified capability.
+-    ///     Use DeviceCapabilities.None (default) to skip FIPS-capable filtering.
++///     Use DeviceCapabilities.None (default) to skip FIPS-capable filtering.
++///     Current Core FIPS-tag mapping is incorrect; this filter cannot establish application approval.
+     /// </summary>
+     public DeviceCapabilities FipsCapable { get; set; } = DeviceCapabilities.None;
+ 
+     /// <summary>
+-    ///     Gets or sets whether FIPS-approved mode is required for the specified capability.
+-    ///     Use DeviceCapabilities.None (default) to skip FIPS-approved filtering.
++///     Gets or sets the required reported FIPS-approved application mask, not an operating mode.
++///     Use DeviceCapabilities.None (default) to skip FIPS-approved filtering.
++///     Current Core FIPS-tag mapping is incorrect; this filter cannot establish application approval.
+     /// </summary>
+     public DeviceCapabilities FipsApproved { get; set; } = DeviceCapabilities.None;
+ 
+@@ -130,7 +138,11 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
+     /// 
+     ///     [SkippableTheory]
+     ///     [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
+-    ///     public async Task Test(YubiKeyTestState device) { }
++///     public async Task ReadSelectedRange(YubiKeyTestState device)
++///     {
++///         var info = await device.Device.GetDeviceInfoAsync();
++///         Assert.Equal(device.SerialNumber, info.SerialNumber);
++///     }
+     ///         </code>
+     ///     </para>
+     /// </remarks>
+@@ -150,7 +162,7 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
+     ///         The placeholder's Device property uses lazy binding - when the test
+     ///         actually accesses Device during execution, it initializes the infrastructure,
+     ///         applies all filter criteria via <see cref="YubiKeyTestInfrastructure.FilterDevices"/>,
+-    ///         and binds to a matching YubiKey.
++///         and binds to the first matching authorized YubiKey.
+     ///     </para>
+     /// </remarks>
+     public override IEnumerable<object[]>
+@@ -172,4 +184,4 @@ public override IEnumerable<object[]>
+         };
+         yield return [YubiKeyTestState.CreateFilteredPlaceholder(criteria)];
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Tests.Shared/README.md w/src/Tests.Shared/README.md
+index 899e2777..9614db3b 100644
+--- i/src/Tests.Shared/README.md
++++ w/src/Tests.Shared/README.md
+@@ -18,6 +18,8 @@ The test infrastructure provides:
+ ```csharp
+ using Yubico.YubiKit.Tests.Shared;
+ using Yubico.YubiKit.Tests.Shared.Infrastructure;
++using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
++using Xunit;
+ 
+ public class MyIntegrationTests
+ {
+@@ -36,14 +38,23 @@ public class MyIntegrationTests
+     [WithYubiKey(MinFirmware = "5.7.0")]
+     public async Task ModernFeatures_RequireFirmware570(YubiKeyTestState state)
+     {
++        using var scpKeyParams = Scp03KeyParameters.Default;
+         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
+         {
+-            Assert.True(deviceInfo.FirmwareVersion.IsAtLeast(5, 7, 0));
+-        }, Scp03KeyParameters.Default);
++            var fresh = await mgmt.GetDeviceInfoAsync();
++            Assert.Equal(deviceInfo.SerialNumber, fresh.SerialNumber);
++        }, scpKeyParams: scpKeyParams);
+     }
+ }
+ ```
+ 
++The SCP example requires a SmartCard-capable dedicated key configured with those SCP03 keys; firmware
++alone does not establish that prerequisite. Each attribute yields one placeholder bound to the first
++matching authorized key. Multiple attributes bind independently, not once per connected key. Helpers
++pass cached `state.DeviceInfo`; query the session explicitly when testing fresh persisted settings.
++The caller owns the SCP parameters. The using scope outlives the awaited helper call, so the helper's
++session and connection are disposed before the parameters clear their owned key arrays.
++
+ ## Safety: Allow List
+ 
+ All integration tests verify the device serial number against an allow list before running any hardware operation.
+@@ -105,6 +116,12 @@ Test method
+ - Supports filters such as `MinFirmware`, `FormFactor`, `RequireUsb`, `RequireNfc`, `ConnectionType`, `Capability`, `FipsCapable`, `FipsApproved`, and `CustomFilter`.
+ - Returns placeholders during discovery so test discovery does not touch hardware.
+ 
++Use three-component firmware criteria such as `"5.7.0"`; malformed strings are currently ignored.
++`RequireUsb` and `Capability` are independent: the latter accepts an application enabled over USB or NFC.
++Current Core FIPS-tag decoding uses the wrong bit mapping, so the FIPS masks and derived filters cannot
++establish application approval. Product flag bits can remain in `FormFactor`, causing exact base-enum
++filters to miss flagged devices. `IsFips` is a separate manufacturing indicator, not an operating mode.
++
+ **YubiKeyTestState**
+ 
+ - Wraps `IYubiKey` plus cached `DeviceInfo`.
+@@ -144,11 +161,25 @@ public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState sta
+ 
+ ### Filtered Test
+ 
++This example uses the SecurityDomain integration project's helper, not a helper shipped in Tests.Shared.
++To compile it, reference `Yubico.YubiKit.SecurityDomain.IntegrationTests` and its normal dependencies,
++or link that project's actual [TestStateExtensions.cs](../SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs)
++with a SecurityDomain project reference. Import the helper namespace shown below.
++
++Execution requires a dedicated, allow-listed SmartCard key supporting Security Domain and SCP03, with
++device state suitable for the helper's reset and subsequent authentication using SCP03 defaults. The
++helper resets Security Domain before reading key information, destroying custom Security Domain key
++configuration. The 5.3.0 minimum and exposed SmartCard filter do not prove application support, key
++configuration or successful reset; the helper explicitly opens SmartCard rather than relying on the filter to pin it.
++
+ ```csharp
++using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
++
+ [SkippableTheory]
+-[WithYubiKey(MinFirmware = "5.7.2", Capability = DeviceCapabilities.SecurityDomain)]
+-public async Task Scp11_ModernDevice_ReturnsKeyInfo(YubiKeyTestState state)
++[WithYubiKey(MinFirmware = "5.3.0", ConnectionType = ConnectionType.SmartCard)]
++public async Task Scp03_AfterReset_ReturnsKeyInfo(YubiKeyTestState state)
+ {
++    using var scpKeyParams = Scp03KeyParameters.Default;
+     await state.WithSecurityDomainSessionAsync(
+         resetBeforeUse: true,
+         async session =>
+@@ -156,10 +187,14 @@ public async Task Scp11_ModernDevice_ReturnsKeyInfo(YubiKeyTestState state)
+             var keyInfo = await session.ListKeyInformationAsync();
+             Assert.NotEmpty(keyInfo);
+         },
+-        scpKeyParams: Scp03KeyParameters.Default);
++        scpKeyParams: scpKeyParams);
+ }
+ ```
+ 
++Keep the caller-owned SCP parameters alive through the awaited helper; that helper disposes its
++sessions/connection, not the supplied parameters. This example supplies SCP03 defaults and reads key
++information; it does not demonstrate an SCP11 handshake.
++
+ ### Custom Filter
+ 
+ ```csharp
+@@ -175,14 +210,38 @@ public async Task RunsOnlyOnProductionKeyRange(YubiKeyTestState state)
+ {
+     await state.WithManagementAsync(async (mgmt, info) =>
+     {
+-        Assert.True(info.SerialNumber > 10_000_000);
++        var freshInfo = await mgmt.GetDeviceInfoAsync();
++        Assert.True(freshInfo.SerialNumber > 10_000_000);
++        Assert.Equal(info.SerialNumber, freshInfo.SerialNumber);
+     });
+ }
+ ```
+ 
+ ## Common Helper Pattern
+ 
+-Application helpers should create the transport explicitly, create the session, invoke the action, and dispose in the same visible flow:
++Application helpers should keep connection/session ownership visible. The Management helper uses its
++device extension to create an owned session, passes cached `state.DeviceInfo`, and disposes that session
++and hidden connection when the callback completes. Its optional arguments are `configuration`,
++`scpKeyParams`, `preferredConnection` and `cancellationToken`, in that order. Name policy arguments.
++To test a transport, filter one concrete row, pin it and assert what was opened:
++
++```csharp
++[SkippableTheory]
++[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
++public async Task ReadMetadata_OverOtpHid(YubiKeyTestState state)
++{
++    await state.WithManagementAsync(async (mgmt, _) =>
++    {
++        Assert.Equal(ConnectionType.HidOtp, mgmt.ConnectionType);
++        var info = await mgmt.GetDeviceInfoAsync();
++        Assert.Equal(state.SerialNumber, info.SerialNumber);
++    }, preferredConnection: state.ConnectionType);
++}
++```
++
++An unfiltered state's connection set may have multiple flags and is not a valid single preference.
++Default Management selection chooses one exposed interface (SmartCard, HID FIDO, then HID OTP), with
++no fallback after open/initialization failure. For a SmartCard-only applet, direct borrowing is useful:
+ 
+ ```csharp
+ public static async Task WithOathAsync(
+@@ -260,4 +319,5 @@ discovery result only hold on a single-key rig; prefer key-count-agnostic invari
+ 
+ - Devices must be connected before the test runner starts.
+ - Allow-list violations call `Environment.Exit(-1)` by design.
+-- Each `[WithYubiKey]` attribute produces one placeholder that binds to a matching authorized device at execution.
++- Each `[WithYubiKey]` attribute produces one placeholder that binds to the first matching authorized
++  device at execution; multiple attributes are not deduplicated by physical key.
+diff --git i/src/Tests.Shared/YubiKeyTestStateExtensions.cs w/src/Tests.Shared/YubiKeyTestStateExtensions.cs
+index 8a730aa2..789430d4 100644
+--- i/src/Tests.Shared/YubiKeyTestStateExtensions.cs
++++ w/src/Tests.Shared/YubiKeyTestStateExtensions.cs
+@@ -38,9 +38,10 @@ public static class YubiKeyTestStateExtensions
+         ///     Automatically handles connection and session lifecycle.
+         /// </summary>
+         /// <param name="action">
+-        ///     Action to execute with the management session and device info.
++        ///     Action to execute with the initialized session and cached <c>state.DeviceInfo</c>.
++        ///     The helper does not refresh this metadata; query the session for current persisted settings.
+         /// </param>
+-        /// <param name="configuration">Optional configuration </param>
++        /// <param name="configuration">Optional protocol configuration.</param>
+         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
+         /// <param name="preferredConnection">
+         ///     Pins the session to a specific transport. <c>null</c> uses Management's default order
+@@ -48,18 +49,19 @@ public static class YubiKeyTestStateExtensions
+         ///     <para>
+         ///         Pass this whenever a test's meaning depends on WHICH transport it runs over.
+         ///         <c>[WithYubiKey(ConnectionType = X)]</c> does NOT pin the transport — it is a device
+-        ///         FILTER, and a composite key exposing SmartCard matches a HID request. Without this
+-        ///         parameter such a test silently runs over SmartCard on any composite key and quietly
+-        ///         proves nothing about HID.
++        ///         filter. A composite key can expose both SmartCard and the requested HID interface.
++        ///         Without a pin, Management can select SmartCard; that does not exercise HID.
++        ///         Assert <c>mgmt.ConnectionType</c> to verify the interface actually opened.
+         ///     </para>
+         /// </param>
+         /// <param name="cancellationToken">Cancellation token.</param>
+         /// <example>
+         ///     <code>
+-        /// [YubiKeyTheory]
+-        /// public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestDevice device)
++        /// [SkippableTheory]
++        /// [WithYubiKey]
++        /// public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state)
+         /// {
+-        ///     await device.WithManagementAsync(async (mgmt, info) =>
++        ///     await state.WithManagementAsync(async (mgmt, info) =>
+         ///     {
+         ///         var deviceInfo = await mgmt.GetDeviceInfoAsync();
+         ///         Assert.Equal(info.SerialNumber, deviceInfo.SerialNumber);
+@@ -95,17 +97,22 @@ public async Task WithManagementAsync(
+         ///     Automatically handles connection and session lifecycle.
+         /// </summary>
+         /// <param name="action">
+-        ///     Synchronous action to execute with the management session and device info.
++        ///     Synchronous action to execute with the initialized session and cached <c>state.DeviceInfo</c>.
+         /// </param>
+-        /// <param name="configuration"></param>
++        /// <param name="configuration">Optional protocol configuration.</param>
+         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
++        /// <param name="preferredConnection">
++        ///     Optional concrete transport pin. A device filter alone does not pin the session.
++        ///     Assert the session's <c>ConnectionType</c> when transport matters.
++        /// </param>
+         /// <param name="cancellationToken">Cancellation token.</param>
+         /// <example>
+         ///     <code>
+-        /// [YubiKeyTheory]
+-        /// public async Task CheckDeviceProperties(YubiKeyTestDevice device)
++        /// [SkippableTheory]
++        /// [WithYubiKey]
++        /// public async Task CheckDeviceProperties(YubiKeyTestState state)
+         /// {
+-        ///     await device.WithManagementAsync((mgmt, info) =>
++        ///     await state.WithManagementAsync((mgmt, info) =>
+         ///     {
+         ///         Assert.True(info.SerialNumber > 0);
+         ///         Assert.NotEqual(FormFactor.Unknown, info.FormFactor);
+@@ -143,14 +150,15 @@ await state.WithManagementAsync(
+         /// <param name="cancellationToken">Cancellation token.</param>
+         /// <example>
+         ///     <code>
+-        /// [YubiKeyTheory]
+-        /// public async Task SendApdu_Success(YubiKeyTestDevice device)
++        /// [SkippableTheory]
++        /// [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
++        /// public async Task ReadMetadata_WithBorrowedConnection(YubiKeyTestState state)
+         /// {
+-        ///     await device.WithConnectionAsync(async connection =>
++        ///     await state.WithConnectionAsync(async connection =>
+         ///     {
+-        ///         var apdu = new CommandApdu(0x00, 0xA4, 0x04, 0x00);
+-        ///         var response = await connection.TransmitAsync(apdu);
+-        ///         Assert.True(response.IsSuccess);
++        ///         await using var session = await ManagementSession.CreateAsync(connection);
++        ///         var info = await session.GetDeviceInfoAsync();
++        ///         Assert.Equal(state.SerialNumber, info.SerialNumber);
+         ///     });
+         /// }
+         ///     </code>
+@@ -187,4 +195,4 @@ await state.WithConnectionAsync(connection =>
+             }, cancellationToken).ConfigureAwait(false);
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Tests.TestProject/Controllers/DiTestController.cs w/src/Tests.TestProject/Controllers/DiTestController.cs
+index 2ef74a97..6aea5e0f 100644
+--- i/src/Tests.TestProject/Controllers/DiTestController.cs
++++ w/src/Tests.TestProject/Controllers/DiTestController.cs
+@@ -6,7 +6,9 @@ namespace TestProject.Controllers;
+ 
+ /// <summary>
+ ///     Example controller demonstrating YubiKey integration with ASP.NET Core.
+-///     Shows proper resource management, error handling, and cancellation support.
++///     Uses the one-shot device-info extension, which disposes its temporary session/connection.
++///     Handles no-device explicitly and forwards the request token; connection/query failures propagate
++///     to the host. The response's legacy session-name string is not a current SDK type.
+ /// </summary>
+ [ApiController]
+ [Route("di/controller")]
+@@ -38,4 +40,4 @@ public async Task<IActionResult> Get(CancellationToken cancellationToken)
+             YubiKey = yubiInfo
+         });
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/YubiOtp/examples/OtpTool/DeviceHelper.cs w/src/YubiOtp/examples/OtpTool/DeviceHelper.cs
+index 0b6d5be2..e5b0edbb 100644
+--- i/src/YubiOtp/examples/OtpTool/DeviceHelper.cs
++++ w/src/YubiOtp/examples/OtpTool/DeviceHelper.cs
+@@ -49,8 +49,10 @@ public record DeviceSelection(
+ /// </summary>
+ /// <remarks>
+ /// OTP is available over both SmartCard (CCID/NFC) and OTP HID (USB keyboard interface).
+-/// When a single physical YubiKey is connected, it may appear on both transports;
+-/// this selector deduplicates by serial number and prefers SmartCard for richer protocol support.
++/// Discovery groups proven interfaces into physical keys; this selector filters that result rather
++/// than deduplicating by serial. Session creation uses the SDK's SmartCard-first default.
++/// Management metadata lookup is best-effort and can select either HID route when SmartCard is absent.
++/// Current Core product-flag retention can produce unnamed form factors; display does not prove family eligibility.
+ /// </remarks>
+ public static class DeviceHelper
+ {

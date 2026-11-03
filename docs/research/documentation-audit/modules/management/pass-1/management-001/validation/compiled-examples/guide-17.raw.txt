@@ -1,0 +1,16 @@
+[SkippableTheory]
+[WithYubiKey(Capability = DeviceCapabilities.Piv)]
+public async Task PivCapability_EnabledDevices_Accessible(YubiKeyTestState state)
+{
+    Assert.True(state.HasCapability(DeviceCapabilities.Piv));
+
+    await state.WithManagementAsync(async (mgmt, cachedInfo) =>
+    {
+        var info = await mgmt.GetDeviceInfoAsync();
+
+        // Verify PIV is enabled on USB or NFC
+        bool pivEnabled = (info.UsbEnabled & DeviceCapabilities.Piv) != 0 ||
+                         (info.NfcEnabled & DeviceCapabilities.Piv) != 0;
+        Assert.True(pivEnabled);
+    });
+}

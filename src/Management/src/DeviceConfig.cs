@@ -27,7 +27,9 @@ namespace Yubico.YubiKit.Management;
 ///         This is the write-side counterpart of <see cref="DeviceInfo" />: <see cref="UsbEnabled" /> and
 ///         <see cref="NfcEnabled" /> use the same <see cref="DeviceCapabilities" /> flags that
 ///         <see cref="DeviceInfo.UsbEnabled" /> and <see cref="DeviceInfo.NfcEnabled" /> report, so a
-///         configuration is usually derived from what the key says:
+///         configuration can be derived from what the key reports to preserve applications you do not
+///         intend to change. This example disables OTP over USB and assumes another supported USB
+///         application remains enabled and the configuration is not locked:
 ///     </para>
 ///     <code>
 ///     var info = await session.GetDeviceInfoAsync();
@@ -35,9 +37,11 @@ namespace Yubico.YubiKit.Management;
 ///     await session.SetDeviceConfigAsync(config, new SetDeviceConfigOptions { Reboot = true });
 ///     </code>
 ///     <para>
-///         Single-property limits are checked when the property is set. Rules that involve the whole
-///         configuration, such as keeping at least one USB application enabled, are checked by
-///         <see cref="Validate" /> when the configuration is applied.
+///         Timeout limits are checked when the property is assigned. When the configuration is applied,
+///         <see cref="Validate" /> rejects <see cref="UsbEnabled" /> set to <see cref="DeviceCapabilities.None" />.
+///         These checks do not verify firmware or application support on the selected device. Check
+///         <see cref="DeviceInfo.UsbSupported" /> and <see cref="DeviceInfo.NfcSupported" /> before choosing
+///         application masks, and keep at least one supported USB application enabled.
 ///     </para>
 /// </remarks>
 public sealed record DeviceConfig
@@ -60,16 +64,34 @@ public sealed record DeviceConfig
     private readonly ushort? _autoEjectTimeout;
     private readonly byte? _challengeResponseTimeout;
 
-    /// <summary>Applications to enable over USB. At least one must remain enabled.</summary>
+    /// <summary>Gets the complete replacement set of applications enabled over USB.</summary>
+    /// <remarks>
+    ///     A set bit enables the application; a cleared bit disables it. A <see langword="null" /> value
+    ///     leaves the current set unchanged. Keep at least one application supported by
+    ///     <see cref="DeviceInfo.UsbSupported" /> enabled. <see cref="Validate" /> rejects
+    ///     <see cref="DeviceCapabilities.None" />, but does not check the mask against the device's supported applications.
+    /// </remarks>
     public DeviceCapabilities? UsbEnabled { get; init; }
 
-    /// <summary>Applications to enable over NFC.</summary>
+    /// <summary>Gets the complete replacement set of applications enabled over NFC.</summary>
+    /// <remarks>
+    ///     A set bit enables the application; a cleared bit disables it. A <see langword="null" /> value
+    ///     leaves the current set unchanged. <see cref="DeviceCapabilities.None" /> requests that all NFC
+    ///     applications be disabled. Choose applications supported by <see cref="DeviceInfo.NfcSupported" />.
+    ///     This setting is separate from the temporary restriction controlled by <see cref="NfcRestricted" />.
+    /// </remarks>
     public DeviceCapabilities? NfcEnabled { get; init; }
 
     /// <summary>
-    ///     Seconds before the smart card is ejected in CCID-only mode with <see cref="Core.Devices.DeviceFlags.TouchEject" />
-    ///     set (0-3600).
+    ///     Gets the inactivity timeout, in seconds, before the smart card is automatically ejected in
+    ///     CCID-only mode with <see cref="Core.Devices.DeviceFlags.TouchEject" /> set.
     /// </summary>
+    /// <remarks>
+    ///     Zero disables automatic ejection; <see langword="null" /> leaves the current timeout unchanged.
+    ///     Setting this property does not enable <see cref="Core.Devices.DeviceFlags.TouchEject" />.
+    ///     The SDK accepts 0 through 3600 seconds; this is an SDK limit, not a firmware maximum.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The assigned value exceeds 3600 seconds.</exception>
     public ushort? AutoEjectTimeout
     {
         get => _autoEjectTimeout;
@@ -82,7 +104,12 @@ public sealed record DeviceConfig
         }
     }
 
-    /// <summary>Seconds that YubiOTP challenge-response waits for touch (0-60).</summary>
+    /// <summary>Gets the timeout, in seconds, for YubiOTP challenge-response operations that require touch.</summary>
+    /// <remarks>
+    ///     Zero restores the default timeout of 15 seconds; <see langword="null" /> leaves the current
+    ///     timeout unchanged. The SDK accepts 0 through 60 seconds; this is an SDK limit, not a firmware maximum.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The assigned value exceeds 60 seconds.</exception>
     public byte? ChallengeResponseTimeout
     {
         get => _challengeResponseTimeout;
@@ -95,18 +122,40 @@ public sealed record DeviceConfig
         }
     }
 
-    /// <summary>Device flags (touch-eject, remote wakeup).</summary>
+    /// <summary>Gets the complete replacement device flags, including touch-eject and remote wakeup.</summary>
+    /// <remarks>
+    ///     Set bits enable the corresponding settings; cleared bits disable them. A <see langword="null" />
+    ///     value leaves the current flags unchanged. Touch-eject applies only in CCID-only mode.
+    /// </remarks>
     public DeviceFlags? DeviceFlags { get; init; }
 
-    /// <summary>Whether NFC is restricted until the key has been used over USB.</summary>
+    /// <summary>Gets the temporary NFC restriction request for NFC-capable YubiKeys with firmware 5.7 or later.</summary>
+    /// <remarks>
+    ///     <para>
+    ///         Set to <see langword="true" /> to request restricted NFC mode. In this mode, NFC permits
+    ///         only reading the URL configured by Yubico in the NDEF tag. To remove the restriction, connect
+    ///         the key to USB power for three seconds; no touch or application operation is required.
+    ///         This does not change the application mask in <see cref="NfcEnabled" />.
+    ///     </para>
+    ///     <para>
+    ///         A <see langword="null" /> value omits the restriction setting. A <see langword="false" />
+    ///         value sends an explicit zero byte for the setting. Use USB power to remove the restriction.
+    ///         The SDK does not check this property's firmware or NFC-support requirements before sending it.
+    ///     </para>
+    /// </remarks>
     public bool? NfcRestricted { get; init; }
 
     /// <summary>
-    ///     Checks the rules that involve more than one property. Called by
-    ///     <see cref="ManagementSession.SetDeviceConfigAsync" /> before anything is sent to the key.
+    ///     Checks that <see cref="UsbEnabled" /> is not explicitly set to <see cref="DeviceCapabilities.None" />.
+    ///     Called by <see cref="ManagementSession.SetDeviceConfigAsync" /> before anything is sent to the key.
     /// </summary>
+    /// <remarks>
+    ///     A <see langword="null" /> USB mask leaves the current setting unchanged and passes this check.
+    ///     This method does not check mask widths, supported applications or firmware requirements.
+    ///     Timeout ranges are checked separately when their properties are assigned.
+    /// </remarks>
     /// <exception cref="InvalidOperationException">
-    ///     <see cref="UsbEnabled" /> is <see cref="DeviceCapabilities.None" />: the key would become unreachable over USB.
+    ///     <see cref="UsbEnabled" /> is <see cref="DeviceCapabilities.None" />.
     /// </exception>
     public void Validate()
     {
@@ -114,7 +163,12 @@ public sealed record DeviceConfig
             throw new InvalidOperationException("At least one USB capability must be enabled.");
     }
 
-    /// <summary>Serializes to wire format: a one-byte length followed by the TLVs in a fixed order (reboot and unlock first), not sorted by tag.</summary>
+    /// <summary>
+    ///     Serializes to wire format: a one-byte length followed by the TLVs in this encoder's fixed order
+    ///     (reboot and unlock first when present), not sorted by tag.
+    /// </summary>
+    /// <returns>A caller-owned buffer that must be cleared after transmission because it can contain lock codes.</returns>
+    /// <remarks>Intermediate encoded buffers are cleared before this method returns.</remarks>
     internal Memory<byte> GetBytes(SetDeviceConfigOptions? options = null)
     {
         Validate();

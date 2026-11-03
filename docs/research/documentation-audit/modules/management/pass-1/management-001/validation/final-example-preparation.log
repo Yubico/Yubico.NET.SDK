@@ -1,0 +1,6 @@
+$ python3 docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/extract-examples.py
+Prepared 63 compile-only groups; 83 explicitly excluded blocks. No compilation or execution.
+$ python3 docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/prepare-project-context.py
+Prepared SDK xUnit2 context: 26 exact wrapper sources; 37 strict-raw groups; no build/restore/execution.
+$ python3 docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/prepare-project-context.py --check
+PASS: prepared source/document/configuration/reference hashes still match; no compilation performed.

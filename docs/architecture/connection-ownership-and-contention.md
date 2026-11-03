@@ -2,7 +2,8 @@
 
 This document defines the SDK's in-process ownership contract:
 
-> A physical YubiKey has at most one live connection, which hosts at most one live session.
+> A grouped physical YubiKey has at most one live connection across its known member interfaces within
+> this process. A connection hosts at most one live session.
 > Connections and sessions are reused sequentially; overlapping ownership attempts throw.
 
 Cross-process contention is outside this registry's scope. Another process holding PC/SC may still
@@ -82,8 +83,10 @@ a hidden connection and call `OwnConnection()`, transferring that connection's l
 session.
 
 `DisposalGate` tears down the physical connection before releasing its registry lease. Disposal runs
-once; all sync and async disposal callers observe the same completion and exception. There is no
-finalizer backstop. A leaked connection can retain the physical-device lease for the process lifetime.
+once; all sync and async disposal callers observe the same completion and exception. Sessions have no
+finalizer recovery. Some built-in connections request best-effort native finalizer cleanup; it is not a
+guarantee of timely teardown or lease release. A leaked connection can retain the physical-device lease
+for the process lifetime. Dispose deterministically to observe completion and failures.
 
 ## Discovery coordination
 
@@ -109,8 +112,8 @@ supported transport in the applet's documented order is selected. The SDK opens 
 propagate without trying another interface. If native open succeeds but session initialization fails,
 the newly opened connection is disposed before the exception escapes.
 
-`ManagementSession.Transport` reports the transport actually opened. Keep its constructor assignment
-when resolving upstream changes; upstream does not expose an equivalent transport property.
+The inherited `ManagementSession.ConnectionType` reports the transport actually opened. Assert it when
+a test's meaning depends on exercising a specific interface; filtering the device alone does not pin it.
 
 ## Protocol exchange overlap
 

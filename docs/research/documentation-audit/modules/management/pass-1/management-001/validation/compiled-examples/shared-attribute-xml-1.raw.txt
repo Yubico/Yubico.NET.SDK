@@ -1,0 +1,27 @@
+
+    // Single configuration
+    [SkippableTheory]
+    [WithYubiKey(MinFirmware = "5.7.2")]
+    public async Task ReadModernDevice(YubiKeyTestState device)
+    {
+        var info = await device.Device.GetDeviceInfoAsync();
+        Assert.Equal(device.SerialNumber, info.SerialNumber);
+    }
+
+    // Multiple configurations
+    [SkippableTheory]
+    [WithYubiKey(MinFirmware = "5.0.0")]
+    [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
+    [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
+    public async Task ReadIndependentlyBoundRows(YubiKeyTestState device)
+    {
+        var info = await device.Device.GetDeviceInfoAsync();
+        Assert.Equal(device.SerialNumber, info.SerialNumber);
+    }
+
+    // Custom filter example
+    public class ProductionKeysOnly : IYubiKeyFilter
+    {
+        public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;
+        public string GetDescription() => "Production keys (SN > 10000000)";
+    }

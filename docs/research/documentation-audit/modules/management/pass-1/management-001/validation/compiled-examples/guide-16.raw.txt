@@ -1,0 +1,15 @@
+[SkippableTheory]
+[WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
+public async Task BioFormFactor_MetadataMatchesCache(YubiKeyTestState state)
+{
+    Assert.Equal(FormFactor.UsbABiometricKeychain, state.FormFactor);
+
+    await state.WithManagementAsync(async (mgmt, cachedInfo) =>
+    {
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(FormFactor.UsbABiometricKeychain, info.FormFactor);
+
+        // Metadata checks only; this does not exercise biometric operations or prove MPE eligibility.
+        Assert.True(info.FirmwareVersion.Major >= 5);
+    });
+}

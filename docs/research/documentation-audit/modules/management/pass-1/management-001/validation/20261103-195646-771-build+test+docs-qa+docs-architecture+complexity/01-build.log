@@ -1,0 +1,52 @@
+$ dotnet build Yubico.YubiKit.sln -c Release
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.YubiOtp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll
+  Yubico.YubiKit.SecurityDomain -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll
+  Yubico.YubiKit.YubiHsm -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.OpenPgp -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Piv -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.Oath -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Ctap2 -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll
+  Yubico.YubiKit.YubiOtp.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.UnitTests.dll
+  Yubico.YubiKit.Tests.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Cli.Shared -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll
+  Yubico.YubiKit.YubiHsm.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.IntegrationTests.dll
+  Yubico.YubiKit.WebAuthn -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll
+  Yubico.YubiKit.Management.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.dll
+  Yubico.YubiKit.SecurityDomain.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.UnitTests.dll
+  Yubico.YubiKit.SecurityDomain.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.dll
+  Yubico.YubiKit.YubiHsm.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.UnitTests.dll
+  Yubico.YubiKit.Core.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.dll
+  Yubico.YubiKit.Ctap2.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+  Yubico.YubiKit.OpenPgp.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.UnitTests.dll
+  Yubico.YubiKit.OpenPgp.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.IntegrationTests.dll
+  Yubico.YubiKit.YubiOtp.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.IntegrationTests.dll
+  Yubico.YubiKit.Cli.Commands -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll
+  Yubico.YubiKit.Piv.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll
+  Yubico.YubiKit.WebAuthn.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.UnitTests.dll
+  Yubico.YubiKit.Ctap2.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll
+  Yubico.YubiKit.WebAuthn.IntegrationTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.dll
+  Yubico.YubiKit.Piv.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Piv.UnitTests.dll
+  Yubico.YubiKit.PublicApi.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/bin/Release/net10.0/Yubico.YubiKit.PublicApi.UnitTests.dll
+  Yubico.YubiKit.Core.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll
+  Yubico.YubiKit.Management.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Management.UnitTests.dll
+  FidoTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool.dll
+  OtpTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool.dll
+  OathTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.dll
+  ManagementTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll
+  OpenPgpTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool.dll
+  Yubico.YubiKit.Cli.YkTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli/YkTool/bin/Release/net10.0/yk.dll
+  HsmAuthTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.dll
+  Yubico.YubiKit.Tests.TestProject -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Tests.TestProject/bin/Release/net10.0/Yubico.YubiKit.Tests.TestProject.dll
+  PivTool -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.dll
+  Yubico.YubiKit.Oath.UnitTests -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:11.02

@@ -170,11 +170,19 @@ explicit `PreferredConnectionType` of `SmartCard`; that is an accepted setting, 
 
 ```csharp
 // Default order (no override): Management prefers SmartCard.
-await using var mgmt = await device.CreateManagementSessionAsync();
+await using (var mgmt = await device.CreateManagementSessionAsync())
+{
+    var info = await mgmt.GetDeviceInfoAsync();
+    Console.WriteLine(info.FirmwareVersion);
+}
 
 // Explicit override: force HID OTP for this session.
-await using var otpMgmt = await device.CreateManagementSessionAsync(
-    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
+await using (var otpMgmt = await device.CreateManagementSessionAsync(
+    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }))
+{
+    var info = await otpMgmt.GetDeviceInfoAsync();
+    Console.WriteLine(info.FirmwareVersion);
+}
 ```
 
 Override semantics, validated before any connect:
@@ -225,11 +233,12 @@ methods open a connection the caller never sees, so the session they return owns
 internal `ApplicationSession.OwnConnection()` path. A direct `Session.CreateAsync(connection)` borrows the
 caller-created connection and does not dispose it. Use `await using` for both connections and sessions.
 Missing connection disposal can retain the physical-device lease for the connection lifetime
-(potentially the process lifetime), blocking later opens; there is intentionally no finalizer backstop,
-because deterministic disposal is the only point at which native-handle teardown and lease release can be
-ordered reliably.
+(potentially the process lifetime), blocking later opens. Sessions have no finalizer recovery. Some
+built-in connections request best-effort native cleanup from a finalizer, but that is not a guarantee of
+timely teardown or lease release. Use deterministic disposal to observe completion and failures.
 
-Opening any grouped member claims all known stable member interface IDs. When conservative discovery cannot
+The registry is process-local; it does not exclude other processes' handles. Opening any grouped member
+claims all known stable member interface IDs. When conservative discovery cannot
 prove grouping, a standalone record retains a one-element scope; the SDK does not guess associations.
 
 macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. SDK

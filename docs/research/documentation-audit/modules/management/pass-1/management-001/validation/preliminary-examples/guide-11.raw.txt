@@ -1,0 +1,12 @@
+await using var mgmt = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken);
+var info = await mgmt.GetDeviceInfoAsync(cancellationToken);
+var remaining = info.UsbEnabled & ~DeviceCapabilities.Otp;
+if ((remaining & info.UsbSupported) == DeviceCapabilities.None)
+{
+    throw new InvalidOperationException("Preserve a supported USB application.");
+}
+await mgmt.SetDeviceConfigAsync(
+    new DeviceConfig { UsbEnabled = remaining },
+    new SetDeviceConfigOptions { Reboot = true },
+    cancellationToken);
+// End this scope; rediscover the intended key and open a fresh connection after reboot.

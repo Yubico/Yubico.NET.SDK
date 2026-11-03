@@ -1,0 +1,1931 @@
+diff --git i/src/Management/CLAUDE.md w/src/Management/CLAUDE.md
+index 2e499183..df01b528 100644
+--- i/src/Management/CLAUDE.md
++++ w/src/Management/CLAUDE.md
+@@ -12,20 +12,23 @@ This file provides Claude-specific guidance for working with the Management modu
+ 
+ ## Module Context
+ 
+-`ApplicationSession` prepares the protocol before Management probes firmware. On HID FIDO, the backend reads
++`ApplicationSession` prepares the protocol before Management probes firmware. On HID FIDO, the session reads
+ the firmware from the already-initialized channel and does not initialize it again. SCP requested on either
+ HID transport is rejected before the first initialization exchange.
+ 
+-The Management module is the **primary interface for YubiKey device configuration**. It's unique because:
++The Management module is the primary interface for YubiKey device configuration:
+ 
+ 1. **Device-level operations**: Works across all applications (PIV, OATH, FIDO2, etc.)
+-2. **No reset mechanism**: Unlike SecurityDomain/PIV, Management has no automatic test reset
+-3. **Destructive operations**: Configuration changes cause device reboots and can lock out applications
+-4. **Rich device filtering**: Test infrastructure provides declarative device selection
++2. **No automatic test reset**: Test setup does not reset device configuration. The public combined reset
++   operation is for Bio Multi-protocol Edition, not a generic test cleanup primitive.
++3. **Persistent operations**: Configuration changes can disable applications; an explicit reboot request
++   can disconnect the device and disrupt other sessions.
++4. **Shared device filtering**: Tests use the same Tests.Shared harness as other applets.
+ 
+ **Key Files:**
+ - [`ManagementSession.cs`](src/ManagementSession.cs) - Main session class
+-- [`DeviceConfig.cs`](src/DeviceConfig.cs) - Configuration model (~190 lines)
++- [`DeviceConfig.cs`](src/DeviceConfig.cs) - Nullable configuration settings and TLV encoding
++- [`SetDeviceConfigOptions.cs`](src/SetDeviceConfigOptions.cs) - Reboot request and per-command lock codes
+ - [`IYubiKeyExtensions.cs`](src/IYubiKeyExtensions.cs) - Convenience extensions for `IYubiKey`
+ 
+ Read-only device metadata types returned by `GetDeviceInfoAsync` (`DeviceInfo`, `DeviceCapabilities`, `DeviceFlags`, `FormFactor`, `VersionQualifier`) live in `Core/src/Devices` under `Yubico.YubiKit.Core.Devices`.
+@@ -34,47 +37,43 @@ Read-only device metadata types returned by `GetDeviceInfoAsync` (`DeviceInfo`,
+ 
+ ### The `[WithYubiKey]` Attribute System
+ 
+-This module showcases the most **powerful test filtering system** in the SDK. Unlike SecurityDomain/PIV which test features, Management tests **device characteristics**.
++Use the shared filters to select dedicated, allow-listed devices with the characteristics needed by an
++operation. Filters describe cached device metadata; they do not prove operation support or pin a session's
++transport. Use three-component firmware strings, for example `"5.3.0"`; malformed strings are currently
++ignored by the shared parser rather than rejected.
+ 
+ ```csharp
+-/// <summary>
+-/// [WithYubiKey] provides declarative device filtering with rich criteria:
+-/// - Firmware version ranges
+-/// - Form factor matching
+-/// - Capability requirements
+-/// - Transport requirements (USB/NFC)
+-/// - FIPS status filtering
+-/// </summary>
+ [SkippableTheory]
+ [WithYubiKey(
+-    MinFirmware = "5.3.0",        // Only firmware >= 5.3.0
+-    FormFactor = FormFactor.UsbAKeychain,  // Only USB-A keychains
+-    Capability = DeviceCapabilities.Piv,   // Must have PIV enabled
+-    RequireUsb = true,            // USB transport required
+-    FipsCapable = DeviceCapabilities.Piv   // FIPS-capable for PIV
+-)]
+-public async Task MyTest(YubiKeyTestState state)
++    MinFirmware = "5.3.0",
++    Capability = DeviceCapabilities.Piv,
++    RequireUsb = true)]
++public async Task ReadMetadata_ForMatchingKey(YubiKeyTestState state)
+ {
+-    // Test runs ONLY on devices matching ALL criteria
+-    // Each matching device in appsettings.json runs the test once
++    await state.WithManagementAsync(async (mgmt, _) =>
++    {
++        var info = await mgmt.GetDeviceInfoAsync();
++        Assert.Equal(state.SerialNumber, info.SerialNumber);
++    });
+ }
+ ```
+ 
+ ### Multi-Device Testing Pattern
+ 
+-Tests execute **once per matching device**:
++Each `[WithYubiKey]` attribute produces one placeholder row. At execution, the row binds to the first
++matching authorized device, not to every matching device. With three allowed serials and one attribute,
++there is still only one row. Multiple attributes bind independently and can select the same physical key.
++For a genuine device matrix, use explicit selection criteria or a separately designed enumeration test;
++do not infer matrix coverage from the number of connected keys.
+ 
+ ```csharp
+-// appsettings.json has: [12345678, 23456789, 34567890]
+-// Test runs 3 times (once per device)
+ [SkippableTheory]
+ [WithYubiKey]
+-public async Task AllDevices_Test(YubiKeyTestState state) { }
+-
+-// If only device 12345678 is USB-C, test runs once
+-[SkippableTheory]
+-[WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
+-public async Task UsbC_Test(YubiKeyTestState state) { }
++public async Task FirstMatchingKey_ReturnsSameSerial(YubiKeyTestState state)
++{
++    var info = await state.Device.GetDeviceInfoAsync();
++    Assert.Equal(state.SerialNumber, info.SerialNumber);
++}
+ ```
+ 
+ ### Multiple Attribute Pattern
+@@ -88,20 +87,27 @@ Use multiple `[WithYubiKey]` attributes to test across different configurations:
+ [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
+ public async Task MultiFormFactor_Test(YubiKeyTestState state)
+ {
+-    // Test runs on all devices with ANY of these form factors
+-    // Each matching device runs the test once
++    // Three independently bound rows; each row requires its attribute's form factor.
++    var info = await state.Device.GetDeviceInfoAsync();
++    Assert.Equal(state.FormFactor, info.FormFactor);
+ }
+ ```
+ 
++Current Core parsing can retain product flag bits in `FormFactor`, so exact base-enum filters can miss
++flagged devices. The enum itself is not a flags enum. FIPS capability/approval tags also currently use
++the wrong bit mapping; `FipsCapable`/`FipsApproved` filters and their derived helpers cannot establish
++application approval. `IsFips` is a distinct manufacturing indicator, not an operating mode. Do not
++use these fields to identify Bio MPE reset eligibility.
++
+ ## YubiKeyTestState - Device Context
+ 
+-The `YubiKeyTestState` provides **rich device information** without querying:
++`YubiKeyTestState` exposes cached metadata from shared device initialization. These property reads do
++not refresh it. The first state access can trigger lazy discovery/binding; a later configuration write
++does not update the cache. Use an explicit session read for current persisted configuration.
+ 
+ ```csharp
+-public async Task MyTest(YubiKeyTestState state)
+-{
+-    // Pre-populated device information (no query needed)
+-    int serial = state.SerialNumber;
++    // Composable fragment inside a test receiving YubiKeyTestState state.
++    int? serial = state.SerialNumber;
+     FirmwareVersion fw = state.FirmwareVersion;
+     FormFactor form = state.FormFactor;
+     bool isUsb = state.IsUsbTransport;
+@@ -110,12 +116,9 @@ public async Task MyTest(YubiKeyTestState state)
+     
+     // Capability checks
+     bool hasPiv = state.HasCapability(DeviceCapabilities.Piv);
+-    bool isFipsCapable = state.IsFipsCapable(DeviceCapabilities.Piv);
+-    bool isFipsApproved = state.IsFipsApproved(DeviceCapabilities.Piv);
+     
+     // Firmware version checks
+     bool isModern = state.FirmwareVersion.IsAtLeast(5, 3, 0);
+-}
+ ```
+ 
+ ## IYubiKey Extension Methods - C# 14 Extensions
+@@ -153,15 +156,24 @@ public static class IYubiKeyExtensions
+ 
+ The extension class provides three levels of abstraction:
+ 
++Consumer fragments below are independent scopes, not one concatenated program. They assume an
++`IYubiKey yubiKey` and `CancellationToken cancellationToken`, with no other live connection to that key.
++Import Management, Core.Devices, Core.Sessions and the typed transport namespaces needed by the fragment.
++Test fragments assume a `YubiKeyTestState state` from the allow-listed shared harness.
++
+ #### 1. High-Level: GetDeviceInfoAsync
+ 
+ **Use when:** You only need device information, one-time query
+ 
+ ```csharp
+-// Extension handles everything
+ var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken: cancellationToken);
++```
+ 
+-// Equivalent manual code:
++For an explicitly SmartCard-capable key, the manual alternative is below. The one-shot extension can
++also select HID, so this is not an equivalent transport choice for every key. Compile/run the alternatives
++independently, after any previous session has ended.
++
++```csharp
+ await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+ await using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+ var deviceInfo = await mgmt.GetDeviceInfoAsync(cancellationToken);
+@@ -181,7 +193,9 @@ var deviceInfo = await mgmt.GetDeviceInfoAsync(cancellationToken);
+ 
+ #### 2. High-Level: SetDeviceConfigAsync
+ 
+-**Use when:** Single configuration change, don't need to query device first
++**Use when:** One configuration write whose supported settings and authorization are already known.
++This fragment assumes an unlocked device that supports PIV over USB. Its full replacement mask disables
++other USB applications; use read/modify/write if they must remain enabled.
+ 
+ ```csharp
+ var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv };
+@@ -192,16 +206,20 @@ await yubiKey.SetDeviceConfigAsync(
+     new SetDeviceConfigOptions
+     {
+         Reboot = true,
+-        CurrentLockCode = lockCode // If device is locked
+     },
+     cancellationToken: cancellationToken);
+ 
+-// Equivalent manual code:
++```
++
++The explicit SmartCard alternative uses the same reboot request and unlocked-device prerequisite:
++
++```csharp
++var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv };
+ await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+ await using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+ await mgmt.SetDeviceConfigAsync(
+     config,
+-    new SetDeviceConfigOptions { Reboot = reboot, CurrentLockCode = lockCode },
++    new SetDeviceConfigOptions { Reboot = true },
+     cancellationToken);
+ ```
+ 
+@@ -221,13 +239,17 @@ await mgmt.SetDeviceConfigAsync(
+ 
+ **Use when:** Multiple operations, batch queries, need control over session lifetime
+ 
++SCP parameters are caller-owned and borrowed for initialization. This example creates them before the
++session so the session is disposed first, then the parameter scope disposes its owned static key arrays.
++
+ ```csharp
+-// Manual session management for multiple operations
++// Requires a SmartCard-capable key configured with the supplied SCP03 keys.
++using var scpParameters = Scp03KeyParameters.Default;
+ await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(
+     new SessionCreationOptions
+     {
+         ProtocolConfiguration = customProtocolConfig,
+-        ScpKeyParameters = Scp03KeyParameters.Default
++        ScpKeyParameters = scpParameters
+     },
+     cancellationToken: cancellationToken);
+ 
+@@ -236,7 +258,7 @@ var info1 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+ // Session stays open for both calls
+ 
+-// YOU are responsible for disposing
++// At scope end, the session is disposed before the caller-owned SCP parameters.
+ ```
+ 
+ **Lifecycle:**
+@@ -249,8 +271,8 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+ **Tradeoffs:**
+ - ✅ Reuse session for multiple operations (more efficient)
+ - ✅ Full control over SCP and protocol configuration
+-- ✅ Batch operations with consistent state
+-- ❌ Must manage session disposal (use `using` statement)
++- ✅ One connection held across sequential operations (not an atomic transaction)
++- ❌ Must manage session disposal (prefer `await using`)
+ - ❌ More verbose code
+ 
+ ### Decision Matrix: Which Pattern to Use?
+@@ -266,47 +288,33 @@ var info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+ | Need logging | Any | Configure `YubiKitLogging.LoggerFactory` (or DI) once at startup |
+ | Testing (YubiKeyTestState) | `state.WithManagementAsync()` | Test helper, automatic cleanup |
+ 
+-### Common Anti-Patterns
++### Choosing a useful lifetime
+ 
+-#### ❌ Creating session for single operation
++A session for one operation is valid; the one-shot extension simply saves lifetime-management code.
++Separate one-shot calls also remain appropriate when an application intentionally releases the key
++between operations. Reuse a session when a sequence should hold one connection, but do not assume that
++reuse makes several public calls atomic or prevents another process from accessing the hardware.
++
++For a query followed by a write, keep the read/modify/write intent visible. This example removes OTP
++while preserving the other reported USB bits and rejects a resulting empty set:
+ 
+ ```csharp
+-// DON'T DO THIS - unnecessary complexity
+-await using var mgmtSession = await yubiKey.CreateManagementSessionAsync();
+-var info = await mgmtSession.GetDeviceInfoAsync();
+-// (end of method, session disposed)
+-
+-// DO THIS INSTEAD - simpler
+-var info = await yubiKey.GetDeviceInfoAsync();
++await using var mgmt = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken);
++var info = await mgmt.GetDeviceInfoAsync(cancellationToken);
++var remaining = info.UsbEnabled & ~DeviceCapabilities.Otp;
++if ((remaining & info.UsbSupported) == DeviceCapabilities.None)
++{
++    throw new InvalidOperationException("Preserve a supported USB application.");
++}
++await mgmt.SetDeviceConfigAsync(
++    new DeviceConfig { UsbEnabled = remaining },
++    new SetDeviceConfigOptions { Reboot = true },
++    cancellationToken);
++// End this scope; rediscover the intended key and open a fresh connection after reboot.
+ ```
+ 
+-#### ❌ Multiple high-level calls
+-
+-```csharp
+-// DON'T DO THIS - creates 3 separate sessions/connections
+-var info1 = await yubiKey.GetDeviceInfoAsync();
+-var info2 = await yubiKey.GetDeviceInfoAsync();
+-var info3 = await yubiKey.GetDeviceInfoAsync();
+-
+-// DO THIS INSTEAD - reuse session
+-using var mgmt = await yubiKey.CreateManagementSessionAsync();
+-var info1 = await mgmt.GetDeviceInfoAsync();
+-var info2 = await mgmt.GetDeviceInfoAsync();
+-var info3 = await mgmt.GetDeviceInfoAsync();
+-```
+-
+-#### ❌ Mixing patterns unnecessarily
+-
+-```csharp
+-// DON'T DO THIS - two separate sessions
+-var info = await yubiKey.GetDeviceInfoAsync();
+-await yubiKey.SetDeviceConfigAsync(config, reboot: true);
+-
+-// DO THIS INSTEAD - single session
+-using var mgmt = await yubiKey.CreateManagementSessionAsync();
+-var info = await mgmt.GetDeviceInfoAsync();
+-await mgmt.SetDeviceConfigAsync(config, reboot: true);
+-```
++The example assumes unlocked configuration. For protected writes, supply the current 16-byte code in
++each operation's options and clear caller-owned buffers in `finally`, independently of hardware cleanup.
+ 
+ ### Implementation Details
+ 
+@@ -329,31 +337,35 @@ The difference is **who manages the session lifecycle**:
+ Direct `ManagementSession.CreateAsync(connection)` validates that `connection` is SmartCard, FIDO
+ HID, or OTP HID before the `ApplicationSession` base attaches its one-session guard. It borrows the
+ connection and never disposes it. The creator must dispose the connection with `await using`; there
+-is no finalizer backstop. One live session per connection is allowed, and sequential reuse after
++is no session finalizer recovery; a connection's best-effort native finalizer is not a lifetime guarantee.
++One live session per connection is allowed, and sequential reuse after
+ session disposal is supported.
+ 
+-A grouped physical YubiKey admits one live connection across CCID, FIDO HID, and OTP HID. Management
++A direct factory does not select another interface: `PreferredConnectionType`, if supplied, asserts
++the already-open connection's type. A mismatch fails rather than reconnecting. Failed direct creation
++cleans up session/protocol state without disposing that borrowed connection; its creator still owns it.
++
++Within the process, a grouped physical YubiKey admits one live connection across its known member
++interfaces. Ungrouped records cannot establish cross-interface exclusion. Management
+ selects exactly one transport from `SmartCard -> HidFido -> HidOtp` (or an explicit override) and opens it
+ once. `ConnectionInUseException`, PC/SC sharing errors, and initialization failures propagate without
+ trying another interface.
+ 
+ ### Testing Considerations
+ 
+-When writing tests, prefer `YubiKeyTestState.WithManagementAsync()` over any of these:
++Use `YubiKeyTestState.WithManagementAsync()` when the test needs a session and the shared state's
++cached metadata. Direct sessions and one-shot reads are also valid when they better express the test.
+ 
+ ```csharp
+-// ✅ Best for tests - automatic cleanup, cached device info
++// Session helper: automatic cleanup and cached device info.
+ await state.WithManagementAsync(async (mgmt, deviceInfo) =>
+ {
+-    // mgmt is ready, deviceInfo is pre-queried
++    var freshInfo = await mgmt.GetDeviceInfoAsync();
++    Assert.Equal(deviceInfo.SerialNumber, freshInfo.SerialNumber);
+ });
+ 
+-// ⚠️ Acceptable but less convenient
+-using var mgmt = await state.Device.CreateManagementSessionAsync();
+-var info = await mgmt.GetDeviceInfoAsync();
+-
+-// ❌ Avoid in tests - less efficient
+-var info = await state.Device.GetDeviceInfoAsync();
++// A one-shot alternative, after the helper's session has been disposed:
++var oneShotInfo = await state.Device.GetDeviceInfoAsync();
+ ```
+ 
+ ## Test Helper Extensions
+@@ -362,24 +374,16 @@ var info = await state.Device.GetDeviceInfoAsync();
+ 
+ Located in [`YubiKeyTestStateExtensions.cs`](../Tests.Shared/YubiKeyTestStateExtensions.cs) (shared test infrastructure):
+ 
+-```csharp
+-extension(YubiKeyTestState state)
+-{
+-    public async Task WithManagementAsync(
+-        Func<ManagementSession, DeviceInfo, Task> action,
+-        ScpKeyParameters? scpKeyParams = null,
+-        ProtocolConfiguration? configuration = null,
+-        CancellationToken cancellationToken = default)
+-    {
+-        // Automatically:
+-        // 1. Creates connection
+-        // 2. Creates Management session (with optional SCP)
+-        // 3. Queries device info
+-        // 4. Calls your action
+-        // 5. Disposes everything properly
+-    }
+-}
+-```
++The async overload accepts `(action, configuration, scpKeyParams, preferredConnection,
++cancellationToken)`, where `action` is `Func<ManagementSession, DeviceInfo, Task>`, `configuration` is
++`ProtocolConfiguration?`, `scpKeyParams` is `ScpKeyParameters?`, and `preferredConnection` is
++`ConnectionType?`. Optional values default to null and the token defaults to `default`. Use named
++arguments for policy settings to avoid confusing protocol configuration with SCP parameters.
++
++It creates an owned session through `state.Device.CreateManagementSessionAsync`, calls the action with
++`state.DeviceInfo`, then disposes the session and hidden connection. It does not refresh the callback's
++metadata. Session initialization may perform a separate firmware-discovery read; that read is not the
++source of the cached callback value.
+ 
+ Usage pattern:
+ 
+@@ -390,7 +394,7 @@ public async Task MyTest(YubiKeyTestState state) =>
+     await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+     {
+         // mgmt = ManagementSession (already initialized)
+-        // cachedDeviceInfo = DeviceInfo from initial query
++        // cachedDeviceInfo = shared test-state snapshot, not a query at helper entry
+         
+         var freshInfo = await mgmt.GetDeviceInfoAsync();
+         Assert.Equal(cachedDeviceInfo.SerialNumber, freshInfo.SerialNumber);
+@@ -420,15 +424,16 @@ public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state) =>
+ ```csharp
+ [SkippableTheory]
+ [WithYubiKey(MinFirmware = "5.7.0")]
+-public async Task ModernFeature_Firmware57Plus_Works(YubiKeyTestState state) =>
++public async Task DeviceInfo_Firmware57Plus_HasVersionDisplay(YubiKeyTestState state) =>
+     await state.WithManagementAsync(async (mgmt, cachedInfo) =>
+     {
+         // This test only runs on firmware >= 5.7.0
+         Assert.True(state.FirmwareVersion.IsAtLeast(5, 7, 0));
+         
+-        // Test modern features
++        // Check the reported display value, not generic firmware feature support.
+         var info = await mgmt.GetDeviceInfoAsync();
+-        Assert.NotNull(info.VersionQualifier);
++        Assert.False(string.IsNullOrWhiteSpace(info.VersionName));
++        Assert.Equal(cachedInfo.SerialNumber, info.SerialNumber);
+     });
+ ```
+ 
+@@ -437,7 +442,7 @@ public async Task ModernFeature_Firmware57Plus_Works(YubiKeyTestState state) =>
+ ```csharp
+ [SkippableTheory]
+ [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
+-public async Task BiometricFeatures_BioKeys_Present(YubiKeyTestState state)
++public async Task BioFormFactor_MetadataMatchesCache(YubiKeyTestState state)
+ {
+     Assert.Equal(FormFactor.UsbABiometricKeychain, state.FormFactor);
+     
+@@ -446,7 +451,7 @@ public async Task BiometricFeatures_BioKeys_Present(YubiKeyTestState state)
+         var info = await mgmt.GetDeviceInfoAsync();
+         Assert.Equal(FormFactor.UsbABiometricKeychain, info.FormFactor);
+         
+-        // Bio keys have modern firmware
++        // Metadata checks only; this does not exercise biometric operations or prove MPE eligibility.
+         Assert.True(info.FirmwareVersion.Major >= 5);
+     });
+ }
+@@ -473,35 +478,14 @@ public async Task PivCapability_EnabledDevices_Accessible(YubiKeyTestState state
+ }
+ ```
+ 
+-### 5. FIPS Testing
++### 5. FIPS Metadata Tests
+ 
+-```csharp
+-[SkippableTheory]
+-[WithYubiKey(FipsCapable = DeviceCapabilities.Piv)]
+-public async Task FipsCapable_PivDevices_HasSupport(YubiKeyTestState state)
+-{
+-    Assert.True(state.IsFipsCapable(DeviceCapabilities.Piv));
+-    
+-    await state.WithManagementAsync(async (mgmt, cachedInfo) =>
+-    {
+-        var info = await mgmt.GetDeviceInfoAsync();
+-        Assert.True((info.FipsCapabilities & DeviceCapabilities.Piv) != 0);
+-    });
+-}
+-
+-[SkippableTheory]
+-[WithYubiKey(FipsApproved = DeviceCapabilities.Piv)]
+-public async Task FipsApproved_PivDevices_InFipsMode(YubiKeyTestState state)
+-{
+-    Assert.True(state.IsFipsApproved(DeviceCapabilities.Piv));
+-    
+-    await state.WithManagementAsync(async (mgmt, cachedInfo) =>
+-    {
+-        var info = await mgmt.GetDeviceInfoAsync();
+-        Assert.True((info.FipsApproved & DeviceCapabilities.Piv) != 0);
+-    });
+-}
+-```
++The shared harness exposes `FipsCapable` and `FipsApproved` filters, but the current Core decoder uses
++the application-bit mapping for the distinct FIPS-tag encoding. The derived masks and filters are not
++reliable evidence of application approval. Comparing a filter result with the same decoded property
++only checks consistency of that interpretation; it does not validate the mapping or approved operations.
++Keep decoder/filter fixture work separate from hardware operation tests. `IsFips` comes from a distinct
++manufacturing flag and must not be relabeled as an active FIPS mode.
+ 
+ ### 6. Multi-Criteria Filtering
+ 
+@@ -522,96 +506,79 @@ public async Task AdvancedFiltering_ModernUsbPiv_Works(YubiKeyTestState state)
+     {
+         var info = await mgmt.GetDeviceInfoAsync();
+         
+-        // All criteria verified by infrastructure
++        // RequireUsb and Capability are independent: PIV may be enabled over USB OR NFC.
+         Assert.True(info.FirmwareVersion.Major >= 5);
+-        Assert.True((info.UsbEnabled & DeviceCapabilities.Piv) != 0);
++        Assert.True(((info.UsbEnabled | info.NfcEnabled) & DeviceCapabilities.Piv) != 0);
+     });
+ }
+ ```
+ 
+ ## Critical Warnings for Configuration Tests
+ 
+-### ⚠️ DO NOT Write Configuration Change Tests
+-
+-**NEVER** write tests that modify device configuration in the shared test suite:
+-
+-```csharp
+-// ❌ NEVER DO THIS - Breaks other tests
+-[SkippableTheory]
+-[WithYubiKey]
+-public async Task BAD_TEST_DisableCapabilities(YubiKeyTestState state) =>
+-    await state.WithManagementAsync(async (mgmt, cachedInfo) =>
+-    {
+-        var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Otp }; // Disables PIV!
+-        
+-        // This BREAKS all PIV tests that run after this!
+-        await mgmt.SetDeviceConfigAsync(config, reboot: true);
+-    });
+-```
+-
+-**Why this is bad:**
+-1. Device reboots (3+ second delay, disrupts test flow)
+-2. Changes persist across test runs
+-3. Breaks tests that depend on specific capabilities
+-4. Requires manual device reconfiguration to fix
+-5. May lock configuration if lock code is set
+-
+-### Safe Configuration Testing
++### Plan configuration changes and restoration
+ 
+ The problem with capability changes is **blast radius across the suite**, not destruction as such. An allow-listed device is a dedicated test device and destructive operations against it are expected — see [docs/TESTING.md](../../docs/TESTING.md#hardware-authorization), which is canonical: *"the allow list is the boundary, and adding a second one would only obscure it."* Do **not** gate these behind an extra environment variable.
+ 
+-What makes `SetDeviceConfigAsync` special is that it reboots the device and can disable applications other tests depend on. So the rule is restore-what-you-changed, not don't-run-it:
++`SetDeviceConfigAsync` changes persistent state and can disable applications other tests depend on.
++It reboots only when requested. The rule is restore what you changed, not prohibit configuration tests:
+ 
+-1. **Restore configuration** in a `finally` — always, including on failure
+-2. **Document the test** clearly as configuration-mutating
+-3. **Account for the reboot** — the device disappears and re-enumerates
+-4. **Avoid lock codes** in tests; a set lock code can make the change unrecoverable
++1. Save every field the test changes, including lock state when testing lock behavior. Do not copy all
++   `DeviceInfo` fields blindly: read/write types differ, notably the challenge-response timeout bytes.
++2. Preserve a usable recovery transport and document the suite-wide effects of disabling an application.
++3. Attempt restoration in `finally`, including after a failed assertion, and read back restored persisted
++   settings when possible. A `finally` guarantees an attempt, not successful hardware recovery.
++4. Keep secret zeroing in an independent `finally` so a restoration failure cannot bypass it. A newly set
++   lock code must remain available until it has been removed or replaced successfully.
++5. If requesting reboot, end old session/connection scopes, rediscover the same authorized key, then open
++   fresh scopes for verification and restoration. A fixed delay cannot reconnect an old session.
+ 
+ ```csharp
+-// ✅ Safe pattern for configuration testing
+ [SkippableTheory]
+ [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
+-public async Task ConfigurationChange_AppliesAndRestores(YubiKeyTestState state)
++public async Task AutoEject_PersistsAndRestorationIsAttempted(YubiKeyTestState state)
+ {
+-    using var connection = await state.Device.ConnectAsync<ISmartCardConnection>();
+-    using var mgmt = await ManagementSession.CreateAsync(connection);
+-    
+-    // Save original config
+-    var originalInfo = await mgmt.GetDeviceInfoAsync();
+-    var originalUsb = originalInfo.UsbEnabled;
+-    var originalNfc = originalInfo.NfcEnabled;
+-    
++    await using var mgmt = await state.Device.CreateManagementSessionAsync(
++        new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
++    var original = await mgmt.GetDeviceInfoAsync();
++    Assert.False(original.IsLocked); // Example prerequisite: unlocked dedicated test key.
++    Assert.InRange(original.AutoEjectTimeout, (ushort)0, (ushort)3600); // Must be restorable through this SDK.
++    ushort changed = original.AutoEjectTimeout == 30 ? (ushort)31 : (ushort)30;
+     try
+     {
+-        // Perform destructive test
+-        var testConfig = new DeviceConfig { /* ... */ };
+-        await mgmt.SetDeviceConfigAsync(testConfig, reboot: true);
+-        
+-        // Wait for reboot
+-        await Task.Delay(3000);
+-        
+-        // Verify changes
+-        // ...
++        await mgmt.SetDeviceConfigAsync(new DeviceConfig { AutoEjectTimeout = changed });
++        var persisted = await mgmt.GetDeviceInfoAsync();
++        Assert.Equal(changed, persisted.AutoEjectTimeout);
+     }
+     finally
+     {
+-        // Restore original configuration
+-        var restoreConfig = new DeviceConfig { UsbEnabled = originalUsb, NfcEnabled = originalNfc };
+-        await mgmt.SetDeviceConfigAsync(restoreConfig, reboot: true);
++        await mgmt.SetDeviceConfigAsync(new DeviceConfig { AutoEjectTimeout = original.AutoEjectTimeout });
++        var restored = await mgmt.GetDeviceInfoAsync();
++        Assert.Equal(original.AutoEjectTimeout, restored.AutoEjectTimeout);
+     }
+ }
+ ```
+ 
++This example checks persistence without reboot, not actual CCID ejection or activation timing. It changes
++only the field it saves. A restoration exception can replace the original assertion failure; production
++test cleanup should preserve both failure reports. For reboot/discovery invariants, read
++`ReconfigurationDiscoveryInvariantTests.cs`; its assertions concern completed scan snapshots, not proof
++that every transient hardware state was observed. Do not generalize its timing to all keys or platforms.
++
++For transport-specific read tests, use a concrete attribute row, pass
++`preferredConnection: state.ConnectionType` to the helper and assert `mgmt.ConnectionType`. A default row
++can contain several connection flags and must not be passed as a single transport preference. See
++[transport-specific testing](../../docs/TESTING.md#transport-specific-testing) for the complete pattern.
++
+ ## Performance Considerations
+ 
+ ### Device Info Caching
+ 
+-`WithManagementAsync` queries `DeviceInfo` once and passes it to your action:
++`WithManagementAsync` passes the existing `state.DeviceInfo` snapshot to your action:
+ 
+ ```csharp
+ await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+ {
+-    // cachedDeviceInfo was queried once at the start
++    // cachedDeviceInfo comes from shared device initialization, not helper entry.
+     // Use it instead of re-querying if data hasn't changed
+     
+     var serial = cachedDeviceInfo.SerialNumber; // ✅ Fast
+@@ -640,25 +607,23 @@ await state.WithManagementAsync(async (mgmt, info) =>
+ 
+ ## Model Patterns
+ 
+-### DeviceInfo - Immutable Record Struct
++### DeviceInfo - Core-owned snapshot
++
++`DeviceInfo` is Core's readonly record struct. Optional serials remain nullable and absent optional
++fields can have default values. It is not a mutable session cache. Compare the fields relevant to the
++test rather than assuming two snapshots must match every field during reconfiguration:
+ 
+ ```csharp
+-public readonly record struct DeviceInfo
+-{
+-    public required bool IsSky { get; init; }
+-    public required FormFactor FormFactor { get; init; }
+-    public int? SerialNumber { get; init; }
+-    public required FirmwareVersion FirmwareVersion { get; init; }
+-    // ... more properties
+-}
+-
+-// Usage: immutable, compared by value
+ var info1 = await mgmt.GetDeviceInfoAsync();
+ var info2 = await mgmt.GetDeviceInfoAsync();
+ Assert.Equal(info1.SerialNumber, info2.SerialNumber); // Value comparison
+ ```
+ 
+-### DeviceConfig - Configuration Builder
++### DeviceConfig - Partial configuration record
++
++Null properties are omitted. Non-null masks and flags replace their whole field. This fragment assumes
++an unlocked key supporting both requested USB applications; it disables the other USB apps. TouchEject
++only takes effect in CCID-only mode, so PIV/OATH is a deliberate choice rather than a generic default:
+ 
+ ```csharp
+ var config = new DeviceConfig
+@@ -676,6 +641,17 @@ await session.SetDeviceConfigAsync(
+     cancellationToken);
+ ```
+ 
++Timeout setters validate 0–3600 auto-eject seconds and 0–60 challenge-response seconds at assignment.
++Those are SDK limits, not firmware maxima. Zero disables auto-eject or requests the challenge-response
++default (normally 15 seconds), respectively. Auto-eject is an inactivity timer; assigning it does not
++implicitly set TouchEject. `Validate()` only rejects exact USB `None`; it does not validate supported
++device applications or all arbitrary enum widths. Check supported masks before writing.
++
++`CurrentLockCode` authorizes each protected command. `NewLockCode` sets/replaces the code, or removes
++it when all sixteen bytes are zero; an empty memory value is invalid. The session borrows both buffers
++until completion and clears its encoded configuration in `finally`; callers still clear source secrets.
++See the README's [lock procedure](README.md#lock-the-configuration) for complete cleanup examples.
++
+ ### Capability Flags Pattern
+ 
+ ```csharp
+@@ -705,38 +681,36 @@ var info = await mgmt.GetDeviceInfoAsync();
+ 
+ // Different version representations
+ FirmwareVersion fw = info.FirmwareVersion;           // e.g., 5.7.2
+-VersionQualifier qualifier = info.VersionQualifier;  // e.g., "5.7.2-rc1"
++VersionQualifier qualifier = info.VersionQualifier;  // e.g., 5.7.2.beta.1
+ string versionName = info.VersionName;               // Display string
+ 
+ // VersionQualifierType enum values:
+ // - Final: Production release (5.7.2)
+-// - ReleaseCandidate: RC version (5.7.2-rc1)
+-// - Development: Dev version (5.7.2-dev)
++// - Alpha: Alpha prerelease (5.7.2.alpha.1)
++// - Beta: Beta prerelease (5.7.2.beta.1)
+ ```
+ 
++Use `FirmwareVersion` for comparisons and `VersionName` for display. `VersionName` uses bare firmware
++for Final, whereas `VersionQualifier.ToString()` itself includes the qualifier type and iteration.
++
+ ### Feature Gating by Firmware
+ 
+-```csharp
+-private static readonly Feature FeatureDeviceReset =
+-    new("Device Reset", 5, 6, 0);
++Operations call inherited `EnsureSupports(FeatureSetConfig)` (5.0.0) or
++`EnsureSupports(FeatureDeviceReset)` (5.6.0). Do not replace these with a local `_version` comparison:
++the inherited check uses effective `FirmwareVersion`, including overrides and major-zero development
++version policy. Alpha/Beta display qualifiers are not that major-zero bypass.
+ 
+-private void EnsureSupports(Feature feature)
+-{
+-    if (_version < feature.Version)
+-        throw new NotSupportedException(
+-            $"{feature.Name} requires firmware {feature.Version} or later");
+-}
+-
+-// Usage
+-public async Task ResetDeviceAsync(CancellationToken cancellationToken = default)
+-{
+-    EnsureSupports(FeatureDeviceReset); // Throws if firmware < 5.6.0
+-    // ...
+-}
+-```
++`FeatureDeviceInfo` declares the supported 4.1.0 read minimum, but current read/factory paths do not
++enforce it. Do not promise `NotSupportedException` before an unsupported read. Likewise the generic
++write check does not enforce NFC restriction's 5.7/NFC-hardware conditions or device-supported masks.
++Reset's firmware check is not a family check: the documented operation resets Bio MPE's FIDO/PIV
++applications and shared PIN, retaining the F9 attestation slot. It does not establish Management lock
++recovery. Do not add a family policy or reset-success lifecycle policy as a documentation-only change.
+ 
+ ## Session Initialization Pattern
+ 
++The following is a source excerpt inside `ManagementSession`, not a standalone consumer factory:
++
+ ```csharp
+ public static Task<ManagementSession> CreateAsync(
+     IConnection connection,
+@@ -758,12 +732,26 @@ Firmware resolution prefers DeviceInfo and falls back to the discovered version.
+ the session constructs its backend with the effective protocol. The shared factory marks the session ready only
+ after this callback completes. SCP parameters are callback inputs, not session fields.
+ 
++The metadata probe occurs before optional SCP establishment; an SCP-authenticated return does not imply
++that every initialization exchange used SCP. A firmware override does not skip probes. It configures
++the protocol and feature checks, while `_version` retains discovered metadata for subsequent reads.
++Non-cancellation metadata-probe failures fall back to the transport version; cancellation propagates.
++
++Management does not forward `SessionCreationOptions.UserPresencePrompt` to its base constructor. The
++service is unused here: this module does not retain, invoke or dispose it. Do not copy the general
++retained-prompt contract into Management-specific ownership explanations.
++
+ ## Architecture - Backend Pattern
+ 
+-ManagementSession uses the **Backend pattern** to abstract protocol differences between SmartCard (APDU) and FIDO (CTAP HID) without branching in public APIs.
++ManagementSession uses backends for configuration writes and the internal legacy mode operation across
++SmartCard, FIDO HID and OTP HID. Shared device-info reads deliberately bypass the backend; reset deliberately
++branches to SmartCard. Keep those responsibilities visible rather than adding unsupported methods to every backend.
+ 
+ ### Internal Structure
+ 
++These declarations belong to different internal scopes (session field and backend interface); they
++illustrate the source structure rather than a consumer program:
++
+ ```csharp
+ // ManagementSession delegates transport-specific work to a backend
+ private IManagementBackend _backend = null!;
+@@ -783,67 +771,59 @@ dispatching reset or rejecting HID; HID backends do not expose unsupported reset
+ 
+ ### Implementations
+ 
+-- **SmartCardBackend**: Encodes operations as ISO 7816 APDUs (INS: 0x1D, 0x1C, 0x16, 0x1F)
+-- **FidoHidBackend**: Encodes operations as CTAP vendor commands (0xC2, 0xC3, 0xC0)
+-- **OtpBackend**: Encodes operations as OTP HID slot commands with CRC validation
++- **SmartCardBackend**: SELECT probe, configuration write (INS 0x1C), internal mode (0x16), reset (0x1F).
++- **FidoHidBackend**: Configuration/mode vendor commands (0xC3/0xC0); Core reads info with 0xC2.
++- **OtpBackend**: Delegates slot commands to Core's OTP HID protocol. Core handles report framing and
++  outbound frame CRC; `DeviceInfoReader` checks inbound device-info CRC, not this backend.
+ 
+ ### Key Design Decisions
+ 
+ 1. **Backend owns nothing**: it borrows the protocol and holds no disposable state, so it is not `IDisposable`. Ownership rule is Core's — see [Core CLAUDE.md](../Core/CLAUDE.md) gotcha #2 and the `IProtocol` doc comment: the session disposes the protocol, and whoever created the connection disposes it.
+ 2. **SCP wrapping works**: the backend can be recreated over an SCP-wrapped protocol without disposing anything.
+-3. **Zero branching**: all public methods delegate to `_backend`, so no protocol-specific logic leaks into business operations, and the session is testable against a fake `IManagementBackend`.
++3. **Narrow delegation**: writes share one backend contract; info reads use Core and reset is SmartCard-only.
++   There is no current public legacy `SetMode` surface, even though the backend retains that primitive.
+ 
+-This matches the Java yubikit-android Backend pattern where Backend doesn't implement Closeable. `ManagementBackendLifecycleTests` pins the non-disposable invariant.
++`ManagementBackendLifecycleTests` pins the non-disposable invariant. It does not prove zero branching,
++hardware feature support, or correctness of Core's multi-page reader.
+ 
+-### Why This Matters
++### Why the backend stays small
+ 
+-**Before (protocol branching):**
+-```csharp
+-if (_fidoProtocol is not null)
+-    result = await _fidoProtocol.SendCommandAsync(0xC2, data, ct);
+-else
+-    result = await _smartCardProtocol.TransmitAsync(apdu, ct);
+-```
+-
+-**After (backend delegation):**
+-```csharp
+-await _backend.WriteConfigAsync(config, ct);
+-```
++The session performs argument/firmware checks, builds the length-prefixed configuration and clears the
++encoded buffer in `finally`. The backend performs one transport write without owning the payload or
++protocol. This keeps the sensitive-buffer lifetime visible and avoids duplicating configuration policy
++across transports. Keep a test fake at that narrow seam when checking session behavior.
+ 
+ ## TLV Encoding/Decoding
+ 
+-Device info uses TLV (Tag-Length-Value) encoding:
++Device information uses TLV (Tag-Length-Value) encoding. The current reader is
++[`Core/src/Devices/DeviceInfoReader.cs`](../Core/src/Devices/DeviceInfoReader.cs), shared with discovery:
+ 
+-```csharp
+-// GetDeviceInfoAsync implements multi-page TLV retrieval
+-byte page = 0;
+-var allPagesTlvs = new List<Tlv>();
++1. Read page zero using the supplied protocol, then verify the one-byte declared response length against
++   the actual TLV body. OTP response CRC is checked before stripping its CRC trailer.
++2. Decode each page and reject duplicate more-data tags (0x10) within that page. A nonempty tag's final
++   byte supplies the remaining-page count, not a boolean `hasMore` flag.
++3. Accumulate non-pagination TLVs, request subsequent pages, and reject more data beyond the byte-sized
++   page index (256 pages). Each page is its own guarded exchange; callers must sequence public operations.
++4. Parse the accumulated metadata through `DeviceInfo.CreateFromTlvs`, with discovered firmware as the
++   session's fallback. Do not route reads through a nonexistent backend `ReadConfigAsync` method.
+ 
+-while (hasMoreData)
+-{
+-    // Backend abstracts protocol (APDU for SmartCard, CTAP for FIDO)
+-    var encodedResult = await _backend.ReadConfigAsync(page, cancellationToken);
+-    
+-    // Decode TLVs from response
+-    var pageTlvs = TlvHelper.DecodeList(encodedResult.AsSpan()[1..]);
+-    allPagesTlvs.AddRange(pageTlvs);
+-    
+-    // Check for "more data" indicator
+-    var moreData = pageTlvs.SingleOrDefault(t => t.Tag == 0x10);
+-    hasMoreData = moreData?.Length == 1 && moreData.Value.Span[0] == 1;
+-    ++page;
+-}
++Writes use one total-length byte followed by the modeled TLVs. Null fields are omitted, including a null
++NFC restriction. True/false restriction values encode 0x01/0x00 respectively, but the false request is not
++a verified NFC recovery procedure. On NFC-capable 5.7+ keys, documented recovery is USB power for three
++seconds; the NDEF URL remains readable while restricted. Do not invent a touch or reboot prerequisite.
+ 
+-// Parse all TLVs into DeviceInfo struct
+-return DeviceInfo.CreateFromTlvs(allPagesTlvs, _version);
+-```
++`DeviceConfig.GetBytes` emits a fixed local order (reboot/current authorization first when present), not
++a protocol-mandated sort order. The configuration reference contains a conflicting NFC write-tag row;
++current encoding uses 0x0E, not the reboot tag 0x0C. The exact-byte test's pinned sibling citation supports
++its fixture order, not a general conformance claim. TLV copies and the intermediate encoding are cleared
++locally; the returned encoded buffer escapes to the session, which clears it after the backend completes.
+ 
+ ## Debugging Tips
+ 
+ ### Enable Verbose Logging
+ 
+ ```csharp
+-var loggerFactory = LoggerFactory.Create(builder =>
++using var loggerFactory = LoggerFactory.Create(builder =>
+ {
+     builder.SetMinimumLevel(LogLevel.Trace);
+     builder.AddConsole();
+@@ -851,7 +831,7 @@ var loggerFactory = LoggerFactory.Create(builder =>
+ 
+ YubiKitLogging.LoggerFactory = loggerFactory;
+ 
+-using var mgmt = await ManagementSession.CreateAsync(
++await using var mgmt = await ManagementSession.CreateAsync(
+     connection);
+ ```
+ 
+@@ -859,7 +839,7 @@ using var mgmt = await ManagementSession.CreateAsync(
+ 
+ ```csharp
+ // Find all connected YubiKeys
+-var devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken);
++var devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken: cancellationToken);
+ foreach (var device in devices)
+ {
+     var info = await device.GetDeviceInfoAsync(cancellationToken: cancellationToken);
+@@ -874,18 +854,24 @@ var yubiKey = devices.SingleOrDefault(device => device.SerialNumber == 12345678)
+ 
+ ## Known Gotchas
+ 
+-1. **Configuration Lock**: Once locked, can only unlock with correct 16-byte code (no recovery on firmware <5.6)
+-2. **Reboot Required**: Capability changes require device reboot (~3 seconds, all sessions terminated)
+-3. **Enumeration Delay**: After reboot, wait 3+ seconds before re-enumerating device
+-4. **USB Capability Minimum**: Cannot disable all USB capabilities (at least one required)
+-5. **Form Factor Constants**: Form factor enum includes flags (0x80=FIPS, 0x40=SKY) in upper bits
+-6. **NFC Availability**: Not all YubiKeys have NFC; check `NfcSupported` before configuring NFC
+-7. **FIPS Mode Restrictions**: FIPS-approved devices have configuration restrictions
+-8. **Version from Select**: Firmware version from SELECT is less reliable than from DeviceInfo
++1. **Configuration lock**: Current-code authorization is per command. Losing the code has no documented
++   reset-based recovery; retain it securely until a replacement/removal write succeeds.
++2. **Reboot**: A reboot request is not factory reset. End old scopes and rediscover/reopen afterwards;
++   neither three seconds nor a discovery result's position proves the intended key is ready.
++3. **USB reachability**: Exact USB `None` is rejected; device-supported-mask and arbitrary-width validation
++   are not comprehensive. Preserve a supported application and a recovery route.
++4. **Metadata interpretation**: Flagged form factors can miss equality filters; current FIPS masks use the
++   wrong mapping. Do not derive approval, active mode or product-family eligibility from these filters.
++5. **NFC**: Check hardware and 5.7+ support for restriction; false encoding alone is not verified recovery.
++6. **Test proof**: Readback checks persisted metadata, not necessarily active interfaces. A broad
++   `ThrowsAnyAsync<Exception>` does not isolate authentication or lock enforcement. Existing restoration
++   and failure-path secret cleanup tests have gaps; do not describe an attempted write as guaranteed recovery.
++7. **Connection lifetime**: Registry exclusion is process-local and limited to proven groups. Dispose
++   every owned session/connection; do not rely on best-effort native finalization.
+ 
+ ## Related Modules
+ 
+-- **Core.YubiKey**: IYubiKey interface, device enumeration
+-- **Core.SmartCard**: Protocol abstractions, APDU handling
+-- **Core.SmartCard.Scp**: SCP03/SCP11 for secure management
++- **Core.Abstractions / Core.Devices**: IYubiKey, discovery and read-only metadata
++- **Core.Sessions**: ApplicationSession, options, effective firmware and lifetime
++- **Core.Protocols.SmartCard.Apdu / .Scp**: APDU handling and secure channels
+ - **Tests.Shared**: YubiKeyTestState, test infrastructure with `[WithYubiKey]` attribute
+diff --git i/src/Management/README.md w/src/Management/README.md
+index a086243a..3a187ddd 100644
+--- i/src/Management/README.md
++++ w/src/Management/README.md
+@@ -3,7 +3,8 @@
+ The Management application is the device-level control surface of a YubiKey. This package reads device
+ information - serial number, firmware, form factor, supported and enabled capabilities - and writes device
+ configuration: enabled applications per transport, timeouts, device flags, NFC restriction, and the
+-configuration lock code. Other modules talk to one application; this one decides which applications exist.
++configuration lock code. Other modules talk to one application; this one controls which supported applications
++are enabled on each transport. Configuration cannot add applications the hardware does not support.
+ 
+ > The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
+ > constraints.
+@@ -11,7 +12,7 @@ configuration lock code. Other modules talk to one application; this one decides
+ ## Requirements
+ 
+ - .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
+-- Any YubiKey with firmware 4.1.0 or later; writing configuration needs 5.0.0 or later.
++- Device-information reads support firmware 4.1.0 or later; writing configuration needs 5.0.0 or later.
+ - Transports: SmartCard (CCID, USB or NFC), HID FIDO, or HID OTP - the only module that runs over all three.
+ 
+ SCP is available only over SmartCard. Supplying `SessionCreationOptions.ScpKeyParameters` with a HID connection
+@@ -25,7 +26,12 @@ rejected without sending a reset command.
+ |---------|------------------|-----------|
+ | Read device information | 4.1.0 | SmartCard, HID FIDO, HID OTP |
+ | Write device configuration | 5.0.0 | SmartCard, HID FIDO, HID OTP |
+-| Factory reset (`ResetDeviceAsync`) | 5.6.0 | SmartCard (CCID) only |
++| Bio Multi-protocol Edition combined reset (`ResetDeviceAsync`) | 5.6.0 SDK gate | SmartCard (CCID) only |
++
++The read minimum is a support requirement, not a host-side preflight check: the SDK can send a read to an
++older key and propagate a device or parsing error. Writes and reset check the effective session firmware;
++passing those generic checks does not establish support for every field or device family. In particular,
++NFC restriction needs NFC-capable hardware with firmware 5.7 or later.
+ 
+ ## Installation
+ 
+@@ -47,14 +53,16 @@ using Yubico.YubiKit.Core.Sessions;
+ using Yubico.YubiKit.Management;
+ 
+ IYubiKey device = await YubiKeyManager.FindFirstAsync();
+-await using var session = await device.CreateManagementSessionAsync();
+-
+-var info = await session.GetDeviceInfoAsync();
+-Console.WriteLine($"Serial {info.SerialNumber}, firmware {info.FirmwareVersion}, {info.FormFactor}");
+-Console.WriteLine($"USB enabled: {info.UsbEnabled}");
++await using (var session = await device.CreateManagementSessionAsync())
++{
++    var info = await session.GetDeviceInfoAsync();
++    Console.WriteLine($"Serial {info.SerialNumber}, firmware {info.FirmwareVersion}, {info.FormFactor}");
++    Console.WriteLine($"USB enabled: {info.UsbEnabled}");
++}
+ ```
+ 
+-Later snippets assume these directives and a `device` obtained the same way. For a single operation, the
++Later snippets are independent alternatives, each assuming these directives and a `device` obtained the
++same way, with no previous connection/session still open. For a single operation, the
+ one-shot extensions `device.GetDeviceInfoAsync()` and `device.SetDeviceConfigAsync(...)` open a connection, act,
+ and dispose both.
+ 
+@@ -69,28 +77,63 @@ bool oathEnabledOverNfc = (info.NfcEnabled & DeviceCapabilities.Oath) != 0;
+ Console.WriteLine($"Configuration locked: {info.IsLocked}");
+ ```
+ 
+-`UsbSupported` and `NfcSupported` describe the hardware; `UsbEnabled` and `NfcEnabled` describe what is on now.
++`UsbSupported` and `NfcSupported` describe the hardware; `UsbEnabled` and `NfcEnabled` report enabled
++applications. After a configuration write, reported persisted values need not mean the active interfaces
++have already changed.
++
++The current Core decoder has two metadata limitations: FIPS capability/approval tags use the wrong bit
++mapping, so `FipsCapabilities`, `FipsApproved` and derived filters must not be used to establish application
++approval. `IsFips` is a separate manufacturing indicator, not an operating mode. Also, product flag bits
++can remain in `FormFactor`, so equality with a named base value can miss a flagged device.
+ 
+ ### Enable or disable applications
+ 
+ ```csharp
+-var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv | DeviceCapabilities.Oath };
++var info = await device.GetDeviceInfoAsync();
++var requested = DeviceCapabilities.Piv | DeviceCapabilities.Oath;
++if ((info.UsbSupported & requested) != requested)
++{
++    throw new NotSupportedException("This key does not support both requested USB applications.");
++}
++var config = new DeviceConfig { UsbEnabled = requested };
+ 
+ await using (var session = await device.CreateManagementSessionAsync())
+ {
+     await session.SetDeviceConfigAsync(config, new SetDeviceConfigOptions { Reboot = true });
+ }
+ 
+-// The key disconnects and re-enumerates. The session above is disposed; rescan before using the device again.
++// The session above is disposed. This pause is illustrative, not an enumeration guarantee.
+ await Task.Delay(TimeSpan.FromSeconds(3));
+ var rebooted = await YubiKeyManager.FindAllAsync(forceRescan: true);
+ ```
+ 
+-`DeviceConfig` is a record whose properties mirror `DeviceInfo`: `UsbEnabled`, `NfcEnabled`, `AutoEjectTimeout`,
++`UsbEnabled` and `NfcEnabled` are complete replacement sets, not lists of applications to add. The example
++disables every other USB application. Preserve a supported USB application and a recovery route; after
++reboot, select the same intended key from fresh discovery results before opening another session. Discovery
++order and a fixed delay do not establish device identity or readiness.
++
++`DeviceConfig` is a record with settings corresponding to `DeviceInfo`: `UsbEnabled`, `NfcEnabled`, `AutoEjectTimeout`,
+ `ChallengeResponseTimeout`, `DeviceFlags` and `NfcRestricted`. Leave a property `null` to keep the device's
+ current value, so deriving from what the key reports is a one-liner:
+ `new DeviceConfig { UsbEnabled = info.UsbEnabled & ~DeviceCapabilities.Otp }`. At least one USB capability must
+-remain enabled; `SetDeviceConfigAsync` rejects `DeviceCapabilities.None` before anything is sent.
++remain enabled. The SDK rejects exactly `DeviceCapabilities.None` for USB, but does not check the requested
++mask against this key's supported applications or comprehensively validate arbitrary cast values. NFC
++`None` is accepted and clears that transport's enabled application set.
++
++### Timeouts, flags and NFC restriction
++
++Timeouts are in seconds. The SDK accepts auto-eject values 0–3600 and challenge-response values 0–60,
++checking those limits when properties are assigned; these are SDK limits, not established firmware maxima.
++Auto-eject zero disables automatic ejection. Nonzero auto-eject controls CCID inactivity and is meaningful
++with `DeviceFlags.TouchEject` in CCID-only mode. Setting the timeout does not set that flag. Challenge-response
++zero requests the device default (normally 15 seconds). A non-null `DeviceFlags` replaces the entire flag set.
++
++On NFC-capable keys with firmware 5.7 or later, `new DeviceConfig { NfcRestricted = true }` requests temporary
++NFC restriction. The configured NDEF URL remains readable. To remove the restriction, supply USB power for
++three seconds; a charger is sufficient, with no touch or authenticated USB operation required. This differs
++from changing `NfcEnabled`. `null` omits the restriction field; `false` encodes a zero-valued request, but
++must not be relied on as a verified recovery procedure. Use the documented USB-power procedure. The SDK
++does not preflight the field's firmware or NFC-hardware requirements.
+ 
+ ### Lock the configuration
+ 
+@@ -110,35 +153,67 @@ finally
+ }
+ ```
+ 
+-While locked, every later `SetDeviceConfigAsync` must supply `CurrentLockCode`. Passing `NewLockCode` again
+-replaces the code; there is no unlock without the current one.
++While locked, each protected write must supply `CurrentLockCode`. It authorizes that command only; it does
++not unlock the session or remove the persistent lock. Passing a nonzero `NewLockCode` replaces the code.
++
++To remove the lock, supply the current code and sixteen zero bytes in the same write. This fragment assumes
++`byte[] currentLockCode` was loaded from your secret store and is owned by this scope:
++
++```csharp
++try
++{
++    await device.SetDeviceConfigAsync(
++        new DeviceConfig(),
++        new SetDeviceConfigOptions
++        {
++            CurrentLockCode = currentLockCode,
++            NewLockCode = new byte[16]
++        });
++}
++finally
++{
++    CryptographicOperations.ZeroMemory(currentLockCode);
++}
++```
++
++An empty memory value is not a removal request: present lock codes must contain exactly 16 bytes.
+ 
+ ### Factory reset
+ 
+-Whole-device reset erases credentials, keys, and configuration and cannot be undone. It requires firmware
+-5.6.0 or later and SmartCard (CCID); select that transport explicitly rather than allowing a HID session:
++This combined reset is documented for **YubiKey Bio Multi-protocol Edition**, not every key whose firmware
++passes the SDK check. It deletes FIDO credentials, fingerprints and the shared PIN, and PIV keys,
++certificates and user data, except the F9 attestation slot. It cannot be undone. It is not a documented
++recovery procedure for a lost Management configuration lock code. Other families use per-application resets.
++
++After confirming the product and authorizing the destruction, select SmartCard explicitly:
+ 
+ ```csharp
+ await using var session = await device.CreateManagementSessionAsync(
+     new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
+ 
+-// Destructive: only call after confirming that all device data may be erased.
++// Destructive: the caller has confirmed Bio MPE applicability and application-data erasure.
+ await session.ResetDeviceAsync();
+ ```
+ 
+ If SmartCard is not exposed, session creation throws `NotSupportedException`. On an existing session,
+ `ResetDeviceAsync` throws `NotSupportedException` if the effective session firmware is a release version below
+ 5.6.0 or the session uses either HID transport, without sending a reset command.
+-`SessionCreationOptions.FirmwareVersionOverride` applies to this check; alpha/beta versions bypass it.
++`SessionCreationOptions.FirmwareVersionOverride` applies to this check; major-zero development versions bypass it.
+ Passing the check does not guarantee that the device implements whole-device reset; a device rejection
+ propagates as `ApduException` rather than `NotSupportedException`.
+ 
+ ## User interaction
+ 
+-Management operations need no touch, no PIN, and no management key. `SessionCreationOptions.UserPresencePrompt`
+-is accepted by the options object but never invoked by this module. The only secret it handles is the 16-byte
+-configuration lock code. Pass a `cancellationToken` to request cancellation; an admitted SmartCard
+-exchange drains before returning, and cancellation does not roll back configuration already sent.
++Management commands do not require touch, a PIN or a PIV management key. Configuration protection uses
++the 16-byte configuration lock code. Optional SCP uses separately supplied, caller-owned key parameters;
++the session borrows them for initialization, and the caller remains responsible for their disposal.
++`SessionCreationOptions.UserPresencePrompt` is accepted by the options object but is not retained,
++invoked or disposed by this module.
++
++Pass a `cancellationToken` to request cancellation; an admitted SmartCard
++exchange drains before returning, and cancellation does not roll back configuration already sent. HID wait
++cancellation has transport-specific behavior. Await operations sequentially: overlapping exchanges are
++refused, not queued. A multi-page read contains separate exchanges; it is not one atomic public operation.
+ 
+ Configuration can change how the device behaves afterwards. `DeviceFlags.TouchEject` makes the CCID smart card
+ absent until the user touches the key, affecting every SmartCard session that follows, but it only takes effect
+@@ -160,27 +235,38 @@ device does not expose throws `NotSupportedException`.
+ 
+ - Supplying `ScpKeyParameters` without an explicit preference selects SmartCard, because SCP does not run over
+   HID.
+-- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection.
++- Within this process, a grouped physical YubiKey admits one live connection across its known member
++  interfaces, and one session per connection. Ungrouped records cannot provide cross-interface exclusion.
+   A second session throws `ConnectionInUseException` until the first is disposed; connection failures propagate
+   rather than falling back to another interface.
+ - Sessions from `device.CreateManagementSessionAsync()` own the connection they opened and close it on
+   disposal. `ManagementSession.CreateAsync(connection, ...)` borrows a connection you opened, and you dispose
+-  it yourself. Use `await using` for both; there is no finalizer backstop.
+-- `SetDeviceConfigAsync` with `Reboot = true` terminates every session on the device, and capability changes
+-  can disable applications other code depends on. `ResetDeviceAsync` resets the whole device and cannot be undone.
+-- Firmware-gated operations throw `NotSupportedException` when the connected key is too old.
++  it yourself. Use `await using` for both. Sessions have no finalizer recovery; a built-in connection's
++  best-effort native finalizer cleanup is not a lifetime guarantee.
++- With a direct factory, `PreferredConnectionType` checks the already-open connection; it does not switch
++  transports. A failed direct creation still leaves connection disposal to its creator.
++- `SetDeviceConfigAsync` with `Reboot = true` requests a reboot; it does not automatically dispose managed
++  session objects. If the requested reboot occurs, do not reuse existing sessions or connections. Dispose
++  them, rediscover the intended key and create fresh scopes. Capability changes can disable applications
++  other code depends on. Reset has the Bio MPE scope described above.
++- Write/reset firmware checks use the effective session version. An override affects protocol configuration
++  and feature checks, not the hardware metadata reported by later reads; initialization still probes the key.
++- Initialization attempts device metadata before establishing optional SCP. An SCP session does not mean
++  every initialization metadata exchange was protected by SCP.
+ 
+ ## Security notes
+ 
+ - The lock codes in `SetDeviceConfigOptions` are borrowed `ReadOnlyMemory<byte>` of exactly 16 bytes. The
+-  options object is not retained; zero your buffer with `CryptographicOperations.ZeroMemory` in a `finally`.
++  options object is not retained. Keep source buffers valid and unchanged until the awaited operation
++  completes, then zero owned secrets with `CryptographicOperations.ZeroMemory` in a `finally`.
+ - The session zeroes the encoded configuration buffer, lock-code copies included, after transmitting it.
+-- A lost lock code cannot be recovered, and firmware below 5.6.0 has no device reset to fall back on.
++- A lost lock code cannot be read back. Do not assume device reset removes it, even on Bio MPE.
+ - Never log lock codes.
+ 
+ ## Example
+ 
+-The interactive ManagementTool sample lives at src/Management/examples/ManagementTool/.
++The [ManagementTool sample](examples/ManagementTool/README.md) provides menus and read-only `info`/`config`
++commands. Its active selector currently lists only SmartCard-capable keys, despite SDK support for HID.
+ 
+ ```bash
+ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj
+diff --git i/src/Management/examples/ManagementTool/Cli/Menus/CapabilitiesMenu.cs w/src/Management/examples/ManagementTool/Cli/Menus/CapabilitiesMenu.cs
+index 147520b6..6aab73b0 100644
+--- i/src/Management/examples/ManagementTool/Cli/Menus/CapabilitiesMenu.cs
++++ w/src/Management/examples/ManagementTool/Cli/Menus/CapabilitiesMenu.cs
+@@ -12,6 +12,8 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
+ 
+ /// <summary>
+ /// CLI menu for configuring USB/NFC capabilities.
++/// Writes complete replacement sets. The active selector requires SmartCard; disabling its last
++/// supporting application can prevent this tool from selecting the key after reboot.
+ /// </summary>
+ public static class CapabilitiesMenu
+ {
+@@ -211,4 +213,4 @@ private static string FormatCapabilities(DeviceCapabilities caps)
+ 
+         return string.Join(", ", parts);
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Cli/Menus/DeviceFlagsMenu.cs w/src/Management/examples/ManagementTool/Cli/Menus/DeviceFlagsMenu.cs
+index 0041ed47..b99120ac 100644
+--- i/src/Management/examples/ManagementTool/Cli/Menus/DeviceFlagsMenu.cs
++++ w/src/Management/examples/ManagementTool/Cli/Menus/DeviceFlagsMenu.cs
+@@ -42,7 +42,7 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+         OutputHelpers.WriteDeviceFlags("Flags", info.DeviceFlags);
+         AnsiConsole.WriteLine();
+ 
+-        // Flag descriptions
++        // TouchEject additionally needs CCID-only mode (OTP/U2F/FIDO2 disabled); the display omits that condition.
+         AnsiConsole.MarkupLine("[grey]Flag descriptions:[/]");
+         AnsiConsole.MarkupLine("[grey]  • Remote Wakeup: USB remote wakeup is enabled[/]");
+         AnsiConsole.MarkupLine("[grey]  • Touch Eject: CCID touch-eject feature (smart card ejected by default, touch to insert)[/]");
+@@ -136,4 +136,4 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Cli/Menus/DeviceInfoMenu.cs w/src/Management/examples/ManagementTool/Cli/Menus/DeviceInfoMenu.cs
+index eb410f26..16301420 100644
+--- i/src/Management/examples/ManagementTool/Cli/Menus/DeviceInfoMenu.cs
++++ w/src/Management/examples/ManagementTool/Cli/Menus/DeviceInfoMenu.cs
+@@ -56,7 +56,7 @@ private static void DisplayDeviceDetails(DeviceInfo info)
+             OutputHelpers.WriteKeyValue("Part Number", info.PartNumber);
+         }
+ 
+-        // Status flags
++        // IsFips is a manufacturing indicator, not the active mode implied by the display label below.
+         AnsiConsole.WriteLine();
+         AnsiConsole.MarkupLine("[bold]Status[/]");
+ 
+@@ -93,7 +93,7 @@ private static void DisplayDeviceDetails(DeviceInfo info)
+             OutputHelpers.WriteCapabilities("Enabled", info.NfcEnabled);
+         }
+ 
+-        // FIPS Capabilities (if applicable)
++        // Current Core FIPS-tag mapping is incorrect; displayed masks cannot establish application approval.
+         if (info.FipsCapabilities != DeviceCapabilities.None)
+         {
+             AnsiConsole.WriteLine();
+@@ -137,7 +137,7 @@ private static void DisplayDeviceDetails(DeviceInfo info)
+             }
+         }
+ 
+-        // Factory reset eligibility
++        // Firmware-only display; it does not establish Bio MPE reset eligibility.
+         AnsiConsole.WriteLine();
+         if (DeviceReset.IsResetSupported(info.FirmwareVersion))
+         {
+@@ -148,4 +148,4 @@ private static void DisplayDeviceDetails(DeviceInfo info)
+             OutputHelpers.WriteWarning($"Factory reset requires firmware 5.6.0+ (current: {info.FirmwareVersion})");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Cli/Menus/LockCodeMenu.cs w/src/Management/examples/ManagementTool/Cli/Menus/LockCodeMenu.cs
+index 83e31811..6a87e549 100644
+--- i/src/Management/examples/ManagementTool/Cli/Menus/LockCodeMenu.cs
++++ w/src/Management/examples/ManagementTool/Cli/Menus/LockCodeMenu.cs
+@@ -49,7 +49,8 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+         }
+         AnsiConsole.WriteLine();
+ 
+-        // Warning about lock codes
++        // The displayed reset-recovery suggestion is not established for Management lock codes.
++        // Preserve the current code securely; the combined reset is a Bio MPE application operation.
+         AnsiConsole.MarkupLine("[red bold]⚠️  IMPORTANT WARNING ⚠️[/]");
+         AnsiConsole.MarkupLine("[red]If you set a lock code and forget it, you will NOT be able to change[/]");
+         AnsiConsole.MarkupLine("[red]the device configuration. The only recovery is a factory reset (5.6.0+),[/]");
+@@ -241,4 +242,4 @@ private static async Task RemoveLockCodeAsync(
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Cli/Menus/ResetMenu.cs w/src/Management/examples/ManagementTool/Cli/Menus/ResetMenu.cs
+index bc5eface..672609c2 100644
+--- i/src/Management/examples/ManagementTool/Cli/Menus/ResetMenu.cs
++++ w/src/Management/examples/ManagementTool/Cli/Menus/ResetMenu.cs
+@@ -10,6 +10,8 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
+ 
+ /// <summary>
+ /// CLI menu for factory reset operation.
++/// The firmware check does not establish Bio MPE applicability. The supported combined reset deletes
++/// FIDO/PIV user data and the shared PIN, retaining F9; the broader display is not an erasure contract.
+ /// </summary>
+ public static class ResetMenu
+ {
+@@ -45,7 +47,7 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+             return;
+         }
+ 
+-        // Display device info and what will be lost
++        // Display device info; caller must establish Bio MPE support, not infer it from firmware alone.
+         AnsiConsole.MarkupLine("[bold]Device to Reset[/]");
+         OutputHelpers.WriteKeyValue("Serial Number", info.SerialNumber?.ToString());
+         OutputHelpers.WriteKeyValue("Firmware Version", info.FirmwareVersion.ToString());
+@@ -95,4 +97,4 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+             OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to reset device");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs w/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs
+index dce91fd5..e18a1c81 100644
+--- i/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs
++++ w/src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs
+@@ -10,6 +10,8 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
+ 
+ /// <summary>
+ /// CLI menu for configuring device timeouts.
++/// The prompted ceilings are SDK limits, not firmware maxima. Auto-eject is a CCID inactivity timer
++/// requiring TouchEject in CCID-only mode; assigning the timeout does not set that flag.
+ /// </summary>
+ public static class TimeoutsMenu
+ {
+@@ -111,4 +113,4 @@ public static async Task RunAsync(CancellationToken cancellationToken = default)
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs w/src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs
+index fa3eb085..c3a1dc02 100644
+--- i/src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs
++++ w/src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs
+@@ -21,20 +21,20 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
+ 
+ /// <summary>
+ /// Handles YubiKey device discovery and selection for Management operations.
+-/// Supports SmartCard, FIDO HID, and OTP HID transports.
++/// The active filter lists SmartCard-capable devices only, although the SDK also supports both HID routes.
+ /// </summary>
+ public static class DeviceSelector
+ {
+-    // Management operations require SmartCard (CCID/APDU) transport only.
+-    // Listing all connection types would return 3 entries per physical key
+-    // (SmartCard + HidFido + HidOtp), causing spurious multi-device prompts.
++    // This tool currently filters for SmartCard; it is not an SDK Management requirement.
++    // Discovery already groups proven interfaces into physical keys, not three rows per key.
++    // The separate three-transport ManagementDeviceSelector is not used by current callers.
+     private static readonly ConnectionType[] SupportedConnectionTypes =
+     [
+         ConnectionType.SmartCard
+     ];
+ 
+     /// <summary>
+-    /// Finds all connected YubiKeys and allows user to select one.
++    /// Finds SmartCard-capable YubiKeys and allows the user to select one.
+     /// </summary>
+     public static async Task<DeviceSelection?> SelectDeviceAsync(
+         CancellationToken cancellationToken = default)
+@@ -61,7 +61,7 @@ public static class DeviceSelector
+     }
+ 
+     /// <summary>
+-    /// Finds all connected YubiKeys, with retry prompt if none found.
++    /// Finds SmartCard-capable YubiKeys, with a retry prompt if none match.
+     /// </summary>
+     public static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
+         CancellationToken cancellationToken = default)
+@@ -90,7 +90,7 @@ public static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
+         return [];
+     }
+ 
+-    /// <summary>Formats form factor for display.</summary>
++    /// <summary>Formats form factor; current Core product-flag retention can produce unnamed enum values.</summary>
+     public static string FormatFormFactor(FormFactor formFactor) => FormFactorFormatter.Format(formFactor);
+ 
+     /// <summary>Formats connection type for display.</summary>
+@@ -173,4 +173,4 @@ private static string FormatDeviceChoice(IYubiKey device, DeviceInfo? info)
+ 
+         return $"YubiKey {FormFactorFormatter.Format(info.Value.FormFactor)} - Serial: {info.Value.SerialNumber?.ToString() ?? "N/A"}, Firmware: {info.Value.FirmwareVersion} ({transport})";
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs w/src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs
+index b5359f57..381f2c35 100644
+--- i/src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs
++++ w/src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs
+@@ -18,8 +18,11 @@
+ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
+ 
+ /// <summary>
+-/// Handles secure lock code input with validation.
++/// Masks lock-code input and validates the parsed length.
+ /// Lock codes are 16 bytes (32 hex characters).
++/// Prompt input and normalized copies are immutable strings; clearing returned arrays cannot erase them.
++/// The confirmation prompt can throw before the first parsed array enters cleanup. This sample is not
++/// a production secret-input primitive.
+ /// 
+ /// <para><b>Security Pattern:</b> Always use try/finally to ensure lock codes are zeroed:</para>
+ /// <code>
+@@ -29,7 +32,10 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
+ ///     lockCode = LockCodePrompt.PromptForLockCode("Enter lock code");
+ ///     if (lockCode is null) return; // User cancelled
+ ///     
+-///     // Use lock code...
++///     // session is an initialized IManagementSession; ct is the caller's CancellationToken.
++///     await session.SetDeviceConfigAsync(
++///         new DeviceConfig { ChallengeResponseTimeout = 15 },
++///         new SetDeviceConfigOptions { CurrentLockCode = lockCode }, ct);
+ /// }
+ /// finally
+ /// {
+@@ -182,4 +188,4 @@ public static byte[] CreateZeroLockCode()
+     {
+         return new byte[LockCodeSize];
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs w/src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs
+index 02ca3b1a..bfea68be 100644
+--- i/src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs
++++ w/src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs
+@@ -25,9 +25,10 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Features;
+ /// <para>
+ /// This class provides examples for setting device configuration including
+ /// USB/NFC capabilities, timeouts, device flags, and lock codes.
++/// Wrappers convert operation exceptions, including cancellation, into failure results; they do not prompt.
+ /// </para>
+ /// <para>
+-/// <b>Security Note:</b> Lock codes must be zeroed after use with
++/// Keep borrowed lock codes valid and unchanged until completion, then zero owned source arrays with
+ /// <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/>.
+ /// </para>
+ /// </remarks>
+@@ -38,7 +39,8 @@ public static class DeviceConfiguration
+     /// </summary>
+     /// <param name="session">A Management session.</param>
+     /// <param name="transport">The transport (USB or NFC).</param>
+-    /// <param name="capabilities">The capabilities to enable.</param>
++    /// <param name="capabilities">Complete replacement enabled set; omitted bits are disabled.
++    /// Preserve a supported USB application and a recovery route; the SDK only rejects exact USB None.</param>
+     /// <param name="lockCode">The current lock code if device is locked.</param>
+     /// <param name="reboot">Whether to reboot the device after configuration.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -89,8 +91,10 @@ await session.SetDeviceConfigAsync(
+     /// Sets the device timeouts.
+     /// </summary>
+     /// <param name="session">A Management session.</param>
+-    /// <param name="autoEjectTimeout">Auto-eject timeout in seconds (0-3600), or null to leave unchanged.</param>
+-    /// <param name="challengeResponseTimeout">Challenge-response timeout in seconds (0-60), or null to leave unchanged.</param>
++    /// <param name="autoEjectTimeout">CCID inactivity timeout in seconds (SDK range 0-3600), or null to
++    /// leave unchanged. Zero disables auto-eject. Nonzero needs TouchEject in CCID-only mode; this does not set the flag.</param>
++    /// <param name="challengeResponseTimeout">OTP challenge-response timeout in seconds (SDK range 0-60),
++    /// or null to leave unchanged. Zero requests the device default, normally 15 seconds. SDK limits are not firmware maxima.</param>
+     /// <param name="lockCode">The current lock code if device is locked.</param>
+     /// <param name="reboot">Whether to reboot the device after configuration.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -128,7 +132,7 @@ await session.SetDeviceConfigAsync(
+     /// Sets the device flags.
+     /// </summary>
+     /// <param name="session">A Management session.</param>
+-    /// <param name="flags">The device flags to set.</param>
++    /// <param name="flags">Complete replacement flag set. TouchEject is effective only in CCID-only mode.</param>
+     /// <param name="lockCode">The current lock code if device is locked.</param>
+     /// <param name="reboot">Whether to reboot the device after configuration.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -159,10 +163,12 @@ await session.SetDeviceConfigAsync(
+     }
+ 
+     /// <summary>
+-    /// Sets whether NFC is restricted.
++    /// Sends the encoded NFC-restriction request; not exposed by the current menus.
+     /// </summary>
+     /// <param name="session">A Management session.</param>
+-    /// <param name="restricted">Whether NFC should be restricted.</param>
++    /// <param name="restricted">True encodes restriction; false encodes zero but is not a verified recovery route.
++    /// For NFC-capable 5.7+ keys, documented recovery is USB power for three seconds. The configured NDEF URL
++    /// remains readable while restricted. The SDK does not preflight those field-specific requirements.</param>
+     /// <param name="lockCode">The current lock code if device is locked.</param>
+     /// <param name="reboot">Whether to reboot the device after configuration.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+@@ -197,7 +203,8 @@ await session.SetDeviceConfigAsync(
+     /// </summary>
+     /// <param name="session">A Management session.</param>
+     /// <param name="currentLockCode">The current lock code (null if not set).</param>
+-    /// <param name="newLockCode">The new lock code (16 bytes).</param>
++    /// <param name="newLockCode">The new lock code (16 bytes); all zero bytes remove the lock.
++    /// The current code authorizes this command only, not subsequent writes.</param>
+     /// <param name="cancellationToken">Cancellation token.</param>
+     /// <returns>Result indicating success or failure.</returns>
+     /// <remarks>
+@@ -292,4 +299,4 @@ await session.SetDeviceConfigAsync(
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs w/src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs
+index a5022471..cb823ab3 100644
+--- i/src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs
++++ w/src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs
+@@ -23,7 +23,10 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Features;
+ /// <para>
+ /// This class provides examples for querying device metadata including
+ /// serial number, firmware version, form factor, and enabled capabilities.
++/// Current Core FIPS masks have a bit-mapping issue and flagged form-factor values can miss named enum
++/// values; do not infer application approval or product eligibility from this display metadata.
+ /// </para>
++/// <para>These wrappers convert operation exceptions, including cancellation, into failure results.</para>
+ /// </remarks>
+ public static class DeviceInfoQuery
+ {
+@@ -36,7 +39,7 @@ public static class DeviceInfoQuery
+     /// <example>
+     /// <code>
+     /// await using var connection = await device.ConnectAsync&lt;ISmartCardConnection&gt;(ct);
+-    /// await using var session = await ManagementSession.CreateAsync(connection, ct);
++    /// await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+     /// 
+     /// var result = await DeviceInfoQuery.GetDeviceInfoAsync(session, ct);
+     /// if (result.Success &amp;&amp; result.DeviceInfo.HasValue)
+@@ -63,4 +66,4 @@ public static async Task<DeviceInfoResult> GetDeviceInfoAsync(
+             return DeviceInfoResult.Failed($"Failed to get device info: {ex.Message}");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Features/DeviceReset.cs w/src/Management/examples/ManagementTool/Features/DeviceReset.cs
+index 01e84e1d..3d7bbbf5 100644
+--- i/src/Management/examples/ManagementTool/Features/DeviceReset.cs
++++ w/src/Management/examples/ManagementTool/Features/DeviceReset.cs
+@@ -18,16 +18,18 @@
+ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Features;
+ 
+ /// <summary>
+-/// Demonstrates factory resetting a YubiKey.
++/// Demonstrates the Bio Multi-protocol Edition combined FIDO/PIV reset over SmartCard.
+ /// </summary>
+ /// <remarks>
+ /// <para>
+-/// <b>WARNING:</b> Factory reset is a destructive operation that erases all data
+-/// on the device. This includes all credentials, keys, and configuration.
+-/// This operation cannot be undone.
++/// Reset destroys FIDO credentials, fingerprints and the shared PIN, and PIV keys, certificates and
++/// user data except the F9 attestation slot. It cannot be undone. It is not a documented recovery
++/// procedure for a lost Management configuration lock code.
+ /// </para>
+ /// <para>
+-/// Factory reset is only available on YubiKeys with firmware version 5.6.0 or later.
++/// The helper checks firmware 5.6.0, not product-family support. A passing check does not establish
++/// Bio MPE eligibility. The SDK additionally requires SmartCard; a device rejection can still fail.
++/// Operation exceptions, including cancellation, are converted to failure results.
+ /// </para>
+ /// </remarks>
+ public static class DeviceReset
+@@ -38,17 +40,17 @@ public static class DeviceReset
+     public static readonly FirmwareVersion MinimumResetVersion = new(5, 6, 0);
+ 
+     /// <summary>
+-    /// Checks if the device supports factory reset.
++    /// Checks the helper's minimum firmware comparison, not device reset capability.
+     /// </summary>
+     /// <param name="firmwareVersion">The device firmware version.</param>
+-    /// <returns>True if factory reset is supported.</returns>
++    /// <returns>True if the supplied firmware is at least the helper's minimum; no family or transport check.</returns>
+     public static bool IsResetSupported(FirmwareVersion firmwareVersion)
+     {
+         return firmwareVersion >= MinimumResetVersion;
+     }
+ 
+     /// <summary>
+-    /// Performs a factory reset on the YubiKey.
++    /// Requests the combined reset after a firmware-only helper check.
+     /// </summary>
+     /// <param name="session">A Management session.</param>
+     /// <param name="deviceInfo">Device information (to check firmware version).</param>
+@@ -56,24 +58,20 @@ public static bool IsResetSupported(FirmwareVersion firmwareVersion)
+     /// <returns>Result indicating success or failure.</returns>
+     /// <remarks>
+     /// <para>
+-    /// <b>WARNING:</b> This operation will:
++    /// Callers must confirm Bio MPE applicability and authorize destructive application reset before calling.
+     /// </para>
+     /// <list type="bullet">
+-    /// <item>Erase all PIV keys and certificates</item>
+-    /// <item>Erase all FIDO2 credentials</item>
+-    /// <item>Erase all OATH accounts</item>
+-    /// <item>Erase all OpenPGP keys</item>
+-    /// <item>Reset all PINs and PUKs to default values</item>
+-    /// <item>Remove configuration lock code</item>
+-    /// <item>Reset all device configuration to defaults</item>
++    /// <item>Deletes PIV keys, certificates and user data, except the F9 attestation slot.</item>
++    /// <item>Deletes FIDO credentials and fingerprint templates, and removes the shared PIN.</item>
+     /// </list>
+     /// <para>
+-    /// Requires firmware version 5.6.0 or later.
++    /// Requires a SmartCard Management session on applicable Bio MPE hardware. Firmware alone is insufficient.
+     /// </para>
+     /// </remarks>
+     /// <example>
+     /// <code>
+-    /// // First get device info to check firmware version
++    /// // Prerequisite: caller confirmed Bio MPE and authorized reset; session uses SmartCard.
++    /// // Metadata below supplies the helper's firmware check, not a product-family check.
+     /// var infoResult = await DeviceInfoQuery.GetDeviceInfoAsync(session, ct);
+     /// if (!infoResult.Success || !infoResult.DeviceInfo.HasValue)
+     /// {
+@@ -81,7 +79,7 @@ public static bool IsResetSupported(FirmwareVersion firmwareVersion)
+     ///     return;
+     /// }
+     /// 
+-    /// // Check firmware version and perform reset
++    /// // Request reset; the helper returns failure results for operation exceptions.
+     /// var resetResult = await DeviceReset.ResetDeviceAsync(
+     ///     session, 
+     ///     infoResult.DeviceInfo.Value, 
+@@ -104,7 +102,7 @@ public static async Task<ResetResult> ResetDeviceAsync(
+     {
+         ArgumentNullException.ThrowIfNull(session);
+ 
+-        // Check firmware version
++        // Firmware-only helper preflight; this does not establish product or transport eligibility.
+         if (!IsResetSupported(deviceInfo.FirmwareVersion))
+         {
+             return ResetResult.Failed(
+@@ -122,4 +120,4 @@ public static async Task<ResetResult> ResetDeviceAsync(
+             return ResetResult.Failed($"Failed to reset device: {ex.Message}");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Features/Results/ConfigResult.cs w/src/Management/examples/ManagementTool/Features/Results/ConfigResult.cs
+index 31d13a2c..1ffe4e97 100644
+--- i/src/Management/examples/ManagementTool/Features/Results/ConfigResult.cs
++++ w/src/Management/examples/ManagementTool/Features/Results/ConfigResult.cs
+@@ -25,7 +25,8 @@ public sealed record ConfigResult
+     public bool Success { get; init; }
+ 
+     /// <summary>
+-    /// Gets whether the device needs to be rebooted for changes to take effect.
++    /// Gets the reboot request flag supplied by the configuration wrapper on success.
++    /// This does not observe whether a reboot is pending, needed or completed.
+     /// </summary>
+     public bool RebootRequired { get; init; }
+ 
+@@ -37,7 +38,7 @@ public sealed record ConfigResult
+     /// <summary>
+     /// Creates a successful configuration result.
+     /// </summary>
+-    /// <param name="rebootRequired">Whether the device requires a reboot.</param>
++    /// <param name="rebootRequired">The wrapper's requested reboot flag, not an observed device requirement.</param>
+     public static ConfigResult Succeeded(bool rebootRequired = false) =>
+         new() { Success = true, RebootRequired = rebootRequired };
+ 
+@@ -46,4 +47,4 @@ public static ConfigResult Succeeded(bool rebootRequired = false) =>
+     /// </summary>
+     public static ConfigResult Failed(string error) =>
+         new() { Success = false, ErrorMessage = error };
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/Program.cs w/src/Management/examples/ManagementTool/Program.cs
+index da5beb38..30bc0d11 100644
+--- i/src/Management/examples/ManagementTool/Program.cs
++++ w/src/Management/examples/ManagementTool/Program.cs
+@@ -19,7 +19,7 @@
+         return await DispatchCliAsync(args);
+     }
+ 
+-    // Interactive mode (existing behavior)
++            // No arguments: interactive menus.
+     return await RunInteractiveAsync();
+ }
+ finally
+@@ -95,4 +95,4 @@ static int PrintUnknownCommand(string command)
+     Console.Error.WriteLine();
+     PrintUsage();
+     return 1;
+-}
+\ No newline at end of file
++}
+diff --git i/src/Management/examples/ManagementTool/README.md w/src/Management/examples/ManagementTool/README.md
+index 98c250c1..f5899bd8 100644
+--- i/src/Management/examples/ManagementTool/README.md
++++ w/src/Management/examples/ManagementTool/README.md
+@@ -4,7 +4,13 @@ YubiKey Management Tool - SDK Example Application for the Management module.
+ 
+ ## Overview
+ 
+-ManagementTool is an interactive CLI application that demonstrates how to use the `Yubico.YubiKit.Management` SDK to manage YubiKey device configuration. It supports all Management operations across SmartCard, FIDO HID, and OTP HID transports.
++ManagementTool demonstrates device-information queries and persistent configuration changes with
++`Yubico.YubiKit.Management`. Start it without arguments for menus, or use the read-only `info` and
++`config` commands below. These commands still prompt for device selection; this is not an unattended
++or serial-selectable command-line client.
++
++The active selector currently lists only SmartCard-capable devices. The SDK itself also supports
++device-info/configuration operations over HID FIDO and HID OTP. Reset remains SmartCard-only.
+ 
+ ## Features
+ 
+@@ -14,7 +20,10 @@ ManagementTool is an interactive CLI application that demonstrates how to use th
+ - **Timeouts** - Set auto-eject and challenge-response timeouts
+ - **Device Flags** - Configure device flags (eject, remote wakeup)
+ - **Lock Code** - Set, change, or remove the configuration lock code (DANGEROUS, CAN LEAD TO BEING LOCKED OUT OF DEVICE)
+-- **Factory Reset** - Reset device to factory defaults (firmware 5.6.0+, Bio MPE keys)
++- **Combined Reset** - Reset Bio Multi-protocol Edition FIDO/PIV applications and shared PIN over SmartCard
++
++The reusable `DeviceConfiguration.SetNfcRestrictedAsync` helper is not reachable from the current menus
++or command dispatch. The tool does not expose every SDK feature simply because a feature helper exists.
+ 
+ ## Project Structure
+ 
+@@ -35,7 +44,11 @@ ManagementTool/
+ │   │   └── OutputHelpers.cs
+ │   └── Prompts/                  # User input prompts
+ │       ├── DeviceSelector.cs
+-│       └── LockCodePrompt.cs
++│       ├── LockCodePrompt.cs
++│       └── ManagementDeviceSelector.cs  # Three-transport selector, not used by current callers
++├── Commands/
++│   ├── InfoCommand.cs             # Read-only device information
++│   └── ConfigCommand.cs           # Read-only configuration
+ └── Features/           # Pure SDK example classes (no UI dependencies)
+     ├── DeviceInfoQuery.cs
+     ├── DeviceConfiguration.cs
+@@ -48,30 +61,91 @@ ManagementTool/
+ 
+ ## Usage
+ 
++Run from the repository root with .NET 10 and the platform setup described in the
++[module README](../../README.md):
++
+ ```bash
+-# Build and run
++# Interactive menus
+ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj
++
++# Read device information (device selection can still prompt)
++dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj -- info
++
++# Read configuration; this command does not change it
++dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj -- config
+ ```
+ 
++The data commands are `info` and `config`. Top-level `-h`, `--help` and `help` print usage. Dispatch uses
++only the first token and ignores extra command arguments, so do not rely on the printed `command --help`
++suggestion: `info --help` can query a device instead of displaying command-specific help. Use the menu
++for configuration changes. Monitoring starts before dispatch, including for top-level help.
++
++## Configuration tasks and recovery
++
++Before writing, confirm the selected physical key and save the current settings. USB/NFC capability
++selections replace the complete enabled set for that transport; unchecked applications are disabled.
++Keep at least one supported USB application and a recovery route. The SDK rejects exact USB `None`
++but does not comprehensively validate supported masks. Disabling the last SmartCard-dependent application
++can make this tool unable to select the key even when SDK HID configuration remains possible.
++
++Timeout input ranges (0–3600 auto-eject seconds and 0–60 challenge-response seconds) are SDK limits, not
++firmware maxima. Zero disables auto-eject or requests the challenge-response default (normally 15 seconds).
++Auto-eject is a CCID inactivity timer. Touch-eject works only in CCID-only mode: OTP, U2F and FIDO2 must
++be disabled; assigning a timeout does not set the flag automatically.
++
++The configuration wrappers request reboot by default for capabilities, timeouts and flags. End old
++scopes after reboot, then rediscover the intended key and open a fresh session. The result property
++`RebootRequired` currently carries the requested reboot flag; it is not an observed pending-reboot state
++or confirmation that re-enumeration has finished. Readback of persisted values does not prove active
++interfaces have already changed.
++
++If calling the NFC-restriction helper directly, use NFC-capable hardware with firmware 5.7 or later.
++Restriction leaves the configured NDEF URL readable. Documented recovery is USB power for three seconds,
++including from a charger; no physical touch is needed. A false value encodes a zero-valued request but
++is not a verified recovery route. The SDK does not preflight those field-specific requirements.
++
++The tool's reset eligibility display checks firmware only. The documented combined reset applies to
++**Bio Multi-protocol Edition**, not every 5.6+ key or every Bio key. It deletes FIDO credentials,
++fingerprints, the shared PIN and PIV keys/certificates/user data, except the F9 attestation slot. It
++cannot be undone and is not a documented way to recover a lost Management configuration lock code.
++The menu's broader erasure/default-PIN wording must not be used as a product-support check.
++
+ ## Security Considerations
+ 
+-- **Lock Codes** are handled securely with memory zeroing using `CryptographicOperations.ZeroMemory()`
+-- Lock codes are never logged or displayed
+-- All destructive operations require explicit confirmation
+-- Factory reset requires double confirmation (yes/no + type "RESET")
++- The sample masks lock-code input and clears returned mutable byte arrays in the callers' `finally`
++  blocks. Confirmation uses a fixed-time byte comparison. The input and normalized copies are immutable
++  strings and cannot be erased by clearing the arrays. If the confirmation prompt throws before returning,
++  the first parsed array can also escape cleanup. Do not use this prompt as a production secret-input primitive.
++- Keep borrowed lock-code buffers valid and unchanged until the awaited write completes; clear owned
++  secrets even when a write fails or is cancelled. Never log codes. Authorizing one write with the
++  current code does not remove the lock; removal sends the current code and sixteen zero replacement bytes.
++- Configuration menus ask for confirmation; reset asks twice (yes/no and typing `RESET`). The feature
++  helpers themselves do not prompt, so direct callers must authorize the operation first.
++- Cancellation is not consistent end to end: menu callbacks discard the console token, and feature
++  wrappers/metadata lookup can turn cancellation exceptions into ordinary failure results. This is a
++  sample limitation, not the SDK session's cancellation contract. Cancellation never rolls back a sent write.
++
++## Metadata display limits
++
++The current UI labels the manufacturing `IsFips` indicator as “FIPS Mode”; it is not an active operating
++mode. Core also currently decodes FIPS capability/approval tags with the wrong bit mapping, so displayed
++masks and derived filters cannot establish application approval. Product flag bits can remain in
++`FormFactor`, so base-enum equality and formatting may miss flagged devices. These limitations are about
++metadata interpretation, not a claim about a device's certification status.
+ 
+ ## Supported Transports
+ 
+-The tool can connect to YubiKeys via:
+-- **SmartCard (CCID)** - Standard smart card interface
+-- **FIDO HID** - FIDO/CTAPHID transport (WebAuthn uses CTAP2 over this transport)
+-- **OTP HID** - Yubico OTP HID interface
++The current menus and both local command handlers use the static SmartCard-only `DeviceSelector`.
++`ManagementDeviceSelector` permits all three SDK transports but is not wired into those paths. The
++no-device message still lists HID transports; that message does not reflect the active filter.
+ 
+ ## Requirements
+ 
+ - .NET 10.0 or later
+-- YubiKey 5 series or later
+-- Factory Reset requires firmware 5.6.0 or later
++- A SmartCard-capable key; supported device-info firmware starts at 4.1.0, writes at 5.0.0. Not every
++  field applies to every model. Follow the platform's PC/SC permissions/service setup.
++- Combined reset: Bio MPE, SmartCard and the SDK's effective-firmware 5.6.0 gate. A passing firmware
++  comparison does not establish product support; the device can reject the command.
+ 
+ ## Dependencies
+ 
+diff --git i/src/Management/tests/CLAUDE.md w/src/Management/tests/CLAUDE.md
+index 5875d00e..9ff78253 100644
+--- i/src/Management/tests/CLAUDE.md
++++ w/src/Management/tests/CLAUDE.md
+@@ -4,7 +4,7 @@ This file provides guidance for the Management module test infrastructure.
+ 
+ ## Required Reading
+ 
+-**CRITICAL:** Read [`docs/TESTING.md`](../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
++**CRITICAL:** Read [`docs/TESTING.md`](../../../../docs/TESTING.md) for test runner requirements. Key rule: **ALWAYS use `dotnet toolchain.cs test` - NEVER use `dotnet test` directly.**
+ 
+ For Management-specific test patterns, device filtering, and test state utilities, see the **Test Infrastructure** section in [`../CLAUDE.md`](../CLAUDE.md#test-infrastructure---advanced-device-filtering).
+ 
+@@ -15,20 +15,22 @@ For Management-specific test patterns, device filtering, and test state utilitie
+ 
+ ## Advanced Device Filtering
+ 
+-Management tests use the most powerful device filtering system in the SDK via `[WithYubiKey]` attribute:
++Management uses the shared `[WithYubiKey]` filters. Each attribute yields one placeholder row, bound to
++the first matching authorized device at execution. It does not enumerate every matching device.
++Multiple attributes bind independently. Use three-component firmware strings; malformed criteria are
++currently ignored rather than rejected.
+ 
+ ```csharp
+ [SkippableTheory]
+ [WithYubiKey(
+     MinFirmware = "5.3.0",                     // Only firmware >= 5.3.0
+-    FormFactor = FormFactor.UsbAKeychain,      // Only USB-A keychains
+-    Capability = DeviceCapabilities.Piv,       // Must have PIV enabled
+-    RequireUsb = true,                         // USB transport required
+-    FipsCapable = DeviceCapabilities.Piv       // FIPS-capable for PIV
++    Capability = DeviceCapabilities.Piv,      // PIV enabled over USB OR NFC
++    RequireUsb = true                         // Independent USB availability requirement
+ )]
+ public async Task MyTest(YubiKeyTestState state)
+ {
+-    // Test runs ONLY on devices matching ALL criteria
++    var info = await state.Device.GetDeviceInfoAsync();
++    Assert.Equal(state.SerialNumber, info.SerialNumber);
+ }
+ ```
+ 
+@@ -43,7 +45,7 @@ public async Task MyTest(YubiKeyTestState state) =>
+     await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+     {
+         // mgmt = ManagementSession (already initialized)
+-        // cachedDeviceInfo = DeviceInfo from initial query
++        // cachedDeviceInfo = shared test-state snapshot, not fresh helper-entry metadata
+         
+         var info = await mgmt.GetDeviceInfoAsync();
+         Assert.Equal(cachedDeviceInfo.SerialNumber, info.SerialNumber);
+@@ -52,26 +54,33 @@ public async Task MyTest(YubiKeyTestState state) =>
+ 
+ ## Critical Warnings
+ 
+-**⚠️ NEVER write tests that modify device configuration in the shared test suite:**
+-- Configuration changes cause device reboots (3+ seconds)
+-- Changes persist across test runs
+-- Breaks tests that depend on specific capabilities
+-- Requires manual device reconfiguration to fix
++The committed allow list authorizes dedicated test devices, including persistent-state changes. Do not
++add a second environment-variable gate. Configuration tests must save every changed field, preserve a
++recovery route, attempt restoration in `finally` and verify restored values where possible. Restoration
++can fail; clear secret buffers in an independent `finally` even if hardware cleanup throws.
++
++Reboot occurs when explicitly requested. End old scopes and rediscover the intended key before opening
++a fresh connection; a delay does not reconnect the old session. The no-reboot timeout example in the
++module guide checks persistence only, not active CCID behavior. Coordinate physical presence/timing tests
++with a human and mark the appropriate traits.
++
++Connection filters do not pin operation transport. For a concrete row, pass
++`preferredConnection: state.ConnectionType` and assert `mgmt.ConnectionType`; do not pass a combined
++unfiltered connection set as a preference. Current FIPS masks/derived filters have a Core decoding issue,
++and flagged form-factor bytes can miss exact base-enum filters. These filters cannot establish FIPS
++approval or Bio MPE reset eligibility.
+ 
+ See [`../CLAUDE.md`](../CLAUDE.md#critical-warnings-for-configuration-tests) for safe configuration testing patterns.
+ 
+ ## Running Tests
+ 
+ ```bash
+-# Run all Management tests
+-dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Management"
+-
+ # Run unit tests only
+-dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Management.UnitTests"
++dotnet toolchain.cs -- test --project Management
+ 
+-# Run integration tests only (requires YubiKey)
+-dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Management.IntegrationTests"
++# Run unit and integration tests (requires YubiKey)
++dotnet toolchain.cs -- test --integration --project Management
+ 
+ # Run specific test class
+-dotnet toolchain.cs -- test --filter "FullyQualifiedName~ManagementIntegrationTests"
++dotnet toolchain.cs -- test --integration --project Management --filter "FullyQualifiedName~ManagementSessionSimpleTests"
+ ```

@@ -1,0 +1,23 @@
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.0.0")]
+public async Task AutoEject_PersistsAndRestorationIsAttempted(YubiKeyTestState state)
+{
+    await using var mgmt = await state.Device.CreateManagementSessionAsync(
+        new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
+    var original = await mgmt.GetDeviceInfoAsync();
+    Assert.False(original.IsLocked); // Example prerequisite: unlocked dedicated test key.
+    Assert.InRange(original.AutoEjectTimeout, (ushort)0, (ushort)3600); // Must be restorable through this SDK.
+    ushort changed = original.AutoEjectTimeout == 30 ? (ushort)31 : (ushort)30;
+    try
+    {
+        await mgmt.SetDeviceConfigAsync(new DeviceConfig { AutoEjectTimeout = changed });
+        var persisted = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(changed, persisted.AutoEjectTimeout);
+    }
+    finally
+    {
+        await mgmt.SetDeviceConfigAsync(new DeviceConfig { AutoEjectTimeout = original.AutoEjectTimeout });
+        var restored = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(original.AutoEjectTimeout, restored.AutoEjectTimeout);
+    }
+}

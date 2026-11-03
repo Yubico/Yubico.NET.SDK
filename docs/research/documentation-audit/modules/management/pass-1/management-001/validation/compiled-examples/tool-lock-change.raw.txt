@@ -1,0 +1,14 @@
+
+byte[]? current = null;
+byte[]? newCode = null;
+try
+{
+    current = GetCurrentCode();
+    newCode = GetNewCode();
+    await DeviceConfiguration.SetLockCodeAsync(session, current, newCode, ct);
+}
+finally
+{
+    if (current is not null) CryptographicOperations.ZeroMemory(current);
+    if (newCode is not null) CryptographicOperations.ZeroMemory(newCode);
+}

@@ -1,0 +1,10 @@
+[SkippableTheory]
+[WithYubiKey]
+public async Task GetDeviceInfo_DefaultManagementSelection(YubiKeyTestState state)
+{
+    await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+    {
+        var deviceInfo = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
+    });
+}

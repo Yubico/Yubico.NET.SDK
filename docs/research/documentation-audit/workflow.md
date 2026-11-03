@@ -7,6 +7,11 @@ truth about contracts and limitations. Use the same evidence to make a later imp
 precise and reviewable. This workflow incorporates the completed OATH and WebAuthn cycles and the
 user's explicit two-pass direction.
 
+**Campaign sequencing:** complete Pass 1 across every remaining in-scope YubiKey applet/module before
+starting the second sweep of Pass 2 returns. A module's documentation closeout does not start its
+implementation pass. Preserve findings and documentation dependencies for that later sweep. OATH's
+already completed implementation exception remains historical; Core's audit scope remains deferred.
+
 Review a whole selected non-Core module in one cycle, with coherent internal assignments. Public APIs
 and user documentation come first; internal explanatory comments, test/example comments, unfinished
 work markers and substantive specification references are also in scope. Core remains deferred until
@@ -153,7 +158,7 @@ the next progress entry when a file cannot contain its own eventual commit hash.
 would otherwise disappear under toolchain log retention. Reports must remain usable after agent sessions,
 temporary worktrees and local planning directories are gone.
 
-## Lessons from WebAuthn for the next target
+## Lessons from completed cycles for the next target
 
 - Inventory complete example blocks, not only lines mentioning the module.
 - Verify the specific specification version independently, especially exceptions and optional fields.
@@ -164,3 +169,9 @@ temporary worktrees and local planning directories are gone.
   private audit transcripts or create editorial churn after factual acceptance.
 - Reconcile every dependent claim after a late correction; use the map rather than memory.
 - Make durable recordkeeping and the pass-2 handoff part of completion, not a later backup task.
+- Review ownership of disposable inputs created inside examples, including convenience defaults, as
+  carefully as session/connection scopes.
+- Use actual project/reference/analyzer context for examples that depend on test or sample libraries;
+  retain raw compiler diagnostics separately rather than hiding them to produce a green result.
+- Mechanically verify local links and complete example blocks; a fresh reviewer can still inherit a
+  mistaken path calculation or overlook an adjacent obsolete capability name.

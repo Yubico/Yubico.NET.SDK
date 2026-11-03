@@ -1,0 +1,8 @@
+
+var result = await DeviceConfiguration.SetCapabilitiesAsync(
+    session,
+    Transport.Usb,
+    DeviceCapabilities.Piv | DeviceCapabilities.Fido2,
+    lockCode: null,
+    reboot: true,
+    ct);

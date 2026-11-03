@@ -67,7 +67,7 @@ public class WithYubiKeyAttribute : DataAttribute
 **Execution phase** (when tests actually run):
 - Test receives placeholder `YubiKeyTestState`
 - Accessing `Device` property triggers `BindToRealDevice()`
-- `YubiKeyTestInfrastructure.FilterDevices()` finds matching device
+- `YubiKeyTestInfrastructure.FilterDevices()` finds candidates; the placeholder binds to the first match
 - Placeholder is replaced with real device state
 
 ### 3. Lazy Static Device Cache
@@ -270,7 +270,19 @@ Static cache eliminates per-test cost, making this worthwhile for test suites wi
 
 1. **Static device cache:** Devices must be connected before test runner starts
 2. **Environment.Exit:** Cannot recover from allow list violations
-3. **Single device per test case:** Each `[WithYubiKey]` attribute produces one test case per matching device
+3. **Single device per attribute:** Each `[WithYubiKey]` attribute yields one placeholder bound to the
+   first matching authorized device at execution. Multiple attributes bind independently and may choose
+   the same key; this is not automatic execution over every matching device.
+4. **Cached callback metadata:** `WithManagementAsync` passes `state.DeviceInfo` without refreshing it.
+   A session initialization read is separate from the callback snapshot. Read explicitly for fresh settings.
+5. **Filtering versus pinning:** Connection filters select eligible devices; pass a concrete
+   `preferredConnection` and assert `mgmt.ConnectionType` when operation transport matters. The unfiltered
+   state's multi-flag set is not a valid preference. Helper argument order is `action`, `configuration`,
+   `scpKeyParams`, `preferredConnection`, `cancellationToken`; use names for policy options.
+6. **Metadata filters:** Malformed firmware strings are ignored; use three components. Capability checks
+   accept USB or NFC enabled bits independently of `RequireUsb`. Current Core FIPS-tag mapping is wrong,
+   so FIPS masks/filters cannot establish application approval. Product flag bits can remain in
+   `FormFactor`, causing exact base-enum filters to miss flagged devices.
 
 ## Security Considerations
 

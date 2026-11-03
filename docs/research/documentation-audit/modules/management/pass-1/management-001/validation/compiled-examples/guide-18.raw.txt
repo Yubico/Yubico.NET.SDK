@@ -1,0 +1,21 @@
+[SkippableTheory]
+[WithYubiKey(
+    MinFirmware = "5.0.0",
+    RequireUsb = true,
+    Capability = DeviceCapabilities.Piv)]
+public async Task AdvancedFiltering_ModernUsbPiv_Works(YubiKeyTestState state)
+{
+    // Multiple requirements enforced by attribute:
+    Assert.True(state.FirmwareVersion.IsAtLeast(5, 0, 0));
+    Assert.True(state.IsUsbTransport);
+    Assert.True(state.HasCapability(DeviceCapabilities.Piv));
+
+    await state.WithManagementAsync(async (mgmt, cachedInfo) =>
+    {
+        var info = await mgmt.GetDeviceInfoAsync();
+
+        // RequireUsb and Capability are independent: PIV may be enabled over USB OR NFC.
+        Assert.True(info.FirmwareVersion.Major >= 5);
+        Assert.True(((info.UsbEnabled | info.NfcEnabled) & DeviceCapabilities.Piv) != 0);
+    });
+}

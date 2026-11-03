@@ -21,28 +21,25 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Management.IntegrationTests;
 
 /// <summary>
-///     Advanced integration tests demonstrating YubiKeyTheoryAttribute for multi-device testing.
-///     These tests showcase declarative device filtering and parameterized test execution.
+///     Integration tests using [SkippableTheory] and [WithYubiKey] for declarative device filtering.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Each test method decorated with [YubiKeyTheory] will run on ALL devices matching the criteria.
-///         For example, if you have 3 authorized devices (2 USB keys + 1 Bio key) and use
-///         [YubiKeyTheory(FormFactor = FormFactor.UsbAKeychain)], the test runs twice (once per USB key).
+///         Each [WithYubiKey] attribute supplies one row, bound to the first matching authorized device.
+///         Multiple attributes bind independently; they need not select the same physical key.
+///         WithManagementAsync passes cached test-state metadata to the callback, not a fresh helper-entry read.
 ///     </para>
 ///     <para>
-///         This pattern is ideal for:
-///         - Testing across different firmware versions
-///         - Verifying behavior on different form factors
-///         - Ensuring FIPS-capable keys work correctly
-///         - Testing transport-specific features (USB vs NFC)
+///         ConnectionType filters require an exposed interface but do not pin the operation's transport.
+///         Form-factor and FIPS filters rely on Core's decoded metadata; these comparisons do not validate
+///         that decoding. Flagged form-factor bytes and FIPS application-bit mapping require separate
+///         decoder coverage. FIPS flag checks are not certification or approved-operation evidence.
 ///     </para>
 /// </remarks>
 public class ManagementSessionAdvancedTests
 {
     /// <summary>
-    ///     Basic example: Runs on ALL authorized devices.
-    ///     Test executes once per device in the allow list.
+    ///     Compares a fresh query with cached discovery metadata for one authorized device row.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey]
@@ -64,7 +61,7 @@ public class ManagementSessionAdvancedTests
 
     /// <summary>
     ///     Firmware filtering: Only runs on devices with firmware >= 5.3.0.
-    ///     Demonstrates SCP03/SCP11 testing on modern firmware.
+    ///     Creates an SCP03 session using default keys; the selected device must have those keys configured.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.3.0", ConnectionType = ConnectionType.SmartCard)]
@@ -82,7 +79,7 @@ public class ManagementSessionAdvancedTests
 
     /// <summary>
     ///     Form factor filtering: Only runs on Bio keys.
-    ///     Perfect for testing biometric-specific features.
+    ///     Checks reported form factor and firmware, not a biometric operation.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
@@ -95,7 +92,7 @@ public class ManagementSessionAdvancedTests
         {
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
 
-            // Bio keys should have specific capabilities
+            // Compare the reported form factor with the row's filter.
             Assert.Equal(FormFactor.UsbABiometricKeychain, deviceInfo.FormFactor);
 
             // Bio keys typically have modern firmware
@@ -147,14 +144,14 @@ public class ManagementSessionAdvancedTests
     }
 
     /// <summary>
-    ///     FIPS-capable filtering: Only runs on FIPS-capable devices for PIV.
-    ///     Critical for FIPS compliance testing.
+    ///     Filters on the decoded PIV FIPS-capability flag.
+    ///     Compares decoded PIV capability flags, not FIPS compliance or decoder correctness.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(FipsCapable = DeviceCapabilities.Piv)]
     public async Task FipsCapable_PivDevices_HasFipsSupport(YubiKeyTestState state)
     {
-        // This test only runs on devices that are FIPS-capable for PIV
+        // The row is selected using the cached decoded PIV FIPS-capability flag.
         Assert.True(state.IsFipsCapable(DeviceCapabilities.Piv));
 
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
@@ -167,21 +164,21 @@ public class ManagementSessionAdvancedTests
     }
 
     /// <summary>
-    ///     FIPS-approved filtering: Only runs on devices in FIPS-approved mode.
-    ///     Ensures operations meet FIPS 140-2 requirements.
+    ///     Selects a row using the decoded PIV FIPS-approval flag and checks a fresh report of that flag.
+    ///     Does not exercise a PIV operation or establish compliance with a FIPS certification target.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(FipsApproved = DeviceCapabilities.Piv)]
     public async Task FipsApproved_PivDevices_InFipsMode(YubiKeyTestState state)
     {
-        // This test only runs on devices in FIPS-approved mode for PIV
+        // Selection and this assertion use the same cached decoded approval flag.
         Assert.True(state.IsFipsApproved(DeviceCapabilities.Piv));
 
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
 
-            // Verify FIPS-approved mode
+            // Compare the freshly decoded PIV approval flag; no approved operation is exercised.
             Assert.True((deviceInfo.FipsApproved & DeviceCapabilities.Piv) != 0);
         });
     }
@@ -228,17 +225,17 @@ public class ManagementSessionAdvancedTests
 
             // Test adapts based on device characteristics
             if (state.FirmwareVersion.IsAtLeast(5, 0, 0))
-                // Modern firmware: expect extended capabilities
+                // On modern firmware, check that the reported USB enabled mask is nonempty.
                 Assert.True(deviceInfo.UsbEnabled != DeviceCapabilities.None);
             else
-                // Legacy firmware: basic capabilities
+                // On older firmware, check that a firmware value is present.
                 Assert.NotNull(deviceInfo.FirmwareVersion);
 
             if (state.FormFactor == FormFactor.UsbABiometricKeychain)
-                // Bio keys: verify biometric support expectations
+                // For the reported Bio form factor, check the firmware minimum, not biometric functionality.
                 Assert.True(state.FirmwareVersion.IsAtLeast(5, 0, 0));
 
-            // Test that works on all devices
+            // This selected device is expected to report a positive serial number.
             Assert.True(deviceInfo.SerialNumber > 0);
         });
 
@@ -312,7 +309,7 @@ public class ManagementSessionAdvancedTests
     /// <summary>
     ///     Real-world scenario: Verifying serial number consistency.
     ///     Ensures device identity remains stable across sessions.
-    ///     Uses WithManagementAsync to automatically select correct transport.
+    ///     Uses default Management transport selection for two sequential sessions.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey]
@@ -341,8 +338,8 @@ public class ManagementSessionAdvancedTests
     }
 
     /// <summary>
-    ///     Performance test: Measure device info retrieval time.
-    ///     Useful for benchmarking across different device types.
+    ///     Measures one device-information read against a one-second threshold on the selected rig.
+    ///     This test threshold is not a general SDK latency guarantee.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
@@ -354,7 +351,7 @@ public class ManagementSessionAdvancedTests
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
             sw.Stop();
 
-            // Device info retrieval should be fast (< 1 second) over SmartCard
+            // Enforce this test's one-second budget; the helper uses default transport selection.
             Assert.True(sw.ElapsedMilliseconds < 1000,
                 $"GetDeviceInfo took {sw.ElapsedMilliseconds}ms on device {state}");
 
@@ -363,8 +360,8 @@ public class ManagementSessionAdvancedTests
         });
 
     /// <summary>
-    ///     Comprehensive example: Full device validation across all properties.
-    ///     Demonstrates accessing all device information through YubiKeyTestState.
+    ///     Checks cached serial, firmware, and form factor, then compares them with a fresh query.
+    ///     USB/NFC transport properties are read but not asserted.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey]
@@ -394,29 +391,29 @@ public class ManagementSessionAdvancedTests
     }
 
     /// <summary>
-    ///     Transport-specific example: Only runs on CCID (SmartCard) connections.
-    ///     Demonstrates ConnectionType filtering for transport-specific operations.
+    ///     Reads a device that exposes SmartCard using default Management selection.
+    ///     The row filter is asserted, but the session's actual connection type is not.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GetDeviceInfo_CcidOnly_UsesSmartCardConnection(YubiKeyTestState state)
     {
-        // This test only runs on CCID (SmartCard) connections
+        // This is the requested row filter, not an assertion of the session's connection type.
         Assert.Equal(ConnectionType.SmartCard, state.ConnectionType);
 
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
 
-            // Verify we're getting valid device info over SmartCard
+            // Compare serial and firmware using the helper's unpinned default session.
             Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
             Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
         });
     }
 
     /// <summary>
-    ///     Multi-transport example: Runs on all available connection types.
-    ///     Verifies device info consistency across different transports (CCID, HidFido, HidOtp).
+    ///     Supplies three independent rows and pins each session to its row's concrete connection type.
+    ///     Compares fresh metadata with that row's cached device, not with another row's physical key.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
@@ -424,20 +421,17 @@ public class ManagementSessionAdvancedTests
     [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
     public async Task GetDeviceInfo_AllTransports_ReturnsConsistentData(YubiKeyTestState state)
     {
-        // This test runs on every transport type available for each device
-        // Same physical device will have multiple test runs (one per ConnectionType)
+        // Each attribute binds independently to a matching authorized device.
 
         await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
         {
-            // The attribute is a device FILTER, not a transport pin, so without preferredConnection
-            // below all three rows ran over SmartCard and this test's premise — consistency ACROSS
-            // transports — was never actually exercised. Assert the transport so it cannot regress
-            // to that silently.
+            // The attribute filters devices; preferredConnection below pins the operation.
+            // Assert the actual connection type so default selection cannot hide a missing pin.
             Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
 
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
 
-            // Device info should be consistent regardless of transport
+            // Compare this transport's query with the selected row's cached identity metadata.
             Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
             Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
             Assert.Equal(state.FormFactor, deviceInfo.FormFactor);

@@ -25,9 +25,10 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Features;
 /// <para>
 /// This class provides examples for setting device configuration including
 /// USB/NFC capabilities, timeouts, device flags, and lock codes.
+/// Wrappers convert operation exceptions, including cancellation, into failure results; they do not prompt.
 /// </para>
 /// <para>
-/// <b>Security Note:</b> Lock codes must be zeroed after use with
+/// Keep borrowed lock codes valid and unchanged until completion, then zero owned source arrays with
 /// <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/>.
 /// </para>
 /// </remarks>
@@ -38,7 +39,8 @@ public static class DeviceConfiguration
     /// </summary>
     /// <param name="session">A Management session.</param>
     /// <param name="transport">The transport (USB or NFC).</param>
-    /// <param name="capabilities">The capabilities to enable.</param>
+    /// <param name="capabilities">Complete replacement enabled set; omitted bits are disabled.
+    /// Preserve a supported USB application and a recovery route; the SDK only rejects exact USB None.</param>
     /// <param name="lockCode">The current lock code if device is locked.</param>
     /// <param name="reboot">Whether to reboot the device after configuration.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -89,8 +91,10 @@ public static class DeviceConfiguration
     /// Sets the device timeouts.
     /// </summary>
     /// <param name="session">A Management session.</param>
-    /// <param name="autoEjectTimeout">Auto-eject timeout in seconds (0-3600), or null to leave unchanged.</param>
-    /// <param name="challengeResponseTimeout">Challenge-response timeout in seconds (0-60), or null to leave unchanged.</param>
+    /// <param name="autoEjectTimeout">CCID inactivity timeout in seconds (SDK range 0-3600), or null to
+    /// leave unchanged. Zero disables auto-eject. Nonzero needs TouchEject in CCID-only mode; this does not set the flag.</param>
+    /// <param name="challengeResponseTimeout">OTP challenge-response timeout in seconds (SDK range 0-60),
+    /// or null to leave unchanged. Zero requests the device default, normally 15 seconds. SDK limits are not firmware maxima.</param>
     /// <param name="lockCode">The current lock code if device is locked.</param>
     /// <param name="reboot">Whether to reboot the device after configuration.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -128,7 +132,7 @@ public static class DeviceConfiguration
     /// Sets the device flags.
     /// </summary>
     /// <param name="session">A Management session.</param>
-    /// <param name="flags">The device flags to set.</param>
+    /// <param name="flags">Complete replacement flag set. TouchEject is effective only in CCID-only mode.</param>
     /// <param name="lockCode">The current lock code if device is locked.</param>
     /// <param name="reboot">Whether to reboot the device after configuration.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -159,10 +163,12 @@ public static class DeviceConfiguration
     }
 
     /// <summary>
-    /// Sets whether NFC is restricted.
+    /// Sends the encoded NFC-restriction request; not exposed by the current menus.
     /// </summary>
     /// <param name="session">A Management session.</param>
-    /// <param name="restricted">Whether NFC should be restricted.</param>
+    /// <param name="restricted">True encodes restriction; false encodes zero but is not a verified recovery route.
+    /// For NFC-capable 5.7+ keys, documented recovery is USB power for three seconds. The configured NDEF URL
+    /// remains readable while restricted. The SDK does not preflight those field-specific requirements.</param>
     /// <param name="lockCode">The current lock code if device is locked.</param>
     /// <param name="reboot">Whether to reboot the device after configuration.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -197,7 +203,8 @@ public static class DeviceConfiguration
     /// </summary>
     /// <param name="session">A Management session.</param>
     /// <param name="currentLockCode">The current lock code (null if not set).</param>
-    /// <param name="newLockCode">The new lock code (16 bytes).</param>
+    /// <param name="newLockCode">The new lock code (16 bytes); all zero bytes remove the lock.
+    /// The current code authorizes this command only, not subsequent writes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     /// <remarks>

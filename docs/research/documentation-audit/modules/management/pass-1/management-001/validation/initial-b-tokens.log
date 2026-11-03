@@ -1,0 +1,4 @@
+$ dotnet /tmp/opencode/management-001-doccheck/bin/Release/net10.0/Yubico.YubiKit.Management.DocCheck.dll tokens /home/rupicola/Code/y/Yubico.Yubikit.NET
+PASS: tokens/directives src/Management/src/DeviceConfig.cs; SHA256=688BF3EF8591D2A5B663E4E30F6C7D5BB517380996C51B19C3AEC1D9CED4946C
+PASS: tokens/directives src/Management/src/SetDeviceConfigOptions.cs; SHA256=825976611B693A92F26D50F5D27C08B96F4999898444CF578E7C0F4943F0B4C5
+Token comparison against da61d2e6: files=2, failures=0; only directive-free using-list order normalized.

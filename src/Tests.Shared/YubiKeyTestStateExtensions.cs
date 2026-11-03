@@ -38,9 +38,10 @@ public static class YubiKeyTestStateExtensions
         ///     Automatically handles connection and session lifecycle.
         /// </summary>
         /// <param name="action">
-        ///     Action to execute with the management session and device info.
+        ///     Action to execute with the initialized session and cached <c>state.DeviceInfo</c>.
+        ///     The helper does not refresh this metadata; query the session for current persisted settings.
         /// </param>
-        /// <param name="configuration">Optional configuration </param>
+        /// <param name="configuration">Optional protocol configuration.</param>
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
         /// <param name="preferredConnection">
         ///     Pins the session to a specific transport. <c>null</c> uses Management's default order
@@ -48,18 +49,19 @@ public static class YubiKeyTestStateExtensions
         ///     <para>
         ///         Pass this whenever a test's meaning depends on WHICH transport it runs over.
         ///         <c>[WithYubiKey(ConnectionType = X)]</c> does NOT pin the transport — it is a device
-        ///         FILTER, and a composite key exposing SmartCard matches a HID request. Without this
-        ///         parameter such a test silently runs over SmartCard on any composite key and quietly
-        ///         proves nothing about HID.
+        ///         filter. A composite key can expose both SmartCard and the requested HID interface.
+        ///         Without a pin, Management can select SmartCard; that does not exercise HID.
+        ///         Assert <c>mgmt.ConnectionType</c> to verify the interface actually opened.
         ///     </para>
         /// </param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <example>
         ///     <code>
-        /// [YubiKeyTheory]
-        /// public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestDevice device)
+        /// [SkippableTheory]
+        /// [WithYubiKey]
+        /// public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state)
         /// {
-        ///     await device.WithManagementAsync(async (mgmt, info) =>
+        ///     await state.WithManagementAsync(async (mgmt, info) =>
         ///     {
         ///         var deviceInfo = await mgmt.GetDeviceInfoAsync();
         ///         Assert.Equal(info.SerialNumber, deviceInfo.SerialNumber);
@@ -95,17 +97,22 @@ public static class YubiKeyTestStateExtensions
         ///     Automatically handles connection and session lifecycle.
         /// </summary>
         /// <param name="action">
-        ///     Synchronous action to execute with the management session and device info.
+        ///     Synchronous action to execute with the initialized session and cached <c>state.DeviceInfo</c>.
         /// </param>
-        /// <param name="configuration"></param>
+        /// <param name="configuration">Optional protocol configuration.</param>
         /// <param name="scpKeyParams">Optional SCP key parameters for secure channel.</param>
+        /// <param name="preferredConnection">
+        ///     Optional concrete transport pin. A device filter alone does not pin the session.
+        ///     Assert the session's <c>ConnectionType</c> when transport matters.
+        /// </param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <example>
         ///     <code>
-        /// [YubiKeyTheory]
-        /// public async Task CheckDeviceProperties(YubiKeyTestDevice device)
+        /// [SkippableTheory]
+        /// [WithYubiKey]
+        /// public async Task CheckDeviceProperties(YubiKeyTestState state)
         /// {
-        ///     await device.WithManagementAsync((mgmt, info) =>
+        ///     await state.WithManagementAsync((mgmt, info) =>
         ///     {
         ///         Assert.True(info.SerialNumber > 0);
         ///         Assert.NotEqual(FormFactor.Unknown, info.FormFactor);
@@ -143,14 +150,15 @@ public static class YubiKeyTestStateExtensions
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <example>
         ///     <code>
-        /// [YubiKeyTheory]
-        /// public async Task SendApdu_Success(YubiKeyTestDevice device)
+        /// [SkippableTheory]
+        /// [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+        /// public async Task ReadMetadata_WithBorrowedConnection(YubiKeyTestState state)
         /// {
-        ///     await device.WithConnectionAsync(async connection =>
+        ///     await state.WithConnectionAsync(async connection =>
         ///     {
-        ///         var apdu = new CommandApdu(0x00, 0xA4, 0x04, 0x00);
-        ///         var response = await connection.TransmitAsync(apdu);
-        ///         Assert.True(response.IsSuccess);
+        ///         await using var session = await ManagementSession.CreateAsync(connection);
+        ///         var info = await session.GetDeviceInfoAsync();
+        ///         Assert.Equal(state.SerialNumber, info.SerialNumber);
         ///     });
         /// }
         ///     </code>

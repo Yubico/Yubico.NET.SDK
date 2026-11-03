@@ -1,0 +1,11 @@
+[SkippableTheory]
+[WithYubiKey]
+public async Task GetDeviceInfo_ReturnsValidData(YubiKeyTestState state) =>
+    await state.WithManagementAsync(async (mgmt, cachedInfo) =>
+    {
+        var info = await mgmt.GetDeviceInfoAsync();
+
+        Assert.True(info.SerialNumber > 0);
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+        Assert.Equal(state.FirmwareVersion, info.FirmwareVersion);
+    });

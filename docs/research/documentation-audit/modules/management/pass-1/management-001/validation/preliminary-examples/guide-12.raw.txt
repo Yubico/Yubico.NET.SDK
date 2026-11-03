@@ -1,0 +1,9 @@
+// Session helper: automatic cleanup and cached device info.
+await state.WithManagementAsync(async (mgmt, deviceInfo) =>
+{
+    var freshInfo = await mgmt.GetDeviceInfoAsync();
+    Assert.Equal(deviceInfo.SerialNumber, freshInfo.SerialNumber);
+});
+
+// A one-shot alternative, after the helper's session has been disposed:
+var oneShotInfo = await state.Device.GetDeviceInfoAsync();

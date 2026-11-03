@@ -1,0 +1,12 @@
+$ python3 docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/prepare-project-context.py --collect
+PASS: prepared source/document/configuration/reference hashes still match; no compilation performed.
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/prepare-project-context.py", line 247, in <module>
+    main()
+    ~~~~^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/prepare-project-context.py", line 239, in main
+    collect(repo, args.workspace)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/prepare-project-context.py", line 181, in collect
+    raise ValueError(f"Unexpected compiler/analyzer policy {name}: {policy.get(name)}")
+ValueError: Unexpected compiler/analyzer policy EnableNETAnalyzers: false

@@ -1,0 +1,15 @@
+// Flags enum - use bitwise operations
+var capabilities = DeviceCapabilities.Piv | DeviceCapabilities.Oath;
+
+// Check if specific capability is set
+bool hasPiv = (capabilities & DeviceCapabilities.Piv) != 0;
+
+// Add capability
+capabilities |= DeviceCapabilities.Fido2;
+
+// Remove capability
+capabilities &= ~DeviceCapabilities.Otp;
+
+// Check multiple
+bool hasPivAndOath = (capabilities & (DeviceCapabilities.Piv | DeviceCapabilities.Oath))
+    == (DeviceCapabilities.Piv | DeviceCapabilities.Oath);

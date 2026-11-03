@@ -26,8 +26,9 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///     <para>
 ///         This attribute works with [SkippableTheory] to provide YubiKey devices as test data and
 ///         report unavailable hardware as a skipped test rather than a failure.
-///         It automatically discovers, filters, and provides devices based on the specified criteria.
-///         Multiple [WithYubiKey] attributes can be applied to run tests with different device configurations.
+///         Each attribute yields one placeholder that binds to the first matching authorized device at
+///         execution. Multiple attributes bind independently, not once per matching physical key.
+///         Connection filters select eligible devices; they do not pin an applet session's transport.
 ///     </para>
 ///     <para>
 ///         Usage:
@@ -35,19 +36,21 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 ///     // Single configuration
 ///     [SkippableTheory]
 ///     [WithYubiKey(MinFirmware = "5.7.2")]
-///     public async Task TestName(YubiKeyTestState device)
+///     public async Task ReadModernDevice(YubiKeyTestState device)
 ///     {
-///         // Test runs on devices with firmware >= 5.7.2
+///         var info = await device.Device.GetDeviceInfoAsync();
+///         Assert.Equal(device.SerialNumber, info.SerialNumber);
 ///     }
 /// 
 ///     // Multiple configurations
 ///     [SkippableTheory]
-///     [WithYubiKey(MinFirmware = "5.0")]
+///     [WithYubiKey(MinFirmware = "5.0.0")]
 ///     [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
 ///     [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
-///     public async Task TestName(YubiKeyTestState device)
+///     public async Task ReadIndependentlyBoundRows(YubiKeyTestState device)
 ///     {
-///         // Test runs on devices matching ANY of the above criteria
+///         var info = await device.Device.GetDeviceInfoAsync();
+///         Assert.Equal(device.SerialNumber, info.SerialNumber);
 ///     }
 /// 
 ///     // Custom filter example
@@ -66,12 +69,14 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
     /// <summary>
     ///     Gets or sets the minimum firmware version required.
     ///     Format: "major.minor.patch" (e.g., "5.7.2")
+    ///     Malformed strings are currently ignored rather than rejected.
     /// </summary>
     public string? MinFirmware { get; set; }
 
     /// <summary>
     ///     Gets or sets the required form factor.
     ///     Use FormFactor.Unknown (default) to match any form factor.
+    ///     Current Core parsing can retain product flag bits, so exact base-value filters can miss flagged devices.
     /// </summary>
     public FormFactor FormFactor { get; set; } = FormFactor.Unknown;
 
@@ -88,11 +93,12 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
     /// <summary>
     ///     Gets or sets the required connection type.
     ///     Use ConnectionType.Unknown (default) to match any connection type.
+    ///     This filters device interfaces, not the transport selected by a later session.
     /// </summary>
     public ConnectionType ConnectionType { get; set; } = ConnectionType.Unknown;
 
     /// <summary>
-    ///     Gets or sets the required capability (must be enabled).
+    ///     Gets or sets the required capability (enabled over USB or NFC, independently of RequireUsb).
     ///     Use DeviceCapabilities.None (default) to skip capability filtering.
     /// </summary>
     public DeviceCapabilities Capability { get; set; } = DeviceCapabilities.None;
@@ -100,12 +106,14 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
     /// <summary>
     ///     Gets or sets whether FIPS-capable is required for the specified capability.
     ///     Use DeviceCapabilities.None (default) to skip FIPS-capable filtering.
+    ///     Current Core FIPS-tag mapping is incorrect; this filter cannot establish application approval.
     /// </summary>
     public DeviceCapabilities FipsCapable { get; set; } = DeviceCapabilities.None;
 
     /// <summary>
-    ///     Gets or sets whether FIPS-approved mode is required for the specified capability.
+    ///     Gets or sets the required reported FIPS-approved application mask, not an operating mode.
     ///     Use DeviceCapabilities.None (default) to skip FIPS-approved filtering.
+    ///     Current Core FIPS-tag mapping is incorrect; this filter cannot establish application approval.
     /// </summary>
     public DeviceCapabilities FipsApproved { get; set; } = DeviceCapabilities.None;
 
@@ -130,7 +138,11 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
     /// 
     ///     [SkippableTheory]
     ///     [WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
-    ///     public async Task Test(YubiKeyTestState device) { }
+    ///     public async Task ReadSelectedRange(YubiKeyTestState device)
+    ///     {
+    ///         var info = await device.Device.GetDeviceInfoAsync();
+    ///         Assert.Equal(device.SerialNumber, info.SerialNumber);
+    ///     }
     ///         </code>
     ///     </para>
     /// </remarks>
@@ -150,7 +162,7 @@ public class WithYubiKeyAttribute : DataAttribute, ITraitAttribute
     ///         The placeholder's Device property uses lazy binding - when the test
     ///         actually accesses Device during execution, it initializes the infrastructure,
     ///         applies all filter criteria via <see cref="YubiKeyTestInfrastructure.FilterDevices"/>,
-    ///         and binds to a matching YubiKey.
+    ///         and binds to the first matching authorized YubiKey.
     ///     </para>
     /// </remarks>
     public override IEnumerable<object[]>

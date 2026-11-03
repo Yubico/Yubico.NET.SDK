@@ -21,28 +21,35 @@ using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.Management;
 
 /// <summary>
-///     Provides a set of static extension methods for interacting with and managing
-///     YubiKeys in the Yubico SDK.
+///     Opens Management sessions and provides one-shot device-information and configuration operations.
 /// </summary>
 /// <remarks>
-///     This class is intended to extend functionality related to YubiKey management
-///     within the Yubico SDK. These methods can simplify operations, enhance
-///     interoperability, and provide additional utilities when working with YubiKey devices.
+///     One-shot operations dispose their temporary session and connection before returning.
+///     For several sequential operations, create a session once and dispose it with <c>await using</c>.
 /// </remarks>
 public static class IYubiKeyExtensions
 {
     extension(IYubiKey yubiKey)
     {
         /// <summary>
-        ///     Retrieves device information from a YubiKey asynchronously.
+        ///     Queries current device information using a temporary Management session and connection.
         /// </summary>
-        /// <param name="options">Optional cross-cutting session creation settings.</param>
+        /// <remarks>
+        ///     Creates and disposes an owned session/connection even if the read fails. Initialization can
+        ///     itself query metadata before this read. See <see cref="CreateManagementSessionAsync" /> for
+        ///     transport selection and initialization, and <see cref="IManagementSession.GetDeviceInfoAsync" />
+        ///     for supported firmware, optional fields, and multi-exchange/cancellation boundaries.
+        /// </remarks>
+        /// <param name="options">Optional transport, protocol, firmware-override, and SCP creation settings.</param>
         /// <param name="cancellationToken">
-        ///     An optional token to cancel the operation.
+        ///     A token requesting cancellation of creation and the read at transport-supported boundaries.
         /// </param>
         /// <returns>
         ///     A <see cref="DeviceInfo" /> structure containing detailed information about the YubiKey device.
         /// </returns>
+        /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
+        /// <exception cref="ArgumentException">The transport preference is invalid.</exception>
+        /// <exception cref="NotSupportedException">No requested/supported transport is exposed, or SCP is requested over HID.</exception>
         public async Task<DeviceInfo> GetDeviceInfoAsync(
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
@@ -53,22 +60,38 @@ public static class IYubiKeyExtensions
         }
 
         /// <summary>
-        ///     Sets the device configuration on a YubiKey asynchronously.
+        ///     Writes device configuration using a temporary Management session and connection.
         /// </summary>
+        /// <remarks>
+        ///     The temporary session and connection are disposed on success or failure. Null configuration
+        ///     properties preserve settings; application masks and flags replace their sets. Each protected
+        ///     write needs the current lock code. Keep borrowed lock-code buffers valid and unchanged through
+        ///     the entire call, including session creation, then clear them when no longer needed in a
+        ///     <c>finally</c> block. A reboot request is not a factory reset; cancellation does not roll back
+        ///     a transmitted configuration. See <see cref="IManagementSession.SetDeviceConfigAsync" /> for
+        ///     firmware, validation, ownership, and transport-specific cancellation details, and
+        ///     <see cref="CreateManagementSessionAsync" /> for creation failures.
+        /// </remarks>
         /// <param name="config">
         ///     The desired device configuration to be applied to the YubiKey.
         /// </param>
-        /// <param name="options">Optional device-configuration policy and borrowed lock-code memory.</param>
+        /// <param name="options">Optional reboot request and borrowed current/replacement lock codes.</param>
         /// <param name="sessionOptions">
         ///     Optional cross-cutting settings for creating the temporary management session. These are distinct
         ///     from <paramref name="options" />, which controls the device-configuration operation.
         /// </param>
         /// <param name="cancellationToken">
-        ///     An optional token to cancel the operation.
+        ///     A token requesting cancellation of creation and the write at transport-supported boundaries.
         /// </param>
         /// <returns>
         ///     A task representing the asynchronous operation.
         /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="config" /> is null.</exception>
+        /// <exception cref="ArgumentException">A lock code is not 16 bytes, or the transport preference is invalid.</exception>
+        /// <exception cref="InvalidOperationException">The USB mask is explicitly None, or initialization cannot determine firmware.</exception>
+        /// <exception cref="NotSupportedException">Firmware, transport, or SCP settings are unsupported.</exception>
+        /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
+        /// <exception cref="ApduException">The device rejects a configuration command over SmartCard.</exception>
         public async Task SetDeviceConfigAsync(
             DeviceConfig config,
             SetDeviceConfigOptions? options = null,
@@ -82,22 +105,36 @@ public static class IYubiKeyExtensions
         }
 
         /// <summary>
-        ///     Creates a management session for interacting with a YubiKey asynchronously.
-        ///     The session provides capabilities to perform management operations on the device.
+        ///     Opens one connection and returns an initialized Management session that owns it.
         /// </summary>
+        /// <remarks>
+        ///     The caller must dispose the returned session, preferably with <c>await using</c>; this also
+        ///     closes its connection. Creation failure disposes the connection opened here. In contrast,
+        ///     <see cref="ManagementSession.CreateAsync" /> borrows a caller-opened connection.
+        ///     Exactly one exposed transport is selected. Connection and initialization failures propagate
+        ///     without trying another interface. SCP requires SmartCard; an explicit HID preference with
+        ///     SCP is rejected before initialization I/O.
+        ///     Firmware probing and a best-effort device-information read precede optional SCP establishment.
+        ///     A firmware override affects protocol configuration and feature checks, not discovery or
+        ///     reported hardware metadata. See <see cref="ManagementSession.CreateAsync" /> for initialization
+        ///     details and <see cref="IManagementSession" /> for operation sequencing and cancellation.
+        /// </remarks>
         /// <param name="options">
         ///     Optional creation settings. Management selects SmartCard, HID FIDO, then HID OTP unless
         ///     <see cref="SessionCreationOptions.PreferredConnectionType" /> specifies a supported transport.
-        ///     Secure-channel parameters force SmartCard when no preference is specified.
+        ///     Supplying caller-owned <see cref="ScpKeyParameters" /> forces SmartCard when no preference is specified.
         /// </param>
         /// <param name="cancellationToken">
-        ///     An optional token to cancel the operation.
+        ///     A token requesting cancellation of connection opening and initialization at transport-supported boundaries.
         /// </param>
         /// <returns>
         ///     A <see cref="ManagementSession" /> instance configured for the YubiKey device.
         ///     The session must be disposed by the caller when no longer needed.
         /// </returns>
         /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
+        /// <exception cref="ArgumentException">The preferred connection type is not one supported concrete transport.</exception>
+        /// <exception cref="NotSupportedException">The selected transport is not exposed, no supported transport is exposed, or SCP is requested over HID.</exception>
+        /// <exception cref="InvalidOperationException">Initialization cannot determine a firmware version.</exception>
         public async Task<ManagementSession> CreateManagementSessionAsync(
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)

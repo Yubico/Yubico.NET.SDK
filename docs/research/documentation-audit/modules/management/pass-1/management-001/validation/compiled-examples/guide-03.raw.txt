@@ -1,0 +1,10 @@
+[SkippableTheory]
+[WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
+[WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
+[WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
+public async Task MultiFormFactor_Test(YubiKeyTestState state)
+{
+    // Three independently bound rows; each row requires its attribute's form factor.
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.FormFactor, info.FormFactor);
+}

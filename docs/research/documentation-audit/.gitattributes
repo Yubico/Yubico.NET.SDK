@@ -2,3 +2,6 @@
 # Current workflow documents outside records/ retain the repository's normal text rules.
 records/** -text -whitespace
 maintenance/**/validation/** -text -whitespace
+# Retained compiler inputs, projects and logs are hashed evidence; preserve exact bytes/EOFs.
+modules/**/validation/** -text -whitespace
+modules/**/patches/** -text -whitespace

@@ -1,0 +1,11 @@
+[SkippableTheory]
+[WithYubiKey(MinFirmware = "5.0.0")]
+public async Task MyTest(YubiKeyTestState state) =>
+    await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+    {
+        // mgmt = ManagementSession (already initialized)
+        // cachedDeviceInfo = shared test-state snapshot, not fresh helper-entry metadata
+
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(cachedDeviceInfo.SerialNumber, info.SerialNumber);
+    });

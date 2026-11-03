@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <RepositoryRoot>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildThisFileDirectory)', 'toolchain.cs'))</RepositoryRoot>
+    <!-- Set early so the canonical root props apply the real test-project analyzer conventions. -->
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <Import Project="$(RepositoryRoot)/Directory.Build.props" />
+  <PropertyGroup>
+    <ManagementExamplesWorkspace Condition="'$(ManagementExamplesWorkspace)' == ''">/tmp/opencode/management-001-xunit2-context</ManagementExamplesWorkspace>
+    <BaseIntermediateOutputPath>$(ManagementExamplesWorkspace)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(ManagementExamplesWorkspace)/obj/</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(ManagementExamplesWorkspace)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

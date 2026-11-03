@@ -27,6 +27,13 @@ using Yubico.YubiKit.Management.Backend;
 
 namespace Yubico.YubiKit.Management;
 
+/// <summary>Provides device-information reads and device-level configuration over SmartCard, FIDO HID, or OTP HID.</summary>
+/// <remarks>
+///     Create an initialized session with <see cref="CreateAsync" /> for a connection you own, or use
+///     <c>IYubiKey.CreateManagementSessionAsync</c> to let the session own the connection it opens.
+///     Dispose the session when finished and await each operation before starting another.
+///     See <see cref="IManagementSession" /> for sequencing and transport-specific cancellation boundaries.
+/// </remarks>
 public sealed class ManagementSession : ApplicationSession, IManagementSession
 {
     private static readonly Feature FeatureDeviceInfo =
@@ -64,6 +71,33 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
                 "Supported types: ISmartCardConnection, IFidoHidConnection, IOtpHidConnection.");
     }
 
+    /// <summary>Creates and initializes a Management session that borrows an open connection.</summary>
+    /// <remarks>
+    ///     The caller must dispose the connection on both success and failure. Disposing this session
+    ///     releases its protocol and session guard, but does not dispose the borrowed connection.
+    ///     Only one live session may use a connection; do not perform raw I/O alongside the session.
+    ///     Initialization prepares the protocol, probes the firmware, and attempts a device-information
+    ///     read before establishing optional SCP. Non-cancellation failure of that read falls back to
+    ///     the transport's firmware probe. Initialization metadata is therefore not all SCP-protected.
+    ///     A firmware override configures the protocol and feature checks; it neither skips discovery
+    ///     nor replaces the hardware metadata returned by later reads.
+    ///     Creation settings are not retained as an options object. SCP parameters remain caller-owned
+    ///     and borrowed through initialization. Management does not retain, invoke, or dispose the optional
+    ///     user-presence prompt. Communication, SCP, and response errors propagate from their layers.
+    /// </remarks>
+    /// <param name="connection">An open SmartCard, FIDO HID, or OTP HID connection, retained by the caller.</param>
+    /// <param name="options">
+    ///     Optional protocol, firmware-override, and SCP settings. A preferred connection type must match
+    ///     the supplied connection: it validates the choice, rather than selecting another transport.
+    ///     SCP requires SmartCard and is rejected on HID before initialization I/O.
+    /// </param>
+    /// <param name="cancellationToken">A token requesting cancellation of initialization at transport-supported boundaries.</param>
+    /// <returns>An initialized session that the caller must dispose, preferably with <c>await using</c>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="connection" /> is null.</exception>
+    /// <exception cref="ArgumentException">The preferred connection type is invalid or does not match the connection.</exception>
+    /// <exception cref="NotSupportedException">The connection type is unsupported, or SCP is requested over HID.</exception>
+    /// <exception cref="ConnectionInUseException">The connection already has a live session.</exception>
+    /// <exception cref="InvalidOperationException">Initialization cannot determine a firmware version.</exception>
     public static Task<ManagementSession> CreateAsync(
         IConnection connection,
         SessionCreationOptions? options = null,
@@ -112,6 +146,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
     }
 
+    /// <inheritdoc cref="IManagementSession.GetDeviceInfoAsync" />
     public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -119,6 +154,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         return DeviceInfoReader.ReadAsync(protocol, _version, cancellationToken);
     }
 
+    /// <inheritdoc cref="IManagementSession.SetDeviceConfigAsync" />
     public Task SetDeviceConfigAsync(
         DeviceConfig config,
         SetDeviceConfigOptions? options = null,

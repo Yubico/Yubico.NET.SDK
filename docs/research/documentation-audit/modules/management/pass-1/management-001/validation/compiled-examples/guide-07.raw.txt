@@ -1,0 +1,3 @@
+await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);
+await using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);
+var deviceInfo = await mgmt.GetDeviceInfoAsync(cancellationToken);

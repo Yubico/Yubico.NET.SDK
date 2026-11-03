@@ -1,0 +1,102 @@
+<Project>
+  <ItemGroup>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-01.cs">
+      <Link>Snippets/guide-01.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-02.cs">
+      <Link>Snippets/guide-02.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-03.cs">
+      <Link>Snippets/guide-03.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-13.cs">
+      <Link>Snippets/guide-13.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-14.cs">
+      <Link>Snippets/guide-14.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-15.cs">
+      <Link>Snippets/guide-15.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-16.cs">
+      <Link>Snippets/guide-16.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-17.cs">
+      <Link>Snippets/guide-17.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-18.cs">
+      <Link>Snippets/guide-18.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-19.cs">
+      <Link>Snippets/guide-19.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/module-tests-1.cs">
+      <Link>Snippets/module-tests-1.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/module-tests-2.cs">
+      <Link>Snippets/module-tests-2.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-helper-xml-1.cs">
+      <Link>Snippets/shared-helper-xml-1.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-helper-xml-2.cs">
+      <Link>Snippets/shared-helper-xml-2.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-helper-xml-3.cs">
+      <Link>Snippets/shared-helper-xml-3.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-attribute-xml-1.cs">
+      <Link>Snippets/shared-attribute-xml-1.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-attribute-xml-2.cs">
+      <Link>Snippets/shared-attribute-xml-2.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-1.cs">
+      <Link>Snippets/shared-readme-1.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-4.cs">
+      <Link>Snippets/shared-readme-4.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-5.cs">
+      <Link>Snippets/shared-readme-5.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-6.cs">
+      <Link>Snippets/shared-readme-6.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-7.cs">
+      <Link>Snippets/shared-readme-7.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-11.cs">
+      <Link>Snippets/testing-11.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-12.cs">
+      <Link>Snippets/testing-12.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-13.cs">
+      <Link>Snippets/testing-13.cs</Link>
+    </Compile>
+    <Compile Include="$(RepositoryRoot)/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-15.cs">
+      <Link>Snippets/testing-15.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Yubico.YubiKit.Core">
+      <HintPath>$(RepositoryRoot)/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.Management">
+      <HintPath>$(RepositoryRoot)/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.Tests.Shared">
+      <HintPath>$(RepositoryRoot)/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.SecurityDomain">
+      <HintPath>$(RepositoryRoot)/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.SecurityDomain.IntegrationTests">
+      <HintPath>$(RepositoryRoot)/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.dll</HintPath>
+    </Reference>
+    <Reference Include="Yubico.YubiKit.Oath">
+      <HintPath>$(RepositoryRoot)/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

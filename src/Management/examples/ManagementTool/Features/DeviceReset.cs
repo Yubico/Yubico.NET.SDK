@@ -18,16 +18,18 @@ using Yubico.YubiKit.Management.Examples.ManagementTool.Features.Results;
 namespace Yubico.YubiKit.Management.Examples.ManagementTool.Features;
 
 /// <summary>
-/// Demonstrates factory resetting a YubiKey.
+/// Demonstrates the Bio Multi-protocol Edition combined FIDO/PIV reset over SmartCard.
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>WARNING:</b> Factory reset is a destructive operation that erases all data
-/// on the device. This includes all credentials, keys, and configuration.
-/// This operation cannot be undone.
+/// Reset destroys FIDO credentials, fingerprints and the shared PIN, and PIV keys, certificates and
+/// user data except the F9 attestation slot. It cannot be undone. It is not a documented recovery
+/// procedure for a lost Management configuration lock code.
 /// </para>
 /// <para>
-/// Factory reset is only available on YubiKeys with firmware version 5.6.0 or later.
+/// The helper checks firmware 5.6.0, not product-family support. A passing check does not establish
+/// Bio MPE eligibility. The SDK additionally requires SmartCard; a device rejection can still fail.
+/// Operation exceptions, including cancellation, are converted to failure results.
 /// </para>
 /// </remarks>
 public static class DeviceReset
@@ -38,17 +40,17 @@ public static class DeviceReset
     public static readonly FirmwareVersion MinimumResetVersion = new(5, 6, 0);
 
     /// <summary>
-    /// Checks if the device supports factory reset.
+    /// Checks the helper's minimum firmware comparison, not device reset capability.
     /// </summary>
     /// <param name="firmwareVersion">The device firmware version.</param>
-    /// <returns>True if factory reset is supported.</returns>
+    /// <returns>True if the supplied firmware is at least the helper's minimum; no family or transport check.</returns>
     public static bool IsResetSupported(FirmwareVersion firmwareVersion)
     {
         return firmwareVersion >= MinimumResetVersion;
     }
 
     /// <summary>
-    /// Performs a factory reset on the YubiKey.
+    /// Requests the combined reset after a firmware-only helper check.
     /// </summary>
     /// <param name="session">A Management session.</param>
     /// <param name="deviceInfo">Device information (to check firmware version).</param>
@@ -56,24 +58,20 @@ public static class DeviceReset
     /// <returns>Result indicating success or failure.</returns>
     /// <remarks>
     /// <para>
-    /// <b>WARNING:</b> This operation will:
+    /// Callers must confirm Bio MPE applicability and authorize destructive application reset before calling.
     /// </para>
     /// <list type="bullet">
-    /// <item>Erase all PIV keys and certificates</item>
-    /// <item>Erase all FIDO2 credentials</item>
-    /// <item>Erase all OATH accounts</item>
-    /// <item>Erase all OpenPGP keys</item>
-    /// <item>Reset all PINs and PUKs to default values</item>
-    /// <item>Remove configuration lock code</item>
-    /// <item>Reset all device configuration to defaults</item>
+    /// <item>Deletes PIV keys, certificates and user data, except the F9 attestation slot.</item>
+    /// <item>Deletes FIDO credentials and fingerprint templates, and removes the shared PIN.</item>
     /// </list>
     /// <para>
-    /// Requires firmware version 5.6.0 or later.
+    /// Requires a SmartCard Management session on applicable Bio MPE hardware. Firmware alone is insufficient.
     /// </para>
     /// </remarks>
     /// <example>
     /// <code>
-    /// // First get device info to check firmware version
+    /// // Prerequisite: caller confirmed Bio MPE and authorized reset; session uses SmartCard.
+    /// // Metadata below supplies the helper's firmware check, not a product-family check.
     /// var infoResult = await DeviceInfoQuery.GetDeviceInfoAsync(session, ct);
     /// if (!infoResult.Success || !infoResult.DeviceInfo.HasValue)
     /// {
@@ -81,7 +79,7 @@ public static class DeviceReset
     ///     return;
     /// }
     /// 
-    /// // Check firmware version and perform reset
+    /// // Request reset; the helper returns failure results for operation exceptions.
     /// var resetResult = await DeviceReset.ResetDeviceAsync(
     ///     session, 
     ///     infoResult.DeviceInfo.Value, 
@@ -104,7 +102,7 @@ public static class DeviceReset
     {
         ArgumentNullException.ThrowIfNull(session);
 
-        // Check firmware version
+        // Firmware-only helper preflight; this does not establish product or transport eligibility.
         if (!IsResetSupported(deviceInfo.FirmwareVersion))
         {
             return ResetResult.Failed(

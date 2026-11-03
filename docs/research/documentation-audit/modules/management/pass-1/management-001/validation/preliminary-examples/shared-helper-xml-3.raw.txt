@@ -1,0 +1,12 @@
+
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+public async Task ReadMetadata_WithBorrowedConnection(YubiKeyTestState state)
+{
+    await state.WithConnectionAsync(async connection =>
+    {
+        await using var session = await ManagementSession.CreateAsync(connection);
+        var info = await session.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+    });
+}

@@ -15,20 +15,22 @@ For Management-specific test patterns, device filtering, and test state utilitie
 
 ## Advanced Device Filtering
 
-Management tests use the most powerful device filtering system in the SDK via `[WithYubiKey]` attribute:
+Management uses the shared `[WithYubiKey]` filters. Each attribute yields one placeholder row, bound to
+the first matching authorized device at execution. It does not enumerate every matching device.
+Multiple attributes bind independently. Use three-component firmware strings; malformed criteria are
+currently ignored rather than rejected.
 
 ```csharp
 [SkippableTheory]
 [WithYubiKey(
     MinFirmware = "5.3.0",                     // Only firmware >= 5.3.0
-    FormFactor = FormFactor.UsbAKeychain,      // Only USB-A keychains
-    Capability = DeviceCapabilities.Piv,       // Must have PIV enabled
-    RequireUsb = true,                         // USB transport required
-    FipsCapable = DeviceCapabilities.Piv       // FIPS-capable for PIV
+    Capability = DeviceCapabilities.Piv,      // PIV enabled over USB OR NFC
+    RequireUsb = true                         // Independent USB availability requirement
 )]
 public async Task MyTest(YubiKeyTestState state)
 {
-    // Test runs ONLY on devices matching ALL criteria
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
 }
 ```
 
@@ -43,7 +45,7 @@ public async Task MyTest(YubiKeyTestState state) =>
     await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
     {
         // mgmt = ManagementSession (already initialized)
-        // cachedDeviceInfo = DeviceInfo from initial query
+        // cachedDeviceInfo = shared test-state snapshot, not fresh helper-entry metadata
         
         var info = await mgmt.GetDeviceInfoAsync();
         Assert.Equal(cachedDeviceInfo.SerialNumber, info.SerialNumber);
@@ -52,26 +54,33 @@ public async Task MyTest(YubiKeyTestState state) =>
 
 ## Critical Warnings
 
-**⚠️ NEVER write tests that modify device configuration in the shared test suite:**
-- Configuration changes cause device reboots (3+ seconds)
-- Changes persist across test runs
-- Breaks tests that depend on specific capabilities
-- Requires manual device reconfiguration to fix
+The committed allow list authorizes dedicated test devices, including persistent-state changes. Do not
+add a second environment-variable gate. Configuration tests must save every changed field, preserve a
+recovery route, attempt restoration in `finally` and verify restored values where possible. Restoration
+can fail; clear secret buffers in an independent `finally` even if hardware cleanup throws.
+
+Reboot occurs when explicitly requested. End old scopes and rediscover the intended key before opening
+a fresh connection; a delay does not reconnect the old session. The no-reboot timeout example in the
+module guide checks persistence only, not active CCID behavior. Coordinate physical presence/timing tests
+with a human and mark the appropriate traits.
+
+Connection filters do not pin operation transport. For a concrete row, pass
+`preferredConnection: state.ConnectionType` and assert `mgmt.ConnectionType`; do not pass a combined
+unfiltered connection set as a preference. Current FIPS masks/derived filters have a Core decoding issue,
+and flagged form-factor bytes can miss exact base-enum filters. These filters cannot establish FIPS
+approval or Bio MPE reset eligibility.
 
 See [`../CLAUDE.md`](../CLAUDE.md#critical-warnings-for-configuration-tests) for safe configuration testing patterns.
 
 ## Running Tests
 
 ```bash
-# Run all Management tests
-dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Management"
-
 # Run unit tests only
-dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Management.UnitTests"
+dotnet toolchain.cs -- test --project Management
 
-# Run integration tests only (requires YubiKey)
-dotnet toolchain.cs -- test --filter "FullyQualifiedName~Yubico.YubiKit.Management.IntegrationTests"
+# Run unit and integration tests (requires YubiKey)
+dotnet toolchain.cs -- test --integration --project Management
 
 # Run specific test class
-dotnet toolchain.cs -- test --filter "FullyQualifiedName~ManagementIntegrationTests"
+dotnet toolchain.cs -- test --integration --project Management --filter "FullyQualifiedName~ManagementSessionSimpleTests"
 ```

@@ -60,7 +60,7 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
                 return ExitCode.DeviceNotFound;
             }
 
-            // 2. Enrich with ManagementSession data (part number, capabilities, etc.)
+            // 2. Best-effort one-shot metadata query; its session/connection end before the command runs.
             DeviceInfo? deviceInfo = null;
             try
             {
@@ -68,8 +68,9 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
             }
             catch (Exception ex)
             {
-                // Non-fatal: log a debug warning and proceed without enriched info.
-                // This can happen if SmartCard transport is unavailable for this connection.
+                // Non-fatal: display an informational message and continue without the snapshot.
+                // Default-selected transport open/query can fail; absent SmartCard alone is not the cause.
+                // This catch also treats cancellation as missing metadata.
                 OutputHelpers.WriteInfo($"Could not retrieve full device info: {ex.Message}");
             }
 

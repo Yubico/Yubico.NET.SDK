@@ -10,6 +10,8 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 
 /// <summary>
 /// CLI menu for factory reset operation.
+/// The firmware check does not establish Bio MPE applicability. The supported combined reset deletes
+/// FIDO/PIV user data and the shared PIN, retaining F9; the broader display is not an erasure contract.
 /// </summary>
 public static class ResetMenu
 {
@@ -45,7 +47,7 @@ public static class ResetMenu
             return;
         }
 
-        // Display device info and what will be lost
+        // Display device info; caller must establish Bio MPE support, not infer it from firmware alone.
         AnsiConsole.MarkupLine("[bold]Device to Reset[/]");
         OutputHelpers.WriteKeyValue("Serial Number", info.SerialNumber?.ToString());
         OutputHelpers.WriteKeyValue("Firmware Version", info.FirmwareVersion.ToString());

@@ -26,9 +26,9 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Disabling a USB application changes the key's PID and reboots it, so a scan loop running
-///         across the transition observes the enumeration states discovery must never mis-handle: stale
-///         interfaces dying, the key absent, fresh interfaces arriving one by one. The invariants under
+///         This test disables USB OTP and explicitly requests a reboot with Reboot = true. The PID-changing
+///         transition can expose stale interfaces, absence, and newly arriving interfaces to a scan loop.
+///         Completed scans need not capture every intermediate state. The invariants under
 ///         test are the contract, not any particular intermediate shape: within every single scan, output
 ///         <c>DeviceId</c>s are pairwise distinct and at most one device carries this key's
 ///         <c>ykphysical:{serial}</c> identity. The intermediate shapes themselves (standalone fragments,
@@ -36,16 +36,15 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 ///         test to enumeration timing.
 ///     </para>
 ///     <para>
-///         First validated as a manual 37,083-scan run across two reboot cycles on macOS (three keys,
-///         zero violations) before being automated here. Honest bound, matching the unit vectors' role:
-///         on rigs where the stale enumeration dies before the fresh one arrives, the contested-serial
+///         On rigs where the stale enumeration dies before the fresh one arrives, the contested-serial
 ///         winner branch itself is not entered — the transitions are sequential. This test then validates
 ///         the invariant the winner rule protects and the transition machinery around it; the contested
 ///         branch stays deterministically covered by the unit vectors.
 ///     </para>
 ///     <para>
-///         Configuration-mutating and self-restoring: the original USB capability set is reapplied in
-///         <c>finally</c> with its own reboot, and restoration is verified. <c>Slow</c> — two device
+///         Configuration-mutating: <c>finally</c> attempts to reapply the original USB capability set with
+///         its own reboot, then reads it back and asserts restoration. Device errors can prevent recovery.
+///         <c>Slow</c> — two device
 ///         reboots (~3s each) plus re-enumeration polling.
 ///     </para>
 /// </remarks>
@@ -82,9 +81,8 @@ public class ReconfigurationDiscoveryInvariantTests
             // Trigger the transition: PID changes, key reboots, interfaces re-enumerate.
             await ApplyConfigWithRebootAsync(serial, withoutOtp);
 
-            // Observe the whole transition. The window is generous relative to the observed cycle
-            // (death + reboot + re-enumeration completed within ~9s on the validation rig) and the loop
-            // asserts invariants on every scan it manages to run, whatever the enumeration timing.
+            // Observe completed scans during the window, without requiring a particular intermediate state.
+            // The deadline is checked between awaits, not enforced as a timeout on each scan.
             var deadline = DateTime.UtcNow + TransitionObservationWindow;
             var scans = 0;
             while (DateTime.UtcNow < deadline)
@@ -104,7 +102,7 @@ public class ReconfigurationDiscoveryInvariantTests
             Assert.Equal(originalUsbEnabled, restored.UsbEnabled);
         }
 
-        // Post-restore steady state: the key is whole again and the invariants still hold.
+        // Check the identity invariants once more after restoration; this does not assert interface completeness.
         var settled = await YubiKeyManager.FindAllAsync(ConnectionType.All, forceRescan: true);
         AssertIdentityInvariants(settled, serial);
     }
@@ -135,8 +133,8 @@ public class ReconfigurationDiscoveryInvariantTests
     }
 
     /// <summary>
-    ///     Applies a USB capability set with <c>reboot: true</c>, locating the key by serial through a
-    ///     fresh scan. Retries until <see cref="RediscoveryDeadline" />: mid-transition the key may be
+    ///     Applies a USB capability set with <c>SetDeviceConfigOptions.Reboot = true</c>, locating the key by serial through a
+    ///     fresh scan. Checks <see cref="RediscoveryDeadline" /> between attempts: mid-transition the key may be
     ///     absent or its interfaces may refuse connections, and both are expected states, not failures.
     /// </summary>
     private static async Task ApplyConfigWithRebootAsync(int serial, DeviceCapabilities usbEnabled)
@@ -159,7 +157,7 @@ public class ReconfigurationDiscoveryInvariantTests
                 catch (Exception ex)
                 {
                     // The key can disappear between the scan and the connect, or mid-exchange, while it
-                    // is still settling from a previous reboot. Bounded by the deadline.
+                    // is still settling from a previous reboot. The deadline bounds retries, not each awaited call.
                     lastFailure = ex;
                 }
             }

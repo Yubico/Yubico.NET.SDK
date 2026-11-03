@@ -1,0 +1,11 @@
+var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv };
+
+// Extension handles everything
+await yubiKey.SetDeviceConfigAsync(
+    config,
+    new SetDeviceConfigOptions
+    {
+        Reboot = true,
+    },
+    cancellationToken: cancellationToken);
+

@@ -1,0 +1,14 @@
+// Default order (no override): Management prefers SmartCard.
+await using (var mgmt = await device.CreateManagementSessionAsync())
+{
+    var info = await mgmt.GetDeviceInfoAsync();
+    Console.WriteLine(info.FirmwareVersion);
+}
+
+// Explicit override: force HID OTP for this session.
+await using (var otpMgmt = await device.CreateManagementSessionAsync(
+    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }))
+{
+    var info = await otpMgmt.GetDeviceInfoAsync();
+    Console.WriteLine(info.FirmwareVersion);
+}

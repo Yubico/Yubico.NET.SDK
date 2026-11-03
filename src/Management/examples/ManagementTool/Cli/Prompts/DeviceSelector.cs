@@ -21,20 +21,20 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 
 /// <summary>
 /// Handles YubiKey device discovery and selection for Management operations.
-/// Supports SmartCard, FIDO HID, and OTP HID transports.
+/// The active filter lists SmartCard-capable devices only, although the SDK also supports both HID routes.
 /// </summary>
 public static class DeviceSelector
 {
-    // Management operations require SmartCard (CCID/APDU) transport only.
-    // Listing all connection types would return 3 entries per physical key
-    // (SmartCard + HidFido + HidOtp), causing spurious multi-device prompts.
+    // This tool currently filters for SmartCard; it is not an SDK Management requirement.
+    // Discovery already groups proven interfaces into physical keys, not three rows per key.
+    // The separate three-transport ManagementDeviceSelector is not used by current callers.
     private static readonly ConnectionType[] SupportedConnectionTypes =
     [
         ConnectionType.SmartCard
     ];
 
     /// <summary>
-    /// Finds all connected YubiKeys and allows user to select one.
+    /// Finds SmartCard-capable YubiKeys and allows the user to select one.
     /// </summary>
     public static async Task<DeviceSelection?> SelectDeviceAsync(
         CancellationToken cancellationToken = default)
@@ -61,7 +61,7 @@ public static class DeviceSelector
     }
 
     /// <summary>
-    /// Finds all connected YubiKeys, with retry prompt if none found.
+    /// Finds SmartCard-capable YubiKeys, with a retry prompt if none match.
     /// </summary>
     public static async Task<IReadOnlyList<IYubiKey>> FindDevicesWithRetryAsync(
         CancellationToken cancellationToken = default)
@@ -90,7 +90,7 @@ public static class DeviceSelector
         return [];
     }
 
-    /// <summary>Formats form factor for display.</summary>
+    /// <summary>Formats form factor; current Core product-flag retention can produce unnamed enum values.</summary>
     public static string FormatFormFactor(FormFactor formFactor) => FormFactorFormatter.Format(formFactor);
 
     /// <summary>Formats connection type for display.</summary>

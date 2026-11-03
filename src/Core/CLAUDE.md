@@ -432,7 +432,8 @@ in `DeviceCapabilities.Fido2` (`0x200`) and `UserPresenceApplications.Fido2` (`"
 `ApplicationSession` does not dispose a caller-created connection. Only internal convenience entry
 points that created a hidden connection call `OwnConnection()`. Whoever creates a connection must use
 `await using` to dispose it; otherwise the physical-device lease can remain held for the
-connection/process lifetime and block later opens. There is no finalizer backstop. Dispose one session
+connection/process lifetime and block later opens. Sessions have no finalizer recovery; a built-in
+connection's best-effort native finalizer cleanup is not a lifetime guarantee. Dispose one session
 before creating the next session over the same connection; sequential reuse is supported.
 
 `IsInitialized` and `IsAuthenticated` become `false` when sync or async disposal is admitted, not
@@ -602,7 +603,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
 ## Known Gotchas
 
 1. **APDU Size Limits**: YubiKey Neo uses 254-byte max; YubiKey 4+ uses extended APDUs up to 2048 bytes
-2. **Connection Ownership**: whoever CREATES a connection disposes it with `await using`. Protocols and sessions are pure users — `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol`, and direct `Session.CreateAsync(connection)` never dispose a connection they were handed. The one exception is deliberate and internal: an `IYubiKey.Create<App>SessionAsync` convenience entry point opens a connection the caller never sees, so it calls `ApplicationSession.OwnConnection()` to hand that connection's lifetime to the session it returns. A leaked connection can retain the physical-device lease and block later opens; no finalizer releases it
+2. **Connection Ownership**: whoever CREATES a connection disposes it with `await using`. Protocols and sessions are pure users — `PcscProtocol`, `FidoHidProtocol`, `OtpHidProtocol`, and direct `Session.CreateAsync(connection)` never dispose a connection they were handed. The one exception is deliberate and internal: an `IYubiKey.Create<App>SessionAsync` convenience entry point opens a connection the caller never sees, so it calls `ApplicationSession.OwnConnection()` to hand that connection's lifetime to the session it returns. A leaked connection can retain the physical-device lease and block later opens; best-effort native finalization is not a substitute for deterministic disposal.
 3. **SCP Key Zeroing**: Always zero SCP keys after use; `StaticKeys` implements `IDisposable`
 4. **TLV Disposal**: `Tlv` and `DisposableTlvList` must be disposed
 5. **Platform-Specific Behavior**: PC/SC APIs behave differently across platforms; test on all three

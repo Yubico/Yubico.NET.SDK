@@ -1,0 +1,8 @@
+[
+  {
+    "path": "src/Management/src/IYubiKeyExtensions.cs",
+    "before_sha256": "0f54c3b2bffaef3b0ab3ed375dfc78ce566a372a6f41afc335c2127e3601fb39",
+    "after_sha256": "0b04c36d103473a9b976087fae45831d79c2dad70bd1c9207f2b30953a6c72b6",
+    "whitespace_only": true
+  }
+]

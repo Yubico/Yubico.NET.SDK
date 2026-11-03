@@ -1,0 +1,10 @@
+using var loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.SetMinimumLevel(LogLevel.Trace);
+    builder.AddConsole();
+});
+
+YubiKitLogging.LoggerFactory = loggerFactory;
+
+await using var mgmt = await ManagementSession.CreateAsync(
+    connection);

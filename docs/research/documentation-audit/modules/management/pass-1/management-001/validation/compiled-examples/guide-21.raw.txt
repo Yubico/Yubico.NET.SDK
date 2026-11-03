@@ -1,0 +1,9 @@
+await state.WithManagementAsync(async (mgmt, info) =>
+{
+    // Multiple operations in one session
+    var info1 = await mgmt.GetDeviceInfoAsync();
+    var info2 = await mgmt.GetDeviceInfoAsync();
+    var info3 = await mgmt.GetDeviceInfoAsync();
+
+    // More efficient than creating 3 separate sessions
+});

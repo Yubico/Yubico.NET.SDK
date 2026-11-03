@@ -1,0 +1,2936 @@
+{
+  "schema_version": 1,
+  "run": "management-001",
+  "baseline": "da61d2e6d754b4c155cbb2579202e910986f4b3a",
+  "scope": "Records reconciliation only; investigation assertions are attributed to their reports, not independently repeated source audits.",
+  "evidence": {
+    "A": "docs/research/documentation-audit/modules/management/pass-1/management-001/investigation-a.md",
+    "B": "docs/research/documentation-audit/modules/management/pass-1/management-001/investigation-b.md",
+    "C": "docs/research/documentation-audit/modules/management/pass-1/management-001/investigation-c.md",
+    "triage": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+    "sampling": "docs/research/documentation-audit/modules/management/pass-1/management-001/sampling.md"
+  },
+  "conventions": {
+    "paths": "Repository-relative, expanded literal paths. Line ranges refer to baseline/report versions, not integrated edits.",
+    "module_read_extent": "All 55 module paths have reported full-file investigation reads. Evidence fields identify report and lines; this is not independent changed-file review.",
+    "mixed": "Required correction, bounded uncertainty, or dependency finding exists; clean neighboring units remain separately identified.",
+    "support": "Inventoried/read support artifact, not a whole-file clean consumer-prose stamp.",
+    "external_full": "Report states complete file read; semantic conclusions remain limited to Management-related units.",
+    "external_narrow": "Only named units/blocks/registry references read; no whole-file coverage claim.",
+    "review": "Independent final-content review and hashes are pending for every entry until integration reconciliation."
+  },
+  "counts": {
+    "module_files": 55,
+    "csharp_files": 42,
+    "owners": {
+      "A": 21,
+      "B": 2,
+      "C": 32
+    },
+    "owner_csharp": {
+      "A": 21,
+      "B": 2,
+      "C": 19
+    },
+    "c_markdown": 5,
+    "c_other_support": 8,
+    "public_families": 5,
+    "snapshot_entries": 47,
+    "candidate_groups": {
+      "A": 14,
+      "B": 8,
+      "C": 19,
+      "total": 41
+    },
+    "accepted_doc_groups": 12,
+    "deferred_implementation_groups": 17,
+    "cross_module_groups": 3
+  },
+  "module_files": [
+    {
+      "path": "src/Management/CLAUDE.md",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:517",
+      "findings": [
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "C-15",
+        "C-18",
+        "C-19"
+      ]
+    },
+    {
+      "path": "src/Management/PACKAGE_README.md",
+      "owner": "C",
+      "disposition": "clean",
+      "evidence": "C:516; C-CLEAN-01"
+    },
+    {
+      "path": "src/Management/README.md",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:515,474-477",
+      "findings": [
+        "C-01",
+        "C-14",
+        "C-15",
+        "C-19"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/CapabilitiesMenu.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:521",
+      "findings": [
+        "C-09",
+        "C-12"
+      ],
+      "note": "Dependencies, not claims that all local explanations are wrong."
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/DeviceFlagsMenu.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:522",
+      "findings": [
+        "C-09",
+        "C-12",
+        "C-13"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/DeviceInfoMenu.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:523",
+      "findings": [
+        "C-01",
+        "C-13",
+        "C-19"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/LockCodeMenu.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:524",
+      "findings": [
+        "C-01",
+        "C-09",
+        "C-11"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/ResetMenu.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:525",
+      "findings": [
+        "C-01",
+        "C-09",
+        "C-12"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:526",
+      "findings": [
+        "C-09",
+        "C-12"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Output/OutputHelpers.cs",
+      "owner": "C",
+      "disposition": "clean",
+      "evidence": "C:527; C-CLEAN-08",
+      "note": "Known-bit display only, not future-bit completeness."
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:528",
+      "findings": [
+        "C-09",
+        "C-12"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:529",
+      "findings": [
+        "C-11"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Cli/Prompts/ManagementDeviceSelector.cs",
+      "owner": "C",
+      "disposition": "clean",
+      "evidence": "C:530; C-CLEAN-11",
+      "note": "Description/settings clean; unused active routing remains C-09."
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Commands/ConfigCommand.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:531",
+      "findings": [
+        "C-09",
+        "C-10"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Commands/InfoCommand.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:532",
+      "findings": [
+        "C-09",
+        "C-10",
+        "C-13"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:533",
+      "findings": [
+        "C-12",
+        "C-13",
+        "C-14"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:534",
+      "findings": [
+        "C-03",
+        "C-12"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Features/DeviceReset.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:535",
+      "findings": [
+        "C-01",
+        "C-12"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Features/Results/ConfigResult.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:536",
+      "findings": [
+        "C-13"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs",
+      "owner": "C",
+      "disposition": "clean",
+      "evidence": "C:537; C-CLEAN-09"
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Features/Results/ResetResult.cs",
+      "owner": "C",
+      "disposition": "clean",
+      "evidence": "C:538; C-CLEAN-09"
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+      "owner": "C",
+      "disposition": "support",
+      "evidence": "C:539",
+      "note": "Old Spectre HintPath observation retained as unselected portability follow-up, not confirmed build failure."
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/Program.cs",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:520",
+      "findings": [
+        "C-10",
+        "C-12",
+        "C-18"
+      ]
+    },
+    {
+      "path": "src/Management/examples/ManagementTool/README.md",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:519",
+      "findings": [
+        "C-01",
+        "C-09",
+        "C-10",
+        "C-11"
+      ]
+    },
+    {
+      "path": "src/Management/src/Backend/FidoHidBackend.cs",
+      "owner": "A",
+      "disposition": "clean",
+      "evidence": "A:217; A-C03"
+    },
+    {
+      "path": "src/Management/src/Backend/IManagementBackend.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:215",
+      "findings": [
+        "A-11"
+      ]
+    },
+    {
+      "path": "src/Management/src/Backend/OtpBackend.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:218",
+      "findings": [
+        "A-11"
+      ]
+    },
+    {
+      "path": "src/Management/src/Backend/SmartCardBackend.cs",
+      "owner": "A",
+      "disposition": "clean",
+      "evidence": "A:216; A-C02",
+      "note": "Present prose clean; dormant SetMode behavior discrepancy is MGMT-IMP-012, not public support or runtime verification."
+    },
+    {
+      "path": "src/Management/src/DeviceConfig.cs",
+      "owner": "B",
+      "disposition": "mixed",
+      "evidence": "B:334-366",
+      "findings": [
+        "B-01",
+        "B-03",
+        "B-04",
+        "B-05",
+        "B-06",
+        "B-08"
+      ]
+    },
+    {
+      "path": "src/Management/src/IManagementSession.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:212",
+      "findings": [
+        "A-01",
+        "A-02",
+        "A-03"
+      ]
+    },
+    {
+      "path": "src/Management/src/IYubiKeyExtensions.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:214",
+      "findings": [
+        "A-01",
+        "A-03"
+      ]
+    },
+    {
+      "path": "src/Management/src/ManagementSession.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:213",
+      "findings": [
+        "A-01",
+        "A-02",
+        "A-03",
+        "A-09"
+      ]
+    },
+    {
+      "path": "src/Management/src/PublicAPI.Shipped.txt",
+      "owner": "C",
+      "disposition": "support",
+      "evidence": "C:541",
+      "note": "Nullable header only."
+    },
+    {
+      "path": "src/Management/src/PublicAPI.Unshipped.txt",
+      "owner": "C",
+      "disposition": "support",
+      "evidence": "C:542,576-584",
+      "note": "47 entries, five families; API preservation pending."
+    },
+    {
+      "path": "src/Management/src/SetDeviceConfigOptions.cs",
+      "owner": "B",
+      "disposition": "mixed",
+      "evidence": "B:361-366",
+      "findings": [
+        "B-02",
+        "B-07"
+      ]
+    },
+    {
+      "path": "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "owner": "C",
+      "disposition": "support",
+      "evidence": "C:540; C-CLEAN-12",
+      "note": "Descriptive metadata is a clean semantic unit within support inventory."
+    },
+    {
+      "path": "src/Management/tests/CLAUDE.md",
+      "owner": "C",
+      "disposition": "mixed",
+      "evidence": "C:518",
+      "findings": [
+        "C-02",
+        "C-04",
+        "C-05"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/IntegrationTestBase.cs",
+      "owner": "A",
+      "disposition": "clean",
+      "evidence": "A:225; A-C16"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementHidConcurrencyTests.cs",
+      "owner": "A",
+      "disposition": "clean",
+      "evidence": "A:231; A-C09..11"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementLockCodeTests.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:230",
+      "findings": [
+        "A-06",
+        "A-07"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:228",
+      "findings": [
+        "A-04",
+        "A-05",
+        "A-06"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionCapabilityTests.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:229",
+      "findings": [
+        "A-07",
+        "A-08"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionSimpleTests.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:227",
+      "findings": [
+        "A-05",
+        "A-06",
+        "A-07"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionTests.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:226",
+      "findings": [
+        "A-04",
+        "A-06",
+        "A-10",
+        "A-12"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:232",
+      "findings": [
+        "A-06"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+      "owner": "C",
+      "disposition": "support",
+      "evidence": "C:543",
+      "note": "xUnit v2/VSTest support; no execution claim."
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/xunit.runner.json",
+      "owner": "C",
+      "disposition": "support",
+      "evidence": "C:544",
+      "note": "Single-runner configuration only, not inter-process exclusion."
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/AuditV2/ManagementAuditReproTests.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:224",
+      "findings": [
+        "A-12"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+      "owner": "A",
+      "disposition": "clean",
+      "evidence": "A:223; A-C15",
+      "note": "Core type in module test inventory; no hash uniqueness guarantee."
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:222",
+      "findings": [
+        "A-12"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementBackendLifecycleTests.cs",
+      "owner": "A",
+      "disposition": "clean",
+      "evidence": "A:220; A-C07"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionExchangeOverlapTests.cs",
+      "owner": "A",
+      "disposition": "clean",
+      "evidence": "A:221; A-C08"
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "owner": "A",
+      "disposition": "mixed",
+      "evidence": "A:219",
+      "findings": [
+        "A-01",
+        "A-06",
+        "A-07",
+        "A-12"
+      ]
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+      "owner": "C",
+      "disposition": "support",
+      "evidence": "C:545",
+      "note": "xUnit v3/MTP opt-in support."
+    },
+    {
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/xunit.runner.json",
+      "owner": "C",
+      "disposition": "support",
+      "evidence": "C:546",
+      "note": "Schema only."
+    }
+  ],
+  "public_families": [
+    {
+      "family": "DeviceConfig",
+      "owner": "B",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "snapshot_entries": 22,
+      "semantic_scope": "Type/null omission, six properties, Validate, derivation example; internal encoder is not public.",
+      "evidence": "B:334-366",
+      "disposition": "mixed"
+    },
+    {
+      "family": "IManagementSession",
+      "owner": "A",
+      "path": "src/Management/src/IManagementSession.cs",
+      "snapshot_entries": 4,
+      "semantic_scope": "Type and read/set/reset, including reset example.",
+      "evidence": "A:212",
+      "disposition": "mixed"
+    },
+    {
+      "family": "IYubiKeyExtensions",
+      "owner": "A",
+      "path": "src/Management/src/IYubiKeyExtensions.cs",
+      "snapshot_entries": 8,
+      "semantic_scope": "Type, create/read/set extensions; projected static entries duplicate these operations.",
+      "evidence": "A:214",
+      "disposition": "mixed"
+    },
+    {
+      "family": "ManagementSession",
+      "owner": "A",
+      "path": "src/Management/src/ManagementSession.cs",
+      "snapshot_entries": 5,
+      "semantic_scope": "Type, direct factory and read/set/reset; inherited lifecycle/type/version contracts traced to Core.",
+      "evidence": "A:213,261-267",
+      "disposition": "mixed"
+    },
+    {
+      "family": "SetDeviceConfigOptions",
+      "owner": "B",
+      "path": "src/Management/src/SetDeviceConfigOptions.cs",
+      "snapshot_entries": 8,
+      "semantic_scope": "Type, Reboot, CurrentLockCode, NewLockCode, borrowed-memory remarks.",
+      "evidence": "B:361-365",
+      "disposition": "mixed"
+    }
+  ],
+  "generated_exclusions": [
+    {
+      "kind": "record-boilerplate",
+      "path": "src/Management/src/PublicAPI.Unshipped.txt",
+      "scope": "DeviceConfig generated constructor/clone/typed and object equality/hash/ToString/operators; no invented independent prose tasks. Getter/init projections are one property contract, not separate prose tasks.",
+      "evidence": "B:338-339; C:576-584"
+    },
+    {
+      "kind": "extension-projections",
+      "path": "src/Management/src/PublicAPI.Unshipped.txt",
+      "scope": "C#14 extension receiver entry and three static projections; preserve API, do not double-count three operations.",
+      "evidence": "C:542,576-584"
+    },
+    {
+      "kind": "implicit-constructor",
+      "path": "src/Management/src/PublicAPI.Unshipped.txt",
+      "scope": "SetDeviceConfigOptions default constructor is represented by type/options contract, not an extra authored task.",
+      "evidence": "B:361-365; C:576-584"
+    }
+  ],
+  "b_semantic_units": [
+    {
+      "id": "B-U01",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Type optional/null summary",
+      "disposition": "clean",
+      "clean_id": "B-C01",
+      "evidence": "B:343"
+    },
+    {
+      "id": "B-U02",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "DeviceInfo correspondence/derivation example",
+      "disposition": "mixed",
+      "evidence": "B:344; B-01/B-05"
+    },
+    {
+      "id": "B-U03",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Validation timing/extent remarks",
+      "disposition": "mixed",
+      "evidence": "B:345; B-05/B-06"
+    },
+    {
+      "id": "B-U04",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "USB property",
+      "disposition": "mixed",
+      "evidence": "B:346; B-01/B-05"
+    },
+    {
+      "id": "B-U05",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "NFC property",
+      "disposition": "mixed",
+      "evidence": "B:347; B-01/B-03"
+    },
+    {
+      "id": "B-U06",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Auto-eject property/get/init/backing field",
+      "disposition": "mixed",
+      "evidence": "B:348; B-06",
+      "denominator": "Exclude mixed row despite clean range enforcement."
+    },
+    {
+      "id": "B-U07",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Challenge-response property/get/init/backing field",
+      "disposition": "mixed",
+      "evidence": "B:349; B-06",
+      "denominator": "Exclude mixed row despite clean range enforcement."
+    },
+    {
+      "id": "B-U08",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Device flags property",
+      "disposition": "mixed",
+      "evidence": "B:350; B-01"
+    },
+    {
+      "id": "B-U09",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "NFC restricted property",
+      "disposition": "mixed",
+      "evidence": "B:351; B-03/B-04"
+    },
+    {
+      "id": "B-U10",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Validate XML/exception",
+      "disposition": "mixed",
+      "evidence": "B:352; B-05",
+      "denominator": "Exclude mixed row despite clean exact-None rejection."
+    },
+    {
+      "id": "B-U11",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Internal tag constants comment/values",
+      "disposition": "clean-with-citation-caveat",
+      "clean_id": "B-C02",
+      "evidence": "B:353; B-08/E1/E5"
+    },
+    {
+      "id": "B-U12",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Max length comment/prefix",
+      "disposition": "clean",
+      "clean_id": "B-C03",
+      "evidence": "B:354"
+    },
+    {
+      "id": "B-U13",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Timeout constants/SDK policy",
+      "disposition": "clean-with-policy-bound",
+      "clean_id": "B-C04",
+      "evidence": "B:355; B-06"
+    },
+    {
+      "id": "B-U14",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "GetBytes local-order summary",
+      "disposition": "clean-optional-expansion",
+      "clean_id": "B-C05",
+      "evidence": "B:356; B-08"
+    },
+    {
+      "id": "B-U15",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "GetBytes validation/conditional assembly",
+      "disposition": "mixed",
+      "evidence": "B:357; B-01..05"
+    },
+    {
+      "id": "B-U16",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "GetBytes serialization/prefix/size for ordinary modeled values",
+      "disposition": "clean-with-scope-bound",
+      "clean_id": "B-C06",
+      "evidence": "B:358"
+    },
+    {
+      "id": "B-U17",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "Intermediate/final cleanup explanation",
+      "disposition": "clean-at-this-layer",
+      "clean_id": "B-C07",
+      "evidence": "B:359"
+    },
+    {
+      "id": "B-U18",
+      "path": "src/Management/src/DeviceConfig.cs",
+      "unit": "UInt16BigEndian helper",
+      "disposition": "clean-no-prose",
+      "evidence": "B:360",
+      "denominator": "Exclude: no explanatory prose needed; do not inflate prose sample population."
+    },
+    {
+      "id": "B-U19",
+      "path": "src/Management/src/SetDeviceConfigOptions.cs",
+      "unit": "Type summary",
+      "disposition": "read-optional-improvement",
+      "evidence": "B:361; B-07",
+      "denominator": "Exclude: broad but not false is not an explicit clean-unit nomination."
+    },
+    {
+      "id": "B-U20",
+      "path": "src/Management/src/SetDeviceConfigOptions.cs",
+      "unit": "Borrowed ownership/retention core contract",
+      "disposition": "clean-core-optional-expansion",
+      "clean_id": "B-C08",
+      "evidence": "B:362; B-07/E6",
+      "note": "Only existing core contract clean; practical added guidance still needs review."
+    },
+    {
+      "id": "B-U21",
+      "path": "src/Management/src/SetDeviceConfigOptions.cs",
+      "unit": "Reboot property",
+      "disposition": "mixed",
+      "evidence": "B:363; B-07"
+    },
+    {
+      "id": "B-U22",
+      "path": "src/Management/src/SetDeviceConfigOptions.cs",
+      "unit": "CurrentLockCode property",
+      "disposition": "mixed",
+      "evidence": "B:364; B-02/B-07"
+    },
+    {
+      "id": "B-U23",
+      "path": "src/Management/src/SetDeviceConfigOptions.cs",
+      "unit": "NewLockCode property",
+      "disposition": "mixed",
+      "evidence": "B:365; B-02/B-07"
+    },
+    {
+      "id": "B-U24",
+      "paths": [
+        "src/Management/src/DeviceConfig.cs",
+        "src/Management/src/SetDeviceConfigOptions.cs"
+      ],
+      "unit": "TODO/specification/development-residue sweep",
+      "disposition": "clean-sweep",
+      "evidence": "B:366",
+      "denominator": "Exclude: negative marker sweep is not an affirmative semantic prose unit."
+    }
+  ],
+  "a_clean_units": [
+    {
+      "id": "A-C01",
+      "path": "src/Management/src/Backend/IManagementBackend.cs",
+      "lines": "21-26",
+      "unit": "Borrowed protocol/non-disposable backend",
+      "evidence": "A:240"
+    },
+    {
+      "id": "A-C02",
+      "path": "src/Management/src/Backend/SmartCardBackend.cs",
+      "lines": "21-24,34-55",
+      "unit": "APDU backend SELECT/write",
+      "evidence": "A:241"
+    },
+    {
+      "id": "A-C03",
+      "path": "src/Management/src/Backend/FidoHidBackend.cs",
+      "lines": "20-30",
+      "unit": "Vendor command wire notation",
+      "evidence": "A:242"
+    },
+    {
+      "id": "A-C04",
+      "path": "src/Management/src/IYubiKeyExtensions.cs",
+      "lines": "127-130",
+      "unit": "OwnConnection rationale",
+      "evidence": "A:243"
+    },
+    {
+      "id": "A-C05",
+      "path": "src/Management/src/IYubiKeyExtensions.cs",
+      "lines": "138-144",
+      "unit": "Single selection/no fallback",
+      "evidence": "A:244"
+    },
+    {
+      "id": "A-C06",
+      "path": "src/Management/src/ManagementSession.cs",
+      "lines": "127-129",
+      "unit": "Disposal before firmware gate",
+      "evidence": "A:245"
+    },
+    {
+      "id": "A-C07",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementBackendLifecycleTests.cs",
+      "lines": "23-39",
+      "unit": "Non-disposable/prepared FIDO invariant",
+      "evidence": "A:246"
+    },
+    {
+      "id": "A-C08",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionExchangeOverlapTests.cs",
+      "lines": "21-25,43-69",
+      "unit": "Exchange not operation atomicity",
+      "evidence": "A:247"
+    },
+    {
+      "id": "A-C09",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementHidConcurrencyTests.cs",
+      "lines": "24-37",
+      "unit": "Nondeterministic overlap scope",
+      "evidence": "A:248"
+    },
+    {
+      "id": "A-C10",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementHidConcurrencyTests.cs",
+      "lines": "59-105",
+      "unit": "Completion/refusal and reuse assertions",
+      "evidence": "A:249"
+    },
+    {
+      "id": "A-C11",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementHidConcurrencyTests.cs",
+      "lines": "108-111",
+      "unit": "Filter versus actual transport pin",
+      "evidence": "A:250"
+    },
+    {
+      "id": "A-C12",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "lines": "53-68",
+      "unit": "Failed direct creation borrowing/pre-cancellation bound",
+      "evidence": "A:251"
+    },
+    {
+      "id": "A-C13",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "lines": "173-191,296-319",
+      "unit": "Real constructor versus skipped initialization",
+      "evidence": "A:252"
+    },
+    {
+      "id": "A-C14",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/AuditV2/ManagementAuditReproTests.cs",
+      "lines": "55-57,71-101",
+      "unit": "Omission/order fixture for supplied values",
+      "evidence": "A:253"
+    },
+    {
+      "id": "A-C15",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+      "lines": "43-74,568-598",
+      "unit": "Integer overload and operator bounds",
+      "evidence": "A:254"
+    },
+    {
+      "id": "A-C16",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/IntegrationTestBase.cs",
+      "lines": "19-29",
+      "unit": "Monitor lifecycle, not suite inheritance",
+      "evidence": "A:255"
+    },
+    {
+      "id": "A-C17",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionSimpleTests.cs",
+      "lines": "31-44,187-208",
+      "unit": "Explicit SmartCard serial/default SCP03 scope",
+      "evidence": "A:256"
+    },
+    {
+      "id": "A-C18",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementLockCodeTests.cs",
+      "lines": "47-48,74-79",
+      "unit": "Zero replacement/current-code command",
+      "evidence": "A:257"
+    },
+    {
+      "id": "A-C19",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "lines": "112-135",
+      "unit": "Two completed-scan identity invariants",
+      "evidence": "A:258"
+    },
+    {
+      "id": "A-C20",
+      "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "lines": "159-172,215-218",
+      "unit": "Retry/deadline between awaits",
+      "evidence": "A:259"
+    }
+  ],
+  "c_clean_units": [
+    {
+      "id": "C-CLEAN-01",
+      "path": "src/Management/PACKAGE_README.md",
+      "lines": "1-25",
+      "unit": "Scope/alpha/transitive dependency/links",
+      "evidence": "C:590"
+    },
+    {
+      "id": "C-CLEAN-02",
+      "path": "src/Management/README.md",
+      "lines": "63-72",
+      "unit": "Supported versus enabled query fragment",
+      "evidence": "C:591-592"
+    },
+    {
+      "id": "C-CLEAN-03",
+      "path": "src/Management/README.md",
+      "lines": "97-111",
+      "unit": "Caller mutable lock buffer finally/store duty",
+      "evidence": "C:593-594"
+    },
+    {
+      "id": "C-CLEAN-04",
+      "path": "src/Management/README.md",
+      "lines": "129-134",
+      "unit": "Effective-version/HID reset rejection, not family support",
+      "evidence": "C:595-596"
+    },
+    {
+      "id": "C-CLEAN-05",
+      "path": "src/Management/CLAUDE.md",
+      "lines": "313-338",
+      "unit": "Borrow/own/one-shot explanation excluding global boundary qualifications",
+      "evidence": "C:597-598"
+    },
+    {
+      "id": "C-CLEAN-06",
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/CapabilitiesMenu.cs",
+      "lines": "113-163",
+      "unit": "Ordinary success/error/confirmation-cancel cleanup",
+      "evidence": "C:599"
+    },
+    {
+      "id": "C-CLEAN-07",
+      "path": "src/Management/examples/ManagementTool/Cli/Menus/LockCodeMenu.cs",
+      "lines": "99-137,146-196,205-242",
+      "unit": "Set/change/remove caller cleanup",
+      "evidence": "C:600"
+    },
+    {
+      "id": "C-CLEAN-08",
+      "paths": [
+        "src/Management/examples/ManagementTool/Cli/Output/OutputHelpers.cs",
+        "src/Cli.Shared/src/Output/ConfirmationPrompts.cs"
+      ],
+      "lines": "30-77;41-56",
+      "unit": "Forwarding and double confirmation, not device touch",
+      "evidence": "C:601-602"
+    },
+    {
+      "id": "C-CLEAN-09",
+      "paths": [
+        "src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs",
+        "src/Management/examples/ManagementTool/Features/Results/ResetResult.cs"
+      ],
+      "lines": "complete files",
+      "unit": "Result factories/properties, one investigator unit across two files",
+      "evidence": "C:603"
+    },
+    {
+      "id": "C-CLEAN-10",
+      "path": "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs",
+      "lines": "88-104",
+      "unit": "Timeout XML SDK ranges, not hardware acceptance",
+      "evidence": "C:604-605"
+    },
+    {
+      "id": "C-CLEAN-11",
+      "path": "src/Management/examples/ManagementTool/Cli/Prompts/ManagementDeviceSelector.cs",
+      "lines": "complete file",
+      "unit": "Unused selector description/settings",
+      "evidence": "C:606-607"
+    },
+    {
+      "id": "C-CLEAN-12",
+      "path": "src/Management/src/Yubico.YubiKit.Management.csproj",
+      "lines": "8-17",
+      "unit": "Description/tags/Core/AOT metadata",
+      "evidence": "C:608"
+    }
+  ],
+  "sampling": {
+    "denominator_policy": "Keep A's 20 and C's 12 nominated bounded units unchanged. Add eight affirmative B prose-bearing clean rows, including explicitly bounded clean core contracts/local-order explanation; exclude mixed rows, no-prose helper, negative marker sweep and un-nominated broad type summary. Do not subdivide overlaps or count every read as clean.",
+    "clean_units_by_owner": {
+      "A": 20,
+      "B": 8,
+      "C": 12
+    },
+    "clean_unit_denominator": 40,
+    "required_fraction": 0.1,
+    "minimum_where_available": 3,
+    "required_count": 4,
+    "completed": [
+      {
+        "sample": "S-01",
+        "unit": "A-C02",
+        "category": "internal-comments"
+      },
+      {
+        "sample": "S-02",
+        "unit": "A-C07",
+        "category": "test-explanations"
+      },
+      {
+        "sample": "S-03",
+        "unit": "A-C08",
+        "category": "test-explanations"
+      },
+      {
+        "sample": "S-04",
+        "unit": "A-C19",
+        "category": "test-explanations"
+      },
+      {
+        "sample": "S-05",
+        "unit": "B-C01",
+        "category": "public-xml"
+      },
+      {
+        "sample": "S-06",
+        "unit": "B-C03",
+        "category": "internal-comments"
+      },
+      {
+        "sample": "S-07",
+        "unit": "C-CLEAN-01",
+        "category": "narrative"
+      },
+      {
+        "sample": "S-08",
+        "unit": "C-CLEAN-02",
+        "category": "examples"
+      },
+      {
+        "sample": "S-09",
+        "unit": "C-CLEAN-09",
+        "category": "public-xml"
+      }
+    ],
+    "completed_count": 9,
+    "completed_fraction": 0.225,
+    "numeric_target_met": true,
+    "category_target_met": true,
+    "missing_category": null,
+    "pending_narrative_samples_counted": 0,
+    "initial_checkpoint": {
+      "completed_count": 6,
+      "completed_fraction": 0.15,
+      "numeric_target_met": true,
+      "category_target_met": false,
+      "note": "Original six met numeric target but not narrative/example breadth. Pending promises were not counted."
+    },
+    "overall_status": "recorded-target-met-not-final-diff-review",
+    "next_action": "Coordinator added actual C checks S-07..09 during reconciliation. All nine are recorded in sampling.md with no material miss. Preserve evidence, expand any category with a later material miss, and keep final changed-file review/hash reconciliation separate."
+  },
+  "snippets": {
+    "module_markdown_blocks": 49,
+    "c_owned_xml_blocks": 5,
+    "evidence": "C:613-686 contains every baseline block's range/classification/disposition, incorporated without changing classifications.",
+    "classes": [
+      "complete",
+      "fragment",
+      "sketch",
+      "historical"
+    ],
+    "not_extra_counts": "Before/after alternatives and multiple calls within a block are not extra fenced-block counts.",
+    "additional_owned_xml": [
+      {
+        "path": "src/Management/src/DeviceConfig.cs",
+        "owner": "B",
+        "evidence": "B:344",
+        "disposition": "fragment; B-01/B-05"
+      },
+      {
+        "path": "src/Management/src/IManagementSession.cs",
+        "owner": "A",
+        "evidence": "A:212; A-02",
+        "disposition": "reset fragment; applicability correction"
+      }
+    ],
+    "compile_execution_status": "Not established by investigation; final compiled-example and changed-snippet reconciliation remain separate coordinator gates."
+  },
+  "external_current_documentation": [
+    {
+      "path": "README.md",
+      "extent": "full",
+      "evidence": "C:701",
+      "disposition": "clean Management package/task context"
+    },
+    {
+      "path": "CLAUDE.md",
+      "extent": "full",
+      "evidence": "C:702",
+      "disposition": "mixed C-03/C-15; non-generic ManagementSession correction"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "extent": "narrow",
+      "units": "105-116,125,140-141,250-283 and creation context",
+      "evidence": "C:703",
+      "disposition": "supported current rows; v1 blocks historical"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "extent": "narrow",
+      "units": "Management/package/device-info/serial recipe entries",
+      "evidence": "C:704",
+      "disposition": "supported conceptual recipes, not literal awaitable C#"
+    },
+    {
+      "path": "docs/TESTING.md",
+      "extent": "narrow",
+      "units": "257-378 complete multi-transport section/blocks and authorization context",
+      "evidence": "C:705; A:8",
+      "disposition": "mixed C-07; test sketches/fragments and historical negative parsing example"
+    },
+    {
+      "path": "docs/architecture/physical-device-model.md",
+      "extent": "full",
+      "evidence": "C:706",
+      "disposition": "mixed C-08/C-15; complete overlapping session block"
+    },
+    {
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "extent": "full",
+      "evidence": "C:707",
+      "disposition": "mixed C-07/C-15; historical conflict versus current sequential scopes"
+    },
+    {
+      "path": "docs/architecture/applet-public-api.md",
+      "extent": "full",
+      "evidence": "C:708",
+      "disposition": "clean selected contract; no consumer executable blocks"
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "extent": "narrow",
+      "units": "Management L1/L2/L4 and complete relevant diagrams/teaching blocks",
+      "evidence": "C:709",
+      "disposition": "two HID backend precision follow-up; illustrative, not API"
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-map.yml",
+      "extent": "narrow",
+      "units": "47-82",
+      "evidence": "C:709",
+      "disposition": "supported Core dependency/transport order"
+    },
+    {
+      "path": "docs/architecture/device-identity.md",
+      "extent": "narrow",
+      "units": "Management/effective-firmware/cache portions",
+      "evidence": "C:710",
+      "disposition": "clean selected separation; Core-wide audit deferred"
+    },
+    {
+      "path": "docs/architecture/device-discovery-guarantees.md",
+      "extent": "narrow",
+      "units": "reconfiguration/version portions",
+      "evidence": "C:710",
+      "disposition": "bounded historical scan evidence, not rerun"
+    },
+    {
+      "path": "docs/NATIVE-AOT.md",
+      "extent": "full",
+      "evidence": "C:711",
+      "disposition": "recorded macOS device-information scope only"
+    },
+    {
+      "path": "docs/v2-highlights.md",
+      "extent": "narrow",
+      "units": "common session/package/AOT sections",
+      "evidence": "C:711",
+      "disposition": "supported Management scope; unrelated deployment prose outside scope"
+    },
+    {
+      "path": "docs/LOGGING.md",
+      "extent": "full",
+      "evidence": "C:712",
+      "disposition": "supported Management category, no current Management invocation; broader security audit not claimed"
+    },
+    {
+      "path": "scripts/alpha/RELEASE_NOTES.md",
+      "extent": "full",
+      "evidence": "C:713",
+      "disposition": "package/alpha scope consistent; feed not network-qualified"
+    },
+    {
+      "path": "TOOLCHAIN.md",
+      "extent": "narrow",
+      "units": "Management project-list references",
+      "evidence": "C:714",
+      "disposition": "support/command context, no behavior example"
+    },
+    {
+      "path": "src/Core/README.md",
+      "extent": "full",
+      "evidence": "C:715",
+      "disposition": "Management-related borrowed metadata/raw-session prerequisite only; broader Core deferred"
+    },
+    {
+      "path": "src/Core/CLAUDE.md",
+      "extent": "full",
+      "evidence": "C:715",
+      "disposition": "mixed C-15 boundary; broader Core deferred"
+    },
+    {
+      "path": "src/Tests.Shared/README.md",
+      "extent": "full",
+      "evidence": "C:716; A:265",
+      "disposition": "mixed C-04 positional SCP example; test fragments"
+    },
+    {
+      "path": "src/Tests.Shared/CLAUDE.md",
+      "extent": "full",
+      "evidence": "C:717; A:265",
+      "disposition": "mixed C-04/XREF-003 row policy; internal sketches"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/README.md",
+      "extent": "narrow",
+      "units": "device-info API-list context",
+      "evidence": "C:718",
+      "disposition": "supported API mention; no complete Management block"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/SDK_PAIN_POINTS.md",
+      "extent": "full",
+      "evidence": "C:719",
+      "disposition": "active resolution example C-17, not immutable history"
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "extent": "narrow",
+      "units": "133-168 constraints/security/related context",
+      "evidence": "C:720",
+      "disposition": "supported firmware source; no overlapping session example"
+    },
+    {
+      "path": "src/OpenPgp/README.md",
+      "extent": "narrow",
+      "units": "212 related link",
+      "evidence": "C:721",
+      "disposition": "clean related reference, no executable block"
+    },
+    {
+      "path": "src/YubiOtp/README.md",
+      "extent": "narrow",
+      "units": "190 related link",
+      "evidence": "C:721",
+      "disposition": "clean related reference, no executable block"
+    },
+    {
+      "path": ".claude/skills/domain-api-design-standards/SKILL.md",
+      "extent": "narrow",
+      "units": "135 module-file table",
+      "evidence": "C:722",
+      "disposition": "instruction-maintenance support hit, obsolete target path is not a covered source file; no skill edit authorized"
+    },
+    {
+      "path": "docs/plans/yubikit-async-boundaries/03-program-design.md",
+      "extent": "narrow",
+      "units": "current-status, operation-evidence, Management overlap references",
+      "evidence": "C:766-769",
+      "disposition": "active program with bounded historical macOS D1-D5 evidence; not all-platform qualification"
+    }
+  ],
+  "external_current_source_examples": [
+    {
+      "path": "src/Cli.Commands/src/Management/ManagementInfoCommand.cs",
+      "extent": "full",
+      "evidence": "C:728",
+      "disposition": "executable snapshot read; no fresh query in command"
+    },
+    {
+      "path": "src/Cli.Commands/src/Management/ManagementConfigCommand.cs",
+      "extent": "full",
+      "evidence": "C:728",
+      "disposition": "C-13 summary; executable snapshot read"
+    },
+    {
+      "path": "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+      "extent": "full",
+      "evidence": "C:728",
+      "disposition": "C-01 family/transport; executable tokens deferred"
+    },
+    {
+      "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "extent": "full",
+      "evidence": "C:729",
+      "disposition": "C-16 one-shot enrichment explanation"
+    },
+    {
+      "path": "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+      "extent": "full",
+      "evidence": "C:729",
+      "disposition": "C-16 snapshot and default route explanation"
+    },
+    {
+      "path": "src/Cli.Shared/src/Device/DeviceSelectorBase.cs",
+      "extent": "full",
+      "evidence": "C:730",
+      "disposition": "one-shot scopes; C-12 catch-all dependency; optional cref precision"
+    },
+    {
+      "path": "src/Cli.Shared/src/Output/ConfirmationPrompts.cs",
+      "extent": "full",
+      "evidence": "C:731",
+      "disposition": "double confirmation supported; generic irreversible UI wording deferred"
+    },
+    {
+      "path": "src/Ctap2/examples/FidoTool/Cli/Prompts/DeviceSelector.cs",
+      "extent": "full",
+      "evidence": "C:732",
+      "disposition": "current one-shot lifetime; C-12 dependency"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+      "extent": "full",
+      "evidence": "C:733",
+      "disposition": "clean selected lifetime and cancellation handling"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/DeviceSelector.cs",
+      "extent": "full",
+      "evidence": "C:734",
+      "disposition": "current metadata-before-applet scope; C-12 dependency"
+    },
+    {
+      "path": "src/OpenPgp/examples/OpenPgpTool/Cli/Prompts/OpenPgpDeviceSelector.cs",
+      "extent": "full",
+      "evidence": "C:734",
+      "disposition": "current metadata-before-applet scope; C-12 dependency"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/DeviceHelper.cs",
+      "extent": "full",
+      "evidence": "C:735",
+      "disposition": "current one-shot lifetime; C-12 dependency"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/CliRunner.cs",
+      "extent": "narrow",
+      "units": "114-155 HandleDeviceInfo body and dispatch context",
+      "evidence": "C:735",
+      "disposition": "supported one-shot lifetime; other credential handlers excluded"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Menus/DeviceInfoMenu.cs",
+      "extent": "full",
+      "evidence": "C:735",
+      "disposition": "supported scoped borrowing/lifetime; C-12 dependency"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Prompts/DeviceSelector.cs",
+      "extent": "full",
+      "evidence": "C:735",
+      "disposition": "supported scoped borrowing/lifetime; C-12 dependency"
+    },
+    {
+      "path": "src/Piv/examples/PivTool/Cli/Commands/JsonOutput.cs",
+      "extent": "narrow",
+      "units": "DeviceInfo capability serialization region",
+      "evidence": "C:736",
+      "disposition": "formatting only; forward-format handling outside selected scope"
+    },
+    {
+      "path": "src/YubiHsm/examples/HsmAuthTool/Cli/Prompts/DeviceSelector.cs",
+      "extent": "full",
+      "evidence": "C:737",
+      "disposition": "supported current one-shot lifetime; C-12 dependency"
+    },
+    {
+      "path": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+      "extent": "full",
+      "evidence": "C:738",
+      "disposition": "supported lifetime; obsolete dedup XML and C-12 dependency"
+    },
+    {
+      "path": "src/Tests.Shared/YubiKeyTestStateExtensions.cs",
+      "extent": "full",
+      "evidence": "C:739; A:265",
+      "disposition": "C-04 XML sketches; actual callback origin traced"
+    },
+    {
+      "path": "src/Tests.Shared/YubiKeyTestState.cs",
+      "extent": "narrow",
+      "units": "315-346,407-427 binding/capability predicates",
+      "evidence": "A:265; C:740",
+      "disposition": "evidence only, not full infrastructure audit"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+      "extent": "full",
+      "evidence": "A:265; C:740",
+      "disposition": "A full read; C narrow placeholder units, not duplicate whole-file audit"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+      "extent": "narrow",
+      "units": "72-125 filtering",
+      "evidence": "A:265; C:740",
+      "disposition": "binding/filter evidence only"
+    },
+    {
+      "path": "src/Tests.TestProject/Program.cs",
+      "extent": "narrow",
+      "units": "complete Management endpoint body",
+      "evidence": "C:741",
+      "disposition": "host-dependent one-shot example; C-16 diagnostic string deferred"
+    },
+    {
+      "path": "src/Tests.TestProject/Controllers/DiTestController.cs",
+      "extent": "narrow",
+      "units": "complete Management endpoint body and explanatory XML",
+      "evidence": "C:741",
+      "disposition": "C-16 error explanation; host-wide behavior not audited"
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+      "extent": "narrow",
+      "units": "144-249 Management classes plus base fixture context",
+      "evidence": "C:742",
+      "disposition": "executable benchmark fragments; bounded scopes, not run"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/AcceptanceScenarios.cs",
+      "extent": "narrow",
+      "units": "196-217 loops and ownership context",
+      "evidence": "C:743",
+      "disposition": "executable scenario, not run; historical results separate"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/ExpertFeatureScenario.cs",
+      "extent": "narrow",
+      "units": "29-47 loops and ownership context",
+      "evidence": "C:743",
+      "disposition": "executable scenario, not run; historical results separate"
+    },
+    {
+      "path": "verification/MacOSHidRouteVerification/SmartCardScenario.cs",
+      "extent": "narrow",
+      "units": "53-85 loops and ownership context",
+      "evidence": "C:743",
+      "disposition": "executable scenario, not run; historical results separate"
+    },
+    {
+      "path": "verification/NativeAotVerification/Program.cs",
+      "extent": "narrow",
+      "units": "typeof(ManagementSession) root",
+      "evidence": "C:744",
+      "disposition": "link-root support exclusion, not an operation example"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+      "extent": "narrow",
+      "units": "Management names/surface registry",
+      "evidence": "C:745",
+      "disposition": "convention-test support inventory, not semantic test audit"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AppletSessionShapeTests.cs",
+      "extent": "narrow",
+      "units": "Management names/surface registry",
+      "evidence": "C:745",
+      "disposition": "convention-test support inventory, not semantic test audit"
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+      "extent": "narrow",
+      "units": "Management names/surface registry",
+      "evidence": "C:745",
+      "disposition": "convention-test support inventory, not semantic test audit"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivSessionContentionTests.cs",
+      "extent": "narrow",
+      "units": "Management conflict/sequential-use references",
+      "evidence": "C:746",
+      "disposition": "A/Core evidence dependency, not a second test-body audit"
+    },
+    {
+      "path": "src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/PivMultiKeyContentionTests.cs",
+      "extent": "narrow",
+      "units": "Management conflict/sequential-use references",
+      "evidence": "C:746",
+      "disposition": "A/Core evidence dependency, not a second test-body audit"
+    }
+  ],
+  "additional_dependency_reads": [
+    {
+      "path": "src/Core/src/Sessions/ApplicationSession.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management call paths only"
+    },
+    {
+      "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management call paths only"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceInfoReader.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management call paths only"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceInfo.cs",
+      "extent": "full",
+      "evidence": "A:263; B:397-401; C:461-464",
+      "scope": "A full dependency read; B 1-190 and C selected decoder units only"
+    },
+    {
+      "path": "src/Core/src/Devices/FirmwareVersion.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management call paths only"
+    },
+    {
+      "path": "src/Core/src/Devices/Feature.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management call paths only"
+    },
+    {
+      "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management call paths only"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceCapabilities.cs",
+      "extent": "full",
+      "evidence": "A:263; B:397",
+      "scope": "Management masks/decoder"
+    },
+    {
+      "path": "src/Core/src/Devices/FormFactor.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management metadata/filter dependency"
+    },
+    {
+      "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management exchange boundaries"
+    },
+    {
+      "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management exchange boundaries"
+    },
+    {
+      "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management initialization/cancellation"
+    },
+    {
+      "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+      "extent": "full",
+      "evidence": "A:263",
+      "scope": "Management status/framing/CRC"
+    },
+    {
+      "path": "src/Core/src/Devices/DeviceFlags.cs",
+      "extent": "full",
+      "evidence": "B:397",
+      "scope": "Configuration flags"
+    },
+    {
+      "path": "src/Core/src/Utilities/Tlv.cs",
+      "extent": "full",
+      "evidence": "B:397",
+      "scope": "Configuration encoding/cleanup"
+    },
+    {
+      "path": "src/Core/src/Utilities/TlvHelper.cs",
+      "extent": "full",
+      "evidence": "B:397",
+      "scope": "Configuration encoding/cleanup"
+    },
+    {
+      "path": "src/Tests.Shared/Infrastructure/FilterCriteria.cs",
+      "extent": "full",
+      "evidence": "A:265",
+      "scope": "Test filter contract"
+    },
+    {
+      "path": "scripts/toolchain/TestTargets.cs",
+      "extent": "narrow",
+      "evidence": "C:203-208,714",
+      "scope": "11-21 unit/integration command selection"
+    }
+  ],
+  "additional_referenced_source_units": [
+    {
+      "path": "src/Core/src/Devices/VersionQualifier.cs",
+      "extent": "referenced-unit-only",
+      "units": "21-26,92 qualifier values/display",
+      "evidence": "C:214-217",
+      "disposition": "Evidence citation for C-06; report does not claim complete file read."
+    },
+    {
+      "path": "src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs",
+      "extent": "referenced-unit-only",
+      "units": "56-65 finalizer",
+      "evidence": "C:397-402",
+      "disposition": "Evidence citation for C-15; report does not claim complete file read."
+    }
+  ],
+  "historical_and_pattern_exclusions": [
+    {
+      "path": "docs/research/documentation-audit/records",
+      "pattern": "docs/research/documentation-audit/records/**",
+      "classification": "immutable-campaign-history",
+      "extent": "search-hit/provenance classification, not wholesale read",
+      "evidence": "C:750-752",
+      "note": "Includes old investigations/reviews/source copies/hashes/results; no per-file current coverage claimed."
+    },
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "classification": "historical-snapshot",
+      "extent": "narrow Management 320-342",
+      "evidence": "B:402-404; C:753-756; triage:105-107",
+      "note": "B calls it active/stale and proposes rewrite; coordinator rejects that classification. Preserve historical Builder/gates/legacy observations."
+    },
+    {
+      "path": "docs/research/native-aot-readiness.md",
+      "classification": "historical-AOT-evidence",
+      "extent": "historical status classification, no full-read claim",
+      "evidence": "C:757-759"
+    },
+    {
+      "path": "docs/research/native-aot-readiness-data.md",
+      "classification": "historical-AOT-evidence",
+      "extent": "historical status classification, no full-read claim",
+      "evidence": "C:757-759"
+    },
+    {
+      "path": "docs/plans/single-connection-single-session.md",
+      "classification": "original-plan",
+      "extent": "historical snippets/proposals, no full-read claim",
+      "evidence": "C:760-765"
+    },
+    {
+      "path": "docs/plans/raw-access-tiers.md",
+      "classification": "original-plan",
+      "extent": "historical snippets/proposals, no full-read claim",
+      "evidence": "C:760-765"
+    },
+    {
+      "path": "docs/plans/2026-09-04-applet-public-api-consolidation.md",
+      "classification": "original-plan",
+      "extent": "historical snippets/proposals, no full-read claim",
+      "evidence": "C:760-765"
+    },
+    {
+      "path": "docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-architecture.md",
+      "classification": "historical-addendum",
+      "extent": "excluded historical proposal; C does not enumerate exact earlier-addendum filenames",
+      "evidence": "C:760-769",
+      "note": "Path expanded from existing addenda inventory; no inferred inspection."
+    },
+    {
+      "path": "docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-program-design.md",
+      "classification": "historical-addendum",
+      "extent": "excluded historical proposal; C does not enumerate exact earlier-addendum filenames",
+      "evidence": "C:760-769",
+      "note": "Path expanded from existing addenda inventory; no inferred inspection."
+    },
+    {
+      "path": "docs/docs-inventory-report.md",
+      "classification": "historical-inventory",
+      "extent": "status classification, no full-read claim",
+      "evidence": "C:770-772"
+    },
+    {
+      "path": "docs/troubleshooting/testdiscovery-findings.md",
+      "classification": "dated-append-only-troubleshooting",
+      "extent": "status classification, no full-read claim",
+      "evidence": "C:770-772"
+    },
+    {
+      "path": "docs/architecture/images/L1-assembly-deps.svg",
+      "classification": "generated-diagram",
+      "extent": "excluded generated output; source inputs assessed",
+      "evidence": "C:773-774"
+    },
+    {
+      "path": "docs/architecture/images/L4-connection.svg",
+      "classification": "generated-diagram",
+      "extent": "excluded generated output; source inputs assessed",
+      "evidence": "C:773-774"
+    },
+    {
+      "path": "src/Management/examples",
+      "patterns": [
+        "src/Management/examples/**/obj/**",
+        "src/Management/examples/**/bin/**"
+      ],
+      "classification": "generated-build-output",
+      "extent": "pattern exclusion only; no generated-file read or successful-build inference",
+      "evidence": "C:775-776"
+    },
+    {
+      "path": "docs/research/audit-v2-closeout-review.md",
+      "classification": "preserved-user-history",
+      "extent": "narrow historical timeout decision at 61",
+      "evidence": "B:289-293",
+      "note": "Untracked user work, historical SDK policy intent, not firmware authority."
+    }
+  ],
+  "non_path_exclusions": [
+    {
+      "classification": "generic-terminology",
+      "scope": "PIV/YubiHSM management-key operations, CTAP credential management, general memory-management hits",
+      "evidence": "C:777-779",
+      "note": "Not Management control-surface coverage; no fictitious file list inferred."
+    },
+    {
+      "classification": "Core-and-sibling-audits-deferred",
+      "scope": "Native implementations, SCP crypto handshake, whole discovery merger, Core tests and sibling full applet semantics",
+      "evidence": "A:263; C:777-779",
+      "note": "Dependency reads do not transfer audit ownership."
+    },
+    {
+      "classification": "missing-requested-instruction",
+      "scope": "Root tests/CLAUDE.md",
+      "evidence": "A:8; C:25",
+      "note": "Reported absent, not a covered path; applicable existing module tests guide is in module_files."
+    }
+  ],
+  "reconciliation_corrections": [
+    {
+      "kind": "classification-correction",
+      "evidence": "B:402-404 versus C:753-756 and triage:105-107",
+      "required": "Treat v1-to-v2-gaps.md as historical point-in-time evidence, not active rewrite ownership.",
+      "status": "Applied to this manifest only; reports/triage untouched."
+    },
+    {
+      "kind": "path-expansion",
+      "evidence": "C:745-746",
+      "required": "Replace ellipsis test paths with actual PublicApi UnitTests and Piv IntegrationTests paths.",
+      "status": "Expanded above; no new semantic read claimed."
+    },
+    {
+      "kind": "path-shorthand",
+      "evidence": "C:672-673; C:599-608",
+      "required": "ManagementTool/README and clean-unit basenames are repository-relative under src/Management/examples/ManagementTool; do not interpret shorthand as extra tracked paths.",
+      "status": "Expanded above."
+    },
+    {
+      "kind": "instruction-hit",
+      "evidence": "C:722; triage:81-85",
+      "required": "Obsolete module target in API-design skill is a finding, not an extant source path or authorized skill edit.",
+      "status": "Existing skill path inventoried, obsolete target not invented."
+    },
+    {
+      "kind": "earlier-addendum-precision",
+      "evidence": "C:760-769",
+      "required": "Report does not specify which earlier addendum was read; existing historical filenames can be excluded but not promoted to full reads.",
+      "status": "Two earlier-* paths explicitly excluded above; exact read attribution remains unclaimed."
+    }
+  ],
+  "investigation_status": {
+    "module_inventory": "reconciled-55-of-55",
+    "ownership": "reconciled-A21-B2-C32",
+    "public_surface": "reconciled-5-families-47-snapshot-entries",
+    "candidate_dispositions": "All A-01..14, B-01..08 and C-01..19 have coordinator dispositions in triage.md. Counts are overlapping candidate groups, not independent bugs.",
+    "external_manifest": "Expanded records with explicit full/narrow/exclusion classification; no new source semantics audited.",
+    "independent_changed_file_review": "pending-integration",
+    "sampling": "9/40 recorded clean samples; numeric and category targets met",
+    "runtime_verification": "not-performed-by-this-task"
+  },
+  "post_integration": {
+    "status": "complete: content-reviewed, validated and final-record-review passed",
+    "reason": "See review-closeout.md and exact final content hashes; publication checkpoint is recorded in campaign management.md after commit.",
+    "integrated_revision": "working tree based on da61d2e6; exact final reviewed SHA-256 values in reviewed-files.json",
+    "final_changed_paths": [
+      "CLAUDE.md",
+      "docs/TESTING.md",
+      "docs/architecture/connection-ownership-and-contention.md",
+      "docs/architecture/physical-device-model.md",
+      "docs/migration/v1-to-v2.md",
+      "docs/research/documentation-audit/.gitattributes",
+      "docs/research/documentation-audit/.gitignore",
+      "docs/research/documentation-audit/README.md",
+      "docs/research/documentation-audit/management.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/analyzer-context-correction.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/closeout.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/compiler-diagnostics.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/correction-c-compilation.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/correction-c-module.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/correction-c-shared.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/corrections.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/coverage.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/coverage.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/edit-a.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/edit-b.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/edit-c.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/final-reconciliation.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/investigation-a.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/investigation-b.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/investigation-c.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/patches/edit-a.patch",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/patches/edit-b.patch",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/patches/edit-c-module.patch",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/patches/edit-c-shared.patch",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/patches/final-content.patch",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/plan.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/project-context-preparation.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/record-manifest.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/records-qa.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/review-a-followup.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/review-a.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/review-b.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/review-c-module-followup.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/review-c-module.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/review-c-shared-followup.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/review-c-shared.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/review-closeout.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/review-final-corrections.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/reviewed-files.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/sampling.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/snippet-preparation.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/status.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation-plan.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation-tooling.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation.md",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-191505-746-checker-build/01-build-Management.DocCheck.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-191505-746-checker-build/result.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-191505-746-checker-build/result.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-191505-746-checker-build/run.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-193945-125-checker-rebuild/01-build-Management.DocCheck.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-193945-125-checker-rebuild/result.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-193945-125-checker-rebuild/result.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-193945-125-checker-rebuild/run.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/01-build.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/02-test-Cli.Commands.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/03-test-Cli.Shared.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/04-test-Core.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/05-test-Ctap2.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/06-test-Management.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/07-test-Oath.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/08-test-OpenPgp.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/09-test-Piv.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/10-test-PublicApi.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/11-test-SecurityDomain.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/12-test-WebAuthn.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/13-test-YubiHsm.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/14-test-YubiOtp.UnitTests.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/result.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/result.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-195646-771-build+test+docs-qa+docs-architecture+complexity/run.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200410-051-xunit2-context-build/01-clean-Management.DocExamples.Xunit2.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200410-051-xunit2-context-build/02-build-Management.DocExamples.Xunit2.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200410-051-xunit2-context-build/result.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200410-051-xunit2-context-build/result.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200410-051-xunit2-context-build/run.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200621-338-xunit2-context-build/01-clean-Management.DocExamples.Xunit2.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200621-338-xunit2-context-build/02-build-Management.DocExamples.Xunit2.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200621-338-xunit2-context-build/result.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200621-338-xunit2-context-build/result.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/20261103-200621-338-xunit2-context-build/run.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/Directory.Build.props",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/Directory.Build.targets",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/compile-examples.py",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/diagnose-compiler.py",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/diagnostic-inputs/AsyncWarningCalibration.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/inspect-compiler-policy.py",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/prepare-project-context.py",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/src/Program.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/src/Yubico.YubiKit.Management.DocCheck.csproj",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/Context.Items.props",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/Context.Packages.props",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/Directory.Build.props",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/Directory.Build.targets",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/context-manifest.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/evidence/analyzers.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/evidence/compile-inputs.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/evidence/csc-command-line.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/evidence/policy-final.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/evidence/resolved-inputs.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/evidence/resolved-references.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/src/Yubico.YubiKit.Management.DocExamples.Xunit2.csproj",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/xunit2-context/strict-raw-manifest.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/config-xml.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/config-xml.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/extract-examples.py",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-01.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-01.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-02.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-02.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-03.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-03.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-04.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-04.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-05.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-05.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-06.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-06.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-07.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-07.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-08.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-08.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-09.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-09.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-10.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-10.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-11.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-11.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-12.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-12.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-13.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-13.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-14.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-14.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-15.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-15.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-16.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-16.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-17.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-17.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-18.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-18.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-19.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-19.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-20.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-20.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-21.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-21.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-22.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-22.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-23.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-23.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-24.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-24.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-25.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-25.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-28.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-28.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-29.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/guide-29.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/manifest.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/migration-device-info.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/migration-device-info.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/module-tests-1.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/module-tests-1.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/module-tests-2.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/module-tests-2.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/physical-metadata.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/physical-metadata.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/physical-transports.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/physical-transports.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/piv-borrowed.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/piv-borrowed.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-02.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-02.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-03.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-03.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-04.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-04.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-05.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-05.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-06.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-06.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-07.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/readme-07.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/root-scp-v3.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/root-scp-v3.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/session-reset-xml.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/session-reset-xml.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-attribute-xml-1.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-attribute-xml-1.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-attribute-xml-2.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-attribute-xml-2.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-guide-oath.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-guide-oath.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-helper-xml-1.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-helper-xml-1.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-helper-xml-2.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-helper-xml-2.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-helper-xml-3.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-helper-xml-3.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-1.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-1.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-4.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-4.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-5.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-5.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-6.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-6.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-7.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-7.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-8.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/shared-readme-8.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-11.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-11.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-12.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-12.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-13.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-13.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-15.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/testing-15.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-capabilities.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-capabilities.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-lock-change.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-lock-change.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-lock-prompt.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-lock-prompt.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-query.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-query.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-reset.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/tool-reset.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-async-calibration-preview.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-async-calibration.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-baseline.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-comparer-helper-build.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-default-comparer.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-desktop-comparer.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-final-preview-default.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-final-preview-desktop.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-final-primary-focused.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-full-diagnostics-helper-build.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-full-diagnostics.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-policy-complete.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-policy.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194257-618-build/01-build-Management.DocCheck.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194257-618-build/result.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194257-618-build/result.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194257-618-build/run.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194518-449-build/01-build-Management.DocCheck.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194518-449-build/result.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194518-449-build/result.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194518-449-build/run.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194810-951-build/01-build-Management.DocCheck.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194810-951-build/result.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194810-951-build/result.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-toolchain-evidence/20261103-194810-951-build/run.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiler-warning-wave-helper-build.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/context-collection-failure/analyzers.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/context-collection-failure/compile-inputs.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/context-collection-failure/context-manifest.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/context-collection-failure/csc-command-line.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/context-collection-failure/policy-final.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/context-collection-failure/prepare-project-context.py",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/context-collection-failure/resolved-references.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/final-api.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/final-context-collection-corrected.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/final-context-collection.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/final-example-preparation.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/final-tokens.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/format-apply-final.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/format-apply.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/format-changes.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/format-final-changes.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/format-initial.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/format-verify-final.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/format-workspace-diagnostics.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/initial-b-api.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/initial-b-tokens.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/config-xml.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/config-xml.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-01.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-01.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-02.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-02.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-03.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-03.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-04.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-04.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-05.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-05.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-06.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-06.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-07.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-07.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-08.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-08.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-09.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-09.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-10.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-10.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-11.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-11.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-12.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-12.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-13.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-13.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-14.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-14.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-15.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-15.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-16.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-16.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-17.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-17.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-18.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-18.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-19.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-19.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-20.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-20.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-21.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-21.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-22.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-22.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-23.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-23.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-24.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-24.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-25.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-25.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-28.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-28.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-29.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/guide-29.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/manifest.json",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/migration-device-info.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/migration-device-info.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/module-tests-1.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/module-tests-1.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/module-tests-2.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/module-tests-2.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/physical-metadata.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/physical-metadata.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/physical-transports.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/physical-transports.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/piv-borrowed.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/piv-borrowed.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-02.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-02.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-03.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-03.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-04.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-04.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-05.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-05.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-06.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-06.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-07.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/readme-07.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/root-scp-v3.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/root-scp-v3.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/session-reset-xml.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/session-reset-xml.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-attribute-xml-1.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-attribute-xml-1.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-attribute-xml-2.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-attribute-xml-2.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-guide-oath.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-guide-oath.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-helper-xml-1.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-helper-xml-1.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-helper-xml-2.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-helper-xml-2.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-helper-xml-3.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-helper-xml-3.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-1.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-1.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-4.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-4.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-5.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-5.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-6.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-6.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-7.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-7.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-8.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/shared-readme-8.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/testing-11.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/testing-11.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/testing-12.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/testing-12.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/testing-13.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/testing-13.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/testing-15.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/testing-15.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-capabilities.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-capabilities.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-lock-change.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-lock-change.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-lock-prompt.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-lock-prompt.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-query.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-query.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-reset.cs",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/preliminary-examples/tool-reset.raw.txt",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/snippets-final-strict-raw.log",
+      "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/snippets-preliminary.log",
+      "docs/research/documentation-audit/workflow.md",
+      "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+      "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+      "src/Cli.Commands/src/Management/ManagementConfigCommand.cs",
+      "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+      "src/Core/CLAUDE.md",
+      "src/Management/CLAUDE.md",
+      "src/Management/README.md",
+      "src/Management/examples/ManagementTool/Cli/Menus/CapabilitiesMenu.cs",
+      "src/Management/examples/ManagementTool/Cli/Menus/DeviceFlagsMenu.cs",
+      "src/Management/examples/ManagementTool/Cli/Menus/DeviceInfoMenu.cs",
+      "src/Management/examples/ManagementTool/Cli/Menus/LockCodeMenu.cs",
+      "src/Management/examples/ManagementTool/Cli/Menus/ResetMenu.cs",
+      "src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+      "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+      "src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs",
+      "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs",
+      "src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs",
+      "src/Management/examples/ManagementTool/Features/DeviceReset.cs",
+      "src/Management/examples/ManagementTool/Features/Results/ConfigResult.cs",
+      "src/Management/examples/ManagementTool/Program.cs",
+      "src/Management/examples/ManagementTool/README.md",
+      "src/Management/src/Backend/IManagementBackend.cs",
+      "src/Management/src/Backend/OtpBackend.cs",
+      "src/Management/src/DeviceConfig.cs",
+      "src/Management/src/IManagementSession.cs",
+      "src/Management/src/IYubiKeyExtensions.cs",
+      "src/Management/src/ManagementSession.cs",
+      "src/Management/src/SetDeviceConfigOptions.cs",
+      "src/Management/tests/CLAUDE.md",
+      "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementLockCodeTests.cs",
+      "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+      "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionCapabilityTests.cs",
+      "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionSimpleTests.cs",
+      "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionTests.cs",
+      "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+      "src/Management/tests/Yubico.YubiKit.Management.UnitTests/AuditV2/ManagementAuditReproTests.cs",
+      "src/Management/tests/Yubico.YubiKit.Management.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+      "src/Piv/examples/PivTool/SDK_PAIN_POINTS.md",
+      "src/Tests.Shared/CLAUDE.md",
+      "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+      "src/Tests.Shared/README.md",
+      "src/Tests.Shared/YubiKeyTestStateExtensions.cs",
+      "src/Tests.TestProject/Controllers/DiTestController.cs",
+      "src/YubiOtp/examples/OtpTool/DeviceHelper.cs"
+    ],
+    "reviewed_files": [
+      {
+        "path": "CLAUDE.md",
+        "content_sha256": "a04b35ebbbba9bb6b2ecb6ce5f95aa8c734b5635a0243e4b37642ba48374074b",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "docs/TESTING.md",
+        "content_sha256": "ccaacaaee2a4c7df77f2ecad10753e4d3bb01dd1cb71dcf2a28e0a4d9a557668",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "docs/architecture/connection-ownership-and-contention.md",
+        "content_sha256": "7dde7422dfeffe2d1464d8a52513340f1f5f6ea7681b581ebca0214a7463cebb",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "docs/architecture/physical-device-model.md",
+        "content_sha256": "1eb4efa5450d69829d0f7165f5d02b413e5e539e8275611b5b64983af5e43cd9",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "docs/migration/v1-to-v2.md",
+        "content_sha256": "d624e3ddbc94d6e629b8585e13b6c6dcc1c2e3374d4243f4012eb15272a22c2a",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+        "content_sha256": "9d51ea48fdeadb008d106445d36f82baad34d5957821da4835f06bd176683c41",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Cli.Commands/src/Infrastructure/YkDeviceContext.cs",
+        "content_sha256": "674339cf4f3b27770caedc88caa12bf9cc26f2498f30aad9da4c2d6cbf4f9347",
+        "review_record": "review-final-corrections.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "included in final correction review"
+      },
+      {
+        "path": "src/Cli.Commands/src/Management/ManagementConfigCommand.cs",
+        "content_sha256": "9f8398c03dd2d4b11fa998a82abbf09f59363fe66624416eb92ce517980afab6",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+        "content_sha256": "e55623f6fd7bd6d672bc1e0732f8ee66ace0c3d912ffc6154673649e62fc25e9",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Core/CLAUDE.md",
+        "content_sha256": "c1093643f6b7cadd5bfa58cf6c6ab65a5d1851a5a8360ee4916264888da35a97",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "src/Management/CLAUDE.md",
+        "content_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "src/Management/README.md",
+        "content_sha256": "e5a631ff57ad934ef294e9805ea6039fdace475dbc63613c92d98534bc5c878d",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Cli/Menus/CapabilitiesMenu.cs",
+        "content_sha256": "1ff2f0c77ba94600625c02360243712534b6e99071e2649ac07ef44a01d988b3",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Cli/Menus/DeviceFlagsMenu.cs",
+        "content_sha256": "c313695ea06726fc4163a1236d194836facb43c8399578c81dcd59f88794dfcb",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Cli/Menus/DeviceInfoMenu.cs",
+        "content_sha256": "574e075c5a56d8123a9af20a8d3897a8da7e88b608440baf8ae1f1338e9d75b6",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Cli/Menus/LockCodeMenu.cs",
+        "content_sha256": "fbc8b21291c824cfc63daf90f638d6f1b1eadd7a9ec21c2f016a6beab1d3977d",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Cli/Menus/ResetMenu.cs",
+        "content_sha256": "08397e675bbffb5f9a1fe4ae60989ce355ce0ec56047a0446740320974b56ea2",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+        "content_sha256": "761d64d0438307f365e51824270a45ec3156c46fc9ca226da6bca8ebf1485e36",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+        "content_sha256": "1c0e84d19ce445e00d280a3fd6e2bd3ace13774b39e34d002b6ec8bac997102b",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs",
+        "content_sha256": "a7013821bad3d4ab28f28db5c2c42ca2e4fdc1e1c8f39f25e965fe3717e1e31b",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs",
+        "content_sha256": "03004d4f3f006ca73a3b7ad9333cd3296f025c6d3c40af528b3e14ad99ce9a4c",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs",
+        "content_sha256": "5a63f2bd0faaf1cd6911019e29edc483943414919170f98e209cb8fb412fabf2",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Features/DeviceReset.cs",
+        "content_sha256": "356acb744426b2bbd4fca76c78d04b305e325c2185b061869ab36c205fce6321",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Features/Results/ConfigResult.cs",
+        "content_sha256": "45deee7d7b6944577e1c616031f299eb1765d6d5830bd4aedc04ab57b2584eb1",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/Program.cs",
+        "content_sha256": "23283fdd6e39c21e15db3d334f39e203c76d2f9987a6ef8f201a6a2d23a2b9f7",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/examples/ManagementTool/README.md",
+        "content_sha256": "3143005aa7f28a9a5843dfa7b0acefff8836b7f9aebb1fdbe7299162a973e50f",
+        "review_record": "review-c-module-followup.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "src/Management/src/Backend/IManagementBackend.cs",
+        "content_sha256": "292f92e53d42445e929a776b1a5adf8094723933de224ebb5422c757933cdf0f",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/src/Backend/OtpBackend.cs",
+        "content_sha256": "591e25bd39fe1e673681a5652e6343d90088b020c5239f719b18fba28b4724af",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/src/DeviceConfig.cs",
+        "content_sha256": "f0eb2e575ec32fe4ed175a546c137e04aaae954ce081d6f9fc2ab409d923a4b4",
+        "review_record": "review-b.md",
+        "original_review": "review-b.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/src/IManagementSession.cs",
+        "content_sha256": "b35858944a645276e2e023bcb971be503ef250e211c85553d4bf77588f11df9f",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/src/IYubiKeyExtensions.cs",
+        "content_sha256": "0b04c36d103473a9b976087fae45831d79c2dad70bd1c9207f2b30953a6c72b6",
+        "review_record": "review-final-corrections.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "included in final correction review"
+      },
+      {
+        "path": "src/Management/src/ManagementSession.cs",
+        "content_sha256": "36f879ea7d703e78c69d0f02b97a24c752301eab4dce02b0164fa1d9f5aadfe9",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/src/SetDeviceConfigOptions.cs",
+        "content_sha256": "d28bb6dbbed4a4fd5d373d4323bb509f834899339f65023b00ba7b015b36061c",
+        "review_record": "review-b.md",
+        "original_review": "review-b.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/tests/CLAUDE.md",
+        "content_sha256": "9f3c914b0d7a7a979229af212966fda534b10608a4179b8edd9ec66ab77aab36",
+        "review_record": "review-final-corrections.md",
+        "original_review": "review-c-module-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "included in final correction review"
+      },
+      {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementLockCodeTests.cs",
+        "content_sha256": "43daec031a94b21ab218aefba479a95ce1be3b4df44023df9153fbefac2da59f",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+        "content_sha256": "b4a1d7fbc4fa4c4af62bd350668ef74f83cc37840e95bee1b96259ff847bc9fe",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionCapabilityTests.cs",
+        "content_sha256": "f145c3e1171fb982dbfac0291bf755d8b93f2dd8f79bbfb7d065f26a6c98d20e",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionSimpleTests.cs",
+        "content_sha256": "acad7cb1830a60f9bfadd845779ad366491faeebbdd615c588aa9a249cc944cd",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionTests.cs",
+        "content_sha256": "9e14a6f17b090ae88374454ca22ae92d0321ef021ee303d64cac1f7c5ad135a1",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+        "content_sha256": "8ed9364d1a90ee1331d9573ecbcbc0dd7748463775cb13832b43332b2fc4f213",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/AuditV2/ManagementAuditReproTests.cs",
+        "content_sha256": "37bb1351fa289ecc549d925335d4d02502fcac62c6c5eb84b13d42f7b0dfcf4f",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+        "content_sha256": "906daac2d262529d5104083f6804869df2c008bb2968045b485e14af060ef661",
+        "review_record": "review-final-corrections.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "included in final correction review"
+      },
+      {
+        "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+        "content_sha256": "6897ff2e152e0b533455e7f40c76e53b891e8147caa80d8750078de67f6f8406",
+        "review_record": "review-a-followup.md",
+        "original_review": "review-a-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Piv/examples/PivTool/SDK_PAIN_POINTS.md",
+        "content_sha256": "0eef2e65430d38b9b0e6d9c05aca7eb409d6033c25a4e38d4ced13f260c601ab",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "content_sha256": "5d9303462a236dcfbc4cf3a71afca4e3d84d3aeecc9ca81b703e284de39e3f35",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+        "content_sha256": "4ed3880bf8ddc6deaa67ac189f4872100c50f36efd015c3b4c49d58f12f31435",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Tests.Shared/README.md",
+        "content_sha256": "061a24d373ea7e26445de3242836a85c5dcdd96631fccbf88b27ec2d993e821e",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "none"
+      },
+      {
+        "path": "src/Tests.Shared/YubiKeyTestStateExtensions.cs",
+        "content_sha256": "fb3fa012ee11dfe4324d9cd4bd38b1480a092db2faac3c035efd6834ad844ad4",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/Tests.TestProject/Controllers/DiTestController.cs",
+        "content_sha256": "04a8512e064c5df5794aa2aec7ac5061552d0abe01db5e8ca3f4a8f82b71a77f",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      },
+      {
+        "path": "src/YubiOtp/examples/OtpTool/DeviceHelper.cs",
+        "content_sha256": "4f66b7ae8b7860d0e9e64bcfeb679ae9bc844afef178625b15822c0fa1f5b755",
+        "review_record": "review-c-shared-followup.md",
+        "original_review": "review-c-shared-followup.md",
+        "reviewer": "github-copilot/gpt-6.1-sol",
+        "reviewed_revision": "exact final content SHA-256",
+        "verdict": "accepted",
+        "sections": "complete changed semantic units and relevant dependencies",
+        "corrections_rereviewed": true,
+        "post_review_formatting": "whitespace-only; final token/directive gate also passed"
+      }
+    ],
+    "reviewed_file_schema": {
+      "path_format": "repository-relative existing path",
+      "content_sha256": "final reviewed bytes",
+      "review_record_format": "existing run review record path",
+      "reviewer": "independent reviewer/model",
+      "reviewed_revision": "integrated revision or precise content identity",
+      "verdict": "accepted / corrections-required / re-reviewed",
+      "sections": "full changed sections and relevant dependencies",
+      "corrections_rereviewed": false
+    },
+    "api_preservation": "PASS: all20 snapshots byte-identical",
+    "executable_token_directive_preservation": "PASS: all37 edited C# files; final-tokens.log",
+    "compiled_examples": "PASS in recorded contexts:37 strict raw plus26 real SDK/MSBuild; raw xUnit2 CS1701 remains preserved",
+    "validation": "PASS: full solution,3998 unit tests(96 Management),5 existing skips,0 failures/warnings; docs/architecture/complexity/scoped-format pass; no hardware/integration execution",
+    "commit_remote_checkpoint": "See docs/research/documentation-audit/management.md publication entry after integration",
+    "final_records_review": "review-closeout.md: PASS, no required/optional corrections",
+    "completed_gate_requirements": [
+      "Enumerate all final changed files, including run/campaign records and external docs, against canonical baseline.",
+      "Match each final path/section to independent review and any correction re-review; investigator full reads are not review substitutes.",
+      "Compute SHA-256 after integration and final corrections; invalidate stale hashes/reviews after subsequent edits.",
+      "Reconcile changed/new/deleted paths against this baseline inventory; retain historical exclusions.",
+      "Preserve nine actual samples including C narrative/examples; update denominator only with explicit unit changes and expand categories after material misses.",
+      "Attach separate final API/token/directive preservation, snippet compilation and authorized validation evidence; do not infer them from coverage."
+    ]
+  }
+}

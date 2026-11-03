@@ -11,6 +11,10 @@ The campaign has two distinct passes:
 2. **Implementation pass:** select and fix recorded defects or behavioral gaps, verify the resulting
    contracts, and independently re-review every affected documentation claim.
 
+Run these as two campaign-wide sweeps: finish Pass 1 for the remaining in-scope applets/modules first,
+then revisit modules for Pass 2. Implementation findings accumulate in the module handoffs until that
+second sweep; completing one module's documentation does not authorize its implementation work.
+
 Use the [workflow](workflow.md) for future modules. The approved [writing style](records/style.md)
 remains the editorial reference. Repository and module instructions still govern execution.
 
@@ -20,7 +24,8 @@ remains the editorial reference. Repository and module instructions still govern
 | --- | --- | --- | --- |
 | OATH | Complete; pilot followed by documentation-impact reviews | Explicitly approved fix waves complete within recorded scope; additional contract/device questions remain deferred | [OATH handoff](oath.md) |
 | WebAuthn | Complete, committed/pushed at `9399b94b` | Not started; 21 implementation/test follow-ups and one CTAP2 documentation dependency recorded | [WebAuthn handoff](webauthn.md) |
-| Management, PIV, Security Domain and other applets | Not started by this campaign | Not scheduled by this campaign | Apply the workflow when a module is selected |
+| Management | Complete: cycle `management-001`; content, independent review and validation accepted | Deferred until the campaign's second sweep | [Management handoff](management.md) |
+| PIV, Security Domain and other applets | Not started by this campaign | Deferred until the campaign's second sweep | Apply the workflow when a module is selected |
 | Core | Deferred; only narrow dependencies and a WebAuthn example were touched | Discovery/SCP follow-ups retain their existing separate scope | Existing module checkpoints; no Core-wide audit is implied |
 
 ## Retained records

@@ -18,6 +18,8 @@ The test infrastructure provides:
 ```csharp
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Xunit;
 
 public class MyIntegrationTests
 {
@@ -36,13 +38,22 @@ public class MyIntegrationTests
     [WithYubiKey(MinFirmware = "5.7.0")]
     public async Task ModernFeatures_RequireFirmware570(YubiKeyTestState state)
     {
+        using var scpKeyParams = Scp03KeyParameters.Default;
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
-            Assert.True(deviceInfo.FirmwareVersion.IsAtLeast(5, 7, 0));
-        }, Scp03KeyParameters.Default);
+            var fresh = await mgmt.GetDeviceInfoAsync();
+            Assert.Equal(deviceInfo.SerialNumber, fresh.SerialNumber);
+        }, scpKeyParams: scpKeyParams);
     }
 }
 ```
+
+The SCP example requires a SmartCard-capable dedicated key configured with those SCP03 keys; firmware
+alone does not establish that prerequisite. Each attribute yields one placeholder bound to the first
+matching authorized key. Multiple attributes bind independently, not once per connected key. Helpers
+pass cached `state.DeviceInfo`; query the session explicitly when testing fresh persisted settings.
+The caller owns the SCP parameters. The using scope outlives the awaited helper call, so the helper's
+session and connection are disposed before the parameters clear their owned key arrays.
 
 ## Safety: Allow List
 
@@ -105,6 +116,12 @@ Test method
 - Supports filters such as `MinFirmware`, `FormFactor`, `RequireUsb`, `RequireNfc`, `ConnectionType`, `Capability`, `FipsCapable`, `FipsApproved`, and `CustomFilter`.
 - Returns placeholders during discovery so test discovery does not touch hardware.
 
+Use three-component firmware criteria such as `"5.7.0"`; malformed strings are currently ignored.
+`RequireUsb` and `Capability` are independent: the latter accepts an application enabled over USB or NFC.
+Current Core FIPS-tag decoding uses the wrong bit mapping, so the FIPS masks and derived filters cannot
+establish application approval. Product flag bits can remain in `FormFactor`, causing exact base-enum
+filters to miss flagged devices. `IsFips` is a separate manufacturing indicator, not an operating mode.
+
 **YubiKeyTestState**
 
 - Wraps `IYubiKey` plus cached `DeviceInfo`.
@@ -144,11 +161,25 @@ public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState sta
 
 ### Filtered Test
 
+This example uses the SecurityDomain integration project's helper, not a helper shipped in Tests.Shared.
+To compile it, reference `Yubico.YubiKit.SecurityDomain.IntegrationTests` and its normal dependencies,
+or link that project's actual [TestStateExtensions.cs](../SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs)
+with a SecurityDomain project reference. Import the helper namespace shown below.
+
+Execution requires a dedicated, allow-listed SmartCard key supporting Security Domain and SCP03, with
+device state suitable for the helper's reset and subsequent authentication using SCP03 defaults. The
+helper resets Security Domain before reading key information, destroying custom Security Domain key
+configuration. The 5.3.0 minimum and exposed SmartCard filter do not prove application support, key
+configuration or successful reset; the helper explicitly opens SmartCard rather than relying on the filter to pin it.
+
 ```csharp
+using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
+
 [SkippableTheory]
-[WithYubiKey(MinFirmware = "5.7.2", Capability = DeviceCapabilities.SecurityDomain)]
-public async Task Scp11_ModernDevice_ReturnsKeyInfo(YubiKeyTestState state)
+[WithYubiKey(MinFirmware = "5.3.0", ConnectionType = ConnectionType.SmartCard)]
+public async Task Scp03_AfterReset_ReturnsKeyInfo(YubiKeyTestState state)
 {
+    using var scpKeyParams = Scp03KeyParameters.Default;
     await state.WithSecurityDomainSessionAsync(
         resetBeforeUse: true,
         async session =>
@@ -156,9 +187,13 @@ public async Task Scp11_ModernDevice_ReturnsKeyInfo(YubiKeyTestState state)
             var keyInfo = await session.ListKeyInformationAsync();
             Assert.NotEmpty(keyInfo);
         },
-        scpKeyParams: Scp03KeyParameters.Default);
+        scpKeyParams: scpKeyParams);
 }
 ```
+
+Keep the caller-owned SCP parameters alive through the awaited helper; that helper disposes its
+sessions/connection, not the supplied parameters. This example supplies SCP03 defaults and reads key
+information; it does not demonstrate an SCP11 handshake.
 
 ### Custom Filter
 
@@ -175,14 +210,38 @@ public async Task RunsOnlyOnProductionKeyRange(YubiKeyTestState state)
 {
     await state.WithManagementAsync(async (mgmt, info) =>
     {
-        Assert.True(info.SerialNumber > 10_000_000);
+        var freshInfo = await mgmt.GetDeviceInfoAsync();
+        Assert.True(freshInfo.SerialNumber > 10_000_000);
+        Assert.Equal(info.SerialNumber, freshInfo.SerialNumber);
     });
 }
 ```
 
 ## Common Helper Pattern
 
-Application helpers should create the transport explicitly, create the session, invoke the action, and dispose in the same visible flow:
+Application helpers should keep connection/session ownership visible. The Management helper uses its
+device extension to create an owned session, passes cached `state.DeviceInfo`, and disposes that session
+and hidden connection when the callback completes. Its optional arguments are `configuration`,
+`scpKeyParams`, `preferredConnection` and `cancellationToken`, in that order. Name policy arguments.
+To test a transport, filter one concrete row, pin it and assert what was opened:
+
+```csharp
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+public async Task ReadMetadata_OverOtpHid(YubiKeyTestState state)
+{
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        Assert.Equal(ConnectionType.HidOtp, mgmt.ConnectionType);
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+    }, preferredConnection: state.ConnectionType);
+}
+```
+
+An unfiltered state's connection set may have multiple flags and is not a valid single preference.
+Default Management selection chooses one exposed interface (SmartCard, HID FIDO, then HID OTP), with
+no fallback after open/initialization failure. For a SmartCard-only applet, direct borrowing is useful:
 
 ```csharp
 public static async Task WithOathAsync(
@@ -260,4 +319,5 @@ discovery result only hold on a single-key rig; prefer key-count-agnostic invari
 
 - Devices must be connected before the test runner starts.
 - Allow-list violations call `Environment.Exit(-1)` by design.
-- Each `[WithYubiKey]` attribute produces one placeholder that binds to a matching authorized device at execution.
+- Each `[WithYubiKey]` attribute produces one placeholder that binds to the first matching authorized
+  device at execution; multiple attributes are not deduplicated by physical key.

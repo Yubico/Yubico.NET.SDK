@@ -280,19 +280,32 @@ Use the `ConnectionType` property to require that the bound device exposes a con
 // One device row; state.ConnectionType may contain multiple flags.
 [SkippableTheory]
 [WithYubiKey]
-public async Task DefaultSelection(YubiKeyTestState state) { }
+public async Task DefaultSelection(YubiKeyTestState state)
+{
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}
 
 // One row whose device must expose SmartCard.
 [SkippableTheory]
 [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-public async Task SmartCardOnly(YubiKeyTestState state) { }
+public async Task SmartCardOnly(YubiKeyTestState state)
+{
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}
 
 // Three separate rows, one for each requested connection type.
 [SkippableTheory]
 [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
 [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
 [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
-public async Task EachManagementConnection(YubiKeyTestState state) { }
+public async Task EachManagementConnection(YubiKeyTestState state)
+{
+    // This demonstrates independent device-filter rows, not operation-transport coverage.
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}
 ```
 
 The filter alone does not pin Management to that connection. Pin the session explicitly when the test's meaning depends on the connection used.
@@ -303,7 +316,10 @@ Test output includes `state.ConnectionType`. An unfiltered row can therefore dis
 
 ### Default Management Selection
 
-`WithManagementAsync` leaves `preferredConnection` as `null` unless the caller supplies it. Management then tries its default order: SmartCard, HID FIDO, and HID OTP. Use this form when the behavior under test is transport-independent:
+`WithManagementAsync` leaves `preferredConnection` as `null` unless the caller supplies it. Management
+selects the first exposed supported interface in its default order: SmartCard, HID FIDO, then HID OTP.
+Connection or initialization failure does not try another interface. The callback receives cached
+`state.DeviceInfo`, not a fresh query at helper entry. Use this form for transport-independent tests:
 
 ```csharp
 [SkippableTheory]
@@ -322,7 +338,7 @@ Do not pass `preferredConnection: state.ConnectionType` from an unfiltered row. 
 
 ### Transport-Specific Testing
 
-When behavior must be exercised over concrete connections, declare one row per connection, pass the row's concrete `state.ConnectionType` as `preferredConnection`, and assert the session's actual `Transport`:
+When behavior must be exercised over concrete connections, declare one row per connection, pass the row's concrete `state.ConnectionType` as `preferredConnection`, and assert the session's actual `ConnectionType`:
 
 ```csharp
 [SkippableTheory]
@@ -336,7 +352,7 @@ public async Task GetDeviceInfo_UsesRequestedManagementConnection(YubiKeyTestSta
 
     await state.WithManagementAsync(async (mgmt, _) =>
     {
-        Assert.Equal(state.ConnectionType, mgmt.Transport);
+        Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
 
         var info = await mgmt.GetDeviceInfoAsync();
         Assert.Equal(state.SerialNumber, info.SerialNumber);
@@ -350,7 +366,7 @@ An explicit `preferredConnection` is a single-candidate request and does not fal
 
 1. **Use default selection for transport-independent tests**: Apply one unfiltered `[WithYubiKey]` and omit `preferredConnection`.
 2. **Create explicit rows for connection-specific tests**: Apply separate attributes with one concrete `ConnectionType` each.
-3. **Pin and verify concrete connections**: Pass `preferredConnection: state.ConnectionType` and assert `mgmt.Transport` in those rows.
+3. **Pin and verify concrete connections**: Pass `preferredConnection: state.ConnectionType` and assert `mgmt.ConnectionType` in those rows.
 4. **Do not pin from unfiltered state**: Its `ConnectionType` can be a multi-flag set that is invalid as a preference.
 5. **Avoid DeviceId parsing**: Use `ConnectionType` filters instead of inferring interfaces from identifier strings.
 
@@ -371,8 +387,9 @@ public async Task ManagementOverFido_Works(YubiKeyTestState state)
 {
     await state.WithManagementAsync(async (mgmt, _) =>
     {
-        Assert.Equal(ConnectionType.HidFido, mgmt.Transport);
-        // Exercise HID FIDO-specific Management behavior.
+        Assert.Equal(ConnectionType.HidFido, mgmt.ConnectionType);
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
     }, preferredConnection: state.ConnectionType);
 }
 ```

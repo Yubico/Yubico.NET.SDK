@@ -1,0 +1,33 @@
+<Project>
+  <!-- Import real repository analyzer/package/AOT policy, not the standalone checker's empty targets. -->
+  <Import Project="$(RepositoryRoot)/Directory.Build.targets" />
+  <Target Name="ValidateManagementDocumentationInputs" BeforeTargets="PrepareForBuild">
+    <Exec Command="python3 &quot;$(MSBuildThisFileDirectory)../prepare-project-context.py&quot; --repo &quot;$(RepositoryRoot)&quot; --check" />
+  </Target>
+  <Target Name="CaptureManagementDocumentationInputs" BeforeTargets="CoreCompile">
+    <MakeDir Directories="$(ManagementExamplesWorkspace)" />
+    <WriteLinesToFile File="$(ManagementExamplesWorkspace)/compile-inputs.txt" Lines="@(Compile-&gt;'%(FullPath)')" Overwrite="true" />
+    <WriteLinesToFile File="$(ManagementExamplesWorkspace)/resolved-references.txt" Lines="@(ReferencePathWithRefAssemblies-&gt;'%(FullPath)|%(FusionName)')" Overwrite="true" />
+    <WriteLinesToFile File="$(ManagementExamplesWorkspace)/analyzers.txt" Lines="@(Analyzer-&gt;'%(FullPath)')" Overwrite="true" />
+  </Target>
+  <Target Name="CaptureManagementDocumentationCompilerPolicy" AfterTargets="CoreCompile">
+    <WriteLinesToFile File="$(ManagementExamplesWorkspace)/csc-command-line.txt" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+    <ItemGroup>
+      <ManagementDocumentationPolicy Include="NETCoreSdkVersion=$(NETCoreSdkVersion)" />
+      <ManagementDocumentationPolicy Include="TargetFramework=$(TargetFramework)" />
+      <ManagementDocumentationPolicy Include="LangVersion=$(LangVersion)" />
+      <ManagementDocumentationPolicy Include="WarningLevel=$(WarningLevel)" />
+      <ManagementDocumentationPolicy Include="TreatWarningsAsErrors=$(TreatWarningsAsErrors)" />
+      <ManagementDocumentationPolicy Include="AnalysisLevel=$(AnalysisLevel)" />
+      <ManagementDocumentationPolicy Include="AnalysisMode=$(AnalysisMode)" />
+      <ManagementDocumentationPolicy Include="EnableNETAnalyzers=$(EnableNETAnalyzers)" />
+      <ManagementDocumentationPolicy Include="RunAnalyzersDuringBuild=$(RunAnalyzersDuringBuild)" />
+      <ManagementDocumentationPolicy Include="RunAnalyzers=$(RunAnalyzers)" />
+      <ManagementDocumentationPolicy Include="SkipAnalyzers=$(_SkipAnalyzers)" />
+      <ManagementDocumentationPolicy Include="SkipCompilerExecution=$(SkipCompilerExecution)" />
+      <ManagementDocumentationPolicy Include="GeneratedProgramFile=$(GeneratedProgramFile)" />
+      <ManagementDocumentationPolicy Include="NoWarn=$([System.String]::Copy('$(NoWarn)').Replace(';', ','))" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(ManagementExamplesWorkspace)/policy-final.txt" Lines="@(ManagementDocumentationPolicy)" Overwrite="true" />
+  </Target>
+</Project>

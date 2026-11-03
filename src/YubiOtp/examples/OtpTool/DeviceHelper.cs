@@ -49,8 +49,10 @@ public record DeviceSelection(
 /// </summary>
 /// <remarks>
 /// OTP is available over both SmartCard (CCID/NFC) and OTP HID (USB keyboard interface).
-/// When a single physical YubiKey is connected, it may appear on both transports;
-/// this selector deduplicates by serial number and prefers SmartCard for richer protocol support.
+/// Discovery groups proven interfaces into physical keys; this selector filters that result rather
+/// than deduplicating by serial. Session creation uses the SDK's SmartCard-first default.
+/// Management metadata lookup is best-effort and can select either HID route when SmartCard is absent.
+/// Current Core product-flag retention can produce unnamed form factors; display does not prove family eligibility.
 /// </remarks>
 public static class DeviceHelper
 {

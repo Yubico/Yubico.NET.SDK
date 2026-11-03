@@ -1,0 +1,11 @@
+
+[SkippableTheory]
+[WithYubiKey]
+public async Task CheckDeviceProperties(YubiKeyTestState state)
+{
+    await state.WithManagementAsync((mgmt, info) =>
+    {
+        Assert.True(info.SerialNumber > 0);
+        Assert.NotEqual(FormFactor.Unknown, info.FormFactor);
+    });
+}

@@ -1,0 +1,24 @@
+
+// Prerequisite: caller confirmed Bio MPE and authorized reset; session uses SmartCard.
+// Metadata below supplies the helper's firmware check, not a product-family check.
+var infoResult = await DeviceInfoQuery.GetDeviceInfoAsync(session, ct);
+if (!infoResult.Success || !infoResult.DeviceInfo.HasValue)
+{
+    Console.WriteLine("Failed to get device info");
+    return;
+}
+
+// Request reset; the helper returns failure results for operation exceptions.
+var resetResult = await DeviceReset.ResetDeviceAsync(
+    session,
+    infoResult.DeviceInfo.Value,
+    ct);
+
+if (resetResult.Success)
+{
+    Console.WriteLine("Device reset successfully");
+}
+else
+{
+    Console.WriteLine($"Reset failed: {resetResult.ErrorMessage}");
+}

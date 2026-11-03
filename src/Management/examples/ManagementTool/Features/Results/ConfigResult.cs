@@ -25,7 +25,8 @@ public sealed record ConfigResult
     public bool Success { get; init; }
 
     /// <summary>
-    /// Gets whether the device needs to be rebooted for changes to take effect.
+    /// Gets the reboot request flag supplied by the configuration wrapper on success.
+    /// This does not observe whether a reboot is pending, needed or completed.
     /// </summary>
     public bool RebootRequired { get; init; }
 
@@ -37,7 +38,7 @@ public sealed record ConfigResult
     /// <summary>
     /// Creates a successful configuration result.
     /// </summary>
-    /// <param name="rebootRequired">Whether the device requires a reboot.</param>
+    /// <param name="rebootRequired">The wrapper's requested reboot flag, not an observed device requirement.</param>
     public static ConfigResult Succeeded(bool rebootRequired = false) =>
         new() { Success = true, RebootRequired = rebootRequired };
 

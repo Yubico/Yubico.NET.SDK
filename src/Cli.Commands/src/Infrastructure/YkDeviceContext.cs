@@ -13,11 +13,10 @@ namespace Yubico.YubiKit.Cli.Commands.Infrastructure;
 /// <summary>
 ///     Enriched device context available to every <c>yk</c> command after device selection.
 ///     <para>
-///         Unlike the per-applet tools which only know about their own session type,
-///         the monolith always opens a <see cref="ManagementSession" /> first to populate
-///         <see cref="Info" /> with rich device metadata: part number, firmware, enabled
-///         capabilities. Commands can use this for feature gating and display without
-///         opening a second management session.
+///         After selection, a best-effort one-shot Management query populates <see cref="Info" />.
+///         Its temporary session and connection are closed before command execution; this context
+///         holds a metadata snapshot, not an open <see cref="ManagementSession" />.
+///         Selection may already have queried metadata.
 ///     </para>
 /// </summary>
 public sealed class YkDeviceContext
@@ -32,9 +31,10 @@ public sealed class YkDeviceContext
     public required DeviceSelection Selection { get; init; }
 
     /// <summary>
-    ///     Full device information from <see cref="ManagementSession" />, including part number,
-    ///     enabled/supported capabilities, FIPS status, and PIN complexity settings.
-    ///     <c>null</c> if the ManagementSession could not be opened (e.g., SmartCard unavailable).
+    ///     Device-information snapshot, or <c>null</c> when enrichment fails, for example because the
+    ///     selected default transport is busy/unavailable or the query fails. Management also supports HID;
+    ///     absent SmartCard alone does not imply failure. Current Core FIPS masks have a mapping issue and
+    ///     flagged form factors can miss named enum values; do not infer approval or family eligibility from them.
     /// </summary>
     public DeviceInfo? Info { get; init; }
 

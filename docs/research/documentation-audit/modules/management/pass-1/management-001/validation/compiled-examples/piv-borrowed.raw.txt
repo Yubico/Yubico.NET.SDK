@@ -1,0 +1,6 @@
+await using (var management = await ManagementSession.CreateAsync(connection))
+{
+    var info = await management.GetDeviceInfoAsync();
+    Console.WriteLine(info.FirmwareVersion);
+}
+await using var piv = await PivSession.CreateAsync(connection);

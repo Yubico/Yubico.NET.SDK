@@ -1,0 +1,16 @@
+public static class IYubiKeyExtensions
+{
+    // C# 14 syntax: extension(Type param) defines extensions for Type
+    extension(IYubiKey yubiKey)
+    {
+        // Methods here extend IYubiKey
+        public async Task<DeviceInfo> GetDeviceInfoAsync(
+            SessionCreationOptions? options = null,
+            CancellationToken cancellationToken = default)
+        {
+            // 'yubiKey' parameter is implicitly the extension target
+            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(options, cancellationToken);
+            return await mgmtSession.GetDeviceInfoAsync(cancellationToken);
+        }
+    }
+}

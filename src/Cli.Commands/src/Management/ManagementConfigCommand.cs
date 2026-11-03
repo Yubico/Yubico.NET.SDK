@@ -10,8 +10,8 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.Cli.Commands.Management;
 
 /// <summary>
-///     Displays the current device configuration: USB/NFC enabled capabilities,
-///     timeouts, device flags, lock status, and PIN complexity.
+///     Displays the context's device-information snapshot: USB/NFC enabled capabilities,
+///     auto-eject timeout, device flags, lock status, and PIN complexity. Does not refresh it in the command body.
 /// </summary>
 public sealed class ManagementConfigCommand : YkCommandBase<GlobalSettings>
 {

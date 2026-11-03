@@ -80,10 +80,15 @@ The prompt receives request and resolution notifications. `TouchPolicy.Always` i
 ### 6. Inconsistent Async Disposal ✅ FIXED
 **Issue**: `ManagementSession` uses `IDisposable` while `PivSession` uses `IAsyncDisposable`, leading to mixed `using` and `await using` patterns.
 
-**Resolution**: `ManagementSession` now implements `IAsyncDisposable`:
+**Resolution**: Both sessions support asynchronous disposal. A direct factory borrows the caller-owned
+SmartCard connection; dispose Management before creating PIV on that same connection:
 
 ```csharp
-await using var management = ManagementSession.Create(connection);
+await using (var management = await ManagementSession.CreateAsync(connection))
+{
+    var info = await management.GetDeviceInfoAsync();
+    Console.WriteLine(info.FirmwareVersion);
+}
 await using var piv = await PivSession.CreateAsync(connection);
 ```
 

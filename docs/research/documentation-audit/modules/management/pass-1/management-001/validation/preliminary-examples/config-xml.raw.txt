@@ -1,0 +1,4 @@
+
+    var info = await session.GetDeviceInfoAsync();
+    var config = new DeviceConfig { UsbEnabled = info.UsbEnabled & ~DeviceCapabilities.Otp };
+    await session.SetDeviceConfigAsync(config, new SetDeviceConfigOptions { Reboot = true });

@@ -19,7 +19,7 @@ try
         return await DispatchCliAsync(args);
     }
 
-    // Interactive mode (existing behavior)
+    // No arguments: interactive menus.
     return await RunInteractiveAsync();
 }
 finally

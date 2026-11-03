@@ -1,0 +1,1221 @@
+{
+  "origin_manifest": "docs/research/documentation-audit/modules/management/pass-1/management-001/validation/compiled-examples/manifest.json",
+  "origin_sha256": "48987abc3dc29454cc4bbbef4d22db2c50f67c6cd8561a9cadad29fa3beb4dea",
+  "groups": [
+    {
+      "name": "readme-02",
+      "source": "../../compiled-examples/readme-02.cs",
+      "source_sha256": "7701c1d983440adf9d997ee88d7045bd44987083a21fa902fba9010b13633f52",
+      "provenance": [
+        "src/Management/README.md fence #2 line 47; anchor=using System.Security.Cryptography"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: program; typed parameters: (none)",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/README.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "e5a631ff57ad934ef294e9805ea6039fdace475dbc63613c92d98534bc5c878d",
+        "language": "csharp",
+        "line": 47,
+        "ordinal": 2
+      },
+      "raw_source": "../../compiled-examples/readme-02.raw.txt",
+      "raw_sha256": "51a85255debf68e68ce1f9ad0910e1ee851a228d0a6d1ca7ba6972a32064f33a",
+      "extracted_text": "using System.Security.Cryptography;\nusing Yubico.YubiKit.Core;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Management;\n\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nawait using (var session = await device.CreateManagementSessionAsync())\n{\n    var info = await session.GetDeviceInfoAsync();\n    Console.WriteLine($\"Serial {info.SerialNumber}, firmware {info.FirmwareVersion}, {info.FormFactor}\");\n    Console.WriteLine($\"USB enabled: {info.UsbEnabled}\");\n}\n",
+      "extracted_sha256": "51a85255debf68e68ce1f9ad0910e1ee851a228d0a6d1ca7ba6972a32064f33a",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "readme-03",
+      "source": "../../compiled-examples/readme-03.cs",
+      "source_sha256": "b947afd98ec4e5f58e46817f25692b0487fe10e2f2abec74644548a9c7bc00a3",
+      "provenance": [
+        "src/Management/README.md fence #3 line 73; anchor=bool pivOverUsb"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey device",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/README.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "e5a631ff57ad934ef294e9805ea6039fdace475dbc63613c92d98534bc5c878d",
+        "language": "csharp",
+        "line": 73,
+        "ordinal": 3
+      },
+      "raw_source": "../../compiled-examples/readme-03.raw.txt",
+      "raw_sha256": "38865469b85e666885f38a7c6429c8d35bb3705f4f14b8dd7144bc6af4ee95fb",
+      "extracted_text": "var info = await device.GetDeviceInfoAsync();\nbool pivOverUsb = (info.UsbSupported & DeviceCapabilities.Piv) != 0;\nbool oathEnabledOverNfc = (info.NfcEnabled & DeviceCapabilities.Oath) != 0;\nConsole.WriteLine($\"Configuration locked: {info.IsLocked}\");\n",
+      "extracted_sha256": "38865469b85e666885f38a7c6429c8d35bb3705f4f14b8dd7144bc6af4ee95fb",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "readme-04",
+      "source": "../../compiled-examples/readme-04.cs",
+      "source_sha256": "7c1f3006adad4c0fdc1a61613d8e1ef912e7a809ea53d934a65aac89626ebba4",
+      "provenance": [
+        "src/Management/README.md fence #4 line 91; anchor=var requested"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey device",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/README.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "e5a631ff57ad934ef294e9805ea6039fdace475dbc63613c92d98534bc5c878d",
+        "language": "csharp",
+        "line": 91,
+        "ordinal": 4
+      },
+      "raw_source": "../../compiled-examples/readme-04.raw.txt",
+      "raw_sha256": "8b74fdd9fb2ffe4c31bacad298e335d27fe7740bf08e6619489574ad7f2abde3",
+      "extracted_text": "var info = await device.GetDeviceInfoAsync();\nvar requested = DeviceCapabilities.Piv | DeviceCapabilities.Oath;\nif ((info.UsbSupported & requested) != requested)\n{\n    throw new NotSupportedException(\"This key does not support both requested USB applications.\");\n}\nvar config = new DeviceConfig { UsbEnabled = requested };\n\nawait using (var session = await device.CreateManagementSessionAsync())\n{\n    await session.SetDeviceConfigAsync(config, new SetDeviceConfigOptions { Reboot = true });\n}\n\n// The session above is disposed. This pause is illustrative, not an enumeration guarantee.\nawait Task.Delay(TimeSpan.FromSeconds(3));\nvar rebooted = await YubiKeyManager.FindAllAsync(forceRescan: true);\n",
+      "extracted_sha256": "8b74fdd9fb2ffe4c31bacad298e335d27fe7740bf08e6619489574ad7f2abde3",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "readme-05",
+      "source": "../../compiled-examples/readme-05.cs",
+      "source_sha256": "d31da4bd15ca91d61706b9197ceb42f674f49b6d8d571ab41d70caf0ea85469f",
+      "provenance": [
+        "src/Management/README.md fence #5 line 140; anchor=byte[] lockCode"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey device",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/README.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "e5a631ff57ad934ef294e9805ea6039fdace475dbc63613c92d98534bc5c878d",
+        "language": "csharp",
+        "line": 140,
+        "ordinal": 5
+      },
+      "raw_source": "../../compiled-examples/readme-05.raw.txt",
+      "raw_sha256": "cb6272cb82491f542af222cc051f276176089eac5ea9072f893f03fe07fb9176",
+      "extracted_text": "await using var session = await device.CreateManagementSessionAsync();\nbyte[] lockCode = RandomNumberGenerator.GetBytes(16);\ntry\n{\n    // Persist lockCode in your secret store first. It cannot be recovered.\n    await session.SetDeviceConfigAsync(\n        new DeviceConfig(),\n        new SetDeviceConfigOptions { NewLockCode = lockCode });\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(lockCode);\n}\n",
+      "extracted_sha256": "cb6272cb82491f542af222cc051f276176089eac5ea9072f893f03fe07fb9176",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "readme-06",
+      "source": "../../compiled-examples/readme-06.cs",
+      "source_sha256": "2797f6c07c83cbf8fc04df3552270f7963c5c348f70cc109d00bb24ab3d0f6e9",
+      "provenance": [
+        "src/Management/README.md fence #6 line 162; anchor=CurrentLockCode = currentLockCode"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey device, byte[] currentLockCode",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/README.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "e5a631ff57ad934ef294e9805ea6039fdace475dbc63613c92d98534bc5c878d",
+        "language": "csharp",
+        "line": 162,
+        "ordinal": 6
+      },
+      "raw_source": "../../compiled-examples/readme-06.raw.txt",
+      "raw_sha256": "78597bedc330502610bf4c7566c6a512000d5e7f7d6a50681afdbc95366d2f78",
+      "extracted_text": "try\n{\n    await device.SetDeviceConfigAsync(\n        new DeviceConfig(),\n        new SetDeviceConfigOptions\n        {\n            CurrentLockCode = currentLockCode,\n            NewLockCode = new byte[16]\n        });\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(currentLockCode);\n}\n",
+      "extracted_sha256": "78597bedc330502610bf4c7566c6a512000d5e7f7d6a50681afdbc95366d2f78",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "readme-07",
+      "source": "../../compiled-examples/readme-07.cs",
+      "source_sha256": "877b3edfec7aad52a2ee83233fb6f7f6cc132f21c03175c77cf33d0c2599e269",
+      "provenance": [
+        "src/Management/README.md fence #7 line 190; anchor=await session.ResetDeviceAsync"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey device",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/README.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "e5a631ff57ad934ef294e9805ea6039fdace475dbc63613c92d98534bc5c878d",
+        "language": "csharp",
+        "line": 190,
+        "ordinal": 7
+      },
+      "raw_source": "../../compiled-examples/readme-07.raw.txt",
+      "raw_sha256": "0d9a305867365241a515b71d5fd1da38e3ae738a3388b3bfb3f4e5224086416f",
+      "extracted_text": "await using var session = await device.CreateManagementSessionAsync(\n    new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });\n\n// Destructive: the caller has confirmed Bio MPE applicability and application-data erasure.\nawait session.ResetDeviceAsync();\n",
+      "extracted_sha256": "0d9a305867365241a515b71d5fd1da38e3ae738a3388b3bfb3f4e5224086416f",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-04",
+      "source": "../../compiled-examples/guide-04.cs",
+      "source_sha256": "b4e10390145a1053a63daf92656b7bdf97a4adf11bef49240238a25fefe77280",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #4 line 108; anchor=int? serial"
+      ],
+      "prerequisites": [
+        "Profile T: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: YubiKeyTestState state",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.core.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.assert.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.abstractions.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Xunit.SkippableFact.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 108,
+        "ordinal": 4
+      },
+      "raw_source": "../../compiled-examples/guide-04.raw.txt",
+      "raw_sha256": "babd9dd39e314df66a5cbdff2feaf01c4af35a745dc65b1b30120e40f834d837",
+      "extracted_text": "    // Composable fragment inside a test receiving YubiKeyTestState state.\n    int? serial = state.SerialNumber;\n    FirmwareVersion fw = state.FirmwareVersion;\n    FormFactor form = state.FormFactor;\n    bool isUsb = state.IsUsbTransport;\n    bool isNfc = state.IsNfcTransport;\n    IYubiKey device = state.Device;\n    \n    // Capability checks\n    bool hasPiv = state.HasCapability(DeviceCapabilities.Piv);\n    \n    // Firmware version checks\n    bool isModern = state.FirmwareVersion.IsAtLeast(5, 3, 0);\n",
+      "extracted_sha256": "58fac1ce33a9197f2daaffa73eddca444beb2a990a3508f1ffe321db955002f5",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-05",
+      "source": "../../compiled-examples/guide-05.cs",
+      "source_sha256": "6bc236cebf02428853e0bd445830248b2a0b2285ab28da4a8124e46b576ee40e",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #5 line 130; anchor=public static class IYubiKeyExtensions"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: declaration; typed parameters: (none)",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 130,
+        "ordinal": 5
+      },
+      "raw_source": "../../compiled-examples/guide-05.raw.txt",
+      "raw_sha256": "e1af8c1e6b26ebb9107556db2a68c6d799d0157b02c58a9a72a153a826020b6b",
+      "extracted_text": "public static class IYubiKeyExtensions\n{\n    // C# 14 syntax: extension(Type param) defines extensions for Type\n    extension(IYubiKey yubiKey)\n    {\n        // Methods here extend IYubiKey\n        public async Task<DeviceInfo> GetDeviceInfoAsync(\n            SessionCreationOptions? options = null,\n            CancellationToken cancellationToken = default)\n        {\n            // 'yubiKey' parameter is implicitly the extension target\n            await using var mgmtSession = await yubiKey.CreateManagementSessionAsync(options, cancellationToken);\n            return await mgmtSession.GetDeviceInfoAsync(cancellationToken);\n        }\n    }\n}\n",
+      "extracted_sha256": "e1af8c1e6b26ebb9107556db2a68c6d799d0157b02c58a9a72a153a826020b6b",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-06",
+      "source": "../../compiled-examples/guide-06.cs",
+      "source_sha256": "db70727a2a56db0734cb4f484a6a46efcac276d05092b857f9b6fad2d37883d7",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #6 line 168; anchor=var deviceInfo"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey yubiKey, CancellationToken cancellationToken",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 168,
+        "ordinal": 6
+      },
+      "raw_source": "../../compiled-examples/guide-06.raw.txt",
+      "raw_sha256": "c0f1e86cb11c8cddff0666ba84cde5d2cc49ff330a182151088a1aae6b16d406",
+      "extracted_text": "var deviceInfo = await yubiKey.GetDeviceInfoAsync(cancellationToken: cancellationToken);\n",
+      "extracted_sha256": "c0f1e86cb11c8cddff0666ba84cde5d2cc49ff330a182151088a1aae6b16d406",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-07",
+      "source": "../../compiled-examples/guide-07.cs",
+      "source_sha256": "7aab50c44b54dc468cf5cf308887ebe915b32fcc19d0b2a3b5af9b536e9a5452",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #7 line 176; anchor=await using var connection"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey yubiKey, CancellationToken cancellationToken",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 176,
+        "ordinal": 7
+      },
+      "raw_source": "../../compiled-examples/guide-07.raw.txt",
+      "raw_sha256": "88e8f4e0f9f1b870b784706468ac93b1a5b4c028175e579dd7502be39d9a5c46",
+      "extracted_text": "await using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);\nawait using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);\nvar deviceInfo = await mgmt.GetDeviceInfoAsync(cancellationToken);\n",
+      "extracted_sha256": "88e8f4e0f9f1b870b784706468ac93b1a5b4c028175e579dd7502be39d9a5c46",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-08",
+      "source": "../../compiled-examples/guide-08.cs",
+      "source_sha256": "a96368813a6a6756958b0694028ecf9cbe4526f5a775c2be7e44406f6a7ee616",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #8 line 200; anchor=var config"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey yubiKey, CancellationToken cancellationToken",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 200,
+        "ordinal": 8
+      },
+      "raw_source": "../../compiled-examples/guide-08.raw.txt",
+      "raw_sha256": "a9b0f35f5346a7eeb1547f32358e83f92b0721848d5a8d81cdca1ad2f48bb559",
+      "extracted_text": "var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv };\n\n// Extension handles everything\nawait yubiKey.SetDeviceConfigAsync(\n    config,\n    new SetDeviceConfigOptions\n    {\n        Reboot = true,\n    },\n    cancellationToken: cancellationToken);\n\n",
+      "extracted_sha256": "a9b0f35f5346a7eeb1547f32358e83f92b0721848d5a8d81cdca1ad2f48bb559",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-09",
+      "source": "../../compiled-examples/guide-09.cs",
+      "source_sha256": "f211cd5740d74b43fac19cf6278955e42964a5f0741d7168bfef718fe1aa791b",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #9 line 216; anchor=var config"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey yubiKey, CancellationToken cancellationToken",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 216,
+        "ordinal": 9
+      },
+      "raw_source": "../../compiled-examples/guide-09.raw.txt",
+      "raw_sha256": "db895d6e87adc2e703d4cdb9421eba8f97b7d0b20f62dc3de22da78f5c40eda3",
+      "extracted_text": "var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv };\nawait using var connection = await yubiKey.ConnectAsync<ISmartCardConnection>(cancellationToken);\nawait using var mgmt = await ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken);\nawait mgmt.SetDeviceConfigAsync(\n    config,\n    new SetDeviceConfigOptions { Reboot = true },\n    cancellationToken);\n",
+      "extracted_sha256": "db895d6e87adc2e703d4cdb9421eba8f97b7d0b20f62dc3de22da78f5c40eda3",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-10",
+      "source": "../../compiled-examples/guide-10.cs",
+      "source_sha256": "b12f1f902afac58619100f8d5eebbe24ee0819ccf5c87a057040b0242322d63c",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #10 line 245; anchor=customProtocolConfig"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey yubiKey, CancellationToken cancellationToken, ProtocolConfiguration customProtocolConfig",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 245,
+        "ordinal": 10
+      },
+      "raw_source": "../../compiled-examples/guide-10.raw.txt",
+      "raw_sha256": "14898ce85301cfb8dd570bac4a089acf80635616d68a9e92beed20f073dc7592",
+      "extracted_text": "// Requires a SmartCard-capable key configured with the supplied SCP03 keys.\nusing var scpParameters = Scp03KeyParameters.Default;\nawait using var mgmtSession = await yubiKey.CreateManagementSessionAsync(\n    new SessionCreationOptions\n    {\n        ProtocolConfiguration = customProtocolConfig,\n        ScpKeyParameters = scpParameters\n    },\n    cancellationToken: cancellationToken);\n\n// Multiple operations in same session\nvar info1 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);\nvar info2 = await mgmtSession.GetDeviceInfoAsync(cancellationToken);\n// Session stays open for both calls\n\n// At scope end, the session is disposed before the caller-owned SCP parameters.\n",
+      "extracted_sha256": "14898ce85301cfb8dd570bac4a089acf80635616d68a9e92beed20f073dc7592",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-11",
+      "source": "../../compiled-examples/guide-11.cs",
+      "source_sha256": "05c44616b4e18829763b087fb66693ecc837a3958519085ca71be39ed1b10c1c",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #11 line 301; anchor=var remaining"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey yubiKey, CancellationToken cancellationToken",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 301,
+        "ordinal": 11
+      },
+      "raw_source": "../../compiled-examples/guide-11.raw.txt",
+      "raw_sha256": "5b26b14fb0578592350c0e5af6f977c18f82a1b1b33296d288a8eef2935bda09",
+      "extracted_text": "await using var mgmt = await yubiKey.CreateManagementSessionAsync(cancellationToken: cancellationToken);\nvar info = await mgmt.GetDeviceInfoAsync(cancellationToken);\nvar remaining = info.UsbEnabled & ~DeviceCapabilities.Otp;\nif ((remaining & info.UsbSupported) == DeviceCapabilities.None)\n{\n    throw new InvalidOperationException(\"Preserve a supported USB application.\");\n}\nawait mgmt.SetDeviceConfigAsync(\n    new DeviceConfig { UsbEnabled = remaining },\n    new SetDeviceConfigOptions { Reboot = true },\n    cancellationToken);\n// End this scope; rediscover the intended key and open a fresh connection after reboot.\n",
+      "extracted_sha256": "5b26b14fb0578592350c0e5af6f977c18f82a1b1b33296d288a8eef2935bda09",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-12",
+      "source": "../../compiled-examples/guide-12.cs",
+      "source_sha256": "ffc22f83bc34459f5f3797c027d3417ebc033f00d1154ae8dc3c1425b0dc6009",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #12 line 359; anchor=await state.WithManagementAsync"
+      ],
+      "prerequisites": [
+        "Profile T: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: YubiKeyTestState state",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.core.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.assert.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.abstractions.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Xunit.SkippableFact.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 359,
+        "ordinal": 12
+      },
+      "raw_source": "../../compiled-examples/guide-12.raw.txt",
+      "raw_sha256": "e2505e39834e415f85a3f35506df1ace56836b33a97876ee05c544dd73363d19",
+      "extracted_text": "// Session helper: automatic cleanup and cached device info.\nawait state.WithManagementAsync(async (mgmt, deviceInfo) =>\n{\n    var freshInfo = await mgmt.GetDeviceInfoAsync();\n    Assert.Equal(deviceInfo.SerialNumber, freshInfo.SerialNumber);\n});\n\n// A one-shot alternative, after the helper's session has been disposed:\nvar oneShotInfo = await state.Device.GetDeviceInfoAsync();\n",
+      "extracted_sha256": "e2505e39834e415f85a3f35506df1ace56836b33a97876ee05c544dd73363d19",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-20",
+      "source": "../../compiled-examples/guide-20.cs",
+      "source_sha256": "bbcda115aef7558a9d5c18d3845bf76b25f2e628291fc3bdbbcc9724b6253de3",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #20 line 578; anchor=await state.WithManagementAsync"
+      ],
+      "prerequisites": [
+        "Profile T: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: YubiKeyTestState state",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.core.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.assert.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.abstractions.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Xunit.SkippableFact.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 578,
+        "ordinal": 20
+      },
+      "raw_source": "../../compiled-examples/guide-20.raw.txt",
+      "raw_sha256": "4297f810e0dd4572317628be8ad80486ff13e2f615784b182778ecebb58631ac",
+      "extracted_text": "await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>\n{\n    // cachedDeviceInfo comes from shared device initialization, not helper entry.\n    // Use it instead of re-querying if data hasn't changed\n    \n    var serial = cachedDeviceInfo.SerialNumber; // \u2705 Fast\n    \n    // Only query again if testing consistency\n    var freshInfo = await mgmt.GetDeviceInfoAsync(); // \u26a0\ufe0f APDU overhead\n    Assert.Equal(cachedDeviceInfo.SerialNumber, freshInfo.SerialNumber);\n});\n",
+      "extracted_sha256": "e4b533c9f8d8ac09c75b07b8825b6d5af5efcad247c3bfed07508d94b630565f",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-21",
+      "source": "../../compiled-examples/guide-21.cs",
+      "source_sha256": "ae31f29767ea0b2c4a954292538414872e2ad09e522c8447160b4dd307744224",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #21 line 596; anchor=var info3"
+      ],
+      "prerequisites": [
+        "Profile T: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: YubiKeyTestState state",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.core.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.assert.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.abstractions.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Xunit.SkippableFact.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 596,
+        "ordinal": 21
+      },
+      "raw_source": "../../compiled-examples/guide-21.raw.txt",
+      "raw_sha256": "20078d1036f6b705f4ba440047343327d956963fd4874bfdb2a65229e9796c38",
+      "extracted_text": "await state.WithManagementAsync(async (mgmt, info) =>\n{\n    // Multiple operations in one session\n    var info1 = await mgmt.GetDeviceInfoAsync();\n    var info2 = await mgmt.GetDeviceInfoAsync();\n    var info3 = await mgmt.GetDeviceInfoAsync();\n    \n    // More efficient than creating 3 separate sessions\n});\n",
+      "extracted_sha256": "4f817a83e3cb8a5a2c05822075f50198e6a36b18e4fc94ced3f87ebe94375d6a",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-22",
+      "source": "../../compiled-examples/guide-22.cs",
+      "source_sha256": "8052b6ba170d9c67afa083f7e0dc880e97cb6fa691b75aca779308a3aca12c37",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #22 line 616; anchor=Assert.Equal(info1.SerialNumber"
+      ],
+      "prerequisites": [
+        "Profile T: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: ManagementSession mgmt",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.core.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.assert.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.abstractions.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Xunit.SkippableFact.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 616,
+        "ordinal": 22
+      },
+      "raw_source": "../../compiled-examples/guide-22.raw.txt",
+      "raw_sha256": "38ec324f13f8ea2a04869a541d3c2e79f9a555df610c74485fee9967d6abf2de",
+      "extracted_text": "var info1 = await mgmt.GetDeviceInfoAsync();\nvar info2 = await mgmt.GetDeviceInfoAsync();\nAssert.Equal(info1.SerialNumber, info2.SerialNumber); // Value comparison\n",
+      "extracted_sha256": "38ec324f13f8ea2a04869a541d3c2e79f9a555df610c74485fee9967d6abf2de",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-23",
+      "source": "../../compiled-examples/guide-23.cs",
+      "source_sha256": "2b146fbf0e809a85b521e0db2883f74b1a5fd2238b0f59d4461fb832898f932a",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #23 line 628; anchor=ChallengeResponseTimeout = 15"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IManagementSession session, CancellationToken cancellationToken",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 628,
+        "ordinal": 23
+      },
+      "raw_source": "../../compiled-examples/guide-23.raw.txt",
+      "raw_sha256": "6a3af56c59c046961eeabf121a0e499e58fd75af89a544277e7fd014d3afc79e",
+      "extracted_text": "var config = new DeviceConfig\n{\n    UsbEnabled = DeviceCapabilities.Piv | DeviceCapabilities.Oath,\n    AutoEjectTimeout = 30,\n    DeviceFlags = DeviceFlags.TouchEject,\n    ChallengeResponseTimeout = 15\n};\n\n// The session serializes the configuration and clears the encoded buffer after transmission.\nawait session.SetDeviceConfigAsync(\n    config,\n    new SetDeviceConfigOptions { Reboot = true },\n    cancellationToken);\n",
+      "extracted_sha256": "6a3af56c59c046961eeabf121a0e499e58fd75af89a544277e7fd014d3afc79e",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-24",
+      "source": "../../compiled-examples/guide-24.cs",
+      "source_sha256": "23df686aa9564945f5a815b545a9d10bb61b2de6782bd271d1e750e32383abf9",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #24 line 657; anchor=bool hasPivAndOath"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: (none)",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 657,
+        "ordinal": 24
+      },
+      "raw_source": "../../compiled-examples/guide-24.raw.txt",
+      "raw_sha256": "8ff128b3cdd678415457451749d19d6fd679b707dad0e48e369cd932056b648d",
+      "extracted_text": "// Flags enum - use bitwise operations\nvar capabilities = DeviceCapabilities.Piv | DeviceCapabilities.Oath;\n\n// Check if specific capability is set\nbool hasPiv = (capabilities & DeviceCapabilities.Piv) != 0;\n\n// Add capability\ncapabilities |= DeviceCapabilities.Fido2;\n\n// Remove capability  \ncapabilities &= ~DeviceCapabilities.Otp;\n\n// Check multiple\nbool hasPivAndOath = (capabilities & (DeviceCapabilities.Piv | DeviceCapabilities.Oath)) \n    == (DeviceCapabilities.Piv | DeviceCapabilities.Oath);\n",
+      "extracted_sha256": "c97711144811cd78638df204836c2cb4885927e5a0e75058f2ae677bc471ce10",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-25",
+      "source": "../../compiled-examples/guide-25.cs",
+      "source_sha256": "96f182724ccf0369fb55d188c3bbd77e371b4827a0dfc6306df58fbc43341258",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #25 line 679; anchor=VersionQualifier qualifier"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: ManagementSession mgmt",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 679,
+        "ordinal": 25
+      },
+      "raw_source": "../../compiled-examples/guide-25.raw.txt",
+      "raw_sha256": "cbf50c0138f0ec7d9d991a92ac7b3d64c803f2b8999c903861eefff6c2be33b5",
+      "extracted_text": "var info = await mgmt.GetDeviceInfoAsync();\n\n// Different version representations\nFirmwareVersion fw = info.FirmwareVersion;           // e.g., 5.7.2\nVersionQualifier qualifier = info.VersionQualifier;  // e.g., 5.7.2.beta.1\nstring versionName = info.VersionName;               // Display string\n\n// VersionQualifierType enum values:\n// - Final: Production release (5.7.2)\n// - Alpha: Alpha prerelease (5.7.2.alpha.1)\n// - Beta: Beta prerelease (5.7.2.beta.1)\n",
+      "extracted_sha256": "cbf50c0138f0ec7d9d991a92ac7b3d64c803f2b8999c903861eefff6c2be33b5",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-28",
+      "source": "../../compiled-examples/guide-28.cs",
+      "source_sha256": "37aeebd7f3e899982434aa2d73d621be2f1d055466e96357a2ea34908879ae48",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #28 line 825; anchor=builder.AddConsole"
+      ],
+      "prerequisites": [
+        "Profile L: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: ISmartCardConnection connection",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Abstractions.dll",
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.dll",
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Logging.Console.dll",
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/Microsoft.Extensions.Options.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 825,
+        "ordinal": 28
+      },
+      "raw_source": "../../compiled-examples/guide-28.raw.txt",
+      "raw_sha256": "1dadfedfca9cbc5799db89f014ea057937b9a43199502f97acba0ec78f865557",
+      "extracted_text": "using var loggerFactory = LoggerFactory.Create(builder =>\n{\n    builder.SetMinimumLevel(LogLevel.Trace);\n    builder.AddConsole();\n});\n\nYubiKitLogging.LoggerFactory = loggerFactory;\n\nawait using var mgmt = await ManagementSession.CreateAsync(\n    connection);\n",
+      "extracted_sha256": "1dadfedfca9cbc5799db89f014ea057937b9a43199502f97acba0ec78f865557",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "guide-29",
+      "source": "../../compiled-examples/guide-29.cs",
+      "source_sha256": "86710734d64e1054867ac717e32e25527a0b4454d1c9e09cc0b07ef09e36c63b",
+      "provenance": [
+        "src/Management/CLAUDE.md fence #29 line 840; anchor=devices.SingleOrDefault"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: CancellationToken cancellationToken",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "42eae875aabe688b4856ecb19252c9edb4454fd4551977549a9a48f3da6c3d74",
+        "language": "csharp",
+        "line": 840,
+        "ordinal": 29
+      },
+      "raw_source": "../../compiled-examples/guide-29.raw.txt",
+      "raw_sha256": "4e94db1779c299c4f57651a2b75b88394b88384e6015f39881bcfc61bc75b929",
+      "extracted_text": "// Find all connected YubiKeys\nvar devices = await YubiKeyManager.FindAllAsync(forceRescan: true, cancellationToken: cancellationToken);\nforeach (var device in devices)\n{\n    var info = await device.GetDeviceInfoAsync(cancellationToken: cancellationToken);\n    Console.WriteLine($\"Serial: {info.SerialNumber}\");\n    Console.WriteLine($\"Firmware: {info.FirmwareVersion}\");\n    Console.WriteLine($\"USB enabled: {info.UsbEnabled}\");\n}\n\n// Find specific device\nvar yubiKey = devices.SingleOrDefault(device => device.SerialNumber == 12345678);\n",
+      "extracted_sha256": "4e94db1779c299c4f57651a2b75b88394b88384e6015f39881bcfc61bc75b929",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "tool-lock-prompt",
+      "source": "../../compiled-examples/tool-lock-prompt.cs",
+      "source_sha256": "c266c23e83b7941d52c808e9d87b53f6b1c03024eaab11117148f5e6b447c083",
+      "provenance": [
+        "src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs XML code #1 line 28; anchor=LockCodePrompt.PromptForLockCode"
+      ],
+      "prerequisites": [
+        "Profile E: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IManagementSession session, CancellationToken ct",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "a7013821bad3d4ab28f28db5c2c42ca2e4fdc1e1c8f39f25e965fe3717e1e31b",
+        "language": "csharp",
+        "line": 28,
+        "ordinal": 1
+      },
+      "raw_source": "../../compiled-examples/tool-lock-prompt.raw.txt",
+      "raw_sha256": "2f7c3e3d773ed0b66092ffd69e97538140c0086f197dd911afb09f488b94abcf",
+      "extracted_text": "\nbyte[]? lockCode = null;\ntry\n{\n    lockCode = LockCodePrompt.PromptForLockCode(\"Enter lock code\");\n    if (lockCode is null) return; // User cancelled\n    \n    // session is an initialized IManagementSession; ct is the caller's CancellationToken.\n    await session.SetDeviceConfigAsync(\n        new DeviceConfig { ChallengeResponseTimeout = 15 },\n        new SetDeviceConfigOptions { CurrentLockCode = lockCode }, ct);\n}\nfinally\n{\n    if (lockCode is not null)\n    {\n        CryptographicOperations.ZeroMemory(lockCode);\n    }\n}\n",
+      "extracted_sha256": "30999499197def23e0c30c08a2f27eb32e5ccb89f27ee8bfb591b185c0a73361",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "tool-capabilities",
+      "source": "../../compiled-examples/tool-capabilities.cs",
+      "source_sha256": "f6dda1ac6dd7e271b6aed96f23aaf4cd6a7ea9ed579238f502eaafa3f33be858",
+      "provenance": [
+        "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs XML code #1 line 49; anchor=DeviceConfiguration.SetCapabilitiesAsync"
+      ],
+      "prerequisites": [
+        "Profile E: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IManagementSession session, CancellationToken ct",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "03004d4f3f006ca73a3b7ad9333cd3296f025c6d3c40af528b3e14ad99ce9a4c",
+        "language": "csharp",
+        "line": 49,
+        "ordinal": 1
+      },
+      "raw_source": "../../compiled-examples/tool-capabilities.raw.txt",
+      "raw_sha256": "6d2753b82f00d1ec104773ef2efca1cea3aad7822d3279241319136da19ae76e",
+      "extracted_text": "\nvar result = await DeviceConfiguration.SetCapabilitiesAsync(\n    session,\n    Transport.Usb,\n    DeviceCapabilities.Piv | DeviceCapabilities.Fido2,\n    lockCode: null,\n    reboot: true,\n    ct);\n",
+      "extracted_sha256": "6d2753b82f00d1ec104773ef2efca1cea3aad7822d3279241319136da19ae76e",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "tool-lock-change",
+      "source": "../../compiled-examples/tool-lock-change.cs",
+      "source_sha256": "9cbe82e67ccdb37f9de19909fd1fa0a313258e05ad811784ab3211cec1146b00",
+      "provenance": [
+        "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs XML code #2 line 214; anchor=GetCurrentCode()"
+      ],
+      "prerequisites": [
+        "Profile E: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IManagementSession session, CancellationToken ct, Func<byte[]?> GetCurrentCode, Func<byte[]> GetNewCode",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "03004d4f3f006ca73a3b7ad9333cd3296f025c6d3c40af528b3e14ad99ce9a4c",
+        "language": "csharp",
+        "line": 214,
+        "ordinal": 2
+      },
+      "raw_source": "../../compiled-examples/tool-lock-change.raw.txt",
+      "raw_sha256": "5764c2906a3203125e23d1d99b0ef7f364bb7ad85cdc52df43af132253a85a98",
+      "extracted_text": "\nbyte[]? current = null;\nbyte[]? newCode = null;\ntry\n{\n    current = GetCurrentCode();\n    newCode = GetNewCode();\n    await DeviceConfiguration.SetLockCodeAsync(session, current, newCode, ct);\n}\nfinally\n{\n    if (current is not null) CryptographicOperations.ZeroMemory(current);\n    if (newCode is not null) CryptographicOperations.ZeroMemory(newCode);\n}\n",
+      "extracted_sha256": "5764c2906a3203125e23d1d99b0ef7f364bb7ad85cdc52df43af132253a85a98",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "tool-query",
+      "source": "../../compiled-examples/tool-query.cs",
+      "source_sha256": "1f55e3d695bbd4e9a2a35961c17dabf7688a46b0bf8733e4828aa84f4a8ad3bb",
+      "provenance": [
+        "src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs XML code #1 line 40; anchor=DeviceInfoQuery.GetDeviceInfoAsync"
+      ],
+      "prerequisites": [
+        "Profile E: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey device, CancellationToken ct",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "5a63f2bd0faaf1cd6911019e29edc483943414919170f98e209cb8fb412fabf2",
+        "language": "csharp",
+        "line": 40,
+        "ordinal": 1
+      },
+      "raw_source": "../../compiled-examples/tool-query.raw.txt",
+      "raw_sha256": "0c554721f2ccc99c3c6cf4eba4b04164573b77a6e4745b57c9be045ae3ee07eb",
+      "extracted_text": "\nawait using var connection = await device.ConnectAsync<ISmartCardConnection>(ct);\nawait using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);\n\nvar result = await DeviceInfoQuery.GetDeviceInfoAsync(session, ct);\nif (result.Success && result.DeviceInfo.HasValue)\n{\n    var info = result.DeviceInfo.Value;\n    Console.WriteLine($\"Serial: {info.SerialNumber}\");\n    Console.WriteLine($\"Firmware: {info.FirmwareVersion}\");\n}\n",
+      "extracted_sha256": "0c554721f2ccc99c3c6cf4eba4b04164573b77a6e4745b57c9be045ae3ee07eb",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "tool-reset",
+      "source": "../../compiled-examples/tool-reset.cs",
+      "source_sha256": "133d51ed72e233536b4a1c39a8a99b23fb2019a29bb6b9fcbd58f1f2b7fa19ec",
+      "provenance": [
+        "src/Management/examples/ManagementTool/Features/DeviceReset.cs XML code #1 line 72; anchor=DeviceReset.ResetDeviceAsync"
+      ],
+      "prerequisites": [
+        "Profile E: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IManagementSession session, CancellationToken ct",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll"
+      ],
+      "extraction": {
+        "path": "src/Management/examples/ManagementTool/Features/DeviceReset.cs",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "356acb744426b2bbd4fca76c78d04b305e325c2185b061869ab36c205fce6321",
+        "language": "csharp",
+        "line": 72,
+        "ordinal": 1
+      },
+      "raw_source": "../../compiled-examples/tool-reset.raw.txt",
+      "raw_sha256": "b149a6d9141f6ffe6572fbe2842d426c597fcce07c2d59d9ff51a33309bb3eee",
+      "extracted_text": "\n// Prerequisite: caller confirmed Bio MPE and authorized reset; session uses SmartCard.\n// Metadata below supplies the helper's firmware check, not a product-family check.\nvar infoResult = await DeviceInfoQuery.GetDeviceInfoAsync(session, ct);\nif (!infoResult.Success || !infoResult.DeviceInfo.HasValue)\n{\n    Console.WriteLine(\"Failed to get device info\");\n    return;\n}\n\n// Request reset; the helper returns failure results for operation exceptions.\nvar resetResult = await DeviceReset.ResetDeviceAsync(\n    session, \n    infoResult.DeviceInfo.Value, \n    ct);\n\nif (resetResult.Success)\n{\n    Console.WriteLine(\"Device reset successfully\");\n}\nelse\n{\n    Console.WriteLine($\"Reset failed: {resetResult.ErrorMessage}\");\n}\n",
+      "extracted_sha256": "36de34d1b9a737a61fdde719b0401ca624ccbdd52afd89901b87bb4f2e842b75",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "session-reset-xml",
+      "source": "../../compiled-examples/session-reset-xml.cs",
+      "source_sha256": "5014f9732611f326e58f6c572398227dcd08a69c58fe330643c971d490703d37",
+      "provenance": [
+        "src/Management/src/IManagementSession.cs XML code #1 line 116; anchor=await session.ResetDeviceAsync"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey device, CancellationToken cancellationToken",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/src/IManagementSession.cs",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "b35858944a645276e2e023bcb971be503ef250e211c85553d4bf77588f11df9f",
+        "language": "csharp",
+        "line": 116,
+        "ordinal": 1
+      },
+      "raw_source": "../../compiled-examples/session-reset-xml.raw.txt",
+      "raw_sha256": "b1739dfd4fadfdf8d4cd9b52dbc08d6094c4ff387774e1cc3c074645cc32f1d8",
+      "extracted_text": "\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.Management;\n\nawait using var session = await device.CreateManagementSessionAsync(\n    new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard },\n    cancellationToken);\n\n// Destructive: confirm that FIDO/PIV data and the shared PIN may be removed.\nawait session.ResetDeviceAsync(cancellationToken);\n    ",
+      "extracted_sha256": "9d6cd1a23ba1221232e49921ecc283636deee8617759ee2da1d27665e8cae7da",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "config-xml",
+      "source": "../../compiled-examples/config-xml.cs",
+      "source_sha256": "c14734a8c83840e8fc78d91e45f27f0083d4bf6515b4ad524e98ccc10f4ecebc",
+      "provenance": [
+        "src/Management/src/DeviceConfig.cs XML code #1 line 34; anchor=info.UsbEnabled & ~DeviceCapabilities.Otp"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IManagementSession session",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "src/Management/src/DeviceConfig.cs",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "f0eb2e575ec32fe4ed175a546c137e04aaae954ce081d6f9fc2ab409d923a4b4",
+        "language": "csharp",
+        "line": 34,
+        "ordinal": 1
+      },
+      "raw_source": "../../compiled-examples/config-xml.raw.txt",
+      "raw_sha256": "38320f6cc18daf363549a02881ad33c25ad1c80ab6eb5a0e2803e425101a1495",
+      "extracted_text": "\n    var info = await session.GetDeviceInfoAsync();\n    var config = new DeviceConfig { UsbEnabled = info.UsbEnabled & ~DeviceCapabilities.Otp };\n    await session.SetDeviceConfigAsync(config, new SetDeviceConfigOptions { Reboot = true });\n    ",
+      "extracted_sha256": "1ec92e564fe873ff9c80a7751d6ee3b60fff7c0d49762169bde6c16b4fe25360",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "shared-readme-8",
+      "source": "../../compiled-examples/shared-readme-8.cs",
+      "source_sha256": "75fd9f1979ae74aa732442e595922ff50fd624c5514eeb10e10b3c403f176242",
+      "provenance": [
+        "src/Tests.Shared/README.md fence #8 line 246; anchor=public static async Task WithOathAsync"
+      ],
+      "prerequisites": [
+        "Profile T: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: extension-member; typed parameters: (none)",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [
+        "Oath"
+      ],
+      "references": [
+        "src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.core.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.assert.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.abstractions.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Xunit.SkippableFact.dll"
+      ],
+      "extraction": {
+        "path": "src/Tests.Shared/README.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "061a24d373ea7e26445de3242836a85c5dcdd96631fccbf88b27ec2d993e821e",
+        "language": "csharp",
+        "line": 246,
+        "ordinal": 8
+      },
+      "raw_source": "../../compiled-examples/shared-readme-8.raw.txt",
+      "raw_sha256": "03942a2831026a9d075fff01b3cc4adb65186ce303fedb0609fbd4cb4a745a7a",
+      "extracted_text": "public static async Task WithOathAsync(\n    this YubiKeyTestState state,\n    Func<OathSession, DeviceInfo, Task> action,\n    ScpKeyParameters? scpKeyParams = null,\n    CancellationToken cancellationToken = default)\n{\n    await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>(cancellationToken);\n\n    await using var session = await OathSession.CreateAsync(\n        connection,\n        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },\n        cancellationToken: cancellationToken);\n\n    await action(session, state.DeviceInfo);\n}\n",
+      "extracted_sha256": "03942a2831026a9d075fff01b3cc4adb65186ce303fedb0609fbd4cb4a745a7a",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "shared-guide-oath",
+      "source": "../../compiled-examples/shared-guide-oath.cs",
+      "source_sha256": "aebfbcb6555ab4ae7dd457a0097a05d29c68b97579c33218a6b1f8816cb7ce0b",
+      "provenance": [
+        "src/Tests.Shared/CLAUDE.md fence #6 line 200; anchor=public static async Task WithOathAsync"
+      ],
+      "prerequisites": [
+        "Profile T: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: extension-member; typed parameters: (none)",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [
+        "Oath"
+      ],
+      "references": [
+        "src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.core.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.assert.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/xunit.abstractions.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Xunit.SkippableFact.dll"
+      ],
+      "extraction": {
+        "path": "src/Tests.Shared/CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "5d9303462a236dcfbc4cf3a71afca4e3d84d3aeecc9ca81b703e284de39e3f35",
+        "language": "csharp",
+        "line": 200,
+        "ordinal": 6
+      },
+      "raw_source": "../../compiled-examples/shared-guide-oath.raw.txt",
+      "raw_sha256": "03942a2831026a9d075fff01b3cc4adb65186ce303fedb0609fbd4cb4a745a7a",
+      "extracted_text": "public static async Task WithOathAsync(\n    this YubiKeyTestState state,\n    Func<OathSession, DeviceInfo, Task> action,\n    ScpKeyParameters? scpKeyParams = null,\n    CancellationToken cancellationToken = default)\n{\n    await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>(cancellationToken);\n\n    await using var session = await OathSession.CreateAsync(\n        connection,\n        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },\n        cancellationToken: cancellationToken);\n\n    await action(session, state.DeviceInfo);\n}\n",
+      "extracted_sha256": "03942a2831026a9d075fff01b3cc4adb65186ce303fedb0609fbd4cb4a745a7a",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "root-scp-v3",
+      "source": "../../compiled-examples/root-scp-v3.cs",
+      "source_sha256": "f26c9d13abf2d6641bca380b5fa4bd68faf028671458ca30d5d98dd618a5b9a6",
+      "provenance": [
+        "CLAUDE.md fence #14 line 523; anchor=CreateSession_WithSCP03_AuthenticatesAndCommunicates"
+      ],
+      "prerequisites": [
+        "Profile V3: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: members; typed parameters: (none)",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [
+        "src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/xunit.v3.core.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/xunit.v3.assert.dll",
+        "src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/xunit.v3.common.dll"
+      ],
+      "extraction": {
+        "path": "CLAUDE.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "a04b35ebbbba9bb6b2ecb6ce5f95aa8c734b5635a0243e4b37642ba48374074b",
+        "language": "csharp",
+        "line": 523,
+        "ordinal": 14
+      },
+      "raw_source": "../../compiled-examples/root-scp-v3.raw.txt",
+      "raw_sha256": "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b",
+      "extracted_text": "// \u2705 GOOD - Tests actual SCP handshake with real hardware\n[Fact]\npublic async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()\n{\n    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);\n    using var scpKeyParams = Scp03KeyParameters.Default;\n    await using var session = await device.CreateManagementSessionAsync(\n        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },\n        cancellationToken: TestContext.Current.CancellationToken);\n\n    var deviceInfo = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);\n    Assert.Equal(device.SerialNumber, deviceInfo.SerialNumber);\n}\n",
+      "extracted_sha256": "4b99ea8a21a5d33d427bd6a0b07568d057177206af24804ab62c50e6d99e123b",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "physical-metadata",
+      "source": "../../compiled-examples/physical-metadata.cs",
+      "source_sha256": "c9f2ffd2cfbb1e7a8af6ac294f40f2cdc06446ba276fb64352b297c6e69dca66",
+      "provenance": [
+        "docs/architecture/physical-device-model.md fence #3 line 141; anchor=DeviceInfo info"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey device",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "docs/architecture/physical-device-model.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "1eb4efa5450d69829d0f7165f5d02b413e5e539e8275611b5b64983af5e43cd9",
+        "language": "csharp",
+        "line": 141,
+        "ordinal": 3
+      },
+      "raw_source": "../../compiled-examples/physical-metadata.raw.txt",
+      "raw_sha256": "ef57ee04943204b3e4bcf75026476ce8c5db23735a98a154db89c8307e80560f",
+      "extracted_text": "using Yubico.YubiKit.Management;\n\nDeviceInfo info = await device.GetDeviceInfoAsync();\nint? serial = info.SerialNumber;\nFirmwareVersion firmware = info.FirmwareVersion;\n",
+      "extracted_sha256": "ef57ee04943204b3e4bcf75026476ce8c5db23735a98a154db89c8307e80560f",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "physical-transports",
+      "source": "../../compiled-examples/physical-transports.cs",
+      "source_sha256": "40ba91bc4a66facb11d0e6f1af44a692f35a3913a16d11939772a0f89852fda3",
+      "provenance": [
+        "docs/architecture/physical-device-model.md fence #4 line 171; anchor=await using (var otpMgmt"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: IYubiKey device",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "docs/architecture/physical-device-model.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "1eb4efa5450d69829d0f7165f5d02b413e5e539e8275611b5b64983af5e43cd9",
+        "language": "csharp",
+        "line": 171,
+        "ordinal": 4
+      },
+      "raw_source": "../../compiled-examples/physical-transports.raw.txt",
+      "raw_sha256": "b340740239715edb5c44007df09adc31f5e309506570224bb651e8fa10dd71d3",
+      "extracted_text": "// Default order (no override): Management prefers SmartCard.\nawait using (var mgmt = await device.CreateManagementSessionAsync())\n{\n    var info = await mgmt.GetDeviceInfoAsync();\n    Console.WriteLine(info.FirmwareVersion);\n}\n\n// Explicit override: force HID OTP for this session.\nawait using (var otpMgmt = await device.CreateManagementSessionAsync(\n    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }))\n{\n    var info = await otpMgmt.GetDeviceInfoAsync();\n    Console.WriteLine(info.FirmwareVersion);\n}\n",
+      "extracted_sha256": "b340740239715edb5c44007df09adc31f5e309506570224bb651e8fa10dd71d3",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "migration-device-info",
+      "source": "../../compiled-examples/migration-device-info.cs",
+      "source_sha256": "e0089945d3e6761adfd9e678e3a2f5f5648d4c2ad69bec7028f43cb3e8fabea5",
+      "provenance": [
+        "docs/migration/v1-to-v2.md fence #8 line 264; anchor=var info = await session.GetDeviceInfoAsync"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: CancellationToken cancellationToken",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [],
+      "references": [],
+      "extraction": {
+        "path": "docs/migration/v1-to-v2.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "d624e3ddbc94d6e629b8585e13b6c6dcc1c2e3374d4243f4012eb15272a22c2a",
+        "language": "csharp",
+        "line": 264,
+        "ordinal": 8
+      },
+      "raw_source": "../../compiled-examples/migration-device-info.raw.txt",
+      "raw_sha256": "7b544ce3ca58d8f8a697dae8db593c6f2c61ad3a80b28b42178fa19f1a5c76bd",
+      "extracted_text": "using Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Management;\n\nvar device = await YubiKeyManager.FindFirstAsync(cancellationToken: cancellationToken);\nawait using var session = await device.CreateManagementSessionAsync(\n    cancellationToken: cancellationToken);\n\nvar info = await session.GetDeviceInfoAsync(cancellationToken);\nConsole.WriteLine(info.SerialNumber);\nConsole.WriteLine(info.VersionName);\n",
+      "extracted_sha256": "7b544ce3ca58d8f8a697dae8db593c6f2c61ad3a80b28b42178fa19f1a5c76bd",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    },
+    {
+      "name": "piv-borrowed",
+      "source": "../../compiled-examples/piv-borrowed.cs",
+      "source_sha256": "54b4f1c5ad69ea1c96672a037bee696ba2dafbac4218033d16c7e15504d03871",
+      "provenance": [
+        "src/Piv/examples/PivTool/SDK_PAIN_POINTS.md fence #6 line 86; anchor=await using (var management"
+      ],
+      "prerequisites": [
+        "Profile M: actual SDK/test/example assemblies; see snippet-preparation.md",
+        "Scaffold mode: method; typed parameters: ISmartCardConnection connection",
+        "Only namespace imports moved and trailing syntactic whitespace normalized; all original statements, callbacks, awaits, branches and disposals retained."
+      ],
+      "modules": [
+        "Piv"
+      ],
+      "references": [],
+      "extraction": {
+        "path": "src/Piv/examples/PivTool/SDK_PAIN_POINTS.md",
+        "source_root": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+        "document_sha256": "0eef2e65430d38b9b0e6d9c05aca7eb409d6033c25a4e38d4ced13f260c601ab",
+        "language": "csharp",
+        "line": 86,
+        "ordinal": 6
+      },
+      "raw_source": "../../compiled-examples/piv-borrowed.raw.txt",
+      "raw_sha256": "353051a9be625649d60e513274c5ba0dbf48730190309cce17c7946de0a4fa6e",
+      "extracted_text": "await using (var management = await ManagementSession.CreateAsync(connection))\n{\n    var info = await management.GetDeviceInfoAsync();\n    Console.WriteLine(info.FirmwareVersion);\n}\nawait using var piv = await PivSession.CreateAsync(connection);\n",
+      "extracted_sha256": "353051a9be625649d60e513274c5ba0dbf48730190309cce17c7946de0a4fa6e",
+      "transformations": [
+        "namespace-import relocation",
+        "trailing syntactic whitespace normalization"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+<Project>
+  <!-- Isolated validation utility, not an SDK project. Imported before SDK default paths. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <ValidationWorkspace Condition="'$(ValidationWorkspace)' == ''">/tmp/opencode/management-001-doccheck</ValidationWorkspace>
+    <BaseIntermediateOutputPath>$(ValidationWorkspace)/obj/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(ValidationWorkspace)/obj/</MSBuildProjectExtensionsPath>
+    <BaseOutputPath>$(ValidationWorkspace)/bin/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

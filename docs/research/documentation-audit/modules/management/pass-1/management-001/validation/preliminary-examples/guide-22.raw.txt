@@ -1,0 +1,3 @@
+var info1 = await mgmt.GetDeviceInfoAsync();
+var info2 = await mgmt.GetDeviceInfoAsync();
+Assert.Equal(info1.SerialNumber, info2.SerialNumber); // Value comparison

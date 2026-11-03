@@ -1,0 +1,34 @@
+{"command": ["dotnet", "--version"], "sdk": "10.0.403"}
+{"command": ["dotnet", "msbuild", "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj", "-p:Configuration=Release", "-getProperty:NoWarn,TreatWarningsAsErrors,TargetFramework,NETCoreSdkVersion,MSBuildProjectFullPath"], "note": "Evaluation only; no target requested"}
+{
+  "Properties": {
+    "NoWarn": ";CS1591;CA1848;CA1707;CA1716;CA1873;CA1001;CA1513;CA1852;CA1859;CA1826;CS8892",
+    "TreatWarningsAsErrors": "true",
+    "TargetFramework": "net10.0",
+    "NETCoreSdkVersion": "10.0.403",
+    "MSBuildProjectFullPath": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj"
+  }
+}
+{"file": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Roslyn/Microsoft.CSharp.Core.targets", "sha256": "33a63870665f8eb019f43da5effa450f6c8000089a879bc5373061e870bd3780"}
+74: <NoWarn>$(NoWarn);1701;1702</NoWarn>
+79: <NoWarn Condition="'$(BuildingInsideVisualStudio)' == 'true' AND '$(VisualStudioVersion)' != '' AND '$(VisualStudioVersion)' &gt; '10.0'">$(NoWarn);2008</NoWarn>
+84: <NoWarn>$(NoWarn);8002</NoWarn>
+113: DisabledWarnings="$(NoWarn)"
+169: TreatWarningsAsErrors="$(TreatWarningsAsErrors)"
+{"file": "/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NET.Sdk.CSharp.props", "sha256": "f87d2992560b148e39c472da8ffb352d979bdafd6d2e7ee05aed842ad3d3e53c"}
+15: <NoWarn Condition=" '$(NoWarn)' == '' ">1701;1702</NoWarn>
+{"file": "/home/rupicola/Code/y/Yubico.Yubikit.NET/Directory.Build.props", "sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"}
+23: <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+29: <NoWarn>$(NoWarn);CS1591;CA1848</NoWarn>
+123: <!-- Tests inherit TreatWarningsAsErrors=true; compiler and xUnit warnings must fail builds. -->
+125: <NoWarn>$(NoWarn);CA1707;CA1716;CA1873;CA1001;CA1513;CA1852;CA1859;CA1826;CS8892</NoWarn>
+{"file": "/home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/project.assets.json", "sha256": "a29cc1df0f8931ca42eb1aeeb94a351ecac5d546a83f4fb4935ad9dd06cdac3f"}
+{"framework": "net10.0", "package": "xunit/2.9.3", "dependencies": {"xunit.analyzers": "1.18.0", "xunit.assert": "2.9.3", "xunit.core": "[2.9.3]"}, "compile": []}
+{"framework": "net10.0", "package": "xunit.abstractions/2.0.3", "dependencies": {}, "compile": ["lib/netstandard2.0/xunit.abstractions.dll"]}
+{"framework": "net10.0", "package": "xunit.analyzers/1.18.0", "dependencies": {}, "compile": []}
+{"framework": "net10.0", "package": "xunit.assert/2.9.3", "dependencies": {}, "compile": ["lib/net6.0/xunit.assert.dll"]}
+{"framework": "net10.0", "package": "xunit.core/2.9.3", "dependencies": {"xunit.extensibility.core": "[2.9.3]", "xunit.extensibility.execution": "[2.9.3]"}, "compile": []}
+{"framework": "net10.0", "package": "xunit.extensibility.core/2.9.3", "dependencies": {"xunit.abstractions": "2.0.3"}, "compile": ["lib/netstandard1.1/xunit.core.dll"]}
+{"framework": "net10.0", "package": "xunit.extensibility.execution/2.9.3", "dependencies": {"xunit.extensibility.core": "[2.9.3]"}, "compile": ["lib/netstandard1.1/xunit.execution.dotnet.dll"]}
+{"framework": "net10.0", "package": "xunit.runner.visualstudio/3.1.4", "dependencies": {}, "compile": ["lib/net8.0/_._"]}
+{"framework": "net10.0", "package": "Xunit.SkippableFact/1.5.23", "dependencies": {"Validation": "2.5.51", "xunit.extensibility.execution": "2.4.0"}, "compile": ["lib/netstandard2.0/Xunit.SkippableFact.dll"]}

@@ -1,0 +1,7 @@
+[SkippableTheory]
+[WithYubiKey]
+public async Task FirstMatchingKey_ReturnsSameSerial(YubiKeyTestState state)
+{
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}

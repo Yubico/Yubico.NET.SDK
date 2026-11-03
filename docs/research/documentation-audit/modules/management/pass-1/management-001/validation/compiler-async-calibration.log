@@ -1,0 +1,7 @@
+["dotnet", "/tmp/opencode/management-001-doccheck/bin/Release/net10.0/Yubico.YubiKit.Management.DocCheck.dll", "compile", "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/diagnostic-inputs/AsyncWarningCalibration.cs", "/home/rupicola/Code/y/Yubico.Yubikit.NET"]
+REFERENCE: /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll; SHA256=FA18B989D6D48FD4BBB33BD112032FEEC751DAC1D37ECCE0218C49AD99FF968B
+REFERENCE: /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll; SHA256=5F443CDB92BA4E4E3EA8194442BCDA009BDA4C16A2588D7E9D1A03A41948958F
+POLICY: identity-comparer=Microsoft.CodeAnalysis.AssemblyIdentityComparer; specific-diagnostic-overrides=0; warnings/errors remain failures.
+DIAGNOSTIC PHASES: binding-warnings/errors=0; emit-warnings/errors=0; unique-warnings/errors=0.
+PASS: compile-only /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/management/pass-1/management-001/validation/checker-source/diagnostic-inputs/AsyncWarningCalibration.cs; SHA256=7D38D9FDCFE7A8F84A2D47F7E3F56C0118EC0C020B5DF8475485A3FEC5EFA6B0; warnings/errors=0; no assembly loaded or snippet executed.
+EXIT: 0

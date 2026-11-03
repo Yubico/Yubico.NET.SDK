@@ -1,0 +1,17 @@
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+public async Task GetDeviceInfo_UsesRequestedManagementConnection(YubiKeyTestState state)
+{
+    Assert.True(state.ConnectionType is
+        ConnectionType.SmartCard or ConnectionType.HidFido or ConnectionType.HidOtp);
+
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
+
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+    }, preferredConnection: state.ConnectionType);
+}

@@ -64,7 +64,7 @@ public class ManagementSessionTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             ManagementSession.CreateAsync(connection, cancellationToken: cancellationSource.Token));
 
-        // Borrowed: a failed CreateAsync must not dispose a connection it did not create.
+        // This pre-cancelled creation must not dispose the borrowed connection; it does not test mid-exchange cancellation.
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -82,6 +82,10 @@ public class ManagementSessionTests
         Assert.True(typeof(IAsyncDisposable).IsAssignableFrom(typeof(ManagementSession)));
     }
 
+    /// <summary>
+    ///     Checks a retained encoded-buffer view after a successful fake backend write. Backend failure,
+    ///     cancellation, and caller-owned lock-code cleanup are not covered by this test.
+    /// </summary>
     [Fact]
     public async Task SetDeviceConfigAsync_ZeroesEncodedConfigAfterBackendWrite()
     {
@@ -128,15 +132,11 @@ public class ManagementSessionTests
     }
 
     /// <summary>
-    ///     Disposal must be observable. Of the eight application sessions, Management was the only one that
-    ///     guarded its public surface with neither <c>ThrowIfDisposed</c> nor <c>EnsureInitialized</c>, so a
-    ///     call after disposal ran on into a torn-down protocol and surfaced whatever incidental failure that
-    ///     produced — or, worse, none at all.
+    ///     A read after disposal must report ObjectDisposedException rather than an incidental protocol error.
     /// </summary>
     /// <remarks>
-    ///     Firmware is pinned at 5.6.0 so the feature gates in <c>SetDeviceConfigAsync</c> and
-    ///     <c>ResetDeviceAsync</c> are satisfied; the only thing left that can reject the call is the disposal
-    ///     guard, which is what these pin.
+    ///     The helper skips initialization and pins firmware at 5.6.0. These disposal tests assert the
+    ///     exception type; they do not establish that an undisposed helper session could perform the operation.
     /// </remarks>
     [Fact]
     public async Task GetDeviceInfoAsync_AfterDispose_ThrowsObjectDisposed()

@@ -165,7 +165,7 @@ Valid device response data that the SDK does not yet model must not block users.
 - **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
 - **HID vocabulary** — `IYubiKey` is the physical key; `IHidInterface` is an operating-system-exposed report interface enumerated by `FindHidInterfaces`; `IHidConnection` is an opened report connection. Windows `IWindowsHidReportAccess` is the internal report-handle seam, not another physical device.
 - **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
-- **Application sessions** — `ApplicationSession` base; protocol-specific sessions like `ManagementSession<TConnection>` are generic over connection type.
+- **Application sessions** — `ApplicationSession` base; the non-generic `ManagementSession` accepts supported SmartCard, FIDO HID or OTP HID connections through its `IConnection` factory parameter.
 - **User interaction** — `ICredentialPrompt` acquires secret bytes where adopted; `IUserPresencePrompt`, supplied through `SessionCreationOptions.UserPresencePrompt`, is the cross-applet touch-notification contract. Sessions retain but do not own the prompt. See [User interaction](docs/usage/user-interaction.md).
 - **Device discovery entry point** — static `YubiKeyManager`; Core no longer requires a DI registration.
 
@@ -293,8 +293,8 @@ public readonly struct CommandApdu
 - Represents entities or services
 - Implements interfaces with mutable operations
 ```csharp
-// ✅ GOOD - Large data structure
-public class DeviceInfo
+// ✅ GOOD - Illustrative application model, not Core's readonly record struct DeviceInfo
+public class DeviceMetadataExample
 {
     public string SerialNumber { get; init; }
     public Version FirmwareVersion { get; init; }
@@ -386,7 +386,7 @@ public readonly struct Timestamp
 }
 
 // ❌ 24+ bytes - Use class instead
-public struct DeviceInfo  // BAD - too large, expensive to copy
+public struct DeviceMetadataExample  // Illustrative large value type, not the SDK DeviceInfo
 {
     public Guid Id { get; }              // 16 bytes
     public long Timestamp { get; }        // 8 bytes
@@ -395,7 +395,7 @@ public struct DeviceInfo  // BAD - too large, expensive to copy
 }
 
 // ✅ Convert to class
-public sealed class DeviceInfo
+public sealed class DeviceMetadataExample
 {
     public Guid Id { get; init; }
     public long Timestamp { get; init; }
@@ -525,14 +525,20 @@ public void Configure_FirmwareBelow400_UsesNeoMaxSize()
 [Fact]
 public async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()
 {
-    var device = await YubiKeyManager.FindFirstAsync();
-    using var session = await ManagementSession.CreateAsync(
-        device, scpKeyParams: scp03Keys);
+    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);
+    using var scpKeyParams = Scp03KeyParameters.Default;
+    await using var session = await device.CreateManagementSessionAsync(
+        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
+        cancellationToken: TestContext.Current.CancellationToken);
 
-    var deviceInfo = await session.GetDeviceInfoAsync();
-    Assert.NotEqual(0, deviceInfo.SerialNumber);
+    var deviceInfo = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);
+    Assert.Equal(device.SerialNumber, deviceInfo.SerialNumber);
 }
 ```
+
+This example requires an authorized dedicated SmartCard key configured with the supplied SCP03 defaults.
+The caller owns the parameters: the session is disposed before their enclosing using scope clears the
+owned static key arrays.
 
 #### When You Can't Write Meaningful Tests
 
@@ -546,18 +552,20 @@ If you can't test actual behavior due to:
 2. **Point to integration tests** that exercise the code path
 3. **Don't create fake tests** just to have coverage
 
-**Example:**
+**Example comment** (illustrative class shell, not the Core implementation):
 ```csharp
 /// <summary>
-///     ScpInitializer routes SCP initialization requests.
-///
-///     LIMITATION: Cannot unit test actual SCP initialization because
-///     ScpState.Scp03InitAsync is a static method. This is tested via
-///     integration tests in ManagementTests.CreateManagementSession_with_SCP03_DefaultKeys.
+///     SCP initialization has a fakeable APDU-processor seam, even though Scp03InitAsync is static.
 /// </summary>
+/// <remarks>
+///     CoreScpAuditReproTests.N2_Scp03InitializeUpdateShortResponse_ThrowsBadResponse supplies a fake
+///     INITIALIZE UPDATE response and checks rejection of malformed lengths. That unit test does not
+///     establish real-device interoperability. Device communication is exercised by integration tests
+///     such as ManagementSessionSimpleTests.CreateManagementSession_WithScp03DefaultKeys_CommunicatesSecurely.
+/// </remarks>
 public class ScpInitializer
 {
-    // Only test the routing logic, not the static method calls
+    // Test fakeable wire behavior directly; use hardware integration tests for device interoperability.
 }
 ```
 

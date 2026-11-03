@@ -6,7 +6,9 @@ namespace TestProject.Controllers;
 
 /// <summary>
 ///     Example controller demonstrating YubiKey integration with ASP.NET Core.
-///     Shows proper resource management, error handling, and cancellation support.
+///     Uses the one-shot device-info extension, which disposes its temporary session/connection.
+///     Handles no-device explicitly and forwards the request token; connection/query failures propagate
+///     to the host. The response's legacy session-name string is not a current SDK type.
 /// </summary>
 [ApiController]
 [Route("di/controller")]

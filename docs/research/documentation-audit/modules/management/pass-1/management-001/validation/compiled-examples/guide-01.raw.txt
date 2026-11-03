@@ -1,0 +1,13 @@
+[SkippableTheory]
+[WithYubiKey(
+    MinFirmware = "5.3.0",
+    Capability = DeviceCapabilities.Piv,
+    RequireUsb = true)]
+public async Task ReadMetadata_ForMatchingKey(YubiKeyTestState state)
+{
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+    });
+}

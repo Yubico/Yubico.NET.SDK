@@ -1,0 +1,13 @@
+var config = new DeviceConfig
+{
+    UsbEnabled = DeviceCapabilities.Piv | DeviceCapabilities.Oath,
+    AutoEjectTimeout = 30,
+    DeviceFlags = DeviceFlags.TouchEject,
+    ChallengeResponseTimeout = 15
+};
+
+// The session serializes the configuration and clears the encoded buffer after transmission.
+await session.SetDeviceConfigAsync(
+    config,
+    new SetDeviceConfigOptions { Reboot = true },
+    cancellationToken);

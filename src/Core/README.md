@@ -286,6 +286,23 @@ await using var raw = await device.CreateRawSmartCardSessionAsync(scp, firmwareV
 `Scp03KeyParameters.Default` carries the well-known factory keys for test devices. Manage the keys on the
 device with `Yubico.YubiKit.SecurityDomain`.
 
+### Decode Base32 text
+
+`Yubico.YubiKit.Core.Utilities.Base32` is a small shared decoder used by OATH and the CLI. `Decode(encoded)`
+returns an independent byte array; you own it and must clear it with `CryptographicOperations.ZeroMemory`
+when it contains secret material. `Decode(encoded, destination)` writes into your buffer and returns the
+number of decoded bytes. Success leaves the unused tail unchanged.
+
+The decoder accepts ASCII upper/lower case, literal spaces, and either absent or complete trailing padding.
+Empty input is valid. Other whitespace, invalid characters, impossible terminal symbol counts, and incomplete
+or embedded padding are rejected; unused bits in the final symbol are not required to be zero.
+
+The span overload requires disjoint source and destination byte ranges. Overlap throws `ArgumentException`
+before decoding and leaves both spans unchanged. An encoded byte length beyond `Int32.MaxValue` likewise
+fails admission with `OverflowException`. After admission, malformed text or insufficient output space clears
+the **entire destination**, including its unused tail. Borrowed source text is never modified. Clear successful
+secret output after use; the decoder cannot erase immutable encoded strings.
+
 ## Constraints
 
 - Choose one interface per connection with the typed `ConnectAsync<TConnection>()`. The parameterless

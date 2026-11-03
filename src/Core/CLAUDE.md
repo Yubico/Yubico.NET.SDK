@@ -194,6 +194,20 @@ Contributor rules:
 - Classify buffers by semantics. For sensitive nested data, clear source buffers plus returned and intermediate
   encodings in `finally`; public or nonsecret encodings do not require special clearing.
 
+### Shared Base32 decoder
+
+`Utilities.Base32` supplies the two public decode overloads used by OATH and CLI callers; keep it a small
+codec, not an encoding framework. It accepts ASCII case, literal spaces, empty input, absent or complete
+trailing padding, and permissive unused pad bits. Reject invalid symbols, impossible terminal symbol counts,
+other whitespace, and incomplete/embedded padding. OATH, not the generic codec, requires nonempty material.
+
+The array overload returns independent caller-owned bytes. The span overload borrows text and output;
+`MemoryMarshal.AsBytes(encoded).Overlaps(destination)` rejects any byte-range overlap before writing or
+entering failure cleanup. The BCL's checked byte-length conversion can throw `OverflowException` at the same
+admission boundary. Either admission failure leaves both spans unchanged. On disjoint admitted storage,
+decoding failure clears the entire destination; success preserves the unused tail. Callers clear successful
+secret output and retain responsibility for encoded source storage. Do not clear borrowed source text.
+
 ### Platform Interop Pattern
 
 Native methods are isolated in `Native/`:

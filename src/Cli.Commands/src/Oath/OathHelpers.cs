@@ -4,6 +4,7 @@
 using System.Buffers;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Cli.Shared.Output;
+using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Oath;
 
 namespace Yubico.YubiKit.Cli.Commands.Oath;
@@ -106,51 +107,15 @@ public static class OathHelpers
         return matches[0];
     }
 
+    /// <summary>Decodes nonempty OATH secret material. The caller owns and must clear returned bytes.</summary>
     public static byte[] Base32Decode(string input)
     {
-        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-
-        input = input.ToUpperInvariant().Replace(" ", "").TrimEnd('=');
-
-        if (input.Length == 0)
+        byte[] decoded = Base32.Decode(input.AsSpan());
+        if (decoded.Length == 0)
         {
-            return [];
+            throw new ArgumentException("OATH secret material must not be empty.", nameof(input));
         }
 
-        int byteCount = input.Length * 5 / 8;
-        byte[] result = new byte[byteCount];
-
-        int buffer = 0;
-        int bitsInBuffer = 0;
-        int index = 0;
-
-        try
-        {
-            foreach (char c in input)
-            {
-                int val = alphabet.IndexOf(c);
-                if (val < 0)
-                {
-                    throw new ArgumentException($"Invalid Base32 character: '{c}'.");
-                }
-
-                buffer = (buffer << 5) | val;
-                bitsInBuffer += 5;
-
-                if (bitsInBuffer >= 8)
-                {
-                    bitsInBuffer -= 8;
-                    result[index++] = (byte)(buffer >> bitsInBuffer);
-                    buffer &= (1 << bitsInBuffer) - 1;
-                }
-            }
-
-            return result;
-        }
-        catch
-        {
-            CryptographicOperations.ZeroMemory(result);
-            throw;
-        }
+        return decoded;
     }
 }

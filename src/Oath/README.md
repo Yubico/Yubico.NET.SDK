@@ -68,6 +68,17 @@ Later snippets assume these directives and a `device` obtained the same way. The
 Set `requireTouch: true` to require touch for individual calculations (firmware 4.2.4+). Bulk calculations return
 `null` for these entries, as described below.
 
+`ParseUri` and PUT require digits from 6 through 8, a positive TOTP period, and a HOTP counter from 0 through
+`Int32.MaxValue`. A missing HOTP counter defaults to zero. HOTP ignores the period; TOTP ignores the counter.
+In a URI, a query-string issuer takes precedence over the label issuer. Numeric query values must still parse
+as `Int32`, including fields the selected OATH type ignores.
+
+Base32 secrets accept ASCII upper/lower case and literal spaces, with either no padding or complete trailing
+padding. Invalid characters, impossible terminal lengths, and incomplete or embedded padding are rejected;
+unused bits in the last symbol remain permissive. OATH requires nonempty decoded material, even though the
+shared Core decoder accepts empty input. Short nonempty seeds retain the SDK's 14-byte storage padding;
+that padding is not an entropy requirement.
+
 ```csharp
 using var credentialData = CredentialData.ParseUri(
     "otpauth://totp/GitHub:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=GitHub", requireTouch: false);
@@ -99,6 +110,19 @@ finally
     CryptographicOperations.ZeroMemory(seed);
 }
 ```
+
+### Credential names and renaming
+
+PUT and rename require an identity that survives UTF-8 encoding and parsing through the SDK's host naming
+convention without changing its name, issuer, or TOTP period. Use a nonempty name and either a nonempty issuer
+or `null`. The complete ID must fit **64 UTF-8 bytes**, including the issuer, colon, and any nondefault TOTP
+period prefix such as `60/`; this is not a 64-character name limit.
+
+Colons and slashes are not banned: `issuer` with name `a:b` is representable, but name `a:b` without an issuer
+would be parsed differently and is rejected. Likewise, a default-period TOTP name `30/demo` without an issuer
+loses the `30/` part when parsed and is rejected. These checks apply to outgoing identities, not general
+validation of raw IDs read from the device. Failed preflight sends no PUT or RENAME and leaves the credential's
+seed unchanged. A successful `RenameCredentialAsync` returns a new credential; the supplied one is unchanged.
 
 ### Calculate codes
 

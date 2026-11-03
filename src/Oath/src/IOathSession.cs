@@ -79,6 +79,9 @@ public interface IOathSession : IApplicationSession
     ///     <para>
     ///         The raw ID is produced by <see cref="CredentialData.GetId" />. The SDK sends PUT without
     ///         checking whether that ID already exists on the device.
+    ///         Before sending PUT or processing the secret, the SDK validates request numbers, nonempty secret
+    ///         material, and an identity that round-trips through the host naming convention within 64 UTF-8 bytes,
+    ///         including issuer, separators, and any period prefix. Failed preflight sends no PUT.
     ///     </para>
     ///     <para>
     ///         Borrows <paramref name="credentialData" /> until the operation completes. PUT uses independent
@@ -86,6 +89,14 @@ public interface IOathSession : IApplicationSession
     ///         The same instance can be used for authentication retry; dispose it only after all uses complete.
     ///     </para>
     /// </remarks>
+    /// <exception cref="ArgumentException">
+    ///     The secret is empty, the name is empty, the issuer is empty rather than null, the complete ID exceeds
+    ///     64 UTF-8 bytes, or encoding/parsing the ID changes the supplied name, issuer, or TOTP period.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     Digits are outside 6 through 8, the TOTP period is not positive, the HOTP counter is negative,
+    ///     or the hash algorithm is unsupported. HOTP counters support 0 through <see cref="int.MaxValue" />.
+    /// </exception>
     Task PutCredentialAsync(CredentialData credentialData,
         CancellationToken cancellationToken = default);
 
@@ -101,9 +112,17 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Renames a credential on the device. Requires firmware 5.3.1+.
     /// </summary>
+    /// <returns>A new credential with the new identity; the supplied credential remains unchanged.</returns>
+    /// <remarks>
+    ///     Borrows <paramref name="credential" /> without modifying its ID. Before sending RENAME, the SDK
+    ///     requires a nonempty new name, a null or nonempty issuer, and a complete ID of at most 64 UTF-8 bytes,
+    ///     including issuer, separators, and any period prefix. Encoding and parsing that ID must preserve the
+    ///     supplied name, issuer, and existing TOTP period. Colons and slashes are allowed when they round-trip.
+    /// </remarks>
     /// <exception cref="ArgumentException">
     ///     <paramref name="credential" /> was read from a different device (its <see cref="Credential.DeviceId" />
-    ///     is not this session's <see cref="DeviceId" />). Nothing is sent.
+    ///     is not this session's <see cref="DeviceId" />), or the new identity fails the size or round-trip
+    ///     requirements. No RENAME is sent.
     /// </exception>
     Task<Credential> RenameCredentialAsync(Credential credential, string? newIssuer, string newName,
         CancellationToken cancellationToken = default);

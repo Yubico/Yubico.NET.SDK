@@ -128,11 +128,22 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
         OathType oathType,
         int period = OathConstants.DefaultPeriod)
     {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        if (issuer is "")
+        {
+            throw new ArgumentException("Credential name must be nonempty and issuer must be null or nonempty.");
+        }
+
+        if (oathType == OathType.Totp && period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "TOTP period must be positive.");
+        }
+
         var credId = new StringBuilder();
 
         if (oathType == OathType.Totp && period != OathConstants.DefaultPeriod)
         {
-            credId.Append(period);
+            credId.Append(period.ToString(CultureInfo.InvariantCulture));
             credId.Append('/');
         }
 
@@ -144,7 +155,20 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
 
         credId.Append(name);
 
-        return Encoding.UTF8.GetBytes(credId.ToString());
+        string text = credId.ToString();
+        if (Encoding.UTF8.GetByteCount(text) > 64)
+        {
+            throw new ArgumentException("Credential ID must fit 64 UTF-8 bytes.");
+        }
+
+        byte[] encoded = Encoding.UTF8.GetBytes(text);
+        var parsed = ParseCredentialId(encoded, oathType);
+        if (parsed != (issuer, name, oathType == OathType.Totp ? period : 0))
+        {
+            throw new ArgumentException("Credential identity cannot round-trip through the host naming convention.");
+        }
+
+        return encoded;
     }
 
     /// <summary>

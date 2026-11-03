@@ -45,6 +45,13 @@ uses ASCII digits followed by `/` and must fit a positive `Int32`; `-30/name` is
 period prefix. Using `[0-9]` rather than `\d` avoids recognizing Unicode decimal digits that integer
 parsing would reject.
 
+Outgoing PUT/rename IDs use the same parser as a round-trip check: UTF-8 encoding and parsing must preserve
+the name, issuer, and TOTP period. The complete ID has a 64-byte UTF-8 budget, including issuer, separators,
+and any nondefault period prefix. Reject empty names, empty non-null issuers, lossy Unicode, and ambiguous
+metadata before sending the command. Do not replace this with a blanket colon/slash ban: a name `a:b` under
+an ordinary issuer and a numeric-slash HOTP name remain representable. Even `30/demo` without an issuer is
+ambiguous for default-period TOTP. Incoming raw-ID parsing and its period-omission policy are unchanged.
+
 ### TLV Tag Constants
 
 | Tag | Value | Purpose |
@@ -63,6 +70,11 @@ parsing would reject.
 
 ### Key Processing
 
+PUT validates 6..8 digits, a positive TOTP period, a nonnegative Int32 HOTP counter, and nonempty secret material
+before processing the secret. HOTP ignores period; TOTP ignores counter. URI numeric fields still parse as
+Int32 before type-specific checks; a missing HOTP counter defaults to zero and the query issuer wins over the
+label issuer. Preserve seven-digit support and these existing URI policies.
+
 1. **HMAC key shortening** (RFC 2104): If key length > hash block size, hash the key
 2. **SDK storage padding**: Append zeroes to secrets shorter than 14 bytes. This threshold is not an HMAC minimum key length or entropy requirement.
 3. **TAG_KEY format**: `[type_byte][digits_byte][secret...]` where type_byte = `oath_type | hash_algorithm`
@@ -76,6 +88,13 @@ clears private storage and existing views, not independent copies. Do not dispos
 `GetProcessedSecret` always returns independent owned storage, including the 14..block-size range that needs neither
 padding nor hashing. PUT clears only that temporary and its payloads, never the credential seed, so Locked → VALIDATE
 → PUT can reuse the object. `ParseUri` and CLI decoders clear temporary decoded bytes on all relevant paths.
+
+All OATH Base32 entry points delegate to the small Core `Utilities.Base32` decoder. It accepts ASCII case,
+literal spaces, absent or complete trailing padding, and permissive unused pad bits; malformed terminal
+lengths/padding and other whitespace are rejected. The generic codec accepts empty text, while OATH boundaries
+reject empty material. Its span overload rejects byte-range overlap before decoding without changing either
+span; on disjoint storage, decoding failure clears the entire destination, while success leaves its unused
+tail unchanged. Keep caller-owned output cleanup and borrowed-source preservation distinct.
 
 ### Access Key Derivation
 

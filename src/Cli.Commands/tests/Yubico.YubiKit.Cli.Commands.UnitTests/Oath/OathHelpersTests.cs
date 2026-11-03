@@ -12,6 +12,39 @@ namespace Yubico.YubiKit.Cli.Commands.UnitTests.Oath;
 
 public sealed class OathHelpersTests
 {
+    [Theory]
+    [InlineData("A")]
+    [InlineData("AAA")]
+    [InlineData("AAAAAA")]
+    [InlineData("MY=")]
+    [InlineData("MY=======")]
+    [InlineData("========")]
+    [InlineData("M=Y=====")]
+    [InlineData("MZXW6YTB!")]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Base32Decode_MalformedTerminalForms_DoNotProduceKey(string encoded) =>
+        Assert.Throws<ArgumentException>(() => OathHelpers.Base32Decode(encoded));
+
+    [Theory]
+    [InlineData("MY======", "f")]
+    [InlineData("MZXQ====", "fo")]
+    [InlineData("MZXW6===", "foo")]
+    [InlineData("MZXW6YQ=", "foob")]
+    [InlineData("MZXW6YTB", "fooba")]
+    [InlineData("MZXW6YTBOI======", "foobar")]
+    [InlineData("m z x w 6 y t b o i", "foobar")]
+    [InlineData("MZ", "f")]
+    public void Base32Decode_RfcVectors_PreserveExactBytes(string encoded, string expected)
+    {
+        foreach (string input in new[] { encoded, encoded.TrimEnd('=') })
+        {
+            byte[] decoded = OathHelpers.Base32Decode(input);
+            try { Assert.True(System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(expected), decoded)); }
+            finally { System.Security.Cryptography.CryptographicOperations.ZeroMemory(decoded); }
+        }
+    }
+
     [Fact]
     public async Task UnlockIfNeededAsync_WithArgvPassword_WarnsOnStderrOnly()
     {

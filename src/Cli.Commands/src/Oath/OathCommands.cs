@@ -71,7 +71,7 @@ public sealed class OathAccountsAddSettings : GlobalSettings
     public string OathTypeStr { get; init; } = "TOTP";
 
     [CommandOption("--digits <DIGITS>")]
-    [Description("Number of digits: 6 or 8 (default: 6).")]
+    [Description("Number of digits: 6..8 (default: 6).")]
     [DefaultValue(6)]
     public int Digits { get; init; } = 6;
 

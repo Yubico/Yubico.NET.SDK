@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --project Oath.UnitTests",
+  "started": "2026-11-02T22:15:30.5079840+01:00",
+  "durationSeconds": 1.7,
+  "runDirectory": "artifacts/toolchain/runs/20261102-221530-507-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 1.6,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "passed",
+      "reason": "205 executed, 0 skipped",
+      "executed": 205,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-221530-507-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

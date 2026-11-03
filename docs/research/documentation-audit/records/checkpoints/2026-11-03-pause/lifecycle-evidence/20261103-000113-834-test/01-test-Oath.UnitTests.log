@@ -1,0 +1,20 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*ValidateAsync_AllResponsePaths*" --filter-method "*OathResetTests*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.ValidateAsync_AllResponsePaths_ClearOriginalWithoutClearingCallerKey(mode: "mismatch") (3ms)
+  Assert.Throws() Failure: Exception type was not an exact match
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+  Actual:   typeof(Yubico.YubiKit.Oath.OathException)
+  ---- Yubico.YubiKit.Oath.OathException : OATH password verification failed. The supplied password is incorrect.
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.ValidateAsync_AllResponsePaths_ClearOriginalWithoutClearingCallerKey(String mode) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:115
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.ValidateAsync_AllResponsePaths_ClearOriginalWithoutClearingCallerKey(String mode) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:126
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at Yubico.YubiKit.Oath.OathSession.ValidateAsync(ReadOnlyMemory`1 key, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:759
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 9
+  failed: 1
+  succeeded: 8
+  skipped: 0
+  duration: 440ms

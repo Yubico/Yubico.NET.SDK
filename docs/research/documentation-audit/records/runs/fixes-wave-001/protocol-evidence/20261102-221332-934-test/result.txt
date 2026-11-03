@@ -1,0 +1,13 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath.UnitTests --filter FullyQualifiedName~OathResponseTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       3.0s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  1 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_IncompleteEntry_ThrowsAndClearsOriginal(data: [113, 1, 97, 114, 2, ···]): Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+      output: artifacts/toolchain/runs/20261102-221332-934-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 36 executed, 1 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_IncompleteEntry_ThrowsAndClearsOriginal"
+Run log: artifacts/toolchain/runs/20261102-221332-934-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

@@ -1,0 +1,52 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolDeviceSelectionTests",
+  "started": "2026-11-02T22:37:19.0975540+01:00",
+  "durationSeconds": 4.4,
+  "runDirectory": "artifacts/toolchain/runs/20261102-223719-097-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 4.4,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "3 test(s) failed",
+      "executed": 4,
+      "failed": 3,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.MetadataCancellation_IsNotConvertedToMissingInfoOrFollowedByOathOpen",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   2"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen(multipleDevices: False)",
+          "message": "Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(System.InvalidOperationException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen(multipleDevices: True)",
+          "message": "Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(System.InvalidOperationException)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261102-223719-097-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.MetadataCancellation_IsNotConvertedToMissingInfoOrFollowedByOathOpen|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen\""
+  ]
+}

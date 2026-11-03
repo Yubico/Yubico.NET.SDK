@@ -1,0 +1,3 @@
+# These are deliberately retained historical records, including logs and source snapshots.
+!records/**
+!maintenance/**

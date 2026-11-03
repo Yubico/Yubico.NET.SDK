@@ -1,0 +1,26 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*ValidateAsync_DeviceRejection*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(status: 27012) (34ms)
+  Assert.DoesNotContain() Failure: Sub-string found
+                                       ↓ (pos 60)
+  String: ···"The supplied password is incorrect. Reference data"···
+  Found:  "incorrect"
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(Int32 status) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:28
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(Int32 status) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:28
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(status: 27264) (0ms)
+  Assert.DoesNotContain() Failure: Sub-string found
+                                       ↓ (pos 60)
+  String: ···"The supplied password is incorrect. Incorrect data"···
+  Found:  "incorrect"
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(Int32 status) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:28
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(Int32 status) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:28
+    --- End of stack trace from previous location ---
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 2
+  failed: 2
+  succeeded: 0
+  skipped: 0
+  duration: 208ms

@@ -1,0 +1,4 @@
+NOT EXECUTED: blocked by fresh device preflight showing other connected serials.
+Working directory: /tmp/opencode/yubikit-oath-scp-reference-probe
+Intended bounded command:
+timeout --signal=TERM --kill-after=15s 240s dotnet toolchain.cs -- test --integration --project Oath --filter 'FullyQualifiedName~OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly&Category!=RequiresUserPresence'

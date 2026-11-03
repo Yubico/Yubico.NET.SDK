@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~SessionCleanup_OwnedSession_PreservesFirstFailure&Category!=RequiresHardware&Category!=RequiresUserPresence\"",
+  "started": "2026-11-03T12:34:57.1482023+01:00",
+  "durationSeconds": 7.3,
+  "runDirectory": "artifacts/toolchain/runs/20261103-123457-148-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 7.2,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 7,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure(operationFails: False, disposalFails: True, cleanupFails: True)",
+          "message": "Assert.Same() Failure: Values are not the same instance | Expected: System.InvalidOperationException: Owned connection disposal failed. | at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.Dispose() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 233"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-123457-148-test/01-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure\""
+  ]
+}

@@ -1,0 +1,10 @@
+$ dotnet run --project src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+
+Test run summary: Passed! - /home/rupicola/Code/y/Yubico.Yubikit.NET/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.UnitTests.dll (net10.0|x64)
+  total: 371
+  failed: 0
+  succeeded: 371
+  skipped: 0
+  duration: 471ms

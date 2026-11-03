@@ -1,0 +1,12 @@
+{
+  "base_commit":"361567ebf6d1507afb474f960f94efe92ae9b802",
+  "python_reference":{"path":"/home/rupicola/Code/y/yubikey-manager","commit":"4ca60f706af930459138d8dc0f0f953480e1c7a4","branch":"main","clean":true,"shallow":true},
+  "devices":[
+    {"serial":125,"model":"YubiKey 5 NFC - Enhanced PIN","firmware":"5.8.0.alpha.2","interfaces":["OTP","FIDO","CCID"],"oath_enabled":true,"already_allowlisted":true},
+    {"serial":9681620,"model":"YubiKey 5 NFC","firmware":"5.4.3","interfaces":["OTP","FIDO","CCID"],"oath_enabled":true,"already_allowlisted":true}
+  ],
+  "inventory_commands":["ykman list","ykman --device 125 info","ykman --device 9681620 info"],
+  "hardware_owner":"protocol worker ses_e61eb4c25ffePGHfPbnG7wRzDE",
+  "parent_inventory_was_read_only":true,
+  "scope":"OATH test operations on the authorized keys; presence-dependent cases require coordination; no unrelated applet configuration changes"
+}

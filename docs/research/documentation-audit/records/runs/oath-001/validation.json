@@ -1,0 +1,34 @@
+{
+  "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+  "phase": "pre-edit investigation checkpoint",
+  "checks": [
+    {
+      "command": "git merge-base HEAD origin/yubikit",
+      "exit_code": 0,
+      "result": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9"
+    },
+    {
+      "command": "dotnet toolchain.cs -- docs-list-active",
+      "exit_code": 0,
+      "result": "73 active documentation files; canonical list saved as active-docs.txt"
+    },
+    {
+      "command": "python3 /home/rupicola/.opencode/plan/yubikit-docs-audit/runs/oath-001/inventory.py",
+      "exit_code": 0,
+      "result": "46 tracked OATH files; 38 Markdown/C# surfaces; 23 external reference files; 15 unverified pattern signals"
+    },
+    {
+      "command": "dotnet toolchain.cs -- docs-qa",
+      "exit_code": 0,
+      "result": "PASSED; 73 active docs; 10 package readmes; 0 warnings",
+      "log": "artifacts/toolchain/runs/20261102-185425-799-docs-qa/run.log"
+    }
+  ],
+  "not_performed": [
+    "SDK build or tests",
+    "Hardware verification",
+    "Full OATH semantic audit",
+    "Documentation editing, commits, pushes, or pull requests"
+  ],
+  "actual_model_usage_and_cost": "unknown; no per-task usage returned by dispatch tool"
+}

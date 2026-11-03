@@ -1,0 +1,45 @@
+# dotnet toolchain.cs -- complexity
+# started:   2026-11-03 00:02:18 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-inputs
+# git:       yubikit-oath-fix-inputs @ c90dced1 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: complexity  (log: artifacts/toolchain/runs/20261103-000218-824-complexity/run.log)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs HEAD
+  files        6
+  methods      12
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    16    17  new        Yubico.YubiKit.Core.Utilities.Base32.DecodeCore
+                         src/Core/src/Utilities/Base32.cs:51-95
+    20    15  worse      Yubico.YubiKit.Oath.CredentialData.ParseUri  (was 19/14)
+                         src/Oath/src/CredentialData.cs:122-237
+    13    11  worse      Yubico.YubiKit.Oath.Credential.FormatCredentialId  (was 4/3)
+                         src/Oath/src/Credential.cs:125-172
+    11     8  worse      Yubico.YubiKit.Cli.Commands.Oath.OathAccountsAddCommand.ExecuteCommandAsync  (was 10/7)
+                         src/Cli.Commands/src/Oath/OathCommands.cs:302-379
+
+4 of 12 methods exceed a threshold: 4 need action (new or worse), 0 are existing debt.
+For each method that needs action, simplify it or add to the commit message:
+  Complexity-Justification: Base32.DecodeCore: <why this complexity is warranted>
+  Complexity-Justification: CredentialData.ParseUri: <why this complexity is warranted>
+  Complexity-Justification: Credential.FormatCredentialId: <why this complexity is warranted>
+  Complexity-Justification: OathAccountsAddCommand.ExecuteCommandAsync: <why this complexity is warranted>
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- complexity)
+Targets:
+  ✓ complexity     1.4s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261103-000218-824-complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

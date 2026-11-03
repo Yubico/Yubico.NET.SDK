@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath.UnitTests --filter FullyQualifiedName~OathResponseTests",
+  "started": "2026-11-02T22:09:43.0943681+01:00",
+  "durationSeconds": 3.1,
+  "runDirectory": "artifacts/toolchain/runs/20261102-220943-094-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 3,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 32,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_UnknownExtensionBetweenEntries_DoesNotHideKnownResults",
+          "message": "Yubico.YubiKit.Core.BadResponseException : CALCULATE ALL entry requires a credential ID and response."
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261102-220943-094-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_UnknownExtensionBetweenEntries_DoesNotHideKnownResults\""
+  ]
+}

@@ -1,0 +1,71 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure&Category!=RequiresHardware&Category!=RequiresUserPresence"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.11]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.17]     Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure [FAIL]
+[xUnit.net 00:00:00.17]       Assert.Same() Failure: Values are not the same instance
+[xUnit.net 00:00:00.17]       Expected: System.InvalidOperationException: Body LIST failed.
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 305
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs:line 39
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs:line 33
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedResponseReceiver.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs:line 42
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Utilities.ExchangeGuard.RunAsync[T](Func`2 exchange, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:line 57
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.TransmitAndReceiveAsync(ApduCommand command, Boolean throwOnError, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs:line 124
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Oath.OathSession.SendAsync(ApduCommand command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:line 193
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Oath.OathSession.ListCredentialsAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:line 207
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Oath.IntegrationTests.TestExtensions.OathTestStateExtensions.WithOathSessionAsync(YubiKeyTestState state, Func`2 action, Boolean resetBeforeUse, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs:line 80
+[xUnit.net 00:00:00.17]       Actual:   System.InvalidOperationException: Body connection teardown failed.
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.Dispose() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 320
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.DisposeAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 324
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Sessions.ApplicationSession.ReleaseConnectionAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 555
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAsyncCore() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 517
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeSessionAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 471
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Devices.DisposalGate.TearDownAsync(TaskCompletionSource claim, Func`1 teardown) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Devices/DisposalGate.cs:line 62
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 454
+[xUnit.net 00:00:00.17]          at Yubico.YubiKit.Oath.IntegrationTests.TestExtensions.OathTestStateExtensions.WithOathSessionAsync(YubiKeyTestState state, Func`2 action, Boolean resetBeforeUse, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs:line 80
+[xUnit.net 00:00:00.17]          at Xunit.Record.ExceptionAsync(Func`1 testCode) in /_/src/xunit.core/Record.cs:line 76
+[xUnit.net 00:00:00.17]       Stack Trace:
+[xUnit.net 00:00:00.17]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs(270,0): at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure()
+[xUnit.net 00:00:00.17]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.18]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Failed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure [32 ms]
+  Error Message:
+   Assert.Same() Failure: Values are not the same instance
+Expected: System.InvalidOperationException: Body LIST failed.
+   at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 305
+   at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs:line 39
+   at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs:line 33
+   at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedResponseReceiver.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs:line 42
+   at Yubico.YubiKit.Core.Utilities.ExchangeGuard.RunAsync[T](Func`2 exchange, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:line 57
+   at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.TransmitAndReceiveAsync(ApduCommand command, Boolean throwOnError, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs:line 124
+   at Yubico.YubiKit.Oath.OathSession.SendAsync(ApduCommand command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:line 193
+   at Yubico.YubiKit.Oath.OathSession.ListCredentialsAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:line 207
+   at Yubico.YubiKit.Oath.IntegrationTests.TestExtensions.OathTestStateExtensions.WithOathSessionAsync(YubiKeyTestState state, Func`2 action, Boolean resetBeforeUse, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs:line 80
+Actual:   System.InvalidOperationException: Body connection teardown failed.
+   at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.Dispose() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 320
+   at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.DisposeAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 324
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.ReleaseConnectionAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 555
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAsyncCore() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 517
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeSessionAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 471
+   at Yubico.YubiKit.Core.Devices.DisposalGate.TearDownAsync(TaskCompletionSource claim, Func`1 teardown) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Devices/DisposalGate.cs:line 62
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 454
+   at Yubico.YubiKit.Oath.IntegrationTests.TestExtensions.OathTestStateExtensions.WithOathSessionAsync(YubiKeyTestState state, Func`2 action, Boolean resetBeforeUse, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs:line 80
+   at Xunit.Record.ExceptionAsync(Func`1 testCode) in /_/src/xunit.core/Record.cs:line 76
+  Stack Trace:
+     at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 270
+--- End of stack trace from previous location ---
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 0.5224 Seconds

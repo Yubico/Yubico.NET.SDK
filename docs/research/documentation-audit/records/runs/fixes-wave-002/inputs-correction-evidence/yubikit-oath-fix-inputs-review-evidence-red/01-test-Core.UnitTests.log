@@ -1,0 +1,46 @@
+$ dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release -- --filter-method "*Base32Tests*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: "MZXW6YTB", byteOffset: 8) (18ms)
+  Assert.Equal() Failure: Collections differ
+                            ↓ (pos 4)
+  Expected: [···, 'X', 'W', '6', 'Y', 'T', ···]
+  Actual:   [···, 'X', 'W', '\0', '\0', '\0', ···]
+                            ↑ (pos 4)
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(String encoded, Int32 byteOffset) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:88
+    at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+    at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: "MZXW6YTB", byteOffset: 0) (0ms)
+  Assert.Equal() Failure: Collections differ
+             ↓ (pos 0)
+  Expected: ['M', 'Z', 'X', 'W', '6', ···]
+  Actual:   ['潦', '扯', 'a', 'W', '6', ···]
+             ↑ (pos 0)
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(String encoded, Int32 byteOffset) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:88
+    at InvokeStub_Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: "MZXW6YTB!", byteOffset: 8) (0ms)
+  Assert.Equal() Failure: Collections differ
+                            ↓ (pos 4)
+  Expected: [···, 'X', 'W', '6', 'Y', 'T', ···]
+  Actual:   [···, 'X', 'W', '\0', '\0', '\0', ···]
+                            ↑ (pos 4)
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(String encoded, Int32 byteOffset) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:88
+    at InvokeStub_Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: "MZXW6YTB", byteOffset: 1) (0ms)
+  Assert.Equal() Failure: Collections differ
+             ↓ (pos 0)
+  Expected: ['M', 'Z', 'X', 'W', '6', ···]
+  Actual:   ['晍', '潯', '慢', 'W', '6', ···]
+             ↑ (pos 0)
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(String encoded, Int32 byteOffset) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:88
+    at InvokeStub_Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64)
+  total: 27
+  failed: 4
+  succeeded: 23
+  skipped: 0
+  duration: 280ms

@@ -1,0 +1,39 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter FullyQualifiedName~OathLifecycleTimeTests",
+  "started": "2026-11-03T00:03:22.2595557+01:00",
+  "durationSeconds": 2.2,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000322-259-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 2.1,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "failed",
+      "reason": "Listing tests failed (exit code 1):\n  Determining projects to restore...\n  All projects are up-to-date for restore.\n  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll\n  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll\n  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll\n  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll\n/tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs(31,38): error CS9035: Required member 'CredentialData.HashAlgorithm' must be set in the object initializer or attribute constructor. [/tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj]\n",
+      "executed": null,
+      "failed": null,
+      "skipped": null,
+      "failedTests": [],
+      "log": null
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --verbose"
+  ]
+}

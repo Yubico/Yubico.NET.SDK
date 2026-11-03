@@ -1,0 +1,14 @@
+$ dotnet build src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-protocol/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.88

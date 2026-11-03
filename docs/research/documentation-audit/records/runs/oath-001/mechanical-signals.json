@@ -1,0 +1,92 @@
+[
+  {
+    "path": "src/Oath/CLAUDE.md",
+    "line": 7,
+    "text": "The OATH module implements TOTP (RFC 6238) and HOTP (RFC 4226) one-time password management for YubiKey devices. It communicates via ISO 7816-4 APDUs through the SmartCard transport only.",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/CLAUDE.md",
+    "line": 62,
+    "text": "1. **HMAC key shortening** (RFC 2104): If key length > hash block size, hash the key",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/README.md",
+    "line": 3,
+    "text": "The OATH application stores TOTP (RFC 6238) and HOTP (RFC 4226) credentials on the YubiKey and calculates their codes",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/examples/OathTool/Commands/AccountsCommand.cs",
+    "line": 433,
+    "text": "/// Decodes a Base32-encoded string (RFC 4648), tolerating missing padding and whitespace.",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/Credential.cs",
+    "line": 137,
+    "text": "///     For TOTP the optional <c>period/</c> prefix is the RFC 6238 \u00a74.1 time step X in seconds, the",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/CredentialData.cs",
+    "line": 161,
+    "text": "// Key URI \"period\": the RFC 6238 \u00a74.1 time step in seconds; it is the divisor in \u00a74.2, so it",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/CredentialData.cs",
+    "line": 209,
+    "text": "///     Shortens an HMAC key per RFC 2104: if the key is longer than the hash",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/CredentialData.cs",
+    "line": 257,
+    "text": "///     Processes the secret for storage: shortens per RFC 2104, then pads to minimum size.",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/IOathSession.cs",
+    "line": 68,
+    "text": "///     client; RFC 6238 \u00a74.1 requires a positive time step) is omitted and logged at warning level.",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/IOathSession.cs",
+    "line": 108,
+    "text": "///     Calculates a formatted OTP code for a single credential (RFC 4226 for HOTP, RFC 6238 for TOTP).",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/IOathSession.cs",
+    "line": 147,
+    "text": "///     <b>Breaking change:</b> The <c>password</c> parameter changed from <c>string</c>",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/OathSession.cs",
+    "line": 444,
+    "text": "// RFC 6238 \u00a74.2: T = floor((now - T0) / X). Credentials read from the device are already",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/OathType.cs",
+    "line": 23,
+    "text": "///     HMAC-based One-Time Password (RFC 4226).",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/src/OathType.cs",
+    "line": 28,
+    "text": "///     Time-based One-Time Password (RFC 6238).",
+    "status": "unverified-signal"
+  },
+  {
+    "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/AuditV2/OathAuditReproTests.cs",
+    "line": 52,
+    "text": "/// <summary>HOTP has no time step; the Key URI \"period\" is ignored for it (RFC 4226 counter-based).</summary>",
+    "status": "unverified-signal"
+  }
+]

@@ -1,0 +1,92 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath.UnitTests --filter FullyQualifiedName~OathResponseTests",
+  "started": "2026-11-02T22:31:40.2305206+01:00",
+  "durationSeconds": 5.2,
+  "runDirectory": "artifacts/toolchain/runs/20261102-223140-230-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 5.1,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "13 test(s) failed",
+      "executed": 54,
+      "failed": 13,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_MisplacedKnownMetadata_RejectsAndClearsOriginal(value: [121, 3, 5, 7, 0])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_MisplacedKnownMetadata_RejectsAndClearsOriginal(value: [123, 1, 1])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [121, 3, 5, 7, 0])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [120, 1, 1])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [116, 1, 1])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [117, 0])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [115, 1, 1])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [123, 1, 1])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [117, 1, 6])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [122, 4, 0, 0, 0, ···])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(value: [6, 0, 0, 1])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(value: [])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(value: [9, 0, 0, 0, 1])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261102-223140-230-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_MisplacedKnownMetadata_RejectsAndClearsOriginal|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue\""
+  ]
+}

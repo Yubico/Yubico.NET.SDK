@@ -1,0 +1,41 @@
+Resumed authorization: ordinary read-only inventory/metadata discovery on other
+attached devices is permitted. Test-body SELECT and INITIALIZE UPDATE remain
+restricted to serial 125. No other hardware actor is active during this run.
+
+Reviewed before execution:
+- WithYubiKey supplies one row using the existing shared authorization/binding.
+- CustomFilter requires serial 125; an explicit serial assertion precedes opening
+  any test-body connection. No direct reader or alternate discovery path exists.
+- One sequential loop contains exactly FF and 00. Each iteration creates a fresh
+  caller-owned ISmartCardConnection and a borrowing RawSmartCardSession.
+- RawSmartCardSession.CreateAsync(connection, token) selects no application and
+  establishes no SCP. No SCP key parameters are supplied.
+- Test-body commands are visibly 00 A4 04 00 (OATH AID) followed by
+  80 50 <FF or 00> 00 (eight random challenge bytes). Le defaults to zero,
+  matching the existing C# SCP03 initialization command construction.
+- Exactly one INITIALIZE UPDATE call per iteration. Core ApduTransmitter does not
+  retry it, and an eight-byte challenge does not trigger command chaining. Core
+  ChainedResponseReceiver may fetch a continued response via GET RESPONSE if the
+  device supplies SW1=61; no INITIALIZE UPDATE replay is implemented there.
+- No EXTERNAL AUTHENTICATE, key loading, reset, password, authentication, touch or
+  Security Domain inspection/configuration path is present.
+- OATH SELECT must succeed before INITIALIZE UPDATE. Binding, opening, transport,
+  selection, and cleanup failures propagate: no catches make the test pass.
+- Returned response storage and caller-owned challenge are cleared in finally;
+  internal transport-to-ApduResponse copy limitation remains documented in the
+  original result.txt. Core/Tests.Shared are unchanged.
+- Session disposal precedes caller-owned connection disposal, each with a finite
+  independent 15-second wait; operation cancellation scope is 30 seconds. Core
+  admitted exchanges are not interruptible; outer command watchdog is 240 seconds.
+- Both statuses are collected before the acceptance assertion, so ordinary device
+  rejection does not prevent observing the other requested version. A rejection
+  causes a failed test rather than a false handshake success.
+- The run is narrowly filtered to the probe method in Oath.IntegrationTests. No
+  unrelated live smoke or broad integration suite is requested.
+
+Scope limits:
+Only INITIALIZE UPDATE reference acceptance is investigated in OATH applet context.
+No cryptogram verification or full handshake is attempted. No conclusion about
+terminal OATH reset, authentication, correctness of default keys, key inventory,
+or other applet contexts can follow from this probe. No change to Default KVN is
+made or justified merely by the Python/C# default difference.

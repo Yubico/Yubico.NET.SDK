@@ -1,0 +1,60 @@
+HISTORICAL INITIAL ATTEMPT ONLY. Superseded after scope clarification by
+result-resumed.txt, which records the completed two-observation probe.
+
+Outcome: BLOCKED BEFORE PROBE EXECUTION; hardware ownership released.
+Source base: 244df5b168f04ce79a4fbde2de34d6ada3b07517
+Branch: yubikit-oath-scp-reference-probe
+Worktree: /tmp/opencode/yubikit-oath-scp-reference-probe
+New uncommitted file: src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathScpReferenceProbeTests.cs
+Exact source copy: OathScpReferenceProbeTests.cs (in this evidence directory)
+
+Fresh ykman list at 2026-11-03T11:32:50Z reported:
+103: firmware 5.8.0.beta.0
+9681620: firmware 5.4.3
+125: firmware 5.8.0.alpha.2
+31683481: firmware 5.7.4
+See source-device-preflight.txt for exact command/output.
+
+This contradicts the supplied exclusive single-device snapshot. The shared harness
+discovers devices and retrieves metadata before applying CustomFilter. Running it
+with the additional devices connected would exceed the serial-125-only scope.
+No wrapper test/build was run. No SELECT or INITIALIZE UPDATE was issued by the
+probe. Actual INITIALIZE UPDATE observation rows: 0. No runner results or skips
+exist; this is a pre-execution safety block, not a passed or skipped test.
+
+No EXTERNAL AUTHENTICATE, RESET, PUT/DELETE key, password/authentication attempts,
+presence requests, or Security Domain configuration requests were made. The sole
+hardware-facing command was the read-only ykman list preflight. It enumerated the
+additional devices; no further commands were run after discovering that mismatch.
+
+Probe design for coordinator review (not compiled/executed):
+- Existing WithYubiKey allowlist/binding, SmartCard filter, serial-125 custom filter
+  and explicit serial assertion; no shared harness or Core changes.
+- One sequential test, FF then 00; each iteration opens a new caller-owned
+  connection, borrows it in RawSmartCardSession, SELECTs OATH and sends one
+  INITIALIZE UPDATE (CLA80 INS50 P1=KVN P2=00, random eight-byte challenge).
+- Logs only device identity, allowed request headers/status/data length, and
+  successful response metadata at offsets 10/11 when at least 12 bytes exist.
+- Clears caller challenge, SELECT response and INITIALIZE UPDATE RawData in finally.
+- Thirty-second operation cancellation scope; independent fifteen-second waits
+  for borrowed-session and connection disposal. SDK exchange cancellation is
+  admission-only, so the intended outer 240-second process watchdog is necessary
+  for native-I/O hangs. No hard in-flight cancellation guarantee is claimed.
+- Collects both statuses before asserting acceptance; rejection fails the test.
+  A passing test would establish only INITIALIZE UPDATE acceptance/response length,
+  not cryptogram verification, handshake establishment, reset safety, or key state.
+- Existing Core ApduTransmitter clones the transport response into ApduResponse;
+  the probe can clear its returned RawData, but not the internal transport copy.
+  Core remains frozen, so this existing lower-layer lifetime limitation is not fixed.
+
+Source inspection confirmed both implementations use P2=00:
+C#: src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs lines 50-55
+Python: /home/rupicola/Code/y/yubikey-manager/yubikit/core/smartcard/scp.py lines 255-258
+No default KVN change is proposed. No conclusion about FF versus 00 acceptance
+can be drawn without running the bounded probe on the authorized single-device rig.
+
+Coordinator action: restore the serial-125-only rig and review the uncompiled probe
+before choosing whether to execute the recorded command. Do not treat this report
+as authorization to run with the additional devices connected.
+
+No commits, pushes, delegation, production edits, or other-worktree edits occurred.

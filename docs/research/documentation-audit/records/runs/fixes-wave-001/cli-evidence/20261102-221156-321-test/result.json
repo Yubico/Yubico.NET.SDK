@@ -1,0 +1,48 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathTool",
+  "started": "2026-11-02T22:11:56.3210988+01:00",
+  "durationSeconds": 3.9,
+  "runDirectory": "artifacts/toolchain/runs/20261102-221156-321-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 3.8,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "2 test(s) failed",
+      "executed": 62,
+      "failed": 2,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: \"RESET --HELP --force\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnconfirmedPassword_IsCancellationNotAuthenticationFailure",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261102-221156-321-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnconfirmedPassword_IsCancellationNotAuthenticationFailure\""
+  ]
+}

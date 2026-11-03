@@ -1,0 +1,22 @@
+$ dotnet build src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Piv -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.OpenPgp -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Ctap2 -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll
+  Yubico.YubiKit.YubiHsm -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.YubiOtp -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Cli.Shared -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll
+  Yubico.YubiKit.Cli.Commands -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll
+  OathTool -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.dll
+  Yubico.YubiKit.Oath.UnitTests -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.58

@@ -1,0 +1,38 @@
+{
+  "captured_at": "2026-11-02T17:54:09.925925+00:00",
+  "repository": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "branch": "yubikit-docs-audit",
+  "commit": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+  "merge_base_origin_yubikit": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+  "status_porcelain": [
+    "?? docs/research/audit-v2-closeout-review.md",
+    "?? docs/research/audit-v2-execution.md",
+    "?? docs/research/audit-v2-jira-traceability.md",
+    "?? mise.toml"
+  ],
+  "investigator_model": "github-copilot/gpt-6.1-sol",
+  "investigator_session": "ses_e629b0717ffedUbklz42fAb2hw",
+  "counts": {
+    "active_docs_repository": 73,
+    "tracked_oath_files": 46,
+    "oath_documentation_surfaces": 38,
+    "oath_markdown": 4,
+    "oath_source_files": 34,
+    "cross_module_reference_files": 23,
+    "pattern_signals": 15
+  },
+  "commands": [
+    "git ls-files -z",
+    "git rev-parse HEAD",
+    "dotnet toolchain.cs -- docs-list-active",
+    "git branch --show-current",
+    "git merge-base HEAD origin/yubikit",
+    "git status --porcelain=v1"
+  ],
+  "limitations": [
+    "Pattern scans are lexical candidates, not semantic findings.",
+    "Cross-module references are lexical discovery, not exhaustive semantic coverage.",
+    "Build outputs and untracked research files are excluded.",
+    "No tests, hardware checks, docs-qa, or full module audit performed."
+  ]
+}

@@ -1,0 +1,14 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~ValidateAsync_DeviceRejection)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       4.0s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  2 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(status: 27012): Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 60) | String: ···"The supplied password is incorrect. Reference data"···
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(status: 27264): Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 60) | String: ···"The supplied password is incorrect. Incorrect data"···
+      output: artifacts/toolchain/runs/20261103-000131-914-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 2 executed, 2 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword"
+Run log: artifacts/toolchain/runs/20261103-000131-914-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

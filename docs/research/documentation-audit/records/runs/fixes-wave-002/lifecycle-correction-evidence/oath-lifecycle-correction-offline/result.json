@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath --filter \"Category!=RequiresHardware&Category!=RequiresUserPresence\"",
+  "started": "2026-11-03T12:35:51.6451312+01:00",
+  "durationSeconds": 8.1,
+  "runDirectory": "artifacts/toolchain/runs/20261103-123551-645-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 8,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "passed",
+      "reason": "344 executed, 0 skipped",
+      "executed": 344,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261103-123551-645-test/01-test-Oath.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "passed",
+      "reason": "9 executed, 0 skipped",
+      "executed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261103-123551-645-test/02-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

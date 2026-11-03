@@ -1,0 +1,78 @@
+FINAL RESUMED OUTCOME: two observations completed; both INITIALIZE UPDATE values
+rejected with SW=6A88. Hardware ownership released. No rerun or further probing.
+
+Source base: 244df5b168f04ce79a4fbde2de34d6ada3b07517
+Branch: yubikit-oath-scp-reference-probe
+Worktree: /tmp/opencode/yubikit-oath-scp-reference-probe
+Only uncommitted source addition:
+src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathScpReferenceProbeTests.cs
+Exact source copy: OathScpReferenceProbeTests.cs in this evidence directory.
+SHA256: a0058e8af82e9b7f0c00a7b559b5bfd4993b45a6cc391e780229f8a9d8ba9fb5
+
+Authorization was clarified after the historical result.txt: read-only discovery
+of other attached devices is allowed; test-body APDUs remain serial-125-only.
+Fresh inventory: source-device-preflight-resumed.txt (2026-11-03T11:46:21Z).
+ykman reports serial 125 firmware 5.8.0.alpha.2. The SDK harness/test output renders
+that firmware as 5.8.0; preserve that distinction rather than infer a release build.
+Other attached serials: 103, 9681620, 31683481. They received no probe test-body APDUs.
+
+Actual probe rows, exclusively serial 125, each with a fresh connection/raw session:
+1. SELECT OATH, header=00 A4 04 00, SW=9000, response data length=15.
+   INITIALIZE UPDATE, header=80 50 FF 00, requested KVN=FF,
+   SW=6A88, response data length=0. Selected KVN/protocol ID: unavailable.
+2. SELECT OATH, header=00 A4 04 00, SW=9000, response data length=15.
+   INITIALIZE UPDATE, header=80 50 00 00, requested KVN=00,
+   SW=6A88, response data length=0. Selected KVN/protocol ID: unavailable.
+
+Raw response/challenge/cryptogram bytes were not logged. Caller challenge and
+returned response storage were cleared in finally. Both borrowing sessions and
+caller-owned connections completed ordinary disposal before acceptance assertions.
+There was no disposal error, no explicit applet RESET, and no EXTERNAL AUTHENTICATE,
+PUT/DELETE key, password/authentication attempt, touch/presence request, or Security
+Domain configuration/inspection. No terminal-reset validation was attempted.
+
+Build:
+dotnet toolchain.cs -- build --project Oath.IntegrationTests
+Wrapper RESULT: PASSED; exit 0; Warnings: 0. One scoped project and dependencies built.
+Exact watchdog command: build-command.txt
+Full wrapper output: build-wrapper.log
+Preserved toolchain logs:
+build-toolchain/runs/20261103-124631-314-build/
+
+Probe:
+dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter 'FullyQualifiedName~OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly&Category!=RequiresUserPresence'
+Wrapper RESULT: FAILED; exit 1; Warnings: 0.
+Tests: 1 executed, 1 failed, 0 skipped. The single test collected both observations;
+its Assert.All acceptance assertion failed on both SW=6A88 responses. This failure
+is retained as diagnostic rejection evidence, not recast as a passing handshake.
+Exact watchdog command: probe-command.txt
+Full wrapper output: probe-wrapper.log
+Preserved toolchain logs:
+probe-toolchain/runs/20261103-124643-513-test/
+Exact runner observations: 01-test-Oath.IntegrationTests.log lines 33-39
+and repeated in standard output lines 51-57.
+
+Shared read-only discovery reported four devices and authorized 103, 125, 31683481.
+It skipped metadata initialization of 9681620 because UnrecoveredConnectionException
+said a previous native operation for interface hid:/dev/hidraw7:0001 was not proven
+released. This was the existing shared-harness behavior, not a bypass or probe catch.
+Serial 125 was not excluded and bound successfully through the existing harness.
+No alternate discovery, reader binding, guard override, or additional live test ran.
+
+Interpretation and limits:
+- Explicitly changing requested KVN from FF to 00 did not make INITIALIZE UPDATE
+  acceptable in the current OATH-selected context on this device.
+- The evidence does not justify changing Scp03KeyParameters.Default to 00.
+- 6A88 is rejection of the requested reference in this context, not proof of the
+  device-wide key inventory, whether factory FF was removed, or another applet's
+  behavior. No Security Domain expansion was performed.
+- No successful response metadata, cryptogram verification, handshake establishment,
+  OATH reset, or terminal-reset policy correctness is established.
+- Existing Core ApduTransmitter clones transport responses; the probe clears its
+  returned RawData, not the inaccessible internal transport response copy. Core is
+  frozen and unchanged. Details: probe-review.txt and historical result.txt.
+- Admission-only cancellation and wait-only cleanup timeout limitations remain as
+  documented in probe-review.txt. No timeout occurred during this run.
+
+No production/shared edits, other-worktree edits, commits, pushes or delegation.
+Probe left uncommitted for coordinator review/disposition. Hardware ownership released.

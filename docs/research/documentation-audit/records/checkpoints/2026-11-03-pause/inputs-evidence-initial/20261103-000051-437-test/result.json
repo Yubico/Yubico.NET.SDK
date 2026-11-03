@@ -1,0 +1,39 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Core --filter FullyQualifiedName~Base32Tests",
+  "started": "2026-11-03T00:00:51.4379004+01:00",
+  "durationSeconds": 4.2,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000051-437-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 4.1,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Core.UnitTests",
+      "outcome": "failed",
+      "reason": "Listing tests failed (exit code 1):\n/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs(28,30): error CS0103: The name 'Base32' does not exist in the current context [/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj]\n/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs(31,31): error CS0103: The name 'Base32' does not exist in the current context [/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj]\n/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs(59,64): error CS0103: The name 'Base32' does not exist in the current context [/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj]\n/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs(62,48): error CS0103: The name 'Base32' does not exist in the current context [/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj]\n/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs(69,48): error CS0103: The name 'Base32' does not exist in the current context [/tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj]\n\nThe build failed. Fix the build errors and run again.\n",
+      "executed": null,
+      "failed": null,
+      "skipped": null,
+      "failedTests": [],
+      "log": null
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Core.UnitTests --verbose"
+  ]
+}

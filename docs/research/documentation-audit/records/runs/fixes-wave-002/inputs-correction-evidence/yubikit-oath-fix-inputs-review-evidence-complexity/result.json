@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- complexity",
+  "started": "2026-11-03T12:36:42.2754515+01:00",
+  "durationSeconds": 0.5,
+  "runDirectory": "artifacts/toolchain/runs/20261103-123642-275-complexity",
+  "targets": [
+    {
+      "name": "complexity",
+      "status": "passed",
+      "durationSeconds": 0.4,
+      "error": null
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

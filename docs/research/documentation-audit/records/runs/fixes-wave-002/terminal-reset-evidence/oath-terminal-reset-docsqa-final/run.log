@@ -1,0 +1,24 @@
+# dotnet toolchain.cs -- docs-qa
+# started:   2026-11-03 12:55:39 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-lifecycle
+# git:       yubikit-oath-fix-lifecycle @ c90dced1 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: docs-qa  (log: artifacts/toolchain/runs/20261103-125539-851-docs-qa/run.log)
+
+▶ target: docs-qa
+
+=== Validating active documentation ===
+
+▶ RUN dotnet msbuild /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Yubico.YubiKit.Core.csproj -getProperty:YubiKitDocsBranch -getProperty:PackageProjectUrl -nologo (output captured)
+✓ Validated 73 active documentation file(s)
+✓ Validated 10 package readme(s)
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- docs-qa)
+Targets:
+  ✓ docs-qa     0.3s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261103-125539-851-docs-qa/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

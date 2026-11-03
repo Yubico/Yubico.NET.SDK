@@ -1,0 +1,53 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~ProtocolResponses_SmartCardOnlyDiscovery&Category!=Slow&Category!=RequiresUserPresence"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-protocol/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.11]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:02.64]       Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException : A previous native operation for interface 'hid:/dev/hidraw7:0001' was not proven released.
+[xUnit.net 00:00:02.64]       ---- System.InvalidOperationException : A bounded discovery read for interface 'hid:/dev/hidraw7:0001' was abandoned while native ownership remained active.
+[xUnit.net 00:00:02.64]       Stack Trace:
+[xUnit.net 00:00:02.64]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SmartCardOnlyDiscovery_ExercisesBothFirmwareGroups [FAIL]
+[xUnit.net 00:00:02.64]         /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/DeviceConnectionRegistry.cs(257,0): at Yubico.YubiKit.Core.Devices.DeviceConnectionRegistry.InterfaceOwnership.ThrowIfUnrecovered()
+[xUnit.net 00:00:02.64]         /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/DeviceConnectionRegistry.cs(168,0): at Yubico.YubiKit.Core.Devices.DeviceConnectionRegistry.InterfaceOwnership.AcquireConnectionAsync(String deviceId, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.64]         /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/DeviceConnectionRegistry.cs(107,0): at Yubico.YubiKit.Core.Devices.DeviceConnectionRegistry.AcquireConnectionAsync(IReadOnlyCollection`1 interfaceIds, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.64]         /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/YubiKeyDevice.cs(145,0): at Yubico.YubiKit.Core.Devices.YubiKeyDevice.ConnectAsync[TConnection](CancellationToken cancellationToken)
+[xUnit.net 00:00:02.64]         /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/YubiKeyConnectionExtensions.cs(294,0): at Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.OpenSessionConnectionAsync(IYubiKey yubiKey, ConnectionType transport, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.64]         /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/YubiKeyConnectionExtensions.cs(261,0): at Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateSessionOverTransportAsync[TResult](IYubiKey yubiKey, ConnectionType transport, Func`3 createAsync, ILogger logger, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.64]         /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/IYubiKeyExtensions.cs(116,0): at Yubico.YubiKit.Management.IYubiKeyExtensions.CreateManagementSessionAsync(IYubiKey yubiKey, SessionCreationOptions options, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.64]         /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/IYubiKeyExtensions.cs(50,0): at Yubico.YubiKit.Management.IYubiKeyExtensions.GetDeviceInfoAsync(IYubiKey yubiKey, SessionCreationOptions options, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.64]         /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs(31,0): at Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SmartCardOnlyDiscovery_ExercisesBothFirmwareGroups()
+[xUnit.net 00:00:02.64]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:02.64]         ----- Inner Stack Trace -----
+[xUnit.net 00:00:02.64]         
+[xUnit.net 00:00:02.65]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Failed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SmartCardOnlyDiscovery_ExercisesBothFirmwareGroups [2 s]
+  Error Message:
+   Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException : A previous native operation for interface 'hid:/dev/hidraw7:0001' was not proven released.
+---- System.InvalidOperationException : A bounded discovery read for interface 'hid:/dev/hidraw7:0001' was abandoned while native ownership remained active.
+  Stack Trace:
+     at Yubico.YubiKit.Core.Devices.DeviceConnectionRegistry.InterfaceOwnership.ThrowIfUnrecovered() in /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/DeviceConnectionRegistry.cs:line 257
+   at Yubico.YubiKit.Core.Devices.DeviceConnectionRegistry.InterfaceOwnership.AcquireConnectionAsync(String deviceId, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/DeviceConnectionRegistry.cs:line 168
+   at Yubico.YubiKit.Core.Devices.DeviceConnectionRegistry.AcquireConnectionAsync(IReadOnlyCollection`1 interfaceIds, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/DeviceConnectionRegistry.cs:line 107
+   at Yubico.YubiKit.Core.Devices.YubiKeyDevice.ConnectAsync[TConnection](CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/YubiKeyDevice.cs:line 145
+   at Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.OpenSessionConnectionAsync(IYubiKey yubiKey, ConnectionType transport, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/YubiKeyConnectionExtensions.cs:line 294
+   at Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateSessionOverTransportAsync[TResult](IYubiKey yubiKey, ConnectionType transport, Func`3 createAsync, ILogger logger, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Devices/YubiKeyConnectionExtensions.cs:line 261
+   at Yubico.YubiKit.Management.IYubiKeyExtensions.CreateManagementSessionAsync(IYubiKey yubiKey, SessionCreationOptions options, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/IYubiKeyExtensions.cs:line 116
+   at Yubico.YubiKit.Management.IYubiKeyExtensions.GetDeviceInfoAsync(IYubiKey yubiKey, SessionCreationOptions options, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/IYubiKeyExtensions.cs:line 50
+   at Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SmartCardOnlyDiscovery_ExercisesBothFirmwareGroups() in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs:line 31
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 2.9557 Seconds

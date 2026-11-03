@@ -1,0 +1,34 @@
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261103-125106-148-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit tests ===
+
+
+=== Testing: Oath.UnitTests ===
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --list-tests --filter-method *OathScpResetTests* --filter-method *ResetFailure_DisposalReplayDoesNotReplaceCliOutcome* (output captured)
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathScpResetTests*" --filter-method "*ResetFailure_DisposalReplayDoesNotReplaceCliOutcome*"
+  output: artifacts/toolchain/runs/20261103-125106-148-test/01-test-Oath.UnitTests.log
+✗ FAIL (1 test(s) failed)
+✗ test: 1 test project(s) failed
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~OathScpResetTests|FullyQualifiedName~ResetFailure_DisposalReplayDoesNotReplaceCliOutcome")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       4.0s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  1 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathScpResetTests.ResetAsync_Scp03_DestroysActualDerivedStateWithoutSelectOrRehandshake: Assert.Equal() Failure: Collections differ | ↓ (pos 0) | Expected: [132, 4, 222, 173]
+      output: artifacts/toolchain/runs/20261103-125106-148-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 7 executed, 1 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathScpResetTests.ResetAsync_Scp03_DestroysActualDerivedStateWithoutSelectOrRehandshake"
+Run log: artifacts/toolchain/runs/20261103-125106-148-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

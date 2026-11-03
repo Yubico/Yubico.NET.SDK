@@ -1,0 +1,29 @@
+{
+  "workingDirectory": "/home/rupicola/Code/y/Yubico.Yubikit.NET",
+  "head": "eba72a816ca57fedc8463d1a5664751c9f999232",
+  "combinedUncommittedWorkingTree": true,
+  "suiteRun": "20261103-131242-460-test",
+  "suiteCounts": {
+    "executed": 32,
+    "failed": 0,
+    "skipped": 7,
+    "warnings": 0,
+    "hardwarePassed": 19,
+    "offlinePassed": 13
+  },
+  "finalCleanupRun": "20261103-131318-719-test",
+  "finalCleanupCounts": {
+    "executed": 1,
+    "failed": 0,
+    "skipped": 1,
+    "warnings": 0
+  },
+  "device": "Only serial 125; YubiKey 5 NFC - Enhanced PIN, firmware 5.8.0.alpha.2; SDK/OATH 5.8.0.",
+  "coverage": "Combined input-validation/runtime plus terminal-reset implementation and migrated helper; normal OATH lifecycle, full HMAC vectors, timestamps, terminal reset and fresh reopen passed.",
+  "skips": "Three absent pre-5.6.3 rows, three absent serial-103 rows, one INITIALIZE UPDATE 6A88 before RESET (cause unresolved).",
+  "excluded": "One RequiresUserPresence test, excluded rather than counted as skipped. No Slow traits.",
+  "scpLimit": "No live successful SCP reset/reopen verification; no variants or Security Domain changes.",
+  "postflight": "OATH password disabled; account count 0; fresh separate ykman processes succeeded, releasing hardware.",
+  "capturedWipManifestUnchanged": true,
+  "agentSourceEdits": false
+}

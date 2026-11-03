@@ -1,0 +1,52 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathToolDeviceSelectionTests*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.MetadataCancellation_IsNotConvertedToMissingInfoOrFollowedByOathOpen (53ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   2
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.MetadataCancellation_IsNotConvertedToMissingInfoOrFollowedByOathOpen() in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDeviceSelectionTests.cs:54
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen(multipleDevices: False) (21ms)
+  Assert.ThrowsAny() Failure: Exception type was not compatible
+  Expected: typeof(System.OperationCanceledException)
+  Actual:   typeof(System.InvalidOperationException)
+  ---- System.InvalidOperationException : Prompt dropped its cancellation token.
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen(Boolean multipleDevices) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDeviceSelectionTests.cs:34
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingInput.ReadKeyAsync(Boolean intercept, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDeviceSelectionTests.cs:111
+    at Spectre.Console.AnsiConsoleExtensions.ReadLine(IAnsiConsole console, Style style, Boolean secret, Nullable`1 mask, IEnumerable`1 items, CancellationToken cancellationToken) in /_/src/Spectre.Console/Extensions/AnsiConsoleExtensions.Input.cs:23
+    at Spectre.Console.TextPrompt`1.<>c__DisplayClass63_0.<<ShowAsync>b__0>d.MoveNext() in /_/src/Spectre.Console/Prompts/TextPrompt.cs:133
+    --- End of stack trace from previous location ---
+    at Spectre.Console.Internal.DefaultExclusivityMode.RunAsync[T](Func`1 func) in /_/src/Spectre.Console/Internal/DefaultExclusivityMode.cs:40
+    at Spectre.Console.TextPrompt`1.ShowAsync(IAnsiConsole console, CancellationToken cancellationToken) in /_/src/Spectre.Console/Prompts/TextPrompt.cs:122
+    at Spectre.Console.ConfirmationPrompt.ShowAsync(IAnsiConsole console, CancellationToken cancellationToken) in /_/src/Spectre.Console/Prompts/ConfirmationPrompt.cs:92
+    at Spectre.Console.ConfirmationPrompt.Show(IAnsiConsole console) in /_/src/Spectre.Console/Prompts/ConfirmationPrompt.cs:73
+    at Spectre.Console.AnsiConsoleExtensions.Confirm(IAnsiConsole console, String prompt, Boolean defaultValue) in /_/src/Spectre.Console/Extensions/AnsiConsoleExtensions.Prompt.cs:61
+    at Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts.DeviceSelector.FindDevicesWithRetryAsync(CancellationToken cancellationToken, IAnsiConsole console, Func`2 discover) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs:99
+    at Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts.DeviceSelector.SelectDeviceAsync(CancellationToken cancellationToken, IAnsiConsole console, Func`2 discover) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs:38
+    at Yubico.YubiKit.Oath.Examples.OathTool.Cli.OathToolServices.OpenSelectedSessionAsync(CancellationToken cancellationToken, IAnsiConsole console, Func`2 discover) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Cli/OathToolServices.cs:50
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen(multipleDevices: True) (44ms)
+  Assert.ThrowsAny() Failure: Exception type was not compatible
+  Expected: typeof(System.OperationCanceledException)
+  Actual:   typeof(System.InvalidOperationException)
+  ---- System.InvalidOperationException : Prompt dropped its cancellation token.
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen(Boolean multipleDevices) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDeviceSelectionTests.cs:34
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingInput.ReadKeyAsync(Boolean intercept, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDeviceSelectionTests.cs:111
+    at Spectre.Console.ListPrompt`1.Show(ListPromptTree`1 tree, SelectionMode selectionMode, Boolean skipUnselectableItems, Boolean searchEnabled, Int32 requestedPageSize, Boolean wrapAround, CancellationToken cancellationToken) in /_/src/Spectre.Console/Prompts/List/ListPrompt.cs:55
+    at Spectre.Console.SelectionPrompt`1.ShowAsync(IAnsiConsole console, CancellationToken cancellationToken) in /_/src/Spectre.Console/Prompts/SelectionPrompt.cs:102
+    at Spectre.Console.SelectionPrompt`1.Show(IAnsiConsole console) in /_/src/Spectre.Console/Prompts/SelectionPrompt.cs:94
+    at Spectre.Console.AnsiConsoleExtensions.Prompt[T](IAnsiConsole console, IPrompt`1 prompt) in /_/src/Spectre.Console/Extensions/AnsiConsoleExtensions.Prompt.cs:22
+    at Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts.DeviceSelector.PromptForDeviceSelectionAsync(IReadOnlyList`1 devices, IAnsiConsole console, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs:163
+    at Yubico.YubiKit.Oath.Examples.OathTool.Cli.Prompts.DeviceSelector.SelectDeviceAsync(CancellationToken cancellationToken, IAnsiConsole console, Func`2 discover) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs:69
+    at Yubico.YubiKit.Oath.Examples.OathTool.Cli.OathToolServices.OpenSelectedSessionAsync(CancellationToken cancellationToken, IAnsiConsole console, Func`2 discover) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Cli/OathToolServices.cs:50
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 4
+  failed: 3
+  succeeded: 1
+  skipped: 0
+  duration: 308ms

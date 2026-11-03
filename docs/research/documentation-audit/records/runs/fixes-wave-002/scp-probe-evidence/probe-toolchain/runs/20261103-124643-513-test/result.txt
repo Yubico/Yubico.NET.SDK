@@ -1,0 +1,13 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly&Category!=RequiresUserPresence")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       7.4s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.IntegrationTests  1 test(s) failed
+      - Yubico.YubiKit.Oath.IntegrationTests.OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Serial125Only)): Assert.All() Failure: 2 out of 2 items in the collection did not pass. | [0]: Item:  Tuple (255, 27272, 0) | Error: INITIALIZE UPDATE KVN=FF rejected: SW=6A88, dataLength=0; secure-channel establishment was not attempted.
+      output: artifacts/toolchain/runs/20261103-124643-513-test/01-test-Oath.IntegrationTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 1 executed, 1 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly"
+Run log: artifacts/toolchain/runs/20261103-124643-513-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

@@ -1,0 +1,18 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --smoke --filter FullyQualifiedName~ProtocolResponses_SmartCardOnlyDiscovery)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       1.9s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.IntegrationTests  Listing tests failed (exit code 1):
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-protocol/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs(32,25): error CS0122: 'YubiKeyTestInfrastructure' is inaccessible due to its protection level [/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj]
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed
+Warnings: 0
+Next: dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --verbose
+Run log: artifacts/toolchain/runs/20261102-221022-641-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

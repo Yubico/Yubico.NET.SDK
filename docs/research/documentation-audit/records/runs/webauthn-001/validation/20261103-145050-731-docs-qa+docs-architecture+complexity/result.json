@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- docs-qa docs-architecture complexity",
+  "started": "2026-11-03T14:50:50.7317436+01:00",
+  "durationSeconds": 1.3,
+  "runDirectory": "artifacts/toolchain/runs/20261103-145050-731-docs-qa+docs-architecture+complexity",
+  "targets": [
+    {
+      "name": "docs-qa",
+      "status": "passed",
+      "durationSeconds": 0.4,
+      "error": null
+    },
+    {
+      "name": "docs-architecture",
+      "status": "passed",
+      "durationSeconds": 0.3,
+      "error": null
+    },
+    {
+      "name": "complexity",
+      "status": "passed",
+      "durationSeconds": 0.6,
+      "error": null
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

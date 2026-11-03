@@ -1,0 +1,96 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Core --filter FullyQualifiedName~Base32Tests",
+  "started": "2026-11-03T00:03:19.8873454+01:00",
+  "durationSeconds": 4.4,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000319-887-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 4.3,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Core.UnitTests",
+      "outcome": "failed",
+      "reason": "14 test(s) failed",
+      "executed": 23,
+      "failed": 14,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"========\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"MZXW6YTB========\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"MZXW6YTBOI=======\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"MZXW6YTB\\t\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"MZXW6YTB\\n\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"AAA\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"MZXW6YTBOI=====\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"MZXW6YTBé\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"MZXW6YTB!\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"AAAAAA\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"MZXW6YTB=OI=====\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"A\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: \"AAAAAAAAA\")",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_DestinationTooSmall_ClearsPartialOutputRatherThanLeavingPrefix",
+          "message": "Assert.True() Failure | Expected: True | Actual:   False"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-000319-887-test/01-test-Core.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Core.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination|FullyQualifiedName~Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_DestinationTooSmall_ClearsPartialOutputRatherThanLeavingPrefix\""
+  ]
+}

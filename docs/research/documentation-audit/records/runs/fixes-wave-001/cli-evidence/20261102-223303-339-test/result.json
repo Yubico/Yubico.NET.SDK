@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolDispatchTests",
+  "started": "2026-11-02T22:33:03.3399911+01:00",
+  "durationSeconds": 6.6,
+  "runDirectory": "artifacts/toolchain/runs/20261102-223303-339-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 6.5,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "passed",
+      "reason": "48 executed, 0 skipped",
+      "executed": 48,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-223303-339-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

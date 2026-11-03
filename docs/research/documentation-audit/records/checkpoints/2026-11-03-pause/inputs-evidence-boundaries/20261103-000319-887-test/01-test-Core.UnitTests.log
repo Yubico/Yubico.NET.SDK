@@ -1,0 +1,108 @@
+$ dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release -- --filter-method "*Base32Tests*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "========") (1ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+    at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB========") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTBOI=======") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB\t") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB\n") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "AAA") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTBOI=====") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTBé") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB!") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "AAAAAA") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB=OI=====") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "A") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "AAAAAAAAA") (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:59
+    at InvokeStub_Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_DestinationTooSmall_ClearsPartialOutputRatherThanLeavingPrefix (0ms)
+  Assert.True() Failure
+  Expected: True
+  Actual:   False
+    at Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_DestinationTooSmall_ClearsPartialOutputRatherThanLeavingPrefix() in /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs:70
+    at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+    at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-inputs/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll (net10.0|x64)
+  total: 23
+  failed: 14
+  succeeded: 9
+  skipped: 0
+  duration: 368ms

@@ -1,0 +1,48 @@
+$ dotnet run --project src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj -c Release
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: "========") (1ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentException)
+    at Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs:25
+    at InvokeStub_OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: "A") (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentException)
+    at Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs:25
+    at InvokeStub_OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: "MY=") (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentException)
+    at Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs:25
+    at InvokeStub_OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: "AAA") (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentException)
+    at Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs:25
+    at InvokeStub_OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: "MY=======") (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentException)
+    at Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs:25
+    at InvokeStub_OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: "AAAAAA") (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentException)
+    at Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(String encoded) in /tmp/opencode/yubikit-oath-fix-inputs/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs:25
+    at InvokeStub_OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+skipped Yubico.YubiKit.Cli.Commands.UnitTests.AuditV2.CliOtpAuditReproTests.YESDK1633_ChildBody_NegativeLength_ThrowsArgumentOutOfRange (0ms)
+  Child-process body; executed only via ChildProcessTestRunner.
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-inputs/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.UnitTests.dll (net10.0|x64)
+  total: 40
+  failed: 6
+  succeeded: 33
+  skipped: 1
+  duration: 577ms

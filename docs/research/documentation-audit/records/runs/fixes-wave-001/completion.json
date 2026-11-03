@@ -1,0 +1,42 @@
+{
+  "commits": {
+    "cli": "618adbec44157c83ad31f073ea4d5fd8589bbf29",
+    "protocol": "c79e4c1e949fa9c1b080165e59e4c2bc9e831583",
+    "integration": "c90dced180de7975895771b32fcc91b9df752591"
+  },
+  "closed": [
+    "IMP-001",
+    "IMP-002",
+    "IMP-008",
+    "IMP-009",
+    "IMP-011",
+    "IMP-012",
+    "IMP-013",
+    "IMP-014"
+  ],
+  "unit_tests": {
+    "executed": 3828,
+    "failed": 0,
+    "skipped": 5,
+    "oath": 311
+  },
+  "integration_smoke": {
+    "executed": 20,
+    "skipped": 5,
+    "failed": 0,
+    "device": "125 / 5.8.0.alpha.2; includes offline cases"
+  },
+  "targeted_hardware": [
+    "9681620 / 5.4.3: revised protocol cases passed separately",
+    "125 / 5.8.0.alpha.2: revised protocol cases passed separately"
+  ],
+  "warnings": 0,
+  "review": "both tasks passed independent re-review after required corrections",
+  "limits": [
+    "CORE-001 two-key discovery remains open",
+    "redirected synchronous CLI reads remain non-interruptible",
+    "unknown/duplicate result policy not expanded",
+    "DEC-001/006 not closed by observed wrong-key/marker data"
+  ],
+  "pushed": false
+}

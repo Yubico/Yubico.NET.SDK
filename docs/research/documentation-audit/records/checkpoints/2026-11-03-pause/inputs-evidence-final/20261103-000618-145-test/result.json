@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --project Core",
+  "started": "2026-11-03T00:06:18.1459014+01:00",
+  "durationSeconds": 29.8,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000618-145-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 29.7,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Core.UnitTests",
+      "outcome": "passed",
+      "reason": "1739 executed, 4 skipped",
+      "executed": 1739,
+      "failed": 0,
+      "skipped": 4,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261103-000618-145-test/01-test-Core.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

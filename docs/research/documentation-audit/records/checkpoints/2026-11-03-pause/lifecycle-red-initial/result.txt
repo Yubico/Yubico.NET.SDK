@@ -1,0 +1,25 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath --filter "FullyQualifiedName~OathTimeTests|FullyQualifiedName~OathResetTests")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                      18.3s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  13 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(cancel: True): Assert.False() Failure | Expected: False | Actual:   True
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(cancel: False): Assert.False() Failure | Expected: False | Actual:   True
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateCodeAsync_NegativeHotpTimestamp_RejectsBeforeAdvancingCounter: Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: -9223372036854775808): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: -1): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: 9223372036854775807): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: 9223372036854775800): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Totp, timestamp: 9223372036854775807, period: 30): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Totp, timestamp: 9223372036854775807, period: 1): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Totp, timestamp: -1, period: 30): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Hotp, timestamp: -1, period: 0): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateAllAsync_CustomWindowOverflow_ClearsResponseWithoutFollowup: Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_RefreshesIdentityAndPreservesEffectiveVersion: Assert.Equal() Failure: Collections differ | Expected: [0, 4, 222, 173] | Actual:   [0, 4, 222, 173, 0]
+      output: artifacts/toolchain/runs/20261103-000001-528-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 24 executed, 13 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateCodeAsync_NegativeHotpTimestamp_RejectsBeforeAdvancingCounter|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateAllAsync_CustomWindowOverflow_ClearsResponseWithoutFollowup"
+Run log: artifacts/toolchain/runs/20261103-000001-528-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

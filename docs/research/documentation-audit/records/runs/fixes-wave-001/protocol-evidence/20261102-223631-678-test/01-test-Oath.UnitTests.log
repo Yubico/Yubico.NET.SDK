@@ -1,0 +1,10 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+
+Test run summary: Passed! - /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 221
+  failed: 0
+  succeeded: 221
+  skipped: 0
+  duration: 229ms

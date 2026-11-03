@@ -1,0 +1,48 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathTool",
+  "started": "2026-11-02T22:12:41.3238129+01:00",
+  "durationSeconds": 3.8,
+  "runDirectory": "artifacts/toolchain/runs/20261102-221241-323-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 3.8,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "2 test(s) failed",
+      "executed": 64,
+      "failed": 2,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.CancelledSetup_DisposesAnyReturnedSessionAndDoesNotMutate(hasSession: False)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.CancelledSetup_DisposesAnyReturnedSessionAndDoesNotMutate(hasSession: True)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261102-221241-323-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.CancelledSetup_DisposesAnyReturnedSessionAndDoesNotMutate\""
+  ]
+}

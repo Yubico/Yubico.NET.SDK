@@ -1,0 +1,10 @@
+$ dotnet run --project src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+
+Test run summary: Passed! - /tmp/opencode/yubikit-oath-fix-lifecycle/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.UnitTests.dll (net10.0|x64)
+  total: 91
+  failed: 0
+  succeeded: 91
+  skipped: 0
+  duration: 201ms

@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath.UnitTests --filter FullyQualifiedName~OathScpResetTests",
+  "started": "2026-11-03T12:50:51.9998937+01:00",
+  "durationSeconds": 3.8,
+  "runDirectory": "artifacts/toolchain/runs/20261103-125051-999-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 3.7,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 5,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathScpResetTests.ResetAsync_Scp03_DestroysActualDerivedStateWithoutSelectOrRehandshake",
+          "message": "Assert.False() Failure | Expected: False | Actual:   True"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-125051-999-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathScpResetTests.ResetAsync_Scp03_DestroysActualDerivedStateWithoutSelectOrRehandshake\""
+  ]
+}

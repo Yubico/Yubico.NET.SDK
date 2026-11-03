@@ -1,0 +1,30 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*ResetFailure_DisposalReplayDoesNotReplaceCliOutcome*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+Error: Reset failed: Reset teardown failed after success.. Device data may already have been erased.
+Reset cancelled. Device data may already have been erased; reopen the session to inspect its state.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ResetFailure_DisposalReplayDoesNotReplaceCliOutcome(cancel: False) (9ms)
+  Xunit.Runner.InProc.SystemConsole.TestingPlatform.XunitException: System.InvalidOperationException : Disposal completion replay.
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.FakeSession.Dispose() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:399
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.FakeSession.DisposeAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:401
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.ResetCommand.ExecuteAsync(Boolean force, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/examples/OathTool/Commands/ResetCommand.cs:53
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ResetFailure_DisposalReplayDoesNotReplaceCliOutcome(Boolean cancel) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:304
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ResetFailure_DisposalReplayDoesNotReplaceCliOutcome(cancel: True) (2ms)
+  Assert.ThrowsAny() Failure: Exception type was not compatible
+  Expected: typeof(System.OperationCanceledException)
+  Actual:   typeof(System.InvalidOperationException)
+  ---- System.InvalidOperationException : Disposal completion replay.
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ResetFailure_DisposalReplayDoesNotReplaceCliOutcome(Boolean cancel) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:301
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.FakeSession.Dispose() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:399
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.FakeSession.DisposeAsync() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:401
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.ResetCommand.ExecuteAsync(Boolean force, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/examples/OathTool/Commands/ResetCommand.cs:53
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 2
+  failed: 2
+  succeeded: 0
+  skipped: 0
+  duration: 182ms

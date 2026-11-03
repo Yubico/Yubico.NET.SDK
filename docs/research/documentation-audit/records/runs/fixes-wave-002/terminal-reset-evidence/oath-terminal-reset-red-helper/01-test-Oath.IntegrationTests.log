@@ -1,0 +1,43 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "(FullyQualifiedName~OathResetTests|FullyQualifiedName~SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession)&Category!=RequiresHardware&Category!=RequiresUserPresence"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.18]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:00:00.18]       Expected: 1
+[xUnit.net 00:00:00.18]       Actual:   0
+[xUnit.net 00:00:00.18]       Stack Trace:
+[xUnit.net 00:00:00.18]     Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession [FAIL]
+[xUnit.net 00:00:00.18]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs(200,0): at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.<>c__DisplayClass7_0.<<SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession>b__0>d.MoveNext()
+[xUnit.net 00:00:00.18]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.18]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs(64,0): at Yubico.YubiKit.Oath.IntegrationTests.TestExtensions.OathTestStateExtensions.WithOathSessionAsync(YubiKeyTestState state, Func`2 action, Boolean resetBeforeUse, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.18]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs(64,0): at Yubico.YubiKit.Oath.IntegrationTests.TestExtensions.OathTestStateExtensions.WithOathSessionAsync(YubiKeyTestState state, Func`2 action, Boolean resetBeforeUse, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.18]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs(198,0): at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession()
+[xUnit.net 00:00:00.18]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.19]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Failed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession [30 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 1
+Actual:   0
+  Stack Trace:
+     at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.<>c__DisplayClass7_0.<<SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession>b__0>d.MoveNext() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 200
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.Oath.IntegrationTests.TestExtensions.OathTestStateExtensions.WithOathSessionAsync(YubiKeyTestState state, Func`2 action, Boolean resetBeforeUse, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs:line 64
+   at Yubico.YubiKit.Oath.IntegrationTests.TestExtensions.OathTestStateExtensions.WithOathSessionAsync(YubiKeyTestState state, Func`2 action, Boolean resetBeforeUse, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs:line 64
+   at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 198
+--- End of stack trace from previous location ---
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 0.5191 Seconds

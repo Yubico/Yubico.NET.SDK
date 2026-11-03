@@ -1,0 +1,32 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "Category!=RequiresHardware&Category!=RequiresUserPresence"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.11]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True) [37 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: False) [< 1 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure(operationFails: False, disposalFails: True, cleanupFails: True) [4 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure(operationFails: False, disposalFails: True, cleanupFails: False) [< 1 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure(operationFails: False, disposalFails: False, cleanupFails: True) [< 1 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure(operationFails: True, disposalFails: True, cleanupFails: True) [< 1 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure(operationFails: True, disposalFails: False, cleanupFails: True) [< 1 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure(operationFails: True, disposalFails: True, cleanupFails: False) [< 1 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure(operationFails: False, disposalFails: False, cleanupFails: False) [< 1 ms]
+[xUnit.net 00:00:00.23]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_FailurePreventsBodyOpenAndPreservesFirstFailure(sendFails: False) [< 1 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_FailurePreventsBodyOpenAndPreservesFirstFailure(sendFails: True) [< 1 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession [1 ms]
+
+Test Run Successful.
+Total tests: 12
+     Passed: 12
+ Total time: 0.5373 Seconds

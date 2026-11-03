@@ -1,0 +1,42 @@
+{
+  "documentation_commit": "7c4153f8549bcc4b89a304b5ca4f1502cde1dd64",
+  "incoming_commit": "089b2393ec90fa2c09434e7b897f635373b46c29",
+  "merge_commit": "361567ebf6d1507afb474f960f94efe92ae9b802",
+  "branch": "yubikit-docs-audit",
+  "untracked_user_files_preserved": true,
+  "tracked_worktree_clean": true,
+  "pushed": false,
+  "review": "PASS; ses_e621dadf5ffeadQj3R4X0XzL5D",
+  "gate_result": "passed; 3684 unit tests, 167 OATH, 5 skips, zero failures/warnings; docs/architecture/format/complexity passed",
+  "remaining_branch_diff_files": {
+    "README.md": "b058f30c22d4ed663a863cb0b384a187b76249da79dd48eecf6854817b494606",
+    "docs/architecture/applet-public-api.md": "ab7209f7a70f79ee18d45ba21355c4ce08764fa01f3f1befffe8c660f986d347",
+    "docs/architecture/physical-device-model.md": "34e7cd1a36884c311c2e6b061296147f184e64c57eb138d594fd011029f26123",
+    "docs/migration/v1-to-v2.md": "b044e06b873149937d431dd577561389c7a028cf3878c97be32f892096953292",
+    "src/Management/README.md": "cc448a75e915540b59b4858b3a679ebd96df95271647e2acfdc1874d3f64e91e",
+    "src/Oath/CLAUDE.md": "25b360d0af821b250de699740f60fdda4d08158a8a036e54eb0f8e985c0814e3",
+    "src/Oath/README.md": "922f73e1cdeb4a00ad3442509b0950def620a54bde83113279b626fe576c8bf4",
+    "src/Oath/examples/OathTool/Cli/Output/OutputHelpers.cs": "e9ed4e8e4189d1030a36adb8f2ec029c51dab149dd946ace5053935e3b7ee162",
+    "src/Oath/examples/OathTool/Commands/AccessCommand.cs": "180062b6d4aa598eaae3f1c0b1bc9c9e85851bac48afb9dc413ecaa6ed5655ac",
+    "src/Oath/examples/OathTool/Commands/AccountsCommand.cs": "c8eb3a80710b3c8b0c79354b109cc111b1b974f70f605f54ccb94b51b6a4176b",
+    "src/Oath/src/Code.cs": "396dc68ac17701320e4e4b1569557dce263f4b72dcb95e998e1dc51c06cdcf9b",
+    "src/Oath/src/Credential.cs": "58fa090873a6f252abf2100e88c310692bfc3f472fe377836e4aa526efe3d7c6",
+    "src/Oath/src/CredentialData.cs": "4caf204544271cdb8ae7ca31942bfbae6cb096265365dbf941ad2cecbb112d7f",
+    "src/Oath/src/HashAlgorithm.cs": "487a74ea3540748b409a5f5a4cddbdbd5e0762c3d492b97b1d2a07ef39c3809b",
+    "src/Oath/src/IOathSession.cs": "2709856c00f4ef2ff4fc413dabe80af9633d1d794f15ceb677845579c55fcdf9",
+    "src/Oath/src/IYubiKeyExtensions.cs": "9357653b7de0776aa5fc2c652c8ec3e881494622bf7d80b2da95d360e64f7a42",
+    "src/Oath/src/OathConstants.cs": "6dd5e8dc6b2d8268c81707f50570d0fdd67a8caf771ca180448e9f6cbb115a8f",
+    "src/Oath/src/OathSession.cs": "e3d2f8fd270921cc4c67f68e63794b8284fcadc1e05017bb71ecb549bafd82bc",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CodeTests.cs": "0e1fb39fd194bd091c3525a88ce93a3e29a49609d2c2322a2e51e5ca24f78619",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs": "9204c9782ad880b525cab41f67239e93fc1f8bded6c38c15077ca5513fa39fbe",
+    "src/Tests.Shared/CLAUDE.md": "ad0e786dff9309491a415516440fe4326a14e256510c80b56f222e99c53d6b9f",
+    "src/Tests.Shared/README.md": "1d80dd4d9f331bcfc4fcd8f348d91f631f59dbe1041cacf020c15ed388edfdd7"
+  },
+  "closure": {
+    "IMP-003": "closed-upstream-verified",
+    "IMP-004": "source-addressed-regression-gap",
+    "other_implementation_items": "unchanged",
+    "DEC-001 through DEC-007": "open",
+    "DOC-001": "open"
+  }
+}

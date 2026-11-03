@@ -1,0 +1,161 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathToolDispatchTests*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts rename old --force new --password passwor"···, expected: "old,new") (2ms)
+  Assert.Equal() Failure: Strings differ
+                ↓ (pos 3)
+  Expected: "old,new"
+  Actual:   "old"
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(String commandLine, String expected) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:52
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts add name --force SECRET --touch", expected: "name,SECRET") (0ms)
+  Assert.Equal() Failure: Strings differ
+                 ↓ (pos 4)
+  Expected: "name,SECRET"
+  Actual:   "name"
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(String commandLine, String expected) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:52
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts uri --touch otpauth://totp/name?secret=MY"···, expected: "otpauth://totp/name?secret=MY") (0ms)
+  Assert.Equal() Failure: Strings differ
+             ↓ (pos 0)
+  Expected: "otpauth://totp/name?secret=MY"
+  Actual:   ""
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(String commandLine, String expected) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:52
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts delete --force name --password password", expected: "name") (0ms)
+  Assert.Equal() Failure: Strings differ
+             ↓ (pos 0)
+  Expected: "name"
+  Actual:   ""
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(String commandLine, String expected) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:52
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts add --touch name SECRET --issuer issuer -"···, expected: "name,SECRET") (0ms)
+  Assert.Equal() Failure: Strings differ
+             ↓ (pos 0)
+  Expected: "name,SECRET"
+  Actual:   "SECRET"
+             ↑ (pos 0)
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(String commandLine, String expected) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:52
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts rename --password password old --force ne"···, expected: "old,new") (0ms)
+  Assert.Equal() Failure: Strings differ
+                ↓ (pos 3)
+  Expected: "old,new"
+  Actual:   "old"
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(String commandLine, String expected) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:52
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "accounts add --unknown --help") (1ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:29
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "access change --help --clear") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:29
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "reset --force -h") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:29
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "accounts delete --force --help name") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:29
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "reset help -f") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:29
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "reset --help --force") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:29
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "help reset --force") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:29
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "--help reset --force") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:29
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "info --help") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:29
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts add name SECRET --digits nope") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:74
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts add name SECRET --period 999999999999999") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:74
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "reset --unknown --force") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:74
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts rename old new extra --force") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:74
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "reset --password password") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:74
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts add name SECRET --algorithm bogus") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:74
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts add name SECRET --issuer first --issuer s"···) (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:74
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts delete --password --force name") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:74
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts delete --password") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 1
+  Actual:   99
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:74
+    --- End of stack trace from previous location ---
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 25
+  failed: 24
+  succeeded: 1
+  skipped: 0
+  duration: 422ms

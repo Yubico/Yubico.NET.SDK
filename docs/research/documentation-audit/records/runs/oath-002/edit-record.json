@@ -1,0 +1,21 @@
+{
+  "editor_session": "ses_e627daba3ffeyKiXmT24GYHeUJ",
+  "files": {
+    "src/Oath/src/CredentialData.cs": "5e190252a74793111cb08b70ff32f3da5359dec87bdfa4eb34d6b17b680c2f01",
+    "src/Oath/src/Credential.cs": "8a0a23bf1bc3e094ec83c851f71aebd6e2b8a15034ffd73e24f3b1736ed86195",
+    "src/Oath/src/HashAlgorithm.cs": "487a74ea3540748b409a5f5a4cddbdbd5e0762c3d492b97b1d2a07ef39c3809b",
+    "src/Oath/src/OathConstants.cs": "6dd5e8dc6b2d8268c81707f50570d0fdd67a8caf771ca180448e9f6cbb115a8f",
+    "src/Oath/src/IOathSession.cs": "da7cc9ab72ac3617b53da18949273058e0ada1fe0da6040db16cc5304eb18e5e",
+    "src/Oath/README.md": "6d0a4f95fbd96c48befe5d1f9695f31723cc6ca75c017e568cfa368627cfbd6a",
+    "src/Oath/CLAUDE.md": "1b376cf565845195e5bc44d096f7c195c57a281777ce84825edca0e9bc97b6e6",
+    "src/Oath/examples/OathTool/Commands/AccountsCommand.cs": "9904a71af05f1a4c43d314a3ebe03fb4985d77f3d0b3a4efa1523b1c20487a09"
+  },
+  "diff_sha256": "3af1d6dc2d3736cbd21511d6862294f55519355c8be24cf1d18a7d2e56eff6ae",
+  "checks": [
+    "eight authorized files changed",
+    "C# non-comment lines unchanged",
+    "original EOF conventions preserved"
+  ],
+  "review_status": "passed; see review.md",
+  "gate_status": "passed; content hashes unchanged; see validation.json and toolchain-result.json"
+}

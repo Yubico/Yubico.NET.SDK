@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~SessionCleanup_OwnedSession_PreservesFirstFailure&Category!=RequiresHardware&Category!=RequiresUserPresence\"",
+  "started": "2026-11-03T12:35:20.8521322+01:00",
+  "durationSeconds": 5.9,
+  "runDirectory": "artifacts/toolchain/runs/20261103-123520-852-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 5.8,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "passed",
+      "reason": "7 executed, 0 skipped",
+      "executed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261103-123520-852-test/01-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

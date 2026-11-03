@@ -1,0 +1,6 @@
+RESULT: PASSED  (dotnet toolchain.cs -- complexity)
+Targets:
+  ✓ complexity     0.4s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261102-221536-602-complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

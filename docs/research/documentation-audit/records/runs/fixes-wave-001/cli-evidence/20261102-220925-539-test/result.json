@@ -1,0 +1,140 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolCancellationTests",
+  "started": "2026-11-02T22:09:25.5399851+01:00",
+  "durationSeconds": 3.8,
+  "runDirectory": "artifacts/toolchain/runs/20261102-220925-539-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 3.7,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "25 test(s) failed",
+      "executed": 30,
+      "failed": 25,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: \"after-input\")",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: \"during-validation\")",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: \"before-validation\")",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: \"before-input\")",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: \"during-input\")",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnsuccessfulUnlock_DisposesSessionButNotCallerInput(cancel: True)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: \"rename\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: \"uri\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: \"delete\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: \"add\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: \"reset\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: \"uri\")",
+          "message": "Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: \"delete\")",
+          "message": "Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: \"add\")",
+          "message": "Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: \"reset\")",
+          "message": "Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: \"rename\")",
+          "message": "Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: \"delete\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: \"clear\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: \"reset\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: \"add\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: \"uri\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: \"rename\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: \"single-code\")",
+          "message": ""
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: \"set\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.PasswordConfirmation_CancellationDisposesSessionAndStopsKeyChange",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261102-220925-539-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnsuccessfulUnlock_DisposesSessionButNotCallerInput|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession\""
+  ]
+}

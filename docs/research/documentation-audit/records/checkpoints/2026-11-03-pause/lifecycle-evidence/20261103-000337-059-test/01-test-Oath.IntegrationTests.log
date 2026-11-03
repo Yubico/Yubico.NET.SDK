@@ -1,0 +1,77 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~OathLifecycleTimeTests"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.07]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.17]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.19]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:125 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.58]     Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.Timestamps_ExactRfcVectorsAndResetRefresh(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [SKIP]
+[xUnit.net 00:00:00.58]       No YubiKey matches filter criteria: ConnectionType = SmartCard, CustomFilter = Firmware before 5.6.3. Available devices: [YubiKey(SN:125,FW:5.8.0,UsbAKeychain,HidFido, HidOtp, SmartCard)]
+  Skipped Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.Timestamps_ExactRfcVectorsAndResetRefresh(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [1 ms]
+[xUnit.net 00:00:02.73]       Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException : SCP03 INITIALIZE UPDATE failed: Referenced data not found (SW=0x6A88)
+[xUnit.net 00:00:02.73]       Stack Trace:
+[xUnit.net 00:00:02.73]     Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [FAIL]
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs(59,0): at Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpState.Scp03InitAsync(IApduProcessor processor, Scp03KeyParameters keyParams, Byte[] hostChallenge, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs(122,0): at Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpInitializer.InitScp03Async(ChainedResponseReceiver initializationProcessor, IApduProcessor commandProcessor, Byte insSendRemaining, Scp03KeyParameters keyParams, CancellationToken cancellationToken, Action`1 onRecoveryRequired)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs(64,0): at Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpInitializer.InitializeScpAsync(IApduProcessor initializationProcessor, IApduProcessor commandProcessor, Byte insSendRemaining, ScpKeyParameters keyParams, CancellationToken cancellationToken, Action`1 onRecoveryRequired)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs(57,0): at Yubico.YubiKit.Core.Utilities.ExchangeGuard.RunAsync[T](Func`2 exchange, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.Scp.cs(27,0): at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.InitializeScpAsync(ScpKeyParameters keyParams, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs(384,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.ConfigureProtocolAsync(IProtocol protocol, FirmwareVersion firmwareVersion, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs(130,0): at Yubico.YubiKit.Oath.OathSession.InitializeAsync(Nullable`1 configuration, FirmwareVersion firmwareVersionOverride, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs(318,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.InitializeSessionAsync(Func`2 initialize, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs(261,0): at Yubico.YubiKit.Core.Sessions.ApplicationSession.ConstructInitializedAsync[TSession](IConnection connection, SessionCreationOptions options, Func`1 create, Func`3 initialize, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/IYubiKeyExtensions.cs(62,0): at Yubico.YubiKit.Oath.IYubiKeyExtensions.<>c__DisplayClass1_0.<<CreateOathSessionAsync>b__0>d.MoveNext()
+[xUnit.net 00:00:02.73]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Devices/YubiKeyConnectionExtensions.cs(265,0): at Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateSessionOverTransportAsync[TResult](IYubiKey yubiKey, ConnectionType transport, Func`3 createAsync, ILogger logger, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Devices/YubiKeyConnectionExtensions.cs(287,0): at Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateSessionOverTransportAsync[TResult](IYubiKey yubiKey, ConnectionType transport, Func`3 createAsync, ILogger logger, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/IYubiKeyExtensions.cs(58,0): at Yubico.YubiKit.Oath.IYubiKeyExtensions.CreateOathSessionAsync(IYubiKey yubiKey, SessionCreationOptions options, CancellationToken cancellationToken)
+[xUnit.net 00:00:02.73]         /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs(77,0): at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset(YubiKeyTestState state)
+[xUnit.net 00:00:02.73]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:02.73]       Output:
+[xUnit.net 00:00:02.73]         SCP03 probe device serial=125, firmware=5.8.0; no Security Domain reset or key changes.
+[xUnit.net 00:00:02.74]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.Timestamps_ExactRfcVectorsAndResetRefresh(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [2 s]
+  Failed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [30 ms]
+  Error Message:
+   Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException : SCP03 INITIALIZE UPDATE failed: Referenced data not found (SW=0x6A88)
+  Stack Trace:
+     at Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpState.Scp03InitAsync(IApduProcessor processor, Scp03KeyParameters keyParams, Byte[] hostChallenge, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs:line 59
+   at Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpInitializer.InitScp03Async(ChainedResponseReceiver initializationProcessor, IApduProcessor commandProcessor, Byte insSendRemaining, Scp03KeyParameters keyParams, CancellationToken cancellationToken, Action`1 onRecoveryRequired) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs:line 122
+   at Yubico.YubiKit.Core.Protocols.SmartCard.Scp.ScpInitializer.InitializeScpAsync(IApduProcessor initializationProcessor, IApduProcessor commandProcessor, Byte insSendRemaining, ScpKeyParameters keyParams, CancellationToken cancellationToken, Action`1 onRecoveryRequired) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs:line 64
+   at Yubico.YubiKit.Core.Utilities.ExchangeGuard.RunAsync[T](Func`2 exchange, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:line 57
+   at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.InitializeScpAsync(ScpKeyParameters keyParams, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.Scp.cs:line 27
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.ConfigureProtocolAsync(IProtocol protocol, FirmwareVersion firmwareVersion, Nullable`1 configuration, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 384
+   at Yubico.YubiKit.Oath.OathSession.InitializeAsync(Nullable`1 configuration, FirmwareVersion firmwareVersionOverride, ScpKeyParameters scpKeyParams, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:line 130
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.InitializeSessionAsync(Func`2 initialize, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 318
+   at Yubico.YubiKit.Core.Sessions.ApplicationSession.ConstructInitializedAsync[TSession](IConnection connection, SessionCreationOptions options, Func`1 create, Func`3 initialize, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 261
+   at Yubico.YubiKit.Oath.IYubiKeyExtensions.<>c__DisplayClass1_0.<<CreateOathSessionAsync>b__0>d.MoveNext() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/IYubiKeyExtensions.cs:line 62
+--- End of stack trace from previous location ---
+   at Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateSessionOverTransportAsync[TResult](IYubiKey yubiKey, ConnectionType transport, Func`3 createAsync, ILogger logger, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Devices/YubiKeyConnectionExtensions.cs:line 265
+   at Yubico.YubiKit.Core.Devices.YubiKeyConnectionExtensions.CreateSessionOverTransportAsync[TResult](IYubiKey yubiKey, ConnectionType transport, Func`3 createAsync, ILogger logger, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Devices/YubiKeyConnectionExtensions.cs:line 287
+   at Yubico.YubiKit.Oath.IYubiKeyExtensions.CreateOathSessionAsync(IYubiKey yubiKey, SessionCreationOptions options, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/IYubiKeyExtensions.cs:line 58
+   at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset(YubiKeyTestState state) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 77
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ SCP03 probe device serial=125, firmware=5.8.0; no Security Domain reset or key changes.
+
+
+
+Test Run Failed.
+Total tests: 3
+     Passed: 1
+     Failed: 1
+    Skipped: 1
+ Total time: 3.1741 Seconds

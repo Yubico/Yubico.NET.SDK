@@ -1,0 +1,17 @@
+{
+  "status":"passed",
+  "command":"dotnet toolchain.cs -- build test docs-qa docs-architecture complexity --filter 'Category!=RequiresUserPresence'",
+  "exit_code":0,
+  "run":"artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity",
+  "build":"Full solution Release passed",
+  "warnings":0,
+  "tests":{"projects_passed":13,"executed":3496,"failed":0,"skipped":5,"oath_executed":137},
+  "docs_qa":"73 active docs and 10 package readmes passed",
+  "architecture":"Evidence map: 6 entries resolve; 7 rendered diagrams present/fresh; no generated images changed",
+  "complexity":"Two methods selected by changed-line analysis; one existing unchanged debt (CalculateAllAsync cc13/cog11); zero new/worse methods requiring action",
+  "formatting":"Final scoped dotnet format --verify-no-changes --no-restore passed; Formatted 0 of 1356 files; final diagnostic log has no warnings/errors",
+  "formatting_scope":["src/Oath/src/OathSession.cs","src/Oath/src/IOathSession.cs","src/Oath/src/IYubiKeyExtensions.cs","src/Oath/src/Code.cs","src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CodeTests.cs","src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs","src/Oath/examples/OathTool/Cli/Output/OutputHelpers.cs"],
+  "mechanical_exception":"Two baseline-unused imports and EOF newline removed from IYubiKeyExtensions; exact reviewed-content reconstruction verified in final-content.json/post-review-format.patch",
+  "content_identity":"All fifteen final hashes matched after gates; previous batch files remain included in the full validated solution",
+  "limitations":["No hardware integration execution","No consumer-package installation verification","Implementation/contract followups not resolved","No commits/pushes/merges"]
+}

@@ -1,0 +1,48 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~ValidateAsync_DeviceRejection",
+  "started": "2026-11-03T00:01:31.9146203+01:00",
+  "durationSeconds": 4.1,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000131-914-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 4,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "2 test(s) failed",
+      "executed": 2,
+      "failed": 2,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(status: 27012)",
+          "message": "Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 60) | String: ···\"The supplied password is incorrect. Reference data\"···"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(status: 27264)",
+          "message": "Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 60) | String: ···\"The supplied password is incorrect. Incorrect data\"···"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-000131-914-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword\""
+  ]
+}

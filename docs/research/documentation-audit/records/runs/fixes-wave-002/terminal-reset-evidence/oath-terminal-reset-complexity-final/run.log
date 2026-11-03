@@ -1,0 +1,35 @@
+# dotnet toolchain.cs -- complexity
+# started:   2026-11-03 12:56:24 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-lifecycle
+# git:       yubikit-oath-fix-lifecycle @ c90dced1 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: complexity  (log: artifacts/toolchain/runs/20261103-125624-807-complexity/run.log)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs HEAD
+  files        4
+  methods      7
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    12    11  unchanged  Yubico.YubiKit.Oath.OathSession.ValidateAsync
+                         src/Oath/src/OathSession.cs:698-778
+
+1 of 7 methods exceeds a threshold: 0 need action (new or worse), 1 is existing debt.
+Existing debt only: simplifying these methods is welcome but optional.
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- complexity)
+Targets:
+  ✓ complexity     0.4s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261103-125624-807-complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

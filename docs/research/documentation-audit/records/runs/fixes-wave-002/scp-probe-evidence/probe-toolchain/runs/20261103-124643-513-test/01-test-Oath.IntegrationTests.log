@@ -1,0 +1,64 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly&Category!=RequiresUserPresence"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-scp-reference-probe/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-scp-reference-probe/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-scp-reference-probe/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-scp-reference-probe/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-scp-reference-probe/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-scp-reference-probe/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.11]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 4 device(s)
+[YubiKey Infrastructure] Device SN:103 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Device SN:125 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Device SN:31683481 (HidFido, HidOtp, SmartCard) authorized (FW:5.7.4, UsbCKeychain)
+[YubiKey Infrastructure] DeviceId:ykphysical:9681620 SKIPPED (initialization failed: UnrecoveredConnectionException: A previous native operation for interface 'hid:/dev/hidraw7:0001' was not proven released.)
+[YubiKey Infrastructure] Initialization complete: 3 authorized, 1 filtered
+[xUnit.net 00:00:02.66]       Assert.All() Failure: 2 out of 2 items in the collection did not pass.
+[xUnit.net 00:00:02.66]       [0]: Item:  Tuple (255, 27272, 0)
+[xUnit.net 00:00:02.66]            Error: INITIALIZE UPDATE KVN=FF rejected: SW=6A88, dataLength=0; secure-channel establishment was not attempted.
+[xUnit.net 00:00:02.66]       [1]: Item:  Tuple (0, 27272, 0)
+[xUnit.net 00:00:02.66]            Error: INITIALIZE UPDATE KVN=00 rejected: SW=6A88, dataLength=0; secure-channel establishment was not attempted.
+[xUnit.net 00:00:02.66]       Stack Trace:
+[xUnit.net 00:00:02.66]     Yubico.YubiKit.Oath.IntegrationTests.OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Serial125Only)) [FAIL]
+[xUnit.net 00:00:02.66]         /tmp/opencode/yubikit-oath-scp-reference-probe/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathScpReferenceProbeTests.cs(108,0): at Yubico.YubiKit.Oath.IntegrationTests.OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly(YubiKeyTestState state)
+[xUnit.net 00:00:02.66]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:02.67]       Output:
+[xUnit.net 00:00:02.67]         Device serial=125, firmware=5.8.0
+[xUnit.net 00:00:02.67]         Diagnostic only: no EXTERNAL AUTHENTICATE, key loading, applet reset, or handshake verification.
+[xUnit.net 00:00:02.67]         SELECT header=00 A4 04 00; SW=9000; dataLength=15
+[xUnit.net 00:00:02.67]         INITIALIZE UPDATE header=80 50 FF 00; requestedKvn=FF; SW=6A88; dataLength=0
+[xUnit.net 00:00:02.67]         SELECT header=00 A4 04 00; SW=9000; dataLength=15
+[xUnit.net 00:00:02.67]         INITIALIZE UPDATE header=80 50 00 00; requestedKvn=00; SW=6A88; dataLength=0
+[xUnit.net 00:00:02.68]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Failed Yubico.YubiKit.Oath.IntegrationTests.OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Serial125Only)) [2 s]
+  Error Message:
+   Assert.All() Failure: 2 out of 2 items in the collection did not pass.
+[0]: Item:  Tuple (255, 27272, 0)
+     Error: INITIALIZE UPDATE KVN=FF rejected: SW=6A88, dataLength=0; secure-channel establishment was not attempted.
+[1]: Item:  Tuple (0, 27272, 0)
+     Error: INITIALIZE UPDATE KVN=00 rejected: SW=6A88, dataLength=0; secure-channel establishment was not attempted.
+  Stack Trace:
+     at Yubico.YubiKit.Oath.IntegrationTests.OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly(YubiKeyTestState state) in /tmp/opencode/yubikit-oath-scp-reference-probe/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathScpReferenceProbeTests.cs:line 108
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ Device serial=125, firmware=5.8.0
+ Diagnostic only: no EXTERNAL AUTHENTICATE, key loading, applet reset, or handshake verification.
+ SELECT header=00 A4 04 00; SW=9000; dataLength=15
+ INITIALIZE UPDATE header=80 50 FF 00; requestedKvn=FF; SW=6A88; dataLength=0
+ SELECT header=00 A4 04 00; SW=9000; dataLength=15
+ INITIALIZE UPDATE header=80 50 00 00; requestedKvn=00; SW=6A88; dataLength=0
+
+
+
+Test Run Failed.
+Total tests: 1
+     Failed: 1
+ Total time: 2.9936 Seconds

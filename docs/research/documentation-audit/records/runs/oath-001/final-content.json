@@ -1,0 +1,23 @@
+{
+  "files": {
+    "src/Oath/CLAUDE.md": {
+      "sha256": "a8f970b4d608642a5cc0c4a5ba1f1947de1a16d40d8915afbdc9abbc5130890d",
+      "difference_from_review": "identical to reviewed content"
+    },
+    "src/Oath/README.md": {
+      "sha256": "b03eaa8317bf3d194a615baadc76254063920e88a222cd88d448a74b37c21af7",
+      "difference_from_review": "identical to reviewed content"
+    },
+    "src/Oath/examples/OathTool/Commands/AccessCommand.cs": {
+      "sha256": "180062b6d4aa598eaae3f1c0b1bc9c9e85851bac48afb9dc413ecaa6ed5655ac",
+      "difference_from_review": "only reviewed terminal newline removed"
+    },
+    "src/Oath/src/IOathSession.cs": {
+      "sha256": "50a969addb06e01e3b26f9adf91f959554a1c4adf204457ae508148ce3ca8532",
+      "difference_from_review": "only reviewed terminal newline removed"
+    }
+  },
+  "diff_sha256": "4ab19ab2c810c1f89de2257722908deecab9df63ca8ef5772ddab19920684388",
+  "non_comment_code_identical_to_baseline": true,
+  "review_and_gate_semantics_preserved": true
+}

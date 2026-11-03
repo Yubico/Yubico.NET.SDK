@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath --filter \"FullyQualifiedName~ValidateAsync_AllResponsePaths|FullyQualifiedName~OathResetTests\"",
+  "started": "2026-11-03T00:01:13.8343175+01:00",
+  "durationSeconds": 5.5,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000113-834-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 5.5,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 9,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.ValidateAsync_AllResponsePaths_ClearOriginalWithoutClearingCallerKey(mode: \"mismatch\")",
+          "message": "Assert.Throws() Failure: Exception type was not an exact match | Expected: typeof(Yubico.YubiKit.Core.BadResponseException) | Actual:   typeof(Yubico.YubiKit.Oath.OathException)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-000113-834-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResponseTests.ValidateAsync_AllResponsePaths_ClearOriginalWithoutClearingCallerKey\""
+  ]
+}

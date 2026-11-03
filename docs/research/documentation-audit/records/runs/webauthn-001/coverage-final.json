@@ -1,0 +1,1058 @@
+{
+  "baseline": "e353b49afa15d1d104fce70bbf1e1abc59ddb132",
+  "module_files": [
+    {
+      "path": "src/WebAuthn/CLAUDE.md",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": true,
+      "sha256": "b058a8b1089549410867550550d24ab7c4540b76a3c47aaa08af995c6b56fe2a"
+    },
+    {
+      "path": "src/WebAuthn/PACKAGE_README.md",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": true,
+      "sha256": "6c7ec48109b88969b9c4c330c7b8fc05e32834c5953703323b0ab2366e5a1647"
+    },
+    {
+      "path": "src/WebAuthn/README.md",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": true,
+      "sha256": "608e32f5270abd2330ca39e5f1dd4e5c47f3af9f625b535bc3f202061c4d68ce"
+    },
+    {
+      "path": "src/WebAuthn/src/Attestation/WebAuthnAttestationObject.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "caf73438332e52d2baaa92a25344d0ffe10e157b3359c4b856650e0a4a60699d"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "4bc9c446bd42044d462240499856fd5e5bc3425c21a89f57c15dc46adbf6e5ad"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/Authentication/CredentialMatcher.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "bc4efb9c5baabe280698100dcf93e640dc088c1f191887229f823319eb0d28b5"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/Authentication/MatchedCredential.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "d04cb09b436eda097f5e7f642ca265d9252e50b1705aeb9f2a426838bf836673"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/Authentication/PublicKeyCredentialRequestOptions.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "afc16bc2f2256be2780149a25ea7d6180c64a858436ecb4c7948bc670f420b56"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/CeremonyDeadline.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "6315c89e7b66fbfedec2779f7f98c399d13110125ab7609d6a9f21c2082a039d"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/CredentialFilter.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "67793da940d0c7213f03007301a501b29200bcde39093f5e0409c459bec7191d"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/IWebAuthnBackend.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "d3a2324d75b3f5641de7c498cc04ae42b9f6016c42714edd750b87a809e29e11"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/PinUvAuthTokenSession.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "6005f2fb3d915f3d7fa6a324f9828e188ff8833fd22dfe2817b8a9ae35429c94"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/PinUvSharedSecret.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "8fa0ee43a87c42f7a31a49c241586d9e7d32ee6e893eac383f3c370833a5fb5b"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/Registration/PublicKeyCredentialCreationOptions.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "a3bf2220b3770b2448843bf197119b585fdb0a375241124ab379b890edbefa9d"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/Registration/RegistrationResponse.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "a9460c3915859b86c80a3dc3c4cd2de7abb32fd2038f2df84703653f067144c6"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/RpIdValidator.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "22fecdf4ac61fd572b187f29bb966e0376844fed5982e36578524372b6b2b87c"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "f4326f93e6a56ebb853c2e21976d284f217716c32a3bf2be239eec7538794a9f"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnBackend.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "ad7e6403a5938844ccdfc05680230252c47f8cb53170b04d2541d0f09664365b"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "6a56a3b90271e8aab24cf959fc7ff26c3263af64e92bf4c3d1c2f174d7b44c51"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "c93f4a677196ab45d2bc01982f4f0bcd438955b2e734d5c7d41633d68ade7dbc"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.PinUvAuth.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "c53c886d634d1dcf5cb27b83113bc5558c6703dec1c1ce6a2e16a770bcb0fa14"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.Registration.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "6f7a9804a1a03d0e00409937df3c7a041f04bece06b99f1bdf73476a4ecc4cb2"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.Validation.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "a0cf2071ea8a47e229e24ff7756a1ebf63804fbf29d84590fef7e1b7ad85f26c"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClient.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "ce590e3e646f32b56f42377840139ba651270d66ad402bc9a0eb86b36facae5f"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClientData.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "1e63ca795735481bb457ffdcb5761870a0b9ece0564eb40c4297b4d61bcb82db"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnClientOptions.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "b15ecbad82956b0a05ba328532d7fa2fcb956eb10af2e340c81b14eea45bdc74"
+    },
+    {
+      "path": "src/WebAuthn/src/Client/WebAuthnOrigin.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "0230fdbd6e5b29f533c28dcf6299e7989d7663359bd879cdaa1943e93d2c4663"
+    },
+    {
+      "path": "src/WebAuthn/src/Cose/Aaguid.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "1b2b42e6ebb8c0f7f8043540b14fc614851d4c548d92012e011c8328456c0a72"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Codec/CredBlobCodec.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "81e3fc093e7af6835e4807cebc93a398827e5fb74d1d21e0f0a332ea5dd5bf43"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Codec/CredProtectCodec.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "57333d4b08d47445eda1826aa2434706646ef285597f6e6af818a3109d8cc242"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Codec/MinPinLengthCodec.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "bf9a2858f40ba2ac60b98ccd62d050ca451ee30377b1622fd9e227be7a296191"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Codec/PreviewSignCodec.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "a394b1cbbc30979835d01da6cf4088d920a8b780a4eaf2605770189118200732"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Codec/PrfCodec.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "19c79865f60ff7e49f057bc94c5a2e92f1a884ce1f15f37e6666aa779c8fa872"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Inputs/CredPropsInput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "81a4f3f96ef8ad804d0ef356547ccab1b29e9ead4a8dfacc180b6ea517b9b405"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Inputs/CredProtectInput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "be4fd27e331cbfd66c3ee40faf0d4f1f6dcf4e255285e6a62b538b58be0e5627"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Inputs/LargeBlobInput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "5ea26adb60acbad09435a18c26740724551d51d114d92d0bd922a8d984a5cf9c"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Inputs/LargeBlobSupport.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "ca42f08467570f7dcfbbbc3164ec00539112f61b1ab5e85473bffb8f11b75e27"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Inputs/PrfInput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "3e1f093d3839931551c7b4703e2e9faa3792bee6ba298e0d3be5df02473c11ca"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Inputs/PrfInputValues.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "14ce3d6c3e286e09e6fc72c7ad357ebe5e2042255197f1aee512d1b317acf36e"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Outputs/CredPropsOutput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "e240b00785058e4528e471e8367bfe1cce70f0cb107f63e7539c16cdf71a5dca"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Outputs/CredProtectOutput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "b40c59b7c8541d47137d85c875fcfff031917fecc5131201b310d3b8ce508d13"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Outputs/LargeBlobOutput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "8fb797b606997355433152dd51150cf3708da7cacac013e6d2b9a68b60a2295e"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Outputs/PrfOutput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "661ae947267d952dd40604d34d332af7ea4c7dd587e7ac564a90fe11ae2f11cd"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/PreviewSign/ByteArrayKeyComparer.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "01fa60f0e76e2b3a54004cd960ab93fff010bb2778574e6490f674da94d27f40"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/PreviewSign/GeneratedSigningKey.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "a8c5240df33c028082bee9ff695353fed4e06f9fe53d7d8913cd593a4b4494c9"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "be9ae1af7a6ae0b6183631c33c888ed1e2df1cc98bf9a59ca85ae963f6bc859c"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignAuthenticationOutput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "1e308b35f5906b9d3235d070d2c3594cedaf6edd190d2c3dfe74ec5431008840"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignErrors.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "ba6da297450eea518843295d55733a76af8168f2542b59938695d3c4e9610059"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignFlags.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "e6415e5c577e56be688db43c98db2def15097859f37d0a8373230f6f08af965d"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignRegistrationInput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "5e15ea9923a7c733ed646901fbde505a96ba92ce1b31877b623af8f205d3ac4c"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "74e877562a4fa415163d2a4b6daeb28c378b1f292402d3f05a05fc13d6a2049c"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignSigningParams.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "89b3d3a6f49cc7fd5d13b8d5eb681a97f5d95bdf8d360d10068334a55ed63d1e"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionOutputsBuilder.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "067d45c2359b947116f79ab40bb151951b831ce0f778ee97294e4c1904a8ab49"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "5a56da1a5c055d49eaefc819d4d2048ac1b4aead6c541564aed8e379def8800f"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/ExtensionContext.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "1de0248955e2611da1c1bd787caafb3952dc215a677ba53e261c328ddc772a71"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/IAuthenticationExtensionProcessor.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "c5e7655a01ab0b4fb4ea25cb283b9b57f1d8e341b23cfb793445bb6f8b35d4b6"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/IRegistrationExtensionProcessor.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "22ff80aa73ca5184484a7c3d7291c91c53cfb41bb3237bb523da3582cdc6ea59"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/Processors/CredBlobProcessor.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "fb768651cd9e6e1763f260b64537ba3fdc4a6ca198d8167cc400a5ae11f858d1"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/Processors/CredPropsProcessor.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "c410456bec6c54927876c033a56277886a25590561b9a23ae791c25d12ac8bd6"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/Processors/CredProtectProcessor.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "e91ccab32bc5272c670bea9910c874f476a00fb0204d52e9b32823ca882c8146"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "2c13aca84e970d61ba6941f782d1e6019bb330fbbe07e8a736d78957370a6c9f"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/Processors/MinPinLengthProcessor.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "582575273eae53fb22e8615c7b4df27fcb111a3deba2e7d0b43d5d666fcf5064"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/Processors/PreviewSignProcessor.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "5dcf02a76c71319eb8f88be7cc0cb39a6e319c71af8fc95163626e6067590a52"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/Processors/PrfProcessor.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "4e547a860099b61ba5e6cf9feeed4ead4ea3f6ff39ffdf86cb487fb405fd2cb3"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionOutputsBuilder.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "e049d856b92fb9170e001225936f319f33cc2637f6a0825834f4c6d37fdd3f8e"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "90c1b71bb902a8828b52437cb0eb782fe33aeaf82e21896abd4126ca64bf34b0"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/WebAuthnExtensionInputs.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "72a395e96c1c963f22c6345d1ed42dea2bb09b1ea591796afd795fa680ae80c4"
+    },
+    {
+      "path": "src/WebAuthn/src/Extensions/WebAuthnExtensionOutputs.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "d3b5ef82080653660d38c7b27292903e67687cb45cb4f7594ea19252eb29e84f"
+    },
+    {
+      "path": "src/WebAuthn/src/IYubiKeyExtensions.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "57bdcde9265ea2951982480b4373c058388f0e1263abd35c1917e670ee27d759"
+    },
+    {
+      "path": "src/WebAuthn/src/Preferences/AttestationPreference.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "9997944e02e9b8629ad48d47b528f7705807c68be9fd311fcd74d9520f2ef16e"
+    },
+    {
+      "path": "src/WebAuthn/src/Preferences/ResidentKeyPreference.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "18c610dda27f85f93c893aebb47b23b0022b1650727f473796def4fbca48a159"
+    },
+    {
+      "path": "src/WebAuthn/src/Preferences/UserVerificationPreference.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "7ec8463c356a2a0e9a44c7457082a594de7e1da702def8a0b6f5b6fd75854812"
+    },
+    {
+      "path": "src/WebAuthn/src/PublicAPI.Shipped.txt",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": false,
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    },
+    {
+      "path": "src/WebAuthn/src/PublicAPI.Unshipped.txt",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": false,
+      "sha256": "58bf398b569712e8c7fd2cc4331daac4d03eee568e4537c01fcfc1e1f6329c41"
+    },
+    {
+      "path": "src/WebAuthn/src/Util/Base64Url.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "7639da849031b0e00077b255cbe06b405d9cdd257db1df8d2bbdf91a679a62d3"
+    },
+    {
+      "path": "src/WebAuthn/src/Util/SensitiveMemory.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "dc27a954e28b16ced49d358e4d66cb11fedebdc4071be47cebfa4b1df85d45f8"
+    },
+    {
+      "path": "src/WebAuthn/src/WebAuthnAuthenticatorData.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "d083829372b4600e2b1eba9793bf013a05149d916b7789dae5f42b7a6e9a779e"
+    },
+    {
+      "path": "src/WebAuthn/src/WebAuthnClientError.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "28ad9186c5f1ba246fde66f144b9e635c9702e18b80a6290b8a93d5aaf5ecb99"
+    },
+    {
+      "path": "src/WebAuthn/src/WebAuthnTransport.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "b5d0bfdcc80233f3990e01f3d2012d402c745b1641eefae530dd032356e3c1b5"
+    },
+    {
+      "path": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": true,
+      "sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/AuditV2/WebAuthnAuditHardwareReproTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "e76e23298277fd5d3175fda15fcc29e98c2a6ca29d5166deb70adda920e1f8e2"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/AuditV2/WebAuthnAuditHardwareTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "86303d0a9598a9f9b2519cbf34cdded2d0c766f92248f739c0aac27a136a4c60"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/PreviewSignTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "e5e80dff9ec33e4899224a9c97967d5815de0e41b893eaf059e93d699ffd5dad"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnClientFactoryTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "14b17026230b638b8b702412fb314c6994f78a8fa1aad14906e90b0d5788551c"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnClientTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "eb393503c766950f0ed6c1ba173ec0f278b12c80b775eec3023aa9a574b4005c"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnExcludeListStressTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "87eae2c7849f47e5cd77b352d28c1f31f7a3c5c6707d7529d046787978618ae2"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnTestHelpers.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "6cc1ea3f6243313fe4f184c24ad770963ff9e8074c69f6c68dd68770b3c772fe"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": false,
+      "sha256": "71ed2e0f5e017827aca5b40767dfd56cf5b0a40d5c0c681bde064380675eea31"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/xunit.runner.json",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": false,
+      "sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Attestation/AttestationObjectTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "adee07b4f0da7a3d791cbf6ecb374a1d91c1c74f7c338fa76a820fc5e49b8a82"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/AuditV2/WebAuthnAuditReproTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "c5e1553c572569a8b0d70e9f74fa1e6d5ee6f7b817f17ee5beb847a1243e4e59"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/AuditV2/WebAuthnExtensionAuditReproTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "489d34011dc8548ea37c8daef597da48c7879b1f29c453c572b2fbde82ea0e59"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/AuditV2/WebAuthnLargeBlobAuditReproTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "38665196fca5d48a06d821cb30a7eb009208a4960ecefeeb8c0469611b1d4f84"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/CredentialFilterTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "45686d5247f70a513b40cf264718d310f9b3fda3f0194034a46a18f85cd9f36b"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/CredentialPromptRetryTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "a4e87ba698804e4c4bec65a4bdc472707fa8e0ee8c35d280116f8de5251c5513"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/CtapStatusMappingTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "16793af6a76ecbb0fae31eea4fc57367716ee1003bf9061dd19f6e1bc88998fa"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/PinUvAuthTokenSessionTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "27b59cbfe0b304db47b4fccc2f2f1f8a0278480b223fa981ce37eff539d7d4da"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/RegistrationTransportTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "1558b58527e8362a7aa5521d46010b6b5be73cd8edad041e58303de3ab6d556a"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/RpAuthorizationTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "a20572bf3350d8ae4c09fd5b1df2fdd852ab88566f9e2d463a558accd1a2f97e"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserPresenceIntentTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "b4efebf82c2d4d54b7c5a91d4c344bd7855d8228badfc52fc0079dd955a72975"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserVerification/UvDecisionLogicTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "38a9061225214cbfbc3efc88bf56359f8e0dcfd0da2b52e31ac5030b502a4630"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnBackendTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "968ab5e4ab60ae0c6a0e0a9bf627a9835ce4c77204420456e513f57988c94d65"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "d787616f384a7c78f16e400298e091c50651bcb881f7f378ed9976c1b24d5576"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientConstructionTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "359781cda2db390a0ef042320100d64f5a9c64a03915f51b51d97d0bfc13aaa3"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientDataTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "40f96107098736b2d6d93690e5f173c1372007c722bfd3c255e44ab3a77790bc"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientMakeCredentialTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "9f0355c42b8536a3ad765789cef624feebd3cc91674ef444232ad0af4ae5bba3"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientOptionsTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "fa0b8d84a5f715d0c399bc37ff9a986e0077bb8ac0676acd02d752c03d2ac785"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientPinRetryTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "5ea56b2e150580884d9a1eb5f4c84a16649f19d6df6a65c42b80dda939feef97"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnOriginTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "a5f38b0d0fd2d60e586e96b78119ff25aad910b403dcaaa239fffc23e66dca7e"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnSurfaceTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "db05c5bc2b9d676d7976ed91410f42d49c68f2aa9e1c7dd6969fa7784530878a"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Cose/AaguidTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "c2477829ed953772ddbf9b28a6b2e34d31d3b3d86be7455e55c57c75dc53ae59"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Cose/CoseAlgorithmTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "3254f50927f5bfc24a005ac35326620c7c2d9df3192fd81c83140f8513017ad7"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Cose/CoseKeyTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "0d6966585a81655ff150bc01301d1b6b8815af7001587e4351fddb44b7685a11"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Cose/Fixtures.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "e38bd3c5b6f9f63c537908b5ee7f480bca239bd1193703d5c7bb4706a25902fe"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/ExtensionSessionTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "bbf0c7ed1526b6c4e193958de0731f22b590321c19df920946206bde1ab72fd3"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/LargeBlob/LargeBlobProcessorTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "f9436c2005b8e0a66b9cd6aa252b7a196250e5bcf3d87ba02407c437504ce5b9"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/PreviewSign/PreviewSignCodecTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "dd343f4dac10c0ca8895a83f31c8fad467421f3f46cfd299ea034e60a80c5cc1"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/PreviewSign/PreviewSignProcessorTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "72b5f6e9f34606e523c0746808c342cffa42f22d18fd3d511267bf75e61e1972"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/PreviewSign/PreviewSignSigningParamsTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "e509f48aaa43f6bec1fd9fb0e0722f7dfbe6a87890a1ae0236eace1109e54871"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/Prf/PrfCodecTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "e73e42a21b37d949e2eb7e270a9e25086146e24a38a6b43faa19371c3bd58e31"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/Prf/PrfInputTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "612415d028e83126027bf59a63072a988c7f16bd057df2dd9741782fba44a408"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/Prf/PrfProcessorTests.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": true,
+      "sha256": "3eaaa8901f81fb5181e0a90d2fef44db261ad117370d3ccab1f6121f64bc07b5"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "f87b4e6f8e39695b2b9d5cbc9b989e92b6da50f02e1adcddaf8f2561d0ecc50f"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/MockCtap2Responses.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "e2007f88e15a5c8213c5bf9924a0f3dc7b36c3b1f0d313f4e19af0a41b613a1f"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/TestExtensionContext.cs",
+      "owner": "b",
+      "semantic_read": "complete",
+      "evidence": "investigation-b.md",
+      "edited": false,
+      "sha256": "892910a0f57a3f6cdae2f70c540bf9cdf8ad98e0063611e075878976038c186d"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/TestPinUvAuthProtocol.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "dfacce476ce024288791f9842c50644723cfee2cdda56dbf880187bddd6f26bb"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/TokenBufferAssert.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": true,
+      "sha256": "13180dd048e3e3fe36cdb05bd173b222e571be2c412c448a0157e42c4cb89ac6"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/WebAuthnAuthenticatorDataTests.cs",
+      "owner": "a",
+      "semantic_read": "complete",
+      "evidence": "investigation-a.md",
+      "edited": false,
+      "sha256": "d6ed0cfe605997a50ff3c1a966ec497805448d31552b1312bd32666b995daa7b"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": false,
+      "sha256": "ffab7fa521d0d5cd5020d2c7b3bfc6df0f4cf3cf7c7175b87cf45852829fc0f0"
+    },
+    {
+      "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/xunit.runner.json",
+      "owner": "c",
+      "semantic_read": "complete",
+      "evidence": "investigation-c.md",
+      "edited": false,
+      "sha256": "a1c0e9aaf0600b78c374bd5157b32a83cc49b757722238a7572a9424173f4110"
+    }
+  ],
+  "external_reference_evidence": [
+    "investigation-c.md",
+    "sample-expansion.md"
+  ],
+  "external_reference_count": 30
+}

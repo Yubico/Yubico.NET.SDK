@@ -1,0 +1,56 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Core --filter FullyQualifiedName~Base32Tests",
+  "started": "2026-11-03T12:32:47.7702006+01:00",
+  "durationSeconds": 5.9,
+  "runDirectory": "artifacts/toolchain/runs/20261103-123247-770-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 5.8,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Core.UnitTests",
+      "outcome": "failed",
+      "reason": "4 test(s) failed",
+      "executed": 27,
+      "failed": 4,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: \"MZXW6YTB\", byteOffset: 8)",
+          "message": "Assert.Equal() Failure: Collections differ | ↓ (pos 4) | Expected: [···, 'X', 'W', '6', 'Y', 'T', ···]"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: \"MZXW6YTB\", byteOffset: 0)",
+          "message": "Assert.Equal() Failure: Collections differ | ↓ (pos 0) | Expected: ['M', 'Z', 'X', 'W', '6', ···]"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: \"MZXW6YTB!\", byteOffset: 8)",
+          "message": "Assert.Equal() Failure: Collections differ | ↓ (pos 4) | Expected: [···, 'X', 'W', '6', 'Y', 'T', ···]"
+        },
+        {
+          "name": "Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: \"MZXW6YTB\", byteOffset: 1)",
+          "message": "Assert.Equal() Failure: Collections differ | ↓ (pos 0) | Expected: ['M', 'Z', 'X', 'W', '6', ···]"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-123247-770-test/01-test-Core.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Core.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination\""
+  ]
+}

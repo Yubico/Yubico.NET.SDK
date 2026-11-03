@@ -1,0 +1,26 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Core --filter FullyQualifiedName~Base32Tests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       4.3s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Core.UnitTests  14 test(s) failed
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "========"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB========"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTBOI======="): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB\t"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB\n"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "AAA"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTBOI====="): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTBé"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB!"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "AAAAAA"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "MZXW6YTB=OI====="): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "A"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination(encoded: "AAAAAAAAA"): Assert.True() Failure | Expected: True | Actual:   False
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_DestinationTooSmall_ClearsPartialOutputRatherThanLeavingPrefix: Assert.True() Failure | Expected: True | Actual:   False
+      output: artifacts/toolchain/runs/20261103-000319-887-test/01-test-Core.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 23 executed, 14 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Core.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_InvalidInput_ClearsEntireCallerVisibleDestination|FullyQualifiedName~Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_DestinationTooSmall_ClearsPartialOutputRatherThanLeavingPrefix"
+Run log: artifacts/toolchain/runs/20261103-000319-887-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

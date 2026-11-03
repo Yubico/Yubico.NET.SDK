@@ -1,0 +1,31 @@
+The dotnet runtime version is '10.0.14'.
+Formatting code files in workspace '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/Yubico.YubiKit.Oath.csproj'.
+Loading workspace.
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/Yubico.YubiKit.Oath.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/Yubico.YubiKit.Oath.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Yubico.YubiKit.Core.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Yubico.YubiKit.Core.csproj'
+Project Yubico.YubiKit.Oath is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/obj/Debug/net10.0/Yubico.YubiKit.Oath.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/obj/Debug/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 1530ms.
+Determining formattable files.
+Skipping referenced project 'Yubico.YubiKit.Core'.
+Complete in 170ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 5 analyzers on Yubico.YubiKit.Oath.
+Complete in 1848ms.
+Analysis complete in 1848ms.
+Running Analyzer Reference analysis.
+Determining diagnostics...
+Running 157 analyzers on Yubico.YubiKit.Oath.
+Complete in 464ms.
+Analysis complete in 464ms.
+Complete in 2754ms.
+Formatted 0 of 16 files.
+Format complete in 4454ms.

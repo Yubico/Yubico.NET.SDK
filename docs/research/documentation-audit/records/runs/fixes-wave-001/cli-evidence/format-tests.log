@@ -1,0 +1,91 @@
+The dotnet runtime version is '10.0.14'.
+Formatting code files in workspace '/tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj'.
+Loading workspace.
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Oath/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Oath/src/Yubico.YubiKit.Oath.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Oath/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Oath/src/Yubico.YubiKit.Oath.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Core/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Core/src/Yubico.YubiKit.Core.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Core/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Core/src/Yubico.YubiKit.Core.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Management/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Management/src/Yubico.YubiKit.Management.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Management/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Management/src/Yubico.YubiKit.Management.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Piv/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Piv/src/Yubico.YubiKit.Piv.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/Piv/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/Piv/src/Yubico.YubiKit.Piv.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/src/Yubico.YubiKit.YubiHsm.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/src/Yubico.YubiKit.YubiOtp.csproj'
+Project Yubico.YubiKit.Oath.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.Oath.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Oath.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Oath.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Core/src/obj/Debug/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Oath/src/obj/Debug/net10.0/Yubico.YubiKit.Oath.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Management/src/obj/Debug/net10.0/Yubico.YubiKit.Management.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Cli.Shared/src/obj/Debug/net10.0/Yubico.YubiKit.Cli.Shared.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/src/obj/Debug/net10.0/Yubico.YubiKit.Ctap2.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Piv/src/obj/Debug/net10.0/Yubico.YubiKit.Piv.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/src/obj/Debug/net10.0/Yubico.YubiKit.OpenPgp.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/src/obj/Debug/net10.0/Yubico.YubiKit.YubiHsm.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/src/obj/Debug/net10.0/Yubico.YubiKit.YubiOtp.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Cli.Commands/src/obj/Debug/net10.0/Yubico.YubiKit.Cli.Commands.GeneratedMSBuildEditorConfig.editorconfig'.
+Project OathTool is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project OathTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project OathTool is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/obj/Debug/net10.0/OathTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Tests.Shared is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/.editorconfig'.
+Project Yubico.YubiKit.Tests.Shared is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Tests.Shared is using configuration from '/tmp/opencode/yubikit-oath-fix-cli/src/Tests.Shared/obj/Debug/net10.0/Yubico.YubiKit.Tests.Shared.GeneratedMSBuildEditorConfig.editorconfig'.
+Complete in 2420ms.
+Determining formattable files.
+Skipping referenced project 'Yubico.YubiKit.Core'.
+Skipping referenced project 'Yubico.YubiKit.Oath'.
+Skipping referenced project 'Yubico.YubiKit.Management'.
+Skipping referenced project 'Yubico.YubiKit.Cli.Shared'.
+Skipping referenced project 'Yubico.YubiKit.Ctap2'.
+Skipping referenced project 'Yubico.YubiKit.Piv'.
+Skipping referenced project 'Yubico.YubiKit.OpenPgp'.
+Skipping referenced project 'Yubico.YubiKit.YubiHsm'.
+Skipping referenced project 'Yubico.YubiKit.YubiOtp'.
+Skipping referenced project 'Yubico.YubiKit.Cli.Commands'.
+Skipping referenced project 'OathTool'.
+Skipping referenced project 'Yubico.YubiKit.Tests.Shared'.
+Complete in 136ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 8 analyzers on Yubico.YubiKit.Oath.UnitTests.
+Complete in 2254ms.
+Fixing diagnostics...
+Complete in 1ms.
+Analysis complete in 2255ms.
+Running Analyzer Reference analysis.
+Determining diagnostics...
+Running 209 analyzers on Yubico.YubiKit.Oath.UnitTests.
+Complete in 370ms.
+Fixing diagnostics...
+Complete in 0ms.
+Analysis complete in 370ms.
+Complete in 3125ms.
+Formatted 0 of 16 files.
+Format complete in 5691ms.

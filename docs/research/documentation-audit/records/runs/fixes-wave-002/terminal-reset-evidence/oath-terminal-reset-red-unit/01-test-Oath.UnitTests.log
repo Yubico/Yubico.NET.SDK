@@ -1,0 +1,102 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathResetTests*" --filter-not-trait "Category=RequiresHardware" --filter-not-trait "Category=RequiresUserPresence"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal(cancel: False) (38ms)
+  Assert.Same() Failure: Values are not the same instance
+  Expected: System.InvalidOperationException: Owned connection teardown failed.
+     at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetConnection.Dispose() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:line 191
+     at Yubico.YubiKit.Core.Sessions.ApplicationSession.ReleaseConnection() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 545
+     at Yubico.YubiKit.Core.Sessions.ApplicationSession.Dispose(Boolean disposing) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 499
+     at Yubico.YubiKit.Core.Sessions.ApplicationSession.Dispose(Boolean disposing) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 482
+     at Yubico.YubiKit.Oath.OathSession.Dispose(Boolean disposing) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:line 939
+     at Yubico.YubiKit.Oath.OathSession.Dispose(Boolean disposing) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:line 931
+     at Yubico.YubiKit.Core.Sessions.ApplicationSession.<Dispose>b__52_0() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 444
+     at Yubico.YubiKit.Core.Devices.DisposalGate.<>c__DisplayClass5_0.<Dispose>b__0() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Devices/DisposalGate.cs:line 37
+     at Yubico.YubiKit.Core.Devices.DisposalGate.TearDownAsync(TaskCompletionSource claim, Func`1 teardown) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Devices/DisposalGate.cs:line 62
+     at Yubico.YubiKit.Core.Devices.DisposalGate.Dispose(Action disposeInner) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Devices/DisposalGate.cs:line 35
+     at Yubico.YubiKit.Core.Sessions.ApplicationSession.Dispose() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 444
+     at Yubico.YubiKit.Core.Sessions.ApplicationSession.DisposeAfterInitializationFailure() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 407
+  Actual:   System.InvalidOperationException: No response enqueued for transmission.
+     at Yubico.YubiKit.Tests.Shared.RecordingSmartCardConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/RecordingSmartCardConnection.cs:line 55
+     at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:line 180
+     at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs:line 39
+     at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs:line 33
+     at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedResponseReceiver.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs:line 42
+     at Yubico.YubiKit.Core.Utilities.ExchangeGuard.RunAsync[T](Func`2 exchange, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:line 57
+     at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.SelectAsync(ReadOnlyMemory`1 applicationId, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs:line 149
+     at Yubico.YubiKit.Oath.Backend.OathBackend.ReadInitialStateAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/Backend/OathBackend.cs:line 35
+     at Yubico.YubiKit.Oath.OathSession.<ResetAsync>b__39_0(CancellationToken token) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:line 683
+     at Yubico.YubiKit.Core.Sessions.ApplicationSession.InitializeSessionAsync(Func`2 initialize, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:line 318
+     at Yubico.YubiKit.Oath.OathSession.ResetAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:line 681
+     at Xunit.Assert.RecordExceptionAsync(Func`1 testCode) in /_/src/xunit.v3.assert/Asserts/Record.cs:line 110
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal(Boolean cancel) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:138
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal(cancel: True) (0ms)
+  Assert.Throws() Failure: Exception type was not an exact match
+  Expected: typeof(System.InvalidOperationException)
+  Actual:   typeof(System.OperationCanceledException)
+  ---- System.OperationCanceledException : The operation was canceled.
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal(Boolean cancel) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:137
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at System.Threading.CancellationToken.ThrowOperationCanceledException()
+    at System.Threading.CancellationToken.ThrowIfCancellationRequested()
+    at Yubico.YubiKit.Core.Utilities.ExchangeGuard.Enter(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:113
+    at Yubico.YubiKit.Core.Utilities.ExchangeGuard.RunAsync[T](Func`2 exchange, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:53
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.SelectAsync(ReadOnlyMemory`1 applicationId, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs:149
+    at Yubico.YubiKit.Oath.Backend.OathBackend.ReadInitialStateAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/Backend/OathBackend.cs:35
+    at Yubico.YubiKit.Oath.OathSession.<ResetAsync>b__39_0(CancellationToken token) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:683
+    at Yubico.YubiKit.Core.Sessions.ApplicationSession.InitializeSessionAsync(Func`2 initialize, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:318
+    at Yubico.YubiKit.Oath.OathSession.ResetAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:681
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(cancel: False) (1ms)
+  Xunit.Runner.InProc.SystemConsole.TestingPlatform.XunitException: System.InvalidOperationException : No response enqueued for transmission.
+    at Yubico.YubiKit.Tests.Shared.RecordingSmartCardConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/RecordingSmartCardConnection.cs:55
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:180
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs:39
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs:33
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedResponseReceiver.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs:42
+    at Yubico.YubiKit.Core.Utilities.ExchangeGuard.RunAsync[T](Func`2 exchange, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:57
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.SelectAsync(ReadOnlyMemory`1 applicationId, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs:149
+    at Yubico.YubiKit.Oath.Backend.OathBackend.ReadInitialStateAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/Backend/OathBackend.cs:35
+    at Yubico.YubiKit.Oath.OathSession.<ResetAsync>b__39_0(CancellationToken token) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:683
+    at Yubico.YubiKit.Core.Sessions.ApplicationSession.InitializeSessionAsync(Func`2 initialize, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:318
+    at Yubico.YubiKit.Oath.OathSession.ResetAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:681
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(Boolean cancel) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:40
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(Boolean cancel)
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(cancel: True) (0ms)
+  Xunit.Runner.InProc.SystemConsole.TestingPlatform.XunitException: System.OperationCanceledException : The operation was canceled.
+    at System.Threading.CancellationToken.ThrowOperationCanceledException()
+    at System.Threading.CancellationToken.ThrowIfCancellationRequested()
+    at Yubico.YubiKit.Core.Utilities.ExchangeGuard.Enter(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:113
+    at Yubico.YubiKit.Core.Utilities.ExchangeGuard.RunAsync[T](Func`2 exchange, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:53
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.SelectAsync(ReadOnlyMemory`1 applicationId, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs:149
+    at Yubico.YubiKit.Oath.Backend.OathBackend.ReadInitialStateAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/Backend/OathBackend.cs:35
+    at Yubico.YubiKit.Oath.OathSession.<ResetAsync>b__39_0(CancellationToken token) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:683
+    at Yubico.YubiKit.Core.Sessions.ApplicationSession.InitializeSessionAsync(Func`2 initialize, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:318
+    at Yubico.YubiKit.Oath.OathSession.ResetAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:681
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(Boolean cancel) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:40
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(Boolean cancel)
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_DisposesOwnedConnectionOnceWithoutRefresh (0ms)
+  Xunit.Runner.InProc.SystemConsole.TestingPlatform.XunitException: System.InvalidOperationException : No response enqueued for transmission.
+    at Yubico.YubiKit.Tests.Shared.RecordingSmartCardConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/RecordingSmartCardConnection.cs:55
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:180
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs:39
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedApduTransmitter.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs:33
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ChainedResponseReceiver.TransmitAsync(ApduCommand command, Boolean useScp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs:42
+    at Yubico.YubiKit.Core.Utilities.ExchangeGuard.RunAsync[T](Func`2 exchange, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Utilities/ExchangeGuard.cs:57
+    at Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.PcscProtocol.SelectAsync(ReadOnlyMemory`1 applicationId, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs:149
+    at Yubico.YubiKit.Oath.Backend.OathBackend.ReadInitialStateAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/Backend/OathBackend.cs:35
+    at Yubico.YubiKit.Oath.OathSession.<ResetAsync>b__39_0(CancellationToken token) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:683
+    at Yubico.YubiKit.Core.Sessions.ApplicationSession.InitializeSessionAsync(Func`2 initialize, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Sessions/ApplicationSession.cs:318
+    at Yubico.YubiKit.Oath.OathSession.ResetAsync(CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/OathSession.cs:681
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_DisposesOwnedConnectionOnceWithoutRefresh() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:70
+    --- End of stack trace from previous location ---
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 8
+  failed: 5
+  succeeded: 3
+  skipped: 0
+  duration: 233ms

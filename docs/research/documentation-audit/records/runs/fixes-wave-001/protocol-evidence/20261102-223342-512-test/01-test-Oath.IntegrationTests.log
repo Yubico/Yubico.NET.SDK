@@ -1,0 +1,64 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~Cleanup_ExpiredOperationToken"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-protocol/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.11]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.13]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.17]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True) [OUTPUT] Executed device serial=, firmware=5.7.0
+[xUnit.net 00:00:00.21]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:00:00.21]       Expected: 3
+[xUnit.net 00:00:00.21]       Actual:   2
+[xUnit.net 00:00:00.21]       Stack Trace:
+[xUnit.net 00:00:00.21]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True) [FAIL]
+[xUnit.net 00:00:00.21]         /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs(187,0): at Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(Boolean cleanupFails)
+[xUnit.net 00:00:00.21]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.21]       Output:
+[xUnit.net 00:00:00.21]         Executed device serial=, firmware=5.7.0
+[xUnit.net 00:00:00.21]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: False) [OUTPUT] Executed device serial=, firmware=5.7.0
+[xUnit.net 00:00:00.22]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: False) [FAIL]
+[xUnit.net 00:00:00.22]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:00:00.22]       Expected: 3
+[xUnit.net 00:00:00.22]       Actual:   2
+[xUnit.net 00:00:00.22]       Stack Trace:
+[xUnit.net 00:00:00.22]         /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs(187,0): at Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(Boolean cleanupFails)
+[xUnit.net 00:00:00.22]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.22]       Output:
+[xUnit.net 00:00:00.22]         Executed device serial=, firmware=5.7.0
+[xUnit.net 00:00:00.22]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Failed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True) [40 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 3
+Actual:   2
+  Stack Trace:
+     at Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(Boolean cleanupFails) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs:line 187
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ Executed device serial=, firmware=5.7.0
+
+
+  Failed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: False) [< 1 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 3
+Actual:   2
+  Stack Trace:
+     at Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(Boolean cleanupFails) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs:line 187
+--- End of stack trace from previous location ---
+  Standard Output Messages:
+ Executed device serial=, firmware=5.7.0
+
+
+
+Test Run Failed.
+Total tests: 2
+     Failed: 2
+ Total time: 0.5694 Seconds

@@ -1,0 +1,56 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath --filter \"(FullyQualifiedName~OathResetTests|FullyQualifiedName~SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession)&Category!=RequiresHardware&Category!=RequiresUserPresence\"",
+  "started": "2026-11-03T12:45:45.9167024+01:00",
+  "durationSeconds": 5.1,
+  "runDirectory": "artifacts/toolchain/runs/20261103-124545-916-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 5,
+      "error": "2 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "--filter cannot mix '|' and '&' for xUnit v3 projects: use either \"A|B\" (any) or \"A&B\" (all).",
+      "executed": null,
+      "failed": null,
+      "skipped": null,
+      "failedTests": [],
+      "log": null
+    },
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   0"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-124545-916-test/01-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --verbose",
+    "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession\""
+  ]
+}

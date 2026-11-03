@@ -1,0 +1,60 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~OathResetTests&Category!=RequiresHardware&Category!=RequiresUserPresence\"",
+  "started": "2026-11-03T12:45:57.1454757+01:00",
+  "durationSeconds": 3.9,
+  "runDirectory": "artifacts/toolchain/runs/20261103-124557-145-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 3.9,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "5 test(s) failed",
+      "executed": 8,
+      "failed": 5,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal(cancel: False)",
+          "message": "Assert.Same() Failure: Values are not the same instance | Expected: System.InvalidOperationException: Owned connection teardown failed."
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal(cancel: True)",
+          "message": "Assert.Throws() Failure: Exception type was not an exact match | Expected: typeof(System.InvalidOperationException) | Actual:   typeof(System.OperationCanceledException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(cancel: False)",
+          "message": "System.InvalidOperationException : No response enqueued for transmission."
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(cancel: True)",
+          "message": "System.OperationCanceledException : The operation was canceled."
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_DisposesOwnedConnectionOnceWithoutRefresh",
+          "message": "System.InvalidOperationException : No response enqueued for transmission."
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-124557-145-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_DisposesOwnedConnectionOnceWithoutRefresh\""
+  ]
+}

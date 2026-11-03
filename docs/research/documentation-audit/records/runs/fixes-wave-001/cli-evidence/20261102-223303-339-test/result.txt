@@ -1,0 +1,10 @@
+RESULT: PASSED  (dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolDispatchTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ test                       6.5s
+Projects (test):
+  ✓ PASS      Oath.UnitTests  48 executed, 0 skipped
+Totals: projects: 1 passed, 0 failed, 0 with no tests executed; tests: 48 executed, 0 failed, 0 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261102-223303-339-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

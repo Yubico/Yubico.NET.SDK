@@ -1,0 +1,49 @@
+{
+  "baseline": "361567ebf6d1507afb474f960f94efe92ae9b802",
+  "worktree": "/tmp/opencode/yubikit-oath-fix-cli",
+  "tracked": [
+    "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+    "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+    "src/Oath/examples/OathTool/Commands/AccessCommand.cs",
+    "src/Oath/examples/OathTool/Commands/AccountsCommand.cs",
+    "src/Oath/examples/OathTool/Commands/ResetCommand.cs",
+    "src/Oath/examples/OathTool/Program.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj"
+  ],
+  "new": [
+    "src/Oath/examples/OathTool/Cli/OathToolServices.cs",
+    "src/Oath/examples/OathTool/OathToolApplication.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDeviceSelectionTests.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs"
+  ],
+  "files": {
+    "src/Oath/examples/OathTool/Cli/OathToolServices.cs": "f234bc91f72f669aad549bdacb479a2afee8ac0bfe79d013d081aa91fe0d4001",
+    "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs": "e5696ac83267831b9b30ceefa728ccc74d5415559db2af20556c187b82daeeba",
+    "src/Oath/examples/OathTool/Cli/SessionHelper.cs": "039b0377adcd34de71c14313bb04f851b248260b4c530c6cc138ac45623519af",
+    "src/Oath/examples/OathTool/Commands/AccessCommand.cs": "25778328dcc549a488df533e0a99ab888a07b723255237c5b4591825d87309b0",
+    "src/Oath/examples/OathTool/Commands/AccountsCommand.cs": "9101c0e2677e10e2a9f5fcaef32bdb63a6c2305b6f8a1d01c28a36a665dbbc69",
+    "src/Oath/examples/OathTool/Commands/ResetCommand.cs": "373720fba775f69789d69c14278b5ceef628e825c6df35a103d051b54de1c164",
+    "src/Oath/examples/OathTool/OathToolApplication.cs": "1a019d75958505b09f387e23e902a862d90b3249ce0f8b830672317075280088",
+    "src/Oath/examples/OathTool/Program.cs": "67da66a1f00ecfc00797778a9b61111bdda589d6dafc33fdb62baf808718f053",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs": "8a09388212250e12fa8b677ad77c6115a1220c2b653c1e7096cd458fdf41b188",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDeviceSelectionTests.cs": "23b71752e8cfb7848f555335bd37e3145b09610b984c0368ddaf6f8f69811f74",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs": "5fda4dc26a213d3ef33d3ad59dd714cda9ca0f018ad6422de99980059d80606f",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj": "c9494567c470384cc2ec879ea5ab29517611598a092acdb6944bd19adcae5373"
+  },
+  "normalized_files": {
+    "src/Oath/examples/OathTool/Cli/OathToolServices.cs": "f234bc91f72f669aad549bdacb479a2afee8ac0bfe79d013d081aa91fe0d4001",
+    "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs": "e5696ac83267831b9b30ceefa728ccc74d5415559db2af20556c187b82daeeba",
+    "src/Oath/examples/OathTool/Cli/SessionHelper.cs": "039b0377adcd34de71c14313bb04f851b248260b4c530c6cc138ac45623519af",
+    "src/Oath/examples/OathTool/Commands/AccessCommand.cs": "25778328dcc549a488df533e0a99ab888a07b723255237c5b4591825d87309b0",
+    "src/Oath/examples/OathTool/Commands/AccountsCommand.cs": "9101c0e2677e10e2a9f5fcaef32bdb63a6c2305b6f8a1d01c28a36a665dbbc69",
+    "src/Oath/examples/OathTool/Commands/ResetCommand.cs": "373720fba775f69789d69c14278b5ceef628e825c6df35a103d051b54de1c164",
+    "src/Oath/examples/OathTool/OathToolApplication.cs": "1a019d75958505b09f387e23e902a862d90b3249ce0f8b830672317075280088",
+    "src/Oath/examples/OathTool/Program.cs": "67da66a1f00ecfc00797778a9b61111bdda589d6dafc33fdb62baf808718f053",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs": "8a09388212250e12fa8b677ad77c6115a1220c2b653c1e7096cd458fdf41b188",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDeviceSelectionTests.cs": "23b71752e8cfb7848f555335bd37e3145b09610b984c0368ddaf6f8f69811f74",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs": "5fda4dc26a213d3ef33d3ad59dd714cda9ca0f018ad6422de99980059d80606f",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj": "17e7674214e09c209097d0fa2afc0768326a7333d24a65551c373f5db2924bf3"
+  },
+  "review": "passed round2; full gates running"
+}

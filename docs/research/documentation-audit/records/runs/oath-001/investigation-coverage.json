@@ -1,0 +1,71 @@
+{
+  "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+  "unit": "OATH-001 authentication/password handling",
+  "investigator_session": "ses_e629b0717ffedUbklz42fAb2hw",
+  "status": "initial investigation complete; edits and post-edit review not started",
+  "scope_note": "Read ranges are investigator-reported reading coverage, not certification of every claim in those ranges. File-wide coverage in coverage.json remains pending until all assigned semantic units are closed.",
+  "module_reads": [
+    {"path": "src/Oath/CLAUDE.md", "ranges": [[1,99]], "focus": "access-key and authentication guidance"},
+    {"path": "src/Oath/src/IOathSession.cs", "ranges": [[1,214]], "focus": "authentication/state public contracts"},
+    {"path": "src/Oath/src/OathSession.cs", "ranges": [[1,873]], "focus": "authentication, initialization, reset, exception translation, disposal"},
+    {"path": "src/Oath/src/Credentials/OathCredentialOptions.cs", "ranges": [[1,34]], "focus": "password reader policy"},
+    {"path": "src/Oath/README.md", "ranges": [[1,175]], "focus": "authentication and security guidance"},
+    {"path": "src/Oath/PACKAGE_README.md", "ranges": [[1,25]], "focus": "authentication overview"},
+    {"path": "src/Oath/examples/OathTool/Commands/AccessCommand.cs", "ranges": [[1,115]], "focus": "password changes/removal"},
+    {"path": "src/Oath/examples/OathTool/Cli/SessionHelper.cs", "ranges": [[1,104]], "focus": "password unlock"},
+    {"path": "src/Oath/examples/OathTool/Program.cs", "ranges": [[55,84]], "focus": "access command dispatch"},
+    {"path": "src/Oath/tests/CLAUDE.md", "ranges": [[1,12]], "focus": "required instructions"},
+    {"path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathAuthenticationTests.cs", "ranges": [[1,525]], "focus": "state, retry and cleanup evidence"},
+    {"path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathPasswordChangeTests.cs", "ranges": [[1,176]], "focus": "change/removal workflow evidence; not executed"},
+    {"path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs", "ranges": [[1,190],[550,646]], "focus": "session authentication evidence"},
+    {"path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathSessionTests.cs", "ranges": [[24,102],[141,190],[298,325]], "focus": "session authentication/reset evidence; not executed"},
+    {"path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathHashAlgorithmTests.cs", "ranges": [[177,236]], "focus": "wrong-key expectations; not executed"},
+    {"path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/AuditV2/OathAuditReproTests.cs", "ranges": [[174,197]], "focus": "caller password ownership evidence"},
+    {"path": "src/Oath/src/OathException.cs", "ranges": [[1,108]], "focus": "authentication failure classification"},
+    {"path": "src/Oath/src/Backend/OathBackend.cs", "ranges": [[1,71]], "focus": "authentication transport dependency"}
+  ],
+  "additional_reads": [
+    {"path": "AGENTS.md", "ranges": [[1,11]], "purpose": "required instructions"},
+    {"path": "CLAUDE.md", "ranges": [[1,635]], "purpose": "required instructions"},
+    {"path": "docs/TESTING.md", "ranges": [[1,565]], "purpose": "required instructions"},
+    {"path": "src/Core/CLAUDE.md", "ranges": [[1,591]], "purpose": "required dependency guidance"},
+    {"path": "src/Core/src/Credentials/CredentialReaderOptions.cs", "ranges": [[1,134]], "purpose": "UTF-8 and reader policy"},
+    {"path": "src/Core/src/Credentials/ConsoleCredentialReader.cs", "ranges": [[1,389]], "purpose": "input cancellation and ownership"},
+    {"path": "src/Core/src/Utilities/DisposableArrayPoolBuffer.cs", "ranges": [[1,85]], "purpose": "input cleanup ownership"},
+    {"path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs", "ranges": [[1,91]], "purpose": "raw response copy ownership"},
+    {"path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs", "ranges": [[104,162]], "purpose": "response transport dependency"},
+    {"path": "docs/migration/v1-to-v2.md", "ranges": [[545,582],[613,619]], "purpose": "authentication recipe and OATH status"},
+    {"path": "docs/migration/v1-to-v2-map.yml", "ranges": [[1,35],[399,434]], "purpose": "migration authentication map; supplemental non-Markdown discovery"},
+    {"path": "docs/migration/v1-to-v2-gaps.md", "ranges": [[1,180]], "purpose": "historical report classification"}
+  ],
+  "supported_claims": [
+    "IsLocked differs from persistent password protection",
+    "DeriveKey uses session salt, PBKDF2-HMAC-SHA1, 1000 iterations, 16 bytes, and rejects disposed sessions",
+    "Retry helper asks for a password only after Locked, authenticates once, and retries once after success",
+    "Helper derived-key cleanup is in finally; caller password memory is not cleared",
+    "README example clears password/access-key arrays in finally",
+    "Salt is session-backed and cleared on disposal; DeviceId formula matches source",
+    "Password reader preset's 1–128 characters is a reader policy, not an established device limit",
+    "Historical migration gap report identifies itself as a snapshot and should not be rewritten as current state"
+  ],
+  "gaps": [
+    "No tests, builds, or hardware checks executed",
+    "Nonstandard key lengths and authentication algorithms not established",
+    "Wrong-key status mappings across firmware not established",
+    "Authentication copies below the session response boundary not comprehensively audited",
+    "Device-HMAC mismatch, malformed VALIDATE responses, and complete post-SET-CODE same-session state not proven by reviewed tests",
+    "Remaining OATH semantic units and external reference files remain pending"
+  ],
+  "coordinator_checks": [
+    "OathSession.cs:630-873 authentication implementation and cleanup",
+    "OathSession.cs:175-183 error translation",
+    "IOathSession.cs:130-214 public authentication reference",
+    "OathException.cs:15-108 failure taxonomy and wording",
+    "ApduResponse.cs:1-91 independent raw response array",
+    "SWConstants.cs:113,133 caught status word values",
+    "AccessCommand.cs:1-115 and SessionHelper.cs:1-104 cancellation omission",
+    "Program.cs:50-89 command dispatch",
+    "README.md:143-159 irreversible wording",
+    "Official YKOATH SELECT, SET CODE, VALIDATE, instruction authentication requirements"
+  ]
+}

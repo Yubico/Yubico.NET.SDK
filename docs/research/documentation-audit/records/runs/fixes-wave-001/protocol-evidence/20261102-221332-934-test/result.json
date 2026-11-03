@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath.UnitTests --filter FullyQualifiedName~OathResponseTests",
+  "started": "2026-11-02T22:13:32.9345306+01:00",
+  "durationSeconds": 3,
+  "runDirectory": "artifacts/toolchain/runs/20261102-221332-934-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 3,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 36,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_IncompleteEntry_ThrowsAndClearsOriginal(data: [113, 1, 97, 114, 2, ···])",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(Yubico.YubiKit.Core.BadResponseException)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261102-221332-934-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_IncompleteEntry_ThrowsAndClearsOriginal\""
+  ]
+}

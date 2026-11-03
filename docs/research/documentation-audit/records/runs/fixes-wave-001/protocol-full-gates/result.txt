@@ -1,0 +1,26 @@
+RESULT: PASSED  (dotnet toolchain.cs -- build test docs-qa complexity --filter "Category!=RequiresUserPresence")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                     29.2s
+  ✓ test                      61.6s
+  ✓ docs-qa                    0.4s
+  ✓ complexity                 0.4s
+Projects (test):
+  ✓ PASS      Cli.Commands.UnitTests    24 executed, 1 skipped
+  ✓ PASS      Cli.Shared.UnitTests      51 executed, 0 skipped
+  ✓ PASS      Core.UnitTests            1716 executed, 4 skipped
+  ✓ PASS      Ctap2.UnitTests           492 executed, 0 skipped
+  ✓ PASS      Management.UnitTests      96 executed, 0 skipped
+  ✓ PASS      Oath.UnitTests            221 executed, 0 skipped
+  ✓ PASS      OpenPgp.UnitTests         186 executed, 0 skipped
+  ✓ PASS      Piv.UnitTests             215 executed, 0 skipped
+  ✓ PASS      PublicApi.UnitTests       24 executed, 0 skipped
+  ✓ PASS      SecurityDomain.UnitTests  50 executed, 0 skipped
+  ✓ PASS      WebAuthn.UnitTests        371 executed, 0 skipped
+  ✓ PASS      YubiHsm.UnitTests         91 executed, 0 skipped
+  ✓ PASS      YubiOtp.UnitTests         201 executed, 0 skipped
+Totals: projects: 13 passed, 0 failed, 0 with no tests executed; tests: 3738 executed, 0 failed, 5 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261102-230711-449-build+test+docs-qa+complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

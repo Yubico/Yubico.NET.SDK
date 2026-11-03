@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly&Category!=RequiresUserPresence\"",
+  "started": "2026-11-03T12:46:43.5131860+01:00",
+  "durationSeconds": 7.5,
+  "runDirectory": "artifacts/toolchain/runs/20261103-124643-513-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 7.4,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.IntegrationTests.OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Serial125Only))",
+          "message": "Assert.All() Failure: 2 out of 2 items in the collection did not pass. | [0]: Item:  Tuple (255, 27272, 0) | Error: INITIALIZE UPDATE KVN=FF rejected: SW=6A88, dataLength=0; secure-channel establishment was not attempted."
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-124643-513-test/01-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathScpReferenceProbeTests.InitializeUpdate_ExplicitFfAndZero_ReportsAcceptanceOnly\""
+  ]
+}

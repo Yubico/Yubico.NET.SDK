@@ -1,0 +1,224 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathToolCancellationTests*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+Error: Authentication failed: Assert.Equal() Failure: Values differ
+Expected: System.Threading.CancellationToken
+Actual:   System.Threading.CancellationToken
+Error: Authentication failed: Assert.Equal() Failure: Values differ
+Expected: System.Threading.CancellationToken
+Actual:   System.Threading.CancellationToken
+Error: Authentication failed: Assert.Equal() Failure: Values differ
+Expected: System.Threading.CancellationToken
+Actual:   System.Threading.CancellationToken
+Error: Authentication failed: Assert.Equal() Failure: Values differ
+Expected: System.Threading.CancellationToken
+Actual:   System.Threading.CancellationToken
+Error: Authentication failed: Assert.Equal() Failure: Values differ
+Expected: System.Threading.CancellationToken
+Actual:   System.Threading.CancellationToken
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "after-input") (14ms)
+  Assert.ThrowsAny() Failure: No exception was thrown
+  Expected: typeof(System.OperationCanceledException)
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(String stage) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:64
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "during-validation") (0ms)
+  Assert.ThrowsAny() Failure: No exception was thrown
+  Expected: typeof(System.OperationCanceledException)
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(String stage) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:64
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "before-validation") (0ms)
+  Assert.ThrowsAny() Failure: No exception was thrown
+  Expected: typeof(System.OperationCanceledException)
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(String stage) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:64
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "before-input") (0ms)
+  Assert.ThrowsAny() Failure: No exception was thrown
+  Expected: typeof(System.OperationCanceledException)
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(String stage) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:64
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "during-input") (0ms)
+  Assert.ThrowsAny() Failure: No exception was thrown
+  Expected: typeof(System.OperationCanceledException)
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(String stage) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:64
+    --- End of stack trace from previous location ---
+Error: Authentication failed: rejected
+Error: Authentication failed: A task was canceled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnsuccessfulUnlock_DisposesSessionButNotCallerInput(cancel: True) (0ms)
+  Assert.ThrowsAny() Failure: No exception was thrown
+  Expected: typeof(System.OperationCanceledException)
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnsuccessfulUnlock_DisposesSessionButNotCallerInput(Boolean cancel) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:105
+    --- End of stack trace from previous location ---
+Rename cancelled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "rename") (2ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:237
+    --- End of stack trace from previous location ---
+Add cancelled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "uri") (4ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:237
+    --- End of stack trace from previous location ---
+Delete cancelled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "delete") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:237
+    --- End of stack trace from previous location ---
+Add cancelled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "add") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:237
+    --- End of stack trace from previous location ---
+WARNING: This will destroy all OATH credentials and the access password on the YubiKey.
+Reset cancelled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "reset") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:237
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "uri") (0ms)
+  Assert.ThrowsAny() Failure: Exception type was not compatible
+  Expected: typeof(System.OperationCanceledException)
+  Actual:   typeof(Xunit.Sdk.EqualException)
+  ---- Assert.Equal() Failure: Values differ
+  Expected: System.Threading.CancellationToken
+  Actual:   System.Threading.CancellationToken
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:159
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.<>c__DisplayClass3_0.<ConfirmationCancellation_DoesNotMutate>b__2(String _, CancellationToken token) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:154
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.AccountsCommand.UriAsync(String uri, Boolean touch, Boolean force, IMemoryOwner`1 passwordBytes, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Commands/AccountsCommand.cs:314
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "delete") (0ms)
+  Assert.ThrowsAny() Failure: Exception type was not compatible
+  Expected: typeof(System.OperationCanceledException)
+  Actual:   typeof(Xunit.Sdk.EqualException)
+  ---- Assert.Equal() Failure: Values differ
+  Expected: System.Threading.CancellationToken
+  Actual:   System.Threading.CancellationToken
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:159
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.<>c__DisplayClass3_0.<ConfirmationCancellation_DoesNotMutate>b__2(String _, CancellationToken token) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:154
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.AccountsCommand.DeleteAsync(String name, Boolean force, IMemoryOwner`1 passwordBytes, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Commands/AccountsCommand.cs:195
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.AccountsCommand.DeleteAsync(String name, Boolean force, IMemoryOwner`1 passwordBytes, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Commands/AccountsCommand.cs:211
+WARNING: This will destroy all OATH credentials and the access password on the YubiKey.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "add") (0ms)
+  Assert.ThrowsAny() Failure: Exception type was not compatible
+  Expected: typeof(System.OperationCanceledException)
+  Actual:   typeof(Xunit.Sdk.EqualException)
+  ---- Assert.Equal() Failure: Values differ
+  Expected: System.Threading.CancellationToken
+  Actual:   System.Threading.CancellationToken
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:159
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.<>c__DisplayClass3_0.<ConfirmationCancellation_DoesNotMutate>b__2(String _, CancellationToken token) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:154
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.AccountsCommand.AddAsync(String name, String secret, String issuer, OathType oathType, Int32 digits, OathHashAlgorithm algorithm, Int32 period, Boolean touch, Boolean force, IMemoryOwner`1 passwordBytes, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Commands/AccountsCommand.cs:106
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "reset") (0ms)
+  Assert.ThrowsAny() Failure: Exception type was not compatible
+  Expected: typeof(System.OperationCanceledException)
+  Actual:   typeof(Xunit.Sdk.EqualException)
+  ---- Assert.Equal() Failure: Values differ
+  Expected: System.Threading.CancellationToken
+  Actual:   System.Threading.CancellationToken
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:159
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.<>c__DisplayClass3_0.<ConfirmationCancellation_DoesNotMutate>b__2(String _, CancellationToken token) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:154
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.ResetCommand.ExecuteAsync(Boolean force, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Commands/ResetCommand.cs:30
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.ResetCommand.ExecuteAsync(Boolean force, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Commands/ResetCommand.cs:46
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "rename") (0ms)
+  Assert.ThrowsAny() Failure: Exception type was not compatible
+  Expected: typeof(System.OperationCanceledException)
+  Actual:   typeof(Xunit.Sdk.EqualException)
+  ---- Assert.Equal() Failure: Values differ
+  Expected: System.Threading.CancellationToken
+  Actual:   System.Threading.CancellationToken
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:159
+    --- End of stack trace from previous location ---
+    ----- Inner Stack Trace -----
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.<>c__DisplayClass3_0.<ConfirmationCancellation_DoesNotMutate>b__2(String _, CancellationToken token) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:154
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.AccountsCommand.RenameAsync(String name, String newName, Boolean force, IMemoryOwner`1 passwordBytes, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Commands/AccountsCommand.cs:247
+    at Yubico.YubiKit.Oath.Examples.OathTool.Commands.AccountsCommand.RenameAsync(String name, String newName, Boolean force, IMemoryOwner`1 passwordBytes, CancellationToken cancellationToken, OathToolServices services) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/Commands/AccountsCommand.cs:280
+Error: Failed to delete credential: A task was canceled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "delete") (1ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:202
+    --- End of stack trace from previous location ---
+Error: Failed to clear password: A task was canceled.
+Error: Reset failed: A task was canceled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "clear") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:202
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "reset") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:202
+    --- End of stack trace from previous location ---
+Operation cancelled.
+Error: Failed to add credential: A task was canceled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "add") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:202
+    --- End of stack trace from previous location ---
+Error: Failed to add credential: A task was canceled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "uri") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:202
+    --- End of stack trace from previous location ---
+Error: Failed to rename credential: A task was canceled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "rename") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:202
+    --- End of stack trace from previous location ---
+Operation cancelled.
+Error: Failed to calculate code: A task was canceled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "single-code") (0ms)
+Error: Failed to set password: A task was canceled.
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:202
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "set") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(String command) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:202
+    --- End of stack trace from previous location ---
+Error: Failed to set password: Assert.Equal() Failure: Values differ
+Expected: System.Threading.CancellationToken
+Actual:   System.Threading.CancellationToken
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.PasswordConfirmation_CancellationDisposesSessionAndStopsKeyChange (0ms)
+  Assert.ThrowsAny() Failure: No exception was thrown
+  Expected: typeof(System.OperationCanceledException)
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.PasswordConfirmation_CancellationDisposesSessionAndStopsKeyChange() in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:133
+    --- End of stack trace from previous location ---
+Operation cancelled.
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 30
+  failed: 25
+  succeeded: 5
+  skipped: 0
+  duration: 209ms

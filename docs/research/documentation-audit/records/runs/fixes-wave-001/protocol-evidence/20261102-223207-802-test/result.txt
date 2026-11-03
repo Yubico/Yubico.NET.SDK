@@ -1,0 +1,14 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath.UnitTests --filter FullyQualifiedName~OathResponseTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       3.4s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  Listing tests failed (exit code 1):
+MSBUILD : error MSB4166: Child node "2" exited prematurely. Shutting down. Diagnostic information may be found in files in "/tmp/MSBuildTemprhG90l/" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.
+
+The build failed. Fix the build errors and run again.
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --verbose
+Run log: artifacts/toolchain/runs/20261102-223207-802-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

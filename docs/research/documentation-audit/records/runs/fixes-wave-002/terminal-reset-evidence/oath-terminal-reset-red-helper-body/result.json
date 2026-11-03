@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure&Category!=RequiresHardware&Category!=RequiresUserPresence\"",
+  "started": "2026-11-03T12:53:52.0049645+01:00",
+  "durationSeconds": 5,
+  "runDirectory": "artifacts/toolchain/runs/20261103-125352-004-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 5,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure",
+          "message": "Assert.Same() Failure: Values are not the same instance | Expected: System.InvalidOperationException: Body LIST failed. | at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 305"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-125352-004-test/01-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure\""
+  ]
+}

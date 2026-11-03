@@ -1,0 +1,42 @@
+# dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathTool
+# started:   2026-11-02 22:11:56 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-cli
+# git:       yubikit-oath-fix-cli @ 361567eb (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261102-221156-321-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit tests ===
+
+
+=== Testing: Oath.UnitTests ===
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --list-tests --filter-method *OathTool* (output captured)
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathTool*"
+  output: artifacts/toolchain/runs/20261102-221156-321-test/01-test-Oath.UnitTests.log
+✗ FAIL (2 test(s) failed)
+✗ test: 1 test project(s) failed
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathTool)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       3.8s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  2 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "RESET --HELP --force"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnconfirmedPassword_IsCancellationNotAuthenticationFailure: Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      output: artifacts/toolchain/runs/20261102-221156-321-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 62 executed, 2 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnconfirmedPassword_IsCancellationNotAuthenticationFailure"
+Run log: artifacts/toolchain/runs/20261102-221156-321-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

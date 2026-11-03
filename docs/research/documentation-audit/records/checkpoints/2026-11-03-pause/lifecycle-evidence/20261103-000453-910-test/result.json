@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~OathLifecycleTimeTests|FullyQualifiedName~ProtocolResponses_SelectAndWrongKeyStatus\"",
+  "started": "2026-11-03T00:04:53.9100305+01:00",
+  "durationSeconds": 9.1,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000453-910-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 9,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "passed",
+      "reason": "2 executed, 3 skipped",
+      "executed": 2,
+      "failed": 0,
+      "skipped": 3,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261103-000453-910-test/01-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

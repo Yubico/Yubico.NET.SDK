@@ -1,0 +1,196 @@
+The dotnet runtime version is '10.0.14'.
+Formatting code files in workspace '/tmp/opencode/yubikit-oath-fix-protocol/Yubico.YubiKit.sln'.
+Loading workspace.
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Yubico.YubiKit.Core.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/Yubico.YubiKit.Core.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/Yubico.YubiKit.Management.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/Yubico.YubiKit.Management.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/PublicAPI.Shipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/Yubico.YubiKit.Oath.csproj'
+Duplicate source file '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/PublicAPI.Unshipped.txt' in project '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/Yubico.YubiKit.Oath.csproj'
+Project Yubico.YubiKit.Core is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Core is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/obj/Debug/net10.0/Yubico.YubiKit.Core.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Management is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/obj/Debug/net10.0/Yubico.YubiKit.Management.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Management.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Management.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Management.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Management.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Management.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.Core.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Core.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Core.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Core.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Core.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.Core.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Core.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Core.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Core/tests/Yubico.YubiKit.Core.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Core.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Core.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.Management.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Management.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Management.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Management/tests/Yubico.YubiKit.Management.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Management.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Management.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.Tests.Shared is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Tests.Shared is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Tests.Shared is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Tests.Shared/obj/Debug/net10.0/Yubico.YubiKit.Tests.Shared.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Piv/src/obj/Debug/net10.0/Yubico.YubiKit.Piv.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Piv is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.Piv.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Piv.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Piv.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Piv.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Piv.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.Piv.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Piv.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Piv.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Piv.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Piv.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Ctap2/src/obj/Debug/net10.0/Yubico.YubiKit.Ctap2.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Ctap2 is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.Ctap2.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Ctap2.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Ctap2.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Ctap2.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Ctap2.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.SecurityDomain is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.SecurityDomain is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/SecurityDomain/src/obj/Debug/net10.0/Yubico.YubiKit.SecurityDomain.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.SecurityDomain.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.SecurityDomain.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.SecurityDomain.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.SecurityDomain.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.SecurityDomain.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.SecurityDomain.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Oath is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/obj/Debug/net10.0/Yubico.YubiKit.Oath.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Oath.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Oath.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Oath.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.Oath.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Oath.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Oath.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Oath.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Oath.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/YubiHsm/src/obj/Debug/net10.0/Yubico.YubiKit.YubiHsm.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiHsm is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.YubiHsm.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.YubiHsm.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiHsm.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.YubiHsm.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiHsm.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiHsm.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.YubiHsm.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiHsm.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.YubiHsm.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiHsm.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/YubiOtp/src/obj/Debug/net10.0/Yubico.YubiKit.YubiOtp.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiOtp is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.YubiOtp.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.YubiOtp.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiOtp.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.YubiOtp.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiOtp.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiOtp.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.YubiOtp.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.YubiOtp.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.YubiOtp.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.YubiOtp.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/OpenPgp/src/obj/Debug/net10.0/Yubico.YubiKit.OpenPgp.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.OpenPgp is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.OpenPgp.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.OpenPgp.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.OpenPgp.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.OpenPgp.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.OpenPgp.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.OpenPgp.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.OpenPgp.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.OpenPgp.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.OpenPgp.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.OpenPgp.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.Tests.TestProject is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Tests.TestProject is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Tests.TestProject is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Tests.TestProject/obj/Debug/net10.0/Yubico.YubiKit.Tests.TestProject.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Tests.TestProject is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project ManagementTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project ManagementTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project ManagementTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Management/examples/ManagementTool/obj/Debug/net10.0/ManagementTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project ManagementTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project HsmAuthTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project HsmAuthTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project HsmAuthTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/YubiHsm/examples/HsmAuthTool/obj/Debug/net10.0/HsmAuthTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project HsmAuthTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project FidoTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project FidoTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project FidoTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Ctap2/examples/FidoTool/obj/Debug/net10.0/FidoTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project FidoTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.Ctap2.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Ctap2.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.Ctap2.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Ctap2.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Cli.Shared/src/obj/Debug/net10.0/Yubico.YubiKit.Cli.Shared.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Cli.Shared is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project OathTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project OathTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project OathTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Oath/examples/OathTool/obj/Debug/net10.0/OathTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project OathTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project OpenPgpTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project OpenPgpTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project OpenPgpTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/OpenPgp/examples/OpenPgpTool/obj/Debug/net10.0/OpenPgpTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project OpenPgpTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Cli.Commands/src/obj/Debug/net10.0/Yubico.YubiKit.Cli.Commands.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Cli.Commands is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.Cli.YkTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.Cli.YkTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.Cli.YkTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Cli/YkTool/obj/Debug/net10.0/Yubico.YubiKit.Cli.YkTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.Cli.YkTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.WebAuthn is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.WebAuthn is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project Yubico.YubiKit.WebAuthn is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/WebAuthn/src/obj/Debug/net10.0/Yubico.YubiKit.WebAuthn.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.WebAuthn is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.WebAuthn.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.WebAuthn.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.WebAuthn.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.WebAuthn.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.WebAuthn.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project Yubico.YubiKit.WebAuthn.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.WebAuthn.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.WebAuthn.IntegrationTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/obj/Debug/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.WebAuthn.IntegrationTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Project PivTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project PivTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project PivTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/Piv/examples/PivTool/obj/Debug/net10.0/PivTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project PivTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project OtpTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project OtpTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_all.globalconfig'.
+Project OtpTool is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/YubiOtp/examples/OtpTool/obj/Debug/net10.0/OtpTool.GeneratedMSBuildEditorConfig.editorconfig'.
+Project OtpTool is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_all.globalconfig'.
+Project Yubico.YubiKit.PublicApi.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/.editorconfig'.
+Project Yubico.YubiKit.PublicApi.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/codestyle/cs/build/config/analysislevelstyle_recommended.globalconfig'.
+Project Yubico.YubiKit.PublicApi.UnitTests is using configuration from '/tmp/opencode/yubikit-oath-fix-protocol/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/obj/Debug/net10.0/Yubico.YubiKit.PublicApi.UnitTests.GeneratedMSBuildEditorConfig.editorconfig'.
+Project Yubico.YubiKit.PublicApi.UnitTests is using configuration from '/home/rupicola/.local/share/mise/dotnet-root/sdk/10.0.403/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_11_recommended.globalconfig'.
+Complete in 4748ms.
+Determining formattable files.
+Complete in 181ms.
+Running formatters.
+Running Code Style analysis.
+Determining diagnostics...
+Running 5 analyzers on Yubico.YubiKit.Oath.
+Running 5 analyzers on Yubico.YubiKit.Oath.UnitTests.
+Running 5 analyzers on Yubico.YubiKit.Oath.IntegrationTests.
+Complete in 2341ms.
+Analysis complete in 2341ms.
+Running Analyzer Reference analysis.
+Determining diagnostics...
+Running 157 analyzers on Yubico.YubiKit.Oath.
+Running 209 analyzers on Yubico.YubiKit.Oath.UnitTests.
+Running 207 analyzers on Yubico.YubiKit.Oath.IntegrationTests.
+Complete in 876ms.
+Analysis complete in 876ms.
+Complete in 3914ms.
+Formatted 0 of 1324 files.
+Format complete in 8843ms.

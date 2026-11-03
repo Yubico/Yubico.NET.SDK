@@ -123,6 +123,7 @@ The existing migration-map YAML parse issue (`DOC-002`, line 101 column 621) is 
 Core, multi-key discovery and deeper SCP investigations remain deferred; see the
 [OATH checkpoint](oath-documentation-audit-checkpoint.md).
 
-Detailed local task packets, file coverage, original evidence, review records and handoffs are maintained
-in the campaign workspace under `yubikit-docs-audit/runs/webauthn-001/`. This tracked checkpoint preserves
-the scope, outcomes and follow-up dependencies in the repository backup.
+The [durable WebAuthn handoff](documentation-audit/webauthn.md) links the full retained workflow,
+task packets, findings, coverage, edits, reviews, validation logs and pass-2 dependencies saved in this
+repository. Use the [two-pass workflow](documentation-audit/workflow.md) when returning for implementation
+and documentation-impact re-review. The historical local workspace is preserved as a hashed record snapshot.

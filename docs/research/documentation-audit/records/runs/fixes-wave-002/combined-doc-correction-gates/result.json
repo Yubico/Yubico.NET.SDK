@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- build docs-qa",
+  "started": "2026-11-03T13:11:36.8003487+01:00",
+  "durationSeconds": 2.8,
+  "runDirectory": "artifacts/toolchain/runs/20261103-131136-800-build+docs-qa",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "durationSeconds": 2.1,
+      "error": null
+    },
+    {
+      "name": "docs-qa",
+      "status": "passed",
+      "durationSeconds": 0.5,
+      "error": null
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

@@ -1,0 +1,983 @@
+diff --git c/README.md w/README.md
+index 362d87f1..07a137b4 100644
+--- c/README.md
++++ w/README.md
+@@ -75,7 +75,7 @@ secure channel. Interactive sample tools live under `src/<Module>/examples/`.
+ - [User interaction](docs/usage/user-interaction.md): touch notification and credential prompting across applications.
+ - [Migrating from v1](docs/migration/v1-to-v2.md) and [what changed in v2](docs/v2-highlights.md).
+ - [Native AOT](docs/NATIVE-AOT.md): every library package publishes AOT compatibility metadata.
+-- [API reference](https://docs.yubico.com/yesdk/).
++- [v1 API reference](https://docs.yubico.com/yesdk/). For v2, start with the [module guides](#packages).
+ 
+ ## Contributing
+ 
+diff --git c/docs/architecture/applet-public-api.md w/docs/architecture/applet-public-api.md
+index c7d5a347..95780a12 100644
+--- c/docs/architecture/applet-public-api.md
++++ w/docs/architecture/applet-public-api.md
+@@ -26,8 +26,10 @@ public concrete-session operations. They are implemented by the SDK and are not
+   ambiguous booleans. A single intrinsic boolean may remain when it reads naturally.
+ - Device input/output methods return `Task` or `Task<T>`, end in `Async`, and take a final defaulted cancellation
+   token.
+-- Borrowed asynchronous bytes use `ReadOnlyMemory<byte>`. Textual secret bytes use an `Utf8` parameter suffix.
+-  The caller owns and clears borrowed secrets. The SDK clears every sensitive buffer it allocates.
++- Borrowed asynchronous bytes use `ReadOnlyMemory<byte>`. Textual-secret contracts must explicitly state UTF-8
++  encoding; an `Utf8` parameter suffix can reinforce this, but OATH `DeriveKey.password` intentionally has no suffix.
++  The caller owns and clears borrowed secrets. The SDK must clear SDK-owned sensitive temporary buffers on both
++  success and failure; sensitive buffers returned to the caller follow the documented ownership contract.
+ - Public collections use read-only interfaces unless mutation is the explicit contract. OATH `DeriveKey` remains
+   the deliberate `byte[]` output exception because the caller owns and must clear that derived secret.
+ - Preserve protocol vocabulary where semantics differ. Normalize only equivalent concepts.
+diff --git c/docs/architecture/physical-device-model.md w/docs/architecture/physical-device-model.md
+index 09158b98..f14999a1 100644
+--- c/docs/architecture/physical-device-model.md
++++ w/docs/architecture/physical-device-model.md
+@@ -154,18 +154,19 @@ machinery.
+ 
+ Applet session-entry extensions keep their ergonomic one-call shape while selecting a transport
+ intentionally on a composite device. Each multi-transport applet documents a default order and accepts an
+-optional explicit `preferredConnection` override. When SCP parameters are supplied without an override,
+-the SCP-capable SmartCard transport is selected instead of the normal default:
++optional explicit `SessionCreationOptions.PreferredConnectionType` override. When SCP parameters are supplied
++without an override, the SCP-capable SmartCard transport is selected instead of the normal default:
+ 
+-| Applet | Default order | Override (`preferredConnection`) |
++| Applet | Default order | `PreferredConnectionType` values |
+ | --- | --- | --- |
+ | Management (`CreateManagementSessionAsync`) | `SmartCard → HidFido → HidOtp` | any of those three |
+ | YubiOTP (`CreateYubiOtpSessionAsync`) | `SmartCard → HidOtp` | `SmartCard` or `HidOtp` |
+ | CTAP2 (`CreateCtap2SessionAsync`) | `HidFido → SmartCard` | `HidFido` or `SmartCard` |
+ | WebAuthn (`CreateWebAuthnClientAsync`) | `HidFido → SmartCard` (forwards to CTAP2) | `HidFido` or `SmartCard` |
++| OATH (`CreateOathSessionAsync`) | `SmartCard` only | `SmartCard` |
+ 
+-Single-transport applets (PIV, OATH, OpenPGP, Security Domain, YubiHSM) are SmartCard-only and take no
+-override.
++Single-transport applets (PIV, OATH, OpenPGP, Security Domain, YubiHSM) are SmartCard-only. OATH accepts an
++explicit `PreferredConnectionType` of `SmartCard`; that is an accepted setting, not an alternative transport.
+ 
+ ```csharp
+ // Default order (no override): Management prefers SmartCard.
+@@ -173,13 +174,13 @@ await using var mgmt = await device.CreateManagementSessionAsync();
+ 
+ // Explicit override: force HID OTP for this session.
+ await using var otpMgmt = await device.CreateManagementSessionAsync(
+-    preferredConnection: ConnectionType.HidOtp);
++    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
+ ```
+ 
+ Override semantics, validated before any connect:
+ 
+-- Explicit valid `preferredConnection` → use it exactly.
+-- Otherwise, non-null `scpKeyParams` → select SmartCard.
++- Explicit valid `options.PreferredConnectionType` → use it exactly.
++- Otherwise, non-null `options.ScpKeyParameters` → select SmartCard.
+ - Otherwise → use the applet's documented default order.
+ - Not exactly one concrete transport (a group/combined/`Unknown` value) → `ArgumentException`.
+ - A concrete transport that is not valid for the applet (even if the device exposes it) → `ArgumentException`.
+@@ -239,9 +240,9 @@ yubikit implementations open non-seizing on macOS: Rust enables hidapi's `macos-
+ 
+ ## SCP Note
+ 
+-Secure Channel Protocol is valid only on SmartCard. Supplying `scpKeyParams` without an explicit override
+-selects SmartCard automatically. Explicitly selecting a non-SmartCard transport with SCP parameters throws
+-`NotSupportedException` during session initialization.
++Secure Channel Protocol is valid only on SmartCard. Supplying `SessionCreationOptions.ScpKeyParameters`
++without an explicit override selects SmartCard automatically. Explicitly selecting a non-SmartCard transport
++with SCP parameters throws `NotSupportedException` during session initialization.
+ 
+ ## Migration From The Per-Interface Handle Model
+ 
+@@ -254,7 +255,7 @@ connection type and enumerated one row per interface. In v2:
+ | Scalar `yubiKey.ConnectionType` to decide routing | `yubiKey.AvailableConnections` + `yubiKey.SupportsConnection(...)` |
+ | Parameterless `ConnectAsync()` picks "the" transport | `ConnectAsync<TConnection>()` for a specific interface; parameterless throws on multi-interface devices |
+ | Reaching for Management types to read metadata | Read-only metadata types now in `Yubico.YubiKit.Core.Devices`; read via `GetDeviceInfoAsync()` |
+-| Applet extension assumed a single transport | Applet extensions select via documented default order + optional `preferredConnection` |
++| Applet extension assumed a single transport | Applet extensions select via documented default order + optional `SessionCreationOptions.PreferredConnectionType` |
+ 
+ Practical steps:
+ 
+@@ -262,8 +263,8 @@ Practical steps:
+    `AvailableConnections` / `SupportsConnection(...)`.
+ 2. Replace any scalar connection-type routing with typed `ConnectAsync<TConnection>()` or an applet session
+    extension.
+-3. Where you need a specific transport, pass `preferredConnection`; otherwise rely on the documented default
+-   order. Connection failures do not select another interface.
++3. Where you need a specific transport, set `SessionCreationOptions.PreferredConnectionType`; otherwise rely
++   on the documented default order. Connection failures do not select another interface.
+ 4. Update metadata type references to `Yubico.YubiKit.Core.Devices`.
+ 5. Dispose every connection at the scope that created it. If you create a connection and pass it to
+    `Session.CreateAsync(connection)`, keep the connection in its own `await using`; the session will not
+diff --git c/src/Management/README.md w/src/Management/README.md
+index a2783c94..6c78dbee 100644
+--- c/src/Management/README.md
++++ w/src/Management/README.md
+@@ -135,7 +135,8 @@ device does not expose throws `NotSupportedException`.
+ | Management | SmartCard, HID FIDO, HID OTP | yes |
+ | YubiOTP | SmartCard, HID OTP | yes |
+ | FIDO2 and WebAuthn | HID FIDO, SmartCard | yes |
+-| PIV, OATH, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no |
++| OATH | SmartCard only | `SmartCard` only; no alternative transport |
++| PIV, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no |
+ 
+ - Supplying `ScpKeyParameters` without an explicit preference selects SmartCard, because SCP does not run over
+   HID.
+diff --git c/src/Oath/CLAUDE.md w/src/Oath/CLAUDE.md
+index db9bf407..3276a2b9 100644
+--- c/src/Oath/CLAUDE.md
++++ w/src/Oath/CLAUDE.md
+@@ -8,7 +8,7 @@ The OATH module implements TOTP (RFC 6238) and HOTP (RFC 4226) one-time password
+ 
+ **Key characteristics:**
+ - **SmartCard-only** — no FIDO/OTP backend abstraction needed (like SecurityDomain)
+-- **No session-open firmware floor** — matches canonical Python/Rust/Android yubikit. Only rename (5.3.1) and SCP03 (5.6.3) are gated; the SDK carries no NEO (firmware < 3.0.0) workarounds such as the post-`set_key` re-select
++- **No general session-open firmware floor** — SDK gates use the effective version for rename and secure-channel creation; touch and SHA-512 device requirements are not preflight-checked. See the table below.
+ - **Sealed session** — `OathSession` is sealed, extended via `IOathSession` interface
+ - **Two-phase init** — private constructor + static `CreateAsync` (matches Management/SecurityDomain)
+ - **Credential policy ownership** — `CredentialData.RequireTouch` travels with creation policy
+@@ -20,8 +20,8 @@ The OATH module implements TOTP (RFC 6238) and HOTP (RFC 4226) one-time password
+ 
+ | File | Purpose |
+ |------|---------|
+-| `src/OathType.cs` | TOTP/HOTP enum (`0x10`/`0x20`) |
+-| `src/HashAlgorithm.cs` | SHA1/SHA256/SHA512 enum (`0x01`/`0x02`/`0x03`) |
++| `src/OathType.cs` | OATH type enum: HOTP = `0x10`, TOTP = `0x20` |
++| `src/HashAlgorithm.cs` | Hash enum: SHA1 = `0x01`, SHA256 = `0x02`, SHA512 = `0x03` |
+ | `src/Credential.cs` | Immutable credential identity, equality on `(DeviceId, Id)` |
+ | `src/CredentialData.cs` | Credential creation data with `ParseUri()` and key processing |
+ | `src/Code.cs` | Calculated OTP code result |
+@@ -31,7 +31,8 @@ The OATH module implements TOTP (RFC 6238) and HOTP (RFC 4226) one-time password
+ 
+ ### Credential ID Format
+ 
+-The credential ID encodes metadata into a UTF-8 byte string:
++The SDK uses Yubico's host-side naming convention to encode metadata into a UTF-8 credential ID for
++interoperability with Yubico Authenticator. YKOATH itself does not define this name grammar:
+ 
+ ```
+ TOTP (default 30s period):  "issuer:name" or "name"
+@@ -39,7 +40,10 @@ TOTP (custom period):       "{period}/issuer:name" or "{period}/name"
+ HOTP:                       "issuer:name" or "name" (no period prefix)
+ ```
+ 
+-Parsing regex: `^((\d+)/)?(([^:]+):)?(.+)$`
++See `TotpIdPattern` and `ParseCredentialId` in `src/Credential.cs` for parsing. A recognized period prefix
++uses ASCII digits followed by `/` and must fit a positive `Int32`; `-30/name` is a name, not a negative
++period prefix. Using `[0-9]` rather than `\d` avoids recognizing Unicode decimal digits that integer
++parsing would reject.
+ 
+ ### TLV Tag Constants
+ 
+@@ -60,23 +64,36 @@ Parsing regex: `^((\d+)/)?(([^:]+):)?(.+)$`
+ ### Key Processing
+ 
+ 1. **HMAC key shortening** (RFC 2104): If key length > hash block size, hash the key
+-2. **Secret padding**: Pad to minimum 14 bytes with zeroes
++2. **SDK storage padding**: Append zeroes to secrets shorter than 14 bytes. This threshold is not an HMAC minimum key length or entropy requirement.
+ 3. **TAG_KEY format**: `[type_byte][digits_byte][secret...]` where type_byte = `oath_type | hash_algorithm`
+ 
+ ### Access Key Derivation
+ 
+-`PBKDF2-HMAC-SHA1(password_utf8, salt, 1000 iterations, 16 bytes)` — dictated by hardware.
++The SDK derives access keys on the host using
++`PBKDF2-HMAC-SHA1(password_utf8, salt, 1000 iterations, 16 bytes)`, with the salt from the OATH SELECT response.
++This follows the [YKOATH SET CODE](https://developers.yubico.com/OATH/YKOATH_Protocol.html) password
++interoperability convention: UTF-8 input, PBKDF2 with 1000 iterations, the SELECT ID as salt, and 16 output bytes.
++The protocol page does not explicitly name the PBKDF2 PRF; the SDK uses HMAC-SHA1.
++The device receives the derived key, not the password or iteration count.
+ 
+ `IOathSession.DeriveKey` takes the password as a borrowed UTF-8 `ReadOnlyMemory<byte>` named
+ `password` — no `Utf8` suffix. The UTF-8 contract and the caller's obligation to zero both the
+ input buffer and the returned key live in the XML documentation for the member.
+ 
+-## Version-Gated Features
++## Firmware Requirements and SDK Gates
+ 
+-| Feature | Minimum Version |
+-|---------|----------------|
+-| Rename credential | 5.3.1 |
+-| SCP03 for OATH | 5.6.3 |
++| Feature | Firmware condition |
++|---------|--------------------|
++| Touch-required credentials | Device requirement: 4.2.4+; no SDK preflight gate |
++| SHA-512 credentials | Device requirement: 4.3.1+; no SDK preflight gate |
++| Rename credential | SDK gate: effective version 5.3.1+ |
++| Secure-channel session | OATH gate: effective version 5.6.3+ for any non-null SCP parameters; Core also gates SCP11 at 5.7.2+ |
++
++Touch and SHA-512 requirements come from the YKOATH protocol. Gates use the detected applet version unless
++`FirmwareVersionOverride` supplies the effective version. The OATH gate applies to all SCP parameters despite
++the `FeatureScp03` name; Core's SCP03 gate is 5.3.0 and its SCP11 gate is 5.7.2. The OATH 5.6.3 gate is current
++SDK policy, not a verified earliest hardware version. Do not infer a general session-open firmware floor or
++an SDK `NotSupportedException` for touch/SHA-512 credential options from these gates.
+ 
+ ## Reference Implementation
+ 
+@@ -94,6 +111,8 @@ When `SessionCreationOptions.UserPresencePrompt` is supplied, `CalculateAsync` a
+ issue `PolicyRequires` immediately before CALCULATE only for credentials whose `TouchRequired` value is
+ `true`. The scope is the public display identity (`issuer:name` or `name`); secret material is never included.
+ Successful, cancelled, and failed operations resolve as `Completed`, `Cancelled`, and `Failed`. OATH status
+-words do not currently provide verified evidence for mapping a failure to `TimedOut`. CALCULATE output is
+-validated before successful resolution; sensitive response copies are cleared if resolution fails, and the
+-immutable `Code.Value` string is not formatted until the callback succeeds.
++words do not currently provide verified evidence for mapping a failure to `TimedOut`. `CalculateCodeAsync`
++validates the truncated response before successful resolution; `CalculateAsync` currently checks only that
++the required response tag is present, not the full response value's structure. Sensitive response copies
++from these individual calculations are cleared if resolution fails, and the immutable `Code.Value` string
++is not formatted until the callback succeeds.
+diff --git c/src/Oath/README.md w/src/Oath/README.md
+index 8a1da7e1..25bed0bd 100644
+--- c/src/Oath/README.md
++++ w/src/Oath/README.md
+@@ -9,14 +9,20 @@ password protecting them. The programmable OTP slots belong to [Yubico.YubiKit.Y
+ 
+ ## Requirements
+ 
+-- .NET 10. On Linux, install PC/SC and the udev rules described in [docs/linux-setup.md](../../docs/linux-setup.md).
+-- A YubiKey 4 or 5 series device with OATH enabled. The SDK implements no YubiKey NEO workarounds. Two
+-  operations need newer firmware:
++- .NET 10. On Linux, a working PC/SC service and reader support must make the YubiKey available over
++  USB CCID or an NFC reader. The [Linux HID setup guide](../../docs/linux-setup.md) does not cover PC/SC setup.
++- A YubiKey 4 or 5 series device with OATH enabled. Feature requirements and SDK gates are:
+ 
+-  | Feature | Minimum firmware |
+-  |---------|------------------|
+-  | Rename credential | 5.3.1 |
+-  | SCP03 for OATH | 5.6.3 |
++  | Feature | Firmware condition |
++  |---------|--------------------|
++  | Touch-required credentials | Device requirement: 4.2.4+; not preflight-checked by the SDK |
++  | SHA-512 credentials | Device requirement: 4.3.1+; not preflight-checked by the SDK |
++  | Rename credential | SDK gate: effective version 5.3.1+ |
++  | Secure-channel session | SDK gate: effective version 5.6.3+ for any SCP parameters; SCP11 also requires 5.7.2+ in Core |
++
++  OATH has no general session-open firmware floor. SDK gates use the detected applet version unless
++  `SessionCreationOptions.FirmwareVersionOverride` supplies the effective version. The 5.6.3 SCP gate
++  describes current SDK behavior, not a confirmed earliest hardware version for OATH over SCP.
+ 
+ - Transport: SmartCard only, over USB CCID or NFC. Setting `PreferredConnectionType` to anything other than
+   `ConnectionType.SmartCard` throws `ArgumentException`.
+@@ -57,7 +63,10 @@ Later snippets assume these directives and a `device` obtained the same way. The
+ 
+ ### Add a TOTP credential from an otpauth URI
+ 
+-`CredentialData` owns the decoded secret, so dispose it. `requireTouch: true` makes every calculation wait for touch.
++`ParseUri` creates a new decoded secret array; dispose the returned `CredentialData` to clear that array.
++`PutCredentialAsync` adds the credential or replaces one with the same raw credential ID, produced by `GetId()`.
++Set `requireTouch: true` to require touch for individual calculations (firmware 4.2.4+). Bulk calculations return
++`null` for these entries, as described below.
+ 
+ ```csharp
+ using var credentialData = CredentialData.ParseUri(
+@@ -68,8 +77,14 @@ await session.PutCredentialAsync(credentialData);
+ 
+ ### Calculate codes
+ 
+-`CalculateAllAsync` returns a `null` code for HOTP and touch-requiring credentials; get those individually. A TOTP
+-`Code.ValidTo` is a Unix timestamp, but a HOTP code never expires and reports `long.MaxValue`, so do not format it.
++`CalculateAllAsync` returns a `null` code for HOTP and touch-required credentials; get those individually with
++`CalculateCodeAsync`. Both methods accept an optional `timestamp` in Unix seconds, defaulting to the current UTC
++time. It determines the TOTP challenge and nominal generation window. For an individual HOTP calculation, the
++device uses its stored counter; the timestamp only sets `Code.ValidFrom`.
++
++For TOTP, `Code.ValidFrom` and `Code.ValidTo` are the inclusive start and exclusive end of the nominal generation
++window, in Unix seconds. For HOTP, `ValidTo` is `long.MaxValue`, a no-time-expiry sentinel, not a date to format.
++These values do not guarantee verifier acceptance: the verifier applies its own time-window, replay, or counter rules.
+ 
+ ```csharp
+ await using var session = await device.CreateOathSessionAsync();
+@@ -85,7 +100,12 @@ Console.WriteLine($"HOTP code {hotpCode.Value}");
+ 
+ ### Protect the application with a password
+ 
+-`DeriveKey` runs PBKDF2 over the device salt, so it needs a live session. Both buffers are yours to zero.
++Use `DeriveKey` on an open OATH session to derive an access key from a UTF-8-encoded password. The method uses
++the device’s salt.
++
++You own both the password buffer and the returned key. Clear each with `CryptographicOperations.ZeroMemory`
++when it is no longer needed, including when an operation fails. The example below uses a `finally` block to clear
++both buffers.
+ 
+ ```csharp
+ byte[] password = Encoding.UTF8.GetBytes("correct horse battery staple");
+@@ -145,15 +165,19 @@ does not interrupt the device or necessarily change the notification outcome.
+ - SmartCard transport only. A physical YubiKey admits one live connection and one session per connection; a second
+   attempt throws `ConnectionInUseException`. Whoever opens a connection disposes it.
+ - A session from `device.CreateOathSessionAsync(...)` owns the connection it opened; `OathSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
+-- `ResetAsync` erases every credential and the access key; `DeleteCredentialAsync`, `SetKeyAsync`, and `UnsetKeyAsync` are also irreversible.
+-- `RenameCredentialAsync` throws `NotSupportedException` through `EnsureSupports` below firmware 5.3.1, and so does
+-  passing `ScpKeyParameters` below 5.6.3. While the applet is locked, protected operations fail with an `OathException`
++- `ResetAsync` erases every credential and the access key. `DeleteCredentialAsync` erases the selected credential.
++  `SetKeyAsync` sets or changes password protection; `UnsetKeyAsync` removes it. Neither changes stored credentials.
++- `RenameCredentialAsync` throws `NotSupportedException` through `EnsureSupports` below effective version 5.3.1,
++  as does passing any non-null `ScpKeyParameters` below 5.6.3. Core additionally requires 5.7.2+ for SCP11.
++  While the applet is locked, protected operations fail with an `OathException`
+   whose `Reason` is `OathFailureReason.Locked` until `ValidateAsync` succeeds.
+ 
+ ## Security notes
+ 
+ - Secrets cross the API as `byte[]` or `ReadOnlyMemory<byte>`. You own the input buffers: zero them with `CryptographicOperations.ZeroMemory` in a `finally`.
+-- `CredentialData` is `IDisposable` and zeroes its `Secret` on disposal. Always `using` it.
++- `CredentialData` properties are assigned only during initialization. Directly assigning `Secret` retains the
++  supplied array without copying it; the property exposes the same mutable array. `ParseUri` creates a new decoded
++  array instead. Use `using` to clear `Secret` on disposal; this does not clear the URI or encoded secret strings.
+ - `DeriveKey` takes a borrowed UTF-8 password and returns a 16-byte key you own and must zero; `AuthenticateAndRetryAsync` zeroes the key it derives, not the bytes your callback returned.
+ - Never log secrets, passwords, derived access keys, or calculated codes.
+ 
+diff --git c/src/Oath/examples/OathTool/Cli/Output/OutputHelpers.cs w/src/Oath/examples/OathTool/Cli/Output/OutputHelpers.cs
+index d5a65b0c..7f994804 100644
+--- c/src/Oath/examples/OathTool/Cli/Output/OutputHelpers.cs
++++ w/src/Oath/examples/OathTool/Cli/Output/OutputHelpers.cs
+@@ -3,12 +3,12 @@
+ 
+ namespace Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
+ 
+-// OathTool intentionally uses plain-text output (no Spectre.Console) for pipe-safe operation.
+-// It does NOT delegate to Yubico.YubiKit.Cli.Shared.Output.OutputHelpers by design.
++// These helpers write plain text through Console so their output works in pipes.
++// They intentionally do not delegate to Yubico.YubiKit.Cli.Shared.Output.OutputHelpers.
+ 
+ /// <summary>
+ /// Provides plain-text formatting utilities for consistent CLI output.
+-/// No Spectre.Console dependency - works in pipes and non-interactive terminals.
++/// These helpers do not use Spectre.Console; device selection elsewhere in the tool does.
+ /// </summary>
+ public static class OutputHelpers
+ {
+@@ -31,7 +31,7 @@ public static void WriteWarning(string message) =>
+         Console.Error.WriteLine($"WARNING: {message}");
+ 
+     /// <summary>
+-    /// Writes an informational message to stderr (so stdout remains machine-parseable).
++    /// Writes an informational message to stderr, keeping it separate from stdout results.
+     /// </summary>
+     public static void WriteInfo(string message) =>
+         Console.Error.WriteLine(message);
+diff --git c/src/Oath/examples/OathTool/Commands/AccessCommand.cs w/src/Oath/examples/OathTool/Commands/AccessCommand.cs
+index 7a86f6a0..a18b44c9 100644
+--- c/src/Oath/examples/OathTool/Commands/AccessCommand.cs
++++ w/src/Oath/examples/OathTool/Commands/AccessCommand.cs
+@@ -12,7 +12,7 @@
+ namespace Yubico.YubiKit.Oath.Examples.OathTool.Commands;
+ 
+ /// <summary>
+-/// Implements 'oath access' subcommands: change, remember, forget.
++/// Implements 'oath access change' for setting, changing, or clearing the OATH access password.
+ /// </summary>
+ public static class AccessCommand
+ {
+diff --git c/src/Oath/examples/OathTool/Commands/AccountsCommand.cs w/src/Oath/examples/OathTool/Commands/AccountsCommand.cs
+index 0f71e13c..ff4419a6 100644
+--- c/src/Oath/examples/OathTool/Commands/AccountsCommand.cs
++++ w/src/Oath/examples/OathTool/Commands/AccountsCommand.cs
+@@ -430,7 +430,7 @@ private static async Task<int> CalculateAllCodesAsync(
+     }
+ 
+     /// <summary>
+-    /// Decodes a Base32-encoded string (RFC 4648), tolerating missing padding and whitespace.
++    /// Decodes a Base32-encoded string (RFC 4648), tolerating missing padding and literal spaces.
+     /// </summary>
+     private static byte[] Base32Decode(string input)
+     {
+diff --git c/src/Oath/src/Code.cs w/src/Oath/src/Code.cs
+index 93113b03..61174ac4 100644
+--- c/src/Oath/src/Code.cs
++++ w/src/Oath/src/Code.cs
+@@ -20,8 +20,18 @@ namespace Yubico.YubiKit.Oath;
+ ///     Represents a calculated OATH one-time password code.
+ /// </summary>
+ /// <param name="Value">The formatted OTP code string, zero-padded to the required digit count.</param>
+-/// <param name="ValidFrom">Unix timestamp indicating when the code becomes valid.</param>
+-/// <param name="ValidTo">Unix timestamp indicating when the code expires.</param>
++/// <param name="ValidFrom">
++///     Unix time in seconds: the inclusive start of the nominal TOTP generation window, or the
++///     requested/current calculation timestamp for HOTP.
++/// </param>
++/// <param name="ValidTo">
++///     Unix time in seconds: the exclusive end of the nominal TOTP generation window, or
++///     <see cref="long.MaxValue" /> for HOTP as a no-time-expiry sentinel, not a date to format.
++/// </param>
++/// <remarks>
++///     These bounds describe generation metadata, not a verifier's acceptance policy. TOTP acceptance
++///     depends on the verifier's time window and replay rules; HOTP acceptance depends on its counter state.
++/// </remarks>
+ public sealed record Code(string Value, long ValidFrom, long ValidTo)
+ {
+     internal readonly record struct ParsedCode(int Digits, int Value);
+@@ -30,12 +40,12 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
+     ///     Formats a truncated OATH response into a <see cref="Code" />.
+     /// </summary>
+     /// <param name="credential">The credential that produced the response.</param>
+-    /// <param name="timestamp">The Unix timestamp used for calculation.</param>
++    /// <param name="timestamp">The Unix time in seconds used for calculation.</param>
+     /// <param name="truncated">
+     ///     The truncated response bytes. The first byte is the digit count,
+     ///     followed by the truncated HMAC value.
+     /// </param>
+-    /// <returns>A formatted <see cref="Code" /> with validity window.</returns>
++    /// <returns>A formatted <see cref="Code" /> with generation-time metadata.</returns>
+     internal static Code FormatCode(Credential credential, long timestamp, ReadOnlySpan<byte> truncated)
+     {
+         ParsedCode parsedCode = ParseCode(credential, truncated);
+diff --git c/src/Oath/src/Credential.cs w/src/Oath/src/Credential.cs
+index 40e75675..b884b110 100644
+--- c/src/Oath/src/Credential.cs
++++ w/src/Oath/src/Credential.cs
+@@ -134,15 +134,18 @@ internal static byte[] FormatCredentialId(
+     ///     Parses a credential ID from the OATH applet wire protocol.
+     /// </summary>
+     /// <remarks>
+-    ///     For TOTP the optional <c>period/</c> prefix is the RFC 6238 §4.1 time step X in seconds, the
+-    ///     divisor in <c>T = (Current Unix time - T0) / X</c> (§4.2). A prefix that is not a positive
+-    ///     integer is malformed. HOTP has no period and reports 0.
++    ///     The host-side TOTP naming convention recognizes an optional prefix of ASCII digits followed
++    ///     by <c>/</c>. Its value must fit a positive <see cref="int" /> and represents the RFC 6238 §4.1
++    ///     time step X in seconds, the divisor in <c>T = (Current Unix time - T0) / X</c> (§4.2).
++    ///     A name such as <c>-30/name</c> has no recognized period prefix. YKOATH does not define this
++    ///     naming convention. HOTP has no period and reports 0.
+     /// </remarks>
+     /// <param name="credentialId">The raw credential ID bytes.</param>
+     /// <param name="oathType">The OATH type (TOTP or HOTP).</param>
+     /// <returns>A tuple of (issuer, name, period).</returns>
+     /// <exception cref="ArgumentException">
+-    ///     <paramref name="oathType" /> is TOTP and the period prefix is zero, negative or out of range.
++    ///     <paramref name="oathType" /> is TOTP and a recognized ASCII-digit period prefix is zero or
++    ///     exceeds <see cref="int.MaxValue" />.
+     /// </exception>
+     internal static (string? Issuer, string Name, int Period) ParseCredentialId(
+         ReadOnlySpan<byte> credentialId,
+diff --git c/src/Oath/src/CredentialData.cs w/src/Oath/src/CredentialData.cs
+index ceadfeb6..14bc70c6 100644
+--- c/src/Oath/src/CredentialData.cs
++++ w/src/Oath/src/CredentialData.cs
+@@ -20,49 +20,61 @@ namespace Yubico.YubiKit.Oath;
+ /// <summary>
+ ///     Holds the data needed to create an OATH credential on a YubiKey.
+ /// </summary>
++/// <remarks>
++///     Properties can be assigned only during initialization. The <see cref="Secret" /> array remains
++///     mutable and is cleared by <see cref="Dispose" />.
++/// </remarks>
+ public sealed class CredentialData : IDisposable
+ {
+     /// <summary>
+-    ///     Gets or sets the account name.
++    ///     Gets the account name, assigned during initialization.
+     /// </summary>
+     public required string Name { get; init; }
+ 
+     /// <summary>
+-    ///     Gets or sets the OATH credential type.
++    ///     Gets the OATH credential type, assigned during initialization.
+     /// </summary>
+     public required OathType OathType { get; init; }
+ 
+     /// <summary>
+-    ///     Gets or sets the hash algorithm for HMAC computation.
++    ///     Gets the hash algorithm for HMAC computation, assigned during initialization.
+     /// </summary>
+     public required OathHashAlgorithm HashAlgorithm { get; init; }
+ 
+     /// <summary>
+-    ///     Gets or sets the shared secret key.
++    ///     Gets the shared secret key, assigned during initialization.
+     /// </summary>
++    /// <remarks>
++    ///     Direct initialization retains the supplied array without copying it, and this property
++    ///     exposes that same array. Disposing this instance clears it, including any caller-held alias.
++    ///     <see cref="ParseUri(string)" /> instead creates a new array from the encoded secret.
++    /// </remarks>
+     public required byte[] Secret { get; init; }
+ 
+     /// <summary>
+-    ///     Gets or sets the number of digits in the OTP code. Defaults to 6.
++    ///     Gets the number of digits in the OTP code, assigned during initialization. Defaults to 6.
+     /// </summary>
+     public int Digits { get; init; } = OathConstants.DefaultDigits;
+ 
+     /// <summary>
+-    ///     Gets or sets the TOTP time step period in seconds. Defaults to 30.
++    ///     Gets the TOTP time step period in seconds, assigned during initialization. Defaults to 30.
+     /// </summary>
+     public int Period { get; init; } = OathConstants.DefaultPeriod;
+ 
+     /// <summary>
+-    ///     Gets or sets the HOTP initial moving factor (counter). Defaults to 0.
++    ///     Gets the HOTP initial moving factor (counter), assigned during initialization. Defaults to 0.
+     /// </summary>
+     public int Counter { get; init; } = OathConstants.DefaultImf;
+ 
+     /// <summary>
+-    ///     Gets or sets the credential issuer.
++    ///     Gets the credential issuer, assigned during initialization.
+     /// </summary>
+     public string? Issuer { get; init; }
+ 
+-    /// <summary>Gets whether using this credential requires physical touch.</summary>
++    /// <summary>
++    ///     Gets whether individual calculations require physical touch, assigned during initialization.
++    ///     Enabling this policy requires YubiKey firmware 4.2.4 or later.
++    /// </summary>
+     public bool RequireTouch { get; init; }
+ 
+     /// <summary>
+@@ -72,7 +84,7 @@ public sealed class CredentialData : IDisposable
+     ///     An otpauth URI as defined by the Google Authenticator Key URI Format,
+     ///     e.g., <c>otpauth://totp/GitHub:user@example.com?secret=JBSWY3DPEHPK3PXP&amp;issuer=GitHub</c>.
+     /// </param>
+-    /// <returns>A populated <see cref="CredentialData" /> instance.</returns>
++    /// <returns>A populated <see cref="CredentialData" /> instance with a newly decoded secret array.</returns>
+     /// <exception cref="ArgumentException">
+     ///     Thrown when the URI scheme is not <c>otpauth</c>, the OATH type is missing or invalid,
+     ///     or the <c>secret</c> query parameter is missing.
+@@ -83,8 +95,11 @@ public sealed class CredentialData : IDisposable
+     ///     Parses an <c>otpauth://</c> URI and applies the credential's physical-touch policy.
+     /// </summary>
+     /// <param name="uri">The otpauth URI to parse.</param>
+-    /// <param name="requireTouch">Whether using the credential requires physical touch.</param>
+-    /// <returns>A populated <see cref="CredentialData" /> instance that exclusively owns its secret.</returns>
++    /// <param name="requireTouch">
++    ///     Whether individual calculations require physical touch. Setting this to <see langword="true" />
++    ///     requires YubiKey firmware 4.2.4 or later.
++    /// </param>
++    /// <returns>A populated <see cref="CredentialData" /> instance with a newly decoded secret array.</returns>
+     public static CredentialData ParseUri(string uri, bool requireTouch)
+     {
+         var parsed = new Uri(uri.Trim());
+@@ -195,7 +210,7 @@ public static CredentialData ParseUri(string uri, bool requireTouch)
+     public byte[] GetId() => Credential.FormatCredentialId(Issuer, Name, OathType, Period);
+ 
+     /// <summary>
+-    ///     Zeros the shared secret to prevent sensitive key material from lingering in memory.
++    ///     Clears the <see cref="Secret" /> array. Does not clear the input URI or encoded secret strings.
+     /// </summary>
+     public void Dispose()
+     {
+@@ -237,10 +252,10 @@ internal static byte[] HmacShortenKey(byte[] key, OathHashAlgorithm algorithm)
+     }
+ 
+     /// <summary>
+-    ///     Pads a secret to the minimum HMAC key size (14 bytes) by appending zero bytes.
++    ///     Appends zero bytes to secrets shorter than the SDK's 14-byte storage-padding threshold.
+     /// </summary>
+     /// <param name="secret">The original secret bytes.</param>
+-    /// <returns>The padded secret, or the original if already at or above minimum size.</returns>
++    /// <returns>The padded secret, or the original if already at or above the storage-padding threshold.</returns>
+     internal static byte[] PadSecret(byte[] secret)
+     {
+         if (secret.Length >= OathConstants.HmacMinimumKeySize)
+@@ -254,7 +269,8 @@ internal static byte[] PadSecret(byte[] secret)
+     }
+ 
+     /// <summary>
+-    ///     Processes the secret for storage: shortens per RFC 2104, then pads to minimum size.
++    ///     Processes the secret for storage: shortens keys exceeding the hash block size per RFC 2104,
++    ///     then applies the SDK's 14-byte storage padding.
+     /// </summary>
+     /// <returns>The processed secret ready for the PUT command.</returns>
+     internal byte[] GetProcessedSecret()
+@@ -263,7 +279,7 @@ internal byte[] GetProcessedSecret()
+         byte[] padded = PadSecret(shortened);
+ 
+         // If HmacShortenKey produced a new array (key was longer than block size)
+-        // and PadSecret produced yet another array (shortened was under minimum size),
++        // and PadSecret produced yet another array (shortened was under the storage-padding threshold),
+         // the intermediate must be zeroed to avoid leaking key material.
+         if (!ReferenceEquals(shortened, Secret) && !ReferenceEquals(shortened, padded))
+         {
+@@ -274,7 +290,7 @@ internal byte[] GetProcessedSecret()
+     }
+ 
+     /// <summary>
+-    ///     Parses a Base32-encoded key string, supporting unpadded input and whitespace.
++    ///     Parses a Base32-encoded key string, supporting unpadded input and literal spaces.
+     /// </summary>
+     /// <param name="key">The Base32-encoded string.</param>
+     /// <returns>The decoded bytes.</returns>
+diff --git c/src/Oath/src/HashAlgorithm.cs w/src/Oath/src/HashAlgorithm.cs
+index 8188082b..f6361236 100644
+--- c/src/Oath/src/HashAlgorithm.cs
++++ w/src/Oath/src/HashAlgorithm.cs
+@@ -30,7 +30,7 @@ public enum OathHashAlgorithm : byte
+     Sha256 = 0x02,
+ 
+     /// <summary>
+-    ///     SHA-512 (512-bit digest, 128-byte block size).
++    ///     SHA-512 (512-bit digest, 128-byte block size). Requires YubiKey firmware 4.3.1 or later.
+     /// </summary>
+     Sha512 = 0x03
+ }
+\ No newline at end of file
+diff --git c/src/Oath/src/IOathSession.cs w/src/Oath/src/IOathSession.cs
+index af5533ed..d68ee88b 100644
+--- c/src/Oath/src/IOathSession.cs
++++ w/src/Oath/src/IOathSession.cs
+@@ -33,16 +33,15 @@ public interface IOathSession : IApplicationSession
+     ReadOnlyMemory<byte> Salt { get; }
+ 
+     /// <summary>
+-    ///     Gets whether the <b>current session</b> is locked and must call <see cref="ValidateAsync" />
+-    ///     before protected operations can be performed.
++    ///     Gets whether the current session must be unlocked before performing protected operations.
+     /// </summary>
+     /// <remarks>
+-    ///     This reflects only the current session's unlock state, not whether the device has a
+-    ///     password configured at all: it starts <see langword="true" /> when the device has a
+-    ///     password configured, and becomes <see langword="false" /> once <see cref="ValidateAsync" />
+-    ///     succeeds — even though the device remains password-protected for the next session. To
+-    ///     check whether the device has a password configured, independent of this session's unlock
+-    ///     state, use <see cref="IsPasswordProtected" /> instead.
++    ///     <para>
++    ///         When a password is configured, the session starts locked. Call <see cref="ValidateAsync" />
++    ///         to unlock it. Successful validation sets this property to <see langword="false" />
++    ///         without removing the password.
++    ///     </para>
++    ///     <para>To check whether a password is configured, use <see cref="IsPasswordProtected" />.</para>
+     /// </remarks>
+     bool IsLocked { get; }
+ 
+@@ -64,14 +63,19 @@ public interface IOathSession : IApplicationSession
+     ///     Lists all credentials stored on the device.
+     /// </summary>
+     /// <remarks>
+-    ///     A credential whose ID is malformed (for example a TOTP period prefix of 0 written by another
+-    ///     client; RFC 6238 §4.1 requires a positive time step) is omitted and logged at warning level.
++    ///     A TOTP credential with a recognized ASCII-digit period prefix that is zero or exceeds
++    ///     <see cref="int.MaxValue" /> is omitted and logged at warning level. This does not imply
++    ///     general validation of raw credential IDs.
+     /// </remarks>
+     Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+-    ///     Stores a new credential on the device.
++    ///     Adds a credential or replaces an existing credential with the same raw credential ID.
+     /// </summary>
++    /// <remarks>
++    ///     The raw ID is produced by <see cref="CredentialData.GetId" />. The SDK sends PUT without
++    ///     checking whether that ID already exists on the device.
++    /// </remarks>
+     Task PutCredentialAsync(CredentialData credentialData,
+         CancellationToken cancellationToken = default);
+ 
+@@ -107,6 +111,13 @@ Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<
+     /// <summary>
+     ///     Calculates a formatted OTP code for a single credential (RFC 4226 for HOTP, RFC 6238 for TOTP).
+     /// </summary>
++    /// <param name="credential">The credential to calculate.</param>
++    /// <param name="timestamp">
++    ///     Unix time in seconds, defaulting to the current UTC time. For TOTP, this determines the
++    ///     time-step challenge and nominal generation window. For HOTP, it only sets <see cref="Code.ValidFrom" />;
++    ///     the device uses its stored counter, not this timestamp, to calculate the code.
++    /// </param>
++    /// <param name="cancellationToken">The cancellation token for the operation.</param>
+     /// <exception cref="ArgumentException">
+     ///     <paramref name="credential" /> is TOTP with a period that is not positive, or was read from a
+     ///     different device (its <see cref="Credential.DeviceId" /> is not this session's <see cref="DeviceId" />).
+@@ -119,10 +130,15 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     ///     Calculates codes for all credentials on the device (YKOATH CALCULATE ALL).
+     ///     HOTP and touch-required credentials return <c>null</c> codes.
+     /// </summary>
++    /// <param name="timestamp">
++    ///     Unix time in seconds, defaulting to the current UTC time. Determines the TOTP time-step
++    ///     challenges and nominal generation windows.
++    /// </param>
++    /// <param name="cancellationToken">The cancellation token for the operation.</param>
+     /// <remarks>
+     ///     The device computes every TOTP response with the default 30-second time step; credentials with
+-    ///     another period are recalculated individually. A credential whose ID is malformed is omitted
+-    ///     and logged at warning level, as in <see cref="ListCredentialsAsync" />.
++    ///     another period are recalculated individually. Entries with invalid recognized TOTP period
++    ///     prefixes are omitted and logged at warning level, as described in <see cref="ListCredentialsAsync" />.
+     /// </remarks>
+     Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null,
+         CancellationToken cancellationToken = default);
+@@ -130,40 +146,81 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     /// <summary>
+     ///     Resets the OATH application, removing all credentials and the access key.
+     /// </summary>
++    /// <remarks>
++    ///     Reset and the subsequent session-state refresh are separate exchanges. If the refresh fails
++    ///     or is cancelled, the device may already have erased the data. Do not assume rollback;
++    ///     dispose the session and reopen it rather than relying on its cached state.
++    /// </remarks>
+     Task ResetAsync(CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+     ///     Derives a key from a password using PBKDF2-HMAC-SHA1 with the device salt.
+     /// </summary>
+     /// <param name="password">
+-    ///     The borrowed UTF-8 encoded password. The caller owns the buffer and must clear it
+-    ///     after use.
++    ///     The borrowed UTF-8-encoded password, not a derived access key. The caller owns the buffer
++    ///     and must keep it unchanged until this method returns.
+     /// </param>
+     /// <returns>
+     ///     The derived 16-byte access key. The caller owns the returned array and must clear it
+     ///     after use.
+     /// </returns>
+     /// <remarks>
+-    ///     <b>Breaking change:</b> The <c>password</c> parameter changed from <c>string</c>
+-    ///     to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers to zero
+-    ///     sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c> and
+-    ///     zero the resulting array when finished.
++    ///     Clear the password buffer and returned key with
++    ///     <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" /> when each
++    ///     is no longer needed, including when an operation fails. Wait for any operation borrowing
++    ///     the key to complete before clearing it.
+     /// </remarks>
+     byte[] DeriveKey(ReadOnlyMemory<byte> password);
+ 
+     /// <summary>
+     ///     Validates the access key using mutual HMAC-SHA1 challenge-response authentication.
+     /// </summary>
++    /// <param name="key">The borrowed access key, normally obtained from <see cref="DeriveKey" />.</param>
++    /// <param name="cancellationToken">The cancellation token for the operation.</param>
++    /// <remarks>
++    ///     <para>
++    ///         Requires an outstanding challenge from the OATH applet SELECT response. Call this method
++    ///         only while <see cref="IsLocked" /> is <see langword="true" />, not for an already unlocked
++    ///         or unprotected session. Successful validation consumes the challenge and unlocks the session.
++    ///     </para>
++    ///     <para>
++    ///         Pass the access key, not raw password bytes. The caller retains ownership of <paramref name="key" />;
++    ///         keep its buffer unchanged until the operation completes, then clear it with
++    ///         <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" /> when no longer
++    ///         needed, including if validation fails.
++    ///     </para>
++    /// </remarks>
++    /// <exception cref="InvalidOperationException">The session has no outstanding challenge.</exception>
+     Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+     ///     Sets or changes the access key for the OATH applet.
+     /// </summary>
++    /// <param name="key">The borrowed new access key, normally obtained from <see cref="DeriveKey" />.</param>
++    /// <param name="cancellationToken">The cancellation token for the operation.</param>
++    /// <remarks>
++    ///     <para>
++    ///         If <see cref="IsLocked" /> is <see langword="true" />, first unlock the session with
++    ///         <see cref="ValidateAsync" /> using the current access key. Then derive the new access key
++    ///         from the new UTF-8-encoded password and pass it here, not the raw password bytes.
++    ///     </para>
++    ///     <para>
++    ///         The caller retains ownership of <paramref name="key" />. Keep its buffer unchanged until
++    ///         the operation completes, then clear it with
++    ///         <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" /> when no longer
++    ///         needed, including if setting the key fails.
++    ///     </para>
++    /// </remarks>
+     Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+     ///     Removes the access key from the OATH applet.
+     /// </summary>
++    /// <remarks>
++    ///     If <see cref="IsLocked" /> is <see langword="true" />, first unlock the session with
++    ///     <see cref="ValidateAsync" /> using the current access key. Removing the access key removes
++    ///     password protection without deleting stored credentials.
++    /// </remarks>
+     Task UnsetKeyAsync(CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+@@ -178,9 +235,11 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     /// <param name="passwordProvider">
+     ///     Invoked only if <paramref name="operation" /> fails with an <see cref="OathException" /> whose
+     ///     <see cref="OathException.Reason" /> is <see cref="OathFailureReason.Locked" />. Must return the raw
+-    ///     (not yet PBKDF2-derived) password bytes; this method derives the access key internally via
++    ///     UTF-8-encoded password bytes, not a derived access key; this method derives the access key internally via
+     ///     <see cref="DeriveKey" /> and zeroes the derived key after the authentication attempt completes.
+-    ///     The caller remains responsible for the lifetime of the bytes it returns.
++    ///     The caller owns the returned password buffer and must keep it unchanged until this method completes,
++    ///     then clear it with <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" />
++    ///     when no longer needed, including if authentication or the retried operation fails.
+     /// </param>
+     /// <param name="cancellationToken">
+     ///     Propagated to <paramref name="operation" />, <paramref name="passwordProvider" />, and the
+@@ -188,6 +247,9 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     ///     requested between the locked failure and the retry stops promptly.
+     /// </param>
+     /// <returns>The result of the (possibly retried) <paramref name="operation" /> call.</returns>
++    /// <remarks>
++    ///     Authentication uses this session's outstanding challenge, as required by <see cref="ValidateAsync" />.
++    /// </remarks>
+     /// <exception cref="OathException">
+     ///     <paramref name="passwordProvider" /> supplied a password that failed validation
+     ///     (<see cref="OathFailureReason.WrongPassword" />), or <paramref name="operation" /> failed
+diff --git c/src/Oath/src/IYubiKeyExtensions.cs w/src/Oath/src/IYubiKeyExtensions.cs
+index 080179d8..912cef2e 100644
+--- c/src/Oath/src/IYubiKeyExtensions.cs
++++ w/src/Oath/src/IYubiKeyExtensions.cs
+@@ -14,8 +14,6 @@
+ 
+ using Yubico.YubiKit.Core.Abstractions;
+ using Yubico.YubiKit.Core.Devices;
+-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+ using Yubico.YubiKit.Core.Sessions;
+ using Yubico.YubiKit.Core.Transports.SmartCard;
+ 
+@@ -31,11 +29,20 @@ public static class IYubiKeyExtensions
+         /// <summary>
+         ///     Creates a new OATH session for the specified YubiKey.
+         /// </summary>
+-        /// <param name="options">Optional cross-cutting session creation settings.</param>
++        /// <param name="options">
++        ///     Optional session creation settings. <see cref="SessionCreationOptions.PreferredConnectionType" />
++        ///     may be omitted or set to <see cref="ConnectionType.SmartCard" />; OATH has no alternative transport.
++        /// </param>
+         /// <param name="cancellationToken">Cancellation token.</param>
+         /// <returns>
+-        ///     A new <see cref="OathSession" /> instance. The caller owns the session and must dispose it.
++        ///     A new <see cref="OathSession" /> that owns the connection opened by this method.
++        ///     The caller must dispose the session with <c>await using</c> to close that connection.
+         /// </returns>
++        /// <remarks>
++        ///     A physical YubiKey admits one live connection, and each connection admits one live session.
++        ///     To use a connection you already own, call <see cref="OathSession.CreateAsync" /> instead;
++        ///     that factory borrows the connection and leaves its disposal to you.
++        /// </remarks>
+         public async Task<OathSession> CreateOathSessionAsync(
+             SessionCreationOptions? options = null,
+             CancellationToken cancellationToken = default)
+@@ -83,7 +90,7 @@ public async Task<IReadOnlyList<Credential>> ListOathCredentialsAsync(
+         ///     Calculates OTP codes for all OATH credentials stored on the YubiKey.
+         ///     HOTP and touch-required credentials return <c>null</c> codes.
+         /// </summary>
+-        /// <param name="timestamp">Optional Unix timestamp. Defaults to current time.</param>
++        /// <param name="timestamp">Unix time in seconds for TOTP calculation. Defaults to the current UTC time.</param>
+         /// <param name="options">Optional cross-cutting session creation settings.</param>
+         /// <param name="cancellationToken">Cancellation token.</param>
+         /// <returns>A dictionary mapping each credential to its calculated code (or null).</returns>
+@@ -97,4 +104,4 @@ public async Task<IReadOnlyList<Credential>> ListOathCredentialsAsync(
+             return await session.CalculateAllAsync(timestamp, cancellationToken).ConfigureAwait(false);
+         }
+     }
+-}
++}
+\ No newline at end of file
+diff --git c/src/Oath/src/OathConstants.cs w/src/Oath/src/OathConstants.cs
+index d7467d64..05e62fb3 100644
+--- c/src/Oath/src/OathConstants.cs
++++ w/src/Oath/src/OathConstants.cs
+@@ -56,5 +56,6 @@ internal static class OathConstants
+     internal const int DefaultDigits = 6;
+     internal const int DefaultImf = 0;
+     internal const int ChallengeLength = 8;
++    // SDK storage-padding threshold, not an HMAC minimum key length or entropy requirement.
+     internal const int HmacMinimumKeySize = 14;
+ }
+\ No newline at end of file
+diff --git c/src/Oath/src/OathSession.cs w/src/Oath/src/OathSession.cs
+index 1c95484c..2198665c 100644
+--- c/src/Oath/src/OathSession.cs
++++ w/src/Oath/src/OathSession.cs
+@@ -67,6 +67,18 @@ private OathSession(
+     /// <summary>
+     ///     Creates and initializes an OATH session.
+     /// </summary>
++    /// <param name="connection">The caller-owned SmartCard connection to borrow for the session lifetime.</param>
++    /// <param name="options">
++    ///     Optional session creation settings. If specified, <see cref="SessionCreationOptions.PreferredConnectionType" />
++    ///     must match the supplied SmartCard connection; it does not select another connection.
++    /// </param>
++    /// <param name="cancellationToken">The cancellation token for initialization.</param>
++    /// <returns>An initialized session that the caller must dispose with <c>await using</c>.</returns>
++    /// <remarks>
++    ///     Disposing the session leaves the borrowed connection open. Dispose the connection separately with
++    ///     <c>await using</c>, after the session. Only one live session may use a connection; dispose it before
++    ///     creating the next session on that connection.
++    /// </remarks>
+     public static Task<OathSession> CreateAsync(
+         ISmartCardConnection connection,
+         SessionCreationOptions? options = null,
+@@ -517,9 +529,9 @@ await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
+     }
+ 
+     /// <summary>
+-    ///     Parses a credential ID from a device response. A malformed ID (for example a TOTP period
+-    ///     prefix of 0, written by another client) is logged by length and skipped, so one bad entry
+-    ///     does not hide the rest of the device's credentials.
++    ///     Parses a credential ID from a device response. A recognized ASCII-digit TOTP period prefix
++    ///     that is zero or exceeds Int32.MaxValue is logged by ID length and skipped, so that entry
++    ///     does not hide the rest of the device's credentials. This is not general raw-ID validation.
+     /// </summary>
+     private bool TryParseCredentialId(
+         byte[] credentialId,
+@@ -583,9 +595,9 @@ private bool TryParseCredentialId(
+                 continue;
+ 
+             // In CALCULATE_ALL, TAG_NAME (0x71) contains the raw credential ID directly.
+-            // The oath type is derived from the response TLV tag (TAG_HOTP/TAG_TOUCH = HOTP,
+-            // TAG_TRUNCATED = TOTP). This differs from LIST where TAG_NAME_LIST (0x72) prepends
+-            // a type byte before the credential ID.
++            // TAG_HOTP identifies HOTP; TAG_TOUCH marks a touch-required entry without a code.
++            // The SDK treats entries without TAG_HOTP as TOTP. Unlike CALCULATE_ALL, LIST uses
++            // TAG_NAME_LIST (0x72) and prepends a type/algorithm byte to the credential ID.
+             var credentialId = nameTlv.Value.ToArray();
+             var oathType = responseTlv.Tag == OathConstants.TagHotp ? OathType.Hotp : OathType.Totp;
+             if (!TryParseCredentialId(credentialId, oathType, "CALCULATE ALL", out var issuer, out var name, out var period))
+diff --git c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CodeTests.cs w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CodeTests.cs
+index fa915082..26aa09fd 100644
+--- c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CodeTests.cs
++++ w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CodeTests.cs
+@@ -52,7 +52,7 @@ public void FormatCode_Totp6Digits_CalculatesValidityWindow()
+             touchRequired: false);
+ 
+         byte[] truncated = [0x06, 0x00, 0x00, 0x00, 0x01];
+-        long timestamp = 1700000010L; // 10 seconds into a 30s window
++        long timestamp = 1700000010L; // Exactly on a 30-second window boundary
+ 
+         var code = Code.FormatCode(credential, timestamp, truncated);
+ 
+diff --git c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs
+index c93a73b0..68733cc7 100644
+--- c/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs
++++ w/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs
+@@ -36,8 +36,7 @@ await Assert.ThrowsAsync<InvalidOperationException>(() =>
+             OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+ 
+         // Borrowed: the session did not create this connection, so disposal is the caller's.
+-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
+-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
++        // Initialization failure must not transfer ownership (see ProtocolConnectionOwnershipTests).
+         Assert.Equal(0, connection.DisposeCount);
+     }
+ 
+@@ -556,10 +555,9 @@ await session.PutCredentialAsync(
+     // ------------------------------------------------------------------------------------------------
+ 
+     /// <summary>
+-    ///     INVARIANT PIN (must hold before and after the ownership change). The convenience entry point opens
+-    ///     a connection the caller never sees, so disposing the session it returned must close that connection.
+-    ///     If this ever regresses, every <c>CreateOathSessionAsync</c> call leaks a PC/SC handle and the
+-    ///     interface stays locked for the process lifetime.
++    ///     The convenience entry point opens a connection the caller never sees, so disposing the returned
++    ///     session must close it. This guards against retaining the PC/SC handle and physical-device lease
++    ///     after session disposal.
+     /// </summary>
+     [Fact]
+     public async Task CreateOathSessionAsync_DisposingSession_DisposesTheConnectionItOpened()
+diff --git c/src/Tests.Shared/CLAUDE.md w/src/Tests.Shared/CLAUDE.md
+index 091ee34a..8b2377a8 100644
+--- c/src/Tests.Shared/CLAUDE.md
++++ w/src/Tests.Shared/CLAUDE.md
+@@ -208,7 +208,7 @@ public static async Task WithOathAsync(
+ 
+     await using var session = await OathSession.CreateAsync(
+         connection,
+-        scpKeyParams: scpKeyParams,
++        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
+         cancellationToken: cancellationToken);
+ 
+     await action(session, state.DeviceInfo);
+diff --git c/src/Tests.Shared/README.md w/src/Tests.Shared/README.md
+index aef5cc26..75efec18 100644
+--- c/src/Tests.Shared/README.md
++++ w/src/Tests.Shared/README.md
+@@ -195,7 +195,7 @@ public static async Task WithOathAsync(
+ 
+     await using var session = await OathSession.CreateAsync(
+         connection,
+-        scpKeyParams: scpKeyParams,
++        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
+         cancellationToken: cancellationToken);
+ 
+     await action(session, state.DeviceInfo);

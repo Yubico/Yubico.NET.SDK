@@ -1,0 +1,17 @@
+{
+  "result": "passed",
+  "content_identity": "All eight reviewed file hashes in edit-record.json matched after validation; no post-review source changes",
+  "command": "dotnet toolchain.cs -- build test docs-qa complexity --filter 'Category!=RequiresUserPresence'",
+  "exit_code": 0,
+  "run": "artifacts/toolchain/runs/20261102-192731-085-build+test+docs-qa+complexity",
+  "build": "full solution Release passed",
+  "warnings": 0,
+  "tests": {"projects_passed": 13, "executed": 3496, "failed": 0, "skipped": 5, "oath_executed": 137},
+  "docs_qa": "73 active docs and 10 package readmes passed",
+  "complexity": "One method selected by changed-line analysis, within thresholds; non-comment source comparison confirms no runtime change",
+  "format_command": "dotnet format Yubico.YubiKit.sln --include src/Oath/src/CredentialData.cs src/Oath/src/Credential.cs src/Oath/src/HashAlgorithm.cs src/Oath/src/OathConstants.cs src/Oath/src/IOathSession.cs src/Oath/examples/OathTool/Commands/AccountsCommand.cs --verify-no-changes --no-restore --verbosity diagnostic",
+  "format_exit_code": 0,
+  "format_result": "Formatted 0 of 1356 files; no warnings/errors found in diagnostic log",
+  "preserved": "OATH-001 authentication edits and original untracked user files",
+  "limitations": ["No hardware integration execution", "Implementation/contract concerns remain deferred", "Not full pilot completion", "No commits or pushes"]
+}

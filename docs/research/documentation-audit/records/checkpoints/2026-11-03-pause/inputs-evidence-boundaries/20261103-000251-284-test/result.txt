@@ -1,0 +1,14 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Cli.Commands)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       2.9s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Cli.Commands.UnitTests  2 test(s) failed
+      - Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: ""): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)
+      - Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: "   "): Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)
+      output: artifacts/toolchain/runs/20261103-000251-284-test/01-test-Cli.Commands.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 41 executed, 2 failed, 1 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Cli.Commands.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey"
+Run log: artifacts/toolchain/runs/20261103-000251-284-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

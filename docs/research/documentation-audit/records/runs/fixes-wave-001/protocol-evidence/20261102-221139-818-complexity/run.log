@@ -1,0 +1,38 @@
+# dotnet toolchain.cs -- complexity
+# started:   2026-11-02 22:11:39 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-protocol
+# git:       yubikit-oath-fix-protocol @ 361567eb (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: complexity  (log: artifacts/toolchain/runs/20261102-221139-818-complexity/run.log)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs HEAD
+  files        2
+  methods      5
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    16    20  worse      Yubico.YubiKit.Oath.OathSession.CalculateAllAsync  (was 13/11)
+                         src/Oath/src/OathSession.cs:570-641
+    12    11  unchanged  Yubico.YubiKit.Oath.OathSession.ValidateAsync
+                         src/Oath/src/OathSession.cs:673-753
+
+2 of 5 methods exceed a threshold: 1 needs action (new or worse), 1 is existing debt.
+For each method that needs action, simplify it or add to the commit message:
+  Complexity-Justification: OathSession.CalculateAllAsync: <why this complexity is warranted>
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- complexity)
+Targets:
+  ✓ complexity     1.3s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261102-221139-818-complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

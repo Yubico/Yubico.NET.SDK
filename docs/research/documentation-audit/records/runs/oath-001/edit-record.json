@@ -1,0 +1,19 @@
+{
+  "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+  "editor_session": "ses_e62871aeeffefYhxtmCQ9JpVt0",
+  "reviewer_session": "ses_e6285b8d4ffeFadb2JbJExKdAo",
+  "diff_sha256": "2dbdb8e4948c4e5e4a94418cd2b76b1a3d18a7cad2bf4ffcb60077957d6e337e",
+  "files": {
+    "src/Oath/CLAUDE.md": "a8f970b4d608642a5cc0c4a5ba1f1947de1a16d40d8915afbdc9abbc5130890d",
+    "src/Oath/README.md": "b03eaa8317bf3d194a615baadc76254063920e88a222cd88d448a74b37c21af7",
+    "src/Oath/examples/OathTool/Commands/AccessCommand.cs": "2bca2be9f3c32dd1c0b9577b4e2f9e22f249e36feae3301dd5df28bb61b5fe87",
+    "src/Oath/src/IOathSession.cs": "73d9e1781470348ed6e6179bda95f426c95ad999e7557f19c364a74a78b16c7f"
+  },
+  "checks": [
+    "exactly four authorized files changed",
+    "C# non-comment lines identical to HEAD",
+    "git diff --check passed"
+  ],
+  "review_status": "passed; see review.md",
+  "gate_status": "passed; see validation-final.json; final EOF formatting recorded separately in final-content.json"
+}

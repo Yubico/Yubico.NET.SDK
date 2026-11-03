@@ -1,0 +1,35 @@
+# dotnet toolchain.cs -- complexity
+# started:   2026-11-03 00:08:07 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-inputs
+# git:       yubikit-oath-fix-inputs @ c90dced1 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: complexity  (log: artifacts/toolchain/runs/20261103-000807-254-complexity/run.log)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs HEAD
+  files        5
+  methods      13
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    19    14  unchanged  Yubico.YubiKit.Oath.CredentialData.ParseUri
+                         src/Oath/src/CredentialData.cs:128-239
+
+1 of 13 methods exceeds a threshold: 0 need action (new or worse), 1 is existing debt.
+Existing debt only: simplifying these methods is welcome but optional.
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- complexity)
+Targets:
+  ✓ complexity     0.4s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261103-000807-254-complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

@@ -1,0 +1,25 @@
+{
+  "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+  "phase": "reviewed documentation batch validation",
+  "gate_command": "dotnet toolchain.cs -- build test docs-qa complexity --filter 'Category!=RequiresUserPresence'",
+  "gate_result": "PASSED",
+  "gate_exit_code": 0,
+  "gate_run": "artifacts/toolchain/runs/20261102-191701-160-build+test+docs-qa+complexity",
+  "build": "full solution Release; passed",
+  "warnings": 0,
+  "tests": {"projects_passed": 13, "executed": 3496, "failed": 0, "skipped": 5, "oath_executed": 137, "oath_failed": 0},
+  "documentation": {"active_files": 73, "package_readmes": 10, "result": "passed"},
+  "complexity": "No shipping C# methods in scope; no runtime method changes",
+  "formatting": {
+    "initial_command": "dotnet format Yubico.YubiKit.sln --include src/Oath/src/IOathSession.cs src/Oath/examples/OathTool/Commands/AccessCommand.cs --verify-no-changes --no-restore",
+    "initial_exit_code": 2,
+    "cause": "Editor added final newline to both C# files; .editorconfig insert_final_newline=false and both baseline files had no final newline",
+    "correction_command": "dotnet format whitespace Yubico.YubiKit.sln --include src/Oath/src/IOathSession.cs src/Oath/examples/OathTool/Commands/AccessCommand.cs --no-restore",
+    "final_command": "dotnet format Yubico.YubiKit.sln --include src/Oath/src/IOathSession.cs src/Oath/examples/OathTool/Commands/AccessCommand.cs --verify-no-changes --no-restore --verbosity diagnostic",
+    "final_exit_code": 0,
+    "final_result": "Formatted 0 of 1356 files; no warnings/errors found in final diagnostic log",
+    "log": "/tmp/opencode/oath-001-format-verify.log",
+    "review_and_test_reuse": "Full gates and independent prose review preceded EOF normalization. Only the two terminal newlines changed afterward; exact before/after content equivalence apart from trailing newline is verified in final-content.json. No runtime, signature, XML prose, or Markdown content changed. Full tests were not repeated for EOF-only normalization."
+  },
+  "remaining_limits": ["No hardware integration execution", "Implementation/contract concerns deferred to pilot closeout", "Other OATH semantic units remain pending", "No commits or pushes made"]
+}

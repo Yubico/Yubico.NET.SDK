@@ -1,0 +1,43 @@
+# dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolDeviceSelectionTests
+# started:   2026-11-02 22:37:19 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-cli
+# git:       yubikit-oath-fix-cli @ 361567eb (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261102-223719-097-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit tests ===
+
+
+=== Testing: Oath.UnitTests ===
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --list-tests --filter-method *OathToolDeviceSelectionTests* (output captured)
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathToolDeviceSelectionTests*"
+  output: artifacts/toolchain/runs/20261102-223719-097-test/01-test-Oath.UnitTests.log
+✗ FAIL (3 test(s) failed)
+✗ test: 1 test project(s) failed
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolDeviceSelectionTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       4.4s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  3 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.MetadataCancellation_IsNotConvertedToMissingInfoOrFollowedByOathOpen: Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   2
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen(multipleDevices: False): Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(System.InvalidOperationException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen(multipleDevices: True): Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(System.InvalidOperationException)
+      output: artifacts/toolchain/runs/20261102-223719-097-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 4 executed, 3 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.MetadataCancellation_IsNotConvertedToMissingInfoOrFollowedByOathOpen|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDeviceSelectionTests.WaitingForRetryOrSelection_CancelsWithoutFurtherInputOrOathOpen"
+Run log: artifacts/toolchain/runs/20261102-223719-097-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

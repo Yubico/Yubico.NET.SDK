@@ -1,0 +1,199 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- build test docs-qa docs-architecture complexity --filter \"Category!=RequiresUserPresence\"",
+  "started": "2026-11-02T19:47:51.0441558+01:00",
+  "durationSeconds": 54.6,
+  "runDirectory": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "native-aot-contract-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "durationSeconds": 5.9,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 47.7,
+      "error": null
+    },
+    {
+      "name": "docs-qa",
+      "status": "passed",
+      "durationSeconds": 0.3,
+      "error": null
+    },
+    {
+      "name": "docs-architecture",
+      "status": "passed",
+      "durationSeconds": 0.2,
+      "error": null
+    },
+    {
+      "name": "complexity",
+      "status": "passed",
+      "durationSeconds": 0.4,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Cli.Commands.UnitTests",
+      "outcome": "passed",
+      "reason": "24 executed, 1 skipped",
+      "executed": 24,
+      "failed": 0,
+      "skipped": 1,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/02-test-Cli.Commands.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Cli.Shared.UnitTests",
+      "outcome": "passed",
+      "reason": "51 executed, 0 skipped",
+      "executed": 51,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/03-test-Cli.Shared.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Core.UnitTests",
+      "outcome": "passed",
+      "reason": "1629 executed, 4 skipped",
+      "executed": 1629,
+      "failed": 0,
+      "skipped": 4,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/04-test-Core.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Ctap2.UnitTests",
+      "outcome": "passed",
+      "reason": "491 executed, 0 skipped",
+      "executed": 491,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/05-test-Ctap2.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Management.UnitTests",
+      "outcome": "passed",
+      "reason": "96 executed, 0 skipped",
+      "executed": 96,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/06-test-Management.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "passed",
+      "reason": "137 executed, 0 skipped",
+      "executed": 137,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/07-test-Oath.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "OpenPgp.UnitTests",
+      "outcome": "passed",
+      "reason": "164 executed, 0 skipped",
+      "executed": 164,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/08-test-OpenPgp.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "Piv.UnitTests",
+      "outcome": "passed",
+      "reason": "215 executed, 0 skipped",
+      "executed": 215,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/09-test-Piv.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "PublicApi.UnitTests",
+      "outcome": "passed",
+      "reason": "24 executed, 0 skipped",
+      "executed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/10-test-PublicApi.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "SecurityDomain.UnitTests",
+      "outcome": "passed",
+      "reason": "48 executed, 0 skipped",
+      "executed": 48,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/11-test-SecurityDomain.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "WebAuthn.UnitTests",
+      "outcome": "passed",
+      "reason": "333 executed, 0 skipped",
+      "executed": 333,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/12-test-WebAuthn.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "YubiHsm.UnitTests",
+      "outcome": "passed",
+      "reason": "91 executed, 0 skipped",
+      "executed": 91,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/13-test-YubiHsm.UnitTests.log"
+    },
+    {
+      "target": "test",
+      "project": "YubiOtp.UnitTests",
+      "outcome": "passed",
+      "reason": "193 executed, 0 skipped",
+      "executed": 193,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-194751-044-build+test+docs-qa+docs-architecture+complexity/14-test-YubiOtp.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

@@ -1,0 +1,340 @@
+--- a/src/Oath/src/CredentialData.cs
++++ b/src/Oath/src/CredentialData.cs
+@@ -20,49 +20,61 @@
+ /// <summary>
+ ///     Holds the data needed to create an OATH credential on a YubiKey.
+ /// </summary>
++/// <remarks>
++///     Properties can be assigned only during initialization. The <see cref="Secret" /> array remains
++///     mutable and is cleared by <see cref="Dispose" />.
++/// </remarks>
+ public sealed class CredentialData : IDisposable
+ {
+     /// <summary>
+-    ///     Gets or sets the account name.
++    ///     Gets the account name, assigned during initialization.
+     /// </summary>
+     public required string Name { get; init; }
+ 
+     /// <summary>
+-    ///     Gets or sets the OATH credential type.
++    ///     Gets the OATH credential type, assigned during initialization.
+     /// </summary>
+     public required OathType OathType { get; init; }
+ 
+     /// <summary>
+-    ///     Gets or sets the hash algorithm for HMAC computation.
++    ///     Gets the hash algorithm for HMAC computation, assigned during initialization.
+     /// </summary>
+     public required OathHashAlgorithm HashAlgorithm { get; init; }
+ 
+     /// <summary>
+-    ///     Gets or sets the shared secret key.
+-    /// </summary>
++    ///     Gets the shared secret key, assigned during initialization.
++    /// </summary>
++    /// <remarks>
++    ///     Direct initialization retains the supplied array without copying it, and this property
++    ///     exposes that same array. Disposing this instance clears it, including any caller-held alias.
++    ///     <see cref="ParseUri(string)" /> instead creates a new array from the encoded secret.
++    /// </remarks>
+     public required byte[] Secret { get; init; }
+ 
+     /// <summary>
+-    ///     Gets or sets the number of digits in the OTP code. Defaults to 6.
++    ///     Gets the number of digits in the OTP code, assigned during initialization. Defaults to 6.
+     /// </summary>
+     public int Digits { get; init; } = OathConstants.DefaultDigits;
+ 
+     /// <summary>
+-    ///     Gets or sets the TOTP time step period in seconds. Defaults to 30.
++    ///     Gets the TOTP time step period in seconds, assigned during initialization. Defaults to 30.
+     /// </summary>
+     public int Period { get; init; } = OathConstants.DefaultPeriod;
+ 
+     /// <summary>
+-    ///     Gets or sets the HOTP initial moving factor (counter). Defaults to 0.
++    ///     Gets the HOTP initial moving factor (counter), assigned during initialization. Defaults to 0.
+     /// </summary>
+     public int Counter { get; init; } = OathConstants.DefaultImf;
+ 
+     /// <summary>
+-    ///     Gets or sets the credential issuer.
++    ///     Gets the credential issuer, assigned during initialization.
+     /// </summary>
+     public string? Issuer { get; init; }
+ 
+-    /// <summary>Gets whether using this credential requires physical touch.</summary>
++    /// <summary>
++    ///     Gets whether individual calculations require physical touch, assigned during initialization.
++    ///     Enabling this policy requires YubiKey firmware 4.2.4 or later.
++    /// </summary>
+     public bool RequireTouch { get; init; }
+ 
+     /// <summary>
+@@ -72,7 +84,7 @@
+     ///     An otpauth URI as defined by the Google Authenticator Key URI Format,
+     ///     e.g., <c>otpauth://totp/GitHub:user@example.com?secret=JBSWY3DPEHPK3PXP&amp;issuer=GitHub</c>.
+     /// </param>
+-    /// <returns>A populated <see cref="CredentialData" /> instance.</returns>
++    /// <returns>A populated <see cref="CredentialData" /> instance with a newly decoded secret array.</returns>
+     /// <exception cref="ArgumentException">
+     ///     Thrown when the URI scheme is not <c>otpauth</c>, the OATH type is missing or invalid,
+     ///     or the <c>secret</c> query parameter is missing.
+@@ -83,8 +95,11 @@
+     ///     Parses an <c>otpauth://</c> URI and applies the credential's physical-touch policy.
+     /// </summary>
+     /// <param name="uri">The otpauth URI to parse.</param>
+-    /// <param name="requireTouch">Whether using the credential requires physical touch.</param>
+-    /// <returns>A populated <see cref="CredentialData" /> instance that exclusively owns its secret.</returns>
++    /// <param name="requireTouch">
++    ///     Whether individual calculations require physical touch. Setting this to <see langword="true" />
++    ///     requires YubiKey firmware 4.2.4 or later.
++    /// </param>
++    /// <returns>A populated <see cref="CredentialData" /> instance with a newly decoded secret array.</returns>
+     public static CredentialData ParseUri(string uri, bool requireTouch)
+     {
+         var parsed = new Uri(uri.Trim());
+@@ -195,7 +210,7 @@
+     public byte[] GetId() => Credential.FormatCredentialId(Issuer, Name, OathType, Period);
+ 
+     /// <summary>
+-    ///     Zeros the shared secret to prevent sensitive key material from lingering in memory.
++    ///     Clears the <see cref="Secret" /> array. Does not clear the input URI or encoded secret strings.
+     /// </summary>
+     public void Dispose()
+     {
+@@ -237,10 +252,10 @@
+     }
+ 
+     /// <summary>
+-    ///     Pads a secret to the minimum HMAC key size (14 bytes) by appending zero bytes.
++    ///     Appends zero bytes to secrets shorter than the SDK's 14-byte storage-padding threshold.
+     /// </summary>
+     /// <param name="secret">The original secret bytes.</param>
+-    /// <returns>The padded secret, or the original if already at or above minimum size.</returns>
++    /// <returns>The padded secret, or the original if already at or above the storage-padding threshold.</returns>
+     internal static byte[] PadSecret(byte[] secret)
+     {
+         if (secret.Length >= OathConstants.HmacMinimumKeySize)
+@@ -254,7 +269,8 @@
+     }
+ 
+     /// <summary>
+-    ///     Processes the secret for storage: shortens per RFC 2104, then pads to minimum size.
++    ///     Processes the secret for storage: shortens keys exceeding the hash block size per RFC 2104,
++    ///     then applies the SDK's 14-byte storage padding.
+     /// </summary>
+     /// <returns>The processed secret ready for the PUT command.</returns>
+     internal byte[] GetProcessedSecret()
+@@ -263,7 +279,7 @@
+         byte[] padded = PadSecret(shortened);
+ 
+         // If HmacShortenKey produced a new array (key was longer than block size)
+-        // and PadSecret produced yet another array (shortened was under minimum size),
++        // and PadSecret produced yet another array (shortened was under the storage-padding threshold),
+         // the intermediate must be zeroed to avoid leaking key material.
+         if (!ReferenceEquals(shortened, Secret) && !ReferenceEquals(shortened, padded))
+         {
+@@ -274,7 +290,7 @@
+     }
+ 
+     /// <summary>
+-    ///     Parses a Base32-encoded key string, supporting unpadded input and whitespace.
++    ///     Parses a Base32-encoded key string, supporting unpadded input and literal spaces.
+     /// </summary>
+     /// <param name="key">The Base32-encoded string.</param>
+     /// <returns>The decoded bytes.</returns>
+--- a/src/Oath/src/Credential.cs
++++ b/src/Oath/src/Credential.cs
+@@ -134,15 +134,18 @@
+     ///     Parses a credential ID from the OATH applet wire protocol.
+     /// </summary>
+     /// <remarks>
+-    ///     For TOTP the optional <c>period/</c> prefix is the RFC 6238 §4.1 time step X in seconds, the
+-    ///     divisor in <c>T = (Current Unix time - T0) / X</c> (§4.2). A prefix that is not a positive
+-    ///     integer is malformed. HOTP has no period and reports 0.
++    ///     The host-side TOTP naming convention recognizes an optional prefix of ASCII digits followed
++    ///     by <c>/</c>. Its value must fit a positive <see cref="int" /> and represents the RFC 6238 §4.1
++    ///     time step X in seconds, the divisor in <c>T = (Current Unix time - T0) / X</c> (§4.2).
++    ///     A name such as <c>-30/name</c> has no recognized period prefix. YKOATH does not define this
++    ///     naming convention. HOTP has no period and reports 0.
+     /// </remarks>
+     /// <param name="credentialId">The raw credential ID bytes.</param>
+     /// <param name="oathType">The OATH type (TOTP or HOTP).</param>
+     /// <returns>A tuple of (issuer, name, period).</returns>
+     /// <exception cref="ArgumentException">
+-    ///     <paramref name="oathType" /> is TOTP and the period prefix is zero, negative or out of range.
++    ///     <paramref name="oathType" /> is TOTP and a recognized ASCII-digit period prefix is zero or
++    ///     exceeds <see cref="int.MaxValue" />.
+     /// </exception>
+     internal static (string? Issuer, string Name, int Period) ParseCredentialId(
+         ReadOnlySpan<byte> credentialId,
+--- a/src/Oath/src/HashAlgorithm.cs
++++ b/src/Oath/src/HashAlgorithm.cs
+@@ -30,7 +30,7 @@
+     Sha256 = 0x02,
+ 
+     /// <summary>
+-    ///     SHA-512 (512-bit digest, 128-byte block size).
++    ///     SHA-512 (512-bit digest, 128-byte block size). Requires YubiKey firmware 4.3.1 or later.
+     /// </summary>
+     Sha512 = 0x03
+ }--- a/src/Oath/src/OathConstants.cs
++++ b/src/Oath/src/OathConstants.cs
+@@ -56,5 +56,6 @@
+     internal const int DefaultDigits = 6;
+     internal const int DefaultImf = 0;
+     internal const int ChallengeLength = 8;
++    // SDK storage-padding threshold, not an HMAC minimum key length or entropy requirement.
+     internal const int HmacMinimumKeySize = 14;
+ }--- a/src/Oath/src/IOathSession.cs
++++ b/src/Oath/src/IOathSession.cs
+@@ -69,8 +69,12 @@
+     Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+-    ///     Stores a new credential on the device.
+-    /// </summary>
++    ///     Adds a credential or replaces an existing credential with the same raw credential ID.
++    /// </summary>
++    /// <remarks>
++    ///     The raw ID is produced by <see cref="CredentialData.GetId" />. The SDK sends PUT without
++    ///     checking whether that ID already exists on the device.
++    /// </remarks>
+     Task PutCredentialAsync(CredentialData credentialData,
+         CancellationToken cancellationToken = default);
+ 
+--- a/src/Oath/README.md
++++ b/src/Oath/README.md
+@@ -10,13 +10,18 @@
+ ## Requirements
+ 
+ - .NET 10. On Linux, install PC/SC and the udev rules described in [docs/linux-setup.md](../../docs/linux-setup.md).
+-- A YubiKey 4 or 5 series device with OATH enabled. The SDK implements no YubiKey NEO workarounds. Two
+-  operations need newer firmware:
++- A YubiKey 4 or 5 series device with OATH enabled. The SDK implements no YubiKey NEO workarounds.
++  These features require newer firmware:
+ 
+   | Feature | Minimum firmware |
+   |---------|------------------|
++  | Touch-required credentials | 4.2.4 |
++  | SHA-512 credentials | 4.3.1 |
+   | Rename credential | 5.3.1 |
+   | SCP03 for OATH | 5.6.3 |
++
++  These are device requirements. The SDK checks firmware before rename and SCP03, but does not
++  preflight touch or SHA-512 support when storing a credential.
+ 
+ - Transport: SmartCard only, over USB CCID or NFC. Setting `PreferredConnectionType` to anything other than
+   `ConnectionType.SmartCard` throws `ArgumentException`.
+@@ -57,7 +62,10 @@
+ 
+ ### Add a TOTP credential from an otpauth URI
+ 
+-`CredentialData` owns the decoded secret, so dispose it. `requireTouch: true` makes every calculation wait for touch.
++`ParseUri` creates a new decoded secret array; dispose the returned `CredentialData` to clear that array.
++`PutCredentialAsync` adds the credential or replaces one with the same raw credential ID, produced by `GetId()`.
++Set `requireTouch: true` to require touch for individual calculations (firmware 4.2.4+). Bulk calculations return
++`null` for these entries, as described below.
+ 
+ ```csharp
+ using var credentialData = CredentialData.ParseUri(
+@@ -159,7 +167,9 @@
+ ## Security notes
+ 
+ - Secrets cross the API as `byte[]` or `ReadOnlyMemory<byte>`. You own the input buffers: zero them with `CryptographicOperations.ZeroMemory` in a `finally`.
+-- `CredentialData` is `IDisposable` and zeroes its `Secret` on disposal. Always `using` it.
++- `CredentialData` properties are assigned only during initialization. Directly assigning `Secret` retains the
++  supplied array without copying it; the property exposes the same mutable array. `ParseUri` creates a new decoded
++  array instead. Use `using` to clear `Secret` on disposal; this does not clear the URI or encoded secret strings.
+ - `DeriveKey` takes a borrowed UTF-8 password and returns a 16-byte key you own and must zero; `AuthenticateAndRetryAsync` zeroes the key it derives, not the bytes your callback returned.
+ - Never log secrets, passwords, derived access keys, or calculated codes.
+ 
+--- a/src/Oath/CLAUDE.md
++++ b/src/Oath/CLAUDE.md
+@@ -8,7 +8,7 @@
+ 
+ **Key characteristics:**
+ - **SmartCard-only** — no FIDO/OTP backend abstraction needed (like SecurityDomain)
+-- **No session-open firmware floor** — matches canonical Python/Rust/Android yubikit. Only rename (5.3.1) and SCP03 (5.6.3) are gated; the SDK carries no NEO (firmware < 3.0.0) workarounds such as the post-`set_key` re-select
++- **No session-open firmware floor** — matches canonical Python/Rust/Android yubikit. SDK preflight gates cover rename (5.3.1) and SCP03 (5.6.3), not the device requirements for touch (4.2.4) or SHA-512 (4.3.1); the SDK carries no NEO (firmware < 3.0.0) workarounds such as the post-`set_key` re-select
+ - **Sealed session** — `OathSession` is sealed, extended via `IOathSession` interface
+ - **Two-phase init** — private constructor + static `CreateAsync` (matches Management/SecurityDomain)
+ - **Credential policy ownership** — `CredentialData.RequireTouch` travels with creation policy
+@@ -20,8 +20,8 @@
+ 
+ | File | Purpose |
+ |------|---------|
+-| `src/OathType.cs` | TOTP/HOTP enum (`0x10`/`0x20`) |
+-| `src/HashAlgorithm.cs` | SHA1/SHA256/SHA512 enum (`0x01`/`0x02`/`0x03`) |
++| `src/OathType.cs` | OATH type enum: HOTP = `0x10`, TOTP = `0x20` |
++| `src/HashAlgorithm.cs` | Hash enum: SHA1 = `0x01`, SHA256 = `0x02`, SHA512 = `0x03` |
+ | `src/Credential.cs` | Immutable credential identity, equality on `(DeviceId, Id)` |
+ | `src/CredentialData.cs` | Credential creation data with `ParseUri()` and key processing |
+ | `src/Code.cs` | Calculated OTP code result |
+@@ -31,7 +31,8 @@
+ 
+ ### Credential ID Format
+ 
+-The credential ID encodes metadata into a UTF-8 byte string:
++The SDK uses Yubico's host-side naming convention to encode metadata into a UTF-8 credential ID for
++interoperability with Yubico Authenticator. YKOATH itself does not define this name grammar:
+ 
+ ```
+ TOTP (default 30s period):  "issuer:name" or "name"
+@@ -39,7 +40,10 @@
+ HOTP:                       "issuer:name" or "name" (no period prefix)
+ ```
+ 
+-Parsing regex: `^((\d+)/)?(([^:]+):)?(.+)$`
++See `TotpIdPattern` and `ParseCredentialId` in `src/Credential.cs` for parsing. A recognized period prefix
++uses ASCII digits followed by `/` and must fit a positive `Int32`; `-30/name` is a name, not a negative
++period prefix. Using `[0-9]` rather than `\d` avoids recognizing Unicode decimal digits that integer
++parsing would reject.
+ 
+ ### TLV Tag Constants
+ 
+@@ -60,7 +64,7 @@
+ ### Key Processing
+ 
+ 1. **HMAC key shortening** (RFC 2104): If key length > hash block size, hash the key
+-2. **Secret padding**: Pad to minimum 14 bytes with zeroes
++2. **SDK storage padding**: Append zeroes to secrets shorter than 14 bytes. This threshold is not an HMAC minimum key length or entropy requirement.
+ 3. **TAG_KEY format**: `[type_byte][digits_byte][secret...]` where type_byte = `oath_type | hash_algorithm`
+ 
+ ### Access Key Derivation
+@@ -76,12 +80,17 @@
+ `password` — no `Utf8` suffix. The UTF-8 contract and the caller's obligation to zero both the
+ input buffer and the returned key live in the XML documentation for the member.
+ 
+-## Version-Gated Features
++## Firmware Requirements and SDK Gates
+ 
+-| Feature | Minimum Version |
+-|---------|----------------|
+-| Rename credential | 5.3.1 |
+-| SCP03 for OATH | 5.6.3 |
++| Feature | Minimum firmware | SDK preflight gate |
++|---------|------------------|--------------------|
++| Touch-required credentials | 4.2.4 | No |
++| SHA-512 credentials | 4.3.1 | No |
++| Rename credential | 5.3.1 | Yes |
++| SCP03 for OATH | 5.6.3 | Yes |
++
++Touch and SHA-512 requirements come from the YKOATH protocol. Do not infer a session-open firmware
++floor or an SDK `NotSupportedException` for those credential options from the rename/SCP03 gates.
+ 
+ ## Reference Implementation
+ 
+--- a/src/Oath/examples/OathTool/Commands/AccountsCommand.cs
++++ b/src/Oath/examples/OathTool/Commands/AccountsCommand.cs
+@@ -430,7 +430,7 @@
+     }
+ 
+     /// <summary>
+-    /// Decodes a Base32-encoded string (RFC 4648), tolerating missing padding and whitespace.
++    /// Decodes a Base32-encoded string (RFC 4648), tolerating missing padding and literal spaces.
+     /// </summary>
+     private static byte[] Base32Decode(string input)
+     {

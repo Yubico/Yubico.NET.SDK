@@ -1,0 +1,165 @@
+# dotnet toolchain.cs -- build test docs-qa docs-architecture complexity --filter "Category!=RequiresUserPresence&Category!=RequiresHardware"
+# started:   2026-11-03 12:58:05 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-lifecycle
+# git:       yubikit-oath-fix-lifecycle @ c90dced1 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: build test docs-qa docs-architecture complexity  (log: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet build Yubico.YubiKit.sln -c Release
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/01-build.log
+✓ Built Yubico.YubiKit.sln in Release configuration
+
+▶ target: test
+
+=== Running unit tests ===
+
+
+=== Testing: Cli.Commands.UnitTests ===
+▶ RUN dotnet run --project src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/02-test-Cli.Commands.UnitTests.log
+✓ PASS (24 executed, 1 skipped)
+
+=== Testing: Cli.Shared.UnitTests ===
+▶ RUN dotnet run --project src/Cli.Shared/tests/Yubico.YubiKit.Cli.Shared.UnitTests/Yubico.YubiKit.Cli.Shared.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/03-test-Cli.Shared.UnitTests.log
+✓ PASS (51 executed, 0 skipped)
+
+=== Testing: Core.UnitTests ===
+▶ RUN dotnet run --project src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/04-test-Core.UnitTests.log
+✓ PASS (1716 executed, 4 skipped)
+
+=== Testing: Ctap2.UnitTests ===
+▶ RUN dotnet run --project src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/05-test-Ctap2.UnitTests.log
+✓ PASS (492 executed, 0 skipped)
+
+=== Testing: Management.UnitTests ===
+▶ RUN dotnet run --project src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/06-test-Management.UnitTests.log
+✓ PASS (96 executed, 0 skipped)
+
+=== Testing: Oath.UnitTests ===
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/07-test-Oath.UnitTests.log
+✓ PASS (353 executed, 0 skipped)
+
+=== Testing: OpenPgp.UnitTests ===
+▶ RUN dotnet run --project src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/08-test-OpenPgp.UnitTests.log
+✓ PASS (186 executed, 0 skipped)
+
+=== Testing: Piv.UnitTests ===
+▶ RUN dotnet run --project src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/09-test-Piv.UnitTests.log
+✓ PASS (215 executed, 0 skipped)
+
+=== Testing: PublicApi.UnitTests ===
+▶ RUN dotnet run --project src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/10-test-PublicApi.UnitTests.log
+✓ PASS (24 executed, 0 skipped)
+
+=== Testing: SecurityDomain.UnitTests ===
+▶ RUN dotnet run --project src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/11-test-SecurityDomain.UnitTests.log
+✓ PASS (50 executed, 0 skipped)
+
+=== Testing: WebAuthn.UnitTests ===
+▶ RUN dotnet run --project src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/12-test-WebAuthn.UnitTests.log
+✓ PASS (371 executed, 0 skipped)
+
+=== Testing: YubiHsm.UnitTests ===
+▶ RUN dotnet run --project src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/13-test-YubiHsm.UnitTests.log
+✓ PASS (91 executed, 0 skipped)
+
+=== Testing: YubiOtp.UnitTests ===
+▶ RUN dotnet run --project src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence" --filter-not-trait "Category=RequiresHardware"
+  output: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/14-test-YubiOtp.UnitTests.log
+✓ PASS (201 executed, 0 skipped)
+
+▶ target: docs-qa
+
+=== Validating active documentation ===
+
+▶ RUN dotnet msbuild /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/Yubico.YubiKit.Core.csproj -getProperty:YubiKitDocsBranch -getProperty:PackageProjectUrl -nologo (output captured)
+✓ Validated 73 active documentation file(s)
+✓ Validated 10 package readme(s)
+
+▶ target: docs-architecture
+
+=== Validating architecture diagrams (evidence map + image freshness) ===
+
+▶ RUN bash "scripts/architecture/check-architecture-map.sh"
+architecture map OK: 6 diagram entries, all evidence + project edges resolve; coverage matches 6 diagram heading level(s).
+▶ RUN bash "scripts/architecture/check-architecture-images.sh"
+architecture images OK: 7 diagrams present and fresh (manifest matches source blocks).
+✓ Architecture diagrams validated (map resolves; images present and fresh)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs HEAD
+  files        4
+  methods      7
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    12    11  unchanged  Yubico.YubiKit.Oath.OathSession.ValidateAsync
+                         src/Oath/src/OathSession.cs:698-778
+
+1 of 7 methods exceeds a threshold: 0 need action (new or worse), 1 is existing debt.
+Existing debt only: simplifying these methods is welcome but optional.
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- build test docs-qa docs-architecture complexity --filter "Category!=RequiresUserPresence&Category!=RequiresHardware")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      4.9s
+  ✓ test                      48.5s
+  ✓ docs-qa                    0.3s
+  ✓ docs-architecture          0.2s
+  ✓ complexity                 0.4s
+Projects (test):
+  ✓ PASS      Cli.Commands.UnitTests    24 executed, 1 skipped
+  ✓ PASS      Cli.Shared.UnitTests      51 executed, 0 skipped
+  ✓ PASS      Core.UnitTests            1716 executed, 4 skipped
+  ✓ PASS      Ctap2.UnitTests           492 executed, 0 skipped
+  ✓ PASS      Management.UnitTests      96 executed, 0 skipped
+  ✓ PASS      Oath.UnitTests            353 executed, 0 skipped
+  ✓ PASS      OpenPgp.UnitTests         186 executed, 0 skipped
+  ✓ PASS      Piv.UnitTests             215 executed, 0 skipped
+  ✓ PASS      PublicApi.UnitTests       24 executed, 0 skipped
+  ✓ PASS      SecurityDomain.UnitTests  50 executed, 0 skipped
+  ✓ PASS      WebAuthn.UnitTests        371 executed, 0 skipped
+  ✓ PASS      YubiHsm.UnitTests         91 executed, 0 skipped
+  ✓ PASS      YubiOtp.UnitTests         201 executed, 0 skipped
+Totals: projects: 13 passed, 0 failed, 0 with no tests executed; tests: 3870 executed, 0 failed, 5 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261103-125805-394-build+test+docs-qa+docs-architecture+complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

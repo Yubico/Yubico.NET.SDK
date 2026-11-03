@@ -81,5 +81,7 @@ The observations above apply only to serial 125; they do not establish a failure
   exception entry parses in isolation. Record it for a documentation-only hygiene pass; full-map YAML validity is
   not part of the successful checks above.
 
-Detailed local handoffs, patches, review records, and raw test logs are retained in the audit workspace. This
-repository checkpoint preserves the results and deferred decisions without publishing those external artifacts.
+The [durable OATH handoff](documentation-audit/oath.md) now links the retained plans, progression,
+findings, patches, implementation decisions, independent reviews and validation logs saved in this
+repository. Use the [two-pass workflow](documentation-audit/workflow.md) for a return visit; the detailed
+records preserve both completed fixes and the evidence gaps above.

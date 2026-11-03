@@ -1,0 +1,48 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Cli.Commands",
+  "started": "2026-11-03T00:02:51.2846905+01:00",
+  "durationSeconds": 3,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000251-284-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 2.9,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Cli.Commands.UnitTests",
+      "outcome": "failed",
+      "reason": "2 test(s) failed",
+      "executed": 41,
+      "failed": 2,
+      "skipped": 1,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: \"\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey(encoded: \"   \")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-000251-284-test/01-test-Cli.Commands.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Cli.Commands.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Cli.Commands.UnitTests.Oath.OathHelpersTests.Base32Decode_MalformedTerminalForms_DoNotProduceKey\""
+  ]
+}

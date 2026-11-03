@@ -1,0 +1,14 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathTool)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       3.8s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  2 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.CancelledSetup_DisposesAnyReturnedSessionAndDoesNotMutate(hasSession: False): Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.CancelledSetup_DisposesAnyReturnedSessionAndDoesNotMutate(hasSession: True): Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)
+      output: artifacts/toolchain/runs/20261102-221241-323-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 64 executed, 2 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.CancelledSetup_DisposesAnyReturnedSessionAndDoesNotMutate"
+Run log: artifacts/toolchain/runs/20261102-221241-323-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

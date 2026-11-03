@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "ykman",
+      "list"
+    ],
+    "exitCode": 0,
+    "stdout": "YubiKey 5 NFC - Enhanced PIN (5.8.0.alpha.2) [OTP+FIDO+CCID] Serial: 125\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "ykman",
+      "list",
+      "--serials"
+    ],
+    "exitCode": 0,
+    "stdout": "125\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "exitCode": 0,
+    "stdout": "c90dced180de7975895771b32fcc91b9df752591\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exitCode": 0,
+    "stdout": " M src/Oath/CLAUDE.md\n M src/Oath/README.md\n M src/Oath/examples/OathTool/Commands/ResetCommand.cs\n M src/Oath/src/Code.cs\n M src/Oath/src/IOathSession.cs\n M src/Oath/src/OathException.cs\n M src/Oath/src/OathSession.cs\n M src/Oath/tests/CLAUDE.md\n M src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs\n M src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathSessionTests.cs\n M src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs\n M src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs\n M src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs\n M src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj\n M src/Tests.Shared/CLAUDE.md\n M src/Tests.Shared/README.md\n?? src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs\n?? src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs\n?? src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathScpResetTests.cs\n?? src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs\n",
+    "stderr": ""
+  }
+]

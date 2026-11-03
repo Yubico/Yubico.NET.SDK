@@ -1,0 +1,48 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter FullyQualifiedName~Cleanup_ExpiredOperationToken",
+  "started": "2026-11-02T22:33:42.5125466+01:00",
+  "durationSeconds": 5.2,
+  "runDirectory": "artifacts/toolchain/runs/20261102-223342-512-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 5.1,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "failed",
+      "reason": "2 test(s) failed",
+      "executed": 2,
+      "failed": 2,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True)",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 3 | Actual:   2"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: False)",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 3 | Actual:   2"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261102-223342-512-test/01-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure\""
+  ]
+}

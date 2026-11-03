@@ -1,0 +1,863 @@
+diff --git a/src/Oath/CLAUDE.md b/src/Oath/CLAUDE.md
+index 02255d9e..c34df229 100644
+--- a/src/Oath/CLAUDE.md
++++ b/src/Oath/CLAUDE.md
+@@ -115,6 +115,24 @@ an SDK `NotSupportedException` for touch/SHA-512 credential options from these g
+ - Integration tests: `tests/Yubico.YubiKit.Oath.IntegrationTests/`
+ - **ALWAYS use `dotnet toolchain.cs test`** — never `dotnet test` directly
+ 
++## Reset and timestamp boundaries
++
++`ResetAsync` invalidates the session if refresh fails after RESET succeeds, using Core's initialization
++completion boundary and failure cleanup. Keep RESET transmission outside that cleanup catch: cancellation
++or overlap refusal before admission must not tear down a healthy session or another admitted operation.
++Cleanup preserves the primary refresh error and does not take ownership of borrowed connections.
++SCP parameters remain creation-only borrows; automatic post-reset SCP re-establishment is not implemented.
++
++Formatted calculations use nonnegative Unix seconds, with zero preserved as the epoch. `Code.GetTotpWindow`
++checks that the exclusive end fits `Int64` before addition. Individual calculations validate before CALCULATE;
++aggregate calculations validate the default period before transmission and custom periods before followup
++CALCULATE, inside the existing raw-response cleanup. HOTP timestamps are metadata only and may reach `Int64.MaxValue`.
++No `DateTimeOffset` calendar bound is imposed.
++
++Failed verification of the device's VALIDATE HMAC is `BadResponseException`, not `WrongPassword`.
++The existing device-rejection category still preserves raw status words; neither its compatibility name nor
++the status alone proves that a user's password was incorrect. Post-verification-failure session policy is unchanged.
++
+ ## User-presence notifications
+ 
+ When `SessionCreationOptions.UserPresencePrompt` is supplied, `CalculateAsync` and `CalculateCodeAsync`
+diff --git a/src/Oath/README.md b/src/Oath/README.md
+index fac1d211..9a471e1d 100644
+--- a/src/Oath/README.md
++++ b/src/Oath/README.md
+@@ -107,6 +107,11 @@ finally
+ time. It determines the TOTP challenge and nominal generation window. For an individual HOTP calculation, the
+ device uses its stored counter; the timestamp only sets `Code.ValidFrom`.
+ 
++Timestamps must be nonnegative; zero means the Unix epoch. For TOTP, the inclusive start and exclusive end
++of the generation window must fit in `long`. The SDK rejects an invalid timestamp before calculation when
++the period is known. In an aggregate calculation, a custom period is learned from the response and checked
++before individual recalculation. There is no calendar-year limit imposed by `DateTimeOffset`.
++
+ For TOTP, `Code.ValidFrom` and `Code.ValidTo` are the inclusive start and exclusive end of the nominal generation
+ window, in Unix seconds. For HOTP, `ValidTo` is `long.MaxValue`, a no-time-expiry sentinel, not a date to format.
+ These values do not guarantee verifier acceptance: the verifier applies its own time-window, replay, or counter rules.
+@@ -203,6 +208,11 @@ does not interrupt the device or necessarily change the notification outcome.
+ - A session from `device.CreateOathSessionAsync(...)` owns the connection it opened; `OathSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
+ - `ResetAsync` erases every credential and the access key. `DeleteCredentialAsync` erases the selected credential.
+   `SetKeyAsync` sets or changes password protection; `UnsetKeyAsync` removes it. Neither changes stored credentials.
++  If RESET succeeds but the subsequent state refresh fails or is cancelled, the session disposes itself and
++  preserves that failure. Create a new session; failure does not roll back the device reset. A borrowed connection
++  remains yours to dispose.
++  Automatic SCP re-establishment is not implemented: after reset, dispose an SCP session and create a new
++  secure-channel session before further operations.
+ - `RenameCredentialAsync` throws `NotSupportedException` through `EnsureSupports` below effective version 5.3.1,
+   as does passing any non-null `ScpKeyParameters` below 5.6.3. Core additionally requires 5.7.2+ for SCP11.
+   While the applet is locked, protected operations fail with an `OathException`
+diff --git a/src/Oath/src/Code.cs b/src/Oath/src/Code.cs
+index 550d4912..98bdf112 100644
+--- a/src/Oath/src/Code.cs
++++ b/src/Oath/src/Code.cs
+@@ -91,6 +91,11 @@ internal static ParsedCode ParseTruncatedResponse(ReadOnlySpan<byte> truncated)
+     /// <summary>Formats a validated response after successful user-presence resolution.</summary>
+     internal static Code FormatCode(Credential credential, long timestamp, ParsedCode parsedCode)
+     {
++        ArgumentOutOfRangeException.ThrowIfNegative(timestamp);
++        (long validFrom, long validTo) = credential.OathType == OathType.Totp
++            ? GetTotpWindow(timestamp, credential.Period)
++            : (timestamp, long.MaxValue);
++
+         int modulus = parsedCode.Digits switch
+         {
+             6 => 1_000_000,
+@@ -101,20 +106,19 @@ internal static Code FormatCode(Credential credential, long timestamp, ParsedCod
+ 
+         string value = (parsedCode.Value % modulus).ToString().PadLeft(parsedCode.Digits, '0');
+ 
+-        long validFrom;
+-        long validTo;
+-        if (credential.OathType == OathType.Totp)
+-        {
+-            long timeStep = timestamp / credential.Period;
+-            validFrom = timeStep * credential.Period;
+-            validTo = (timeStep + 1) * credential.Period;
+-        }
+-        else
+-        {
+-            validFrom = timestamp;
+-            validTo = long.MaxValue;
+-        }
+-
+         return new Code(value, validFrom, validTo);
+     }
++
++    /// <summary>Validates the supported time domain without overflowing the exclusive window end.</summary>
++    internal static (long From, long To) GetTotpWindow(long timestamp, int period)
++    {
++        ArgumentOutOfRangeException.ThrowIfNegative(timestamp);
++        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(period);
++        long from = timestamp - timestamp % period;
++        if (from > long.MaxValue - period)
++            throw new ArgumentOutOfRangeException(nameof(timestamp), timestamp,
++                "The TOTP generation window must fit in Int64 Unix seconds.");
++
++        return (from, from + period);
++    }
+ }
+\ No newline at end of file
+diff --git a/src/Oath/src/IOathSession.cs b/src/Oath/src/IOathSession.cs
+index 7646f871..e60152a4 100644
+--- a/src/Oath/src/IOathSession.cs
++++ b/src/Oath/src/IOathSession.cs
+@@ -146,8 +146,9 @@ Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<
+     /// </summary>
+     /// <param name="credential">The credential to calculate.</param>
+     /// <param name="timestamp">
+-    ///     Unix time in seconds, defaulting to the current UTC time. For TOTP, this determines the
+-    ///     time-step challenge and nominal generation window. For HOTP, it only sets <see cref="Code.ValidFrom" />;
++    ///     Nonnegative Unix time in seconds, defaulting to the current UTC time. Zero means the Unix epoch.
++    ///     For TOTP, this determines the time-step challenge and nominal generation window.
++    ///     For HOTP, it only sets <see cref="Code.ValidFrom" />;
+     ///     the device uses its stored counter, not this timestamp, to calculate the code.
+     /// </param>
+     /// <param name="cancellationToken">The cancellation token for the operation.</param>
+@@ -156,6 +157,10 @@ Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<
+     ///     different device (its <see cref="Credential.DeviceId" /> is not this session's <see cref="DeviceId" />).
+     ///     Nothing is sent.
+     /// </exception>
++    /// <exception cref="ArgumentOutOfRangeException">
++    ///     <paramref name="timestamp" /> is negative, or the exclusive end of the TOTP generation window
++    ///     exceeds <see cref="long.MaxValue" />. Nothing is sent.
++    /// </exception>
+     /// <exception cref="Core.BadResponseException">
+     ///     The required truncated-response tag is missing, or its value does not contain five bytes
+     ///     with a digit count from six through eight.
+@@ -168,8 +173,8 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     ///     HOTP and touch-required credentials return <c>null</c> codes.
+     /// </summary>
+     /// <param name="timestamp">
+-    ///     Unix time in seconds, defaulting to the current UTC time. Determines the TOTP time-step
+-    ///     challenges and nominal generation windows.
++    ///     Nonnegative Unix time in seconds, defaulting to the current UTC time. Zero means the Unix epoch.
++    ///     Determines the TOTP time-step challenges and nominal generation windows.
+     /// </param>
+     /// <param name="cancellationToken">The cancellation token for the operation.</param>
+     /// <remarks>
+@@ -178,6 +183,11 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     ///     prefixes are omitted and logged at warning level, as described in <see cref="ListCredentialsAsync" />.
+     ///     Known response values are validated before that host-side omission policy or any recalculation.
+     /// </remarks>
++    /// <exception cref="ArgumentOutOfRangeException">
++    ///     <paramref name="timestamp" /> is negative, or a required TOTP generation window exceeds
++    ///     <see cref="long.MaxValue" />. The default 30-second window is checked before CALCULATE ALL;
++    ///     a custom period is checked after the response reveals it, before individual recalculation.
++    /// </exception>
+     /// <exception cref="Core.BadResponseException">
+     ///     An entry lacks required name/response structure, uses a known non-result tag or a full-response
+     ///     tag for the truncated request, or has a truncated value other than five bytes with a digit count
+@@ -191,8 +201,12 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     /// </summary>
+     /// <remarks>
+     ///     Reset and the subsequent session-state refresh are separate exchanges. If the refresh fails
+-    ///     or is cancelled, the device may already have erased the data. Do not assume rollback;
+-    ///     dispose the session and reopen it rather than relying on its cached state.
++    ///     or is cancelled after RESET succeeds, the session is disposed and cannot perform further operations.
++    ///     The original refresh error or cancellation is preserved. The device has already erased the data;
++    ///     this is not rollback. Create a new session before continuing. A caller-owned connection remains
++    ///     the caller's responsibility to dispose.
++    ///     Automatic SCP re-establishment is not implemented; after reset, dispose an SCP session and create
++    ///     a new secure-channel session before further operations.
+     /// </remarks>
+     Task ResetAsync(CancellationToken cancellationToken = default);
+ 
+@@ -234,6 +248,10 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     ///     </para>
+     /// </remarks>
+     /// <exception cref="InvalidOperationException">The session has no outstanding challenge.</exception>
++    /// <exception cref="Core.BadResponseException">
++    ///     The device's authentication HMAC does not match verification, or its required response is missing.
++    ///     A failed device verification is not reported as proof of an incorrect user password.
++    /// </exception>
+     Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+diff --git a/src/Oath/src/OathException.cs b/src/Oath/src/OathException.cs
+index 900df414..90bd3102 100644
+--- a/src/Oath/src/OathException.cs
++++ b/src/Oath/src/OathException.cs
+@@ -27,7 +27,8 @@ public enum OathFailureReason
+     Locked,
+ 
+     /// <summary>
+-    ///     Password verification failed because the supplied password (or derived key) was incorrect.
++    ///     The applet rejected access-key validation. This compatibility name does not prove that the
++    ///     user's password was incorrect; inspect the device status and the operation context.
+     /// </summary>
+     WrongPassword,
+ }
+@@ -97,7 +98,7 @@ private static string GetMessage(OathFailureReason reason, short? statusWord)
+             OathFailureReason.Locked =>
+                 "The OATH application is locked. Authenticate with ValidateAsync (or AuthenticateAndRetryAsync) before retrying this operation.",
+             OathFailureReason.WrongPassword =>
+-                "OATH password verification failed. The supplied password is incorrect.",
++                "The OATH application rejected access-key validation.",
+             _ => "OATH operation failed.",
+         };
+ 
+diff --git a/src/Oath/src/OathSession.cs b/src/Oath/src/OathSession.cs
+index 20edaa56..76d51d3f 100644
+--- a/src/Oath/src/OathSession.cs
++++ b/src/Oath/src/OathSession.cs
+@@ -461,6 +461,7 @@ public async Task<Code> CalculateCodeAsync(
+         ThrowIfFromAnotherDevice(credential);
+ 
+         long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
++        ArgumentOutOfRangeException.ThrowIfNegative(ts, nameof(timestamp));
+         byte[] challenge;
+ 
+         if (credential.OathType == OathType.Totp)
+@@ -470,6 +471,7 @@ public async Task<Code> CalculateCodeAsync(
+             if (credential.Period <= 0)
+                 throw new ArgumentException("TOTP credential period must be positive (RFC 6238 §4.1).", nameof(credential));
+ 
++            _ = Code.GetTotpWindow(ts, credential.Period);
+             long timeStep = ts / credential.Period;
+             challenge = new byte[OathConstants.ChallengeLength];
+             BinaryPrimitives.WriteInt64BigEndian(challenge, timeStep);
+@@ -578,6 +580,7 @@ private bool TryParseCredentialId(
+         ThrowIfDisposed();
+ 
+         long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
++        _ = Code.GetTotpWindow(ts, OathConstants.DefaultPeriod);
+         long timeStep = ts / OathConstants.DefaultPeriod;
+ 
+         byte[] challenge = new byte[OathConstants.ChallengeLength];
+@@ -670,10 +673,24 @@ public async Task ResetAsync(CancellationToken cancellationToken = default)
+         var command = new ApduCommand(0x00, OathConstants.InsReset, 0xDE, 0xAD);
+         await SendAsync(command, cancellationToken).ConfigureAwait(false);
+ 
+-        // Re-select and re-parse to get new state
+-        var initialization = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+-        // Preserve the effective version selected at creation; reset refreshes applet state, not caller policy.
+-        ApplyInitialization(initialization, FirmwareVersion);
++        // RESET has succeeded. From here a failed refresh cannot leave a usable session
++        // with its pre-reset identity. Refusal before RESET admission never reaches this boundary.
++        IsInitialized = false;
++        try
++        {
++            await InitializeSessionAsync(async token =>
++            {
++                var initialization = await _backend.ReadInitialStateAsync(token).ConfigureAwait(false);
++                // Reset refreshes applet state, not the caller's effective-version policy.
++                ApplyInitialization(initialization, FirmwareVersion);
++            }, cancellationToken).ConfigureAwait(false);
++        }
++        catch
++        {
++            // This preserves the refresh failure (including cancellation) if teardown also fails.
++            DisposeAfterInitializationFailure();
++            throw;
++        }
+ 
+         _logger.LogInformation("OATH application reset, new DeviceId={DeviceId}", DeviceId);
+     }
+@@ -739,7 +756,7 @@ public async Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken canc
+                         throw new BadResponseException("No TAG_RESPONSE in VALIDATE response.");
+ 
+                     if (!CryptographicOperations.FixedTimeEquals(expectedResponse, deviceResponse))
+-                        throw new OathException(OathFailureReason.WrongPassword);
++                        throw new BadResponseException("The OATH device authentication response did not match verification.");
+ 
+                     IsLocked = false;
+                     CryptographicOperations.ZeroMemory(_challenge);
+@@ -757,8 +774,8 @@ public async Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken canc
+                 ex.SW == SWConstants.ReferenceDataUnusable ||
+                 ex.SW == SWConstants.InvalidCommandDataParameter)
+             {
+-                // The device rejected the VALIDATE command itself because the supplied
+-                // (wrong) key produced a client response it did not recognize.
++                // Preserve the existing rejection category and raw status. These statuses
++                // do not by themselves prove that a user supplied an incorrect password.
+                 throw new OathException(OathFailureReason.WrongPassword, ex.SW, ex);
+             }
+             finally
+diff --git a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs
+index 8d96fd0f..4c87e191 100644
+--- a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs
++++ b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs
+@@ -34,6 +34,31 @@ private static ApduResponse Response(byte[] raw)
+         finally { CryptographicOperations.ZeroMemory(raw); }
+     }
+ 
++    [Theory]
++    [InlineData(0x6984)]
++    [InlineData(0x6A80)]
++    public async Task ValidateAsync_DeviceRejection_PreservesStatusWithoutClaimingIncorrectPassword(int status)
++    {
++        var connection = new RecordingSmartCardConnection(
++            [.. Select()[..^2], 0x74, 8, 1, 2, 3, 4, 5, 6, 7, 8, 0x90, 0],
++            [(byte)(status >> 8), (byte)status]);
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        byte[] key = new byte[16];
++        try
++        {
++            var failure = await Assert.ThrowsAsync<OathException>(() => session.ValidateAsync(key, TestContext.Current.CancellationToken));
++            Assert.Equal(unchecked((short)status), failure.StatusWord);
++            Assert.Equal(unchecked((short)status), Assert.IsAssignableFrom<ApduException>(failure.InnerException).SW);
++            Assert.DoesNotContain("password is incorrect", failure.Message, StringComparison.OrdinalIgnoreCase);
++        }
++        finally
++        {
++            CryptographicOperations.ZeroMemory(key);
++            foreach (byte[] command in connection.TransmittedCommands)
++                CryptographicOperations.ZeroMemory(command);
++        }
++    }
++
+     [Theory]
+     [InlineData(20)]
+     [InlineData(32)]
+@@ -110,6 +135,11 @@ public async Task ValidateAsync_AllResponsePaths_ClearOriginalWithoutClearingCal
+                 await session.ValidateAsync(key, TestContext.Current.CancellationToken);
+                 Assert.False(session.IsLocked);
+             }
++            else if (mode == "mismatch")
++            {
++                await Assert.ThrowsAsync<BadResponseException>(() => session.ValidateAsync(key, TestContext.Current.CancellationToken));
++                Assert.True(session.IsLocked);
++            }
+             else
+             {
+                 await Assert.ThrowsAnyAsync<Exception>(() => session.ValidateAsync(key, TestContext.Current.CancellationToken));
+diff --git a/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs b/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs
+new file mode 100644
+index 00000000..72335d85
+--- /dev/null
++++ b/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs
+@@ -0,0 +1,155 @@
++// Copyright 2026 Yubico AB
++//
++// Licensed under the Apache License, Version 2.0 (the "License").
++// You may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++using System.Security.Cryptography;
++using Xunit.Abstractions;
++using Yubico.YubiKit.Core.Devices;
++using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
++using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
++using Yubico.YubiKit.Core.Sessions;
++using Yubico.YubiKit.Oath.IntegrationTests.TestExtensions;
++using Yubico.YubiKit.Tests.Shared;
++using Yubico.YubiKit.Tests.Shared.Infrastructure;
++
++namespace Yubico.YubiKit.Oath.IntegrationTests;
++
++public sealed class OathLifecycleTimeTests(ITestOutputHelper output)
++{
++    [SkippableTheory]
++    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.3")]
++    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, CustomFilter = typeof(OathProtocolResponseTests.Before563))]
++    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
++    public async Task Timestamps_ExactRfcVectorsAndResetRefresh(YubiKeyTestState state)
++    {
++        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
++        await WithCleanupAsync(state, () => state.WithOathSessionAsync(async session =>
++        {
++            output.WriteLine($"Executed device serial={state.SerialNumber}, firmware={state.FirmwareVersion}");
++            byte[] seed = "12345678901234567890"u8.ToArray();
++            try
++            {
++                using var data = new CredentialData
++                {
++                    Name = "time",
++                    OathType = OathType.Totp,
++                    HashAlgorithm = OathHashAlgorithm.Sha1,
++                    Secret = seed,
++                    Digits = 8
++                };
++                await session.PutCredentialAsync(data, timeout.Token);
++                var credential = Assert.Single(await session.ListCredentialsAsync(timeout.Token));
++                // RFC 6238 Appendix B, plus epoch and exact step boundaries from RFC 4226.
++                foreach ((long timestamp, string expected, long from, long to) in new (long, string, long, long)[]
++                {
++                    (0, "84755224", 0, 30), (29, "84755224", 0, 30),
++                    (30, "94287082", 30, 60), (59, "94287082", 30, 60),
++                    (60, "37359152", 60, 90), (20000000000, "65353130", 19999999980, 20000000010)
++                })
++                {
++                    var single = await session.CalculateCodeAsync(credential, timestamp, timeout.Token);
++                    var aggregate = Assert.Single(await session.CalculateAllAsync(timestamp, timeout.Token));
++                    Assert.Equal(expected, single.Value);
++                    Assert.Equal(from, single.ValidFrom);
++                    Assert.Equal(to, single.ValidTo);
++                    Assert.Equal(single, aggregate.Value);
++                }
++                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.CalculateCodeAsync(credential, -1, timeout.Token));
++                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.CalculateAllAsync(long.MaxValue, timeout.Token));
++                string before = session.DeviceId;
++                await session.ResetAsync(timeout.Token);
++                Assert.NotEqual(before, session.DeviceId);
++                Assert.True(session.IsInitialized);
++                Assert.False(session.IsPasswordProtected);
++                Assert.Empty(await session.ListCredentialsAsync(timeout.Token));
++                output.WriteLine("Epoch, step boundaries, future RFC vector, aggregate equality and post-reset LIST passed.");
++            }
++            finally { CryptographicOperations.ZeroMemory(seed); }
++        }, cancellationToken: timeout.Token));
++    }
++
++    [SkippableTheory]
++    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.3")]
++    [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
++    public async Task ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset(YubiKeyTestState state)
++    {
++        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
++        using var parameters = Scp03KeyParameters.Default;
++        output.WriteLine($"SCP03 probe device serial={state.SerialNumber}, firmware={state.FirmwareVersion}; no Security Domain reset or key changes.");
++        // Establish SCP before any reset. If default credentials are unavailable, this is a
++        // credential/environment limitation, not evidence about reset recovery.
++        OathSession session;
++        try
++        {
++            session = await state.Device.CreateOathSessionAsync(
++                new SessionCreationOptions { ScpKeyParameters = parameters }, timeout.Token);
++        }
++        catch (ApduException exception) when (exception.SW == unchecked((short)0x6A88) &&
++                                             exception.Cla == 0x80 && exception.Ins == 0x50)
++        {
++            output.WriteLine("Default SCP03 key reference unavailable (6A88) before RESET; recovery was not exercised.");
++            Skip.If(true, "Default SCP03 key reference unavailable (6A88); SCP reset recovery not exercised.");
++            throw;
++        }
++        await using var sessionLifetime = session;
++        Assert.True(session.IsAuthenticated);
++        await session.ListCredentialsAsync(timeout.Token);
++        output.WriteLine("Default SCP03 establishment and initial protected LIST passed.");
++        Exception? primaryFailure = null;
++        try
++        {
++            await session.ResetAsync(timeout.Token);
++            Assert.True(session.IsAuthenticated);
++            Assert.Empty(await session.ListCredentialsAsync(timeout.Token));
++            output.WriteLine("SCP03 RESET and subsequent protected LIST passed.");
++        }
++        catch (Exception exception)
++        {
++            primaryFailure = exception;
++            throw;
++        }
++        finally
++        {
++            // End the SCP session before independent bounded OATH-only cleanup.
++            try { await session.DisposeAsync(); }
++            catch (Exception exception) when (primaryFailure is not null)
++            {
++                output.WriteLine($"SCP session teardown also failed ({exception.GetType().Name}); preserving the primary failure.");
++            }
++            finally { await CleanupAsync(state, primaryFailure); }
++        }
++    }
++
++    private async Task WithCleanupAsync(YubiKeyTestState state, Func<Task> operation)
++    {
++        Exception? primaryFailure = null;
++        try { await operation(); }
++        catch (Exception exception)
++        {
++            primaryFailure = exception;
++            throw;
++        }
++        finally { await CleanupAsync(state, primaryFailure); }
++    }
++
++    private async Task CleanupAsync(YubiKeyTestState state, Exception? primaryFailure)
++    {
++        // A cancelled operation can leave OATH changed. Cleanup has its own finite budget.
++        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(15));
++        try { await state.WithOathSessionAsync(_ => Task.CompletedTask, cancellationToken: cleanup.Token); }
++        catch (Exception exception) when (primaryFailure is not null)
++        {
++            output.WriteLine($"OATH cleanup also failed ({exception.GetType().Name}); preserving the primary failure.");
++        }
++    }
++}
+diff --git a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs
+new file mode 100644
+index 00000000..e1379f4b
+--- /dev/null
++++ b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs
+@@ -0,0 +1,192 @@
++// Copyright 2026 Yubico AB
++//
++// Licensed under the Apache License, Version 2.0 (the "License").
++// You may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++using Yubico.YubiKit.Core;
++using Yubico.YubiKit.Core.Abstractions;
++using Yubico.YubiKit.Core.Devices;
++using Yubico.YubiKit.Core.Sessions;
++using Yubico.YubiKit.Core.Transports.SmartCard;
++using Yubico.YubiKit.Tests.Shared;
++
++namespace Yubico.YubiKit.Oath.UnitTests;
++
++public sealed class OathResetTests
++{
++    private static byte[] Select(byte salt = 1) => [0x79, 3, 5, 7, 0, 0x71, 1, salt, 0x90, 0];
++
++    [Theory]
++    [InlineData(false)]
++    [InlineData(true)]
++    public async Task ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(bool cancel)
++    {
++        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
++        var connection = new ResetConnection(Select(), [0x90, 0], [0x79, 3, 5, 7, 0, 0x90, 0], Select(2));
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: cancellation.Token);
++        ReadOnlyMemory<byte> oldSalt = session.Salt;
++        if (cancel)
++            connection.AfterReset = cancellation.Cancel;
++
++        if (cancel)
++        {
++            var failure = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.ResetAsync(cancellation.Token));
++            Assert.Equal(cancellation.Token, failure.CancellationToken);
++        }
++        else
++            await Assert.ThrowsAsync<BadResponseException>(() => session.ResetAsync(cancellation.Token));
++
++        int commandCount = connection.Inner.TransmittedCommands.Count;
++        Assert.False(session.IsInitialized);
++        Assert.False(session.IsAuthenticated);
++        Assert.All(oldSalt.ToArray(), value => Assert.Equal(0, value));
++        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListCredentialsAsync(TestContext.Current.CancellationToken));
++        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
++        Assert.Throws<ObjectDisposedException>(() => session.DeriveKey(new byte[1]));
++        Assert.Equal(commandCount, connection.Inner.TransmittedCommands.Count);
++        Assert.Equal(0, connection.Inner.DisposeCount);
++
++        // Failure detached the old session without taking ownership of this connection.
++        // Discard the malformed response that cancellation deliberately left unconsumed.
++        if (cancel)
++            await connection.Inner.TransmitAndReceiveAsync(new byte[] { 0, 0, 0, 0 }, TestContext.Current.CancellationToken);
++        await using var replacement = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        Assert.True(replacement.IsInitialized);
++        Assert.Equal(new byte[] { 2 }, replacement.Salt.ToArray());
++    }
++
++    [Fact]
++    public async Task ResetAsync_Success_RefreshesIdentityAndPreservesEffectiveVersion()
++    {
++        var connection = new RecordingSmartCardConnection(Select(), [0x90, 0], Select(2), [0x90, 0]);
++        await using var session = await OathSession.CreateAsync(connection,
++            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) }, TestContext.Current.CancellationToken);
++        string before = session.DeviceId;
++        await session.ResetAsync(TestContext.Current.CancellationToken);
++        Assert.NotEqual(before, session.DeviceId);
++        Assert.Equal(new FirmwareVersion(5, 8, 0), session.FirmwareVersion);
++        Assert.True(session.IsInitialized);
++        Assert.False(session.IsLocked);
++        Assert.False(session.IsPasswordProtected);
++        Assert.Empty(await session.ListCredentialsAsync(TestContext.Current.CancellationToken));
++        Assert.Equal(new byte[] { 0, 4, 0xDE, 0xAD, 0 }, connection.TransmittedCommands[1]);
++    }
++
++    [Fact]
++    public async Task ResetAsync_CancelledBeforeAdmission_DoesNotInvalidateSession()
++    {
++        var connection = new RecordingSmartCardConnection(Select(), [0x90, 0]);
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
++        cancellation.Cancel();
++        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.ResetAsync(cancellation.Token));
++        Assert.True(session.IsInitialized);
++        Assert.Single(connection.TransmittedCommands);
++        Assert.Empty(await session.ListCredentialsAsync(TestContext.Current.CancellationToken));
++    }
++
++    [Fact]
++    public async Task ResetAsync_OverlapRefused_DoesNotTearDownAdmittedList()
++    {
++        var connection = new ResetConnection(Select(), [0x90, 0], [0x90, 0]);
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
++        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
++        connection.BeforeList = async () =>
++        {
++            entered.SetResult();
++            await release.Task;
++        };
++        var admitted = session.ListCredentialsAsync(TestContext.Current.CancellationToken);
++        try
++        {
++            await entered.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
++            await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
++            Assert.True(session.IsInitialized);
++            Assert.Single(connection.Inner.TransmittedCommands);
++        }
++        finally
++        {
++            release.TrySetResult();
++            // Drain the admitted fake exchange before disposing its session, even on assertion failure.
++            await admitted.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
++        }
++        Assert.Empty(await admitted);
++        connection.BeforeList = null;
++        Assert.Empty(await session.ListCredentialsAsync(TestContext.Current.CancellationToken));
++    }
++
++    [Theory]
++    [InlineData(false)]
++    [InlineData(true)]
++    public async Task ResetAsync_RefreshAndOwnedCleanupFail_PreservesRefreshFailure(bool cancel)
++    {
++        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
++        var cleanupFailure = new InvalidOperationException("Owned connection teardown failed.");
++        var connection = new ResetConnection(Select(), [0x90, 0], [0x90, 0]) { DisposeFailure = cleanupFailure };
++        var device = new ResetDevice(connection);
++        var session = await device.CreateOathSessionAsync(cancellationToken: cancellation.Token);
++        if (cancel)
++            connection.AfterReset = cancellation.Cancel;
++
++        if (cancel)
++            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.ResetAsync(cancellation.Token));
++        else
++            await Assert.ThrowsAsync<BadResponseException>(() => session.ResetAsync(cancellation.Token));
++
++        Assert.False(session.IsInitialized);
++        Assert.Equal(1, connection.Inner.DisposeCount);
++        Assert.Same(cleanupFailure, Assert.Throws<InvalidOperationException>(session.Dispose));
++        Assert.Equal(1, connection.Inner.DisposeCount);
++        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListCredentialsAsync(TestContext.Current.CancellationToken));
++    }
++
++    private sealed class ResetDevice(ResetConnection connection) : IYubiKey
++    {
++        public string DeviceId => "owned-reset-failure";
++        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
++        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
++            where TConnection : class, IConnection => Task.FromResult(Assert.IsAssignableFrom<TConnection>(connection));
++    }
++
++    private sealed class ResetConnection(params byte[][] responses) : ISmartCardConnection
++    {
++        public RecordingSmartCardConnection Inner { get; } = new(responses);
++        public Action? AfterReset { get; set; }
++        public Func<Task>? BeforeList { get; set; }
++        public Exception? DisposeFailure { get; init; }
++        public Transport Transport => Transport.Usb;
++        public ConnectionType Type => ConnectionType.SmartCard;
++        public async Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken = default)
++        {
++            if (command.Span[1] == 0xA1 && BeforeList is { } beforeList)
++                await beforeList();
++            var response = await Inner.TransmitAndReceiveAsync(command, cancellationToken);
++            if (command.Span[1] == 4)
++                AfterReset?.Invoke();
++            return response;
++        }
++        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => Inner.BeginTransaction(cancellationToken);
++        public bool SupportsExtendedApdu() => false;
++        public void Dispose()
++        {
++            Inner.Dispose();
++            if (DisposeFailure is { } failure)
++                throw failure;
++        }
++        public ValueTask DisposeAsync()
++        {
++            Dispose();
++            return ValueTask.CompletedTask;
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs
+new file mode 100644
+index 00000000..a91d4ad6
+--- /dev/null
++++ b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs
+@@ -0,0 +1,164 @@
++// Copyright 2026 Yubico AB
++//
++// Licensed under the Apache License, Version 2.0 (the "License").
++// You may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++using System.Buffers.Binary;
++using System.Reflection;
++using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
++using Yubico.YubiKit.Core.Utilities;
++using Yubico.YubiKit.Oath.Backend;
++using Yubico.YubiKit.Tests.Shared;
++
++namespace Yubico.YubiKit.Oath.UnitTests;
++
++public sealed class OathTimeTests
++{
++    private static byte[] Select() => [0x79, 3, 5, 7, 0, 0x71, 1, 1, 0x90, 0];
++    private static byte[] Truncated() => [0x76, 5, 6, 0, 0, 0, 1, 0x90, 0];
++    private static Credential CredentialFor(string deviceId, OathType type = OathType.Totp, int period = 30) =>
++        new(deviceId, "a"u8.ToArray(), null, "a", type, period, false);
++
++    [Theory]
++    [InlineData(-1L)]
++    [InlineData(long.MinValue)]
++    [InlineData(long.MaxValue)]
++    [InlineData(9223372036854775800L)]
++    public async Task Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(long timestamp)
++    {
++        var connection = new RecordingSmartCardConnection(Select(), Truncated(), [0x90, 0]);
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++
++        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.CalculateCodeAsync(
++            CredentialFor(session.DeviceId), timestamp, TestContext.Current.CancellationToken));
++        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.CalculateAllAsync(timestamp, TestContext.Current.CancellationToken));
++        Assert.Single(connection.TransmittedCommands); // Only the initialization SELECT.
++    }
++
++    [Theory]
++    [InlineData(1, long.MaxValue)]
++    [InlineData(32, 9223372036854775799L)]
++    [InlineData(int.MaxValue, long.MaxValue)]
++    public async Task CalculateCodeAsync_KnownCustomWindowOverflow_RejectsBeforeWire(int period, long timestamp)
++    {
++        var connection = new RecordingSmartCardConnection(Select(), Truncated());
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.CalculateCodeAsync(
++            CredentialFor(session.DeviceId, period: period), timestamp, TestContext.Current.CancellationToken));
++        Assert.Single(connection.TransmittedCommands);
++    }
++
++    [Fact]
++    public async Task CalculateCodeAsync_LastRepresentableOneSecondWindow_DoesNotImposeDefaultPeriodBound()
++    {
++        var connection = new RecordingSmartCardConnection(Select(), Truncated());
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var code = await session.CalculateCodeAsync(CredentialFor(session.DeviceId, period: 1),
++            long.MaxValue - 1, TestContext.Current.CancellationToken);
++        Assert.Equal(long.MaxValue - 1, code.ValidFrom);
++        Assert.Equal(long.MaxValue, code.ValidTo);
++    }
++
++    [Theory]
++    [InlineData(0L, 0L, 0L, 30L)]
++    [InlineData(29L, 0L, 0L, 30L)]
++    [InlineData(30L, 1L, 30L, 60L)]
++    [InlineData(59L, 1L, 30L, 60L)]
++    [InlineData(60L, 2L, 60L, 90L)]
++    [InlineData(20000000000L, 666666666L, 19999999980L, 20000000010L)]
++    [InlineData(300000000000L, 10000000000L, 300000000000L, 300000000030L)]
++    [InlineData(9223372036854775799L, 307445734561825859L, 9223372036854775770L, 9223372036854775800L)]
++    public async Task Calculations_ValidTimestamp_EncodeExactChallengeAndWindow(long timestamp, long step, long from, long to)
++    {
++        var connection = new RecordingSmartCardConnection(Select(), Truncated(),
++            [0x71, 1, 0x61, .. Truncated()]);
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var individual = await session.CalculateCodeAsync(CredentialFor(session.DeviceId), timestamp, TestContext.Current.CancellationToken);
++        var aggregate = Assert.Single(await session.CalculateAllAsync(timestamp, TestContext.Current.CancellationToken));
++
++        Assert.Equal(individual, aggregate.Value);
++        Assert.Equal(from, individual.ValidFrom);
++        Assert.Equal(to, individual.ValidTo);
++        foreach (byte[] command in connection.TransmittedCommands.Skip(1))
++        {
++            using var tlvs = TlvHelper.DecodeList(command.AsSpan(5, command[4]));
++            var challenge = Assert.Single(tlvs, tlv => tlv.Tag == 0x74).Value;
++            Assert.Equal(8, challenge.Length);
++            Assert.Equal(step, BinaryPrimitives.ReadInt64BigEndian(challenge.Span));
++        }
++    }
++
++    [Theory]
++    [InlineData(OathType.Totp, -1L, 30)]
++    [InlineData(OathType.Totp, long.MaxValue, 30)]
++    [InlineData(OathType.Totp, long.MaxValue, 1)]
++    [InlineData(OathType.Hotp, -1L, 0)]
++    public void FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(OathType type, long timestamp, int period)
++    {
++        var credential = CredentialFor("test", type, period);
++        Assert.Throws<ArgumentOutOfRangeException>(() => Code.FormatCode(credential, timestamp, new byte[] { 6, 0, 0, 0, 1 }));
++    }
++
++    [Theory]
++    [InlineData(0L)]
++    [InlineData(long.MaxValue)]
++    public async Task CalculateCodeAsync_Hotp_TimestampIsOnlyMetadata(long timestamp)
++    {
++        var connection = new RecordingSmartCardConnection(Select(), Truncated());
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var code = await session.CalculateCodeAsync(CredentialFor(session.DeviceId, OathType.Hotp, 0), timestamp, TestContext.Current.CancellationToken);
++        Assert.Equal(timestamp, code.ValidFrom);
++        Assert.Equal(long.MaxValue, code.ValidTo);
++        byte[] command = connection.TransmittedCommands[1];
++        using var tlvs = TlvHelper.DecodeList(command.AsSpan(5, command[4]));
++        Assert.Empty(Assert.Single(tlvs, tlv => tlv.Tag == 0x74).Value.ToArray());
++    }
++
++    [Fact]
++    public async Task CalculateCodeAsync_NegativeHotpTimestamp_RejectsBeforeAdvancingCounter()
++    {
++        var connection = new RecordingSmartCardConnection(Select(), Truncated());
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.CalculateCodeAsync(
++            CredentialFor(session.DeviceId, OathType.Hotp, 0), -1, TestContext.Current.CancellationToken));
++        Assert.Single(connection.TransmittedCommands);
++    }
++
++    [Fact]
++    public async Task CalculateAllAsync_CustomWindowOverflow_ClearsResponseWithoutFollowup()
++    {
++        var backend = new AggregateBackend();
++        await using var session = await OathSession.CreateAsync(new RecordingSmartCardConnection(Select()),
++            cancellationToken: TestContext.Current.CancellationToken);
++        var field = typeof(OathSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
++            ?? throw new InvalidOperationException("OATH backend seam was not found.");
++        field.SetValue(session, backend);
++
++        // Fits the 30-second window, but not the 32-second window revealed by the response.
++        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.CalculateAllAsync(
++            9223372036854775799L, TestContext.Current.CancellationToken));
++        Assert.Equal(1, backend.SendCount);
++        Assert.All(backend.Response.RawData.ToArray(), value => Assert.Equal(0, value));
++    }
++
++    private sealed class AggregateBackend : IOathBackend
++    {
++        public ApduResponse Response { get; } = new(new byte[] { 0x71, 4, 0x33, 0x32, 0x2F, 0x61, 0x76, 5, 6, 0, 0, 0, 1, 0x90, 0 });
++        public int SendCount { get; private set; }
++        public Task<OathInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
++        public Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError = true, CancellationToken cancellationToken = default)
++        {
++            SendCount++;
++            return Task.FromResult(Response);
++        }
++    }
++}
+\ No newline at end of file

@@ -1,0 +1,17 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~OathResetTests&Category!=RequiresHardware&Category!=RequiresUserPresence")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       3.9s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  5 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal(cancel: False): Assert.Same() Failure: Values are not the same instance | Expected: System.InvalidOperationException: Owned connection teardown failed.
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal(cancel: True): Assert.Throws() Failure: Exception type was not an exact match | Expected: typeof(System.InvalidOperationException) | Actual:   typeof(System.OperationCanceledException)
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(cancel: False): System.InvalidOperationException : No response enqueued for transmission.
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(cancel: True): System.OperationCanceledException : The operation was canceled.
+      - Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_DisposesOwnedConnectionOnceWithoutRefresh: System.InvalidOperationException : No response enqueued for transmission.
+      output: artifacts/toolchain/runs/20261103-124557-145-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 8 executed, 5 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_DisposesOwnedConnectionOnceWithoutRefresh"
+Run log: artifacts/toolchain/runs/20261103-124557-145-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

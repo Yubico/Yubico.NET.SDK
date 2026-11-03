@@ -1,0 +1,1250 @@
+{
+  "coverage_updates": [
+    {"unit": "OATH-001", "scope": "authentication/password handling", "status": "documentation changes validated; implementation/contract follow-ups deferred", "reading_record": "investigation-coverage.json", "completion_record": "completion.md"},
+    {"unit": "OATH-002", "scope": "credential creation, URI parsing, identity and secret ownership", "status": "accepted documentation edits reviewed and validated; engineering concerns deferred", "dispatch_record": "../oath-002/dispatch.md", "coverage_record": "../oath-002/coverage.md", "findings_record": "../oath-002/findings.json"},
+    {"unit": "OATH-003", "scope": "stored credential operations and calculation", "status": "investigation complete; accepted documentation portions reviewed/validated; engineering concerns deferred", "coverage_record": "../oath-003/coverage.md", "validation_record": "../oath-003-004/validation.json"},
+    {"unit": "OATH-004", "scope": "setup, residual scaffolding and external OATH claims", "status": "investigation complete; accepted documentation portions reviewed/validated; engineering concerns deferred", "coverage_record": "../oath-004/coverage.md", "validation_record": "../oath-003-004/validation.json"}
+  ],
+  "status_note": "File entries below preserve the original baseline inventory. Consult coverage_updates and per-unit records for subsequent partial semantic coverage; a completed unit does not close every claim in its shared files.",
+  "module_surfaces": [
+    {
+      "path": "src/Oath/CLAUDE.md",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "7c40166307769951ca82a8ad17f7cc49fe6cd55931cab4995ec7d17c3327e5c1",
+      "lines": 99,
+      "surface": "markdown",
+      "lane": "active",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/PACKAGE_README.md",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "90f3674ce3f939f07fe1dc160e0894d490cb3cb334cabc3bc3d20a9afe72f41b",
+      "lines": 25,
+      "surface": "markdown",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/README.md",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "98ed975dccf763b55a9e59bafe16529e3631db3ff6ef885b4940069ca372a886",
+      "lines": 175,
+      "surface": "markdown",
+      "lane": "active",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/Output/OutputHelpers.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "417b58bc8339cda3e4a3c36458c847d64191eee79e87de328dd42da1c690ebec",
+      "lines": 50,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "0d0f5e51c63358b8b2ad6e83db6dd777bf4cc4a2fdfd61db7bc9ceabbbbb715e",
+      "lines": 188,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/Prompts/OathDeviceSelector.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "d7244528893aa136249057bb24b51fa3b627afddf2904006d4854b63493fdc9c",
+      "lines": 48,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "64f806bd1c424b9469916f7d1b5a210a290d5217ebb8512bb2c5ee30f6cd2fdf",
+      "lines": 104,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Commands/AccessCommand.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "285eccd0f0bfb2d10c5760e37bd1cdd0dbf87b2601b6760046c9a8e9d95fda54",
+      "lines": 115,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Commands/AccountsCommand.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "1aeec8ae1976adf51ec0b51a4cbb5c864b67e30b5e6b1f64919c4b74c33b8e90",
+      "lines": 474,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Commands/InfoCommand.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "2a51dd2c321ebb87f52f2c22d567fd5902f627e05c1cf301c9226502ad0a29be",
+      "lines": 31,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Commands/ResetCommand.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "ad65bffa2cc850597aaba01adb004373f1b3fdcd287233d8293495942e78af28",
+      "lines": 52,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Program.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "8602142c8ba5b665ea24f15e7f85bbc5c95a096ffb4db34bdfff5c0a646f43b3",
+      "lines": 387,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/Backend/IOathBackend.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "a3a210f645282af4f77988659fc3c4306e19882b6a172e1d272f6e2a0b2ac818",
+      "lines": 27,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/Backend/OathBackend.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "ff41475684fad513eed70551d3eb331b1fe879e0c930471a0f33030939d4bc0f",
+      "lines": 71,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/Code.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "8fcdecd935812125ec3ac23b98eb09bb562826edbaea3fa9843da54f6bec8491",
+      "lines": 103,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/Credential.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "10caa0278c8c52579e48af37387b5865ef09f67d61f2aebc1223fabba2871ec9",
+      "lines": 241,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/CredentialData.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "50ee511a64b00f7f23150172478111af5d4121ecec978874ef33513e155ca0b4",
+      "lines": 335,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/Credentials/OathCredentialOptions.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "4b76719a68365db75afa60fbb1b7ff4cfc9a9c2052c95563ea89f255844a6aca",
+      "lines": 34,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/HashAlgorithm.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "740bb3e6882b7826027a3a9a4c33fd33b0cbec2699b810e07e169b95361fb230",
+      "lines": 36,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/IOathSession.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "8cb1d8191884d096fe3bd7c4a8dbd4555afab518d7f38421f19bfd309da49669",
+      "lines": 214,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/IYubiKeyExtensions.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "4b898af1f323c71089066c08895bca9be6c7b0ded51ed3570b4063b93373641b",
+      "lines": 100,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/OathConstants.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "ef1f18bd94cacb0591ab3b76da00e2ab61ff11d166f686ffb8d8800cc635338a",
+      "lines": 60,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/OathException.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "cf349ec123991a42cca1fa123c892bb794c7015d0d65b69efd98aa04db1ca71a",
+      "lines": 108,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/OathSession.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "48e60b1080706fe7af89e2ee3b0d3c9b4e7cf81762a692fff675638a3a10f819",
+      "lines": 873,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/src/OathType.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "91699521ac164d1e85a5049d9fe827e60125205352ed69178ad39f72934821c4",
+      "lines": 31,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/CLAUDE.md",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "612b211cf82a4c88aabc09b8e96bdc6a3cba21b5827f91c45a3b1eac3362386c",
+      "lines": 12,
+      "surface": "markdown",
+      "lane": "active",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/AuditV2/OathAuditReproTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "ec53758612cca8af4d3ec4ce9683b50c070097f60dc5edd6fa69fb85524c2e74",
+      "lines": 69,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathHashAlgorithmTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "a29b1d97d8fa867cc54b0f3a3248913efea5608ca48d13ec096aef414c89ab8c",
+      "lines": 236,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathPasswordChangeTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "f7ca7c401a25830bb8ddffdc8cb510ba93114dc22cd24ebf92f88a279421de78",
+      "lines": 176,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathSessionTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "4059519ddf4f1ffa41ad93639f11035cb2abc2fb4b129f736b1608750bd2a7d8",
+      "lines": 351,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "661dc365111bdbab2d6c7b1d181cffa1273b43cbb537a97201da7b2e908caf17",
+      "lines": 67,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/AuditV2/OathAuditReproTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "9af905a0e2dd5cf69b011eb5f08e2a674f36759fa9e93974c32bcc55f3589528",
+      "lines": 197,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CodeTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "46726c339c4695b0cd5b09370150bc623b6638fe0c1ba3ae1e8d091e73d8f0b1",
+      "lines": 188,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "450fe61271677188beec052c2b2b75db8e4fde671c652d6bab58d237a12f69e5",
+      "lines": 445,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialIdTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "ad2a7d1ce2e426da17a4596ba0b11a7011fcf17997f407a38b6c8461eb102583",
+      "lines": 193,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "b0c78765f93095b0c8bd4a617343433d41b6da9bc5d09af53a930138b9873f79",
+      "lines": 113,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathAuthenticationTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "877c265176e89487af2e9b09035b351e9256d8ab7c9fdd34d25b3b9e43181214",
+      "lines": 525,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+      "baseline": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+      "sha256": "989ce91eee14ff64c1c218bc661e0d19d65ef10d51828b485497c283ff7244a1",
+      "lines": 734,
+      "surface": "source-comments",
+      "lane": "supplemental",
+      "mechanical": {
+        "pattern_scan": "complete",
+        "links_xml_symbols": "pending"
+      },
+      "semantic": "pending",
+      "deep_verification": "pending",
+      "independent_review": "pending"
+    }
+  ],
+  "external_reference_surfaces": [
+    {
+      "path": "2026-09-21-yubikit-async-boundaries-ISA.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 328,
+          "text": "5. **Regression and consistency:** preserve exchange, disposal, ownership, prompting, and byte-level tests. For changed code and callers/contracts affected by the migration diff, compare Core/protocol/native and relevant Management, Piv, Fido2, WebAuthn, Oath, YubiOtp, OpenPgp, SecurityDomain, and YubiHsm siblings for naming/type placement, visible wire flow, cancellation/exception/lifetime ownership, `ConfigureAwait` convention, exact prompt pairing, memory/zeroing/logging, tests, and docs. This is a scoped review, not a blanket whole-repository style sweep."
+        },
+        {
+          "line": 671,
+          "text": "For each slice and the final integrated tree, use unmodified siblings as comparators for changed code and for callers/contracts affected by the migration diff. Relevant comparators may come from Core/protocol/native and Management, Piv, Fido2, WebAuthn, Oath, YubiOtp, OpenPgp, SecurityDomain, and YubiHsm; this is not a blanket sweep requiring unrelated modules to change. Review naming/type placement, visible wire flow/no command hierarchy, cancellation/exception/lifetime ownership, `ConfigureAwait` conventions, prompt pairing, memory/zeroing/logging, tests, and docs. Equivalent semantics share conventions; platform-required differences are justified, not forced into inheritance."
+        },
+        {
+          "line": 1380,
+          "text": "- Applet delta review used `git diff 99e082c46018ecdde63c3c47980c14e313b70192 HEAD -- src/Management/src src/Piv/src src/Fido2/src src/WebAuthn/src src/Oath/src src/YubiOtp/src src/OpenPgp/src src/SecurityDomain/src src/YubiHsm/src`. Only `src/Fido2/src/Extensions/PreviewSign/PreviewSignGeneratedKey.cs` and its `PublicAPI.Unshipped.txt` differ: the demo-only `FromArkgSeedKey` static factory is absent on the integration base. The class itself remains. All other source in these nine roots matches; test/example differences outside these roots are not included in this assertion. This closes source-delta revalidation, not a whole-applet behavior audit."
+        },
+        {
+          "line": 1381,
+          "text": "- Primary shipping scan scope: `src/{Core,Management,Piv,Fido2,WebAuthn,Oath,YubiOtp,OpenPgp,SecurityDomain,YubiHsm}/src/**/*.cs`. The nine applets were searched independently of Core. Test projects, example executables, command-line tooling, benchmarks, verification hosts, generated `obj`/`bin`, and native source from the other lineage are separate evidence scopes, not silently included as shipping-library imports. Public raw connections and Core console credential helpers remain in scope."
+        },
+        {
+          "line": 1406,
+          "text": "rg --count-matches '\\[(LibraryImport|DllImport)\\(' src/Core/src src/Management/src src/Piv/src src/Fido2/src src/WebAuthn/src src/Oath/src src/YubiOtp/src src/OpenPgp/src src/SecurityDomain/src src/YubiHsm/src --glob '*.cs'"
+        },
+        {
+          "line": 1412,
+          "text": "rg --count-matches 'Task\\.Run\\(|Task\\.Factory\\.StartNew\\(|\\.GetAwaiter\\(\\)\\.GetResult\\(|\\.Wait\\(|\\.Result\\b|Thread\\.Sleep\\(|new Thread\\(' src/Core/src src/Management/src src/Piv/src src/Fido2/src src/WebAuthn/src src/Oath/src src/YubiOtp/src src/OpenPgp/src src/SecurityDomain/src src/YubiHsm/src --glob '*.cs'"
+        },
+        {
+          "line": 1467,
+          "text": "| Oath | SmartCard | `src/Oath/src/IYubiKeyExtensions.cs:39-63` |"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "CLAUDE.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 20,
+          "text": "| `Oath/` | TOTP/HOTP |"
+        },
+        {
+          "line": 454,
+          "text": "| **Targeted check** | Specific test you touched | `dotnet toolchain.cs -- test --integration --project Oath --filter \"FullyQualifiedName~Calculate\"` |"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "README.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 62,
+          "text": "| [Yubico.YubiKit.Oath](src/Oath/README.md) | TOTP and HOTP credentials |"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/NATIVE-AOT.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 6,
+          "text": "build. At the time of writing that is `Core`, `Management`, `Piv`, `Ctap2`, `WebAuthn`, `Oath`,"
+        },
+        {
+          "line": 24,
+          "text": "- Ctap2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and YubiHsm are link-verified but have not"
+        },
+        {
+          "line": 161,
+          "text": "- Runtime-exercise representative Ctap2, WebAuthn, Oath, OpenPgp, SecurityDomain, YubiOtp, and"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/TESTING.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 77,
+          "text": "dotnet toolchain.cs -- test --integration --project Oath --filter \"FullyQualifiedName~CalculateAll\""
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/architecture/applet-public-api.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 31,
+          "text": "- Public collections use read-only interfaces unless mutation is the explicit contract. OATH `DeriveKey` remains"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 68,
+          "text": "await using var oath = await OathSession.CreateAsync(connection);"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/architecture/physical-device-model.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 167,
+          "text": "Single-transport applets (PIV, OATH, OpenPGP, Security Domain, YubiHSM) are SmartCard-only and take no"
+        },
+        {
+          "line": 215,
+          "text": "await using var oath = await OathSession.CreateAsync(connection);"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 25,
+          "text": "Apps[\"App modules<br/>PIV \u00b7 OATH \u00b7 CTAP2 \u00b7 WebAuthn<br/>OpenPGP \u00b7 Mgmt \u00b7 YubiOTP \u00b7 HSM \u00b7 SD\"]"
+        },
+        {
+          "line": 53,
+          "text": "Oath[\"Oath\"]"
+        },
+        {
+          "line": 63,
+          "text": "Oath --> Core"
+        },
+        {
+          "line": 103,
+          "text": "SCProto[\"ISmartCardProtocol<br/>(PIV/OATH/OpenPGP/SD/HSM)\"]"
+        },
+        {
+          "line": 171,
+          "text": "- *SmartCard-only:* PIV, OATH, OpenPGP, SecurityDomain, YubiHSM."
+        },
+        {
+          "line": 180,
+          "text": "**reuses `ISmartCardProtocol` \u2014 the exact same APDU decorator pipeline** as PIV/OATH."
+        },
+        {
+          "line": 333,
+          "text": "S[\"PIV\u00b7OATH\u00b7OpenPGP\u00b7SD\u00b7HSM: SmartCard only\"]"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/docs-inventory-report.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 62,
+          "text": "| `src/Oath/CLAUDE.md` | module | 81 | a20afb55 (2026-06-06) | 26 | none |"
+        },
+        {
+          "line": 63,
+          "text": "| `src/Oath/tests/CLAUDE.md` | module | 12 | 3b44f755 (2026-06-07) | 25 | none |"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-changelog.md",
+      "lane": "migration",
+      "hits": [
+        {
+          "line": 28,
+          "text": "- Added a `Common Migration Recipes` section to `v1-to-v2.md` with source-backed before/after examples for device discovery, device info, applet session creation, PIV key generation, FIDO2 authenticator info, OATH credential add/calculate, and YubiOTP HMAC-SHA1 challenge-response."
+        },
+        {
+          "line": 43,
+          "text": "## 2026-07-30 - Gap-remediation restorations (PIV, OATH, YubiOTP, YubiHSM, SecurityDomain, OpenPGP)"
+        },
+        {
+          "line": 45,
+          "text": "- Analyzed range `5a82db9bce05addc0385162e9f085adbc2366c5b..e042280ed7ec03a0250745ff3ff272680e5570b9` (80 commits, 482 changed files; PR #535 \"yubikit-gaps\" merge). The automated diff context for this range truncated before reaching any `src/` files, so this update was grounded directly in current source (`src/Piv`, `src/Oath`, `src/YubiOtp`, `src/YubiHsm`, `src/SecurityDomain`, `src/OpenPgp`) and in `docs/plans/yubikit-gaps-remediation/ISA.md`, the in-repo remediation record for this merge, rather than the truncated `diff.patch`."
+        },
+        {
+          "line": 46,
+          "text": "- This range closes several confirmed v1-parity gaps recorded in `docs/migration/v1-to-v2-gaps.md`. Added map entries and migration-guide notes for: PIV PIN-only management-key mode and typed CHUID/CCC/AdminData/KeyHistory data objects; OATH `IsPasswordProtected`, `AuthenticateAndRetryAsync`, and the dedicated `OathException`; YubiOTP keyboard-aware static passwords and Yubico-OTP-algorithm challenge-response; YubiHSM Auth's `HsmAuthRetryException`, `OnTouchRequired` callback, and the hardware-verified `HsmAuthCredential.Counter` to `RetriesRemaining` rename; and new dedicated exception types for SecurityDomain (`SecureChannelException`) and OpenPGP (`OpenPgpInvalidPinException`)."
+        },
+        {
+          "line": 47,
+          "text": "- Added two new Common Migration Recipes: PIV PIN-only mode enablement and OATH password-protection-check-plus-retry, each backed by a corresponding `v1-to-v2-map.yml` entry."
+        },
+        {
+          "line": 106,
+          "text": "- `Yubico.YubiKit.YubiHsm` was the last shipping module whose public API accepted a secret as a `string`. Nine members on `IHsmAuthSession`/`HsmAuthSession` (11 parameters in total) now take UTF-8 `ReadOnlyMemory<byte>` instead: `PutCredentialSymmetricAsync`, `PutCredentialDerivedAsync`, `CalculateSessionKeysSymmetricAsync`, `CalculateSessionKeysAsymmetricAsync`, `GetChallengeAsync`, `PutCredentialAsymmetricAsync`, `GenerateCredentialAsymmetricAsync`, `ChangeCredentialPasswordAsync`, and `ChangeCredentialPasswordAdminAsync`. Parameters are named plainly (`credentialPassword`, `derivationPassword`, `currentPassword`, `newPassword`, `password`); the UTF-8 encoding contract and the borrowed-buffer ownership contract live in each parameter's XML documentation. See the 2026-09-05 entry, which applied the same naming to Fido2, OpenPgp, and Oath."
+        },
+        {
+          "line": 107,
+          "text": "- This finishes the sweep started by `75353fd1` (\"security(fido2,openpgp,oath): replace string PIN/password APIs with `ReadOnlyMemory<byte>`\", 2026-04-09), which did not reach `src/YubiHsm/` because that module had landed seven days earlier. The rationale is unchanged: .NET strings are immutable and cannot be securely wiped, so callers could not zero credential passwords after use."
+        },
+        {
+          "line": 115,
+          "text": "## 2026-09-05 - Secret parameters drop the `...Utf8` suffix across Fido2, OpenPgp, and Oath"
+        },
+        {
+          "line": 121,
+          "text": "- `Yubico.YubiKit.Oath` \u2014 `IOathSession.DeriveKey`/`OathSession.DeriveKey` (`passwordUtf8` to `password`)."
+        },
+        {
+          "line": 132,
+          "text": "- Corrected the `yubihsm-credential-password-bytes` map entry, which had gone stale: its `v2` line still said the credential-password parameters were \"renamed with the `...Utf8` suffix\", but `refactor(yubihsm,core): drop Utf8 param suffix and split prompt types` (`c5dc3aec`, in this range) dropped that suffix in favor of plain names (`credentialPassword`, `derivationPassword`, `currentPassword`, `newPassword`, `password`), matching the parallel Fido2/OpenPgp/Oath rename already recorded in the 2026-09-05 entry below. The changelog prose itself was already correct; only the map entry's `v2` line and notes needed the fix. No guide prose change was needed."
+        },
+        {
+          "line": 133,
+          "text": "- Confirmed no new migration-relevant content in this range for YubiHSM Auth or the Fido2/OpenPgp/Oath `...Utf8` parameter rename beyond the map correction above: the diff in this range is those same already-documented changes (2026-08-31, 2026-09-03, 2026-09-05 entries) landing on `yubikit` later than they were manually written up, not new substance."
+        },
+        {
+          "line": 162,
+          "text": "contract for PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth touch notifications."
+        },
+        {
+          "line": 185,
+          "text": "- No-impact items confirmed in this range that need no guide or map changes: ~25 commits reshaping module `README.md`/`PACKAGE_README.md` files to a shared structure, adding package-page readmes, fixing repository links, and slimming the root `README.md` and `docs/DEV-GUIDE.md` (docs-only, outside this guide's v1-to-v2 API mapping scope); `build: read YubiKitDocsBranch from MSBuild evaluation, not the props file` (`5a32475a`) and `build: single source of truth for the v2 documentation branch` (`3c323d1d`) are build/tooling-only; `docs(oath): state the firmware floor the code actually enforces` (`19603b95`) and `docs: correct stale API claims in contributor docs and a doc comment` (`91d8c943`) touch contributor-facing docs, not this guide."
+        },
+        {
+          "line": 209,
+          "text": "- No-impact items confirmed in this range: `ConsoleUserPresencePrompt`'s new `Touch your YubiKey to {intent}.` wording is the reference terminal implementation adopting the new fields, not an API surface change; the PIV/FIDO2/OATH/OpenPGP/YubiOTP/YubiHSM session-file and test-file diffs in this range only thread the new optional fields/scopes through existing touch-notification call sites already covered by `user-presence-prompt` and its per-applet notes."
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "lane": "migration",
+      "hits": [
+        {
+          "line": 14,
+          "text": "`yubikit-piv`, `yubikit-oath`, `yubikit-openpgp`, `yubikit-hsmauth`, `yubikit-yubiotp`, `yubikit-transaction`, `yubikit-smartcard-improvements`, `yubikit-piv-example`, `yubikit-fido2-cli`, `yubikit-consolidation`, `yubikit-performance`, `yubikit-webauthn-puat-retry`, `yubikit-ctap-status-22-alignment`, `yubikit-ctaphid-sequence-wrap`, `yubikit-device-info-more-data-count`, `yubikit-apdu-always-append-le`, `yubikit-piv-9-byte-aid`."
+        },
+        {
+          "line": 29,
+          "text": "| 4 | `KeyCollector` delegate pattern removed \u2014 credential collection and retry remain mostly application-controlled. `ICredentialPrompt` is adopted by WebAuthn, while `IUserPresencePrompt` now provides shared touch notification across PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. This is not PIN/PUK/password/key `KeyCollector` parity | Cross-cutting | Major |"
+        },
+        {
+          "line": 34,
+          "text": "| 9 | Exception hierarchy shrank (10\u21928 types) \u2014 `TlvException`, `SecureChannelException`, `KeyboardConnectionException` have no v2 equivalent; SecurityDomain/YubiOtp/OpenPgp/Management/YubiHsm/Oath have zero dedicated exception types | Cross-cutting | Major |"
+        },
+        {
+          "line": 36,
+          "text": "| 11 | OATH loses `IsPasswordProtected` signal and auto-retry-on-lock behavior; exception on wrong password is now generic, not `SecurityException` | OATH | Major |"
+        },
+        {
+          "line": 65,
+          "text": "**v2 status**: Missing \u2014 no general-purpose equivalents; Base32-like logic only reappears inline in `src/Oath/src/CredentialData.cs`, ModHex only inside private `HidCodeTranslator`."
+        },
+        {
+          "line": 152,
+          "text": "## Module: OATH"
+        },
+        {
+          "line": 154,
+          "text": "v1 location: `Yubico.YubiKey/src/Yubico/YubiKey/Oath/**`"
+        },
+        {
+          "line": 155,
+          "text": "v2 location: `src/Oath/src/**`"
+        },
+        {
+          "line": 168,
+          "text": "**v2 status**: Behavior-changed/Degraded \u2014 v2 throws generic `ArgumentException`/`InvalidOperationException`/`BadResponseException` with no dedicated exception type or OATH-specific status-word mapping."
+        },
+        {
+          "line": 308,
+          "text": "**v2 status**: **Regressed, now fixed (2026-08-31).** v2 originally shipped these as `string`, which callers cannot wipe \u2014 the only module in the SDK still doing so after the `75353fd1` Fido2/OpenPgp/Oath sweep, which missed `src/YubiHsm/` because it landed seven days earlier. Nine members now take UTF-8 `ReadOnlyMemory<byte>`, restoring v1 parity. Padding and PBKDF2 behavior are unchanged. The parameters are named plainly (`credentialPassword` and friends), with the UTF-8 and ownership contracts documented on each `<param>`."
+        },
+        {
+          "line": 352,
+          "text": "- **Exception hierarchy**: v1 has 10 dedicated exception types (`ApduException`, `TlvException`, `SCardException`, `PlatformApiException`, `Ctap2DataException`, `Fido2Exception`, `KeyboardConnectionException`, `MalformedYubiKeyResponseException`, `SecureChannelException` \u00d72). v2 has 8 (`BadResponseException`, `PlatformInteropException`, `SCardException`, `PlatformApiException`, `ApduException`, `CtapException`, `InvalidPinException`, `WebAuthnClientError`). No v2 equivalent for `TlvException`, `KeyboardConnectionException`, or either `SecureChannelException`; `Fido2Exception`/`Ctap2DataException`'s two-level hierarchy collapses into one flat `CtapException`. SecurityDomain, YubiOtp, OpenPgp, Management, YubiHsm, and Oath have **zero** dedicated exception types."
+        },
+        {
+          "line": 361,
+          "text": "Touch is mostly addressed: `IUserPresencePrompt` is one async, cancellable request/resolution contract wired through `SessionCreationOptions.UserPresencePrompt` across PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. HID FIDO and OTP paths can report `DeviceWaiting`; smart-card paths use policy certainty, with cached or unknown policy reported as `PolicyMayRequire` and no inferred timeout."
+        },
+        {
+          "line": 368,
+          "text": "- **NuGet package count**: v1 = 2 packages (`Yubico.Core`, `Yubico.YubiKey`). v2 = 9 packages (Core, Management, Piv, Fido2, WebAuthn, Oath, YubiOtp, OpenPgp, SecurityDomain, YubiHsm), confirmed no meta-package referencing all 9."
+        },
+        {
+          "line": 384,
+          "text": "- OATH credential types/algorithms, PBKDF2, calculate-all semantics"
+        },
+        {
+          "line": 385,
+          "text": "- Cross-applet touch notification for PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "lane": "migration",
+      "hits": [
+        {
+          "line": 15,
+          "text": "- Application features are split by applet: `Yubico.YubiKit.Piv`, `Yubico.YubiKit.Ctap2`, `Yubico.YubiKit.Oath`, `Yubico.YubiKit.YubiOtp`, `Yubico.YubiKit.OpenPgp`, `Yubico.YubiKit.SecurityDomain`, and `Yubico.YubiKit.YubiHsm`."
+        },
+        {
+          "line": 80,
+          "text": "FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and YubiHSM Auth. This is touch notification only; PIN, PUK, password,"
+        },
+        {
+          "line": 96,
+          "text": "| `OathSession.PutCredentialAsync(data, requireTouch, cancellationToken)` | Set `CredentialData.RequireTouch`; for URI input use `CredentialData.ParseUri(uri, requireTouch)`, then call `PutCredentialAsync(data, cancellationToken)`. |"
+        },
+        {
+          "line": 107,
+          "text": "| Any of the eight `XSession.CreateAsync(connection, configuration, scpKeyParams[, firmwareVersion], cancellationToken)` factories | `XSession.CreateAsync(connection, SessionCreationOptions?, cancellationToken)`. The eight applets are Management, PIV, FIDO2, OATH, OpenPGP, Security Domain, YubiOTP, and YubiHSM Auth. |"
+        },
+        {
+          "line": 127,
+          "text": "| OATH `DependencyInjection`, `OathSessionFactory`, `AddOath` | `OathSession.CreateAsync` or `CreateOathSessionAsync` |"
+        },
+        {
+          "line": 397,
+          "text": "### OATH: Add and Calculate Credentials"
+        },
+        {
+          "line": 399,
+          "text": "V1 OATH code used synchronous credential APIs and string-based secrets:"
+        },
+        {
+          "line": 402,
+          "text": "using Yubico.YubiKey.Oath;"
+        },
+        {
+          "line": 404,
+          "text": "using var oath = new OathSession(device);"
+        },
+        {
+          "line": 405,
+          "text": "oath.KeyCollector = keyCollector;"
+        },
+        {
+          "line": 416,
+          "text": "oath.AddCredential(credential);"
+        },
+        {
+          "line": 417,
+          "text": "var codes = oath.CalculateAllCredentials();"
+        },
+        {
+          "line": 423,
+          "text": "using Yubico.YubiKit.Oath;"
+        },
+        {
+          "line": 425,
+          "text": "await using var oath = await device.CreateOathSessionAsync("
+        },
+        {
+          "line": 431,
+          "text": "await oath.PutCredentialAsync(credentialData, cancellationToken: cancellationToken);"
+        },
+        {
+          "line": 432,
+          "text": "var codes = await oath.CalculateAllAsync(cancellationToken: cancellationToken);"
+        },
+        {
+          "line": 437,
+          "text": "- `CredentialData.ParseUri(...)` decodes the OATH URI into v2 credential data. If you construct `CredentialData` manually, v2 expects decoded secret bytes in `CredentialData.Secret`; decode and zero caller-owned secret material when appropriate."
+        },
+        {
+          "line": 438,
+          "text": "- If the OATH applet is password-protected, derive and validate the access key explicitly with byte buffers that can be zeroed."
+        },
+        {
+          "line": 439,
+          "text": "- Adding, deleting, renaming, or setting keys mutates persistent OATH state and should be reviewed manually."
+        },
+        {
+          "line": 545,
+          "text": "### OATH: Check Password Protection and Retry a Locked Operation"
+        },
+        {
+          "line": 550,
+          "text": "using Yubico.YubiKey.Oath;"
+        },
+        {
+          "line": 552,
+          "text": "using var oath = new OathSession(device);"
+        },
+        {
+          "line": 553,
+          "text": "oath.KeyCollector = keyCollector;"
+        },
+        {
+          "line": 555,
+          "text": "if (oath.IsPasswordProtected)"
+        },
+        {
+          "line": 557,
+          "text": "var codes = oath.CalculateAllCredentials();"
+        },
+        {
+          "line": 564,
+          "text": "using Yubico.YubiKit.Oath;"
+        },
+        {
+          "line": 566,
+          "text": "await using var oath = await device.CreateOathSessionAsync("
+        },
+        {
+          "line": 569,
+          "text": "if (oath.IsPasswordProtected)"
+        },
+        {
+          "line": 571,
+          "text": "var codes = await oath.AuthenticateAndRetryAsync("
+        },
+        {
+          "line": 572,
+          "text": "ct => oath.CalculateAllAsync(cancellationToken: ct),"
+        },
+        {
+          "line": 613,
+          "text": "### OATH"
+        },
+        {
+          "line": 615,
+          "text": "Use `Yubico.YubiKit.Oath` for TOTP/HOTP credential management and code calculation. Review credential naming, secret handling, password flows, and time-source assumptions manually."
+        },
+        {
+          "line": 617,
+          "text": "`IOathSession.IsPasswordProtected` (device-password state independent of session unlock state), `AuthenticateAndRetryAsync` (module-appropriate authenticate-and-retry), and the dedicated `OathException`/`OathFailureReason` type were restored after an initial v2 gap; see `oath-password-protection-state`, `oath-authenticate-and-retry`, and `oath-exception` in `v1-to-v2-map.yml`."
+        },
+        {
+          "line": 658,
+          "text": "Credential passwords moved from `string` to UTF-8 `ReadOnlyMemory<byte>` across nine `IHsmAuthSession`/`HsmAuthSession` members, closing a v1 regression rather than introducing one, since v1's equivalent path already used byte-based passwords; see `yubihsm-credential-password-bytes` in `v1-to-v2-map.yml`. The parameters are named plainly \u2014 `credentialPassword`, `derivationPassword`, `currentPassword`, `newPassword`, and `password` \u2014 with no `Utf8` suffix; `refactor(fido2,openpgp,oath)!: drop Utf8 param suffix from secret parameters` (`5af953f6`) applied the same convention to FIDO2, OpenPGP, and OATH. PIV is the exception and still uses `pinUtf8`, `pukUtf8`, and friends."
+        },
+        {
+          "line": 687,
+          "text": "- Applet recipes: before/after examples for common PIV, FIDO2, OATH, YubiOTP, OpenPGP, Security Domain, and YubiHSM tasks."
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 68,
+          "text": "| `UserPresenceOperations.Oath` | `Calculate`, `CalculateCode` |"
+        },
+        {
+          "line": 83,
+          "text": "_ when context.Application == UserPresenceApplications.Oath => \"Touch your YubiKey to generate a code.\","
+        },
+        {
+          "line": 179,
+          "text": "- PIV, OATH, OpenPGP, and YubiHSM Auth are smart-card paths and therefore use policy evidence. PIV"
+        },
+        {
+          "line": 180,
+          "text": "`Always`, OATH touch-required credentials, OpenPGP user-interaction flags `On`/`Fixed`, and a known"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 80,
+          "text": "exists \u2014 OATH's `AuthenticateAndRetryAsync` takes a password-provider callback"
+        },
+        {
+          "line": 86,
+          "text": "separate and now unified: PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, and"
+        },
+        {
+          "line": 129,
+          "text": "- OATH `IsPasswordProtected` and `AuthenticateAndRetryAsync`, plus a"
+        },
+        {
+          "line": 133,
+          "text": "OATH, OpenPGP, and YubiOTP as well."
+        },
+        {
+          "line": 139,
+          "text": "`newPassword`, and `password`). FIDO2, OpenPGP, and OATH secret parameters"
+        },
+        {
+          "line": 175,
+          "text": "management; Management device-info read and device-config write; OATH"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "docs/v2-highlights.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 94,
+          "text": "`Yubico.YubiKit.Core`, `.Management`, `.Piv`, `.Ctap2`, `.WebAuthn`, `.Oath`,"
+        },
+        {
+          "line": 148,
+          "text": "`IUserPresencePrompt` is shared by PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP,"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "src/Core/README.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 275,
+          "text": "[CTAP2](../Ctap2/README.md), [WebAuthn](../WebAuthn/README.md), [OATH](../Oath/README.md),"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "src/Management/CLAUDE.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 21,
+          "text": "1. **Device-level operations**: Works across all applications (PIV, OATH, FIDO2, etc.)"
+        },
+        {
+          "line": 666,
+          "text": "UsbEnabled = DeviceCapabilities.Piv | DeviceCapabilities.Oath,"
+        },
+        {
+          "line": 683,
+          "text": "var capabilities = DeviceCapabilities.Piv | DeviceCapabilities.Oath;"
+        },
+        {
+          "line": 695,
+          "text": "bool hasPivAndOath = (capabilities & (DeviceCapabilities.Piv | DeviceCapabilities.Oath))"
+        },
+        {
+          "line": 696,
+          "text": "== (DeviceCapabilities.Piv | DeviceCapabilities.Oath);"
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "src/Management/README.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 68,
+          "text": "bool oathEnabledOverNfc = (info.NfcEnabled & DeviceCapabilities.Oath) != 0;"
+        },
+        {
+          "line": 77,
+          "text": "var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv | DeviceCapabilities.Oath };"
+        },
+        {
+          "line": 138,
+          "text": "| PIV, OATH, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no |"
+        },
+        {
+          "line": 171,
+          "text": "- [../Piv/README.md](../Piv/README.md), [../Oath/README.md](../Oath/README.md), [../Ctap2/README.md](../Ctap2/README.md) - applications this module toggles."
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "src/Tests.Shared/CLAUDE.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 196,
+          "text": "When adding support for a new application (e.g., OATH, PIV):"
+        },
+        {
+          "line": 203,
+          "text": "Func<OathSession, DeviceInfo, Task> action,"
+        },
+        {
+          "line": 209,
+          "text": "await using var session = await OathSession.CreateAsync("
+        },
+        {
+          "line": 275,
+          "text": "- **Only dedicated test devices.** Adding a serial authorizes destructive operations against that device \u2014 application resets, key overwrites, credential deletion. Never add a personal or production key, including one used for SSH, FIDO2/WebAuthn, PIV certificates, or OATH."
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "src/Tests.Shared/README.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 190,
+          "text": "Func<OathSession, DeviceInfo, Task> action,"
+        },
+        {
+          "line": 196,
+          "text": "await using var session = await OathSession.CreateAsync("
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "src/YubiOtp/PACKAGE_README.md",
+      "lane": "package",
+      "hits": [
+        {
+          "line": 3,
+          "text": "YubiOTP support for YubiKey devices: program the two slots with Yubico OTP, static password, OATH-HOTP,"
+        },
+        {
+          "line": 5,
+          "text": "HOTP credentials are a different application; use `Yubico.YubiKit.Oath` for those."
+        }
+      ],
+      "semantic_status": "pending"
+    },
+    {
+      "path": "src/YubiOtp/README.md",
+      "lane": "active",
+      "hits": [
+        {
+          "line": 4,
+          "text": "OTP, static password, OATH-HOTP, or HMAC-SHA1 challenge-response configuration, reads slot state, runs"
+        },
+        {
+          "line": 5,
+          "text": "challenge-response, and sets the NFC NDEF record. Stored TOTP and HOTP credentials belong to [Oath](../Oath/README.md)."
+        },
+        {
+          "line": 173,
+          "text": "- [../Oath/README.md](../Oath/README.md) - TOTP and HOTP credential storage."
+        }
+      ],
+      "semantic_status": "pending"
+    }
+  ],
+  "supporting_files": [
+    "src/Oath/examples/OathTool/OathTool.csproj",
+    "src/Oath/src/PublicAPI.Shipped.txt",
+    "src/Oath/src/PublicAPI.Unshipped.txt",
+    "src/Oath/src/Yubico.YubiKit.Oath.csproj",
+    "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj",
+    "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/xunit.runner.json",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/xunit.runner.json"
+  ]
+}

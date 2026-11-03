@@ -1,0 +1,39 @@
+[
+  {
+    "command": [
+      "ykman",
+      "list",
+      "--serials"
+    ],
+    "exitCode": 0,
+    "stderr": "",
+    "stdout": "125\n"
+  },
+  {
+    "command": [
+      "ykman",
+      "--device",
+      "125",
+      "oath",
+      "info"
+    ],
+    "exitCode": 0,
+    "stderr": "",
+    "stdout": "OATH version:        5.8.0\nPassword protection: disabled\n"
+  },
+  {
+    "command": [
+      "ykman",
+      "--device",
+      "125",
+      "oath",
+      "accounts",
+      "list"
+    ],
+    "exitCode": 0,
+    "stderr": "",
+    "stdoutEmpty": true,
+    "accountCount": 0,
+    "stdout": ""
+  }
+]

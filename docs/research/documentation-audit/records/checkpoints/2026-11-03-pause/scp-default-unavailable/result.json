@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter FullyQualifiedName~OathLifecycleTimeTests",
+  "started": "2026-11-03T00:03:37.0592326+01:00",
+  "durationSeconds": 9.2,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000337-059-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 9.1,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "failed",
+      "reason": "1 test(s) failed",
+      "executed": 2,
+      "failed": 1,
+      "skipped": 1,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard))",
+          "message": "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException : SCP03 INITIALIZE UPDATE failed: Referenced data not found (SW=0x6A88)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-000337-059-test/01-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset\""
+  ]
+}

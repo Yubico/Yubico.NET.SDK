@@ -1,0 +1,65 @@
+# dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolCancellationTests
+# started:   2026-11-02 22:09:25 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-cli
+# git:       yubikit-oath-fix-cli @ 361567eb (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261102-220925-539-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit tests ===
+
+
+=== Testing: Oath.UnitTests ===
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --list-tests --filter-method *OathToolCancellationTests* (output captured)
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathToolCancellationTests*"
+  output: artifacts/toolchain/runs/20261102-220925-539-test/01-test-Oath.UnitTests.log
+✗ FAIL (25 test(s) failed)
+✗ test: 1 test project(s) failed
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolCancellationTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       3.7s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  25 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "after-input"): Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "during-validation"): Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "before-validation"): Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "before-input"): Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers(stage: "during-input"): Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnsuccessfulUnlock_DisposesSessionButNotCallerInput(cancel: True): Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "rename"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "uri"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "delete"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "add"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode(command: "reset"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "uri"): Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "delete"): Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "add"): Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "reset"): Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate(command: "rename"): Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(Xunit.Sdk.EqualException)
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "delete"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "clear"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "reset"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "add"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "uri"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "rename"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "single-code"): 
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession(command: "set"): Assert.Equal() Failure: Values differ | Expected: 5 | Actual:   1
+      - Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.PasswordConfirmation_CancellationDisposesSessionAndStopsKeyChange: Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.OperationCanceledException)
+      output: artifacts/toolchain/runs/20261102-220925-539-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 30 executed, 25 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Unlock_CancellationPropagatesAndClearsOnlyOwnedBuffers|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnsuccessfulUnlock_DisposesSessionButNotCallerInput|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.DeclinedConfirmation_ReturnsRepositoryCancellationCode|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ConfirmationCancellation_DoesNotMutate|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.OperationCancellation_ReachesCliBoundaryAndDisposesSession"
+Run log: artifacts/toolchain/runs/20261102-220925-539-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

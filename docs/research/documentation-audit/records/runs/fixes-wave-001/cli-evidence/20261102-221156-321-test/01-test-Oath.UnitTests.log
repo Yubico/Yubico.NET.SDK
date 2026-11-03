@@ -1,0 +1,414 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathTool*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Unknown or duplicate option: --HELP
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Error: Authentication failed: rejected
+Rename cancelled.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Add cancelled.
+Delete cancelled.
+Add cancelled.
+WARNING: This will destroy all OATH credentials and the access password on the YubiKey.
+Reset cancelled.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "RESET --HELP --force") (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 0
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(String commandLine) in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolDispatchTests.cs:30
+    --- End of stack trace from previous location ---
+WARNING: This will destroy all OATH credentials and the access password on the YubiKey.
+Invalid add option value.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Invalid add option value.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Unknown or duplicate option: --unknown
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Expected 2 to 2 positional arguments for 'accounts rename'.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Unknown or duplicate option: --password
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Invalid add option value.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Unknown or duplicate option: --issuer
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Option --password requires a value.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Option --password requires a value.
+Usage: oath <command> [options]
+  info                      Display OATH application status
+  reset [--force|-f]         Erase all OATH accounts and the password
+  access change [--password|-p PASSWORD] [--new-password|-n PASSWORD] [--clear|-c]
+  accounts list [--password|-p PASSWORD]
+  accounts code [QUERY] [--password|-p PASSWORD]
+  accounts add NAME SECRET [options]
+  accounts delete NAME [--force|-f] [--password|-p PASSWORD]
+  accounts rename NAME NEW_NAME [--force|-f] [--password|-p PASSWORD]
+  accounts uri URI [--touch] [--force|-f] [--password|-p PASSWORD]
+
+Add options: --issuer ISSUER, --oath-type TOTP|HOTP, --digits 6|8,
+  --algorithm SHA1|SHA256|SHA512, --period SECONDS, --touch, --force|-f,
+  --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds.
+Options may precede, separate, or follow positional arguments after the command.
+Boolean flags take no value. Value options require one following non-option token.
+Use -- to end options for positional arguments beginning with '-'.
+--help, -h, or help anywhere displays help without accessing a device.
+Help takes precedence over all other arguments, including --force and errors.
+Operation cancelled.
+Operation cancelled.
+Reset cancelled. Device data may already have been erased; reopen the session to inspect its state.
+Operation cancelled.
+Operation cancelled.
+Operation cancelled.
+Operation cancelled.
+Operation cancelled.
+Operation cancelled.
+Operation cancelled.
+Operation cancelled.
+Error: New password cannot be empty. Use --clear to remove password protection.
+failed Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnconfirmedPassword_IsCancellationNotAuthenticationFailure (0ms)
+  Assert.Equal() Failure: Values differ
+  Expected: 5
+  Actual:   1
+    at Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.UnconfirmedPassword_IsCancellationNotAuthenticationFailure() in /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs:180
+    --- End of stack trace from previous location ---
+Operation cancelled.
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 62
+  failed: 2
+  succeeded: 60
+  skipped: 0
+  duration: 194ms

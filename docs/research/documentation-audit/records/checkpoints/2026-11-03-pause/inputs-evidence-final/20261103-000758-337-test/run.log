@@ -1,0 +1,36 @@
+# dotnet toolchain.cs -- test --project Cli.Commands
+# started:   2026-11-03 00:07:58 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-inputs
+# git:       yubikit-oath-fix-inputs @ c90dced1 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261103-000758-337-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit tests ===
+
+
+=== Testing: Cli.Commands.UnitTests ===
+▶ RUN dotnet run --project src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj -c Release
+  output: artifacts/toolchain/runs/20261103-000758-337-test/01-test-Cli.Commands.UnitTests.log
+✓ PASS (42 executed, 1 skipped)
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- test --project Cli.Commands)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ test                       1.9s
+Projects (test):
+  ✓ PASS      Cli.Commands.UnitTests  42 executed, 1 skipped
+Totals: projects: 1 passed, 0 failed, 0 with no tests executed; tests: 42 executed, 0 failed, 1 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261103-000758-337-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

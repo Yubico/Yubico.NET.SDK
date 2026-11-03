@@ -1,0 +1,354 @@
+[
+  {
+    "path": "docs/architecture/webauthn-extension-processing.md",
+    "sha256": "6b183a1724e6d7da3720f300d5d5c91124851cda08a4e3f12cdedf79973a7178"
+  },
+  {
+    "path": "docs/usage/user-interaction.md",
+    "sha256": "4d6cd060543ceed194b4dd4990f2f7e1acdf64a6c9f396ef6430c956cd063085"
+  },
+  {
+    "path": "docs/v1-to-v2-comparison.md",
+    "sha256": "a07bb434dc71d2217cd9c1f50646012e2161c767dad69dcb63392eed53e59d16"
+  },
+  {
+    "path": "docs/v2-highlights.md",
+    "sha256": "bb7fb985d6424f5f5ce6acef448e6aa33873e370b91967f3cf3e48d59d702f00"
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+    "sha256": "06e90a09cdd8f6ac45a9dbc0d9072f48f9d2ebcc9c9736bccc48864a4d9b63ed"
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/README.md",
+    "sha256": "6033d0fd99359bfa9dc70ddf1f87a553555a43a712ca2e580fee7b0801bee406"
+  },
+  {
+    "path": "src/WebAuthn/CLAUDE.md",
+    "sha256": "b058a8b1089549410867550550d24ab7c4540b76a3c47aaa08af995c6b56fe2a"
+  },
+  {
+    "path": "src/WebAuthn/PACKAGE_README.md",
+    "sha256": "6c7ec48109b88969b9c4c330c7b8fc05e32834c5953703323b0ab2366e5a1647"
+  },
+  {
+    "path": "src/WebAuthn/README.md",
+    "sha256": "608e32f5270abd2330ca39e5f1dd4e5c47f3af9f625b535bc3f202061c4d68ce"
+  },
+  {
+    "path": "src/WebAuthn/src/Attestation/WebAuthnAttestationObject.cs",
+    "sha256": "caf73438332e52d2baaa92a25344d0ffe10e157b3359c4b856650e0a4a60699d"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+    "sha256": "4bc9c446bd42044d462240499856fd5e5bc3425c21a89f57c15dc46adbf6e5ad"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Authentication/CredentialMatcher.cs",
+    "sha256": "bc4efb9c5baabe280698100dcf93e640dc088c1f191887229f823319eb0d28b5"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Authentication/MatchedCredential.cs",
+    "sha256": "d04cb09b436eda097f5e7f642ca265d9252e50b1705aeb9f2a426838bf836673"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Authentication/PublicKeyCredentialRequestOptions.cs",
+    "sha256": "afc16bc2f2256be2780149a25ea7d6180c64a858436ecb4c7948bc670f420b56"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/CeremonyDeadline.cs",
+    "sha256": "6315c89e7b66fbfedec2779f7f98c399d13110125ab7609d6a9f21c2082a039d"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/CredentialFilter.cs",
+    "sha256": "67793da940d0c7213f03007301a501b29200bcde39093f5e0409c459bec7191d"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/IWebAuthnBackend.cs",
+    "sha256": "d3a2324d75b3f5641de7c498cc04ae42b9f6016c42714edd750b87a809e29e11"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/PinUvSharedSecret.cs",
+    "sha256": "8fa0ee43a87c42f7a31a49c241586d9e7d32ee6e893eac383f3c370833a5fb5b"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Registration/PublicKeyCredentialCreationOptions.cs",
+    "sha256": "a3bf2220b3770b2448843bf197119b585fdb0a375241124ab379b890edbefa9d"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/UserVerification/UvDecision.cs",
+    "sha256": "f4326f93e6a56ebb853c2e21976d284f217716c32a3bf2be239eec7538794a9f"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnBackend.cs",
+    "sha256": "ad7e6403a5938844ccdfc05680230252c47f8cb53170b04d2541d0f09664365b"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Authentication.cs",
+    "sha256": "6a56a3b90271e8aab24cf959fc7ff26c3263af64e92bf4c3d1c2f174d7b44c51"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Ceremony.cs",
+    "sha256": "c93f4a677196ab45d2bc01982f4f0bcd438955b2e734d5c7d41633d68ade7dbc"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.PinUvAuth.cs",
+    "sha256": "c53c886d634d1dcf5cb27b83113bc5558c6703dec1c1ce6a2e16a770bcb0fa14"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Registration.cs",
+    "sha256": "6f7a9804a1a03d0e00409937df3c7a041f04bece06b99f1bdf73476a4ecc4cb2"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.Validation.cs",
+    "sha256": "a0cf2071ea8a47e229e24ff7756a1ebf63804fbf29d84590fef7e1b7ad85f26c"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClient.cs",
+    "sha256": "ce590e3e646f32b56f42377840139ba651270d66ad402bc9a0eb86b36facae5f"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnClientData.cs",
+    "sha256": "1e63ca795735481bb457ffdcb5761870a0b9ece0564eb40c4297b4d61bcb82db"
+  },
+  {
+    "path": "src/WebAuthn/src/Client/WebAuthnOrigin.cs",
+    "sha256": "0230fdbd6e5b29f533c28dcf6299e7989d7663359bd879cdaa1943e93d2c4663"
+  },
+  {
+    "path": "src/WebAuthn/src/Cose/Aaguid.cs",
+    "sha256": "1b2b42e6ebb8c0f7f8043540b14fc614851d4c548d92012e011c8328456c0a72"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/CredProtectCodec.cs",
+    "sha256": "57333d4b08d47445eda1826aa2434706646ef285597f6e6af818a3109d8cc242"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/MinPinLengthCodec.cs",
+    "sha256": "bf9a2858f40ba2ac60b98ccd62d050ca451ee30377b1622fd9e227be7a296191"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/PreviewSignCodec.cs",
+    "sha256": "a394b1cbbc30979835d01da6cf4088d920a8b780a4eaf2605770189118200732"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/PrfCodec.cs",
+    "sha256": "19c79865f60ff7e49f057bc94c5a2e92f1a884ce1f15f37e6666aa779c8fa872"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/CredProtectInput.cs",
+    "sha256": "be4fd27e331cbfd66c3ee40faf0d4f1f6dcf4e255285e6a62b538b58be0e5627"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/LargeBlobInput.cs",
+    "sha256": "5ea26adb60acbad09435a18c26740724551d51d114d92d0bd922a8d984a5cf9c"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/LargeBlobSupport.cs",
+    "sha256": "ca42f08467570f7dcfbbbc3164ec00539112f61b1ab5e85473bffb8f11b75e27"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/PrfInput.cs",
+    "sha256": "3e1f093d3839931551c7b4703e2e9faa3792bee6ba298e0d3be5df02473c11ca"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Inputs/PrfInputValues.cs",
+    "sha256": "14ce3d6c3e286e09e6fc72c7ad357ebe5e2042255197f1aee512d1b317acf36e"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Outputs/CredProtectOutput.cs",
+    "sha256": "b40c59b7c8541d47137d85c875fcfff031917fecc5131201b310d3b8ce508d13"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Outputs/LargeBlobOutput.cs",
+    "sha256": "8fb797b606997355433152dd51150cf3708da7cacac013e6d2b9a68b60a2295e"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Outputs/PrfOutput.cs",
+    "sha256": "661ae947267d952dd40604d34d332af7ea4c7dd587e7ac564a90fe11ae2f11cd"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/ByteArrayKeyComparer.cs",
+    "sha256": "01fa60f0e76e2b3a54004cd960ab93fff010bb2778574e6490f674da94d27f40"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/GeneratedSigningKey.cs",
+    "sha256": "a8c5240df33c028082bee9ff695353fed4e06f9fe53d7d8913cd593a4b4494c9"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs",
+    "sha256": "be9ae1af7a6ae0b6183631c33c888ed1e2df1cc98bf9a59ca85ae963f6bc859c"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignAuthenticationOutput.cs",
+    "sha256": "1e308b35f5906b9d3235d070d2c3594cedaf6edd190d2c3dfe74ec5431008840"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignFlags.cs",
+    "sha256": "e6415e5c577e56be688db43c98db2def15097859f37d0a8373230f6f08af965d"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignRegistrationInput.cs",
+    "sha256": "5e15ea9923a7c733ed646901fbde505a96ba92ce1b31877b623af8f205d3ac4c"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignRegistrationOutput.cs",
+    "sha256": "74e877562a4fa415163d2a4b6daeb28c378b1f292402d3f05a05fc13d6a2049c"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignSigningParams.cs",
+    "sha256": "89b3d3a6f49cc7fd5d13b8d5eb681a97f5d95bdf8d360d10068334a55ed63d1e"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/AuthenticationExtensionSession.cs",
+    "sha256": "5a56da1a5c055d49eaefc819d4d2048ac1b4aead6c541564aed8e379def8800f"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/ExtensionContext.cs",
+    "sha256": "1de0248955e2611da1c1bd787caafb3952dc215a677ba53e261c328ddc772a71"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/IAuthenticationExtensionProcessor.cs",
+    "sha256": "c5e7655a01ab0b4fb4ea25cb283b9b57f1d8e341b23cfb793445bb6f8b35d4b6"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/IRegistrationExtensionProcessor.cs",
+    "sha256": "22ff80aa73ca5184484a7c3d7291c91c53cfb41bb3237bb523da3582cdc6ea59"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/CredPropsProcessor.cs",
+    "sha256": "c410456bec6c54927876c033a56277886a25590561b9a23ae791c25d12ac8bd6"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/CredProtectProcessor.cs",
+    "sha256": "e91ccab32bc5272c670bea9910c874f476a00fb0204d52e9b32823ca882c8146"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs",
+    "sha256": "2c13aca84e970d61ba6941f782d1e6019bb330fbbe07e8a736d78957370a6c9f"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/MinPinLengthProcessor.cs",
+    "sha256": "582575273eae53fb22e8615c7b4df27fcb111a3deba2e7d0b43d5d666fcf5064"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/Processors/PrfProcessor.cs",
+    "sha256": "4e547a860099b61ba5e6cf9feeed4ead4ea3f6ff39ffdf86cb487fb405fd2cb3"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Processing/RegistrationExtensionSession.cs",
+    "sha256": "90c1b71bb902a8828b52437cb0eb782fe33aeaf82e21896abd4126ca64bf34b0"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/WebAuthnExtensionInputs.cs",
+    "sha256": "72a395e96c1c963f22c6345d1ed42dea2bb09b1ea591796afd795fa680ae80c4"
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/WebAuthnExtensionOutputs.cs",
+    "sha256": "d3b5ef82080653660d38c7b27292903e67687cb45cb4f7594ea19252eb29e84f"
+  },
+  {
+    "path": "src/WebAuthn/src/IYubiKeyExtensions.cs",
+    "sha256": "57bdcde9265ea2951982480b4373c058388f0e1263abd35c1917e670ee27d759"
+  },
+  {
+    "path": "src/WebAuthn/src/Preferences/AttestationPreference.cs",
+    "sha256": "9997944e02e9b8629ad48d47b528f7705807c68be9fd311fcd74d9520f2ef16e"
+  },
+  {
+    "path": "src/WebAuthn/src/WebAuthnAuthenticatorData.cs",
+    "sha256": "d083829372b4600e2b1eba9793bf013a05149d916b7789dae5f42b7a6e9a779e"
+  },
+  {
+    "path": "src/WebAuthn/src/WebAuthnClientError.cs",
+    "sha256": "28ad9186c5f1ba246fde66f144b9e635c9702e18b80a6290b8a93d5aaf5ecb99"
+  },
+  {
+    "path": "src/WebAuthn/src/WebAuthnTransport.cs",
+    "sha256": "b5d0bfdcc80233f3990e01f3d2012d402c745b1641eefae530dd032356e3c1b5"
+  },
+  {
+    "path": "src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj",
+    "sha256": "f556b7f50d91c1c22b50929a4abfa8fb7a0dd978efcf29896d482ecb73824d60"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/AuditV2/WebAuthnAuditHardwareReproTests.cs",
+    "sha256": "e76e23298277fd5d3175fda15fcc29e98c2a6ca29d5166deb70adda920e1f8e2"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/AuditV2/WebAuthnAuditHardwareTests.cs",
+    "sha256": "86303d0a9598a9f9b2519cbf34cdded2d0c766f92248f739c0aac27a136a4c60"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/PreviewSignTests.cs",
+    "sha256": "e5e80dff9ec33e4899224a9c97967d5815de0e41b893eaf059e93d699ffd5dad"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnClientTests.cs",
+    "sha256": "eb393503c766950f0ed6c1ba173ec0f278b12c80b775eec3023aa9a574b4005c"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/WebAuthnExcludeListStressTests.cs",
+    "sha256": "87eae2c7849f47e5cd77b352d28c1f31f7a3c5c6707d7529d046787978618ae2"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/AuditV2/WebAuthnExtensionAuditReproTests.cs",
+    "sha256": "489d34011dc8548ea37c8daef597da48c7879b1f29c453c572b2fbde82ea0e59"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/UserVerification/UvDecisionLogicTests.cs",
+    "sha256": "38a9061225214cbfbc3efc88bf56359f8e0dcfd0da2b52e31ac5030b502a4630"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnBackendTests.cs",
+    "sha256": "968ab5e4ab60ae0c6a0e0a9bf627a9835ce4c77204420456e513f57988c94d65"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientCeremonyFrameTests.cs",
+    "sha256": "d787616f384a7c78f16e400298e091c50651bcb881f7f378ed9976c1b24d5576"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientDataTests.cs",
+    "sha256": "40f96107098736b2d6d93690e5f173c1372007c722bfd3c255e44ab3a77790bc"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientGetAssertionTests.cs",
+    "sha256": "9f12c9ace45d8fe8e534a700557c353a67fd4707a257cfd73def6bec0abd84d5"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Client/WebAuthnClientMakeCredentialTests.cs",
+    "sha256": "9f0355c42b8536a3ad765789cef624feebd3cc91674ef444232ad0af4ae5bba3"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/ExtensionSessionTests.cs",
+    "sha256": "bbf0c7ed1526b6c4e193958de0731f22b590321c19df920946206bde1ab72fd3"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/LargeBlob/LargeBlobProcessorTests.cs",
+    "sha256": "f9436c2005b8e0a66b9cd6aa252b7a196250e5bcf3d87ba02407c437504ce5b9"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/PreviewSign/PreviewSignCodecTests.cs",
+    "sha256": "dd343f4dac10c0ca8895a83f31c8fad467421f3f46cfd299ea034e60a80c5cc1"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/PreviewSign/PreviewSignSigningParamsTests.cs",
+    "sha256": "e509f48aaa43f6bec1fd9fb0e0722f7dfbe6a87890a1ae0236eace1109e54871"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/Prf/PrfCodecTests.cs",
+    "sha256": "e73e42a21b37d949e2eb7e270a9e25086146e24a38a6b43faa19371c3bd58e31"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Extensions/Prf/PrfProcessorTests.cs",
+    "sha256": "3eaaa8901f81fb5181e0a90d2fef44db261ad117370d3ccab1f6121f64bc07b5"
+  },
+  {
+    "path": "src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/TestSupport/TokenBufferAssert.cs",
+    "sha256": "13180dd048e3e3fe36cdb05bd173b222e571be2c412c448a0157e42c4cb89ac6"
+  },
+  {
+    "path": "docs/research/webauthn-documentation-audit-checkpoint.md",
+    "sha256": "f161af81b94349fa6fa055e1dc3f5b4a1d597af2ef40cdb592b267385361f94a"
+  }
+]

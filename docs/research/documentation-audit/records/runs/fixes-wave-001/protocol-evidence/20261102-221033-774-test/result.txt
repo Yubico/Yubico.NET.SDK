@@ -1,0 +1,13 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --smoke --filter FullyQualifiedName~ProtocolResponses_SmartCardOnlyDiscovery)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       7.0s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.IntegrationTests  1 test(s) failed
+      - Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SmartCardOnlyDiscovery_ExercisesBothFirmwareGroups: Yubico.YubiKit.Core.Devices.UnrecoveredConnectionException : A previous native operation for interface 'hid:/dev/hidraw7:0001' was not proven released. | ---- System.InvalidOperationException : A bounded discovery read for interface 'hid:/dev/hidraw7:0001' was abandoned while native ownership remained active.
+      output: artifacts/toolchain/runs/20261102-221033-774-test/01-test-Oath.IntegrationTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 1 executed, 1 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SmartCardOnlyDiscovery_ExercisesBothFirmwareGroups"
+Run log: artifacts/toolchain/runs/20261102-221033-774-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

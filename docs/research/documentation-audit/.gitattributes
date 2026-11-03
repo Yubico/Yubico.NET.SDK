@@ -1,0 +1,4 @@
+# Preserve original evidence bytes and whitespace, including failed-run/diff snapshots.
+# Current workflow documents outside records/ retain the repository's normal text rules.
+records/** -text -whitespace
+maintenance/**/validation/** -text -whitespace

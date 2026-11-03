@@ -1,0 +1,202 @@
+diff --git c/src/Oath/CLAUDE.md w/src/Oath/CLAUDE.md
+index db9bf407..d35a5a4c 100644
+--- c/src/Oath/CLAUDE.md
++++ w/src/Oath/CLAUDE.md
+@@ -65,7 +65,12 @@ Parsing regex: `^((\d+)/)?(([^:]+):)?(.+)$`
+ 
+ ### Access Key Derivation
+ 
+-`PBKDF2-HMAC-SHA1(password_utf8, salt, 1000 iterations, 16 bytes)` — dictated by hardware.
++The SDK derives access keys on the host using
++`PBKDF2-HMAC-SHA1(password_utf8, salt, 1000 iterations, 16 bytes)`, with the salt from the OATH SELECT response.
++This follows the [YKOATH SET CODE](https://developers.yubico.com/OATH/YKOATH_Protocol.html) password
++interoperability convention: UTF-8 input, PBKDF2 with 1000 iterations, the SELECT ID as salt, and 16 output bytes.
++The protocol page does not explicitly name the PBKDF2 PRF; the SDK uses HMAC-SHA1.
++The device receives the derived key, not the password or iteration count.
+ 
+ `IOathSession.DeriveKey` takes the password as a borrowed UTF-8 `ReadOnlyMemory<byte>` named
+ `password` — no `Utf8` suffix. The UTF-8 contract and the caller's obligation to zero both the
+diff --git c/src/Oath/README.md w/src/Oath/README.md
+index 8a1da7e1..e09318c1 100644
+--- c/src/Oath/README.md
++++ w/src/Oath/README.md
+@@ -85,7 +85,12 @@ Console.WriteLine($"HOTP code {hotpCode.Value}");
+ 
+ ### Protect the application with a password
+ 
+-`DeriveKey` runs PBKDF2 over the device salt, so it needs a live session. Both buffers are yours to zero.
++Use `DeriveKey` on an open OATH session to derive an access key from a UTF-8-encoded password. The method uses
++the device’s salt.
++
++You own both the password buffer and the returned key. Clear each with `CryptographicOperations.ZeroMemory`
++when it is no longer needed, including when an operation fails. The example below uses a `finally` block to clear
++both buffers.
+ 
+ ```csharp
+ byte[] password = Encoding.UTF8.GetBytes("correct horse battery staple");
+@@ -145,7 +150,8 @@ does not interrupt the device or necessarily change the notification outcome.
+ - SmartCard transport only. A physical YubiKey admits one live connection and one session per connection; a second
+   attempt throws `ConnectionInUseException`. Whoever opens a connection disposes it.
+ - A session from `device.CreateOathSessionAsync(...)` owns the connection it opened; `OathSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
+-- `ResetAsync` erases every credential and the access key; `DeleteCredentialAsync`, `SetKeyAsync`, and `UnsetKeyAsync` are also irreversible.
++- `ResetAsync` erases every credential and the access key. `DeleteCredentialAsync` erases the selected credential.
++  `SetKeyAsync` sets or changes password protection; `UnsetKeyAsync` removes it. Neither changes stored credentials.
+ - `RenameCredentialAsync` throws `NotSupportedException` through `EnsureSupports` below firmware 5.3.1, and so does
+   passing `ScpKeyParameters` below 5.6.3. While the applet is locked, protected operations fail with an `OathException`
+   whose `Reason` is `OathFailureReason.Locked` until `ValidateAsync` succeeds.
+diff --git c/src/Oath/examples/OathTool/Commands/AccessCommand.cs w/src/Oath/examples/OathTool/Commands/AccessCommand.cs
+index 7a86f6a0..cb74ea25 100644
+--- c/src/Oath/examples/OathTool/Commands/AccessCommand.cs
++++ w/src/Oath/examples/OathTool/Commands/AccessCommand.cs
+@@ -12,7 +12,7 @@
+ namespace Yubico.YubiKit.Oath.Examples.OathTool.Commands;
+ 
+ /// <summary>
+-/// Implements 'oath access' subcommands: change, remember, forget.
++/// Implements 'oath access change' for setting, changing, or clearing the OATH access password.
+ /// </summary>
+ public static class AccessCommand
+ {
+@@ -112,4 +112,4 @@ public static async Task<int> ChangeAsync(
+             prompted?.Dispose();
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git c/src/Oath/src/IOathSession.cs w/src/Oath/src/IOathSession.cs
+index af5533ed..6cb36741 100644
+--- c/src/Oath/src/IOathSession.cs
++++ w/src/Oath/src/IOathSession.cs
+@@ -33,16 +33,15 @@ public interface IOathSession : IApplicationSession
+     ReadOnlyMemory<byte> Salt { get; }
+ 
+     /// <summary>
+-    ///     Gets whether the <b>current session</b> is locked and must call <see cref="ValidateAsync" />
+-    ///     before protected operations can be performed.
++    ///     Gets whether the current session must be unlocked before performing protected operations.
+     /// </summary>
+     /// <remarks>
+-    ///     This reflects only the current session's unlock state, not whether the device has a
+-    ///     password configured at all: it starts <see langword="true" /> when the device has a
+-    ///     password configured, and becomes <see langword="false" /> once <see cref="ValidateAsync" />
+-    ///     succeeds — even though the device remains password-protected for the next session. To
+-    ///     check whether the device has a password configured, independent of this session's unlock
+-    ///     state, use <see cref="IsPasswordProtected" /> instead.
++    ///     <para>
++    ///         When a password is configured, the session starts locked. Call <see cref="ValidateAsync" />
++    ///         to unlock it. Successful validation sets this property to <see langword="false" />
++    ///         without removing the password.
++    ///     </para>
++    ///     <para>To check whether a password is configured, use <see cref="IsPasswordProtected" />.</para>
+     /// </remarks>
+     bool IsLocked { get; }
+ 
+@@ -136,34 +135,70 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     ///     Derives a key from a password using PBKDF2-HMAC-SHA1 with the device salt.
+     /// </summary>
+     /// <param name="password">
+-    ///     The borrowed UTF-8 encoded password. The caller owns the buffer and must clear it
+-    ///     after use.
++    ///     The borrowed UTF-8-encoded password, not a derived access key. The caller owns the buffer
++    ///     and must keep it unchanged until this method returns.
+     /// </param>
+     /// <returns>
+     ///     The derived 16-byte access key. The caller owns the returned array and must clear it
+     ///     after use.
+     /// </returns>
+     /// <remarks>
+-    ///     <b>Breaking change:</b> The <c>password</c> parameter changed from <c>string</c>
+-    ///     to <c>ReadOnlyMemory&lt;byte&gt;</c> (UTF-8 encoded) to allow callers to zero
+-    ///     sensitive material after use. Pass <c>Encoding.UTF8.GetBytes(password)</c> and
+-    ///     zero the resulting array when finished.
++    ///     Clear the password buffer and returned key with
++    ///     <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" /> when each
++    ///     is no longer needed, including when an operation fails. Wait for any operation borrowing
++    ///     the key to complete before clearing it.
+     /// </remarks>
+     byte[] DeriveKey(ReadOnlyMemory<byte> password);
+ 
+     /// <summary>
+     ///     Validates the access key using mutual HMAC-SHA1 challenge-response authentication.
+     /// </summary>
++    /// <param name="key">The borrowed access key, normally obtained from <see cref="DeriveKey" />.</param>
++    /// <param name="cancellationToken">The cancellation token for the operation.</param>
++    /// <remarks>
++    ///     <para>
++    ///         Requires an outstanding challenge from the OATH applet SELECT response. Call this method
++    ///         only while <see cref="IsLocked" /> is <see langword="true" />, not for an already unlocked
++    ///         or unprotected session. Successful validation consumes the challenge and unlocks the session.
++    ///     </para>
++    ///     <para>
++    ///         Pass the access key, not raw password bytes. The caller retains ownership of <paramref name="key" />;
++    ///         keep its buffer unchanged until the operation completes, then clear it with
++    ///         <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" /> when no longer
++    ///         needed, including if validation fails.
++    ///     </para>
++    /// </remarks>
++    /// <exception cref="InvalidOperationException">The session has no outstanding challenge.</exception>
+     Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+     ///     Sets or changes the access key for the OATH applet.
+     /// </summary>
++    /// <param name="key">The borrowed new access key, normally obtained from <see cref="DeriveKey" />.</param>
++    /// <param name="cancellationToken">The cancellation token for the operation.</param>
++    /// <remarks>
++    ///     <para>
++    ///         If <see cref="IsLocked" /> is <see langword="true" />, first unlock the session with
++    ///         <see cref="ValidateAsync" /> using the current access key. Then derive the new access key
++    ///         from the new UTF-8-encoded password and pass it here, not the raw password bytes.
++    ///     </para>
++    ///     <para>
++    ///         The caller retains ownership of <paramref name="key" />. Keep its buffer unchanged until
++    ///         the operation completes, then clear it with
++    ///         <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" /> when no longer
++    ///         needed, including if setting the key fails.
++    ///     </para>
++    /// </remarks>
+     Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+     ///     Removes the access key from the OATH applet.
+     /// </summary>
++    /// <remarks>
++    ///     If <see cref="IsLocked" /> is <see langword="true" />, first unlock the session with
++    ///     <see cref="ValidateAsync" /> using the current access key. Removing the access key removes
++    ///     password protection without deleting stored credentials.
++    /// </remarks>
+     Task UnsetKeyAsync(CancellationToken cancellationToken = default);
+ 
+     /// <summary>
+@@ -178,9 +213,11 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     /// <param name="passwordProvider">
+     ///     Invoked only if <paramref name="operation" /> fails with an <see cref="OathException" /> whose
+     ///     <see cref="OathException.Reason" /> is <see cref="OathFailureReason.Locked" />. Must return the raw
+-    ///     (not yet PBKDF2-derived) password bytes; this method derives the access key internally via
++    ///     UTF-8-encoded password bytes, not a derived access key; this method derives the access key internally via
+     ///     <see cref="DeriveKey" /> and zeroes the derived key after the authentication attempt completes.
+-    ///     The caller remains responsible for the lifetime of the bytes it returns.
++    ///     The caller owns the returned password buffer and must keep it unchanged until this method completes,
++    ///     then clear it with <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory" />
++    ///     when no longer needed, including if authentication or the retried operation fails.
+     /// </param>
+     /// <param name="cancellationToken">
+     ///     Propagated to <paramref name="operation" />, <paramref name="passwordProvider" />, and the
+@@ -188,6 +225,9 @@ Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null,
+     ///     requested between the locked failure and the retry stops promptly.
+     /// </param>
+     /// <returns>The result of the (possibly retried) <paramref name="operation" /> call.</returns>
++    /// <remarks>
++    ///     Authentication uses this session's outstanding challenge, as required by <see cref="ValidateAsync" />.
++    /// </remarks>
+     /// <exception cref="OathException">
+     ///     <paramref name="passwordProvider" /> supplied a password that failed validation
+     ///     (<see cref="OathFailureReason.WrongPassword" />), or <paramref name="operation" /> failed
+@@ -211,4 +251,4 @@ Task AuthenticateAndRetryAsync(
+         Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,
+         CancellationToken cancellationToken = default);
+ #pragma warning restore RS0026
+-}
+\ No newline at end of file
++}

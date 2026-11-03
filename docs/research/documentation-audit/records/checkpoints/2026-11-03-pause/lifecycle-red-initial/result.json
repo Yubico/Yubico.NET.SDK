@@ -1,0 +1,92 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath --filter \"FullyQualifiedName~OathTimeTests|FullyQualifiedName~OathResetTests\"",
+  "started": "2026-11-03T00:00:01.5288599+01:00",
+  "durationSeconds": 18.4,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000001-528-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 18.3,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "13 test(s) failed",
+      "executed": 24,
+      "failed": 13,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(cancel: True)",
+          "message": "Assert.False() Failure | Expected: False | Actual:   True"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(cancel: False)",
+          "message": "Assert.False() Failure | Expected: False | Actual:   True"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateCodeAsync_NegativeHotpTimestamp_RejectsBeforeAdvancingCounter",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: -9223372036854775808)",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: -1)",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: 9223372036854775807)",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: 9223372036854775800)",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Totp, timestamp: 9223372036854775807, period: 30)",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Totp, timestamp: 9223372036854775807, period: 1)",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Totp, timestamp: -1, period: 30)",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Hotp, timestamp: -1, period: 0)",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateAllAsync_CustomWindowOverflow_ClearsResponseWithoutFollowup",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentOutOfRangeException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_RefreshesIdentityAndPreservesEffectiveVersion",
+          "message": "Assert.Equal() Failure: Collections differ | Expected: [0, 4, 222, 173] | Actual:   [0, 4, 222, 173, 0]"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-000001-528-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateCodeAsync_NegativeHotpTimestamp_RejectsBeforeAdvancingCounter|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateAllAsync_CustomWindowOverflow_ClearsResponseWithoutFollowup\""
+  ]
+}

@@ -1,0 +1,42 @@
+# dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~SessionCleanup_OwnedSession_PreservesFirstFailure&Category!=RequiresHardware&Category!=RequiresUserPresence"
+# started:   2026-11-03 12:34:57 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-lifecycle
+# git:       yubikit-oath-fix-lifecycle @ c90dced1 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261103-123457-148-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit + integration tests ===
+
+
+=== Testing: Oath.IntegrationTests ===
+▶ RUN dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --list-tests --filter FullyQualifiedName~SessionCleanup_OwnedSession_PreservesFirstFailure&Category!=RequiresHardware&Category!=RequiresUserPresence (output captured)
+▶ RUN dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~SessionCleanup_OwnedSession_PreservesFirstFailure&Category!=RequiresHardware&Category!=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261103-123457-148-test/01-test-Oath.IntegrationTests.log
+  Error Message:
+✗ FAIL (1 test(s) failed)
+✗ test: 1 test project(s) failed
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~SessionCleanup_OwnedSession_PreservesFirstFailure&Category!=RequiresHardware&Category!=RequiresUserPresence")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       7.2s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.IntegrationTests  1 test(s) failed
+      - Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure(operationFails: False, disposalFails: True, cleanupFails: True): Assert.Same() Failure: Values are not the same instance | Expected: System.InvalidOperationException: Owned connection disposal failed. | at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.Dispose() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 233
+      output: artifacts/toolchain/runs/20261103-123457-148-test/01-test-Oath.IntegrationTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 7 executed, 1 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SessionCleanup_OwnedSession_PreservesFirstFailure"
+Run log: artifacts/toolchain/runs/20261103-123457-148-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

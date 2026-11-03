@@ -1,0 +1,13 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter FullyQualifiedName~OathLifecycleTimeTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       9.1s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.IntegrationTests  1 test(s) failed
+      - Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)): Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException : SCP03 INITIALIZE UPDATE failed: Referenced data not found (SW=0x6A88)
+      output: artifacts/toolchain/runs/20261103-000337-059-test/01-test-Oath.IntegrationTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 2 executed, 1 failed, 1 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset"
+Run log: artifacts/toolchain/runs/20261103-000337-059-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

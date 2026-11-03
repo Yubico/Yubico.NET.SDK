@@ -1,0 +1,9 @@
+Probe SHA256: a0058e8af82e9b7f0c00a7b559b5bfd4993b45a6cc391e780229f8a9d8ba9fb5
+Command: ['git', 'diff', '--check']
+Exit: 0
+
+Command: ['git', 'status', '--short', '--branch']
+Exit: 0
+## yubikit-oath-scp-reference-probe
+?? src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathScpReferenceProbeTests.cs
+

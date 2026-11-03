@@ -1,0 +1,46 @@
+{
+  "baseline": "361567ebf6d1507afb474f960f94efe92ae9b802",
+  "worktree": "/tmp/opencode/yubikit-oath-fix-protocol",
+  "tracked": [
+    "src/Oath/CLAUDE.md",
+    "src/Oath/README.md",
+    "src/Oath/src/Backend/OathBackend.cs",
+    "src/Oath/src/Code.cs",
+    "src/Oath/src/IOathSession.cs",
+    "src/Oath/src/OathConstants.cs",
+    "src/Oath/src/OathSession.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/AuditV2/OathAuditReproTests.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs"
+  ],
+  "new": [
+    "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs"
+  ],
+  "files": {
+    "src/Oath/CLAUDE.md": "bf239a3a8cae8f0aee543c72a4ec3d51644405e82d9ccc8a2106ceff13f20c6b",
+    "src/Oath/README.md": "e04614119089c539652e4832cdc2d12709dee2147824f0381ae321345bba49a4",
+    "src/Oath/src/Backend/OathBackend.cs": "84d982b3f9ab4ac2d8e0d68be48602dd275578cbc423bc716104b9829576f8c5",
+    "src/Oath/src/Code.cs": "603f6b7e4aaef2ac441b15c89afbc6d2a90480f3760ecf99ac52c9fe4e1eb9e7",
+    "src/Oath/src/IOathSession.cs": "7bdb7aad524450afa87ceb19a28fbcf4ea96f3f951ad42a0484510263880cf1f",
+    "src/Oath/src/OathConstants.cs": "9d64bc046cf979d4352fdfbc2e0cd54eabe362f5edf32aa2992eae99a2012b0a",
+    "src/Oath/src/OathSession.cs": "a0754cc14276fc24eb7ac91d5b2c61126b635b67afc8a406ae66648db3bd378c",
+    "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs": "663533f46e8d21f57202bec8686f52b9a938b523cc8952f4cb57a9719ba65748",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/AuditV2/OathAuditReproTests.cs": "966d954e2d233deb108fc998c34c3054fa4a38097efa6711cb29489ab7f48c55",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs": "69bd30ef906c4c0f17893dcbd845213e3952efa54b9fa5cd4965d31d0b006312",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs": "43faee4d94e9ee97ab48692481988425fbd97b22361af2d1d773975aecb0477a"
+  },
+  "normalized_files": {
+    "src/Oath/CLAUDE.md": "bf239a3a8cae8f0aee543c72a4ec3d51644405e82d9ccc8a2106ceff13f20c6b",
+    "src/Oath/README.md": "e04614119089c539652e4832cdc2d12709dee2147824f0381ae321345bba49a4",
+    "src/Oath/src/Backend/OathBackend.cs": "84d982b3f9ab4ac2d8e0d68be48602dd275578cbc423bc716104b9829576f8c5",
+    "src/Oath/src/Code.cs": "603f6b7e4aaef2ac441b15c89afbc6d2a90480f3760ecf99ac52c9fe4e1eb9e7",
+    "src/Oath/src/IOathSession.cs": "7bdb7aad524450afa87ceb19a28fbcf4ea96f3f951ad42a0484510263880cf1f",
+    "src/Oath/src/OathConstants.cs": "9d64bc046cf979d4352fdfbc2e0cd54eabe362f5edf32aa2992eae99a2012b0a",
+    "src/Oath/src/OathSession.cs": "a0754cc14276fc24eb7ac91d5b2c61126b635b67afc8a406ae66648db3bd378c",
+    "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathProtocolResponseTests.cs": "663533f46e8d21f57202bec8686f52b9a938b523cc8952f4cb57a9719ba65748",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/AuditV2/OathAuditReproTests.cs": "966d954e2d233deb108fc998c34c3054fa4a38097efa6711cb29489ab7f48c55",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs": "69bd30ef906c4c0f17893dcbd845213e3952efa54b9fa5cd4965d31d0b006312",
+    "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs": "43faee4d94e9ee97ab48692481988425fbd97b22361af2d1d773975aecb0477a"
+  },
+  "review": "passed round2; full gates running"
+}

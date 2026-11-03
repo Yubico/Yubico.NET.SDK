@@ -1,0 +1,82 @@
+{
+  "created_utc": "2026-11-02T23:25:17.317206+00:00",
+  "paused": true,
+  "active_agent_tasks": [],
+  "main_branch": "yubikit-docs-audit",
+  "main_commit": "244df5b168f04ce79a4fbde2de34d6ada3b07517",
+  "main_status": [
+    "?? docs/research/audit-v2-closeout-review.md",
+    "?? docs/research/audit-v2-execution.md",
+    "?? docs/research/audit-v2-jira-traceability.md",
+    "?? mise.toml"
+  ],
+  "pushed": false,
+  "worktrees": {
+    "inputs": {
+      "directory": "/tmp/opencode/yubikit-oath-fix-inputs",
+      "branch": "yubikit-oath-fix-inputs",
+      "base_commit": "c90dced180de7975895771b32fcc91b9df752591",
+      "status": [
+        " M src/Cli.Commands/src/Oath/OathHelpers.cs",
+        " M src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs",
+        " M src/Core/src/PublicAPI.Unshipped.txt",
+        " M src/Oath/examples/OathTool/Commands/AccountsCommand.cs",
+        " M src/Oath/src/Credential.cs",
+        " M src/Oath/src/CredentialData.cs",
+        " M src/Oath/src/OathSession.cs",
+        " M src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs",
+        "?? src/Core/src/Utilities/Base32.cs",
+        "?? src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs",
+        "?? src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathInputTests.cs"
+      ],
+      "files": {
+        "src/Cli.Commands/src/Oath/OathHelpers.cs": "3ae4fb841b2b478574a7d934ad842eb34bb0eaec584357ffdb3a1147f690e64c",
+        "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs": "d5139154993f52d586d1dc3f7869ce77cca02c039c805ddec033c1c32b55f52f",
+        "src/Core/src/PublicAPI.Unshipped.txt": "a3783751457529595f2e085e75656b99d073a88a4b6f5ef15d4474c9112eb0a0",
+        "src/Core/src/Utilities/Base32.cs": "e91077f4888eea77f8feba28d6fb4c496c25a9352ab996e193e9eedc74add711",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs": "e4f97454b1e802e94e3cd4b5a531a032230e248b22848b742924f9a83472ea84",
+        "src/Oath/examples/OathTool/Commands/AccountsCommand.cs": "07efe8f82322acc3513f91e47637304261fb6aa4570f592dacca25c40e7720f9",
+        "src/Oath/src/Credential.cs": "849638de9b0e044a3ae579115f95316d34707424869d7036450a448d5ea02b3d",
+        "src/Oath/src/CredentialData.cs": "537265624f8adf8573cbce39cb8cc6a6a395a1e89f0402c74d92204cdcabc519",
+        "src/Oath/src/OathSession.cs": "22e9717dbac57971ae0b4e5691dbe465879c791a94b5eec47b0b7a801b1b2e75",
+        "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathInputTests.cs": "8f348f1e78bc4e363e41b4cea934f22bf038ca128c85cd6b13795ec9b34190fe",
+        "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs": "b936e337acf286d4a85a31689f0b75b0b59a9562fe9b26e04428c8a4fde1117e"
+      },
+      "patch_sha256": "4c0b1aaf5ef54f919bc4af4ddaa36e7628a2f8164923345a88ebc4c1adb918e6",
+      "restore_patch_checked_against_base": true,
+      "review_status": "not independently reviewed; do not treat as merge-ready"
+    },
+    "lifecycle": {
+      "directory": "/tmp/opencode/yubikit-oath-fix-lifecycle",
+      "branch": "yubikit-oath-fix-lifecycle",
+      "base_commit": "c90dced180de7975895771b32fcc91b9df752591",
+      "status": [
+        " M src/Oath/CLAUDE.md",
+        " M src/Oath/README.md",
+        " M src/Oath/src/Code.cs",
+        " M src/Oath/src/IOathSession.cs",
+        " M src/Oath/src/OathException.cs",
+        " M src/Oath/src/OathSession.cs",
+        " M src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs",
+        "?? src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs",
+        "?? src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs",
+        "?? src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs"
+      ],
+      "files": {
+        "src/Oath/CLAUDE.md": "dda58b0b8a8fbf1f880f01b92d35df65627ccb516aa28685fb1f77e24d37516c",
+        "src/Oath/README.md": "f811e91065fa21bb4edd4db1cebfc78005d516439081e27d020ccc2ff5e334fc",
+        "src/Oath/src/Code.cs": "74a7ced7fe41baa134fb738cfdd67d1739ad2c35393df9555805f046e1fb5735",
+        "src/Oath/src/IOathSession.cs": "92d7818ecf728009a83a25d810b25003a7a6d7fb4a516a0b1af5d3c2c6a53fa0",
+        "src/Oath/src/OathException.cs": "14fc89d2ac2812fb3a65488199b43092ab1b85cbcbaa31a63135a871642408ea",
+        "src/Oath/src/OathSession.cs": "ab8c789159e9b4d255da5381d6bfc559a08eb8184f8d9f0b576801c7c0f99f10",
+        "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs": "f4ee011c8e17362a7cb49a2e0d4a15c0e9a609a8ac08050668365cf22c548076",
+        "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs": "22d525da82127f2b337d75ebd420cf1f5e4adfb62c888ecf401045a7ade5fe96",
+        "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs": "7f9bf3849fedb1da54d7ef7ba766f8906eb0e906b20da6e7913828cf77fd96d3",
+        "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs": "2bc9ad60a74da149893231815b06e1b3768133e3c16268355b001e8434ec10e3"
+      },
+      "patch_sha256": "c28663324c9689a2bf92fbccb531917fd2423fda60cdf5345ee85252d3a87bc6",
+      "restore_patch_checked_against_base": true,
+      "review_status": "not independently reviewed; do not treat as merge-ready"
+    }
+  }
+}

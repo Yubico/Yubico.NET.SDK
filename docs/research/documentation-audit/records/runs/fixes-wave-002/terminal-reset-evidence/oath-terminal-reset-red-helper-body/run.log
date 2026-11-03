@@ -1,0 +1,42 @@
+# dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure&Category!=RequiresHardware&Category!=RequiresUserPresence"
+# started:   2026-11-03 12:53:52 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-lifecycle
+# git:       yubikit-oath-fix-lifecycle @ c90dced1 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261103-125352-004-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit + integration tests ===
+
+
+=== Testing: Oath.IntegrationTests ===
+▶ RUN dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --list-tests --filter FullyQualifiedName~SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure&Category!=RequiresHardware&Category!=RequiresUserPresence (output captured)
+▶ RUN dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure&Category!=RequiresHardware&Category!=RequiresUserPresence"
+  output: artifacts/toolchain/runs/20261103-125352-004-test/01-test-Oath.IntegrationTests.log
+  Error Message:
+✗ FAIL (1 test(s) failed)
+✗ test: 1 test project(s) failed
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure&Category!=RequiresHardware&Category!=RequiresUserPresence")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       5.0s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.IntegrationTests  1 test(s) failed
+      - Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure: Assert.Same() Failure: Values are not the same instance | Expected: System.InvalidOperationException: Body LIST failed. | at Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.LifecycleConnection.TransmitAndReceiveAsync(ReadOnlyMemory`1 command, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathLifecycleTimeTests.cs:line 305
+      output: artifacts/toolchain/runs/20261103-125352-004-test/01-test-Oath.IntegrationTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 1 executed, 1 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupBody_OperationAndOwnedDisposalFail_PreservesOperationFailure"
+Run log: artifacts/toolchain/runs/20261103-125352-004-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

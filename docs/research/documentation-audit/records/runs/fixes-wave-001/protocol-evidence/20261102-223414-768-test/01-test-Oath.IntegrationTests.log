@@ -1,0 +1,25 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~Cleanup_ExpiredOperationToken"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-protocol/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.11]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.14]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True) [OUTPUT] Executed device serial=, firmware=5.7.0
+[xUnit.net 00:00:00.17]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True) [OUTPUT] OATH cleanup also failed (ApduException); preserving the operation failure.
+[xUnit.net 00:00:00.18]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: False) [OUTPUT] Executed device serial=, firmware=5.7.0
+[xUnit.net 00:00:00.19]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True) [39 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: False) [< 1 ms]
+
+Test Run Successful.
+Total tests: 2
+     Passed: 2
+ Total time: 0.5367 Seconds

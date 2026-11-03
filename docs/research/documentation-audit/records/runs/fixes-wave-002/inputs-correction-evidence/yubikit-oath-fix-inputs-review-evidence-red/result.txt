@@ -1,0 +1,16 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Core --filter FullyQualifiedName~Base32Tests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       5.8s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Core.UnitTests  4 test(s) failed
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: "MZXW6YTB", byteOffset: 8): Assert.Equal() Failure: Collections differ | ↓ (pos 4) | Expected: [···, 'X', 'W', '6', 'Y', 'T', ···]
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: "MZXW6YTB", byteOffset: 0): Assert.Equal() Failure: Collections differ | ↓ (pos 0) | Expected: ['M', 'Z', 'X', 'W', '6', ···]
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: "MZXW6YTB!", byteOffset: 8): Assert.Equal() Failure: Collections differ | ↓ (pos 4) | Expected: [···, 'X', 'W', '6', 'Y', 'T', ···]
+      - Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination(encoded: "MZXW6YTB", byteOffset: 1): Assert.Equal() Failure: Collections differ | ↓ (pos 0) | Expected: ['M', 'Z', 'X', 'W', '6', ···]
+      output: artifacts/toolchain/runs/20261103-123247-770-test/01-test-Core.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 27 executed, 4 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Core.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Core.UnitTests.Utilities.Base32Tests.Decode_OverlappingStorage_RejectsWithoutChangingSourceOrDestination"
+Run log: artifacts/toolchain/runs/20261103-123247-770-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

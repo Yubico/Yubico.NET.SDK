@@ -1,0 +1,15 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project Oath --filter "(FullyQualifiedName~OathResetTests|FullyQualifiedName~SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession)&Category!=RequiresHardware&Category!=RequiresUserPresence")
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       5.0s  2 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests         --filter cannot mix '|' and '&' for xUnit v3 projects: use either "A|B" (any) or "A&B" (all).
+  ✗ FAIL      Oath.IntegrationTests  1 test(s) failed
+      - Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession: Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   0
+      output: artifacts/toolchain/runs/20261103-124545-916-test/01-test-Oath.IntegrationTests.log
+Totals: projects: 0 passed, 2 failed, 0 with no tests executed; tests: 1 executed, 1 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --verbose
+Next: dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.SetupReset_ClosesResetConnectionBeforeOpeningFreshBodySession"
+Run log: artifacts/toolchain/runs/20261103-124545-916-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

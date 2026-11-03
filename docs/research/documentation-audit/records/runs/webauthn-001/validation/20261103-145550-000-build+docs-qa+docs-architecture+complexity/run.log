@@ -1,0 +1,81 @@
+# dotnet toolchain.cs -- build docs-qa docs-architecture complexity
+# started:   2026-11-03 14:55:50 +01:00
+# directory: /home/rupicola/Code/y/Yubico.Yubikit.NET
+# git:       yubikit-docs-audit @ e353b49a (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: build docs-qa docs-architecture complexity  (log: artifacts/toolchain/runs/20261103-145550-000-build+docs-qa+docs-architecture+complexity/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet build Yubico.YubiKit.sln -c Release
+  output: artifacts/toolchain/runs/20261103-145550-000-build+docs-qa+docs-architecture+complexity/01-build.log
+✓ Built Yubico.YubiKit.sln in Release configuration
+
+▶ target: docs-qa
+
+=== Validating active documentation ===
+
+▶ RUN dotnet msbuild /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj -getProperty:YubiKitDocsBranch -getProperty:PackageProjectUrl -nologo (output captured)
+✓ Validated 73 active documentation file(s)
+✓ Validated 10 package readme(s)
+
+▶ target: docs-architecture
+
+=== Validating architecture diagrams (evidence map + image freshness) ===
+
+▶ RUN bash "scripts/architecture/check-architecture-map.sh"
+architecture map OK: 6 diagram entries, all evidence + project edges resolve; coverage matches 6 diagram heading level(s).
+▶ RUN bash "scripts/architecture/check-architecture-images.sh"
+architecture images OK: 7 diagrams present and fresh (manifest matches source blocks).
+✓ Architecture diagrams validated (map resolves; images present and fresh)
+
+▶ target: complexity
+
+=== Checking method complexity ===
+
+▶ RUN dotnet complexity.cs
+
+Complexity check (source only, no coverage)
+  scope        changed lines vs HEAD
+  files        59
+  methods      19
+  thresholds   cyclomatic > 10, cognitive > 20
+
+    cc   cog  status     method
+    17    18  unchanged  Yubico.YubiKit.WebAuthn.Client.CredentialFilter.SelectAsync
+                         src/WebAuthn/src/Client/CredentialFilter.cs:54-150
+    14     9  unchanged  Yubico.YubiKit.WebAuthn.Client.WebAuthnOrigin.TryParse
+                         src/WebAuthn/src/Client/WebAuthnOrigin.cs:75-130
+
+2 of 19 methods exceed a threshold: 0 need action (new or worse), 2 are existing debt.
+Existing debt only: simplifying these methods is welcome but optional.
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- build docs-qa docs-architecture complexity)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      2.5s
+  ✓ docs-qa                    0.6s
+  ✓ docs-architecture          0.3s
+  ✓ complexity                 0.5s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261103-145550-000-build+docs-qa+docs-architecture+complexity/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

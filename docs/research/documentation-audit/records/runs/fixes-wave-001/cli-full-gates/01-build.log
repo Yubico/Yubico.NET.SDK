@@ -1,0 +1,82 @@
+$ dotnet build Yubico.YubiKit.sln -c Release
+  Determining projects to restore...
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/Yubico.YubiKit.YubiOtp.UnitTests.csproj (in 999 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/Yubico.YubiKit.WebAuthn.UnitTests.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/WebAuthn/src/Yubico.YubiKit.WebAuthn.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/Yubico.YubiKit.YubiHsm.IntegrationTests.csproj (in 992 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj (in 991 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/examples/FidoTool/FidoTool.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/Yubico.YubiKit.Piv.IntegrationTests.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Piv/examples/PivTool/PivTool.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/Yubico.YubiKit.YubiHsm.UnitTests.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/Yubico.YubiKit.WebAuthn.IntegrationTests.csproj (in 976 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/Yubico.YubiKit.OpenPgp.IntegrationTests.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/Yubico.YubiKit.YubiOtp.IntegrationTests.csproj (in 998 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Cli/YkTool/Yubico.YubiKit.Cli.YkTool.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/examples/OtpTool/OtpTool.csproj (in 994 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Management/examples/ManagementTool/ManagementTool.csproj (in 1.12 sec).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj (in 25 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj (in 34 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj (in 34 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/Yubico.YubiKit.OpenPgp.UnitTests.csproj (in 33 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj (in 42 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Yubico.YubiKit.Ctap2.IntegrationTests.csproj (in 10 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj (in 30 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj (in 36 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.YubiKit.Ctap2.UnitTests.csproj (in 17 ms).
+  Restored /tmp/opencode/yubikit-oath-fix-cli/src/Tests.TestProject/Yubico.YubiKit.Tests.TestProject.csproj (in 71 ms).
+  13 of 43 projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-cli/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.YubiHsm -> /tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/src/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.dll
+  Yubico.YubiKit.OpenPgp -> /tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/src/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-cli/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Ctap2 -> /tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/src/bin/Release/net10.0/Yubico.YubiKit.Ctap2.dll
+  Yubico.YubiKit.Piv -> /tmp/opencode/yubikit-oath-fix-cli/src/Piv/src/bin/Release/net10.0/Yubico.YubiKit.Piv.dll
+  Yubico.YubiKit.YubiOtp -> /tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/src/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-cli/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-cli/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Cli.Shared -> /tmp/opencode/yubikit-oath-fix-cli/src/Cli.Shared/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Shared.dll
+  Yubico.YubiKit.Management.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Management/tests/Yubico.YubiKit.Management.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Management.UnitTests.dll
+  Yubico.YubiKit.YubiHsm.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.IntegrationTests.dll
+  Yubico.YubiKit.YubiOtp.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.IntegrationTests.dll
+  Yubico.YubiKit.Management.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Management.IntegrationTests.dll
+  Yubico.YubiKit.SecurityDomain -> /tmp/opencode/yubikit-oath-fix-cli/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll
+  Yubico.YubiKit.Core.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Core.IntegrationTests.dll
+  Yubico.YubiKit.YubiOtp.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/tests/Yubico.YubiKit.YubiOtp.UnitTests/bin/Release/net10.0/Yubico.YubiKit.YubiOtp.UnitTests.dll
+  Yubico.YubiKit.Piv.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Piv.UnitTests.dll
+  Yubico.YubiKit.Piv.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Piv/tests/Yubico.YubiKit.Piv.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Piv.IntegrationTests.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+  Yubico.YubiKit.OpenPgp.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.IntegrationTests.dll
+  Yubico.YubiKit.Tests.TestProject -> /tmp/opencode/yubikit-oath-fix-cli/src/Tests.TestProject/bin/Release/net10.0/Yubico.YubiKit.Tests.TestProject.dll
+  Yubico.YubiKit.OpenPgp.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/tests/Yubico.YubiKit.OpenPgp.UnitTests/bin/Release/net10.0/Yubico.YubiKit.OpenPgp.UnitTests.dll
+  Yubico.YubiKit.Ctap2.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.IntegrationTests.dll
+  Yubico.YubiKit.WebAuthn -> /tmp/opencode/yubikit-oath-fix-cli/src/WebAuthn/src/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.dll
+  Yubico.YubiKit.YubiHsm.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/tests/Yubico.YubiKit.YubiHsm.UnitTests/bin/Release/net10.0/Yubico.YubiKit.YubiHsm.UnitTests.dll
+  Yubico.YubiKit.Cli.Commands -> /tmp/opencode/yubikit-oath-fix-cli/src/Cli.Commands/src/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.dll
+  Yubico.YubiKit.SecurityDomain.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.UnitTests.dll
+  Yubico.YubiKit.Ctap2.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Ctap2.UnitTests.dll
+  Yubico.YubiKit.SecurityDomain.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.IntegrationTests.dll
+  Yubico.YubiKit.Cli.YkTool -> /tmp/opencode/yubikit-oath-fix-cli/src/Cli/YkTool/bin/Release/net10.0/yk.dll
+  HsmAuthTool -> /tmp/opencode/yubikit-oath-fix-cli/src/YubiHsm/examples/HsmAuthTool/bin/Release/net10.0/HsmAuthTool.dll
+  Yubico.YubiKit.PublicApi.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/bin/Release/net10.0/Yubico.YubiKit.PublicApi.UnitTests.dll
+  OpenPgpTool -> /tmp/opencode/yubikit-oath-fix-cli/src/OpenPgp/examples/OpenPgpTool/bin/Release/net10.0/OpenPgpTool.dll
+  OtpTool -> /tmp/opencode/yubikit-oath-fix-cli/src/YubiOtp/examples/OtpTool/bin/Release/net10.0/OtpTool.dll
+  Yubico.YubiKit.WebAuthn.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-cli/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.IntegrationTests.dll
+  ManagementTool -> /tmp/opencode/yubikit-oath-fix-cli/src/Management/examples/ManagementTool/bin/Release/net10.0/ManagementTool.dll
+  OathTool -> /tmp/opencode/yubikit-oath-fix-cli/src/Oath/examples/OathTool/bin/Release/net10.0/OathTool.dll
+  Yubico.YubiKit.Oath.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll
+  FidoTool -> /tmp/opencode/yubikit-oath-fix-cli/src/Ctap2/examples/FidoTool/bin/Release/net10.0/FidoTool.dll
+  PivTool -> /tmp/opencode/yubikit-oath-fix-cli/src/Piv/examples/PivTool/bin/Release/net10.0/PivTool.dll
+  Yubico.YubiKit.Core.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/Core/tests/Yubico.YubiKit.Core.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Core.UnitTests.dll
+  Yubico.YubiKit.WebAuthn.UnitTests -> /tmp/opencode/yubikit-oath-fix-cli/src/WebAuthn/tests/Yubico.YubiKit.WebAuthn.UnitTests/bin/Release/net10.0/Yubico.YubiKit.WebAuthn.UnitTests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:27.95

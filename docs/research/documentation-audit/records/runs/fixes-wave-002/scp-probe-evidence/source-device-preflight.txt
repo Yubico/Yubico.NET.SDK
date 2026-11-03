@@ -1,0 +1,18 @@
+UTC: 2026-11-03T11:32:50.645549+00:00
+Worktree: /tmp/opencode/yubikit-oath-scp-reference-probe
+Command: ['git', 'rev-parse', 'HEAD']
+Exit: 0
+244df5b168f04ce79a4fbde2de34d6ada3b07517
+
+Command: ['git', 'status', '--short', '--branch']
+Exit: 0
+## yubikit-oath-scp-reference-probe
+?? src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathScpReferenceProbeTests.cs
+
+Command: ['ykman', 'list']
+Exit: 0
+YubiKey 5 NFC - Enhanced PIN (5.8.0.beta.0) [OTP+FIDO+CCID] Serial: 103
+YubiKey 5 NFC (5.4.3) [OTP+FIDO+CCID] Serial: 9681620
+YubiKey 5 NFC - Enhanced PIN (5.8.0.alpha.2) [OTP+FIDO+CCID] Serial: 125
+YubiKey 5C NFC (5.7.4) [OTP+FIDO+CCID] Serial: 31683481
+

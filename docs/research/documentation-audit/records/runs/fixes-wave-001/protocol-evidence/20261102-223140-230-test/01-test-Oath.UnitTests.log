@@ -1,0 +1,88 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathResponseTests*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_MisplacedKnownMetadata_RejectsAndClearsOriginal(value: [121, 3, 5, 7, 0]) (32ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_MisplacedKnownMetadata_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:172
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_MisplacedKnownMetadata_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:173
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_MisplacedKnownMetadata_RejectsAndClearsOriginal(value: [123, 1, 1]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_MisplacedKnownMetadata_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:172
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_MisplacedKnownMetadata_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:173
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [121, 3, 5, 7, 0]) (2ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:161
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:162
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [120, 1, 1]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:161
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:162
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [116, 1, 1]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:161
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:162
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [117, 0]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:161
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:162
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [115, 1, 1]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:161
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:162
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [123, 1, 1]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:161
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:162
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [117, 1, 6]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:161
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:162
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(value: [122, 4, 0, 0, 0, ···]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:161
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_KnownNonTruncatedResult_RejectsAndClearsOriginal(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:162
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(value: [6, 0, 0, 1]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:185
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:187
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(value: []) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:185
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:187
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(value: [9, 0, 0, 0, 1]) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(Yubico.YubiKit.Core.BadResponseException)
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:185
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_InvalidPeriodCannotHideMalformedWireValue(Byte[] value) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:187
+    --- End of stack trace from previous location ---
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 54
+  failed: 13
+  succeeded: 41
+  skipped: 0
+  duration: 255ms

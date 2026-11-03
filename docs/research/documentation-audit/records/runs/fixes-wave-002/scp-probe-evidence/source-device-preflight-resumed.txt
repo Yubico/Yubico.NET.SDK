@@ -1,0 +1,8 @@
+UTC: 2026-11-03T11:46:21.618462+00:00
+Clarified authorization: read-only discovery permitted for all attached devices; test-body APDUs only on serial 125.
+Command: ['ykman', 'list']
+Exit: 0
+YubiKey 5 NFC - Enhanced PIN (5.8.0.beta.0) [OTP+FIDO+CCID] Serial: 103
+YubiKey 5 NFC (5.4.3) [OTP+FIDO+CCID] Serial: 9681620
+YubiKey 5 NFC - Enhanced PIN (5.8.0.alpha.2) [OTP+FIDO+CCID] Serial: 125
+YubiKey 5C NFC (5.7.4) [OTP+FIDO+CCID] Serial: 31683481

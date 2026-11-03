@@ -1,0 +1,3 @@
+UTC: 2026-11-03T11:46:30.124830+00:00
+Working directory: /tmp/opencode/yubikit-oath-scp-reference-probe
+timeout --signal=TERM --kill-after=15s 240s dotnet toolchain.cs -- build --project Oath.IntegrationTests

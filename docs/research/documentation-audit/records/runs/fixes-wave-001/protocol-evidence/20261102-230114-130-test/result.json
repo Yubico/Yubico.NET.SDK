@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --smoke --filter FullyQualifiedName~OathProtocolResponseTests",
+  "started": "2026-11-02T23:01:14.1309890+01:00",
+  "durationSeconds": 8.5,
+  "runDirectory": "artifacts/toolchain/runs/20261102-230114-130-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 8.4,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.IntegrationTests",
+      "outcome": "passed",
+      "reason": "4 executed, 2 skipped",
+      "executed": 4,
+      "failed": 0,
+      "skipped": 2,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261102-230114-130-test/01-test-Oath.IntegrationTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

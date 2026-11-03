@@ -1,0 +1,23 @@
+{
+  "suiteRun": "20261103-130351-906-test",
+  "suiteCounts": {
+    "executed": 32,
+    "failed": 0,
+    "skipped": 7,
+    "warnings": 0,
+    "hardwarePassed": 19,
+    "offlinePassed": 13
+  },
+  "finalCleanupRun": "20261103-130446-766-test",
+  "finalCleanupCounts": {
+    "executed": 1,
+    "failed": 0,
+    "skipped": 1,
+    "warnings": 0
+  },
+  "excluded": "One RequiresUserPresence test; not counted as skipped. No Slow traits in this project.",
+  "hardware": "Only serial 125; YubiKey 5 NFC - Enhanced PIN, firmware 5.8.0.alpha.2; SDK/OATH version 5.8.0.",
+  "scpLimit": "INITIALIZE UPDATE returned 6A88 before RESET; cause unresolved. No successful live SCP reset/reopen verification; no variant retries or Security Domain changes.",
+  "postflight": "Serial 125 only; OATH password protection disabled; accounts list empty; separate ykman processes opened OATH successfully and exited 0.",
+  "sourceUnchanged": true
+}

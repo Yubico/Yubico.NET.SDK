@@ -1,0 +1,22 @@
+{
+  "audit_base": "ddf3cdc24984f598678b48f2a0f98d6be1a58bf9",
+  "documentation_commit": "7c4153f8549bcc4b89a304b5ca4f1502cde1dd64",
+  "incoming": "089b2393ec90fa2c09434e7b897f635373b46c29",
+  "reconciliation_session": "ses_e62226647ffe65c8B5tipbsa4g",
+  "merge_review_session": "ses_e621dadf5ffeadQj3R4X0XzL5D",
+  "conflicts_resolved": [
+    "src/Oath/README.md",
+    "src/Oath/src/CredentialData.cs",
+    "src/Oath/src/IOathSession.cs"
+  ],
+  "additional_reconciliation": [
+    "Credential ordering history moved to migration guide; incoming identity order retained",
+    "Old array-aliasing prose replaced by current cloned-storage/borrowed-view contracts"
+  ],
+  "checks": [
+    "no unresolved index entries",
+    "resolved C# non-comment lines match incoming origin/yubikit",
+    "staged and unstaged diff checks pass"
+  ],
+  "gates": "passed; committed integration and final validation are recorded in integration.json"
+}

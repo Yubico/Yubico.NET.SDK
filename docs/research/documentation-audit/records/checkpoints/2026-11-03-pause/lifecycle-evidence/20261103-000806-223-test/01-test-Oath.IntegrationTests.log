@@ -1,0 +1,44 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~OathLifecycleTimeTests|FullyQualifiedName~OathProtocolResponseTests"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.12]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.14]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 1 device(s)
+[YubiKey Infrastructure] Device SN:125 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 0 filtered
+[xUnit.net 00:00:00.45]     Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.Timestamps_ExactRfcVectorsAndResetRefresh(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [SKIP]
+[xUnit.net 00:00:00.45]       No YubiKey matches filter criteria: ConnectionType = SmartCard, CustomFilter = Firmware before 5.6.3. Available devices: [YubiKey(SN:125,FW:5.8.0,UsbAKeychain,HidFido, HidOtp, SmartCard)]
+  Skipped Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.Timestamps_ExactRfcVectorsAndResetRefresh(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [1 ms]
+[xUnit.net 00:00:02.60]     Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [SKIP]
+[xUnit.net 00:00:02.60]       Default SCP03 key reference unavailable (6A88); SCP reset recovery not exercised.
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.Timestamps_ExactRfcVectorsAndResetRefresh(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [2 s]
+  Skipped Yubico.YubiKit.Oath.IntegrationTests.OathLifecycleTimeTests.ResetWithScp03_DefaultKeys_RequiresProtectedOperationAfterReset(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [1 ms]
+[xUnit.net 00:00:04.02]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SelectAndWrongKeyStatus(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [SKIP]
+[xUnit.net 00:00:04.02]       No YubiKey matches filter criteria: ConnectionType = SmartCard, CustomFilter = Firmware before 5.6.3. Available devices: [YubiKey(SN:125,FW:5.8.0,UsbAKeychain,HidFido, HidOtp, SmartCard)]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SelectAndWrongKeyStatus(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [1 s]
+  Skipped Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SelectAndWrongKeyStatus(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [1 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True) [4 ms]
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: False) [< 1 ms]
+[xUnit.net 00:00:05.71]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_KnownHmacVectorsAndLifecycle(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [SKIP]
+[xUnit.net 00:00:05.71]       No YubiKey matches filter criteria: ConnectionType = SmartCard, CustomFilter = Firmware before 5.6.3. Available devices: [YubiKey(SN:125,FW:5.8.0,UsbAKeychain,HidFido, HidOtp, SmartCard)]
+[xUnit.net 00:00:05.71]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_KnownHmacVectorsAndLifecycle(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [1 s]
+  Skipped Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_KnownHmacVectorsAndLifecycle(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [1 ms]
+
+Test Run Successful.
+Total tests: 9
+     Passed: 5
+    Skipped: 4
+ Total time: 6.0313 Seconds

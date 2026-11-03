@@ -1,0 +1,36 @@
+$ dotnet test src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/Yubico.YubiKit.Oath.IntegrationTests.csproj -c Release --logger "console;verbosity=normal" --filter "FullyQualifiedName~OathProtocolResponseTests&Category!=Slow&Category!=RequiresUserPresence"
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /tmp/opencode/yubikit-oath-fix-protocol/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.Oath -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/bin/Release/net10.0/Yubico.YubiKit.Oath.dll
+  Yubico.YubiKit.Management -> /tmp/opencode/yubikit-oath-fix-protocol/src/Management/src/bin/Release/net10.0/Yubico.YubiKit.Management.dll
+  Yubico.YubiKit.Tests.Shared -> /tmp/opencode/yubikit-oath-fix-protocol/src/Tests.Shared/bin/Release/net10.0/Yubico.YubiKit.Tests.Shared.dll
+  Yubico.YubiKit.Oath.IntegrationTests -> /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll
+Test run for /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/bin/Release/net10.0/Yubico.YubiKit.Oath.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.14)
+[xUnit.net 00:00:00.05]   Discovering: Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.10]   Discovered:  Yubico.YubiKit.Oath.IntegrationTests
+[xUnit.net 00:00:00.12]   Starting:    Yubico.YubiKit.Oath.IntegrationTests
+info: Yubico.YubiKit.Tests.Shared.Infrastructure.AllowList[0]
+      AllowList initialized with 11 allowed serial numbers
+[YubiKey Infrastructure] Initializing devices (once per test run)...
+[YubiKey Infrastructure] Found 2 device(s)
+[YubiKey Infrastructure] DeviceId:ykphysical:9681620 SKIPPED (initialization failed: UnrecoveredConnectionException: A previous native operation for interface 'hid:/dev/hidraw7:0001' was not proven released.)
+[YubiKey Infrastructure] Device SN:125 (HidFido, HidOtp, SmartCard) authorized (FW:5.8.0, UsbAKeychain)
+[YubiKey Infrastructure] Initialization complete: 1 authorized, 1 filtered
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SelectAndWrongKeyStatus(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [3 s]
+[xUnit.net 00:00:04.15]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SelectAndWrongKeyStatus(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [SKIP]
+[xUnit.net 00:00:04.15]       No YubiKey matches filter criteria: ConnectionType = SmartCard, CustomFilter = Firmware before 5.6.3. Available devices: [YubiKey(SN:125,FW:5.8.0,UsbAKeychain,HidFido, HidOtp, SmartCard)]
+  Skipped Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_SelectAndWrongKeyStatus(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [1 ms]
+[xUnit.net 00:00:05.83]     Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_KnownHmacVectorsAndLifecycle(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [SKIP]
+[xUnit.net 00:00:05.83]       No YubiKey matches filter criteria: ConnectionType = SmartCard, CustomFilter = Firmware before 5.6.3. Available devices: [YubiKey(SN:125,FW:5.8.0,UsbAKeychain,HidFido, HidOtp, SmartCard)]
+[xUnit.net 00:00:05.84]   Finished:    Yubico.YubiKit.Oath.IntegrationTests
+  Passed Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_KnownHmacVectorsAndLifecycle(state: YubiKey(Placeholder #0: FW>=5.6.3,Conn=SmartCard)) [1 s]
+  Skipped Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.ProtocolResponses_KnownHmacVectorsAndLifecycle(state: YubiKey(Placeholder #0: Conn=SmartCard,Filter=Before563)) [1 ms]
+
+Test Run Successful.
+Total tests: 4
+     Passed: 2
+    Skipped: 2
+ Total time: 6.1474 Seconds

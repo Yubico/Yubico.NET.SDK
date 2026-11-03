@@ -1,0 +1,14 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter FullyQualifiedName~Cleanup_ExpiredOperationToken)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       5.1s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.IntegrationTests  2 test(s) failed
+      - Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: True): Assert.Equal() Failure: Values differ | Expected: 3 | Actual:   2
+      - Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure(cleanupFails: False): Assert.Equal() Failure: Values differ | Expected: 3 | Actual:   2
+      output: artifacts/toolchain/runs/20261102-223342-512-test/01-test-Oath.IntegrationTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 2 executed, 2 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.IntegrationTests.OathProtocolResponseTests.Cleanup_ExpiredOperationToken_StillResetsAndPreservesFailure"
+Run log: artifacts/toolchain/runs/20261102-223342-512-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

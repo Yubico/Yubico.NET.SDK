@@ -1,0 +1,985 @@
+diff --git a/src/Cli.Commands/src/Oath/OathHelpers.cs b/src/Cli.Commands/src/Oath/OathHelpers.cs
+index b5200a3d..db7e653a 100644
+--- a/src/Cli.Commands/src/Oath/OathHelpers.cs
++++ b/src/Cli.Commands/src/Oath/OathHelpers.cs
+@@ -4,6 +4,7 @@
+ using System.Buffers;
+ using System.Security.Cryptography;
+ using Yubico.YubiKit.Cli.Shared.Output;
++using Yubico.YubiKit.Core.Utilities;
+ using Yubico.YubiKit.Oath;
+ 
+ namespace Yubico.YubiKit.Cli.Commands.Oath;
+@@ -106,51 +107,15 @@ internal static async Task<bool> UnlockIfNeededAsync(
+         return matches[0];
+     }
+ 
++    /// <summary>Decodes nonempty OATH secret material. The caller owns and must clear returned bytes.</summary>
+     public static byte[] Base32Decode(string input)
+     {
+-        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+-
+-        input = input.ToUpperInvariant().Replace(" ", "").TrimEnd('=');
+-
+-        if (input.Length == 0)
++        byte[] decoded = Base32.Decode(input.AsSpan());
++        if (decoded.Length == 0)
+         {
+-            return [];
++            throw new ArgumentException("OATH secret material must not be empty.", nameof(input));
+         }
+ 
+-        int byteCount = input.Length * 5 / 8;
+-        byte[] result = new byte[byteCount];
+-
+-        int buffer = 0;
+-        int bitsInBuffer = 0;
+-        int index = 0;
+-
+-        try
+-        {
+-            foreach (char c in input)
+-            {
+-                int val = alphabet.IndexOf(c);
+-                if (val < 0)
+-                {
+-                    throw new ArgumentException($"Invalid Base32 character: '{c}'.");
+-                }
+-
+-                buffer = (buffer << 5) | val;
+-                bitsInBuffer += 5;
+-
+-                if (bitsInBuffer >= 8)
+-                {
+-                    bitsInBuffer -= 8;
+-                    result[index++] = (byte)(buffer >> bitsInBuffer);
+-                    buffer &= (1 << bitsInBuffer) - 1;
+-                }
+-            }
+-
+-            return result;
+-        }
+-        catch
+-        {
+-            CryptographicOperations.ZeroMemory(result);
+-            throw;
+-        }
++        return decoded;
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs b/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs
+index 6ff7bc41..6d4c1d04 100644
+--- a/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs
++++ b/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs
+@@ -12,6 +12,39 @@ namespace Yubico.YubiKit.Cli.Commands.UnitTests.Oath;
+ 
+ public sealed class OathHelpersTests
+ {
++    [Theory]
++    [InlineData("A")]
++    [InlineData("AAA")]
++    [InlineData("AAAAAA")]
++    [InlineData("MY=")]
++    [InlineData("MY=======")]
++    [InlineData("========")]
++    [InlineData("M=Y=====")]
++    [InlineData("MZXW6YTB!")]
++    [InlineData("")]
++    [InlineData("   ")]
++    public void Base32Decode_MalformedTerminalForms_DoNotProduceKey(string encoded) =>
++        Assert.Throws<ArgumentException>(() => OathHelpers.Base32Decode(encoded));
++
++    [Theory]
++    [InlineData("MY======", "f")]
++    [InlineData("MZXQ====", "fo")]
++    [InlineData("MZXW6===", "foo")]
++    [InlineData("MZXW6YQ=", "foob")]
++    [InlineData("MZXW6YTB", "fooba")]
++    [InlineData("MZXW6YTBOI======", "foobar")]
++    [InlineData("m z x w 6 y t b o i", "foobar")]
++    [InlineData("MZ", "f")]
++    public void Base32Decode_RfcVectors_PreserveExactBytes(string encoded, string expected)
++    {
++        foreach (string input in new[] { encoded, encoded.TrimEnd('=') })
++        {
++            byte[] decoded = OathHelpers.Base32Decode(input);
++            try { Assert.True(System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(expected), decoded)); }
++            finally { System.Security.Cryptography.CryptographicOperations.ZeroMemory(decoded); }
++        }
++    }
++
+     [Fact]
+     public async Task UnlockIfNeededAsync_WithArgvPassword_WarnsOnStderrOnly()
+     {
+diff --git a/src/Core/src/PublicAPI.Unshipped.txt b/src/Core/src/PublicAPI.Unshipped.txt
+index 724eea34..0f0aa3cc 100644
+--- a/src/Core/src/PublicAPI.Unshipped.txt
++++ b/src/Core/src/PublicAPI.Unshipped.txt
+@@ -1,5 +1,9 @@
+ #nullable enable
+ 
++Yubico.YubiKit.Core.Utilities.Base32
++static Yubico.YubiKit.Core.Utilities.Base32.Decode(System.ReadOnlySpan<char> encoded) -> byte[]!
++static Yubico.YubiKit.Core.Utilities.Base32.Decode(System.ReadOnlySpan<char> encoded, System.Span<byte> destination) -> int
++
+ Yubico.YubiKit.Core.Abstractions.IApplicationSession
+ Yubico.YubiKit.Core.Abstractions.IApplicationSession.ConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType
+ Yubico.YubiKit.Core.Abstractions.IApplicationSession.EnsureSupports(Yubico.YubiKit.Core.Devices.Feature feature) -> void
+diff --git a/src/Oath/examples/OathTool/Commands/AccountsCommand.cs b/src/Oath/examples/OathTool/Commands/AccountsCommand.cs
+index 3243d08f..0d3a3adf 100644
+--- a/src/Oath/examples/OathTool/Commands/AccountsCommand.cs
++++ b/src/Oath/examples/OathTool/Commands/AccountsCommand.cs
+@@ -4,6 +4,7 @@
+ using System.Buffers;
+ using System.Security.Cryptography;
+ using Yubico.YubiKit.Cli.Commands.Infrastructure;
++using Yubico.YubiKit.Core.Utilities;
+ using Yubico.YubiKit.Oath.Examples.OathTool.Cli;
+ using Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
+ 
+@@ -447,53 +448,16 @@ private static async Task<int> CalculateAllCodesAsync(
+     }
+ 
+     /// <summary>
+-    /// Decodes a Base32-encoded string (RFC 4648), tolerating missing padding and literal spaces.
++    /// Decodes nonempty OATH secret material using the shared Base32 codec. The caller owns and clears the output.
+     /// </summary>
+     private static byte[] Base32Decode(string input)
+     {
+-        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+-
+-        input = input.ToUpperInvariant().Replace(" ", "").TrimEnd('=');
+-
+-        if (input.Length == 0)
++        byte[] decoded = Base32.Decode(input.AsSpan());
++        if (decoded.Length == 0)
+         {
+-            return [];
++            throw new ArgumentException("OATH secret material must not be empty.", nameof(input));
+         }
+ 
+-        int byteCount = input.Length * 5 / 8;
+-        byte[] result = new byte[byteCount];
+-
+-        int buffer = 0;
+-        int bitsInBuffer = 0;
+-        int index = 0;
+-
+-        try
+-        {
+-            foreach (char c in input)
+-            {
+-                int val = alphabet.IndexOf(c);
+-                if (val < 0)
+-                {
+-                    throw new ArgumentException($"Invalid Base32 character: '{c}'.");
+-                }
+-
+-                buffer = (buffer << 5) | val;
+-                bitsInBuffer += 5;
+-
+-                if (bitsInBuffer >= 8)
+-                {
+-                    bitsInBuffer -= 8;
+-                    result[index++] = (byte)(buffer >> bitsInBuffer);
+-                    buffer &= (1 << bitsInBuffer) - 1;
+-                }
+-            }
+-
+-            return result;
+-        }
+-        catch
+-        {
+-            CryptographicOperations.ZeroMemory(result);
+-            throw;
+-        }
++        return decoded;
+     }
+ }
+\ No newline at end of file
+diff --git a/src/Oath/src/Credential.cs b/src/Oath/src/Credential.cs
+index 174e4195..777bfe11 100644
+--- a/src/Oath/src/Credential.cs
++++ b/src/Oath/src/Credential.cs
+@@ -128,11 +128,22 @@ internal static byte[] FormatCredentialId(
+         OathType oathType,
+         int period = OathConstants.DefaultPeriod)
+     {
++        ArgumentException.ThrowIfNullOrEmpty(name);
++        if (issuer is "")
++        {
++            throw new ArgumentException("Credential name must be nonempty and issuer must be null or nonempty.");
++        }
++
++        if (oathType == OathType.Totp && period <= 0)
++        {
++            throw new ArgumentOutOfRangeException(nameof(period), "TOTP period must be positive.");
++        }
++
+         var credId = new StringBuilder();
+ 
+         if (oathType == OathType.Totp && period != OathConstants.DefaultPeriod)
+         {
+-            credId.Append(period);
++            credId.Append(period.ToString(CultureInfo.InvariantCulture));
+             credId.Append('/');
+         }
+ 
+@@ -144,7 +155,20 @@ internal static byte[] FormatCredentialId(
+ 
+         credId.Append(name);
+ 
+-        return Encoding.UTF8.GetBytes(credId.ToString());
++        string text = credId.ToString();
++        if (Encoding.UTF8.GetByteCount(text) > 64)
++        {
++            throw new ArgumentException("Credential ID must fit 64 UTF-8 bytes.");
++        }
++
++        byte[] encoded = Encoding.UTF8.GetBytes(text);
++        var parsed = ParseCredentialId(encoded, oathType);
++        if (parsed != (issuer, name, oathType == OathType.Totp ? period : 0))
++        {
++            throw new ArgumentException("Credential identity cannot round-trip through the host naming convention.");
++        }
++
++        return encoded;
+     }
+ 
+     /// <summary>
+diff --git a/src/Oath/src/CredentialData.cs b/src/Oath/src/CredentialData.cs
+index 20bb7f42..eb137ebf 100644
+--- a/src/Oath/src/CredentialData.cs
++++ b/src/Oath/src/CredentialData.cs
+@@ -14,6 +14,7 @@
+ 
+ using System.Security.Cryptography;
+ using System.Web;
++using Yubico.YubiKit.Core.Utilities;
+ 
+ namespace Yubico.YubiKit.Oath;
+ 
+@@ -30,7 +31,8 @@ public sealed class CredentialData : IDisposable
+     private readonly byte[] _secret = [];
+ 
+     /// <summary>
+-    ///     Gets the account name, assigned during initialization.
++    ///     Gets the account name, assigned during initialization. Outgoing identities must be nonempty,
++    ///     fit 64 UTF-8 bytes including issuer/period metadata, and round-trip through the host ID convention.
+     /// </summary>
+     public required string Name { get; init; }
+ 
+@@ -49,6 +51,7 @@ public sealed class CredentialData : IDisposable
+     /// </summary>
+     /// <remarks>
+     ///     Initialization copies the supplied bytes; the caller still owns and must clear the input buffer.
++    ///     PUT requires nonempty secret material; the SDK's storage padding does not supply missing material.
+     ///     Reading this property does not allocate or transfer ownership. The view is valid only until this
+     ///     instance is disposed, which clears its backing storage and all existing views. Do not modify the
+     ///     backing storage through array-extraction APIs. If an independent copy is needed, the caller owns
+@@ -61,22 +64,25 @@ public required ReadOnlyMemory<byte> Secret
+     }
+ 
+     /// <summary>
+-    ///     Gets the number of digits in the OTP code, assigned during initialization. Defaults to 6.
++    ///     Gets the number of digits in the OTP code, from 6 through 8. Defaults to 6.
+     /// </summary>
+     public int Digits { get; init; } = OathConstants.DefaultDigits;
+ 
+     /// <summary>
+-    ///     Gets the TOTP time step period in seconds, assigned during initialization. Defaults to 30.
++    ///     Gets the positive TOTP time step period in seconds. Defaults to 30. Ignored for HOTP.
+     /// </summary>
+     public int Period { get; init; } = OathConstants.DefaultPeriod;
+ 
+     /// <summary>
+-    ///     Gets the HOTP initial moving factor (counter), assigned during initialization. Defaults to 0.
++    ///     Gets the HOTP initial moving factor (counter), from 0 through <see cref="int.MaxValue" />.
++    ///     Defaults to 0. Ignored for TOTP. The four-byte wire field can represent larger values,
++    ///     but this API supports only nonnegative <see cref="int" /> values.
+     /// </summary>
+     public int Counter { get; init; } = OathConstants.DefaultImf;
+ 
+     /// <summary>
+-    ///     Gets the credential issuer, assigned during initialization.
++    ///     Gets the credential issuer, or <see langword="null" /> for no issuer. An empty issuer is not
++    ///     representable in outgoing identities; issuer and name must round-trip without reinterpretation.
+     /// </summary>
+     public string? Issuer { get; init; }
+ 
+@@ -96,9 +102,12 @@ public required ReadOnlyMemory<byte> Secret
+     /// <returns>A populated <see cref="CredentialData" /> instance whose owned secret must be disposed.</returns>
+     /// <remarks>The URI string contains secret material and cannot be cleared by this method.</remarks>
+     /// <exception cref="ArgumentException">
+-    ///     Thrown when the URI scheme is not <c>otpauth</c>, the OATH type is missing or invalid,
+-    ///     or the <c>secret</c> query parameter is missing.
++    ///     The URI scheme/type, algorithm, numeric fields, identity, or Base32 secret is invalid,
++    ///     or the secret parameter is absent or decodes to no material. Digits must be 6 through 8,
++    ///     TOTP period must be positive, and HOTP counter must be a nonnegative Int32 value.
+     /// </exception>
++    /// <exception cref="FormatException">A numeric query field is not an integer.</exception>
++    /// <exception cref="OverflowException">A numeric query field does not fit an Int32.</exception>
+     public static CredentialData ParseUri(string uri) => ParseUri(uri, requireTouch: false);
+ 
+     /// <summary>
+@@ -113,6 +122,8 @@ public required ReadOnlyMemory<byte> Secret
+     /// <remarks>
+     ///     Dispose the returned instance after use. Decoded temporary bytes are cleared on success and failure;
+     ///     the URI string and encoded secret strings cannot be cleared by this method.
++    ///     Non-secret request fields are validated before decoding. Missing HOTP counter defaults to zero;
++    ///     query issuer continues to take precedence over the label issuer.
+     /// </remarks>
+     public static CredentialData ParseUri(string uri, bool requireTouch)
+     {
+@@ -201,9 +212,13 @@ public static CredentialData ParseUri(string uri, bool requireTouch)
+             ? int.Parse(counterParam, System.Globalization.CultureInfo.InvariantCulture)
+             : OathConstants.DefaultImf;
+ 
++        ValidateRequestNumbers(oathType, digits, period, counter);
++        _ = Credential.FormatCredentialId(issuer, name, oathType, period);
++
+         byte[] secret = ParseBase32Key(secretParam);
+         try
+         {
++            ValidateSecretMaterial(secret);
+             return new CredentialData
+             {
+                 Name = name,
+@@ -227,8 +242,44 @@ public static CredentialData ParseUri(string uri, bool requireTouch)
+     ///     Gets the credential ID in wire format for the OATH applet.
+     /// </summary>
+     /// <returns>The credential ID as UTF-8 encoded bytes.</returns>
++    /// <exception cref="ArgumentException">
++    ///     The name is empty, the issuer is empty rather than null, the complete ID exceeds 64 UTF-8 bytes,
++    ///     or the identity cannot round-trip through the existing host convention. A TOTP period must be positive.
++    /// </exception>
+     public byte[] GetId() => Credential.FormatCredentialId(Issuer, Name, OathType, Period);
+ 
++    internal void ValidateRequest()
++    {
++        ValidateRequestNumbers(OathType, Digits, Period, Counter);
++        ValidateSecretMaterial(_secret);
++    }
++
++    private static void ValidateSecretMaterial(ReadOnlySpan<byte> secret)
++    {
++        if (secret.IsEmpty)
++        {
++            throw new ArgumentException("OATH secret material must not be empty.", nameof(Secret));
++        }
++    }
++
++    private static void ValidateRequestNumbers(OathType oathType, int digits, int period, int counter)
++    {
++        if (digits is < 6 or > 8)
++        {
++            throw new ArgumentOutOfRangeException(nameof(digits), "OATH codes must have 6 through 8 digits.");
++        }
++
++        if (oathType == OathType.Totp && period <= 0)
++        {
++            throw new ArgumentOutOfRangeException(nameof(period), "TOTP period must be positive.");
++        }
++
++        if (oathType == OathType.Hotp && counter < 0)
++        {
++            throw new ArgumentOutOfRangeException(nameof(counter), "HOTP counter must be a nonnegative Int32 value.");
++        }
++    }
++
+     /// <summary>
+     ///     Clears the owned shared secret, including any previously borrowed views. Safe to call repeatedly.
+     /// </summary>
+@@ -307,70 +358,9 @@ internal byte[] GetProcessedSecret()
+     }
+ 
+     /// <summary>
+-    ///     Parses a Base32-encoded key string, supporting unpadded input and literal spaces.
++    ///     Parses a Base32-encoded key string, supporting ASCII case, literal spaces, and complete or absent padding.
+     /// </summary>
+     /// <param name="key">The Base32-encoded string.</param>
+-    /// <returns>The decoded bytes.</returns>
+-    internal static byte[] ParseBase32Key(string key)
+-    {
+-        key = key.ToUpperInvariant().Replace(" ", "");
+-
+-        // Add padding if necessary
+-        int paddingNeeded = (8 - (key.Length % 8)) % 8;
+-        if (paddingNeeded > 0)
+-        {
+-            key += new string('=', paddingNeeded);
+-        }
+-
+-        return FromBase32(key);
+-    }
+-
+-    private static byte[] FromBase32(string base32)
+-    {
+-        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+-
+-        // Remove padding
+-        base32 = base32.TrimEnd('=');
+-
+-        if (base32.Length == 0)
+-        {
+-            return [];
+-        }
+-
+-        int byteCount = base32.Length * 5 / 8;
+-        byte[] result = new byte[byteCount];
+-
+-        int buffer = 0;
+-        int bitsInBuffer = 0;
+-        int index = 0;
+-
+-        try
+-        {
+-            foreach (char c in base32)
+-            {
+-                int val = alphabet.IndexOf(c);
+-                if (val < 0)
+-                {
+-                    throw new ArgumentException($"Invalid Base32 character: '{c}'.");
+-                }
+-
+-                buffer = (buffer << 5) | val;
+-                bitsInBuffer += 5;
+-
+-                if (bitsInBuffer >= 8)
+-                {
+-                    bitsInBuffer -= 8;
+-                    result[index++] = (byte)(buffer >> bitsInBuffer);
+-                    buffer &= (1 << bitsInBuffer) - 1;
+-                }
+-            }
+-
+-            return result;
+-        }
+-        catch
+-        {
+-            CryptographicOperations.ZeroMemory(result);
+-            throw;
+-        }
+-    }
++    /// <returns>Independently owned decoded bytes, which the caller must clear.</returns>
++    internal static byte[] ParseBase32Key(string key) => Base32.Decode(key.AsSpan());
+ }
+\ No newline at end of file
+diff --git a/src/Oath/src/OathSession.cs b/src/Oath/src/OathSession.cs
+index 20edaa56..d9a3837d 100644
+--- a/src/Oath/src/OathSession.cs
++++ b/src/Oath/src/OathSession.cs
+@@ -250,6 +250,7 @@ public async Task PutCredentialAsync(
+         ThrowIfDisposed();
+         ArgumentNullException.ThrowIfNull(credentialData);
+ 
++        credentialData.ValidateRequest();
+         byte[] credId = credentialData.GetId();
+         byte[] secret = credentialData.GetProcessedSecret();
+ 
+diff --git a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs
+index a813f0a8..e6ac6060 100644
+--- a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs
++++ b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathToolCancellationTests.cs
+@@ -313,6 +313,52 @@ public async Task CancelledBoundary_WritesCancellationInsteadOfAuthenticationFai
+         Assert.DoesNotContain("Authentication failed", output.ToString());
+     }
+ 
++    [Theory]
++    [InlineData("A")]
++    [InlineData("AAA")]
++    [InlineData("AAAAAA")]
++    [InlineData("MY=")]
++    [InlineData("MY=======")]
++    [InlineData("========")]
++    [InlineData("M=Y=====")]
++    [InlineData("MZXW6YTB!")]
++    [InlineData("")]
++    [InlineData("   ")]
++    public async Task Add_MalformedOrAbsentSecret_NeverOpensSession(string encoded)
++    {
++        int opens = 0;
++        var services = new OathToolServices(_ => { opens++; return Task.FromResult<IOathSession?>(null); },
++            new FakeReader(_ => null), (_, _) => ValueTask.FromResult(true));
++        int exit = await AccountsCommand.AddAsync("name", encoded, force: true,
++            cancellationToken: TestContext.Current.CancellationToken, services: services);
++        Assert.Equal(1, exit);
++        Assert.Equal(0, opens);
++    }
++
++    [Theory]
++    [InlineData("MY======", "f")]
++    [InlineData("MZXQ====", "fo")]
++    [InlineData("MZXW6===", "foo")]
++    [InlineData("MZXW6YQ=", "foob")]
++    [InlineData("MZXW6YTB", "fooba")]
++    [InlineData("m z x w 6 y t b o i", "foobar")]
++    [InlineData("MZXW6YTBOI======", "foobar")]
++    [InlineData("MZ", "f")]
++    public async Task Add_RfcSecretBytes_ReachPutThenAreDisposed(string encoded, string expected)
++    {
++        foreach (string input in new[] { encoded, encoded.TrimEnd('=') })
++        {
++            var session = new FakeSession();
++            session.OnPut = data => Assert.True(CryptographicOperations.FixedTimeEquals(
++                System.Text.Encoding.ASCII.GetBytes(expected), data.Secret.Span));
++            int exit = await AccountsCommand.AddAsync("name", input, force: true,
++                cancellationToken: TestContext.Current.CancellationToken, services: Services(session));
++            Assert.Equal(0, exit);
++            Assert.Equal(1, session.Operations);
++            Assert.True(session.PutSecret.Span.IndexOfAnyExcept((byte)0) < 0);
++        }
++    }
++
+     private static OathToolServices Services(FakeSession session, ISecureCredentialReader? reader = null) =>
+         new(_ => Task.FromResult<IOathSession?>(session), reader ?? new FakeReader(_ => null),
+             (_, _) => ValueTask.FromResult(true));
+@@ -361,6 +407,8 @@ private sealed class FakeSession : IOathSession
+         public bool CancelList { get; init; }
+         public byte[] DerivedKey { get; private set; } = [];
+         public Action OnDerive { get; set; } = () => { };
++        public Action<CredentialData> OnPut { get; set; } = _ => { };
++        public ReadOnlyMemory<byte> PutSecret { get; private set; }
+         public Func<CancellationToken, Task> OnOperation { get; set; } = _ => Task.CompletedTask;
+         public FirmwareVersion FirmwareVersion => new(5, 7, 0);
+         public ConnectionType ConnectionType => ConnectionType.SmartCard;
+@@ -381,7 +429,12 @@ public async Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationTo
+             return [new Credential("fake", "name"u8.ToArray(), null, "name", OathType.Totp, 30, false)];
+         }
+         public Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default) => Operate(cancellationToken);
+-        public Task PutCredentialAsync(CredentialData credentialData, CancellationToken cancellationToken = default) => Operate(cancellationToken);
++        public Task PutCredentialAsync(CredentialData credentialData, CancellationToken cancellationToken = default)
++        {
++            PutSecret = credentialData.Secret;
++            OnPut(credentialData);
++            return Operate(cancellationToken);
++        }
+         public Task DeleteCredentialAsync(Credential credential, CancellationToken cancellationToken = default) => Operate(cancellationToken);
+         public async Task<Credential> RenameCredentialAsync(Credential credential, string? newIssuer, string newName, CancellationToken cancellationToken = default)
+         { await Operate(cancellationToken); return credential; }
+diff --git a/src/Core/src/Utilities/Base32.cs b/src/Core/src/Utilities/Base32.cs
+new file mode 100644
+index 00000000..654b0878
+--- /dev/null
++++ b/src/Core/src/Utilities/Base32.cs
+@@ -0,0 +1,108 @@
++// Copyright 2026 Yubico AB
++// Licensed under the Apache License, Version 2.0.
++
++using System.Security.Cryptography;
++
++namespace Yubico.YubiKit.Core.Utilities;
++
++/// <summary>Decodes RFC 4648 Base32 text without creating transformed text copies.</summary>
++/// <remarks>
++///     Accepts ASCII upper/lower case, ignores literal ASCII spaces, and accepts either complete padding
++///     or no padding. Unused bits in the last symbol are ignored, not required to be zero. Empty text is valid.
++/// </remarks>
++public static class Base32
++{
++    /// <summary>Decodes Base32 text into independently owned storage.</summary>
++    /// <param name="encoded">The borrowed encoded text.</param>
++    /// <returns>The decoded bytes. The caller must clear them when they contain secret material.</returns>
++    /// <exception cref="ArgumentException">The text has invalid characters, length, or padding.</exception>
++    public static byte[] Decode(ReadOnlySpan<char> encoded)
++    {
++        int symbols = 0;
++        foreach (char c in encoded)
++        {
++            if (c is not (' ' or '=')) { symbols++; }
++        }
++
++        byte[] result = new byte[(int)((long)symbols * 5 / 8)];
++        Decode(encoded, result); // The span overload clears result on every failure.
++        return result;
++    }
++
++    /// <summary>Decodes Base32 text into caller-owned storage and returns the number of bytes written.</summary>
++    /// <param name="encoded">The borrowed encoded text.</param>
++    /// <param name="destination">The output buffer; unused bytes are unchanged on success.</param>
++    /// <returns>The number of decoded bytes written.</returns>
++    /// <remarks>
++    ///     On any decoding failure, the entire destination is cleared, including any partially decoded prefix.
++    ///     On success, the caller owns the output and must clear secret material after use.
++    /// </remarks>
++    /// <exception cref="ArgumentException">The text is malformed or the destination is too small.</exception>
++    public static int Decode(ReadOnlySpan<char> encoded, Span<byte> destination)
++    {
++        try { return DecodeCore(encoded, destination); }
++        catch
++        {
++            CryptographicOperations.ZeroMemory(destination);
++            throw;
++        }
++    }
++
++    private static int DecodeCore(ReadOnlySpan<char> encoded, Span<byte> destination)
++    {
++        int symbols = 0, padding = 0, buffer = 0, bits = 0, written = 0;
++        foreach (char c in encoded)
++        {
++            if (c == ' ') { continue; }
++            if (c == '=') { padding++; continue; }
++            int value = DecodeSymbol(c);
++            if (padding != 0 || value < 0)
++            {
++                throw new ArgumentException("Invalid Base32 character or padding.", nameof(encoded));
++            }
++
++            symbols++;
++            buffer = (buffer << 5) | value;
++            bits += 5;
++            if (bits >= 8)
++            {
++                if (written == destination.Length)
++                {
++                    throw new ArgumentException("Base32 destination is too small.", nameof(destination));
++                }
++
++                bits -= 8;
++                destination[written++] = (byte)(buffer >> bits);
++                buffer &= (1 << bits) - 1;
++            }
++        }
++
++        ValidateTerminalLength(symbols, padding);
++        return written;
++    }
++
++    private static void ValidateTerminalLength(int symbols, int padding)
++    {
++        int requiredPadding = (symbols % 8) switch
++        {
++            0 => 0,
++            2 => 6,
++            4 => 4,
++            5 => 3,
++            7 => 1,
++            _ => -1
++        };
++        if (requiredPadding < 0 || (padding != 0 && padding != requiredPadding))
++        {
++            throw new ArgumentException("Invalid Base32 terminal length or padding.");
++        }
++    }
++
++    private static int DecodeSymbol(char value) => value switch
++    {
++        >= 'A' and <= 'Z' => value - 'A',
++        >= 'a' and <= 'z' => value - 'a',
++        >= '2' and <= '7' => value - '2' + 26,
++        _ => -1
++    };
++}
+\ No newline at end of file
+diff --git a/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs
+new file mode 100644
+index 00000000..f576ddab
+--- /dev/null
++++ b/src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/Base32Tests.cs
+@@ -0,0 +1,72 @@
++// Copyright 2026 Yubico AB
++// Licensed under the Apache License, Version 2.0.
++
++using System.Security.Cryptography;
++using System.Text;
++using Yubico.YubiKit.Core.Utilities;
++
++namespace Yubico.YubiKit.Core.UnitTests.Utilities;
++
++public sealed class Base32Tests
++{
++    [Theory]
++    [InlineData("", "")]
++    [InlineData("MY======", "f")]
++    [InlineData("MZXQ====", "fo")]
++    [InlineData("MZXW6===", "foo")]
++    [InlineData("MZXW6YQ=", "foob")]
++    [InlineData("MZXW6YTB", "fooba")]
++    [InlineData("MZXW6YTBOI======", "foobar")]
++    [InlineData("MZ", "f")]
++    [InlineData("m z x w 6 y t b o i", "foobar")]
++    public void Decode_RfcVectors_WriteExactBytesAndLeaveUnusedDestinationAlone(string encoded, string expected)
++    {
++        foreach (string input in new[] { encoded, encoded.TrimEnd('=') })
++        {
++            byte[] destination = new byte[32];
++            Array.Fill(destination, (byte)0xA5);
++            byte[] decoded = Base32.Decode(input.AsSpan());
++            try
++            {
++                int written = Base32.Decode(input.AsSpan(), destination);
++                Assert.Equal(expected.Length, written);
++                Assert.True(CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(expected), destination.AsSpan(0, written)));
++                Assert.True(CryptographicOperations.FixedTimeEquals(decoded, destination.AsSpan(0, written)));
++                Assert.True(destination.AsSpan(written).IndexOfAnyExcept((byte)0xA5) < 0);
++            }
++            finally { CryptographicOperations.ZeroMemory(destination); CryptographicOperations.ZeroMemory(decoded); }
++        }
++    }
++
++    [Theory]
++    [InlineData("A")]
++    [InlineData("AAA")]
++    [InlineData("AAAAAA")]
++    [InlineData("AAAAAAAAA")]
++    [InlineData("MZXW6YTB!")]
++    [InlineData("MZXW6YTBé")]
++    [InlineData("MZXW6YTB\t")]
++    [InlineData("MZXW6YTB\n")]
++    [InlineData("MZXW6YTBOI=====")]
++    [InlineData("MZXW6YTBOI=======")]
++    [InlineData("MZXW6YTB=OI=====")]
++    [InlineData("========")]
++    [InlineData("MZXW6YTB========")]
++    public void Decode_InvalidInput_ClearsEntireCallerVisibleDestination(string encoded)
++    {
++        byte[] destination = new byte[32];
++        Array.Fill(destination, (byte)0xA5);
++        var exception = Assert.Throws<ArgumentException>(() => Base32.Decode(encoded.AsSpan(), destination));
++        Assert.True(destination.AsSpan().IndexOfAnyExcept((byte)0) < 0);
++        Assert.DoesNotContain(encoded, exception.Message);
++        Assert.Throws<ArgumentException>(() => Base32.Decode(encoded.AsSpan()));
++    }
++
++    [Fact]
++    public void Decode_DestinationTooSmall_ClearsPartialOutputRatherThanLeavingPrefix()
++    {
++        byte[] destination = [0xA5, 0xA5];
++        Assert.Throws<ArgumentException>(() => Base32.Decode("MZXW6YTB".AsSpan(), destination));
++        Assert.True(destination.AsSpan().IndexOfAnyExcept((byte)0) < 0);
++    }
++}
+\ No newline at end of file
+diff --git a/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathInputTests.cs b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathInputTests.cs
+new file mode 100644
+index 00000000..9795119d
+--- /dev/null
++++ b/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathInputTests.cs
+@@ -0,0 +1,224 @@
++// Copyright 2026 Yubico AB
++// Licensed under the Apache License, Version 2.0.
++
++using System.Security.Cryptography;
++using System.Text;
++using Yubico.YubiKit.Core.Utilities;
++using Yubico.YubiKit.Tests.Shared;
++
++namespace Yubico.YubiKit.Oath.UnitTests;
++
++public sealed class OathInputTests
++{
++    [Theory]
++    [InlineData("A")]
++    [InlineData("AAA")]
++    [InlineData("AAAAAA")]
++    [InlineData("AAAAAAAAA")]
++    [InlineData("MY=")]
++    [InlineData("MY=======")]
++    [InlineData("========")]
++    [InlineData("M=Y=====")]
++    [InlineData("MZXW6YTB!")]
++    public void Decode_MalformedTerminalForms_DoNotProduceCredentialMaterial(string encoded)
++    {
++        Assert.Throws<ArgumentException>(() => CredentialData.ParseBase32Key(encoded));
++    }
++
++    [Theory]
++    [InlineData("MY======", "f")]
++    [InlineData("MZXQ====", "fo")]
++    [InlineData("MZXW6===", "foo")]
++    [InlineData("MZXW6YQ=", "foob")]
++    [InlineData("MZXW6YTB", "fooba")]
++    [InlineData("MZXW6YTBOI======", "foobar")]
++    [InlineData("m z x w 6 y t b o i", "foobar")]
++    [InlineData("MZ", "f")] // Preserve permissive unused pad bits.
++    public void Decode_RfcVectors_PreserveExactBytes(string encoded, string expected)
++    {
++        foreach (string input in new[] { encoded, encoded.TrimEnd('=') })
++        {
++            byte[] decoded = CredentialData.ParseBase32Key(input);
++            try { Assert.True(CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(expected), decoded)); }
++            finally { CryptographicOperations.ZeroMemory(decoded); }
++        }
++    }
++
++    [Theory]
++    [InlineData("")]
++    [InlineData("%20%20")]
++    public void ParseUri_AbsentSecretMaterial_DoesNotCreatePaddedZeroKey(string secret)
++    {
++        Assert.Throws<ArgumentException>(() => CredentialData.ParseUri($"otpauth://totp/name?secret={secret}"));
++    }
++
++    [Theory]
++    [InlineData("digits=262")]
++    [InlineData("digits=5")]
++    [InlineData("counter=-1", "hotp")]
++    [InlineData("period=0")]
++    public void ParseUri_InvalidNonSecretFields_AreRejectedBeforeDecoding(string query, string type = "totp")
++    {
++        var exception = Assert.ThrowsAny<ArgumentException>(() =>
++            CredentialData.ParseUri($"otpauth://{type}/name?secret=INVALID!&{query}"));
++        Assert.DoesNotContain("Base32", exception.Message);
++    }
++
++    [Theory]
++    [InlineData("60/demo")]
++    [InlineData("issuer:")]
++    [InlineData("name?issuer=")]
++    [InlineData("name?issuer=a%3Ab")]
++    public void ParseUri_UnrepresentableIdentity_IsRejectedBeforeDecoding(string label)
++    {
++        string separator = label.Contains('?') ? "&" : "?";
++        var exception = Assert.ThrowsAny<ArgumentException>(() =>
++            CredentialData.ParseUri($"otpauth://totp/{label}{separator}secret=INVALID!"));
++        Assert.DoesNotContain("Base32", exception.Message);
++    }
++
++    [Theory]
++    [InlineData("", null, 30, 6, 0, OathType.Totp)]
++    [InlineData("60/demo", null, 30, 6, 0, OathType.Totp)]
++    [InlineData("demo", "", 30, 6, 0, OathType.Totp)]
++    [InlineData("demo", "a:b", 30, 6, 0, OathType.Totp)]
++    [InlineData("a:b", null, 30, 6, 0, OathType.Totp)]
++    [InlineData("demo", "60/a", 30, 6, 0, OathType.Totp)]
++    [InlineData("demo", null, 0, 6, 0, OathType.Totp)]
++    [InlineData("demo", null, 30, 262, 0, OathType.Totp)]
++    [InlineData("demo", null, 30, -250, 0, OathType.Totp)]
++    [InlineData("demo", null, 30, 9, 0, OathType.Totp)]
++    [InlineData("demo", null, 30, 6, -1, OathType.Hotp)]
++    [InlineData("ééééééééééééééééééééééééééééééééé", null, 30, 6, 0, OathType.Totp)]
++    public async Task Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(
++        string name, string? issuer, int period, int digits, int counter, OathType type)
++    {
++        var connection = Connection();
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        byte[] input = [0xA5];
++        using var data = new CredentialData
++        {
++            Name = name,
++            Issuer = issuer,
++            Period = period,
++            Digits = digits,
++            Counter = counter,
++            OathType = type,
++            HashAlgorithm = OathHashAlgorithm.Sha1,
++            Secret = input
++        };
++        ReadOnlyMemory<byte> borrowed = data.Secret;
++        try
++        {
++            await Assert.ThrowsAnyAsync<ArgumentException>(() => session.PutCredentialAsync(data, TestContext.Current.CancellationToken));
++            Assert.Single(connection.TransmittedCommands); // SELECT only.
++            Assert.True(CryptographicOperations.FixedTimeEquals(input, borrowed.Span));
++        }
++        finally { Clear(connection); CryptographicOperations.ZeroMemory(input); }
++    }
++
++    [Fact]
++    public async Task Put_EmptySeed_DoesNotTransmitAnAllZeroKey()
++    {
++        var connection = Connection();
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        using var data = new CredentialData { Name = "name", OathType = OathType.Totp, HashAlgorithm = OathHashAlgorithm.Sha1, Secret = ReadOnlyMemory<byte>.Empty };
++        await Assert.ThrowsAnyAsync<ArgumentException>(() => session.PutCredentialAsync(data, TestContext.Current.CancellationToken));
++        Assert.Single(connection.TransmittedCommands);
++        Clear(connection);
++    }
++
++    [Theory]
++    [InlineData("", null)]
++    [InlineData("60/demo", null)]
++    [InlineData("demo", "")]
++    [InlineData("demo", "a:b")]
++    [InlineData("a:b", null)]
++    [InlineData("demo", "60/a")]
++    [InlineData("ééééééééééééééééééééééééééééééééé", null)]
++    public async Task Rename_AmbiguousOrOversizedIdentity_DoesNotTransmit(string name, string? issuer)
++    {
++        var connection = Connection();
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        var original = new Credential(session.DeviceId, "old"u8.ToArray(), null, "old", OathType.Totp, 30, false);
++        await Assert.ThrowsAnyAsync<ArgumentException>(() => session.RenameCredentialAsync(original, issuer, name, TestContext.Current.CancellationToken));
++        Assert.Single(connection.TransmittedCommands);
++        Assert.Equal("old"u8.ToArray(), original.Id.ToArray());
++        Clear(connection);
++    }
++
++    [Theory]
++    [InlineData(OathType.Totp, "a:b", "issuer", 30)]
++    [InlineData(OathType.Totp, ":name", null, 30)]
++    [InlineData(OathType.Totp, "60/demo", "issuer", 60)]
++    [InlineData(OathType.Hotp, "60/demo", null, 30)]
++    [InlineData(OathType.Hotp, "a:b", "issuer", -1)]
++    public async Task Put_RepresentableMetadata_RoundTripsAndPreservesSevenDigits(OathType type, string name, string? issuer, int period)
++    {
++        var connection = Connection();
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        byte[] input = [0xA5];
++        using var data = new CredentialData { Name = name, Issuer = issuer, OathType = type, Period = period, Digits = 7, Counter = int.MaxValue, HashAlgorithm = OathHashAlgorithm.Sha1, Secret = input };
++        try
++        {
++            await session.PutCredentialAsync(data, TestContext.Current.CancellationToken);
++            byte[] command = connection.TransmittedCommands[1];
++            using var tlvs = TlvHelper.DecodeList(command.AsSpan(5, command[4]));
++            var parsed = Credential.ParseCredentialId(tlvs[0].Value.Span, type);
++            Assert.Equal(issuer, parsed.Issuer);
++            Assert.Equal(name, parsed.Name);
++            Assert.Equal(type == OathType.Totp ? period : 0, parsed.Period);
++            Assert.Equal(7, tlvs[1].Value.Span[1]);
++            if (type == OathType.Hotp) { Assert.Equal(new byte[] { 0x7F, 0xFF, 0xFF, 0xFF }, tlvs[2].Value.ToArray()); }
++            Assert.True(CryptographicOperations.FixedTimeEquals(input, data.Secret.Span));
++        }
++        finally { Clear(connection); CryptographicOperations.ZeroMemory(input); }
++    }
++
++    [Theory]
++    [InlineData(OathType.Totp, 30)]
++    [InlineData(OathType.Totp, 60)]
++    [InlineData(OathType.Hotp, 30)]
++    [InlineData(OathType.Hotp, 0)]
++    public async Task Rename_Exactly64Utf8Bytes_RoundTripsWithoutRestrictingRepresentableColons(OathType type, int period)
++    {
++        var connection = Connection();
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        string prefix = type == OathType.Totp && period != 30 ? "60/" : "";
++        string name = new('a', 64 - prefix.Length - "issuer:".Length - ":tail".Length);
++        name += ":tail";
++        var original = new Credential(session.DeviceId, "old"u8.ToArray(), null, "old", type, period, false);
++        var renamed = await session.RenameCredentialAsync(original, "issuer", name, TestContext.Current.CancellationToken);
++        Assert.Equal(64, renamed.Id.Length);
++        Assert.Equal(("issuer", name, type == OathType.Totp ? period : 0), Credential.ParseCredentialId(renamed.Id.Span, type));
++        using var tlvs = TlvHelper.DecodeList(connection.TransmittedCommands[1].AsSpan(5, connection.TransmittedCommands[1][4]));
++        Assert.Equal(renamed.Id.ToArray(), tlvs[1].Value.ToArray());
++        Assert.Equal("old"u8.ToArray(), original.Id.ToArray());
++        Clear(connection);
++    }
++
++    [Fact]
++    public async Task Put_HotpDefaultCounterAndIgnoredPeriod_OmitsImf()
++    {
++        var connection = Connection();
++        await using var session = await OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
++        using var data = CredentialData.ParseUri("otpauth://hotp/name?secret=MY&period=-1");
++        Assert.Equal(0, data.Counter);
++        try
++        {
++            await session.PutCredentialAsync(data, TestContext.Current.CancellationToken);
++            byte[] command = connection.TransmittedCommands[1];
++            using var tlvs = TlvHelper.DecodeList(command.AsSpan(5, command[4]));
++            Assert.Equal(2, tlvs.Count);
++            Assert.Equal("name"u8.ToArray(), tlvs[0].Value.ToArray());
++        }
++        finally { Clear(connection); }
++    }
++
++    private static RecordingSmartCardConnection Connection() => new(
++        [0x79, 3, 5, 7, 0, 0x71, 4, 1, 2, 3, 4, 0x90, 0], [0x90, 0]);
++    private static void Clear(RecordingSmartCardConnection connection)
++    {
++        foreach (byte[] command in connection.TransmittedCommands) { CryptographicOperations.ZeroMemory(command); }
++    }
++}
+\ No newline at end of file

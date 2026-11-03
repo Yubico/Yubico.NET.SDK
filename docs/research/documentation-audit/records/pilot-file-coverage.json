@@ -1,0 +1,497 @@
+{
+  "local": [
+    {
+      "path": "src/Oath/CLAUDE.md",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001",
+        "OATH-002",
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "52fbebde2e256a2a7f98e655761db84a32a682c556462b54e5544e0313de2278",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/PACKAGE_README.md",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-004"
+      ],
+      "current_sha256": "90f3674ce3f939f07fe1dc160e0894d490cb3cb334cabc3bc3d20a9afe72f41b",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/README.md",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001",
+        "OATH-002",
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "a30517e32682a29909777210957021d99f14afa3ce7f59ccc552a455cc0e93f6",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/Output/OutputHelpers.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "e9ed4e8e4189d1030a36adb8f2ec029c51dab149dd946ace5053935e3b7ee162",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/Prompts/DeviceSelector.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-004"
+      ],
+      "current_sha256": "0d0f5e51c63358b8b2ad6e83db6dd777bf4cc4a2fdfd61db7bc9ceabbbbb715e",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/Prompts/OathDeviceSelector.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-004"
+      ],
+      "current_sha256": "d7244528893aa136249057bb24b51fa3b627afddf2904006d4854b63493fdc9c",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Cli/SessionHelper.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001"
+      ],
+      "current_sha256": "64f806bd1c424b9469916f7d1b5a210a290d5217ebb8512bb2c5ee30f6cd2fdf",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Commands/AccessCommand.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001"
+      ],
+      "current_sha256": "180062b6d4aa598eaae3f1c0b1bc9c9e85851bac48afb9dc413ecaa6ed5655ac",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Commands/AccountsCommand.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002",
+        "OATH-003"
+      ],
+      "current_sha256": "9904a71af05f1a4c43d314a3ebe03fb4985d77f3d0b3a4efa1523b1c20487a09",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Commands/InfoCommand.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-004"
+      ],
+      "current_sha256": "2a51dd2c321ebb87f52f2c22d567fd5902f627e05c1cf301c9226502ad0a29be",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Commands/ResetCommand.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "ad65bffa2cc850597aaba01adb004373f1b3fdcd287233d8293495942e78af28",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/examples/OathTool/Program.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-004"
+      ],
+      "current_sha256": "8602142c8ba5b665ea24f15e7f85bbc5c95a096ffb4db34bdfff5c0a646f43b3",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/Backend/IOathBackend.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-004"
+      ],
+      "current_sha256": "a3a210f645282af4f77988659fc3c4306e19882b6a172e1d272f6e2a0b2ac818",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/Backend/OathBackend.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001",
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "ff41475684fad513eed70551d3eb331b1fe879e0c930471a0f33030939d4bc0f",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/Code.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-003"
+      ],
+      "current_sha256": "396dc68ac17701320e4e4b1569557dce263f4b72dcb95e998e1dc51c06cdcf9b",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/Credential.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002"
+      ],
+      "current_sha256": "8a0a23bf1bc3e094ec83c851f71aebd6e2b8a15034ffd73e24f3b1736ed86195",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/CredentialData.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002"
+      ],
+      "current_sha256": "5e190252a74793111cb08b70ff32f3da5359dec87bdfa4eb34d6b17b680c2f01",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/Credentials/OathCredentialOptions.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001"
+      ],
+      "current_sha256": "4b76719a68365db75afa60fbb1b7ff4cfc9a9c2052c95563ea89f255844a6aca",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/HashAlgorithm.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002"
+      ],
+      "current_sha256": "487a74ea3540748b409a5f5a4cddbdbd5e0762c3d492b97b1d2a07ef39c3809b",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/IOathSession.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001",
+        "OATH-002",
+        "OATH-003"
+      ],
+      "current_sha256": "0f77e3243c635249299e4254ef757f4284c9779f46e275fbc99a5cf9defa526a",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/IYubiKeyExtensions.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "9357653b7de0776aa5fc2c652c8ec3e881494622bf7d80b2da95d360e64f7a42",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/OathConstants.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002",
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "6dd5e8dc6b2d8268c81707f50570d0fdd67a8caf771ca180448e9f6cbb115a8f",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/OathException.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001"
+      ],
+      "current_sha256": "cf349ec123991a42cca1fa123c892bb794c7015d0d65b69efd98aa04db1ca71a",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/OathSession.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001",
+        "OATH-002",
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "e3d2f8fd270921cc4c67f68e63794b8284fcadc1e05017bb71ecb549bafd82bc",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/src/OathType.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002"
+      ],
+      "current_sha256": "91699521ac164d1e85a5049d9fe827e60125205352ed69178ad39f72934821c4",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/CLAUDE.md",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-004"
+      ],
+      "current_sha256": "612b211cf82a4c88aabc09b8e96bdc6a3cba21b5827f91c45a3b1eac3362386c",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/AuditV2/OathAuditReproTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002",
+        "OATH-003"
+      ],
+      "current_sha256": "ec53758612cca8af4d3ec4ce9683b50c070097f60dc5edd6fa69fb85524c2e74",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathHashAlgorithmTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001",
+        "OATH-002",
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "a29b1d97d8fa867cc54b0f3a3248913efea5608ca48d13ec096aef414c89ab8c",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathPasswordChangeTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001"
+      ],
+      "current_sha256": "f7ca7c401a25830bb8ddffdc8cb510ba93114dc22cd24ebf92f88a279421de78",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/OathSessionTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001",
+        "OATH-002",
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "4059519ddf4f1ffa41ad93639f11035cb2abc2fb4b129f736b1608750bd2a7d8",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.IntegrationTests/TestExtensions/OathTestStateExtensions.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "661dc365111bdbab2d6c7b1d181cffa1273b43cbb537a97201da7b2e908caf17",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/AuditV2/OathAuditReproTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001",
+        "OATH-002",
+        "OATH-003"
+      ],
+      "current_sha256": "9af905a0e2dd5cf69b011eb5f08e2a674f36759fa9e93974c32bcc55f3589528",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CodeTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-003"
+      ],
+      "current_sha256": "0e1fb39fd194bd091c3525a88ce93a3e29a49609d2c2322a2e51e5ca24f78619",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialDataTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002"
+      ],
+      "current_sha256": "450fe61271677188beec052c2b2b75db8e4fde671c652d6bab58d237a12f69e5",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialIdTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002"
+      ],
+      "current_sha256": "ad2a7d1ce2e426da17a4596ba0b11a7011fcf17997f407a38b6c8461eb102583",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/CredentialTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-002"
+      ],
+      "current_sha256": "b0c78765f93095b0c8bd4a617343433d41b6da9bc5d09af53a930138b9873f79",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathAuthenticationTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001"
+      ],
+      "current_sha256": "877c265176e89487af2e9b09035b351e9256d8ab7c9fdd34d25b3b9e43181214",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    },
+    {
+      "path": "src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathSessionTests.cs",
+      "semantic_reading": "complete within pilot scope",
+      "investigations": [
+        "OATH-001",
+        "OATH-002",
+        "OATH-003",
+        "OATH-004"
+      ],
+      "current_sha256": "48ec3b7f0daceadcca30b4c1ec5575e09552f4058a84318bfbbfe4c9e1d99536",
+      "finding_disposition": "see linked per-unit findings; implementation/contract deferrals remain open"
+    }
+  ],
+  "external": [
+    {
+      "path": "2026-09-21-yubikit-async-boundaries-ISA.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "CLAUDE.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "README.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/NATIVE-AOT.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/TESTING.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/architecture/applet-public-api.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/architecture/connection-ownership-and-contention.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/architecture/physical-device-model.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/architecture/sdk-architecture-diagrams.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/docs-inventory-report.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-changelog.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/migration/v1-to-v2-gaps.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/usage/user-interaction.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/v1-to-v2-comparison.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "docs/v2-highlights.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "src/Core/README.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "src/Management/CLAUDE.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "src/Management/README.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "src/Tests.Shared/CLAUDE.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "src/Tests.Shared/README.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "src/YubiOtp/PACKAGE_README.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    },
+    {
+      "path": "src/YubiOtp/README.md",
+      "investigation": "OATH-004",
+      "status": "OATH-specific surrounding claims reviewed; unrelated claims excluded"
+    }
+  ],
+  "detailed_ranges": "runs/oath-001/investigation-coverage.json and runs/oath-002/003/004 coverage records",
+  "limitations": "Semantic reading is not runtime/spec conformance certification. Lexical external reference discovery may not expose every implicit reference."
+}

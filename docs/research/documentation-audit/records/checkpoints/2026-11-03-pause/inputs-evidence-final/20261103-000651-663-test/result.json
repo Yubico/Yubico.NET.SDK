@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "command": "dotnet toolchain.cs -- test --project PublicApi",
+  "started": "2026-11-03T00:06:51.6637097+01:00",
+  "durationSeconds": 2.2,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000651-663-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "passed",
+      "durationSeconds": 2.1,
+      "error": null
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "PublicApi.UnitTests",
+      "outcome": "passed",
+      "reason": "24 executed, 0 skipped",
+      "executed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "failedTests": [],
+      "log": "artifacts/toolchain/runs/20261103-000651-663-test/01-test-PublicApi.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

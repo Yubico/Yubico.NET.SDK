@@ -1,0 +1,16 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathResponseTests*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_UnknownExtensionBetweenEntries_DoesNotHideKnownResults (0ms)
+  Xunit.Runner.InProc.SystemConsole.TestingPlatform.XunitException: Yubico.YubiKit.Core.BadResponseException : CALCULATE ALL entry requires a credential ID and response.
+    at Yubico.YubiKit.Oath.OathSession.CalculateAllAsync(Nullable`1 timestamp, CancellationToken cancellationToken) in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/src/OathSession.cs:597
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_UnknownExtensionBetweenEntries_DoesNotHideKnownResults() in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:172
+    at Yubico.YubiKit.Oath.UnitTests.OathResponseTests.CalculateAllAsync_UnknownExtensionBetweenEntries_DoesNotHideKnownResults() in /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResponseTests.cs:176
+    --- End of stack trace from previous location ---
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-protocol/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 32
+  failed: 1
+  succeeded: 31
+  skipped: 0
+  duration: 223ms

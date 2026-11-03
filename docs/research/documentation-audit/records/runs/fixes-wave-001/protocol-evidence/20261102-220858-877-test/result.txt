@@ -1,0 +1,10 @@
+RESULT: PASSED  (dotnet toolchain.cs -- test --integration --project Oath.IntegrationTests --smoke --filter FullyQualifiedName~OathProtocolResponseTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ test                      10.3s
+Projects (test):
+  ✓ PASS      Oath.IntegrationTests  2 executed, 2 skipped
+Totals: projects: 1 passed, 0 failed, 0 with no tests executed; tests: 2 executed, 0 failed, 2 skipped
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261102-220858-877-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

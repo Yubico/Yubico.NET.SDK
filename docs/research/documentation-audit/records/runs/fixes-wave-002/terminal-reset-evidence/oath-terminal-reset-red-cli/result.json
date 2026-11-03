@@ -1,0 +1,48 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath.UnitTests --filter FullyQualifiedName~ResetFailure_DisposalReplayDoesNotReplaceCliOutcome",
+  "started": "2026-11-03T12:48:22.1189512+01:00",
+  "durationSeconds": 3.9,
+  "runDirectory": "artifacts/toolchain/runs/20261103-124822-118-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 3.8,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "2 test(s) failed",
+      "executed": 2,
+      "failed": 2,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ResetFailure_DisposalReplayDoesNotReplaceCliOutcome(cancel: False)",
+          "message": "System.InvalidOperationException : Disposal completion replay."
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ResetFailure_DisposalReplayDoesNotReplaceCliOutcome(cancel: True)",
+          "message": "Assert.ThrowsAny() Failure: Exception type was not compatible | Expected: typeof(System.OperationCanceledException) | Actual:   typeof(System.InvalidOperationException)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-124822-118-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.ResetFailure_DisposalReplayDoesNotReplaceCliOutcome\""
+  ]
+}

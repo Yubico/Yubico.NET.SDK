@@ -1,0 +1,64 @@
+# dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolDispatchTests
+# started:   2026-11-02 22:06:27 +01:00
+# directory: /tmp/opencode/yubikit-oath-fix-cli
+# git:       yubikit-oath-fix-cli @ 361567eb (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: test  (log: artifacts/toolchain/runs/20261102-220627-381-test/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: test
+
+=== Running unit tests ===
+
+
+=== Testing: Oath.UnitTests ===
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --list-tests --filter-method *OathToolDispatchTests* (output captured)
+▶ RUN dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathToolDispatchTests*"
+  output: artifacts/toolchain/runs/20261102-220627-381-test/01-test-Oath.UnitTests.log
+✗ FAIL (24 test(s) failed)
+✗ test: 1 test project(s) failed
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolDispatchTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                      13.5s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  24 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts rename old --force new --password passwor"···, expected: "old,new"): Assert.Equal() Failure: Strings differ | ↓ (pos 3) | Expected: "old,new"
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts add name --force SECRET --touch", expected: "name,SECRET"): Assert.Equal() Failure: Strings differ | ↓ (pos 4) | Expected: "name,SECRET"
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts uri --touch otpauth://totp/name?secret=MY"···, expected: "otpauth://totp/name?secret=MY"): Assert.Equal() Failure: Strings differ | ↓ (pos 0) | Expected: "otpauth://totp/name?secret=MY"
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts delete --force name --password password", expected: "name"): Assert.Equal() Failure: Strings differ | ↓ (pos 0) | Expected: "name"
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts add --touch name SECRET --issuer issuer -"···, expected: "name,SECRET"): Assert.Equal() Failure: Strings differ | ↓ (pos 0) | Expected: "name,SECRET"
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues(commandLine: "accounts rename --password password old --force ne"···, expected: "old,new"): Assert.Equal() Failure: Strings differ | ↓ (pos 3) | Expected: "old,new"
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "accounts add --unknown --help"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "access change --help --clear"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "reset --force -h"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "accounts delete --force --help name"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "reset help -f"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "reset --help --force"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "help reset --force"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "--help reset --force"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation(commandLine: "info --help"): Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts add name SECRET --digits nope"): Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts add name SECRET --period 999999999999999"): Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "reset --unknown --force"): Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts rename old new extra --force"): Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "reset --password password"): Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts add name SECRET --algorithm bogus"): Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts add name SECRET --issuer first --issuer s"···): Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts delete --password --force name"): Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   99
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap(commandLine: "accounts delete --password"): Assert.Equal() Failure: Values differ | Expected: 1 | Actual:   99
+      output: artifacts/toolchain/runs/20261102-220627-381-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 25 executed, 24 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Options_ConsumeOnlyTheirDeclaredValues|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.Help_NeverInvokesBootstrapOrMutation|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.MalformedOptions_DoNotEnterBootstrap"
+Run log: artifacts/toolchain/runs/20261102-220627-381-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

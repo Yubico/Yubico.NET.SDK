@@ -1,0 +1,92 @@
+$ dotnet run --project src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/Yubico.YubiKit.Oath.UnitTests.csproj -c Release -- --filter-method "*OathTimeTests*" --filter-method "*OathResetTests*"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(cancel: True) (75ms)
+  Assert.False() Failure
+  Expected: False
+  Actual:   True
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(Boolean cancel) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:37
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(Boolean cancel)
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(cancel: False) (1ms)
+  Assert.False() Failure
+  Expected: False
+  Actual:   True
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(Boolean cancel) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:37
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_RefreshFails_FailsClosedAndLeavesBorrowedConnectionOpen(Boolean cancel)
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateCodeAsync_NegativeHotpTimestamp_RejectsBeforeAdvancingCounter (2ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateCodeAsync_NegativeHotpTimestamp_RejectsBeforeAdvancingCounter() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:96
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateCodeAsync_NegativeHotpTimestamp_RejectsBeforeAdvancingCounter() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:98
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: -9223372036854775808) (1ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(Int64 timestamp) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:30
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(Int64 timestamp) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:33
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: -1) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(Int64 timestamp) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:30
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(Int64 timestamp) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:33
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: 9223372036854775807) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(Int64 timestamp) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:30
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(Int64 timestamp) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:33
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(timestamp: 9223372036854775800) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(Int64 timestamp) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:30
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.Calculations_UnrepresentableDefaultWindow_RejectBeforeWire(Int64 timestamp) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:33
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Totp, timestamp: 9223372036854775807, period: 30) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(OathType type, Int64 timestamp, Int32 period) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:73
+    at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+    at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Totp, timestamp: 9223372036854775807, period: 1) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(OathType type, Int64 timestamp, Int32 period) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:73
+    at InvokeStub_OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Totp, timestamp: -1, period: 30) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(OathType type, Int64 timestamp, Int32 period) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:73
+    at InvokeStub_OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(type: Hotp, timestamp: -1, period: 0) (0ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(OathType type, Int64 timestamp, Int32 period) in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:73
+    at InvokeStub_OathTimeTests.FormatCode_InvalidTime_DoesNotReturnWrappedMetadata(Object, Span`1)
+    at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+failed Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateAllAsync_CustomWindowOverflow_ClearsResponseWithoutFollowup (1ms)
+  Assert.Throws() Failure: No exception was thrown
+  Expected: typeof(System.ArgumentOutOfRangeException)
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateAllAsync_CustomWindowOverflow_ClearsResponseWithoutFollowup() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:112
+    at Yubico.YubiKit.Oath.UnitTests.OathTimeTests.CalculateAllAsync_CustomWindowOverflow_ClearsResponseWithoutFollowup() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathTimeTests.cs:115
+    --- End of stack trace from previous location ---
+failed Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_RefreshesIdentityAndPreservesEffectiveVersion (20ms)
+  Assert.Equal() Failure: Collections differ
+  Expected: [0, 4, 222, 173]
+  Actual:   [0, 4, 222, 173, 0]
+                             ↑ (pos 4)
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_RefreshesIdentityAndPreservesEffectiveVersion() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:69
+    at Yubico.YubiKit.Oath.UnitTests.OathResetTests.ResetAsync_Success_RefreshesIdentityAndPreservesEffectiveVersion() in /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/OathResetTests.cs:69
+    --- End of stack trace from previous location ---
+
+Test run summary: Failed! - /tmp/opencode/yubikit-oath-fix-lifecycle/src/Oath/tests/Yubico.YubiKit.Oath.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Oath.UnitTests.dll (net10.0|x64)
+  total: 24
+  failed: 13
+  succeeded: 11
+  skipped: 0
+  duration: 448ms

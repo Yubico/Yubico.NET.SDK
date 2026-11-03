@@ -1,0 +1,200 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- test --project Oath",
+  "started": "2026-11-03T00:00:01.5242751+01:00",
+  "durationSeconds": 15.1,
+  "runDirectory": "artifacts/toolchain/runs/20261103-000001-524-test",
+  "targets": [
+    {
+      "name": "test-infrastructure-qa",
+      "status": "passed",
+      "durationSeconds": 0,
+      "error": null
+    },
+    {
+      "name": "test",
+      "status": "failed",
+      "durationSeconds": 15,
+      "error": "1 test project(s) failed"
+    }
+  ],
+  "projects": [
+    {
+      "target": "test",
+      "project": "Oath.UnitTests",
+      "outcome": "failed",
+      "reason": "40 test(s) failed",
+      "executed": 375,
+      "failed": 40,
+      "skipped": 0,
+      "failedTests": [
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Add_MalformedOrAbsentSecret_NeverOpensSession(encoded: \"MY=\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"demo\", issuer: null, period: 0, digits: 6, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Add_MalformedOrAbsentSecret_NeverOpensSession(encoded: \"AAAAAA\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"ééééééééééééééééééééééééééééééééé\", issuer: null, period: 30, digits: 6, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Add_MalformedOrAbsentSecret_NeverOpensSession(encoded: \"\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"demo\", issuer: null, period: 30, digits: -250, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Add_MalformedOrAbsentSecret_NeverOpensSession(encoded: \"A\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Add_MalformedOrAbsentSecret_NeverOpensSession(encoded: \"AAA\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"demo\", issuer: \"60/a\", period: 30, digits: 6, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Add_MalformedOrAbsentSecret_NeverOpensSession(encoded: \"========\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Add_MalformedOrAbsentSecret_NeverOpensSession(encoded: \"   \")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"demo\", issuer: null, period: 30, digits: 6, counter: -1, type: Hotp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Add_MalformedOrAbsentSecret_NeverOpensSession(encoded: \"MY=======\")",
+          "message": "Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"60/demo\", issuer: null, period: 30, digits: 6, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"\", issuer: null, period: 30, digits: 6, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"demo\", issuer: null, period: 30, digits: 9, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"a:b\", issuer: null, period: 30, digits: 6, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"demo\", issuer: null, period: 30, digits: 262, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"demo\", issuer: \"a:b\", period: 30, digits: 6, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed(name: \"demo\", issuer: \"\", period: 30, digits: 6, counter: 0, type: Totp)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Decode_MalformedTerminalForms_DoNotProduceCredentialMaterial(encoded: \"MY=======\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Decode_MalformedTerminalForms_DoNotProduceCredentialMaterial(encoded: \"AAAAAAAAA\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Decode_MalformedTerminalForms_DoNotProduceCredentialMaterial(encoded: \"MY=\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Decode_MalformedTerminalForms_DoNotProduceCredentialMaterial(encoded: \"AAAAAA\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Decode_MalformedTerminalForms_DoNotProduceCredentialMaterial(encoded: \"========\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Decode_MalformedTerminalForms_DoNotProduceCredentialMaterial(encoded: \"AAA\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Decode_MalformedTerminalForms_DoNotProduceCredentialMaterial(encoded: \"A\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.ParseUri_InvalidNonSecretFields_AreRejectedBeforeDecoding(query: \"digits=5\", type: \"totp\")",
+          "message": "Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 8) | String: \"Invalid Base32 character: '!'.\""
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.ParseUri_InvalidNonSecretFields_AreRejectedBeforeDecoding(query: \"digits=262\", type: \"totp\")",
+          "message": "Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 8) | String: \"Invalid Base32 character: '!'.\""
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.ParseUri_InvalidNonSecretFields_AreRejectedBeforeDecoding(query: \"counter=-1\", type: \"hotp\")",
+          "message": "Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 8) | String: \"Invalid Base32 character: '!'.\""
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Rename_AmbiguousOrOversizedIdentity_DoesNotTransmit(name: \"ééééééééééééééééééééééééééééééééé\", issuer: null)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Rename_AmbiguousOrOversizedIdentity_DoesNotTransmit(name: \"demo\", issuer: \"60/a\")",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Rename_AmbiguousOrOversizedIdentity_DoesNotTransmit(name: \"\", issuer: null)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Rename_AmbiguousOrOversizedIdentity_DoesNotTransmit(name: \"demo\", issuer: \"a:b\")",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Rename_AmbiguousOrOversizedIdentity_DoesNotTransmit(name: \"a:b\", issuer: null)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Rename_AmbiguousOrOversizedIdentity_DoesNotTransmit(name: \"60/demo\", issuer: null)",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Rename_AmbiguousOrOversizedIdentity_DoesNotTransmit(name: \"demo\", issuer: \"\")",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.ParseUri_AbsentSecretMaterial_DoesNotCreatePaddedZeroKey(secret: \"%20%20\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.ParseUri_AbsentSecretMaterial_DoesNotCreatePaddedZeroKey(secret: \"\")",
+          "message": "Assert.Throws() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        },
+        {
+          "name": "Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_EmptySeed_DoesNotTransmitAnAllZeroKey",
+          "message": "Assert.ThrowsAny() Failure: No exception was thrown | Expected: typeof(System.ArgumentException)"
+        }
+      ],
+      "log": "artifacts/toolchain/runs/20261103-000001-524-test/01-test-Oath.UnitTests.log"
+    }
+  ],
+  "warningCount": 0,
+  "warnings": [],
+  "next": [
+    "dotnet toolchain.cs -- test --project Oath.UnitTests --filter \"FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolCancellationTests.Add_MalformedOrAbsentSecret_NeverOpensSession|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathInputTests.Put_InvalidRequest_SendsNothingAndPreservesOwnedSeed|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathInputTests.Decode_MalformedTerminalForms_DoNotProduceCredentialMaterial|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathInputTests.ParseUri_InvalidNonSecretFields_AreRejectedBeforeDecoding|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathInputTests.Rename_AmbiguousOrOversizedIdentity_DoesNotTransmit\""
+  ]
+}

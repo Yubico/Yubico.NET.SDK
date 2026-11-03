@@ -1,0 +1,10 @@
+$ dotnet run --project src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/Yubico.YubiKit.Piv.UnitTests.csproj -c Release -- --filter-not-trait "Category=RequiresUserPresence"
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+
+Test run summary: Passed! - /tmp/opencode/yubikit-oath-fix-cli/src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Piv.UnitTests.dll (net10.0|x64)
+  total: 215
+  failed: 0
+  succeeded: 215
+  skipped: 0
+  duration: 379ms

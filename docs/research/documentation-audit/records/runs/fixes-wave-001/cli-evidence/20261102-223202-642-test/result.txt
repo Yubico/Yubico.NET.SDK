@@ -1,0 +1,26 @@
+RESULT: FAILED  (dotnet toolchain.cs -- test --project Oath --filter FullyQualifiedName~OathToolDispatchTests)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✗ test                       8.4s  1 test project(s) failed
+Projects (test):
+  ✗ FAIL      Oath.UnitTests  14 test(s) failed
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "accounts delete help --force", positionals: "help", password: null, issuer: null, newPassword: null): Assert.NotNull() Failure: Value is null
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "accounts rename old help --force", positionals: "old,help", password: null, issuer: null, newPassword: null): Assert.NotNull() Failure: Value is null
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "accounts code help", positionals: "help", password: null, issuer: null, newPassword: null): Assert.NotNull() Failure: Value is null
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "accounts code -- --help", positionals: "--help", password: null, issuer: null, newPassword: null): 
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "accounts code -- help", positionals: "help", password: null, issuer: null, newPassword: null): Assert.NotNull() Failure: Value is null
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "accounts add name SECRET --issuer help", positionals: "name,SECRET", password: null, issuer: "help", newPassword: null): Assert.NotNull() Failure: Value is null
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "access change --password help --new-password help", positionals: "", password: "help", issuer: null, newPassword: "help"): Assert.NotNull() Failure: Value is null | accounts list [--password|-p PASSWORD] | accounts code [QUERY] [--password|-p PASSWORD]
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "accounts code --password help query", positionals: "query", password: "help", issuer: null, newPassword: null): --password|-p PASSWORD. Defaults: TOTP, 6 digits, SHA1, 30 seconds. | Assert.NotNull() Failure: Value is null
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "accounts add help SECRET --force", positionals: "help,SECRET", password: null, issuer: null, newPassword: null): Assert.NotNull() Failure: Value is null
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged(commandLine: "accounts code -- -h", positionals: "-h", password: null, issuer: null, newPassword: null): Assert.NotNull() Failure: Value is null
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.InvalidInput_DoesNotDiscloseUnclassifiedTokens(commandLine: "access change --new-password=OtherSecret", secret: "OtherSecret"): Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 44) | String: ···"e option: --new-password=OtherSecret\nUsage: oath <"···
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.InvalidInput_DoesNotDiscloseUnclassifiedTokens(commandLine: "access change --password=MixedCaseSecret", secret: "MixedCaseSecret"): Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 40) | String: ···"icate option: --password=MixedCaseSecret\nUsage: oa"···
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.InvalidInput_DoesNotDiscloseUnclassifiedTokens(commandLine: "access change --password first --password=Duplicat"···, secret: "DuplicateSecret"): Assert.DoesNotContain() Failure: Sub-string found | ↓ (pos 40) | String: ···"icate option: --password=DuplicateSecret\nUsage: oa"···
+      - Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.RawAdd_SevenDigitsReachesCallback: Assert.Equal() Failure: Values differ | Expected: 0 | Actual:   1
+      output: artifacts/toolchain/runs/20261102-223202-642-test/01-test-Oath.UnitTests.log
+Totals: projects: 0 passed, 1 failed, 0 with no tests executed; tests: 48 executed, 14 failed, 0 skipped
+Warnings: 0
+Next: dotnet toolchain.cs -- test --project Oath.UnitTests --filter "FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.HelpLikeData_ReachesCallbackUnchanged|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.InvalidInput_DoesNotDiscloseUnclassifiedTokens|FullyQualifiedName~Yubico.YubiKit.Oath.UnitTests.OathToolDispatchTests.RawAdd_SevenDigitsReachesCallback"
+Run log: artifacts/toolchain/runs/20261102-223202-642-test/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

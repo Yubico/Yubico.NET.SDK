@@ -65,6 +65,10 @@ storage. They do not substitute for live SCP verification; there is no new SCP11
 be established, rerun the live terminal-reset case and review any resulting SCP, firmware, and reset documentation
 claims. Do not infer missing credentials, unsupported firmware, or a protocol defect solely from this status.
 
+The failure may also be specific to the tested YubiKey. Repeat the bounded initialization check on different
+SCP-capable YubiKeys before generalizing, recording each device's serial, firmware, key reference, and result.
+The observations above apply only to serial 125; they do not establish a failure across YubiKeys.
+
 ## Other recorded follow-ups
 
 - **CORE-001:** multi-key discovery can exclude serial 9681620 after an abandoned HID identity read; it works alone.

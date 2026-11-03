@@ -473,6 +473,44 @@ zero only for equal identities, so sorted collections retain distinct credential
 For UI ordering, sort explicitly by issuer (or name when no issuer is present), then by name, using
 `StringComparer.OrdinalIgnoreCase`. Use the credential itself as a final identity tie-breaker.
 
+#### Credential request validation (v2 alpha breaking change)
+
+PUT and rename now reject identities that cannot round-trip through the SDK's naming convention. The complete
+ID must fit 64 UTF-8 bytes, including issuer, separators, and any nondefault TOTP period prefix. Empty names,
+empty non-null issuers, lossy Unicode, and ambiguous metadata are rejected before transmission. This is not a
+blanket colon/slash restriction; see [credential names and renaming](../../src/Oath/README.md#credential-names-and-renaming).
+
+PUT accepts 6..8 digits, a positive TOTP period, and a nonnegative `Int32` HOTP counter. Irrelevant raw fields
+remain ignored: HOTP ignores period, and TOTP ignores counter. Missing URI HOTP counters still default to zero,
+and the query issuer still takes precedence over the label issuer.
+
+All OATH Base32 decoders now share Core's `Yubico.YubiKit.Core.Utilities.Base32`. Impossible terminal lengths,
+invalid characters, and incomplete or misplaced padding are rejected. ASCII case, literal spaces, omitted
+padding, and permissive unused pad bits remain supported. OATH requires nonempty secret material even though
+the generic decoder accepts empty text. See [Base32 decoding](../../src/Core/README.md#decode-base32-text) for output
+ownership, overlap rejection, and failure cleanup.
+
+#### Calculation and validation failures
+
+Explicit calculation timestamps must be nonnegative Unix seconds. TOTP windows must fit in `Int64`, including
+the exclusive end; the SDK does not impose a calendar-year limit. HOTP uses the timestamp only as result metadata.
+Invalid known timestamps are rejected before individual CALCULATE; aggregate custom-period bounds are checked
+when the response identifies the credential's period.
+
+A failed device-HMAC verification now throws `BadResponseException`. An access-key rejection reported by the
+device retains its `OathException` and raw status; that rejection does not by itself prove a mistyped password.
+
+#### Reset ends the session (v2 alpha breaking change)
+
+Successful `ResetAsync` now ends the OATH session, with or without SCP. Replace reset-then-reuse sequences with
+reset, close/reopen, and creation of a fresh session. A convenience-created session closes its owned connection;
+if you supplied the connection, you still own and must close it. Query the new identity and state through the
+fresh session, and supply live SCP parameters when creating that session if needed.
+
+Reset does not retain creation keys or re-establish SCP. Teardown can fail after the device has already reset;
+the error propagates and the session remains terminal. See [reset caller migration](../../src/Oath/README.md#migrating-reset-callers)
+for the reopening pattern. This OATH contract does not change reset behavior in other application modules.
+
 ### YubiOTP: HMAC-SHA1 Challenge-Response
 
 V1 used OTP operation builders for slot programming and calculation:
@@ -614,7 +652,9 @@ Migration notes:
 
 - `IsPasswordProtected` reflects whether the device has a password configured at all, independent of `IsLocked`'s per-session unlock state.
 - `AuthenticateAndRetryAsync` retries the wrapped operation exactly once after a successful `ValidateAsync`; it is not an unbounded retry loop like v1's `KeyCollector`.
-- Catch the dedicated `OathException` and branch on `OathException.Reason` (`Locked` or `WrongPassword`) instead of v1's `SecurityException`.
+- Catch `OathException` for device-reported access-key rejection or a locked applet, and inspect `Reason` and
+  `StatusWord`. The `WrongPassword` category does not by itself prove a mistyped password. Handle device-HMAC
+  verification failure separately as `BadResponseException`, rather than treating it as another password prompt.
 
 ## Application Sections
 

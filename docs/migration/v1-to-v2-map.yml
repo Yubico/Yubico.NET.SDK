@@ -425,13 +425,13 @@ mappings:
     confidence: high
     migration_kind: behavior
     v1: SecurityException with status-word-to-message mapping on wrong/locked OATH password
-    v2: OathException with OathFailureReason (Locked, WrongPassword) and StatusWord
+    v2: OathException with OathFailureReason and StatusWord for device rejection; BadResponseException for device-HMAC mismatch
     evidence:
       - yubikit:src/Oath/src/OathException.cs
       - yubikit:src/Oath/src/IOathSession.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot threw generic `ArgumentException`/`InvalidOperationException`/`BadResponseException` for wrong-password or locked-applet failures with no dedicated exception type (historical gap 11). The `yubikit-gaps` remediation effort added `OathException`, a dedicated public exception with a typed `Reason` (`OathFailureReason.Locked` or `WrongPassword`) and an optional `StatusWord`, thrown by `ValidateAsync` and by operations that fail because the applet is locked. Update `catch` clauses that targeted v1's `SecurityException` to catch `OathException` and branch on `Reason` instead of parsing the message.
-    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+    notes: Catch `OathException` for a locked applet or device-reported access-key rejection, and inspect `Reason` and `StatusWord` rather than parsing its message. The retained `WrongPassword` category does not prove that a password was mistyped. A device-HMAC mismatch during `ValidateAsync` instead throws `BadResponseException`; handle it separately from a request to collect another password.
+    last_reviewed_commit: d74cdd44f0d00874f93ac4aa462212a8c6dbc90e
   - id: yubiotp-static-password-keyboard
     status: assisted
     confidence: high

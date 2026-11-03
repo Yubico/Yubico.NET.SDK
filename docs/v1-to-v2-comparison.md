@@ -32,11 +32,12 @@ so the SDK can keep moving.
 | V1 capability | V2 status | Why |
 |---|---|---|
 | `TlvReader`/`TlvWriter` typed, sequential TLV parsing | Replaced by a thinner `Tlv`/`TlvHelper`/`DisposableTlvList` surface — tag/value containers and static helpers only | V1's public typed TLV API was a broad extensibility surface; every change to it was a breaking change |
-| `Base16`/`Base32`/`Bcd`/`ModHex` standalone codecs | No longer public | Same reasoning — general-purpose public utilities constrained internal iteration |
+| `Base16`/`Base32`/`Bcd`/`ModHex` standalone codecs | The full codec surface is not restored; public `Core.Utilities.Base32` provides decoding only | The small shared decoder supports OATH input without restoring the v1 encoding framework |
 | Pluggable crypto primitives (`IAesGcmPrimitives`, `IEcdhPrimitives`, `ICmacPrimitives`) | No longer public extension points | Same reasoning; AES-CMAC is now hardcoded internal to SCP code |
 
-If your code used any of these directly, you'll need your own replacement.
-That's the cost, and we think the smaller surface is worth it.
+If your code used the removed APIs directly, you'll need an alternative. For Base32 decoding, use
+[`Yubico.YubiKit.Core.Utilities.Base32`](../src/Core/README.md#decode-base32-text); it does not provide encoding
+or replacements for the other codecs.
 
 ### Device discovery, events, and ownership
 

@@ -14,6 +14,7 @@
 
 using System.Security.Cryptography;
 using System.Web;
+using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Oath;
 
@@ -30,7 +31,8 @@ public sealed class CredentialData : IDisposable
     private readonly byte[] _secret = [];
 
     /// <summary>
-    ///     Gets the account name, assigned during initialization.
+    ///     Gets the account name, assigned during initialization. Outgoing identities must be nonempty,
+    ///     fit 64 UTF-8 bytes including issuer/period metadata, and round-trip through the host ID convention.
     /// </summary>
     public required string Name { get; init; }
 
@@ -49,6 +51,7 @@ public sealed class CredentialData : IDisposable
     /// </summary>
     /// <remarks>
     ///     Initialization copies the supplied bytes; the caller still owns and must clear the input buffer.
+    ///     PUT requires nonempty secret material; the SDK's storage padding does not supply missing material.
     ///     Reading this property does not allocate or transfer ownership. The view is valid only until this
     ///     instance is disposed, which clears its backing storage and all existing views. Do not modify the
     ///     backing storage through array-extraction APIs. If an independent copy is needed, the caller owns
@@ -61,22 +64,25 @@ public sealed class CredentialData : IDisposable
     }
 
     /// <summary>
-    ///     Gets the number of digits in the OTP code, assigned during initialization. Defaults to 6.
+    ///     Gets the number of digits in the OTP code, from 6 through 8. Defaults to 6.
     /// </summary>
     public int Digits { get; init; } = OathConstants.DefaultDigits;
 
     /// <summary>
-    ///     Gets the TOTP time step period in seconds, assigned during initialization. Defaults to 30.
+    ///     Gets the positive TOTP time step period in seconds. Defaults to 30. Ignored for HOTP.
     /// </summary>
     public int Period { get; init; } = OathConstants.DefaultPeriod;
 
     /// <summary>
-    ///     Gets the HOTP initial moving factor (counter), assigned during initialization. Defaults to 0.
+    ///     Gets the HOTP initial moving factor (counter), from 0 through <see cref="int.MaxValue" />.
+    ///     Defaults to 0. Ignored for TOTP. The four-byte wire field can represent larger values,
+    ///     but this API supports only nonnegative <see cref="int" /> values.
     /// </summary>
     public int Counter { get; init; } = OathConstants.DefaultImf;
 
     /// <summary>
-    ///     Gets the credential issuer, assigned during initialization.
+    ///     Gets the credential issuer, or <see langword="null" /> for no issuer. An empty issuer is not
+    ///     representable in outgoing identities; issuer and name must round-trip without reinterpretation.
     /// </summary>
     public string? Issuer { get; init; }
 
@@ -96,9 +102,12 @@ public sealed class CredentialData : IDisposable
     /// <returns>A populated <see cref="CredentialData" /> instance whose owned secret must be disposed.</returns>
     /// <remarks>The URI string contains secret material and cannot be cleared by this method.</remarks>
     /// <exception cref="ArgumentException">
-    ///     Thrown when the URI scheme is not <c>otpauth</c>, the OATH type is missing or invalid,
-    ///     or the <c>secret</c> query parameter is missing.
+    ///     The URI scheme/type, algorithm, numeric fields, identity, or Base32 secret is invalid,
+    ///     or the secret parameter is absent or decodes to no material. Digits must be 6 through 8,
+    ///     TOTP period must be positive, and HOTP counter must be a nonnegative Int32 value.
     /// </exception>
+    /// <exception cref="FormatException">A numeric query field is not an integer.</exception>
+    /// <exception cref="OverflowException">A numeric query field does not fit an Int32.</exception>
     public static CredentialData ParseUri(string uri) => ParseUri(uri, requireTouch: false);
 
     /// <summary>
@@ -113,7 +122,16 @@ public sealed class CredentialData : IDisposable
     /// <remarks>
     ///     Dispose the returned instance after use. Decoded temporary bytes are cleared on success and failure;
     ///     the URI string and encoded secret strings cannot be cleared by this method.
+    ///     Non-secret request fields are validated before decoding. Missing HOTP counter defaults to zero;
+    ///     query issuer continues to take precedence over the label issuer.
     /// </remarks>
+    /// <exception cref="ArgumentException">
+    ///     The URI scheme/type, algorithm, numeric fields, identity, or Base32 secret is invalid,
+    ///     or the secret parameter is absent or decodes to no material. Digits must be 6 through 8,
+    ///     TOTP period must be positive, and HOTP counter must be a nonnegative Int32 value.
+    /// </exception>
+    /// <exception cref="FormatException">A numeric query field is not an integer.</exception>
+    /// <exception cref="OverflowException">A numeric query field does not fit an Int32.</exception>
     public static CredentialData ParseUri(string uri, bool requireTouch)
     {
         var parsed = new Uri(uri.Trim());
@@ -201,9 +219,13 @@ public sealed class CredentialData : IDisposable
             ? int.Parse(counterParam, System.Globalization.CultureInfo.InvariantCulture)
             : OathConstants.DefaultImf;
 
+        ValidateRequestNumbers(oathType, digits, period, counter);
+        _ = Credential.FormatCredentialId(issuer, name, oathType, period);
+
         byte[] secret = ParseBase32Key(secretParam);
         try
         {
+            ValidateSecretMaterial(secret);
             return new CredentialData
             {
                 Name = name,
@@ -227,7 +249,43 @@ public sealed class CredentialData : IDisposable
     ///     Gets the credential ID in wire format for the OATH applet.
     /// </summary>
     /// <returns>The credential ID as UTF-8 encoded bytes.</returns>
+    /// <exception cref="ArgumentException">
+    ///     The name is empty, the issuer is empty rather than null, the complete ID exceeds 64 UTF-8 bytes,
+    ///     or the identity cannot round-trip through the existing host convention. A TOTP period must be positive.
+    /// </exception>
     public byte[] GetId() => Credential.FormatCredentialId(Issuer, Name, OathType, Period);
+
+    internal void ValidateRequest()
+    {
+        ValidateRequestNumbers(OathType, Digits, Period, Counter);
+        ValidateSecretMaterial(_secret);
+    }
+
+    private static void ValidateSecretMaterial(ReadOnlySpan<byte> secret)
+    {
+        if (secret.IsEmpty)
+        {
+            throw new ArgumentException("OATH secret material must not be empty.", nameof(Secret));
+        }
+    }
+
+    private static void ValidateRequestNumbers(OathType oathType, int digits, int period, int counter)
+    {
+        if (digits is < 6 or > 8)
+        {
+            throw new ArgumentOutOfRangeException(nameof(digits), "OATH codes must have 6 through 8 digits.");
+        }
+
+        if (oathType == OathType.Totp && period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "TOTP period must be positive.");
+        }
+
+        if (oathType == OathType.Hotp && counter < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(counter), "HOTP counter must be a nonnegative Int32 value.");
+        }
+    }
 
     /// <summary>
     ///     Clears the owned shared secret, including any previously borrowed views. Safe to call repeatedly.
@@ -307,70 +365,9 @@ public sealed class CredentialData : IDisposable
     }
 
     /// <summary>
-    ///     Parses a Base32-encoded key string, supporting unpadded input and literal spaces.
+    ///     Parses a Base32-encoded key string, supporting ASCII case, literal spaces, and complete or absent padding.
     /// </summary>
     /// <param name="key">The Base32-encoded string.</param>
-    /// <returns>The decoded bytes.</returns>
-    internal static byte[] ParseBase32Key(string key)
-    {
-        key = key.ToUpperInvariant().Replace(" ", "");
-
-        // Add padding if necessary
-        int paddingNeeded = (8 - (key.Length % 8)) % 8;
-        if (paddingNeeded > 0)
-        {
-            key += new string('=', paddingNeeded);
-        }
-
-        return FromBase32(key);
-    }
-
-    private static byte[] FromBase32(string base32)
-    {
-        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-
-        // Remove padding
-        base32 = base32.TrimEnd('=');
-
-        if (base32.Length == 0)
-        {
-            return [];
-        }
-
-        int byteCount = base32.Length * 5 / 8;
-        byte[] result = new byte[byteCount];
-
-        int buffer = 0;
-        int bitsInBuffer = 0;
-        int index = 0;
-
-        try
-        {
-            foreach (char c in base32)
-            {
-                int val = alphabet.IndexOf(c);
-                if (val < 0)
-                {
-                    throw new ArgumentException($"Invalid Base32 character: '{c}'.");
-                }
-
-                buffer = (buffer << 5) | val;
-                bitsInBuffer += 5;
-
-                if (bitsInBuffer >= 8)
-                {
-                    bitsInBuffer -= 8;
-                    result[index++] = (byte)(buffer >> bitsInBuffer);
-                    buffer &= (1 << bitsInBuffer) - 1;
-                }
-            }
-
-            return result;
-        }
-        catch
-        {
-            CryptographicOperations.ZeroMemory(result);
-            throw;
-        }
-    }
+    /// <returns>Independently owned decoded bytes, which the caller must clear.</returns>
+    internal static byte[] ParseBase32Key(string key) => Base32.Decode(key.AsSpan());
 }

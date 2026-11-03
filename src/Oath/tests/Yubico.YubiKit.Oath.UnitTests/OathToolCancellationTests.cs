@@ -313,6 +313,52 @@ public class OathToolCancellationTests
         Assert.DoesNotContain("Authentication failed", output.ToString());
     }
 
+    [Theory]
+    [InlineData("A")]
+    [InlineData("AAA")]
+    [InlineData("AAAAAA")]
+    [InlineData("MY=")]
+    [InlineData("MY=======")]
+    [InlineData("========")]
+    [InlineData("M=Y=====")]
+    [InlineData("MZXW6YTB!")]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Add_MalformedOrAbsentSecret_NeverOpensSession(string encoded)
+    {
+        int opens = 0;
+        var services = new OathToolServices(_ => { opens++; return Task.FromResult<IOathSession?>(null); },
+            new FakeReader(_ => null), (_, _) => ValueTask.FromResult(true));
+        int exit = await AccountsCommand.AddAsync("name", encoded, force: true,
+            cancellationToken: TestContext.Current.CancellationToken, services: services);
+        Assert.Equal(1, exit);
+        Assert.Equal(0, opens);
+    }
+
+    [Theory]
+    [InlineData("MY======", "f")]
+    [InlineData("MZXQ====", "fo")]
+    [InlineData("MZXW6===", "foo")]
+    [InlineData("MZXW6YQ=", "foob")]
+    [InlineData("MZXW6YTB", "fooba")]
+    [InlineData("m z x w 6 y t b o i", "foobar")]
+    [InlineData("MZXW6YTBOI======", "foobar")]
+    [InlineData("MZ", "f")]
+    public async Task Add_RfcSecretBytes_ReachPutThenAreDisposed(string encoded, string expected)
+    {
+        foreach (string input in new[] { encoded, encoded.TrimEnd('=') })
+        {
+            var session = new FakeSession();
+            session.OnPut = data => Assert.True(CryptographicOperations.FixedTimeEquals(
+                System.Text.Encoding.ASCII.GetBytes(expected), data.Secret.Span));
+            int exit = await AccountsCommand.AddAsync("name", input, force: true,
+                cancellationToken: TestContext.Current.CancellationToken, services: Services(session));
+            Assert.Equal(0, exit);
+            Assert.Equal(1, session.Operations);
+            Assert.True(session.PutSecret.Span.IndexOfAnyExcept((byte)0) < 0);
+        }
+    }
+
     private static OathToolServices Services(FakeSession session, ISecureCredentialReader? reader = null) =>
         new(_ => Task.FromResult<IOathSession?>(session), reader ?? new FakeReader(_ => null),
             (_, _) => ValueTask.FromResult(true));
@@ -361,6 +407,8 @@ public class OathToolCancellationTests
         public bool CancelList { get; init; }
         public byte[] DerivedKey { get; private set; } = [];
         public Action OnDerive { get; set; } = () => { };
+        public Action<CredentialData> OnPut { get; set; } = _ => { };
+        public ReadOnlyMemory<byte> PutSecret { get; private set; }
         public Func<CancellationToken, Task> OnOperation { get; set; } = _ => Task.CompletedTask;
         public FirmwareVersion FirmwareVersion => new(5, 7, 0);
         public ConnectionType ConnectionType => ConnectionType.SmartCard;
@@ -381,7 +429,12 @@ public class OathToolCancellationTests
             return [new Credential("fake", "name"u8.ToArray(), null, "name", OathType.Totp, 30, false)];
         }
         public Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default) => Operate(cancellationToken);
-        public Task PutCredentialAsync(CredentialData credentialData, CancellationToken cancellationToken = default) => Operate(cancellationToken);
+        public Task PutCredentialAsync(CredentialData credentialData, CancellationToken cancellationToken = default)
+        {
+            PutSecret = credentialData.Secret;
+            OnPut(credentialData);
+            return Operate(cancellationToken);
+        }
         public Task DeleteCredentialAsync(Credential credential, CancellationToken cancellationToken = default) => Operate(cancellationToken);
         public async Task<Credential> RenameCredentialAsync(Credential credential, string? newIssuer, string newName, CancellationToken cancellationToken = default)
         { await Operate(cancellationToken); return credential; }

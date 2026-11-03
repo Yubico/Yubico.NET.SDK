@@ -250,6 +250,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credentialData);
 
+        credentialData.ValidateRequest();
         byte[] credId = credentialData.GetId();
         byte[] secret = credentialData.GetProcessedSecret();
 

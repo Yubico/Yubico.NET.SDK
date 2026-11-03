@@ -1,5 +1,9 @@
 #nullable enable
 
+Yubico.YubiKit.Core.Utilities.Base32
+static Yubico.YubiKit.Core.Utilities.Base32.Decode(System.ReadOnlySpan<char> encoded) -> byte[]!
+static Yubico.YubiKit.Core.Utilities.Base32.Decode(System.ReadOnlySpan<char> encoded, System.Span<byte> destination) -> int
+
 Yubico.YubiKit.Core.Abstractions.IApplicationSession
 Yubico.YubiKit.Core.Abstractions.IApplicationSession.ConnectionType.get -> Yubico.YubiKit.Core.Devices.ConnectionType
 Yubico.YubiKit.Core.Abstractions.IApplicationSession.EnsureSupports(Yubico.YubiKit.Core.Devices.Feature feature) -> void

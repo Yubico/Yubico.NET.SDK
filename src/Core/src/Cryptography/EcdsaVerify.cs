@@ -336,15 +336,15 @@
 //         {
 //             if (encodedPointLength == (KeyDefinitions.P256.LengthInBytes * 2) + 1)
 //             {
-//                 return Oids.ECP256;
+//                 return Oids.P256;
 //             }
 //             if (encodedPointLength == (KeyDefinitions.P384.LengthInBytes * 2) + 1)
 //             {
-//                 return Oids.ECP384;
+//                 return Oids.P384;
 //             }
 //             if (encodedPointLength == (KeyDefinitions.P521.LengthInBytes * 2) + 1)
 //             {
-//                 return Oids.ECP521;
+//                 return Oids.P521;
 //             }
 // //
 //             throw new ArgumentException("ExceptionMessages.UnsupportedAlgorithm);");
@@ -445,10 +445,10 @@
 //         {
 //             return algorithm switch
 //             {
-//                 CoseAlgorithmIdentifier.ES256 => Oids.ECP256,
-//                 CoseAlgorithmIdentifier.ECDHwHKDF256 => Oids.ECP256,
-//                 CoseAlgorithmIdentifier.ES384 => Oids.ECP384,
-//                 CoseAlgorithmIdentifier.ES512 => Oids.ECP521,
+//                 CoseAlgorithmIdentifier.Es256 => Oids.P256,
+//                 CoseAlgorithmIdentifier.EcdhEsHkdf256 => Oids.P256,
+//                 CoseAlgorithmIdentifier.Es384 => Oids.P384,
+//                 CoseAlgorithmIdentifier.Es512 => Oids.P521,
 //                 _ => throw new NotSupportedException("Unsupported algorithm")
 //             };
 //         }

@@ -19,28 +19,28 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 public class OidsTests
 {
     [Theory]
-    [InlineData(KeyType.RSA1024, Oids.RSA, null)]
-    [InlineData(KeyType.RSA2048, Oids.RSA, null)]
-    [InlineData(KeyType.RSA3072, Oids.RSA, null)]
-    [InlineData(KeyType.RSA4096, Oids.RSA, null)]
-    [InlineData(KeyType.ECP256, Oids.ECDSA, Oids.ECP256)]
-    [InlineData(KeyType.ECP384, Oids.ECDSA, Oids.ECP384)]
-    [InlineData(KeyType.ECP521, Oids.ECDSA, Oids.ECP521)]
+    [InlineData(KeyType.Rsa1024, Oids.Rsa, null)]
+    [InlineData(KeyType.Rsa2048, Oids.Rsa, null)]
+    [InlineData(KeyType.Rsa3072, Oids.Rsa, null)]
+    [InlineData(KeyType.Rsa4096, Oids.Rsa, null)]
+    [InlineData(KeyType.P256, Oids.EcPublicKey, Oids.P256)]
+    [InlineData(KeyType.P384, Oids.EcPublicKey, Oids.P384)]
+    [InlineData(KeyType.P521, Oids.EcPublicKey, Oids.P521)]
     [InlineData(KeyType.X25519, Oids.X25519, null)]
     [InlineData(KeyType.Ed25519, Oids.Ed25519, null)]
-    [InlineData(KeyType.AES128, Oids.AES128Cbc, null)]
-    [InlineData(KeyType.AES192, Oids.AES192Cbc, null)]
-    [InlineData(KeyType.AES256, Oids.AES256Cbc, null)]
-    [InlineData(KeyType.TripleDES, Oids.TripleDESCbc, null)]
+    [InlineData(KeyType.Aes128, Oids.Aes128Cbc, null)]
+    [InlineData(KeyType.Aes192, Oids.Aes192Cbc, null)]
+    [InlineData(KeyType.Aes256, Oids.Aes256Cbc, null)]
+    [InlineData(KeyType.TripleDes, Oids.TripleDesCbc, null)]
     public void GetOidsByKeyType_MappedKeyType_ReturnsExpectedOidPair(
         KeyType keyType,
         string expectedAlgorithmOid,
         string? expectedCurveOid)
     {
-        (string AlgorithmOid, string? Curveoid) result = Oids.GetOidsByKeyType(keyType);
+        (string AlgorithmOid, string? CurveOid) result = Oids.GetOidsByKeyType(keyType);
 
         Assert.Equal(expectedAlgorithmOid, result.AlgorithmOid);
-        Assert.Equal(expectedCurveOid, result.Curveoid);
+        Assert.Equal(expectedCurveOid, result.CurveOid);
     }
 
     [Fact]

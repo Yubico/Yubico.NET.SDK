@@ -102,7 +102,7 @@
 //                 PublicKey = publicKey,
 //                 Curve = CoseEcCurve.Ed25519,
 //                 Type = CoseKeyType.Okp,
-//                 Algorithm = CoseAlgorithmIdentifier.EdDSA
+//                 Algorithm = CoseAlgorithmIdentifier.EdDsa
 //             };
 //         }
 //
@@ -143,7 +143,7 @@
 //
 //             return new CborMapWriter<int>()
 //                 .Entry(TagKeyType, (int)CoseKeyType.Okp)
-//                 .Entry(TagAlgorithm, (int)CoseAlgorithmIdentifier.EdDSA)
+//                 .Entry(TagAlgorithm, (int)CoseAlgorithmIdentifier.EdDsa)
 //                 .Entry(TagCurve, (int)CoseEcCurve.Ed25519)
 //                 .Entry(TagPublicKey, PublicKey)
 //                 .Encode();

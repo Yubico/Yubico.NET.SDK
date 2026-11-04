@@ -29,9 +29,9 @@ internal static class EcTestSupport
 {
     public static ECCurve NamedCurve(string curveOid) => curveOid switch
     {
-        Oids.ECP256 => ECCurve.NamedCurves.nistP256,
-        Oids.ECP384 => ECCurve.NamedCurves.nistP384,
-        Oids.ECP521 => ECCurve.NamedCurves.nistP521,
+        Oids.P256 => ECCurve.NamedCurves.nistP256,
+        Oids.P384 => ECCurve.NamedCurves.nistP384,
+        Oids.P521 => ECCurve.NamedCurves.nistP521,
         _ => throw new ArgumentOutOfRangeException(nameof(curveOid))
     };
 
@@ -42,9 +42,9 @@ internal static class EcTestSupport
     /// </summary>
     public static int CoordinateSize(string curveOid) => curveOid switch
     {
-        Oids.ECP256 => 32,
-        Oids.ECP384 => 48,
-        Oids.ECP521 => 66,
+        Oids.P256 => 32,
+        Oids.P384 => 48,
+        Oids.P521 => 66,
         _ => throw new ArgumentOutOfRangeException(nameof(curveOid))
     };
 

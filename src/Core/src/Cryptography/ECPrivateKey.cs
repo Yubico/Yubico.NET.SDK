@@ -229,7 +229,7 @@ namespace Yubico.YubiKit.Core.Cryptography
             Action<ECParameters>? parametersCreated)
         {
             var keyDefinition = keyType.GetKeyDefinition();
-            if (keyDefinition.AlgorithmOid is not Oids.ECDSA)
+            if (keyDefinition.AlgorithmOid is not Oids.EcPublicKey)
             {
                 throw new ArgumentException("Only P-256, P-384 and P-521 are supported.", nameof(keyType));
             }

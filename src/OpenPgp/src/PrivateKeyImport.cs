@@ -103,9 +103,9 @@ internal sealed class PrivateKeyImport : IDisposable
             case ECPrivateKey ec:
                 return EcAttributes.Create(keyRef, ec.KeyType switch
                 {
-                    KeyType.ECP256 => CurveOid.Secp256R1,
-                    KeyType.ECP384 => CurveOid.Secp384R1,
-                    KeyType.ECP521 => CurveOid.Secp521R1,
+                    KeyType.P256 => CurveOid.Secp256R1,
+                    KeyType.P384 => CurveOid.Secp384R1,
+                    KeyType.P521 => CurveOid.Secp521R1,
                     _ => throw new NotSupportedException($"Curve {ec.KeyType} is not supported for OpenPGP import."),
                 });
 

@@ -52,7 +52,7 @@ public sealed class RSAPublicKey : PublicKey
     {
         ArgumentNullException.ThrowIfNull(parameters.Modulus);
         Parameters = parameters.DeepCopy();
-        KeyDefinition = KeyDefinitions.GetByRSAModulusLength(parameters.Modulus);
+        KeyDefinition = KeyDefinitions.GetByRsaModulusLength(parameters.Modulus);
     }
 
     /// <inheritdoc />

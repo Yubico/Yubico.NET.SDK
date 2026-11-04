@@ -15,22 +15,23 @@
 namespace Yubico.YubiKit.Core.Cryptography;
 
 /// <summary>
-/// Represents the type of cryptographic key.
+/// Identifies a concrete supported cryptographic key variant, not an operation algorithm or wire identifier.
 /// </summary>
+/// <remarks>Numeric values are explicit. Enum names and ToString output are not a persistence contract.</remarks>
 public enum KeyType
 {
-    None,
-    ECP256,
-    ECP384,
-    ECP521,
-    X25519,
-    Ed25519,
-    RSA1024,
-    RSA2048,
-    RSA3072,
-    RSA4096,
-    TripleDES,
-    AES128,
-    AES192,
-    AES256
+    None = 0,
+    P256 = 1,
+    P384 = 2,
+    P521 = 3,
+    X25519 = 4,
+    Ed25519 = 5,
+    Rsa1024 = 6,
+    Rsa2048 = 7,
+    Rsa3072 = 8,
+    Rsa4096 = 9,
+    TripleDes = 10,
+    Aes128 = 11,
+    Aes192 = 12,
+    Aes256 = 13
 }

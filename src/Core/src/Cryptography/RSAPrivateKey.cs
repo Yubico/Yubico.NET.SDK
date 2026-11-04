@@ -61,7 +61,7 @@ public sealed class RSAPrivateKey : PrivateKey
     {
         var keyLengthBits = parameters.DP?.Length * 8 * 2 ?? 0;
 
-        KeyDefinition = KeyDefinitions.GetByRSALength(keyLengthBits); // cheap gate first: unsupported sizes never reach arithmetic
+        KeyDefinition = KeyDefinitions.GetByRsaLength(keyLengthBits); // cheap gate first: unsupported sizes never reach arithmetic
         PrivateKeyConsistency.ThrowIfInconsistent(parameters);
         Parameters = parameters.NormalizeParameters(parametersCopied);
     }

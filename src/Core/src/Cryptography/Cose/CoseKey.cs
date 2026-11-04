@@ -109,11 +109,11 @@
 //             var algorithm = GetAlgorithm(cborMap);
 //             return algorithm switch
 //             {
-//                 CoseAlgorithmIdentifier.ECDHwHKDF256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-//                 CoseAlgorithmIdentifier.ES256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-//                 CoseAlgorithmIdentifier.ES384 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-//                 CoseAlgorithmIdentifier.ES512 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
-//                 CoseAlgorithmIdentifier.EdDSA => CoseEdDsaPublicKey.CreateFromEncodedKey(coseEncodedKey),
+//                 CoseAlgorithmIdentifier.EcdhEsHkdf256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+//                 CoseAlgorithmIdentifier.Es256 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+//                 CoseAlgorithmIdentifier.Es384 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+//                 CoseAlgorithmIdentifier.Es512 => CoseEcPublicKey.CreateFromEncodedKey(coseEncodedKey),
+//                 CoseAlgorithmIdentifier.EdDsa => CoseEdDsaPublicKey.CreateFromEncodedKey(coseEncodedKey),
 //                 _ => throw new NotSupportedException(
 //                     string.Format(CultureInfo.CurrentCulture, ExceptionMessages.UnsupportedAlgorithm))
 //             };

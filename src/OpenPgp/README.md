@@ -184,6 +184,10 @@ Signing, decryption, internal authentication, and attestation notify before thei
 
 ## Constraints
 
+Core key import identities now use `KeyType.P256/P384/P521` and `Rsa*`; OpenPGP `CurveOid` and algorithm
+attribute wire values are unchanged and explicitly mapped. A shared COSE mapping is not OpenPGP capability.
+See [key metadata migration](../../docs/migration/key-metadata.md).
+
 - SmartCard only. Asking for `ConnectionType.HidFido` or `ConnectionType.HidOtp` through `SessionCreationOptions.PreferredConnectionType` throws `ArgumentException`.
 - A physical YubiKey admits one live connection and one session over it. A session from `CreateOpenPgpSessionAsync` owns the connection it opened; `OpenPgpSession.CreateAsync` borrows yours and you dispose it. Use `await using` for both.
 - `ResetAsync` is destructive: it deliberately blocks both PINs, terminates the applet, and reactivates it, erasing every key, certificate, and setting and restoring the default PINs.

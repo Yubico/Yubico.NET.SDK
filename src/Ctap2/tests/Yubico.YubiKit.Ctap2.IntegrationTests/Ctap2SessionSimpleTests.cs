@@ -14,12 +14,11 @@
 
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
-
-using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
@@ -119,7 +118,7 @@ public class Ctap2SessionSimpleTests
             if (info.Algorithms is { Count: > 0 })
             {
                 var hasEs256 = info.Algorithms.Any(a =>
-                    a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.ES256);
+                    a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
                 Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
             }
         });

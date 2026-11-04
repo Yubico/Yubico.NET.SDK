@@ -141,7 +141,7 @@ v2 locations: `src/Fido2/src/**`, `src/WebAuthn/src/**`
   There is no one-to-one `KeyCollector` analog for PIN/UV collection, but touch is no longer a gap.
   **Severity**: Minor (migration friction, not capability loss) | **Confidence**: High
 
-- **Feature/API**: COSE named constants `ES512` (-36) and `ECDHwHKDF256` (-25)
+- **Feature/API**: COSE named constants `Es512` (-36) and `EcdhEsHkdf256` (-25)
   **v2 status**: Degraded (cosmetic) — `CoseAlgorithm.IsKnown`/`ToString()` doesn't recognize these; still functionally usable via `CoseAlgorithm.Other(int)`.
   **Severity**: Cosmetic | **Confidence**: Medium
 

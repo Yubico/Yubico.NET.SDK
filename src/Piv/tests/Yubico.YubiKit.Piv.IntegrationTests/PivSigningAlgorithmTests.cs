@@ -130,14 +130,14 @@ public class PivSigningAlgorithmTests
         var hash = SHA1.HashData(dataToSign);
 #pragma warning restore CA5350
 
-        var paddedData = CreatePkcs1v15SigningPadding(Sha1DigestInfo, hash, KeyDefinitions.RSA2048.LengthInBytes);
+        var paddedData = CreatePkcs1v15SigningPadding(Sha1DigestInfo, hash, KeyDefinitions.Rsa2048.LengthInBytes);
 
         var signature = await session.SignOrDecryptAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa2048,
             paddedData);
 
-        Assert.Equal(KeyDefinitions.RSA2048.LengthInBytes, signature.Length);
+        Assert.Equal(KeyDefinitions.Rsa2048.LengthInBytes, signature.Length);
 
         using var rsa = RSA.Create();
         rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
@@ -163,14 +163,14 @@ public class PivSigningAlgorithmTests
         var dataToSign = "SHA-384 signing test"u8.ToArray();
         var hash = SHA384.HashData(dataToSign);
 
-        var paddedData = CreatePkcs1v15SigningPadding(Sha384DigestInfo, hash, KeyDefinitions.RSA2048.LengthInBytes);
+        var paddedData = CreatePkcs1v15SigningPadding(Sha384DigestInfo, hash, KeyDefinitions.Rsa2048.LengthInBytes);
 
         var signature = await session.SignOrDecryptAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa2048,
             paddedData);
 
-        Assert.Equal(KeyDefinitions.RSA2048.LengthInBytes, signature.Length);
+        Assert.Equal(KeyDefinitions.Rsa2048.LengthInBytes, signature.Length);
 
         using var rsa = RSA.Create();
         rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);
@@ -194,14 +194,14 @@ public class PivSigningAlgorithmTests
         var dataToSign = "SHA-512 signing test"u8.ToArray();
         var hash = SHA512.HashData(dataToSign);
 
-        var paddedData = CreatePkcs1v15SigningPadding(Sha512DigestInfo, hash, KeyDefinitions.RSA2048.LengthInBytes);
+        var paddedData = CreatePkcs1v15SigningPadding(Sha512DigestInfo, hash, KeyDefinitions.Rsa2048.LengthInBytes);
 
         var signature = await session.SignOrDecryptAsync(
             PivSlot.Signature,
             PivAlgorithm.Rsa2048,
             paddedData);
 
-        Assert.Equal(KeyDefinitions.RSA2048.LengthInBytes, signature.Length);
+        Assert.Equal(KeyDefinitions.Rsa2048.LengthInBytes, signature.Length);
 
         using var rsa = RSA.Create();
         rsa.ImportSubjectPublicKeyInfo(((RSAPublicKey)publicKey).ExportSubjectPublicKeyInfo(), out _);

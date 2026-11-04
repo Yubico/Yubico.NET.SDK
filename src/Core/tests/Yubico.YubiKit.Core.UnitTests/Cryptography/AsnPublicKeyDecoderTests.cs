@@ -110,7 +110,7 @@ public class AsnPublicKeyDecoderTests
     [Fact]
     public void CreatePublicKey_EcPointPrefixNotUncompressed_ThrowsCryptographicExceptionWithExpectedMessage()
     {
-        var spki = BuildEcSubjectPublicKeyInfo(Oids.ECP256, PointWithBadPrefix(0x02, coordinateSize: 32));
+        var spki = BuildEcSubjectPublicKeyInfo(Oids.P256, PointWithBadPrefix(0x02, coordinateSize: 32));
 
         var ex = Assert.Throws<CryptographicException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
 
@@ -122,7 +122,7 @@ public class AsnPublicKeyDecoderTests
     {
         // Valid 0x04 prefix but truncated coordinate data for P-256 (expects 65 bytes total).
         var badPoint = new byte[] { 0x04, 0x01, 0x02, 0x03 };
-        var spki = BuildEcSubjectPublicKeyInfo(Oids.ECP256, badPoint);
+        var spki = BuildEcSubjectPublicKeyInfo(Oids.P256, badPoint);
 
         var ex = Assert.Throws<CryptographicException>(() => AsnPublicKeyDecoder.CreatePublicKey(spki));
 
@@ -130,9 +130,9 @@ public class AsnPublicKeyDecoderTests
     }
 
     [Theory]
-    [InlineData(Oids.ECP256)]
-    [InlineData(Oids.ECP384)]
-    [InlineData(Oids.ECP521)]
+    [InlineData(Oids.P256)]
+    [InlineData(Oids.P384)]
+    [InlineData(Oids.P521)]
     public void CreatePublicKey_EmptyEcPoint_ThrowsCryptographicExceptionNotIndexOutOfRange(string curveOid)
     {
         // A zero-length BIT STRING has no prefix octet to inspect. The decoder must report this as
@@ -152,7 +152,7 @@ public class AsnPublicKeyDecoderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(Oids.RSA);
+                writer.WriteObjectIdentifier(Oids.Rsa);
                 writer.WriteNull();
             }
 
@@ -222,7 +222,7 @@ public class AsnPublicKeyDecoderTests
         {
             using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(Oids.ECDSA);
+                writer.WriteObjectIdentifier(Oids.EcPublicKey);
                 writer.WriteObjectIdentifier(curveOid);
             }
 

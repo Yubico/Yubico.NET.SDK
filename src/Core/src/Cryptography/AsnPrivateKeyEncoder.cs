@@ -45,9 +45,9 @@ internal static class AsnPrivateKeyEncoder
     {
         return keyType switch
         {
-            KeyType.ECP256 => EncodeECKey(privateKey, Oids.ECP256, publicPoint),
-            KeyType.ECP384 => EncodeECKey(privateKey, Oids.ECP384, publicPoint),
-            KeyType.ECP521 => EncodeECKey(privateKey, Oids.ECP521, publicPoint),
+            KeyType.P256 => EncodeECKey(privateKey, Oids.P256, publicPoint),
+            KeyType.P384 => EncodeECKey(privateKey, Oids.P384, publicPoint),
+            KeyType.P521 => EncodeECKey(privateKey, Oids.P521, publicPoint),
             KeyType.X25519 => EncodeCurve25519Key(privateKey.Span, Oids.X25519),
             KeyType.Ed25519 => EncodeCurve25519Key(privateKey.Span, Oids.Ed25519),
             _ => throw new NotSupportedException($"Key type {keyType} is not supported for encoding.")
@@ -118,7 +118,7 @@ internal static class AsnPrivateKeyEncoder
         writer.WriteInteger(0);
 
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(Oids.RSA);
+        writer.WriteObjectIdentifier(Oids.Rsa);
         writer.WriteNull();
         writer.PopSequence();
 
@@ -244,7 +244,7 @@ internal static class AsnPrivateKeyEncoder
 
         // Algorithm Identifier SEQUENCE
         _ = writer.PushSequence();
-        writer.WriteObjectIdentifier(Oids.ECDSA);
+        writer.WriteObjectIdentifier(Oids.EcPublicKey);
         writer.WriteObjectIdentifier(curveOid);
         writer.PopSequence();
 

@@ -148,12 +148,12 @@ internal static class PivKeyProtocol
         // Determine algorithm from key type
         var algorithm = privateKey.KeyType switch
         {
-            KeyType.RSA1024 => PivAlgorithm.Rsa1024,
-            KeyType.RSA2048 => PivAlgorithm.Rsa2048,
-            KeyType.RSA3072 => PivAlgorithm.Rsa3072,
-            KeyType.RSA4096 => PivAlgorithm.Rsa4096,
-            KeyType.ECP256 => PivAlgorithm.EccP256,
-            KeyType.ECP384 => PivAlgorithm.EccP384,
+            KeyType.Rsa1024 => PivAlgorithm.Rsa1024,
+            KeyType.Rsa2048 => PivAlgorithm.Rsa2048,
+            KeyType.Rsa3072 => PivAlgorithm.Rsa3072,
+            KeyType.Rsa4096 => PivAlgorithm.Rsa4096,
+            KeyType.P256 => PivAlgorithm.EccP256,
+            KeyType.P384 => PivAlgorithm.EccP384,
             KeyType.Ed25519 => PivAlgorithm.Ed25519,
             KeyType.X25519 => PivAlgorithm.X25519,
             _ => throw new NotSupportedException($"Key type {privateKey.KeyType} is not supported for PIV import")

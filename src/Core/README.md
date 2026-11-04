@@ -286,6 +286,34 @@ await using var raw = await device.CreateRawSmartCardSessionAsync(scp, firmwareV
 `Scp03KeyParameters.Default` carries the well-known factory keys for test devices. Manage the keys on the
 device with `Yubico.YubiKit.SecurityDomain`.
 
+## Key identities and metadata
+
+Use `KeyType` for a concrete variant and `KeyDefinitions` for its shared metadata:
+
+```csharp
+using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Cryptography.Cose;
+
+KeyDefinition definition = KeyType.P256.GetKeyDefinition();
+Console.WriteLine(definition.DisplayName); // P-256
+CoseKeyType? family = KeyType.Rsa2048.GetCoseKeyType(); // Rsa
+CoseEcCurve? curve = KeyDefinitions.Rsa2048.CoseKeyDefinition?.CurveIdentifier; // null
+bool mapped = KeyType.TripleDes.HasCoseMapping(); // false
+```
+
+COSE family and curve identifiers describe representation, not an algorithm, codec, applet, or hardware
+capability. Choose the algorithm through the operation/profile; decoded CTAP2 keys retain their received
+algorithm. RSA sizes and AES sizes have COSE families without curves. Triple DES has no registered mapping
+in this catalog. Invalid `KeyType` lookups throw rather than returning an absent mapping.
+
+`DisplayName` is for human output; `KeyType` is symbolic identity. Do not persist enum `ToString()` names.
+The catalog is read-only, and COSE metadata is immutable and value-equal. RSA's shared algorithm OID and
+id-ecPublicKey do not identify a key size/curve. Symmetric OIDs retain their **CBC-mode-specific** mappings,
+not a mode-independent key identity or operation default.
+
+Earlier v2 names were removed without aliases. See [key metadata migration](../../docs/migration/key-metadata.md)
+for the PascalCase names, namespace move, removed algorithm property, and display-name migration.
+
 ## Constraints
 
 - Choose one interface per connection with the typed `ConnectAsync<TConnection>()`. The parameterless

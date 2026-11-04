@@ -186,6 +186,12 @@ The prompt shows the indication and returns without waiting. Over HID the reques
 
 ## Constraints
 
+Core key metadata uses PascalCase concrete identities and `Core.Cryptography.Cose.CoseKeyDefinition`;
+see [key metadata migration](../../docs/migration/key-metadata.md). Core `CoseAlgorithmIdentifier` now uses
+`Es256`, `Es384`, `Es512`, `EdDsa`, `Rs256`, and `EcdhEsHkdf256`. CTAP2's `CoseAlgorithm` remains open-valued
+with its existing PascalCase constants and unknown-value preservation. A Core COSE mapping is not CTAP2
+operation/profile support; PIN/UV curve and algorithm checks remain strict.
+
 Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, GetInfo follows channel
 preparation directly; there is no applet-selection step.
 

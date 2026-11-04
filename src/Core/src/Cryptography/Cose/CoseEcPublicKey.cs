@@ -158,7 +158,7 @@
 //             Curve = curve;
 //             XCoordinate = xCoordinate;
 //             YCoordinate = yCoordinate;
-//             Algorithm = coseDefinition.AlgorithmIdentifier;
+//             // Historical inactive implementation: algorithms must come from the operation/profile, not key metadata.
 //         }
 //
 //         /// <summary>
@@ -246,7 +246,7 @@
 //                         ExceptionMessages.UnsupportedAlgorithm));
 //             }
 //
-//             Algorithm = definition.CoseKeyDefinition.AlgorithmIdentifier;
+//             // Historical inactive implementation: algorithms must come from the operation/profile, not key metadata.
 //             Curve = definition.CoseKeyDefinition.CurveIdentifier;
 //             Type = definition.CoseKeyDefinition.Type;
 //             XCoordinate = ecParameters.Q.X;

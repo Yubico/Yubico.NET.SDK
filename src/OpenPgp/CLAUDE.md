@@ -66,6 +66,10 @@ Supports SHA256 (0x08) and SHA512 (0x0A).
 
 ## Model Layer
 
+Core import key identities use `KeyType.P256/P384/P521`, with explicit mappings to independent OpenPGP
+`CurveOid`/algorithm attributes. Never cast Core key identity to protocol identifiers or infer operation
+support from a COSE mapping. See [key metadata migration](../../docs/migration/key-metadata.md).
+
 ### Protocol Enums (internal)
 - `Ins` — Instruction bytes
 - `Crt` — Control Reference Templates

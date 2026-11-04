@@ -18,7 +18,7 @@ Core is the **foundational library** for the entire SDK. It provides:
 - **Connection Layer**: SmartCard (PC/SC) and HID connection abstractions
 - **Protocol Layer**: ISO 7816-4 APDU processing, SCP (Secure Channel Protocol) support
 - **Platform Interop**: Cross-platform native library loading (Windows, macOS, Linux)
-- **Cryptography**: Key types, COSE encoding, ASN.1 utilities
+- **Cryptography**: Concrete key identities, shared metadata and COSE registry identifiers, ASN.1 utilities
 - **TLV Processing**: Tag-Length-Value parsing and construction
 
 **Key Directories:**
@@ -36,7 +36,7 @@ src/
 │   ├── Fido/Hid/        # FIDO/CTAP HID protocol binding
 │   └── Otp/Hid/         # OTP HID protocol binding
 ├── Cryptography/        # Key types, COSE, ASN.1
-│   └── Cose/            # COSE key representations
+│   └── Cose/            # COSE registry metadata; active codecs live in Ctap2
 ├── Native/              # Native interop per platform
 │   ├── Desktop/SCard/   # PC/SC interop
 │   ├── Windows/         # Windows-specific (HidD, Cfgmgr32)
@@ -68,6 +68,36 @@ YubiKitLogging.LoggerFactory = LoggerFactory.Create(builder =>
 If using DI, configure logging explicitly from the DI-provided `ILoggerFactory` once during startup: `YubiKitLogging.Configure(serviceProvider.GetRequiredService<ILoggerFactory>())`.
 
 ## Critical Patterns
+
+### Concrete key identity and metadata
+
+`KeyType` identifies only supported concrete variants, with explicit numeric values. `KeyDefinitions`
+is the sole shared metadata catalog; its `FrozenDictionary` and init-only definitions prevent mutation.
+`KeyDefinition` lives in its own file and equality/hash include all stored metadata, including `DisplayName`
+and the value-equal sealed `CoseKeyDefinition` record. `None` and invalid enum values are not asymmetric.
+
+Keep three concepts separate: concrete `KeyType`, COSE family (`CoseKeyType`), and operation algorithm.
+`CoseKeyDefinition` lives in `Core.Cryptography.Cose`, has required init-only `Type`, optional
+`CurveIdentifier`, and no algorithm. EC2/OKP mappings have a curve, RSA/AES mappings do not; Triple DES
+has no COSE mapping. `HasCoseMapping`/`GetCoseKeyType` are metadata queries, not capability checks.
+Known unmapped types return null; invalid lookup values throw. The COSE curve registry can contain values
+without concrete SDK support (X448/Ed448 are not `KeyType` variants).
+
+OID extensions and `Oids.GetOidsByKeyType` delegate to this catalog, never maintain a second switch.
+`Oids.EcPublicKey` is id-ecPublicKey, not an ECDSA operation identifier. Neither it nor `Oids.Rsa`
+selects a concrete variant alone. Symmetric algorithm OIDs deliberately retain the existing CBC mappings;
+they do not select a mode for an operation. Core's old COSE codec files remain commented out; active
+`Ctap2.Cose.CoseKey` preserves open wire families/algorithms and strict PIN/UV profile checks.
+
+Migration: `ECP*` → `P*`, `RSA*` → `Rsa*`, `AES*` → `Aes*`, `TripleDES` → `TripleDes`,
+`IsRSA` → `IsRsa`, `GetByRSALength`/`GetByRSAModulusLength` → `GetByRsaLength`/`GetByRsaModulusLength`.
+Use `DisplayName` instead of `Name` for human output; use `KeyType` for symbolic identity and an explicit
+application contract for persistence (enum `ToString()` is not stable). No old-name aliases remain.
+Full names/namespace/algorithm migration: [key metadata migration](../../docs/migration/key-metadata.md).
+
+Adding a future supported variant requires a new explicit `KeyType` value, catalog entry with display name,
+OID/curve/length, classification updates, optional registered COSE mapping, module-specific operation support,
+and real key/encoding vectors plus consistency tests. Registry identifiers alone never establish support.
 
 ### Applet session initialization
 

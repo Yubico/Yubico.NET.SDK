@@ -50,7 +50,7 @@ internal class AsnPublicKeyDecoder
 
         switch (oidAlgorithm)
         {
-            case Oids.RSA:
+            case Oids.Rsa:
                 {
                     if (seqAlgorithmIdentifier.HasData)
                     {
@@ -60,7 +60,7 @@ internal class AsnPublicKeyDecoder
 
                     return CreateRSAPublicKey(subjectPublicKey);
                 }
-            case Oids.ECDSA:
+            case Oids.EcPublicKey:
                 {
                     var oidCurve = seqAlgorithmIdentifier.ReadObjectIdentifier();
                     return CreateECPublicKey(oidCurve, subjectPublicKey);

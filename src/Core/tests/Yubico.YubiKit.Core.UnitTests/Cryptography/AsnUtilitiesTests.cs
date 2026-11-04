@@ -128,8 +128,8 @@ public class AsnUtilitiesTests
     {
         Oids.X25519, // 32-byte definition, so it would masquerade as a P-256 coordinate size
         Oids.Ed25519,
-        Oids.AES256Cbc,
-        Oids.TripleDESCbc
+        Oids.Aes256Cbc,
+        Oids.TripleDesCbc
     };
 
     /// <summary>Well-formed EC curve OIDs that this SDK does not support.</summary>
@@ -141,9 +141,9 @@ public class AsnUtilitiesTests
     };
 
     [Theory]
-    [InlineData(Oids.ECP256, 32)]
-    [InlineData(Oids.ECP384, 48)]
-    [InlineData(Oids.ECP521, 66)]
+    [InlineData(Oids.P256, 32)]
+    [InlineData(Oids.P384, 48)]
+    [InlineData(Oids.P521, 66)]
     public void GetDecodedCoordinateSize_SupportedCurve_ReturnsExpectedSize(string curveOid, int expectedSize)
     {
         var size = AsnUtilities.GetDecodedCoordinateSize(curveOid);
@@ -217,16 +217,16 @@ public class AsnUtilitiesTests
     }
 
     [Theory]
-    [InlineData(Oids.ECP256, 32)]
-    [InlineData(Oids.ECP384, 48)]
-    [InlineData(Oids.ECP521, 66)]
+    [InlineData(Oids.P256, 32)]
+    [InlineData(Oids.P384, 48)]
+    [InlineData(Oids.P521, 66)]
     public void ValidateEcPrivateScalarArgument_CurveSizedScalar_DoesNotThrow(string curveOid, int scalarSize) =>
         AsnUtilities.ValidateEcPrivateScalarArgument(new byte[scalarSize], curveOid, "parameters");
 
     [Theory]
-    [InlineData(Oids.ECP256, 48)]
-    [InlineData(Oids.ECP384, 32)]
-    [InlineData(Oids.ECP521, 48)]
+    [InlineData(Oids.P256, 48)]
+    [InlineData(Oids.P384, 32)]
+    [InlineData(Oids.P521, 48)]
     public void ValidateEcPrivateScalarArgument_ScalarSizedForAnotherCurve_ThrowsArgumentException(
         string curveOid, int scalarSize)
     {

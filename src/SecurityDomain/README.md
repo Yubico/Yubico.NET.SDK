@@ -132,6 +132,10 @@ than other operations.
 
 ## Constraints
 
+Shared Core metadata now names concrete curves `KeyType.P256/P384/P521` and uses PascalCase key/OID
+names. `DisplayName` is for human output; COSE mappings do not expand SCP11's P-256 requirements.
+See [key metadata migration](../../docs/migration/key-metadata.md).
+
 - SmartCard transport only. Requesting another transport through
   `SessionCreationOptions { PreferredConnectionType = ... }` throws.
 - One live connection per physical YubiKey, and one session per connection. Whoever creates a connection

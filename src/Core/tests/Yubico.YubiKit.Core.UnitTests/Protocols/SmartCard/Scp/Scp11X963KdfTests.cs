@@ -165,7 +165,7 @@ public class Scp11X963KdfTests
         // Use the fixed test key from GetECDHs
         var privateKey = ECPrivateKey.CreateFromValue(
             Convert.FromHexString("549D2A8A03E62DC829ADE4D6850DB9568475147C59EF238F122A08CF557CDB91"),
-            KeyType.ECP256);
+            KeyType.P256);
         return privateKey.ToECDiffieHellman();
     }
 
@@ -174,7 +174,7 @@ public class Scp11X963KdfTests
         // Another mock private key
         var privateKey = ECPrivateKey.CreateFromValue(
             Convert.FromHexString("1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF"),
-            KeyType.ECP256);
+            KeyType.P256);
         return privateKey.ToECDiffieHellman();
     }
 

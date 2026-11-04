@@ -51,7 +51,7 @@ internal class AsnPrivateKeyDecoder
         var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
         switch (oidAlgorithm)
         {
-            case Oids.RSA:
+            case Oids.Rsa:
                 {
                     if (seqAlgorithmIdentifier.HasData)
                     {
@@ -61,7 +61,7 @@ internal class AsnPrivateKeyDecoder
 
                     return RSAPrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
                 }
-            case Oids.ECDSA:
+            case Oids.EcPublicKey:
                 {
                     return ECPrivateKey.CreateFromPkcs8(pkcs8EncodedKey);
                 }
@@ -185,7 +185,7 @@ internal class AsnPrivateKeyDecoder
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != Oids.ECDSA)
+        if (oidAlgorithm != Oids.EcPublicKey)
         {
             throw new InvalidOperationException(
                 string.Format(
@@ -196,9 +196,9 @@ internal class AsnPrivateKeyDecoder
 
         var curveOid = seqAlgorithmIdentifier.ReadObjectIdentifier();
         if (curveOid is not (
-            Oids.ECP256 or
-            Oids.ECP384 or
-            Oids.ECP521))
+            Oids.P256 or
+            Oids.P384 or
+            Oids.P521))
         {
             throw new InvalidOperationException(
                 string.Format(
@@ -313,7 +313,7 @@ internal class AsnPrivateKeyDecoder
 
         var seqAlgorithmIdentifier = seqPrivateKeyInfo.ReadSequence();
         var oidAlgorithm = seqAlgorithmIdentifier.ReadObjectIdentifier();
-        if (oidAlgorithm != Oids.RSA)
+        if (oidAlgorithm != Oids.Rsa)
         {
             throw new InvalidOperationException(
                 string.Format(

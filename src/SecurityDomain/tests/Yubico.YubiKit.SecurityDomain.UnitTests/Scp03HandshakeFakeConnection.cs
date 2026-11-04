@@ -23,27 +23,23 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 namespace Yubico.YubiKit.SecurityDomain.UnitTests;
 
 /// <summary>
-///     A minimal, protocol-conformant fake SCP03 device used only to prove that
+///     A deterministic SCP03 fixture used to check that
 ///     <see cref="SecurityDomainSession.ResetAsync" />'s post-reset secure-channel reinitialization
 ///     is wrapped by <see cref="SecureChannelException" /> exactly like
 ///     <see cref="SecurityDomainSession.CreateAsync" />'s initial handshake.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Unlike <see cref="Yubico.YubiKit.Tests.Shared.RecordingSmartCardConnection" />, this fake
-///         cannot play back static queued bytes: a genuinely successful SCP03 handshake requires the
-///         "device" side to derive session keys and a card cryptogram from the host challenge the
-///         client actually sends (which Core generates randomly and does not expose), so this fixture
-///         independently implements the public, standardized GlobalPlatform SCP03 key-derivation and
-///         secure-messaging scheme (AES-128 CMAC-based KDF, NIST SP 800-108 counter-mode construction)
-///         using only BCL primitives (<see cref="Aes" />). It is the "other side" of the protocol, not
-///         a copy of Core's internal implementation, and is validated against the official RFC 4493
-///         AES-CMAC test vectors in <see cref="Scp03HandshakeFakeConnectionTests" /> to avoid silently
-///         trusting unverified hand-rolled crypto.
+///         Unlike static queued responses, this fixture derives session keys and a card cryptogram
+///         from the host challenge it receives. It also constructs the encrypted/MACed key-information
+///         response needed by the reset scenario. Scp03HandshakeFakeConnectionTests checks only its
+///         AES-CMAC primitive against four RFC 4493 vectors, not its complete KDF or messaging flow.
+///         The fixture does not verify the host cryptogram or command MAC and is not an independent
+///         SCP03 conformance or interoperability test.
 ///     </para>
 ///     <para>
 ///         This fixture only implements exactly the exchanges needed for one scenario: a full SCP03
-///         handshake (SELECT, INITIALIZE UPDATE, EXTERNAL AUTHENTICATE), one encrypted+MACed GET DATA
+///         handshake sequence (SELECT, INITIALIZE UPDATE, EXTERNAL AUTHENTICATE), one encrypted+MACed GET DATA
 ///         round trip (key information, used by <c>ResetAsync</c>'s pre-reset key enumeration), the raw
 ///         (non-SCP) key-blocking APDU used by <c>ResetAsync</c>, a re-SELECT, and a final rejected
 ///         INITIALIZE UPDATE simulating the just-blocked key failing to reauthenticate during reinit.
@@ -81,7 +77,7 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
     public List<byte[]> TransmittedCommands { get; } = [];
 
     /// <summary>
-    ///     Gets or sets the status word returned for the reinit's INITIALIZE UPDATE (step index 5).
+    ///     Gets or sets the status word returned for the reinit's INITIALIZE UPDATE (step index 6).
     ///     Defaults to 0x6982 (Security status not satisfied), simulating a just-blocked key.
     /// </summary>
     public short ReinitRejectionStatusWord { get; set; } = unchecked((short)0x6982);
@@ -154,7 +150,7 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
         _srmac = DeriveKey(_staticKeys.Mac.ToArray(), DerivationTypeSRMac, context, SessionKeyLengthBits);
         var cardCryptogram = DeriveKey(_smac, DerivationTypeCardCryptogram, context, DerivationContextLengthBits);
 
-        _macChain = new byte[16]; // matches ScpInitializer's `new ScpState(sessionKeys, new byte[16])`
+        _macChain = new byte[16]; // Start the fixture's command MAC chain at zero.
 
         byte[] diversificationData = new byte[10];
         byte[] keyInfo = [0xFF, 0x02, 0x00];
@@ -165,7 +161,7 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
     private byte[] HandleExternalAuthenticate(byte[] wire)
     {
         AdvanceMacChain(wire);
-        return Ok(); // Zero-length response data: ScpProcessor skips R-MAC verification entirely.
+        return Ok(); // Accept without verifying the host cryptogram or command MAC.
     }
 
     private byte[] HandleGetData(byte[] wire)
@@ -175,7 +171,7 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
         if (_senc is null || _srmac is null)
             throw new InvalidOperationException("SCP03 handshake state not established before GET DATA.");
 
-        const int encCounterForFirstEncryptedExchange = 1; // Client's _encCounter is 1 for the first post-handshake Encrypt()/Decrypt() pair.
+        const int encCounterForFirstEncryptedExchange = 1; // First encrypted exchange in this fixture sequence.
         var ciphertext = EncryptResponsePayload(_senc, KeyInformationPlaintext, encCounterForFirstEncryptedExchange);
         var rmac = ComputeRMac(_srmac, _macChain, ciphertext, SWConstants.Success);
 
@@ -187,8 +183,8 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
         if (_smac is null)
             throw new InvalidOperationException("SCP03 handshake state not established before a MACed command.");
 
-        // Mirrors ScpProcessor.TransmitAsync's MAC scope: the full formatted command minus the
-        // trailing 8-byte MAC and 1-byte Le (this fixture only ever sees short-APDU-formatted commands).
+        // This scenario assumes short commands with an 8-byte MAC and one-byte Le at the end.
+        // Advance the chain over the preceding bytes; this is not command-MAC verification.
         var apduToMac = wire[..^9];
         _macChain = AesCmac(_smac, Concat(_macChain, apduToMac));
     }
@@ -220,7 +216,7 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
         return result;
     }
 
-    // --- SCP03 key derivation (GlobalPlatform Card Spec Amendment D / NIST SP 800-108 counter mode) ---
+    // Fixture CMAC-based key derivation; the RFC CMAC vectors do not validate this whole construction.
 
     internal static byte[] DeriveKey(byte[] key, byte derivationType, byte[] context16, short lengthBits)
     {
@@ -240,7 +236,7 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
         using var aes = Aes.Create();
         aes.Key = senc;
 
-        var iv = DeriveIv(aes, encCounter, ivPrefix: 0x80); // IvPrefixForDecryption in ScpState.cs
+        var iv = DeriveIv(aes, encCounter, ivPrefix: 0x80); // Response-direction prefix in this scenario.
 
         var padLen = 16 - plaintext.Length % 16;
         var padded = new byte[plaintext.Length + padLen];
@@ -270,9 +266,8 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
         return fullMac[..8];
     }
 
-    // --- RFC 4493 AES-128-CMAC, validated against the RFC's official test vectors in
-    //     Scp03HandshakeFakeConnectionTests. Built from raw AES-ECB (BCL) since this SDK targets a
-    //     .NET version with no built-in AES-CMAC primitive. ---
+    // RFC 4493 AES-128-CMAC, checked against its four vectors in Scp03HandshakeFakeConnectionTests.
+    // This primitive check does not validate the rest of the SCP03 fixture.
 
     internal static byte[] AesCmac(byte[] key, byte[] message)
     {

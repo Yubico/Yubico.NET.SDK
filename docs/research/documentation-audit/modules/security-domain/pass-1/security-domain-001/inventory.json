@@ -1,0 +1,233 @@
+{
+  "baseline": "b73efe3813b429b4b8eb2a7e819a6ad7be699d47",
+  "files": [
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "bytes": 12448,
+      "sha256": "ffea0d4c9f7745aaa7b1c19afe33bfcaa66f33ededb7d79e821683e6cc685c54",
+      "kind": ".md"
+    },
+    {
+      "path": "src/SecurityDomain/PACKAGE_README.md",
+      "bytes": 1191,
+      "sha256": "54c948f9adff97293689eda608a4b6e2668e1836e32ca1b80c1d45072de50a08",
+      "kind": ".md"
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "bytes": 8808,
+      "sha256": "376762442aced7b566a0a64b38e86656479930133baea28727053415c6996941",
+      "kind": ".md"
+    },
+    {
+      "path": "src/SecurityDomain/src/Backend/ISecurityDomainBackend.cs",
+      "bytes": 969,
+      "sha256": "1d61b48541d0f7d5447239f6453d749d819898619c6ca82a29335b167dbed5fa",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/Backend/SecurityDomainBackend.cs",
+      "bytes": 1545,
+      "sha256": "b6b783bf00f399fdeba43c79792fec96232ab8644b9f7475a904596dc1ad39c3",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/CaIdentifier.cs",
+      "bytes": 775,
+      "sha256": "0ce19f100c2dcd717c05c02fed2453f0d2cfcb52eda2b041fb9db8ab1bd29916",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/CaIdentifierType.cs",
+      "bytes": 1002,
+      "sha256": "a58b215bb44e78e617f89c9e58d37102137ab9e067908be92e7e1fb73ab166c5",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "bytes": 9749,
+      "sha256": "f0e72fbb6f2df2c84ff8a65a2397eef4a44df66ff7e7cc6cf385061b9a802b54",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "bytes": 4143,
+      "sha256": "16830ea9b7e62767c6c94bb9b1a21265d8aab2c4314acf608ee0a1651828465c",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/KeyInfo.cs",
+      "bytes": 889,
+      "sha256": "70feed6061167d3922e6dea891ea6c5e41aef7f54da85b6440aefca77d718d95",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/PublicAPI.Shipped.txt",
+      "bytes": 17,
+      "sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "kind": ".txt"
+    },
+    {
+      "path": "src/SecurityDomain/src/PublicAPI.Unshipped.txt",
+      "bytes": 18555,
+      "sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+      "kind": ".txt"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecureChannelException.cs",
+      "bytes": 4619,
+      "sha256": "a8b2cd403ea773d0231971ee91eb61b3440e9cd05b4d759196bbaca1189cfe5e",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainKeyMaterial.cs",
+      "bytes": 3784,
+      "sha256": "460c287a76894853a38cceeb26d395ac3ddf25c0aa5f63c65b2fa1930290baf7",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "bytes": 47546,
+      "sha256": "e20a68fd71b3fc54d94c098c525bfaf626a265e9c405c6bfd6d19f1d83b18d2f",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainTlvEncoding.cs",
+      "bytes": 1645,
+      "sha256": "9fb61783ebbc99019a0199722d0b4798e770847535f4bcbceb35d1e5f854bc99",
+      "kind": "library-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+      "bytes": 856,
+      "sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0",
+      "kind": ".csproj"
+    },
+    {
+      "path": "src/SecurityDomain/tests/CLAUDE.md",
+      "bytes": 4773,
+      "sha256": "e0f344f232ed132d1c800493182557a0508a1b86df990cc826f5615adf6a934b",
+      "kind": ".md"
+    },
+    {
+      "path": "src/SecurityDomain/tests/README.md",
+      "bytes": 3009,
+      "sha256": "51bcfdc7ecee729d533f8ef25ddc2fe720fbef0927ddee7d333ca83315a451f5",
+      "kind": ".md"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/Scp11TestData.cs",
+      "bytes": 6051,
+      "sha256": "9026fcdd5e12f4735834cf7cbbfa3468acf1e5585b3453bb9878cd9ae340d346",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs",
+      "bytes": 3215,
+      "sha256": "7428a3de5850948a60ee1604216aa84e51f297e912620b2e6157f1b65be2d5e9",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs",
+      "bytes": 4483,
+      "sha256": "cd2a9517ef36de83d2b1e3a5e4ebadbf7a143ac096d724f6f8a23d6201edd728",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "bytes": 10202,
+      "sha256": "42bcc3dfd4d9afd607d9c1af3be3597ce3b43a490fd9309d8ed58dc6929e4abf",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "bytes": 9415,
+      "sha256": "ac07d6d1e0fed1235d81ae0a72b5a5a30c8d9854da7bd23f8124bdd210293e2e",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs",
+      "bytes": 14911,
+      "sha256": "ec04d60363252e65e2e13ae3aebf229d45ea8f746445ae06acdf02c2750a0c33",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+      "bytes": 7267,
+      "sha256": "b008cca577a123b8e7de0e0f764d2cc68dbe87f2b1629c9eef8311b574219783",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/SecurityDomainStateRestoringTests.cs",
+      "bytes": 2581,
+      "sha256": "a774b10ed0da9dbadc96f8f6eb79bbfce7225ffb451d799ec0f41dff1a44098d",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+      "bytes": 4165,
+      "sha256": "0ad608e8ef3ce62be0c9a5e99d771753a8652e1503f6f5c2f9a70f96cd2aba8a",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+      "bytes": 1722,
+      "sha256": "75d8583754f53f8479c6fd7113cc889f04b52873734042ad5698b4a22043f909",
+      "kind": ".csproj"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/xunit.runner.json",
+      "bytes": 175,
+      "sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c",
+      "kind": ".json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/AuditV2/SecurityDomainAuditReproTests.cs",
+      "bytes": 1904,
+      "sha256": "40873cd3120c4e24ca9d82df4f60bfb1f1fde3396b6c959133a0eb61781c9819",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+      "bytes": 14319,
+      "sha256": "d6ae01007d3137b937ab0f9c6a8e6c1b7b2d74812cd2af61e70c7501c00480c0",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnectionTests.cs",
+      "bytes": 2023,
+      "sha256": "a52992d0676a16ebcc73df3d4fc6b29cf852d39bb8312e1edac5c1b9df65344c",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs",
+      "bytes": 9575,
+      "sha256": "ab0d621148a701acdb07b295ca086dbf5324c0989d04e67620e5b47541bf461c",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainCertificateBundleTests.cs",
+      "bytes": 4615,
+      "sha256": "23bd8b401bcda54b23eae1554d89baf7bd3d886f386bacc7a0b366fb82268778",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+      "bytes": 28380,
+      "sha256": "ae48275c1a07646ee16bff223ed85a8ee8ce09ee29155a722d676e552bac8456",
+      "kind": "test-csharp"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj",
+      "bytes": 1123,
+      "sha256": "af1a9564844531b0dd815462cc1005f46162eff27d7c77e15bb29e1a8a8f59a9",
+      "kind": ".csproj"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/xunit.runner.json",
+      "bytes": 77,
+      "sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+      "kind": ".json"
+    }
+  ]
+}

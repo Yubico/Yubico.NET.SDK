@@ -735,9 +735,9 @@ policy is advisory and may not result in a device wait.
 
 ### Security Domain
 
-Use `Yubico.YubiKit.SecurityDomain` for SCP03 and security domain key management. Treat all secure channel, cryptographic key, and diversification migrations as manual until a specific high-confidence mapping exists.
+Use `Yubico.YubiKit.SecurityDomain` for SCP03/SCP11 key and associated-data management. SCP11b establishes a device-authenticated channel, not host authority for key management. Treat all secure channel, cryptographic key, and diversification migrations as manual until a specific high-confidence mapping exists.
 
-Secure-channel handshake/authentication failures (during session creation or post-reset reinitialization) throw a dedicated `SecureChannelException` that preserves the original failure as `InnerException`; see `securitydomain-exception` in `v1-to-v2-map.yml`. Per-operation failures after a channel is open are unchanged.
+With SCP parameters supplied, session creation and post-reset reinitialization wrap selected secure-channel configuration failures (`ApduException`, `BadResponseException`, or `NotSupportedException`) in `SecureChannelException`, preserving the original failure as `InnerException`. `StatusWord` is copied only from an immediate `ApduException`. Earlier protocol preparation/application selection failures and cancellation are not wrapped by this catch; later per-operation failures retain their original types. See `securitydomain-exception` in `v1-to-v2-map.yml`.
 
 ### YubiHSM
 

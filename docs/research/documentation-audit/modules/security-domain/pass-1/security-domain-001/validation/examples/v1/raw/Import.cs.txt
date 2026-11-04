@@ -1,0 +1,16 @@
+using var scpKeyParameters = Scp03KeyParameters.Default;
+await using var session = await device.CreateSecurityDomainSessionAsync(
+    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });
+
+IReadOnlyList<KeyInfo> keys = await session.ListKeyInformationAsync();
+byte[] keyMaterial = RandomNumberGenerator.GetBytes(48);
+try
+{
+    // Escrow keyMaterial before you send it: the device will not give it back.
+    using var newKeys = new StaticKeys(keyMaterial.AsSpan(0, 16), keyMaterial.AsSpan(16, 16), keyMaterial.AsSpan(32, 16));
+    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, replaceKvn: 0);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(keyMaterial);
+}

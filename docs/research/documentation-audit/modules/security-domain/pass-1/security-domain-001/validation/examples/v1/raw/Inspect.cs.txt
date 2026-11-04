@@ -1,0 +1,8 @@
+var keyInfo = await session.ListKeyInformationAsync(cancellationToken);
+foreach (var entry in keyInfo)
+{
+    logger.LogDebug(
+        "Key: KID={Kid:X2}, KVN={Kvn:X2}",
+        entry.KeyReference.Kid,
+        entry.KeyReference.Kvn);
+}

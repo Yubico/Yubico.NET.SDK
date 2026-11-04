@@ -1,0 +1,5 @@
+PASS: 784 prior archive records: docs/research/documentation-audit/record-manifest.json
+PASS: 402 prior archive records: docs/research/documentation-audit/modules/management/pass-1/management-001/record-manifest.json
+PASS: 534 prior archive records: docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/record-manifest.json
+PASS: four original untracked files unchanged.
+EXIT=0

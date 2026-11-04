@@ -16,7 +16,7 @@ public class SecurityDomainSession_Scp03Tests : SecurityDomainStateRestoringTest
 
     /// <summary>
     ///     Validates that a Security Domain session can be created with SCP03 on devices
-    ///     running firmware 5.7.2 or newer.
+    ///     running firmware 5.4.3 or newer.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
@@ -71,7 +71,7 @@ public class SecurityDomainSession_Scp03Tests : SecurityDomainStateRestoringTest
 
         try
         {
-            // Custom key set (non-default) for testing
+            // Public factory test bytes, imported under a custom reference; not unique secret material.
             byte[] keyBytes =
             [
                 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,

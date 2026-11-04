@@ -1,0 +1,25 @@
+$ dotnet /tmp/opencode/security-domain-001-doccheck/bin/Release/net10.0/Yubico.YubiKit.AuditSd001.Checker.dll tokens-import-removals /home/rupicola/Code/y/Yubico.Yubikit.NET docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/import-removals.json
+IMPORT EXCEPTION MANIFEST: /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/import-removals.json; SHA256=B31749E002CB26C04AB361CDA13ABFE16E9FA8EDBC5BB332688D87770CAD2D9E; baseline=b73efe3813b429b4b8eb2a7e819a6ad7be699d47
+PASS: strict tokens/directives src/SecurityDomain/src/CaIdentifier.cs; SHA256=ADE7B669A29A9833A2B09403A127AF09F2E34557E12714E99BFD678C5C580678
+PASS: strict tokens/directives src/SecurityDomain/src/ISecurityDomainSession.cs; SHA256=D3C00FED7F2368D136B7646F9CCF48CE142F3F496B91CDB1ADBEF725EEBC5705
+IMPORT REMOVAL: src/SecurityDomain/src/IYubiKeyExtensions.cs: using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu; IDE0005 provenance=docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/format-apply.log
+IMPORT REMOVAL: src/SecurityDomain/src/IYubiKeyExtensions.cs: using Yubico.YubiKit.Core.Protocols.SmartCard.Scp; IDE0005 provenance=docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/format-initial.log; command-log=docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/format-apply.log
+PASS: listed-import-normalized tokens/directives src/SecurityDomain/src/IYubiKeyExtensions.cs; SHA256=6B3ADBAF0F02FE0535A5692B590135C67EA15CC2D970A7B8C878F001DB4DD349
+PASS: strict tokens/directives src/SecurityDomain/src/KeyInfo.cs; SHA256=8C8B78B68447431CE2775B38D3EDC0C2D43E9A32303E6B5443D94E801A8DED83
+PASS: strict tokens/directives src/SecurityDomain/src/SecureChannelException.cs; SHA256=A2BC6C316F3E241106149DCA933D5A5A9D791261B428C59BBE912DD59EDF0AF4
+PASS: strict tokens/directives src/SecurityDomain/src/SecurityDomainSession.cs; SHA256=BF6D32F74BCB82E6E209F3C4589D809D9A5BE57B1DF02169B90493031B7B9956
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs; SHA256=AFFF71FB205952DB92F40BB3A410F45AA0771D7C05DF751687775D58ED284068
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs; SHA256=CB4256CCB2A427DE68AEDFBFA88811DED09A4FFF072B639C256F5B4CB6EF2C29
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs; SHA256=45611DF36E9356CAC9047193F5F02551D220C3F6390C4ACE91AEB8E8D540F7A5
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs; SHA256=3DA509332C908F02EEB8421C48E623C30125C54890DA89CFF14F76B3DF9D08C8
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs; SHA256=70762ACBDBE91ADC9E493DA27A06BAEFE212E4FE663AFBF1244C4E1BC85655AA
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/SecurityDomainStateRestoringTests.cs; SHA256=6A7725030D06E9A92D0E2E3A2215BA7941BC24B27724D4F1ABD36FA79E9BCC51
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs; SHA256=FE661501A0A2B0A52E0BFA37CA6C7C10320537A3A3014FB9897E2F4FAD625B5E
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/AuditV2/SecurityDomainAuditReproTests.cs; SHA256=2719B01755D036E72F724570ED109798F1503C0E67FAA353BBDCDF7CB4387A8B
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs; SHA256=FC052FC7CA926EBA2706F9CABC3C5F039359E401E7D344BB06B566079ACCCAEE
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs; SHA256=66999FB68DDFADA76820229B7CB0F41133D5197E0D7059E6E8FC8CF4A710B0A8
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainCertificateBundleTests.cs; SHA256=77C9C7BCB956E0C1ADD350029AA3EFBF1A0DEB773E63C9D42A3F4B9C31E0C807
+PASS: strict tokens/directives src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs; SHA256=F9AA1D32677D9B27B1885A9B789803A230090CE641DEAB371C03D7522F4C947F
+Import-accounted comparison against b73efe3813b429b4b8eb2a7e819a6ad7be699d47: files=18, exception-files=1, explicitly-listed-removals=2, failures=0; syntax is NOT identical: only listed ordinary namespace imports plus the existing directive-free using order allowance were normalized.
+
+EXIT=0

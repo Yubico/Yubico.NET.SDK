@@ -22,35 +22,22 @@ namespace Yubico.YubiKit.SecurityDomain;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This exception is thrown only for failures encountered while a secure channel is being
-///         established during <see cref="SecurityDomainSession.CreateAsync" /> or
-///         <see cref="SecurityDomainSession.ResetAsync" />'s post-reset reinitialization — for
-///         example, an SCP03 static-key mismatch, an SCP11 key-agreement receipt mismatch, an SCP11
-///         certificate rejected by the device, or SCP requested against firmware/transport that does
-///         not support it. It lets callers distinguish "the secure channel could not be established"
-///         as a category from a generic per-operation Security Domain failure
-///         (<see cref="ApduException" /> or <see cref="Yubico.YubiKit.Core.BadResponseException" />)
-///         that occurs after a channel is already open, such as <c>GetDataAsync</c>,
-///         <c>PutKeyAsync</c>, or <c>DeleteKeyAsync</c> — those are unchanged by this type and
-///         continue to surface their original exception directly.
+///         During creation and post-reset reinitialization, SecurityDomainSession wraps selected
+///         secure-channel configuration failures when SCP parameters were supplied: ApduException,
+///         BadResponseException, and NotSupportedException. Protocol preparation and application
+///         selection occur before that catch, and cancellation is rethrown unchanged. This type is
+///         not a wrapper for every session-creation failure or for later per-operation failures.
 ///     </para>
 ///     <para>
-///         The original exception raised by Core's SCP initialization (an <see cref="ApduException" />
-///         for an APDU-level rejection such as a wrong key, a
-///         <see cref="Yubico.YubiKit.Core.BadResponseException" /> for a cryptographic verification
-///         failure such as a card-cryptogram or receipt mismatch, or a <see cref="NotSupportedException" />
-///         when SCP itself is not supported) is always preserved as
-///         <see cref="Exception.InnerException" />. When the underlying failure carried an ISO 7816
-///         status word, it is also preserved on <see cref="StatusWord" />.
+///         The wrapped exception is preserved as <see cref="Exception.InnerException" />. If that
+///         immediate exception is an ApduException, its status word is copied to StatusWord;
+///         nested inner exceptions are not searched.
 ///     </para>
 /// </remarks>
 public class SecureChannelException : Exception
 {
     /// <summary>
-    ///     Gets the ISO 7816 status word returned by the device during the failed handshake, or
-    ///     <see langword="null" /> if the underlying failure did not carry one (for example, a
-    ///     cryptographic verification failure detected locally, or an unsupported-firmware/transport
-    ///     failure detected before any APDU was sent).
+    ///     Gets the status word of the immediate wrapped ApduException, or null for other exception types.
     /// </summary>
     public short? StatusWord { get; }
 

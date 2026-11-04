@@ -26,9 +26,10 @@ remains the editorial reference. Repository and module instructions still govern
 | WebAuthn | Complete, committed/pushed at `9399b94b`; CTAP2 cycle resolves WA-XREF-001 documentation consistency | Not started; 21 implementation/test follow-ups remain deferred | [WebAuthn handoff](webauthn.md) |
 | Management | Complete: cycle `management-001`, committed/pushed at `bac07ee7`; independent review and validation accepted | Deferred until the campaign's second sweep | [Management handoff](management.md) |
 | CTAP2 | Complete, committed/pushed at `3bc3e409`: cycle `ctap2-001`, dedicated CTAP/WebAuthn consistency review and verified gates | Deferred until the campaign's second sweep | [CTAP2 handoff](ctap2.md) |
-| Security Domain, YubiOTP | Next after CTAP2, in that order | Deferred until the campaign's second sweep | Apply the workflow at selection/baseline |
+| Security Domain | Content, independent review and gates complete: module-focused `security-domain-001`; publication pending | Deferred until the campaign's second sweep | [Security Domain handoff](security-domain.md) |
+| YubiOTP | Next after Security Domain | Deferred until the campaign's second sweep | Apply the workflow at selection/baseline |
 | PIV | Reserved for the final part of the first sweep | Deferred until the campaign's second sweep | Scope/inventory at selection |
-| Core | Reserved for last; detailed audit scope still to be planned. Narrow dependencies are not a Core-wide audit | Discovery/SCP follow-ups retain their separate scope | Existing module checkpoints and future Core plan |
+| Core | Final target; detailed scope and per-applet cross-module boundary reviews to be planned then | Discovery/SCP follow-ups retain their separate scope | Existing module checkpoints and future Core plan |
 | Other remaining applets | Not yet scheduled within the first sweep | Deferred until the campaign's second sweep | Apply the workflow when selected |
 
 ## Retained records

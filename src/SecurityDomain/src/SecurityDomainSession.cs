@@ -31,16 +31,19 @@ namespace Yubico.YubiKit.SecurityDomain;
 
 /// <summary>
 ///     Entry point for interacting with the YubiKey Security Domain application.
-///     Provides lifecycle management for SCP (Secure Channel Protocol) sessions and will
-///     eventually expose key and data management operations.
+///     Reads metadata and manages SCP keys, certificates, CA identifiers, and allowlists.
 /// </summary>
 public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainSession
 {
-    // Feature detection constants
+    /// <summary>Security Domain application descriptor, with minimum firmware 5.3.0.</summary>
     public static readonly Feature FeatureSecurityDomain = new("Security Domain", 5, 3, 0);
+    /// <summary>SCP03 descriptor, with minimum firmware 5.3.0.</summary>
     public static readonly Feature FeatureScp03 = new("SCP03", 5, 3, 0);
+    /// <summary>SCP11 descriptor, with minimum firmware 5.7.2.</summary>
     public static readonly Feature FeatureScp11 = new("SCP11", 5, 7, 2);
+    /// <summary>Key-attestation descriptor at firmware 5.7.0; this session exposes no attestation operation.</summary>
     public static readonly Feature FeatureKeyAttestation = new("Key Attestation", 5, 7, 0);
+    /// <summary>Allowlist descriptor at firmware 5.7.0; not an independent check of protocol or device applicability.</summary>
     public static readonly Feature FeatureAllowList = new("Allow List", 5, 7, 0);
 
     private const byte ClaGlobalPlatform = 0x80;
@@ -86,9 +89,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     internal Action<X509Certificate2>? CertificateLoadedObserver { get; set; }
 
     /// <summary>
-    ///     Entry point for interacting with the YubiKey Security Domain application.
-    ///     Provides lifecycle management for SCP (Secure Channel Protocol) sessions and will
-    ///     eventually expose key and data management operations.
+    ///     Retains the caller's connection and optional SCP parameters for asynchronous initialization.
     /// </summary>
     private SecurityDomainSession(
         ISmartCardConnection connection,
@@ -117,11 +118,21 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <summary>
     ///     Factory helper that creates and initializes a Security Domain session.
     /// </summary>
+    /// <param name="connection">Caller-owned SmartCard connection, left open when the session is disposed.</param>
+    /// <param name="options">Optional protocol configuration, SCP parameters and firmware override.</param>
+    /// <param name="cancellationToken">Token used to cancel creation.</param>
+    /// <returns>An initialized session. Dispose it before reusing or disposing the connection.</returns>
+    /// <remarks>
+    ///     Without SCP parameters the session supports unauthenticated discovery. The caller retains
+    ///     ownership of supplied key parameters and disposes them after the session. Security Domain
+    ///     cannot detect firmware: creation uses the supplied override or configures with 5.3.0.
+    ///     Supply an exact version for the local SCP11 generation gate. Reset currently does not forward
+    ///     the original configuration/version; create a fresh session to reapply them after reset.
+    /// </remarks>
     /// <exception cref="SecureChannelException">
-    ///     Secure-channel parameters were supplied and establishing the SCP secure channel failed
-    ///     (for example, a wrong SCP03 key, an SCP11 receipt/authentication mismatch, a rejected SCP11
-    ///     certificate, or SCP unsupported by the connected firmware/transport). The original failure is
-    ///     available as <see cref="Exception.InnerException" />.
+    ///     SCP parameters were supplied and secure-channel configuration threw ApduException,
+    ///     BadResponseException, or NotSupportedException. The original failure is InnerException.
+    ///     Earlier protocol preparation/application selection failures and cancellation are not wrapped here.
     /// </exception>
     public static Task<SecurityDomainSession> CreateAsync(
         ISmartCardConnection connection,
@@ -138,7 +149,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <summary>
     ///     Ensures the Security Domain application is selected and secure messaging is configured if requested.
     /// </summary>
-    /// <param name="configuration"></param>
+    /// <param name="configuration">Optional protocol settings for this initialization.</param>
     /// <param name="firmwareVersion">Optional firmware version used to configure the protocol.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     private async Task InitializeAsync(
@@ -179,10 +190,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         catch (Exception ex) when (_scpKeyParams is not null &&
             ex is ApduException or BadResponseException or NotSupportedException)
         {
-            // Only the SCP handshake/authentication path can throw these exception types while
-            // _scpKeyParams is set (protocol.Configure(...) above does not transmit APDUs). Wrap as
-            // SecureChannelException so callers can distinguish "secure channel could not be
-            // established" from a generic post-handshake Security Domain operation failure.
+            // Wrap selected configuration failures only when SCP was requested. Preparation and
+            // application selection occur before this catch; operation failures are outside it.
             throw new SecureChannelException(ex);
         }
 
@@ -195,13 +204,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         _backend = backend;
     }
 
-    /// <summary>
-    ///     Executes the GlobalPlatform GET DATA command for the specified data object.
-    /// </summary>
-    /// <param name="dataObject">Two-byte identifier, combined as {P1,P2}, selecting the data object.</param>
-    /// <param name="requestData">Optional request payload sent alongside the GET DATA command.</param>
-    /// <param name="expectedResponseLength">Optional expected response length encoded in the Le field.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <inheritdoc />
     public async Task<ReadOnlyMemory<byte>> GetDataAsync(
         int dataObject,
         ReadOnlyMemory<byte> requestData = default,
@@ -241,10 +244,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         }
     }
 
-    /// <summary>
-    ///     Retrieves key metadata exposed by the Security Domain via the key information data object.
-    /// </summary>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <inheritdoc />
     public async Task<IReadOnlyList<KeyInfo>> ListKeyInformationAsync(
         CancellationToken cancellationToken = default)
     {
@@ -282,11 +282,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     }
 
 
-    /// <summary>
-    ///     Retrieves the Security Domain card recognition data (tag 0x73).
-    /// </summary>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The raw card recognition TLV payload.</returns>
+    /// <inheritdoc />
     public async Task<ReadOnlyMemory<byte>> GetCardRecognitionDataAsync(
         CancellationToken cancellationToken = default)
     {
@@ -303,18 +299,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         return cardRecognitionData;
     }
 
-    /// <summary>
-    ///     Retrieves the certificate bundle associated with the supplied key reference.
-    /// </summary>
-    /// <param name="keyReference">Key reference identifying the certificate store.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>
-    ///     A list of certificates where the leaf certificate appears last. The caller owns each
-    ///     returned certificate and must dispose it when no longer needed, independently of the session.
-    /// </returns>
-    /// <exception cref="CryptographicException">
-    ///     A certificate cannot be loaded. Already-loaded certificates are disposed and no partial bundle is returned.
-    /// </exception>
+    /// <inheritdoc />
     public async Task<IReadOnlyList<X509Certificate2>> GetCertificatesAsync(
         KeyReference keyReference,
         CancellationToken cancellationToken = default)
@@ -354,11 +339,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         }
     }
 
-    /// <summary>
-    ///     Retrieves the supported CA identifiers (KLOC/KLCC) exposed by the Security Domain.
-    /// </summary>
-    /// <param name="identifierTypes">The identifier groups to retrieve.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <inheritdoc />
     public async Task<IReadOnlyList<CaIdentifier>> GetCaIdentifiersAsync(
         CaIdentifierType identifierTypes,
         CancellationToken cancellationToken = default)
@@ -413,18 +394,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         return caIdentifiers;
     }
 
-    /// <summary>
-    ///     Stores a certificate bundle for the specified key reference.
-    /// </summary>
-    /// <remarks>
-    ///     The certificates will be stored in the order they are provided in the list.
-    ///     Requires off-card entity verification.
-    ///     <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
-    /// </remarks>
-    /// <param name="keyReference">Key reference that will own the certificate bundle.</param>
-    /// <param name="certificates">Certificates to persist, with the leaf certificate last.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <exception cref="ArgumentException">Thrown when a certificate cannot be encoded.</exception>
+    /// <inheritdoc />
     public async Task StoreCertificatesAsync(
         KeyReference keyReference,
         IReadOnlyList<X509Certificate2> certificates,
@@ -468,16 +438,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         }
     }
 
-    /// <summary>
-    ///     Imports an SCP03 static key set into the Security Domain.
-    /// </summary>
-    /// <param name="keyReference">Key reference that will receive the key set.</param>
-    /// <param name="staticKeys">Static ENC/MAC/DEK values to load.</param>
-    /// <param name="replaceKvn">Optional key version number to replace.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <exception cref="ArgumentNullException">Thrown when staticKeys is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when keyReference.Kid is not 0x01 (required for SCP03).</exception>
-    /// <exception cref="InvalidOperationException">Thrown when no SCP session is active or KCV validation fails.</exception>
+    /// <inheritdoc />
     // The three overloads represent distinct SCP03, EC public-key, and EC private-key payloads.
 #pragma warning disable RS0026
     public async Task PutKeyAsync(
@@ -533,12 +494,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     }
 #pragma warning restore RS0026
 
-    /// <summary>
-    ///     Deletes keys matching the supplied reference.
-    /// </summary>
-    /// <param name="keyReference">Key reference describing the key(s) to delete.</param>
-    /// <param name="deleteLast">Whether the last remaining key may be deleted.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <inheritdoc />
     public Task DeleteKeyAsync(
         KeyReference keyReference,
         bool deleteLast = false,
@@ -563,13 +519,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         return TransmitAndGetResponseDataAsync(command, cancellationToken);
     }
 
-    /// <summary>
-    ///     Generates a new SCP11 key pair on the device and returns the public point.
-    /// </summary>
-    /// <param name="keyReference">Key reference that will own the generated key pair.</param>
-    /// <param name="replaceKvn">Optional key version number to replace.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The uncompressed EC public point (0x04 || X || Y).</returns>
+    /// <inheritdoc />
     public async Task<ECPublicKey> GenerateKeyAsync(
         KeyReference keyReference,
         byte replaceKvn = 0,
@@ -627,19 +577,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         return ECPublicKey.CreateFromValue(publicPoint, KeyType.ECP256);
     }
 
-    /// <summary>
-    ///     Puts an EC public key onto the YubiKey using the Security Domain.
-    /// </summary>
-    /// <param name="keyReference">The key reference identifying where to store the key.</param>
-    /// <param name="publicKey">The EC public key parameters to store.</param>
-    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key (Default value is 0).</param>
-    /// <param name="cancellationToken"></param>
-    /// <exception cref="ArgumentException">Thrown when the public key is not of type SECP256R1.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
-    /// <exception cref="InvalidOperationException">
-    ///     Thrown when the new key set's checksum failed to verify, or some other SCP related error
-    ///     described in the exception message.
-    /// </exception>
+    /// <inheritdoc />
     // The EC public-key import overload has distinct key ownership and wire encoding.
 #pragma warning disable RS0026
     public async Task PutKeyAsync(KeyReference keyReference, ECPublicKey publicKey, int replaceKvn = 0,
@@ -656,19 +594,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     }
 #pragma warning restore RS0026
 
-    /// <summary>
-    ///     Puts an EC private key onto the YubiKey using the Security Domain.
-    /// </summary>
-    /// <param name="keyReference">The key reference identifying where to store the key.</param>
-    /// <param name="privateKey">The EC private key parameters to store.</param>
-    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key (Default value is 0).</param>
-    /// <param name="cancellationToken"></param>
-    /// <exception cref="ArgumentException">Thrown when the private key is not of type NIST P-256.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when no secure session is established.</exception>
-    /// <exception cref="InvalidOperationException">
-    ///     Thrown when the new key set's checksum failed to verify, or some other SCP related error
-    ///     described in the exception message.
-    /// </exception>
+    /// <inheritdoc />
     // The EC private-key import overload encrypts caller-owned private key material before transfer.
 #pragma warning disable RS0026
     public async Task PutKeyAsync(
@@ -684,8 +610,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             throw new ArgumentException("Private key must be of type NIST P-256");
 
         var encryptedKey = EncryptData(parameters.D.AsSpan());
-        // NOTE: Do not zero parameters.D here — it belongs to the caller's ECPrivateKey.
-        // The caller is responsible for calling ECPrivateKey.Clear() when done with the key.
+        // Do not clear the supplied key's private parameters here. The caller retains responsibility
+        // for the ECPrivateKey and should keep it in a using scope.
 
         await PutEcKeyAsync(keyReference, KeyTypeEccPrivateKey, (ReadOnlyMemory<byte>)encryptedKey, replaceKvn,
             cancellationToken).ConfigureAwait(false);
@@ -749,30 +675,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         }
     }
 
-    /// <summary>
-    ///     Stores an allowlist of certificate serial numbers for a specified key reference using the GlobalPlatform STORE DATA
-    ///     command.
-    /// </summary>
-    /// <remarks>
-    ///     This method requires off-card entity verification. The allowlist replaces any existing one for the
-    ///     key reference and must contain at least one serial: with an allowlist present only the listed
-    ///     certificates are accepted, without one every certificate signed by the CA is accepted
-    ///     (GlobalPlatform Card Specification v2.3 Amendment F, SCP11, v1.3 §4.3). A zero-length allowlist is
-    ///     the device's "remove" command, so an empty <paramref name="serials" /> is rejected here rather than
-    ///     silently lifting the restriction; call <see cref="ClearAllowListAsync" /> to remove an allowlist on
-    ///     purpose. There is no device-level deny-all: to stop trusting a CA, delete its key with
-    ///     <see cref="DeleteKeyAsync" />.
-    ///     <para>See GlobalPlatform Card Specification v2.3 Amendment F v1.3 §7.9 STORE DATA (Allowlist).</para>
-    /// </remarks>
-    /// <param name="keyReference">A reference to the key for which the allowlist will be stored.</param>
-    /// <param name="serials">
-    ///     The certificate serial numbers (hexadecimal strings) to allow for the given <see cref="KeyReference" />.
-    ///     Must contain at least one entry.
-    /// </param>
-    /// <param name="cancellationToken"></param>
-    /// <exception cref="ArgumentException">
-    ///     Thrown when <paramref name="serials" /> is empty, or when a serial number is not valid hexadecimal.
-    /// </exception>
+    /// <inheritdoc />
     public async Task StoreAllowListAsync(KeyReference keyReference, IReadOnlyCollection<string> serials,
         CancellationToken cancellationToken = default)
     {
@@ -802,20 +705,14 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         _logger.LogInformation("Allow list stored (KeyReference: {KeyReference})", keyReference);
     }
 
-    /// <summary>
-    ///     Removes the allow list for the given <see cref="KeyReference" />. Afterwards every certificate signed
-    ///     by the CA is accepted (GlobalPlatform Card Specification v2.3 Amendment F v1.3 §4.3).
-    /// </summary>
-    /// <seealso cref="StoreAllowListAsync" />
-    /// <param name="keyReference">The key reference that holds the allow list</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <inheritdoc />
     public async Task ClearAllowListAsync(KeyReference keyReference, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
 
         _logger.LogDebug("Clearing allow list (KeyReference: {KeyReference})", keyReference);
 
-        // Amd F §7.9: "To remove an allowlist, the allowlist TLV of the command shall have a length of zero."
+        // Explicit removal uses an empty tag 0x70; an empty input to StoreAllowListAsync is rejected.
         using var kidKvnTlv = new Tlv(TagKidKvn, keyReference.AsSpan());
         using var controlRefTlv = new Tlv(TagControlReference, kidKvnTlv.AsSpan());
         using var emptyListTlv = new Tlv(TagSerialsAllowList, []);
@@ -826,32 +723,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         _logger.LogInformation("Allow list cleared (KeyReference: {KeyReference})", keyReference);
     }
 
-    /// <summary>
-    ///     Stores data in the Security Domain or targeted Application on the YubiKey using the GlobalPlatform STORE DATA
-    ///     command.
-    /// </summary>
-    /// <remarks>
-    ///     The STORE DATA command is used to transfer data to either the Security Domain itself or to an Application
-    ///     being personalized. The data must be formatted as BER-TLV structures according to ISO 8825.
-    ///     <para>
-    ///         This implementation:
-    ///         - Uses a single block transfer (P1.b8=1 indicating last block)
-    ///         - Requires BER-TLV formatted data (P1.b5-b4=10)
-    ///         - Does not provide encryption information (P1.b7-b6=00)
-    ///     </para>
-    ///     <para>See GlobalPlatform Technology Card Specification v2.3.1 §11 APDU Command Reference for more information.</para>
-    ///     The <see cref="SecurityDomainSession" /> makes use of this method to store data in the Security Domain. Such as the
-    ///     <see cref="StoreCaIssuerAsync" />, <see cref="StoreCertificatesAsync" />, <see cref="StoreAllowListAsync" />, and
-    ///     other data.
-    /// </remarks>
-    /// <param name="data">
-    ///     The data to be stored, which must be formatted as BER-TLV structures according to ISO 8825.
-    /// </param>
-    /// <param name="cancellationToken"></param>
-    /// <exception cref="InvalidOperationException">
-    ///     Thrown when no secure connection is available or the security context is invalid.
-    /// </exception>
-    /// <exception cref="InvalidOperationException">Thrown when there was an SCP error, described in the exception message.</exception>
+    /// <inheritdoc />
     public async Task StoreDataAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -862,13 +734,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>
-    ///     Store the SKI (Subject Key Identifier) for the CA of a given key.
-    ///     Requires off-card entity verification.
-    /// </summary>
-    /// <param name="keyReference">A reference to the key for which to store the CA issuer.</param>
-    /// <param name="ski">The Subject Key Identifier to store.</param>
-    /// <param name="cancellationToken"></param>
+    /// <inheritdoc />
     public async Task StoreCaIssuerAsync(KeyReference keyReference, ReadOnlyMemory<byte> ski,
         CancellationToken cancellationToken = default)
     {
@@ -895,14 +761,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         _logger.LogInformation("CA issuer SKI stored (KeyReference: {KeyReference})", keyReference);
     }
 
-    /// <summary>
-    ///     Performs a factory reset by blocking all registered key references and reinitializing the session.
-    /// </summary>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <exception cref="SecureChannelException">
-    ///     This session was created with SCP key parameters and reinitializing the secure channel after
-    ///     the reset failed. The original failure is available as <see cref="Exception.InnerException" />.
-    /// </exception>
+    /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
         await InitializeSessionAsync(token => InitializeAsync(cancellationToken: token), cancellationToken)

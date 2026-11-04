@@ -1,0 +1,566 @@
+{
+  "baseline": "b73efe3813b429b4b8eb2a7e819a6ad7be699d47",
+  "state": "content-reviewed-and-reconciled",
+  "authority": "status.md is current progression; coverage.json is investigation history; validation.md records gates",
+  "module_paths": 38,
+  "edited_module_paths": 23,
+  "unchanged_module_paths": 15,
+  "public_families": 8,
+  "api_entries": 96,
+  "authored_paths": 26,
+  "edited_csharp_paths": 18,
+  "core_boundary_review": "deferred-until-Core",
+  "final_clean_population": 9,
+  "clean_samples": 3,
+  "files": [
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "investigation": "findings",
+      "read": "complete",
+      "candidates": [
+        "SD-C001",
+        "SD-C002",
+        "SD-C005",
+        "SD-C006",
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "ffea0d4c9f7745aaa7b1c19afe33bfcaa66f33ededb7d79e821683e6cc685c54",
+      "final_sha256": "6d5e5c55f89c2c0dfa53200afe4f2d35732c09994cfe94b1ea1db4e924a14a12",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/PACKAGE_README.md",
+      "investigation": "clean",
+      "read": "complete",
+      "candidates": [],
+      "edited": true,
+      "baseline_sha256": "54c948f9adff97293689eda608a4b6e2668e1836e32ca1b80c1d45072de50a08",
+      "final_sha256": "854d204ed4b648c436209aba6b87f055a0133b92a458a0b5f597bb8375386b9b",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "investigation": "findings-and-clean-units",
+      "read": "complete",
+      "candidates": [
+        "SD-C002",
+        "SD-C003",
+        "SD-C004",
+        "SD-C005",
+        "SD-C006",
+        "SD-C007",
+        "SD-C011"
+      ],
+      "edited": true,
+      "baseline_sha256": "376762442aced7b566a0a64b38e86656479930133baea28727053415c6996941",
+      "final_sha256": "f211ae74ac5bf831ae9e566a82511c1fcb48a6277d319ad87f9a2419168410da",
+      "authored_review": "review-followup.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/src/Backend/ISecurityDomainBackend.cs",
+      "investigation": "clean",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "1d61b48541d0f7d5447239f6453d749d819898619c6ca82a29335b167dbed5fa",
+      "final_sha256": "1d61b48541d0f7d5447239f6453d749d819898619c6ca82a29335b167dbed5fa",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/src/Backend/SecurityDomainBackend.cs",
+      "investigation": "clean",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "b6b783bf00f399fdeba43c79792fec96232ab8644b9f7475a904596dc1ad39c3",
+      "final_sha256": "b6b783bf00f399fdeba43c79792fec96232ab8644b9f7475a904596dc1ad39c3",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/src/CaIdentifier.cs",
+      "investigation": "missing-public-explanation",
+      "read": "complete",
+      "candidates": [
+        "SD-C006"
+      ],
+      "edited": true,
+      "baseline_sha256": "0ce19f100c2dcd717c05c02fed2453f0d2cfcb52eda2b041fb9db8ab1bd29916",
+      "final_sha256": "ade7b669a29a9833a2b09403a127af09f2e34557e12714e99bfd678c5c580678",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/src/CaIdentifierType.cs",
+      "investigation": "clean",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "a58b215bb44e78e617f89c9e58d37102137ab9e067908be92e7e1fb73ab166c5",
+      "final_sha256": "a58b215bb44e78e617f89c9e58d37102137ab9e067908be92e7e1fb73ab166c5",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "investigation": "findings-and-clean-units",
+      "read": "complete",
+      "candidates": [
+        "SD-C002",
+        "SD-C003",
+        "SD-C004",
+        "SD-C005",
+        "SD-C006",
+        "SD-C007",
+        "SD-C008"
+      ],
+      "edited": true,
+      "baseline_sha256": "f0e72fbb6f2df2c84ff8a65a2397eef4a44df66ff7e7cc6cf385061b9a802b54",
+      "final_sha256": "d3c00fed7f2368d136b7646f9ccf48ce142f3f496b91cdb1adbef725eebc5705",
+      "authored_review": "review-followup.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "investigation": "findings-and-clean-units",
+      "read": "complete",
+      "candidates": [
+        "SD-C006"
+      ],
+      "edited": true,
+      "baseline_sha256": "16830ea9b7e62767c6c94bb9b1a21265d8aab2c4314acf608ee0a1651828465c",
+      "final_sha256": "6b3adbaf0f02fe0535a5692b590135c67ea15cc2d970a7b8c878f001db4dd349",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/src/KeyInfo.cs",
+      "investigation": "missing-public-explanation",
+      "read": "complete",
+      "candidates": [
+        "SD-C006"
+      ],
+      "edited": true,
+      "baseline_sha256": "70feed6061167d3922e6dea891ea6c5e41aef7f54da85b6440aefca77d718d95",
+      "final_sha256": "8c8b78b68447431ce2775b38d3edc0c2d43e9a32303e6b5443d94e801a8ded83",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/src/PublicAPI.Shipped.txt",
+      "investigation": "reference-only-no-change",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "final_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/src/PublicAPI.Unshipped.txt",
+      "investigation": "reference-only-no-change",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+      "final_sha256": "a8c2e55b8170b31eed2221c9b6f9df5b8656ec327ccbe20eaf791d1c3b0bd718",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecureChannelException.cs",
+      "investigation": "findings-and-clean-units",
+      "read": "complete",
+      "candidates": [
+        "SD-C006"
+      ],
+      "edited": true,
+      "baseline_sha256": "a8b2cd403ea773d0231971ee91eb61b3440e9cd05b4d759196bbaca1189cfe5e",
+      "final_sha256": "a2bc6c316f3e241106149dca933d5a5a9d791261b428c59bbe912dd59edf0af4",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainKeyMaterial.cs",
+      "investigation": "behavior-questions; documentation-description-correction",
+      "read": "complete",
+      "candidates": [
+        "SD-C001",
+        "SD-C012",
+        "SD-C013"
+      ],
+      "edited": false,
+      "baseline_sha256": "460c287a76894853a38cceeb26d395ac3ddf25c0aa5f63c65b2fa1930290baf7",
+      "final_sha256": "460c287a76894853a38cceeb26d395ac3ddf25c0aa5f63c65b2fa1930290baf7",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "investigation": "findings-and-clean-units",
+      "read": "complete",
+      "candidates": [
+        "SD-C001",
+        "SD-C002",
+        "SD-C003",
+        "SD-C004",
+        "SD-C005",
+        "SD-C006",
+        "SD-C007",
+        "SD-C008",
+        "SD-C010",
+        "SD-C011",
+        "SD-C012",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "e20a68fd71b3fc54d94c098c525bfaf626a265e9c405c6bfd6d19f1d83b18d2f",
+      "final_sha256": "bf6d32f74bcb82e6e209f3c4589d809d9a5be57b1df02169b90493031b7b9956",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainTlvEncoding.cs",
+      "investigation": "behavior-question-and-missing-caller-contract",
+      "read": "complete",
+      "candidates": [
+        "SD-C003"
+      ],
+      "edited": false,
+      "baseline_sha256": "9fb61783ebbc99019a0199722d0b4798e770847535f4bcbceb35d1e5f854bc99",
+      "final_sha256": "9fb61783ebbc99019a0199722d0b4798e770847535f4bcbceb35d1e5f854bc99",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/src/Yubico.YubiKit.SecurityDomain.csproj",
+      "investigation": "clean-descriptive-metadata; runtime-settings-frozen",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0",
+      "final_sha256": "c437247e67a97571a70b2b3c0788226392a2225d013fb4a105ee29af9249dea0",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/tests/CLAUDE.md",
+      "investigation": "findings",
+      "read": "complete",
+      "candidates": [
+        "SD-C001",
+        "SD-C002",
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "e0f344f232ed132d1c800493182557a0508a1b86df990cc826f5615adf6a934b",
+      "final_sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/README.md",
+      "investigation": "findings",
+      "read": "complete",
+      "candidates": [
+        "SD-C001",
+        "SD-C002",
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "51bcfdc7ecee729d533f8ef25ddc2fe720fbef0927ddee7d333ca83315a451f5",
+      "final_sha256": "83b15cd245f2eefafb833af830b25cbeed0f616b8845d81345e170541ed1c1f8",
+      "authored_review": "review-followup.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/Scp11TestData.cs",
+      "investigation": "clean-fixture-description; fixed-test-data-not-production",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "9026fcdd5e12f4735834cf7cbbfa3468acf1e5585b3453bb9878cd9ae340d346",
+      "final_sha256": "9026fcdd5e12f4735834cf7cbbfa3468acf1e5585b3453bb9878cd9ae340d346",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs",
+      "investigation": "findings",
+      "read": "complete",
+      "candidates": [
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "7428a3de5850948a60ee1604216aa84e51f297e912620b2e6157f1b65be2d5e9",
+      "final_sha256": "afff71fb205952db92f40bb3a410f45aa0771d7c05df751687775d58ed284068",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs",
+      "investigation": "findings",
+      "read": "complete",
+      "candidates": [
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "cd2a9517ef36de83d2b1e3a5e4ebadbf7a143ac096d724f6f8a23d6201edd728",
+      "final_sha256": "cb4256ccb2a427de68aedfbfa88811ded09a4fff072b639c256f5b4cb6ef2c29",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "investigation": "findings-and-useful-lifecycle-evidence",
+      "read": "complete",
+      "candidates": [
+        "SD-C003",
+        "SD-C004",
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "42bcc3dfd4d9afd607d9c1af3be3597ce3b43a490fd9309d8ed58dc6929e4abf",
+      "final_sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "investigation": "findings-and-clean-units",
+      "read": "complete",
+      "candidates": [
+        "SD-C002",
+        "SD-C004",
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "ac07d6d1e0fed1235d81ae0a72b5a5a30c8d9854da7bd23f8124bdd210293e2e",
+      "final_sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs",
+      "investigation": "findings",
+      "read": "complete",
+      "candidates": [
+        "SD-C005",
+        "SD-C007",
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "ec04d60363252e65e2e13ae3aebf229d45ea8f746445ae06acdf02c2750a0c33",
+      "final_sha256": "70762acbdbe91adc9e493da27a06baefe212e4fe663afbf1244c4e1bc85655aa",
+      "authored_review": "review-followup.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11cTests.cs",
+      "investigation": "findings-and-qualified-authentication-evidence",
+      "read": "complete",
+      "candidates": [
+        "SD-C005",
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": false,
+      "baseline_sha256": "b008cca577a123b8e7de0e0f764d2cc68dbe87f2b1629c9eef8311b574219783",
+      "final_sha256": "b008cca577a123b8e7de0e0f764d2cc68dbe87f2b1629c9eef8311b574219783",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/SecurityDomainStateRestoringTests.cs",
+      "investigation": "findings",
+      "read": "complete",
+      "candidates": [
+        "SD-C002",
+        "SD-C009"
+      ],
+      "edited": true,
+      "baseline_sha256": "a774b10ed0da9dbadc96f8f6eb79bbfce7225ffb451d799ec0f41dff1a44098d",
+      "final_sha256": "6a7725030d06e9a92d0e2e3a2215ba7941bc24b27724d4f1abd36fa79e9bcc51",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+      "investigation": "findings-and-clean-session-sequencing",
+      "read": "complete",
+      "candidates": [
+        "SD-C002",
+        "SD-C009"
+      ],
+      "edited": true,
+      "baseline_sha256": "0ad608e8ef3ce62be0c9a5e99d771753a8652e1503f6f5c2f9a70f96cd2aba8a",
+      "final_sha256": "fe661501a0a2b0a52e0bfa37ca6c7c10320537a3a3014fb9897e2f4fad625b5e",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Yubico.YubiKit.SecurityDomain.IntegrationTests.csproj",
+      "investigation": "clean-infrastructure-comments; settings-frozen",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "75d8583754f53f8479c6fd7113cc889f04b52873734042ad5698b4a22043f909",
+      "final_sha256": "75d8583754f53f8479c6fd7113cc889f04b52873734042ad5698b4a22043f909",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/xunit.runner.json",
+      "investigation": "infrastructure-reference-no-content-edit",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c",
+      "final_sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/AuditV2/SecurityDomainAuditReproTests.cs",
+      "investigation": "clean-local-assertions; final-spec-citation-gap",
+      "read": "complete",
+      "candidates": [
+        "SD-C007"
+      ],
+      "edited": true,
+      "baseline_sha256": "40873cd3120c4e24ca9d82df4f60bfb1f1fde3396b6c959133a0eb61781c9819",
+      "final_sha256": "2719b01755d036e72f724570ed109798f1503c0e67faa353bbdcdf7cb4387a8b",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+      "investigation": "findings",
+      "read": "complete",
+      "candidates": [
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "d6ae01007d3137b937ab0f9c6a8e6c1b7b2d74812cd2af61e70c7501c00480c0",
+      "final_sha256": "fc052fc7ca926eba2706f9cabc3c5f039359e401e7d344bb06b566079acccaee",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnectionTests.cs",
+      "investigation": "clean",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "a52992d0676a16ebcc73df3d4fc6b29cf852d39bb8312e1edac5c1b9df65344c",
+      "final_sha256": "a52992d0676a16ebcc73df3d4fc6b29cf852d39bb8312e1edac5c1b9df65344c",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs",
+      "investigation": "findings-and-clean-local-wrap-evidence",
+      "read": "complete",
+      "candidates": [
+        "SD-C006",
+        "SD-C009",
+        "SD-C013"
+      ],
+      "edited": true,
+      "baseline_sha256": "ab0d621148a701acdb07b295ca086dbf5324c0989d04e67620e5b47541bf461c",
+      "final_sha256": "66999fb68ddfada76820229b7cb0f41133d5197e0d7059e6e8fc8cf4a710b0a8",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainCertificateBundleTests.cs",
+      "investigation": "clean-behavior-evidence; stale-comment",
+      "read": "complete",
+      "candidates": [
+        "SD-C009"
+      ],
+      "edited": true,
+      "baseline_sha256": "23bd8b401bcda54b23eae1554d89baf7bd3d886f386bacc7a0b366fb82268778",
+      "final_sha256": "77c9c7bcb956e0c1add350029aa3efbf1a0deb773e63c9d42a3f4b9c31e0c807",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+      "investigation": "findings-and-clean-wire-evidence",
+      "read": "complete",
+      "candidates": [
+        "SD-C002",
+        "SD-C003",
+        "SD-C006",
+        "SD-C008",
+        "SD-C009"
+      ],
+      "edited": true,
+      "baseline_sha256": "ae48275c1a07646ee16bff223ed85a8ee8ce09ee29155a722d676e552bac8456",
+      "final_sha256": "f9aa1d32677d9b27b1885a9b789803a230090ce641deab371c03d7522f4c947f",
+      "authored_review": "review.md",
+      "note": "Independent changed-content review"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Yubico.YubiKit.SecurityDomain.UnitTests.csproj",
+      "investigation": "clean-infrastructure-comments; settings-frozen",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "af1a9564844531b0dd815462cc1005f46162eff27d7c77e15bb29e1a8a8f59a9",
+      "final_sha256": "af1a9564844531b0dd815462cc1005f46162eff27d7c77e15bb29e1a8a8f59a9",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/xunit.runner.json",
+      "investigation": "infrastructure-reference-no-content-edit",
+      "read": "complete",
+      "candidates": [],
+      "edited": false,
+      "baseline_sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+      "final_sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+      "authored_review": null,
+      "note": "Investigation disposition; not claimed individually re-reviewed"
+    }
+  ],
+  "external_authored": [
+    {
+      "path": "docs/AI-DOCS-GUIDE.md",
+      "review": "review.md",
+      "reviewed_sha256": "54ff0bf0a5c57143e73094f0b7f2bd67d4175e358c4ae2e554bdaa05616b9a93",
+      "final_sha256": "54ff0bf0a5c57143e73094f0b7f2bd67d4175e358c4ae2e554bdaa05616b9a93",
+      "post_review_transform": null
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "review": "review.md",
+      "reviewed_sha256": "eea28b28c26fbcff358b04214e7fb660cc32226c5e5e7fa2d97bd5fbc9729c41",
+      "final_sha256": "eea28b28c26fbcff358b04214e7fb660cc32226c5e5e7fa2d97bd5fbc9729c41",
+      "post_review_transform": null
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "review": "review.md",
+      "reviewed_sha256": "606f8822d3dc0f6360a709c7adf33acb164dffe1d559acaf8ce2c95971dd2588",
+      "final_sha256": "606f8822d3dc0f6360a709c7adf33acb164dffe1d559acaf8ce2c95971dd2588",
+      "post_review_transform": null
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/check-records.py
+PASS:26 current authored hashes; 17 current record/handoff Markdown files / 42 local links; balanced fences, UTF-8-only retained artifacts, git diff whitespace clean.
+
+EXIT=0

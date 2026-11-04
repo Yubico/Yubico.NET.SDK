@@ -1,0 +1,43 @@
+"""Account for the observed formatter-only import removal and trailing newlines."""
+from pathlib import Path
+import hashlib
+import json
+import re
+import subprocess
+
+HERE=Path(__file__).resolve().parent
+ROOT=next(p for p in HERE.parents if (p/'toolchain.cs').exists())
+baseline='b73efe3813b429b4b8eb2a7e819a6ad7be699d47'
+capture=HERE/'pre-format-content.json'
+before=json.loads(capture.read_text())
+assert before['baseline']==baseline
+assert (HERE/'format-apply.log').read_text().endswith('EXIT=0\n')
+expected={'src/SecurityDomain/src/IYubiKeyExtensions.cs':['Yubico.YubiKit.Core.Protocols.SmartCard.Apdu','Yubico.YubiKit.Core.Protocols.SmartCard.Scp']}
+pattern=r'^using ([A-Za-z0-9_.]+);\n'
+def sha(data):return hashlib.sha256(data).hexdigest()
+records=[]
+for row in before['files']:
+    old=row['content']; current=(ROOT/row['path']).read_text()
+    assert sha(old.encode())==row['sha256']
+    old_imports=re.findall(pattern,old,re.M); new_imports=re.findall(pattern,current,re.M)
+    removed=sorted(set(old_imports)-set(new_imports)); added=sorted(set(new_imports)-set(old_imports))
+    assert removed==expected.get(row['path'],[]) and not added,row['path']
+    # Compare every other character, allowing only final newline normalization.
+    assert re.sub(pattern,'',old,flags=re.M).rstrip('\n')==re.sub(pattern,'',current,flags=re.M).rstrip('\n'),row['path']
+    records.append(dict(path=row['path'],before_sha256=row['sha256'],after_sha256=sha(current.encode()),
+                        removed_namespaces=removed,added_namespaces=added,non_using_non_whitespace_identical=True))
+transform=HERE/'format-transform.json'
+transform.write_text(json.dumps(dict(baseline=baseline,formatter_exit=0,files=records),indent=2)+'\n')
+def relative(p):return str(p.relative_to(ROOT))
+manifest=dict(schema_version=1,baseline=baseline,formatter=dict(diagnostic='IDE0005',
+    command_log=relative(HERE/'format-apply.log'),command_log_sha256=sha((HERE/'format-apply.log').read_bytes()),
+    log=relative(HERE/'format-initial.log'),log_sha256=sha((HERE/'format-initial.log').read_bytes())),files=[])
+for r in records:
+    if not r['removed_namespaces']:continue
+    original=subprocess.check_output(['git','show',baseline+':'+r['path']],cwd=ROOT)
+    manifest['files'].append(dict(path=r['path'],baseline_sha256=sha(original),
+        before=dict(path=relative(capture),bundle_sha256=sha(capture.read_bytes()),sha256=r['before_sha256']),
+        after=dict(path=relative(transform),bundle_sha256=sha(transform.read_bytes()),sha256=r['after_sha256']),
+        removals=[dict(namespace=n) for n in r['removed_namespaces']]))
+(HERE/'import-removals.json').write_text(json.dumps(manifest,indent=2)+'\n')
+print(f'PASS: {len(records)} formatter transforms; two exact ordinary namespace imports removed in one file; other text identical except final newlines and import ordering. Roslyn proof remains separate.')

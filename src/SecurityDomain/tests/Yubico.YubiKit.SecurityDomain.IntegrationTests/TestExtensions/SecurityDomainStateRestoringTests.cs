@@ -17,22 +17,18 @@ using Yubico.YubiKit.Tests.Shared;
 namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
 
 /// <summary>
-///     Base class for Security Domain test classes that leave the device's key state altered,
-///     restoring the factory Security Domain after every test.
+///     Requests Security Domain reset after each test that records a device with Track.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Importing, rotating, or deleting key sets can leave the device with no key set matching
-///         <c>Scp03KeyParameters.Default</c>. Every later consumer of the default keys then fails
-///         secure-channel establishment with <c>SW=0x6A88</c> (referenced data not found). Because the
-///         failure appears in whichever suite runs next rather than in the test that caused it, it reads
-///         as an unrelated regression: the Management SCP03 tests were the visible symptom of Security
-///         Domain SCP11 tests running first.
+///         Key operations can replace factory defaults and affect later tests using public default keys.
+///         Cleanup uses an independent 60-second cancellation source so the test token cannot cancel it
+///         immediately. Reset remains a destructive attempt, not verified factory-state restoration.
 ///     </para>
 ///     <para>
 ///         xUnit constructs the test class once per test, so <see cref="DisposeAsync" /> runs after each
 ///         one with that test's device. Derived tests must call <see cref="Track" /> with their state so
-///         the correct device is restored.
+///         cleanup targets the correct device. Tests that do not call Track receive no cleanup here.
 ///     </para>
 /// </remarks>
 public abstract class SecurityDomainStateRestoringTests : IAsyncLifetime
@@ -53,7 +49,7 @@ public abstract class SecurityDomainStateRestoringTests : IAsyncLifetime
     }
 
     /// <summary>
-    ///     Records the device under test so the Security Domain is restored after the test completes.
+    ///     Records the device on which cleanup will request Security Domain reset after the test.
     /// </summary>
     protected YubiKeyTestState Track(YubiKeyTestState state)
     {

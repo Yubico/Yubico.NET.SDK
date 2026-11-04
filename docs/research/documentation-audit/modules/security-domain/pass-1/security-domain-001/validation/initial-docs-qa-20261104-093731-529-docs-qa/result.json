@@ -1,0 +1,19 @@
+{
+  "status": "failed",
+  "command": "dotnet toolchain.cs -- docs-qa",
+  "started": "2026-11-04T09:37:31.5296908+01:00",
+  "durationSeconds": 0.4,
+  "runDirectory": "artifacts/toolchain/runs/20261104-093731-529-docs-qa",
+  "targets": [
+    {
+      "name": "docs-qa",
+      "status": "failed",
+      "durationSeconds": 0.3,
+      "error": "Documentation validation failed with 1 issue(s)"
+    }
+  ],
+  "projects": [],
+  "warningCount": 0,
+  "warnings": [],
+  "next": []
+}

@@ -1,0 +1,343 @@
+{
+  "revision": "v1",
+  "baseline": "b73efe3813b429b4b8eb2a7e819a6ad7be699d47",
+  "blocks": [
+    {
+      "path": "src/SecurityDomain/README.md",
+      "index": 1,
+      "text": "using System.Security.Cryptography;\nusing Yubico.YubiKit.Core.Abstractions;\nusing Yubico.YubiKit.Core.Cryptography;\nusing Yubico.YubiKit.Core.Devices;\nusing Yubico.YubiKit.Core.Protocols.SmartCard.Scp;\nusing Yubico.YubiKit.Core.Sessions;\nusing Yubico.YubiKit.SecurityDomain;\n\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nawait using var session = await device.CreateSecurityDomainSessionAsync();\n\nforeach (var keyInfo in await session.ListKeyInformationAsync())\n{\n    Console.WriteLine(keyInfo.KeyReference);\n}\n",
+      "line": 48,
+      "document_sha256": "0a290632f4eb8db0eb6e051e69ad555e567009f8df4b888d93cefd922f9508f5",
+      "block_sha256": "d4408cea0f39447dbe1eb119ff58745dced737a923b96a1885d1453a1e1bd5f8"
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "index": 2,
+      "text": "using var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<KeyInfo> keys = await session.ListKeyInformationAsync();\n",
+      "line": 76,
+      "document_sha256": "0a290632f4eb8db0eb6e051e69ad555e567009f8df4b888d93cefd922f9508f5",
+      "block_sha256": "277f99736332d33d72695eab8069ce0a1ef67b3925d9141b0a96f07feb5e1b3f"
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "index": 3,
+      "text": "byte[] keyMaterial = RandomNumberGenerator.GetBytes(48);\ntry\n{\n    // Escrow keyMaterial before you send it: the device will not give it back.\n    using var newKeys = new StaticKeys(keyMaterial.AsSpan(0, 16), keyMaterial.AsSpan(16, 16), keyMaterial.AsSpan(32, 16));\n    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, replaceKvn: 0);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(keyMaterial);\n}\n",
+      "line": 90,
+      "document_sha256": "0a290632f4eb8db0eb6e051e69ad555e567009f8df4b888d93cefd922f9508f5",
+      "block_sha256": "61351ce29b5719a3744ce3c8ae4831a5796c3fdc3a443ad672a2ee0be3a52abd"
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "index": 4,
+      "text": "var keyReference = new KeyReference(ScpKid.SCP11b, Kvn: 0x01);\nECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, replaceKvn: 0);\n",
+      "line": 126,
+      "document_sha256": "0a290632f4eb8db0eb6e051e69ad555e567009f8df4b888d93cefd922f9508f5",
+      "block_sha256": "6a4e1071f9802c834144bc2b15837cc1f5b73e1921125b9fb754c534a359acef"
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "index": 5,
+      "text": "await using var session = await device.CreateSecurityDomainSessionAsync();\nawait session.ResetAsync();\n",
+      "line": 165,
+      "document_sha256": "0a290632f4eb8db0eb6e051e69ad555e567009f8df4b888d93cefd922f9508f5",
+      "block_sha256": "99d8dde3f77b1aa8f602ce10e0684fc7a3dccc3965eac6a618da2c74c64f1f94"
+    },
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "index": 1,
+      "text": "const byte ClaGlobalPlatform = 0x80;\n\n// Common instructions\nconst byte InsGetData = 0xCA;\nconst byte InsPutKey = 0xD8;\nconst byte InsInitializeUpdate = 0x50;\nconst byte InsExternalAuthenticate = 0x82;\nconst byte InsInternalAuthenticate = 0x88;\nconst byte InsDelete = 0xE4;\nconst byte InsGenerateKey = 0xF1;\nconst byte InsPerformSecurityOperation = 0x2A;\n\n// TLV tags for data encoding\nconst int TagKeyInformationTemplate = 0xE0;\nconst byte TagControlReference = 0xA6;\nconst byte TagKidKvn = 0x83;\n",
+      "line": 150,
+      "document_sha256": "6d5e5c55f89c2c0dfa53200afe4f2d35732c09994cfe94b1ea1db4e924a14a12",
+      "block_sha256": "6abbae7576d4bc1903a73673f80461fe7369af48102ed6f85b27d3409e752c92"
+    },
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "index": 2,
+      "text": "var keyInfo = await session.ListKeyInformationAsync(cancellationToken);\nforeach (var entry in keyInfo)\n{\n    logger.LogDebug(\n        \"Key: KID={Kid:X2}, KVN={Kvn:X2}\",\n        entry.KeyReference.Kid,\n        entry.KeyReference.Kvn);\n}\n",
+      "line": 181,
+      "document_sha256": "6d5e5c55f89c2c0dfa53200afe4f2d35732c09994cfe94b1ea1db4e924a14a12",
+      "block_sha256": "54d1fca657940782e9033fcd3cd186f1ad90cc8effa314d4077b2e9b2d6a83d6"
+    },
+    {
+      "path": "src/SecurityDomain/tests/README.md",
+      "index": 1,
+      "text": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = \"5.4.3\")]\npublic async Task MyTest(YubiKeyTestState state)\n{\n    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(100));\n    CancellationToken ct = timeout.Token;\n    using var parameters = Scp03KeyParameters.Default;\n    await state.WithSecurityDomainSessionAsync(\n        resetBeforeUse: true,\n        async session =>\n        {\n            var keyInfo = await session.ListKeyInformationAsync(ct);\n            Assert.NotEmpty(keyInfo);\n        },\n        scpKeyParams: parameters,\n        cancellationToken: ct);\n}\n",
+      "line": 56,
+      "document_sha256": "658b60cae8657c4e0fe2d44fe5cbc7c174b606fde246b97bb4ad0c2ecd796394",
+      "block_sha256": "313b54555f8d41982fe2d853624b94b3f22ff8adbef1e8bc3f3fe95fd0a305ed"
+    },
+    {
+      "path": "src/SecurityDomain/tests/CLAUDE.md",
+      "index": 1,
+      "text": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = \"5.4.3\")]\npublic async Task ListAfterReset_ContainsFactoryVersion(YubiKeyTestState state)\n{\n    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(100));\n    CancellationToken ct = timeout.Token;\n    using var parameters = Scp03KeyParameters.Default;\n    await state.WithSecurityDomainSessionAsync(\n        resetBeforeUse: true,\n        async session =>\n        {\n            var keys = await session.ListKeyInformationAsync(ct);\n            Assert.Contains(keys, entry => entry.KeyReference.Kvn == 0xFF);\n        },\n        scpKeyParams: parameters,\n        cancellationToken: ct);\n}\n",
+      "line": 86,
+      "document_sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5",
+      "block_sha256": "13314aa92f4ef050426ba15fd44d8c6eb9225e7c77fb36a79c9ca78993bea948"
+    },
+    {
+      "path": "src/SecurityDomain/tests/CLAUDE.md",
+      "index": 2,
+      "text": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = \"5.7.2\")]\npublic async Task GeneratedKey_IsListedInNextSession(YubiKeyTestState state)\n{\n    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(100));\n    CancellationToken ct = timeout.Token;\n    using var parameters = Scp03KeyParameters.Default;\n    var keyRef = new KeyReference(ScpKid.SCP11b, 0x03);\n    try\n    {\n        await state.WithSecurityDomainSessionAsync(\n            resetBeforeUse: true,\n            async session => { await session.GenerateKeyAsync(keyRef, cancellationToken: ct); },\n            scpKeyParams: parameters,\n            cancellationToken: ct);\n\n        await state.WithSecurityDomainSessionAsync(\n            resetBeforeUse: false,\n            async session =>\n            {\n                var keys = await session.ListKeyInformationAsync(ct);\n                Assert.Contains(keys, entry => entry.KeyReference.Kid == keyRef.Kid &&\n                    entry.KeyReference.Kvn == keyRef.Kvn);\n            },\n            cancellationToken: ct);\n    }\n    finally\n    {\n        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(60));\n        await state.ResetSecurityDomainAsync(cleanup.Token);\n    }\n}\n",
+      "line": 113,
+      "document_sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5",
+      "block_sha256": "9eb0bcd07d8c24fb6c0b57e1f793ef7fe2d124005a6843a26c74450c2eca039b"
+    }
+  ],
+  "inline": {
+    "path": "src/SecurityDomain/README.md",
+    "index": "inline-constructor",
+    "text": "new Scp11KeyParameters(keyReference, devicePublicKey)",
+    "document_sha256": "0a290632f4eb8db0eb6e051e69ad555e567009f8df4b888d93cefd922f9508f5",
+    "block_sha256": "2ea389e5e0e5abf22221078c95e047f756fe9725d2a5f96953d244988171791d"
+  },
+  "groups": [
+    {
+      "name": "ReadOnly",
+      "context": "consumer",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 1
+        }
+      ],
+      "raw": "raw/ReadOnly.cs.txt",
+      "raw_sha256": "d4408cea0f39447dbe1eb119ff58745dced737a923b96a1885d1453a1e1bd5f8",
+      "wrapped": "public static async Task ReadOnlyAsync()\n{\n\nIYubiKey device = await YubiKeyManager.FindFirstAsync();\nawait using var session = await device.CreateSecurityDomainSessionAsync();\n\nforeach (var keyInfo in await session.ListKeyInformationAsync())\n{\n    Console.WriteLine(keyInfo.KeyReference);\n}\n\n}\n",
+      "prerequisites": []
+    },
+    {
+      "name": "Authenticate",
+      "context": "consumer",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 2
+        }
+      ],
+      "raw": "raw/Authenticate.cs.txt",
+      "raw_sha256": "277f99736332d33d72695eab8069ce0a1ef67b3925d9141b0a96f07feb5e1b3f",
+      "wrapped": "public static async Task AuthenticateAsync(IYubiKey device)\n{\nusing var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<KeyInfo> keys = await session.ListKeyInformationAsync();\n\n}\n",
+      "prerequisites": [
+        "Caller-selected IYubiKey device; no existing live session"
+      ]
+    },
+    {
+      "name": "Import",
+      "context": "consumer",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 2
+        },
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 3
+        }
+      ],
+      "raw": "raw/Import.cs.txt",
+      "raw_sha256": "d4f872caee58e92259e4a0a434291cbd171f9c71a00f56022bfce30ed7d7183f",
+      "wrapped": "public static async Task ImportAsync(IYubiKey device)\n{\nusing var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<KeyInfo> keys = await session.ListKeyInformationAsync();\n\nbyte[] keyMaterial = RandomNumberGenerator.GetBytes(48);\ntry\n{\n    // Escrow keyMaterial before you send it: the device will not give it back.\n    using var newKeys = new StaticKeys(keyMaterial.AsSpan(0, 16), keyMaterial.AsSpan(16, 16), keyMaterial.AsSpan(32, 16));\n    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, replaceKvn: 0);\n}\nfinally\n{\n    CryptographicOperations.ZeroMemory(keyMaterial);\n}\n\n}\n",
+      "prerequisites": [
+        "Factory-SCP03 administrative task; escrow remains caller responsibility"
+      ]
+    },
+    {
+      "name": "Generate",
+      "context": "consumer",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 2
+        },
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 4
+        }
+      ],
+      "raw": "raw/Generate.cs.txt",
+      "raw_sha256": "4a5ed7bb013461555d9b2da4f61bc554e8d7964d1c2df640015ecdd00de70fb4",
+      "wrapped": "public static async Task GenerateAsync(IYubiKey device)\n{\nusing var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<KeyInfo> keys = await session.ListKeyInformationAsync();\n\nvar keyReference = new KeyReference(ScpKid.SCP11b, Kvn: 0x01);\nECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, replaceKvn: 0);\n\n}\n",
+      "prerequisites": [
+        "Factory-SCP03 administrative task; capable firmware if executed"
+      ]
+    },
+    {
+      "name": "Reset",
+      "context": "consumer",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": 5
+        }
+      ],
+      "raw": "raw/Reset.cs.txt",
+      "raw_sha256": "99d8dde3f77b1aa8f602ce10e0684fc7a3dccc3965eac6a618da2c74c64f1f94",
+      "wrapped": "public static async Task ResetAsync(IYubiKey device)\n{\nawait using var session = await device.CreateSecurityDomainSessionAsync();\nawait session.ResetAsync();\n\n}\n",
+      "prerequisites": [
+        "Separate unauthenticated task; destructive if executed"
+      ]
+    },
+    {
+      "name": "Inspect",
+      "context": "consumer",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/CLAUDE.md",
+          "index": 2
+        }
+      ],
+      "raw": "raw/Inspect.cs.txt",
+      "raw_sha256": "54d1fca657940782e9033fcd3cd186f1ad90cc8effa314d4077b2e9b2d6a83d6",
+      "wrapped": "public static async Task InspectAsync(ISecurityDomainSession session, ILogger logger, CancellationToken cancellationToken)\n{\nvar keyInfo = await session.ListKeyInformationAsync(cancellationToken);\nforeach (var entry in keyInfo)\n{\n    logger.LogDebug(\n        \"Key: KID={Kid:X2}, KVN={Kvn:X2}\",\n        entry.KeyReference.Kid,\n        entry.KeyReference.Kvn);\n}\n\n}\n",
+      "prerequisites": [
+        "Caller-owned session/logger/token; only metadata is logged"
+      ]
+    },
+    {
+      "name": "OpenScp11",
+      "context": "consumer",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/README.md",
+          "index": "inline-constructor"
+        }
+      ],
+      "raw": "raw/OpenScp11.cs.txt",
+      "raw_sha256": "2ea389e5e0e5abf22221078c95e047f756fe9725d2a5f96953d244988171791d",
+      "wrapped": "public static async Task OpenScp11Async(IYubiKey device, KeyReference keyReference, ECPublicKey devicePublicKey)\n{\nusing var parameters = new Scp11KeyParameters(keyReference, devicePublicKey);\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = parameters });\n}\n",
+      "prerequisites": [
+        "Trusted provisioned key/reference supplied by caller; previous administrative session disposed"
+      ]
+    },
+    {
+      "name": "Basic",
+      "context": "hardware",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/tests/README.md",
+          "index": 1
+        }
+      ],
+      "raw": "raw/Basic.cs.txt",
+      "raw_sha256": "313b54555f8d41982fe2d853624b94b3f22ff8adbef1e8bc3f3fe95fd0a305ed",
+      "wrapped": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = \"5.4.3\")]\npublic async Task MyTest(YubiKeyTestState state)\n{\n    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(100));\n    CancellationToken ct = timeout.Token;\n    using var parameters = Scp03KeyParameters.Default;\n    await state.WithSecurityDomainSessionAsync(\n        resetBeforeUse: true,\n        async session =>\n        {\n            var keyInfo = await session.ListKeyInformationAsync(ct);\n            Assert.NotEmpty(keyInfo);\n        },\n        scpKeyParams: parameters,\n        cancellationToken: ct);\n}\n",
+      "prerequisites": [
+        "Existing xUnit-v2 project context; public real test helpers/attributes; compile only"
+      ]
+    },
+    {
+      "name": "Factory",
+      "context": "hardware",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/tests/CLAUDE.md",
+          "index": 1
+        }
+      ],
+      "raw": "raw/Factory.cs.txt",
+      "raw_sha256": "13314aa92f4ef050426ba15fd44d8c6eb9225e7c77fb36a79c9ca78993bea948",
+      "wrapped": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = \"5.4.3\")]\npublic async Task ListAfterReset_ContainsFactoryVersion(YubiKeyTestState state)\n{\n    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(100));\n    CancellationToken ct = timeout.Token;\n    using var parameters = Scp03KeyParameters.Default;\n    await state.WithSecurityDomainSessionAsync(\n        resetBeforeUse: true,\n        async session =>\n        {\n            var keys = await session.ListKeyInformationAsync(ct);\n            Assert.Contains(keys, entry => entry.KeyReference.Kvn == 0xFF);\n        },\n        scpKeyParams: parameters,\n        cancellationToken: ct);\n}\n",
+      "prerequisites": [
+        "Existing xUnit-v2 project context; public real test helpers/attributes; compile only"
+      ]
+    },
+    {
+      "name": "Successive",
+      "context": "hardware",
+      "blocks": [
+        {
+          "path": "src/SecurityDomain/tests/CLAUDE.md",
+          "index": 2
+        }
+      ],
+      "raw": "raw/Successive.cs.txt",
+      "raw_sha256": "9eb0bcd07d8c24fb6c0b57e1f793ef7fe2d124005a6843a26c74450c2eca039b",
+      "wrapped": "[SkippableTheory]\n[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = \"5.7.2\")]\npublic async Task GeneratedKey_IsListedInNextSession(YubiKeyTestState state)\n{\n    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(100));\n    CancellationToken ct = timeout.Token;\n    using var parameters = Scp03KeyParameters.Default;\n    var keyRef = new KeyReference(ScpKid.SCP11b, 0x03);\n    try\n    {\n        await state.WithSecurityDomainSessionAsync(\n            resetBeforeUse: true,\n            async session => { await session.GenerateKeyAsync(keyRef, cancellationToken: ct); },\n            scpKeyParams: parameters,\n            cancellationToken: ct);\n\n        await state.WithSecurityDomainSessionAsync(\n            resetBeforeUse: false,\n            async session =>\n            {\n                var keys = await session.ListKeyInformationAsync(ct);\n                Assert.Contains(keys, entry => entry.KeyReference.Kid == keyRef.Kid &&\n                    entry.KeyReference.Kvn == keyRef.Kvn);\n            },\n            cancellationToken: ct);\n    }\n    finally\n    {\n        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(60));\n        await state.ResetSecurityDomainAsync(cleanup.Token);\n    }\n}\n",
+      "prerequisites": [
+        "Existing xUnit-v2 project context; public real test helpers/attributes; compile only"
+      ]
+    }
+  ],
+  "exclusions": [
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "index": 1,
+      "reason": "Instruction/tag constant navigation sketch, not an executable task"
+    }
+  ],
+  "transforms": "Only namespace imports separated from entry-point statements; all resource using/await/finally/attribute/assertion bodies retained verbatim. Typed wrappers do not execute.",
+  "inputs": [
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/consumer/Directory.Build.props",
+      "sha256": "396e2b9e2af05c6832d714b756796c28d6a0b1a04d175f763b1a2ac78543e357"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/consumer/Directory.Build.targets",
+      "sha256": "4ad2be5400bcb7cfc02ffe1f815183d5c90ba3fbff8e107fd8b0630cdc8ee66c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/consumer/src/Examples.cs",
+      "sha256": "870dc0de4471348632f935a8b7c2f25ad0b3f66a5889011762b30c778c2179ac"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditSd001.Examples.v1.consumer.csproj",
+      "sha256": "5f8c47e3843054c658f154e488a02605715ae6194e8dac1291f7e97481b3e1ae"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/hardware/Directory.Build.props",
+      "sha256": "992d156289223beaf844157f4c5047025d0eaaa5a0f72cbe734ed23c21dc9252"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/hardware/Directory.Build.targets",
+      "sha256": "4ad2be5400bcb7cfc02ffe1f815183d5c90ba3fbff8e107fd8b0630cdc8ee66c"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/hardware/src/Examples.cs",
+      "sha256": "31b7c8c9daff3cf71f2736aea27da3df4f886791340fc8b3752708aa8afe2e75"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/hardware/src/Yubico.YubiKit.AuditSd001.Examples.v1.hardware.csproj",
+      "sha256": "332952b495dade59029cc9c16594c4c741f06434924343f331abde11bef7bcb2"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/Authenticate.cs.txt",
+      "sha256": "277f99736332d33d72695eab8069ce0a1ef67b3925d9141b0a96f07feb5e1b3f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/Basic.cs.txt",
+      "sha256": "313b54555f8d41982fe2d853624b94b3f22ff8adbef1e8bc3f3fe95fd0a305ed"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/Factory.cs.txt",
+      "sha256": "13314aa92f4ef050426ba15fd44d8c6eb9225e7c77fb36a79c9ca78993bea948"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/Generate.cs.txt",
+      "sha256": "4a5ed7bb013461555d9b2da4f61bc554e8d7964d1c2df640015ecdd00de70fb4"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/Import.cs.txt",
+      "sha256": "d4f872caee58e92259e4a0a434291cbd171f9c71a00f56022bfce30ed7d7183f"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/Inspect.cs.txt",
+      "sha256": "54d1fca657940782e9033fcd3cd186f1ad90cc8effa314d4077b2e9b2d6a83d6"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/OpenScp11.cs.txt",
+      "sha256": "2ea389e5e0e5abf22221078c95e047f756fe9725d2a5f96953d244988171791d"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/ReadOnly.cs.txt",
+      "sha256": "d4408cea0f39447dbe1eb119ff58745dced737a923b96a1885d1453a1e1bd5f8"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/Reset.cs.txt",
+      "sha256": "99d8dde3f77b1aa8f602ce10e0684fc7a3dccc3965eac6a618da2c74c64f1f94"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/raw/Successive.cs.txt",
+      "sha256": "9eb0bcd07d8c24fb6c0b57e1f793ef7fe2d124005a6843a26c74450c2eca039b"
+    }
+  ]
+}

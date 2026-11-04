@@ -22,6 +22,13 @@ approachable, and optimized for understanding. Preserve useful rationale, condit
 Paragraphs explain; numbered steps guide procedures; tables compare real alternatives. Internal
 comments explain present constraints and intent rather than an agent's development history.
 
+**2026-11-04 scope decision:** Security Domain and subsequent applet cycles stay module-focused.
+Dedicated cross-module boundary reviews are deferred until Core, the final target, when each applet's
+relationship with Core will be reviewed together. Record unresolved Core dependencies with precise
+paths/questions; do not expand them into a Core investigation or editing assignment now. CTAP's completed
+CTAP/WebAuthn review remains historical evidence. Match assignment and record volume to the selected
+module's complexity; related logical records may share files.
+
 Sol 6.1 remains the primary investigator/editor/independent reviewer; Astra coordinates, adjudicates
 consequential uncertainty, samples, validates and integrates. Resolve exact available model IDs before
 dispatch. Use fresh editor and reviewer sessions with explicit scope and evidence. The coordinator owns
@@ -175,3 +182,8 @@ temporary worktrees and local planning directories are gone.
   retain raw compiler diagnostics separately rather than hiding them to produce a green result.
 - Mechanically verify local links and complete example blocks; a fresh reviewer can still inherit a
   mistaken path calculation or overlook an adjacent obsolete capability name.
+- Reconcile authoritative current status, coverage and correction pointers at each phase transition;
+  retain earlier checkpoints as clearly labeled history rather than contradictory current instructions.
+- Preserve complete resource scopes when preparing examples, use collision-free validation project names,
+  and distinguish compiler errors from extraction/provenance-tool failures. Plan durable source/log
+  retention before collecting generated runtime/cache artifacts.

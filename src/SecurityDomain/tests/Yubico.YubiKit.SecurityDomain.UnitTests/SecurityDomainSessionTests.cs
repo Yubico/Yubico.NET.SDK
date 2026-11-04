@@ -29,8 +29,6 @@ public class SecurityDomainSessionTests
             SecurityDomainSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
         // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -48,8 +46,6 @@ public class SecurityDomainSessionTests
         session.Dispose();
 
         // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
         connection.DidNotReceive().Dispose();
     }
 
@@ -433,7 +429,7 @@ public class SecurityDomainSessionTests
 
         // Assert
         Assert.NotNull(keyInfo);
-        // Session should be disposed automatically - verify connection was used
+        // Verify the connection was used; this assertion does not observe session or connection disposal.
         await connection.Received()
             .TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
     }

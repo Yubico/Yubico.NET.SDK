@@ -1,0 +1,6 @@
+RESULT: FAILED  (dotnet toolchain.cs -- docs-qa)
+Targets:
+  ✗ docs-qa     0.3s  Documentation validation failed with 1 issue(s)
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-093731-529-docs-qa/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

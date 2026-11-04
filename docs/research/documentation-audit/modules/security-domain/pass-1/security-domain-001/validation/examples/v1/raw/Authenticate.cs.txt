@@ -1,0 +1,5 @@
+using var scpKeyParameters = Scp03KeyParameters.Default;
+await using var session = await device.CreateSecurityDomainSessionAsync(
+    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });
+
+IReadOnlyList<KeyInfo> keys = await session.ListKeyInformationAsync();

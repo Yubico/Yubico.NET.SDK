@@ -1,0 +1,41 @@
+# dotnet toolchain.cs -- build --project AuditSd001.Examples.v1.hardware --clean
+# started:   2026-11-04 09:38:16 +01:00
+# directory: /home/rupicola/Code/y/Yubico.Yubikit.NET
+# git:       yubikit-docs-audit @ b73efe38 (uncommitted changes)
+# runtime:   .NET 10.0.14 on Omarchy
+# projects:  names drop the 'Yubico.YubiKit.' prefix
+
+▶ toolchain: build  (log: artifacts/toolchain/runs/20261104-093816-190-build/run.log)
+
+▶ target: test-infrastructure-qa
+
+=== Validating hardware-test declarations ===
+
+✓ All [WithYubiKey] tests use [SkippableTheory] and declare the required package
+
+▶ target: native-aot-contract-qa
+
+=== Validating Native AOT support contract ===
+
+✓ All 10 supported SDK libraries opt in, are referenced by the verification host, and are anchored there by an entry type
+✓ Excluded internal tooling (2): src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj, src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj
+
+▶ target: build
+
+=== Building ===
+
+▶ RUN dotnet clean docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/hardware/src/Yubico.YubiKit.AuditSd001.Examples.v1.hardware.csproj -c Release
+  output: artifacts/toolchain/runs/20261104-093816-190-build/01-clean-AuditSd001.Examples.v1.hardware.log
+▶ RUN dotnet build docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/hardware/src/Yubico.YubiKit.AuditSd001.Examples.v1.hardware.csproj -c Release --no-incremental
+  output: artifacts/toolchain/runs/20261104-093816-190-build/02-build-AuditSd001.Examples.v1.hardware.log
+✓ Built 1 project(s) matching 'AuditSd001.Examples.v1.hardware': AuditSd001.Examples.v1.hardware
+
+============================================================
+RESULT: PASSED  (dotnet toolchain.cs -- build --project AuditSd001.Examples.v1.hardware --clean)
+Targets:
+  ✓ test-infrastructure-qa     0.0s
+  ✓ native-aot-contract-qa     0.0s
+  ✓ build                      5.7s
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-093816-190-build/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================

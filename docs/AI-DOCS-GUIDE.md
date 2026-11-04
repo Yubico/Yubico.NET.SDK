@@ -504,8 +504,8 @@ This is a **low-level security module** requiring careful key handling.
 
 ## Known Gotchas
 
-1. **Reset is irreversible**: Once called, all custom keys are blocked.
-2. **Default keys are KVN=0xFF**: After reset.
+1. **Reset is destructive**: It attempts to remove custom Security Domain keys/data; failure or cancellation can leave partial changes. Return does not verify factory state.
+2. **Factory SCP03 reference**: KVN=0xFF is reserved for defaults; the first custom import replaces that set.
 ```
 
 ## Maintenance

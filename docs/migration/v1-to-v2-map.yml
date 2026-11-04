@@ -501,7 +501,7 @@ mappings:
     evidence:
       - yubikit:src/SecurityDomain/src/SecureChannelException.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot had zero dedicated SecurityDomain exception types; SCP handshake failures surfaced as a generic `ApduException`, `BadResponseException`, or `NotSupportedException` (historical gap 9, cross-cutting exception-hierarchy shrinkage). The `yubikit-gaps` remediation effort added a dedicated `SecureChannelException`, thrown only for failures while establishing a secure channel during `SecurityDomainSession.CreateAsync` or the post-reset reinitialization inside `ResetAsync`; it always preserves the original failure as `InnerException` and the status word (when present) as `StatusWord`. Per-operation failures after a channel is already open (`GetDataAsync`, `PutKeyAsync`, `DeleteKeyAsync`, etc.) are unchanged and still surface their original exception type directly.
+    notes: With SCP parameters supplied, SecurityDomainSession.CreateAsync and post-reset reinitialization wrap ApduException, BadResponseException, or NotSupportedException from secure-channel configuration in SecureChannelException. The original failure is preserved as InnerException; StatusWord is copied only from an immediate ApduException, not a nested exception. Protocol preparation and application selection occur before this catch, cancellation is rethrown unchanged, and later per-operation failures retain their original exception types.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: openpgp-exception
     status: assisted

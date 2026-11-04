@@ -1,0 +1,5 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/hardware/src/Examples.cs
+/home/rupicola/.nuget/packages/microsoft.net.test.sdk/18.0.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
+/tmp/opencode/security-domain-001-examples-v1-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditSd001.Examples.v1.hardware.GlobalUsings.g.cs
+/tmp/opencode/security-domain-001-examples-v1-hardware/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/security-domain-001-examples-v1-hardware/obj/Release/net10.0/Yubico.YubiKit.AuditSd001.Examples.v1.hardware.AssemblyInfo.cs

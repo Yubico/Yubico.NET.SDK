@@ -1,0 +1,32 @@
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
+public async Task GeneratedKey_IsListedInNextSession(YubiKeyTestState state)
+{
+    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(100));
+    CancellationToken ct = timeout.Token;
+    using var parameters = Scp03KeyParameters.Default;
+    var keyRef = new KeyReference(ScpKid.SCP11b, 0x03);
+    try
+    {
+        await state.WithSecurityDomainSessionAsync(
+            resetBeforeUse: true,
+            async session => { await session.GenerateKeyAsync(keyRef, cancellationToken: ct); },
+            scpKeyParams: parameters,
+            cancellationToken: ct);
+
+        await state.WithSecurityDomainSessionAsync(
+            resetBeforeUse: false,
+            async session =>
+            {
+                var keys = await session.ListKeyInformationAsync(ct);
+                Assert.Contains(keys, entry => entry.KeyReference.Kid == keyRef.Kid &&
+                    entry.KeyReference.Kvn == keyRef.Kvn);
+            },
+            cancellationToken: ct);
+    }
+    finally
+    {
+        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        await state.ResetSecurityDomainAsync(cleanup.Token);
+    }
+}

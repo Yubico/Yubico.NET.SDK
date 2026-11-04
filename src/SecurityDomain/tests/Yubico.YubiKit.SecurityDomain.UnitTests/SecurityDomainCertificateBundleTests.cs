@@ -50,7 +50,7 @@ public sealed class SecurityDomainCertificateBundleTests
         }
         finally
         {
-            // Also release the deliberately leaked certificates when demonstrating RED.
+            // Release observed certificates even if a disposal assertion fails.
             foreach (var certificate in loaded)
                 certificate.Dispose();
         }

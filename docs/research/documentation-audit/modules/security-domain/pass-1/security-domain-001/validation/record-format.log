@@ -1,0 +1,8 @@
+$ python3 docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/record-format.py
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/record-format.py", line 24, in <module>
+    assert removed==expected.get(row['path'],[]) and not added,row['path']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: src/SecurityDomain/src/IYubiKeyExtensions.cs
+
+EXIT=1

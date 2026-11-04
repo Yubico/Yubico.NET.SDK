@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/capture.py v1 hardware
+PASS hardware: 5 actual compiler sources, 206 references, 12 analyzers; preserved text and binary identities.
+
+EXIT=0

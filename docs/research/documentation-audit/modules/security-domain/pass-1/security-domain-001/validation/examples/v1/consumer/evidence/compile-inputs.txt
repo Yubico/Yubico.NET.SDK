@@ -1,0 +1,4 @@
+/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/consumer/src/Examples.cs
+/tmp/opencode/security-domain-001-examples-v1-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditSd001.Examples.v1.consumer.GlobalUsings.g.cs
+/tmp/opencode/security-domain-001-examples-v1-consumer/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/tmp/opencode/security-domain-001-examples-v1-consumer/obj/Release/net10.0/Yubico.YubiKit.AuditSd001.Examples.v1.consumer.AssemblyInfo.cs

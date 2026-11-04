@@ -30,8 +30,8 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateR
 
     /// <summary>
     ///     Imports two custom SCP03 key sets, then deletes them one at a time, verifying
-    ///     each deletion. Follows the pattern from the Java SDK's testDeleteKey: to delete
-    ///     a key you must authenticate with a different key that remains on the device.
+    ///     each deletion. Uses the retained second set to delete the first, then explicitly
+    ///     permits deletion of the last custom set while authenticated with that set.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
@@ -129,8 +129,8 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateR
         }
         finally
         {
-            // Both custom key sets were deleted, leaving no SCP03 key on the device. Restore factory
-            // defaults so later tests and suites can still authenticate with the default keys.
+            // Request cleanup even if a lifecycle assertion failed. Last-SCP03-set deletion is
+            // documented to restore defaults; this test does not assert that restored state.
             await state.ResetSecurityDomainAsync(ct);
         }
     }

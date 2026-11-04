@@ -1,0 +1,20 @@
+[
+  {
+    "unit": "SD-CL01",
+    "path": "src/SecurityDomain/src/CaIdentifierType.cs",
+    "sha256": "a58b215bb44e78e617f89c9e58d37102137ab9e067908be92e7e1fb73ab166c5",
+    "result": "pass-bounded-semantic-sample"
+  },
+  {
+    "unit": "SD-CL05",
+    "path": "src/SecurityDomain/PACKAGE_README.md",
+    "sha256": "54c948f9adff97293689eda608a4b6e2668e1836e32ca1b80c1d45072de50a08",
+    "result": "pass-bounded-semantic-sample"
+  },
+  {
+    "unit": "SD-CL09",
+    "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnectionTests.cs",
+    "sha256": "a52992d0676a16ebcc73df3d4fc6b29cf852d39bb8312e1edac5c1b9df65344c",
+    "result": "pass-bounded-semantic-sample"
+  }
+]

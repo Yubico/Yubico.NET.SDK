@@ -1,0 +1,11 @@
+$ python3 docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/verify.py v1
+PASS: consumer retained compiler/source/configuration evidence
+PASS: hardware retained compiler/source/configuration evidence
+PASS: 10 current fenced blocks; 9 selected, 1 excluded; 10 groups including inline constructor; raw/full wrapper bodies preserved.
+Current document hashes (prose may change independently of exact compiled blocks):
+6d5e5c55f89c2c0dfa53200afe4f2d35732c09994cfe94b1ea1db4e924a14a12 src/SecurityDomain/CLAUDE.md
+f211ae74ac5bf831ae9e566a82511c1fcb48a6277d319ad87f9a2419168410da src/SecurityDomain/README.md
+fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5 src/SecurityDomain/tests/CLAUDE.md
+83b15cd245f2eefafb833af830b25cbeed0f616b8845d81345e170541ed1c1f8 src/SecurityDomain/tests/README.md
+
+EXIT=0

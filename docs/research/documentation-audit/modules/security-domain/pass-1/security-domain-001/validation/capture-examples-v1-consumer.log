@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/capture.py v1 consumer
+PASS consumer: 4 actual compiler sources, 179 references, 10 analyzers; preserved text and binary identities.
+
+EXIT=0

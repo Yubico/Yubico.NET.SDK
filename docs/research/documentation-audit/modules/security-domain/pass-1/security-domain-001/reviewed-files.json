@@ -1,0 +1,188 @@
+{
+  "baseline": "b73efe3813b429b4b8eb2a7e819a6ad7be699d47",
+  "authored_count": 26,
+  "files": [
+    {
+      "path": "docs/AI-DOCS-GUIDE.md",
+      "review": "review.md",
+      "reviewed_sha256": "54ff0bf0a5c57143e73094f0b7f2bd67d4175e358c4ae2e554bdaa05616b9a93",
+      "final_sha256": "54ff0bf0a5c57143e73094f0b7f2bd67d4175e358c4ae2e554bdaa05616b9a93",
+      "post_review_transform": null
+    },
+    {
+      "path": "docs/migration/v1-to-v2-map.yml",
+      "review": "review.md",
+      "reviewed_sha256": "eea28b28c26fbcff358b04214e7fb660cc32226c5e5e7fa2d97bd5fbc9729c41",
+      "final_sha256": "eea28b28c26fbcff358b04214e7fb660cc32226c5e5e7fa2d97bd5fbc9729c41",
+      "post_review_transform": null
+    },
+    {
+      "path": "docs/migration/v1-to-v2.md",
+      "review": "review.md",
+      "reviewed_sha256": "606f8822d3dc0f6360a709c7adf33acb164dffe1d559acaf8ce2c95971dd2588",
+      "final_sha256": "606f8822d3dc0f6360a709c7adf33acb164dffe1d559acaf8ce2c95971dd2588",
+      "post_review_transform": null
+    },
+    {
+      "path": "src/SecurityDomain/CLAUDE.md",
+      "review": "review.md",
+      "reviewed_sha256": "6d5e5c55f89c2c0dfa53200afe4f2d35732c09994cfe94b1ea1db4e924a14a12",
+      "final_sha256": "6d5e5c55f89c2c0dfa53200afe4f2d35732c09994cfe94b1ea1db4e924a14a12",
+      "post_review_transform": null
+    },
+    {
+      "path": "src/SecurityDomain/PACKAGE_README.md",
+      "review": "review.md",
+      "reviewed_sha256": "854d204ed4b648c436209aba6b87f055a0133b92a458a0b5f597bb8375386b9b",
+      "final_sha256": "854d204ed4b648c436209aba6b87f055a0133b92a458a0b5f597bb8375386b9b",
+      "post_review_transform": null
+    },
+    {
+      "path": "src/SecurityDomain/README.md",
+      "review": "review-followup.md",
+      "reviewed_sha256": "f211ae74ac5bf831ae9e566a82511c1fcb48a6277d319ad87f9a2419168410da",
+      "final_sha256": "f211ae74ac5bf831ae9e566a82511c1fcb48a6277d319ad87f9a2419168410da",
+      "post_review_transform": null
+    },
+    {
+      "path": "src/SecurityDomain/src/CaIdentifier.cs",
+      "review": "review.md",
+      "reviewed_sha256": "6b3ce2f017aa678dffa796366b2850ecf56c53fd974848ce818651e3cec2ecf8",
+      "final_sha256": "ade7b669a29a9833a2b09403a127af09f2e34557e12714e99bfd678c5c580678",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "review": "review-followup.md",
+      "reviewed_sha256": "c9daab35f6388b8a711bcbe2df2881056a09c4babdcd8b18b294aa80241425d5",
+      "final_sha256": "d3c00fed7f2368d136b7646f9ccf48ce142f3f496b91cdb1adbef725eebc5705",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "review": "review.md",
+      "reviewed_sha256": "40aeb7d45b6717b92a83caa7306ad6c204674b190ee12605e9413826de58183c",
+      "final_sha256": "6b3adbaf0f02fe0535a5692b590135c67ea15cc2d970a7b8c878f001db4dd349",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/src/KeyInfo.cs",
+      "review": "review.md",
+      "reviewed_sha256": "10d445ef6df239e4518a700f968208c8ea16c5af64a3a5eab31e744e4ed7a1e2",
+      "final_sha256": "8c8b78b68447431ce2775b38d3edc0c2d43e9a32303e6b5443d94e801a8ded83",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecureChannelException.cs",
+      "review": "review.md",
+      "reviewed_sha256": "7227829b83651cf905969fd52fdbd14d01f7301c27281ff249769407616b2f82",
+      "final_sha256": "a2bc6c316f3e241106149dca933d5a5a9d791261b428c59bbe912dd59edf0af4",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "review": "review.md",
+      "reviewed_sha256": "5a67ccf399c1bd60c53485fba0976eb5dc492bb110fad2415f44463d4ab3f2e0",
+      "final_sha256": "bf6d32f74bcb82e6e209f3c4589d809d9a5be57b1df02169b90493031b7b9956",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/CLAUDE.md",
+      "review": "review.md",
+      "reviewed_sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5",
+      "final_sha256": "fa5db89cf8e780481a88245a5d4f52d716e13cb6f63b9fd2766de1bb788530c5",
+      "post_review_transform": null
+    },
+    {
+      "path": "src/SecurityDomain/tests/README.md",
+      "review": "review-followup.md",
+      "reviewed_sha256": "83b15cd245f2eefafb833af830b25cbeed0f616b8845d81345e170541ed1c1f8",
+      "final_sha256": "83b15cd245f2eefafb833af830b25cbeed0f616b8845d81345e170541ed1c1f8",
+      "post_review_transform": null
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs",
+      "review": "review.md",
+      "reviewed_sha256": "60fed66b3ad1d08e1a6bef9a70ae217c5d29960a2ccb755f9e6657e1d62a025f",
+      "final_sha256": "afff71fb205952db92f40bb3a410f45aa0771d7c05df751687775d58ed284068",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs",
+      "review": "review.md",
+      "reviewed_sha256": "fc3459f453a3be25d129a222d31e29ba879f8c62dd214df6115b5abacc9a88aa",
+      "final_sha256": "cb4256ccb2a427de68aedfbfa88811ded09a4fff072b639c256f5b4cb6ef2c29",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "review": "review.md",
+      "reviewed_sha256": "62b28bb2b347f795da553fbc8ca3234c30b7df2558191f18aa7ea503d129da3a",
+      "final_sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "review": "review.md",
+      "reviewed_sha256": "8295999e0895306b014de9e3f6d28513d7e61a53fe9d46b23d765b8dc357dd7e",
+      "final_sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs",
+      "review": "review-followup.md",
+      "reviewed_sha256": "3bbbb90e48eea81924f49d539fa235af5d4ea3508cbd0d5a7bc0025b258f22a4",
+      "final_sha256": "70762acbdbe91adc9e493da27a06baefe212e4fe663afbf1244c4e1bc85655aa",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/SecurityDomainStateRestoringTests.cs",
+      "review": "review.md",
+      "reviewed_sha256": "1ca525a8e82b2b690d41952b15d69cb67d2fc98b4e88e407fa433d97766f4bcc",
+      "final_sha256": "6a7725030d06e9a92d0e2e3a2215ba7941bc24b27724d4f1abd36fa79e9bcc51",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+      "review": "review.md",
+      "reviewed_sha256": "0af1b49de21ffee8cb937379b98869bd20404a0a99798e880d135a0a7d360778",
+      "final_sha256": "fe661501a0a2b0a52e0bfa37ca6c7c10320537a3a3014fb9897e2f4fad625b5e",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/AuditV2/SecurityDomainAuditReproTests.cs",
+      "review": "review.md",
+      "reviewed_sha256": "779c5caa812bb132918302fa016fd5fb8264483e312da3e8048ef24c9e188207",
+      "final_sha256": "2719b01755d036e72f724570ed109798f1503c0e67faa353bbdcdf7cb4387a8b",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+      "review": "review.md",
+      "reviewed_sha256": "28facb769793997f44eefa40418436e4b58dc085ad803cd09cd0137dd06539c2",
+      "final_sha256": "fc052fc7ca926eba2706f9cabc3c5f039359e401e7d344bb06b566079acccaee",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs",
+      "review": "review.md",
+      "reviewed_sha256": "f8edd5cb5a3f1240aef6a65b5257f1aa285d12db2f3d4212b3b4c5700bc45f04",
+      "final_sha256": "66999fb68ddfada76820229b7cb0f41133d5197e0d7059e6e8fc8cf4a710b0a8",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainCertificateBundleTests.cs",
+      "review": "review.md",
+      "reviewed_sha256": "eb150df5f8103ddf02a1ca8cc6305a329a8a10f3bb8e576941bbb1d911c70f09",
+      "final_sha256": "77c9c7bcb956e0c1add350029aa3efbf1a0deb773e63c9d42a3f4b9c31e0c807",
+      "post_review_transform": "validation/format-transform.json"
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+      "review": "review.md",
+      "reviewed_sha256": "493adcd9ce5bcd8f30ec01512d61141d6542401d65402beec660959eded03969",
+      "final_sha256": "f9aa1d32677d9b27b1885a9b789803a230090ce641deab371c03d7522f4c947f",
+      "post_review_transform": "validation/format-transform.json"
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "baseline": "b73efe3813b429b4b8eb2a7e819a6ad7be699d47",
+  "formatter_exit": 0,
+  "files": [
+    {
+      "path": "src/SecurityDomain/src/CaIdentifier.cs",
+      "before_sha256": "6b3ce2f017aa678dffa796366b2850ecf56c53fd974848ce818651e3cec2ecf8",
+      "after_sha256": "ade7b669a29a9833a2b09403a127af09f2e34557e12714e99bfd678c5c580678",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+      "before_sha256": "c9daab35f6388b8a711bcbe2df2881056a09c4babdcd8b18b294aa80241425d5",
+      "after_sha256": "d3c00fed7f2368d136b7646f9ccf48ce142f3f496b91cdb1adbef725eebc5705",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "before_sha256": "40aeb7d45b6717b92a83caa7306ad6c204674b190ee12605e9413826de58183c",
+      "after_sha256": "6b3adbaf0f02fe0535a5692b590135c67ea15cc2d970a7b8c878f001db4dd349",
+      "removed_namespaces": [
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu",
+        "Yubico.YubiKit.Core.Protocols.SmartCard.Scp"
+      ],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/src/KeyInfo.cs",
+      "before_sha256": "10d445ef6df239e4518a700f968208c8ea16c5af64a3a5eab31e744e4ed7a1e2",
+      "after_sha256": "8c8b78b68447431ce2775b38d3edc0c2d43e9a32303e6b5443d94e801a8ded83",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/src/SecureChannelException.cs",
+      "before_sha256": "7227829b83651cf905969fd52fdbd14d01f7301c27281ff249769407616b2f82",
+      "after_sha256": "a2bc6c316f3e241106149dca933d5a5a9d791261b428c59bbe912dd59edf0af4",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+      "before_sha256": "5a67ccf399c1bd60c53485fba0976eb5dc492bb110fad2415f44463d4ab3f2e0",
+      "after_sha256": "bf6d32f74bcb82e6e209f3c4589d809d9a5be57b1df02169b90493031b7b9956",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/Helpers/ScpCertificates.cs",
+      "before_sha256": "60fed66b3ad1d08e1a6bef9a70ae217c5d29960a2ccb755f9e6657e1d62a025f",
+      "after_sha256": "afff71fb205952db92f40bb3a410f45aa0771d7c05df751687775d58ed284068",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_NegativeTests.cs",
+      "before_sha256": "fc3459f453a3be25d129a222d31e29ba879f8c62dd214df6115b5abacc9a88aa",
+      "after_sha256": "cb4256ccb2a427de68aedfbfa88811ded09a4fff072b639c256f5b4cb6ef2c29",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03KeyLifecycleTests.cs",
+      "before_sha256": "62b28bb2b347f795da553fbc8ca3234c30b7df2558191f18aa7ea503d129da3a",
+      "after_sha256": "45611df36e9356cac9047193f5f02551d220c3f6390c4ace91aeb8e8d540f7a5",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp03Tests.cs",
+      "before_sha256": "8295999e0895306b014de9e3f6d28513d7e61a53fe9d46b23d765b8dc357dd7e",
+      "after_sha256": "3da509332c908f02eeb8421c48e623c30125c54890da89cff14f76b3df9d08c8",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/SecurityDomainSession_Scp11Tests.cs",
+      "before_sha256": "3bbbb90e48eea81924f49d539fa235af5d4ea3508cbd0d5a7bc0025b258f22a4",
+      "after_sha256": "70762acbdbe91adc9e493da27a06baefe212e4fe663afbf1244c4e1bc85655aa",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/SecurityDomainStateRestoringTests.cs",
+      "before_sha256": "1ca525a8e82b2b690d41952b15d69cb67d2fc98b4e88e407fa433d97766f4bcc",
+      "after_sha256": "6a7725030d06e9a92d0e2e3a2215ba7941bc24b27724d4f1abd36fa79e9bcc51",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs",
+      "before_sha256": "0af1b49de21ffee8cb937379b98869bd20404a0a99798e880d135a0a7d360778",
+      "after_sha256": "fe661501a0a2b0a52e0bfa37ca6c7c10320537a3a3014fb9897e2f4fad625b5e",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/AuditV2/SecurityDomainAuditReproTests.cs",
+      "before_sha256": "779c5caa812bb132918302fa016fd5fb8264483e312da3e8048ef24c9e188207",
+      "after_sha256": "2719b01755d036e72f724570ed109798f1503c0e67faa353bbdcdf7cb4387a8b",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnection.cs",
+      "before_sha256": "28facb769793997f44eefa40418436e4b58dc085ad803cd09cd0137dd06539c2",
+      "after_sha256": "fc052fc7ca926eba2706f9cabc3c5f039359e401e7d344bb06b566079acccaee",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecureChannelExceptionTests.cs",
+      "before_sha256": "f8edd5cb5a3f1240aef6a65b5257f1aa285d12db2f3d4212b3b4c5700bc45f04",
+      "after_sha256": "66999fb68ddfada76820229b7cb0f41133d5197e0d7059e6e8fc8cf4a710b0a8",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainCertificateBundleTests.cs",
+      "before_sha256": "eb150df5f8103ddf02a1ca8cc6305a329a8a10f3bb8e576941bbb1d911c70f09",
+      "after_sha256": "77c9c7bcb956e0c1add350029aa3efbf1a0deb773e63c9d42a3f4b9c31e0c807",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    },
+    {
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/SecurityDomainSessionTests.cs",
+      "before_sha256": "493adcd9ce5bcd8f30ec01512d61141d6542401d65402beec660959eded03969",
+      "after_sha256": "f9aa1d32677d9b27b1885a9b789803a230090ce641deab371c03d7522f4c947f",
+      "removed_namespaces": [],
+      "added_namespaces": [],
+      "non_using_non_whitespace_identical": true
+    }
+  ]
+}

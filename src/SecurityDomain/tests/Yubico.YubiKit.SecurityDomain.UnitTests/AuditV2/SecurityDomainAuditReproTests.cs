@@ -20,7 +20,7 @@ public sealed class SecurityDomainAuditReproTests
         Assert.Equal(before, connection.TransmittedCommands.Count);
     }
 
-    /// <summary>GP Amd F v1.3 §7.9: removal is a zero-length allowlist TLV, sent only by the explicit clear.</summary>
+    /// <summary>Explicit clear sends the reference and an empty tag 0x70; empty store input sends nothing.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
     public async Task YESDK1634_ClearAllowList_SendsZeroLengthAllowListTlv()

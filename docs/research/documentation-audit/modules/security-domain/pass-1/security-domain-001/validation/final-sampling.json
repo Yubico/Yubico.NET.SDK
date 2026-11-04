@@ -1,0 +1,49 @@
+{
+  "eligible": [
+    "SD-CL01",
+    "SD-CL04",
+    "SD-CL06",
+    "SD-CL07",
+    "SD-CL08",
+    "SD-CL09",
+    "SD-CL10",
+    "SD-CL11",
+    "SD-CL12"
+  ],
+  "excluded_edited_overlap": [
+    "SD-CL02",
+    "SD-CL03",
+    "SD-CL05"
+  ],
+  "counted": [
+    "SD-CL01",
+    "SD-CL07",
+    "SD-CL09"
+  ],
+  "supplemental": [
+    "SD-CL05"
+  ],
+  "required": 3,
+  "completed": 3,
+  "replacement": {
+    "id": "SD-CL07",
+    "path": "src/SecurityDomain/README.md",
+    "csharp_block": 2,
+    "baseline_and_current_sha256": "277f99736332d33d72695eab8069ce0a1ef67b3925d9141b0a96f07feb5e1b3f",
+    "body": "using var scpKeyParameters = Scp03KeyParameters.Default;\nawait using var session = await device.CreateSecurityDomainSessionAsync(\n    new SessionCreationOptions { ScpKeyParameters = scpKeyParameters });\n\nIReadOnlyList<KeyInfo> keys = await session.ListKeyInformationAsync();\n"
+  },
+  "unchanged_files": [
+    {
+      "unit": "SD-CL01",
+      "path": "src/SecurityDomain/src/CaIdentifierType.cs",
+      "sha256": "a58b215bb44e78e617f89c9e58d37102137ab9e067908be92e7e1fb73ab166c5",
+      "result": "pass-bounded-semantic-sample"
+    },
+    {
+      "unit": "SD-CL09",
+      "path": "src/SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.UnitTests/Scp03HandshakeFakeConnectionTests.cs",
+      "sha256": "a52992d0676a16ebcc73df3d4fc6b29cf852d39bb8312e1edac5c1b9df65344c",
+      "result": "pass-bounded-semantic-sample"
+    }
+  ]
+}

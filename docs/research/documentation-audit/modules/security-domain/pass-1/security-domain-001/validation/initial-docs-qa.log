@@ -1,0 +1,20 @@
+$ dotnet toolchain.cs docs-qa
+▶ toolchain: docs-qa  (log: artifacts/toolchain/runs/20261104-093731-529-docs-qa/run.log)
+
+▶ target: docs-qa
+
+=== Validating active documentation ===
+
+▶ RUN dotnet msbuild /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/Yubico.YubiKit.Core.csproj -getProperty:YubiKitDocsBranch -getProperty:PackageProjectUrl -nologo (output captured)
+  ✗ src/SecurityDomain/tests/README.md:87: human-facing docs must not reference agent instruction files; link docs/DEV-GUIDE.md instead
+✗ docs-qa: Documentation validation failed with 1 issue(s)
+
+============================================================
+RESULT: FAILED  (dotnet toolchain.cs -- docs-qa)
+Targets:
+  ✗ docs-qa     0.3s  Documentation validation failed with 1 issue(s)
+Warnings: 0
+Run log: artifacts/toolchain/runs/20261104-093731-529-docs-qa/run.log (result.json and step logs beside it; reprint this block: dotnet toolchain.cs -- last)
+============================================================
+
+EXIT=1

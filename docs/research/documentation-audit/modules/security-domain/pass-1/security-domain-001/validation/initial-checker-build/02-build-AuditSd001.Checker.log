@@ -1,0 +1,10 @@
+$ dotnet build docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/checker/src/Yubico.YubiKit.AuditSd001.Checker.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/checker/src/Yubico.YubiKit.AuditSd001.Checker.csproj (in 57 ms).
+  Yubico.YubiKit.AuditSd001.Checker -> /tmp/opencode/security-domain-001-doccheck/bin/Release/net10.0/Yubico.YubiKit.AuditSd001.Checker.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.81

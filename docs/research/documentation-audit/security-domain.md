@@ -1,0 +1,46 @@
+# Security Domain documentation handoff
+
+## Current cycle
+
+Pass-1 content, independent review and execution gates are complete as
+[security-domain-001](modules/security-domain/pass-1/security-domain-001/plan.md),
+on `yubikit-docs-audit` from verified local/GitHub baseline
+`b73efe3813b429b4b8eb2a7e819a6ad7be699d47`. See [current status](modules/security-domain/pass-1/security-domain-001/status.md).
+Fresh independent final record review passed with no required corrections. Publication is pending at
+this checkpoint; the verified content commit and GitHub hash will be recorded here after push.
+
+The user approved a module-focused, proportionate cycle. Core project investigation and dedicated
+cross-module boundary review are deferred until Core, the final target, when per-applet relationships
+will be reviewed together. Record precise dependencies for that later work.
+
+All 38 tracked module paths were investigated: eight public families / 96 API snapshot entries. Twenty-six
+authored paths have independent acceptance; three final clean samples cover nine eligible units.
+Ten meaningful example groups compiled across two contexts. Final clean solution gates passed 3998 unit
+tests, including 50 Security Domain cases, with five existing skips and zero compiler/analyzer warnings.
+Implementation and hardware verification remain separate from documentation completion.
+
+## Return-visit records
+
+- [Closeout](modules/security-domain/pass-1/security-domain-001/closeout.md): scope, outcomes and remaining limits.
+- [Findings](modules/security-domain/pass-1/security-domain-001/findings.md): SD-IMP-001–008 and SD-DEP-001–005,
+  source observations, missing evidence and exact documentation reopening triggers.
+- [Final coverage](modules/security-domain/pass-1/security-domain-001/coverage-final.json) and
+  [reviewed hashes](modules/security-domain/pass-1/security-domain-001/reviewed-files.json): every module path
+  disposition and exact authored-content acceptance/formatter mapping.
+- [Validation](modules/security-domain/pass-1/security-domain-001/validation.md) and
+  [examples](modules/security-domain/pass-1/security-domain-001/snippet-validation.md): actual commands,
+  preserved inputs/results, failed attempts and limits.
+
+All engineering groups remain deferred-pass-2. They include reset completion/options, deletion filters,
+allowlist profile/validation, malformed responses, range/KCV validation, test assertions and sensitive
+resource cleanup. The accessible SCP11 public-review draft is not final-profile evidence. Re-baseline
+selected items before implementing; no live hardware test or device-state mutation occurred here.
+
+## Inherited evidence limits
+
+The [OATH handoff](oath.md) retains a live SCP03 attempt on serial 125 blocked at INITIALIZE UPDATE:
+both `80 50 FF 00` and `80 50 00 00` returned `6A88`. EXTERNAL AUTHENTICATE and RESET were not reached.
+That historical result is an unresolved initialization question, not evidence for Security Domain reset
+behavior. Future device work must re-establish inventory/state and the exact authorized scope.
+
+Next target after this cycle: YubiOTP Pass 1. Implementation returns wait until the campaign's second sweep.

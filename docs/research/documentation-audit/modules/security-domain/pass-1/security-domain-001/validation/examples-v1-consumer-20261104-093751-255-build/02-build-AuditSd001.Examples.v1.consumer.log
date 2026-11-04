@@ -1,0 +1,13 @@
+$ dotnet build docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditSd001.Examples.v1.consumer.csproj -c Release --no-incremental
+  Determining projects to restore...
+  Restored /home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/v1/consumer/src/Yubico.YubiKit.AuditSd001.Examples.v1.consumer.csproj (in 455 ms).
+  2 of 3 projects are up-to-date for restore.
+  Yubico.YubiKit.Core -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Core/src/bin/Release/net10.0/Yubico.YubiKit.Core.dll
+  Yubico.YubiKit.SecurityDomain -> /home/rupicola/Code/y/Yubico.Yubikit.NET/src/SecurityDomain/src/bin/Release/net10.0/Yubico.YubiKit.SecurityDomain.dll
+  Yubico.YubiKit.AuditSd001.Examples.v1.consumer -> /tmp/opencode/security-domain-001-examples-v1-consumer/bin/Release/net10.0/Yubico.YubiKit.AuditSd001.Examples.v1.consumer.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.54

@@ -1,0 +1,1 @@
+new Scp11KeyParameters(keyReference, devicePublicKey)

@@ -1,0 +1,5 @@
+$ python3 docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/examples/prepare.py v1
+Prepared consumer: 7 groups; project Yubico.YubiKit.AuditSd001.Examples.v1.consumer.csproj; no build or execution
+Prepared hardware: 3 groups; project Yubico.YubiKit.AuditSd001.Examples.v1.hardware.csproj; no build or execution
+
+EXIT=0

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "baseline": "b73efe3813b429b4b8eb2a7e819a6ad7be699d47",
+  "formatter": {
+    "diagnostic": "IDE0005",
+    "command_log": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/format-apply.log",
+    "command_log_sha256": "6258748cbb553f436e6a8b5382b1eca287a358ee14976503e538b5ae786f6cdc",
+    "log": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/format-initial.log",
+    "log_sha256": "01fcbbb33dbb60c9b5fea81724bc248c208c88875bc1162a7eed257a0234a434"
+  },
+  "files": [
+    {
+      "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+      "baseline_sha256": "16830ea9b7e62767c6c94bb9b1a21265d8aab2c4314acf608ee0a1651828465c",
+      "before": {
+        "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/pre-format-content.json",
+        "bundle_sha256": "ec6e69153dbda1f5ceefc00a63b14624189bb8af63feeb94846b7a3b4c6f7a91",
+        "sha256": "40aeb7d45b6717b92a83caa7306ad6c204674b190ee12605e9413826de58183c"
+      },
+      "after": {
+        "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/format-transform.json",
+        "bundle_sha256": "0c1a6c4c8c09630177053cad8ee09b178461ea3bbd7ad20599894628cec92722",
+        "sha256": "6b3adbaf0f02fe0535a5692b590135c67ea15cc2d970a7b8c878f001db4dd349"
+      },
+      "removals": [
+        {
+          "namespace": "Yubico.YubiKit.Core.Protocols.SmartCard.Apdu"
+        },
+        {
+          "namespace": "Yubico.YubiKit.Core.Protocols.SmartCard.Scp"
+        }
+      ]
+    }
+  ]
+}

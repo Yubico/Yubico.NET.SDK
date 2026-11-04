@@ -1,0 +1,4 @@
+$ python3 docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/validation/record-format.py
+PASS: 18 formatter transforms; two exact ordinary namespace imports removed in one file; other text identical except final newlines and import ordering. Roslyn proof remains separate.
+
+EXIT=0

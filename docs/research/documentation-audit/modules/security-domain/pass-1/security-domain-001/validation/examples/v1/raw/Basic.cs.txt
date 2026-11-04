@@ -1,0 +1,17 @@
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
+public async Task MyTest(YubiKeyTestState state)
+{
+    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(100));
+    CancellationToken ct = timeout.Token;
+    using var parameters = Scp03KeyParameters.Default;
+    await state.WithSecurityDomainSessionAsync(
+        resetBeforeUse: true,
+        async session =>
+        {
+            var keyInfo = await session.ListKeyInformationAsync(ct);
+            Assert.NotEmpty(keyInfo);
+        },
+        scpKeyParams: parameters,
+        cancellationToken: ct);
+}

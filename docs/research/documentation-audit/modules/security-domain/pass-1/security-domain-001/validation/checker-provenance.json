@@ -1,0 +1,34 @@
+{
+  "replacements": {
+    "5b09a9b6942ded3913b5c9340c3e126617e61a82": "b73efe3813b429b4b8eb2a7e819a6ad7be699d47",
+    "modules/ctap2/pass-1/ctap2-001/": "modules/security-domain/pass-1/security-domain-001/",
+    "/tmp/opencode/ctap2-001-doccheck": "/tmp/opencode/security-domain-001-doccheck",
+    "Yubico.YubiKit.Ctap2.DocCheck": "Yubico.YubiKit.AuditSd001.Checker"
+  },
+  "files": [
+    {
+      "source": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/src/Program.cs",
+      "source_sha256": "8161648f135a047525729034da76236488b8616a93de070d818a57b1c7a8e193",
+      "target": "checker/src/Program.cs",
+      "target_sha256": "284b1ef757c618d2014bb5bc5d01769fca751d4985477be2650009a371ef22af"
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/Directory.Build.props",
+      "source_sha256": "e1d5bbc264d12827311cda9b131067e481a95c408efe48788310717508d8051e",
+      "target": "checker/Directory.Build.props",
+      "target_sha256": "25f9096ee67025285dc66f6348c4e24e7d4db002bdcdb50748f97f2fcf849d55"
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/Directory.Build.targets",
+      "source_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a",
+      "target": "checker/Directory.Build.targets",
+      "target_sha256": "507c64d34aaa76d4d88d048aa5efea0f9eee4568f47012ee25ab5568eae7bb8a"
+    },
+    {
+      "source": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/validation/checker-source/src/Yubico.YubiKit.AuditCt001.Checker.csproj",
+      "source_sha256": "415c775f585ea0ddf3f96a1d57481516989ab9f678acc015490aef24b546e4c6",
+      "target": "checker/src/Yubico.YubiKit.AuditSd001.Checker.csproj",
+      "target_sha256": "89bd979476711371091b95a0972f4765b994e3b3e4baffe201c4c5dbb79de465"
+    }
+  ]
+}

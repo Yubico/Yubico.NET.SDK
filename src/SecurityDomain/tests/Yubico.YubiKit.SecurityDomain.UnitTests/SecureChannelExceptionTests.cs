@@ -22,13 +22,11 @@ using Yubico.YubiKit.Tests.Shared;
 namespace Yubico.YubiKit.SecurityDomain.UnitTests;
 
 /// <summary>
-///     Verifies the <see cref="SecureChannelException" /> contract (ISC-43): SCP handshake/
-///     authentication failures during <see cref="SecurityDomainSession.CreateAsync" /> and
-///     <see cref="SecurityDomainSession.ResetAsync" /> surface as <see cref="SecureChannelException" />
+///     Checks selected SCP03 configuration failures during CreateAsync and ResetAsync reinitialization
+///     surface as <see cref="SecureChannelException" />
 ///     with the original failure preserved as <see cref="Exception.InnerException" /> and, when
 ///     available, the ISO 7816 status word preserved on <see cref="SecureChannelException.StatusWord" />.
-///     Post-handshake, per-operation Security Domain failures are unaffected and continue to surface
-///     their original exception type directly.
+///     Also checks an unauthenticated malformed key-information response retains its original exception type.
 /// </summary>
 public class SecureChannelExceptionTests
 {
@@ -57,13 +55,12 @@ public class SecureChannelExceptionTests
         Assert.Equal(3, connection.TransmittedCommands.Count);
     }
 
-    // --- ISC-43: APDU-level rejection (e.g. wrong key detected by the device) ---
+    // APDU-level rejection supplied by the recording connection.
 
     [Fact]
     public async Task CreateAsync_Scp03InitializeUpdateRejectedByDevice_ThrowsSecureChannelExceptionWithStatusWordAndInnerApduException()
     {
-        // INITIALIZE UPDATE rejected with SW=0x6982 (Security status not satisfied), the status word
-        // a device returns for APDU-level authentication rejection such as an unrecognized/wrong key.
+        // Simulate INITIALIZE UPDATE rejection with SW=0x6982 (Security status not satisfied).
         var connection = new RecordingSmartCardConnection(
             OkResponse(), // SELECT
             [0x69, 0x82]); // INITIALIZE UPDATE rejected
@@ -82,7 +79,7 @@ public class SecureChannelExceptionTests
         Assert.Contains("INITIALIZE UPDATE", inner.Message);
     }
 
-    // --- ISC-43: cryptographic verification failure (e.g. wrong static keys) ---
+    // Local card-cryptogram verification failure.
 
     [Fact]
     public async Task CreateAsync_Scp03CardCryptogramMismatch_ThrowsSecureChannelExceptionWithInnerBadResponseException()
@@ -118,7 +115,7 @@ public class SecureChannelExceptionTests
         Assert.Same(inner, ex.InnerException);
     }
 
-    // --- ISC-43: SCP not supported by the connected firmware ---
+    // Unsupported supplied firmware version.
 
     [Fact]
     public async Task CreateAsync_Scp03UnsupportedFirmware_ThrowsSecureChannelExceptionWithInnerNotSupportedException()
@@ -144,14 +141,13 @@ public class SecureChannelExceptionTests
         Assert.Contains("SCP03", ex.InnerException!.Message);
     }
 
-    // --- ISC-43: post-handshake, per-operation failures are unaffected ---
+    // Per-operation parsing failure without SCP.
 
     [Fact]
     public async Task ListKeyInformationAsync_MalformedResponse_DoesNotWrapAsSecureChannelException()
     {
-        // No scpKeyParams: the session establishes without a secure channel, so a subsequent
-        // per-operation failure must surface as the original exception type, not
-        // SecureChannelException, since ISC-43 only concerns the SCP handshake phase.
+        // No SCP parameters: assert that parsing the later malformed entry throws BadResponseException
+        // directly, outside initialization's SecureChannelException catch.
         var connection = new RecordingSmartCardConnection(
             OkResponse(),
             [0xC0, 0x00, 0x90, 0x00]); // Key information entry advertises 0 bytes for its value
@@ -165,19 +161,15 @@ public class SecureChannelExceptionTests
         Assert.IsNotType<SecureChannelException>(ex);
     }
 
-    // --- ISC-43: ResetAsync's post-reset reinitialization is wrapped identically to CreateAsync ---
+    // Reset reinitialization reaches the same selected configuration-error wrapper as creation.
 
     [Fact]
     public async Task ResetAsync_ReinitializationRejectedAfterKeyBlocked_ThrowsSecureChannelExceptionWithInnerApduException()
     {
-        // This drives a genuine end-to-end scenario through the real SCP03 handshake/secure-messaging
-        // math (see Scp03HandshakeFakeConnection): a session is created with real SCP03 key params
-        // (the handshake must actually succeed, cryptographically, for CreateAsync to return a
-        // session at all), ResetAsync() enumerates the one live key via an encrypted+MACed GET DATA,
-        // blocks it via the raw (non-SCP) reset-attempt bypass, and then the reinit's INITIALIZE
-        // UPDATE is rejected -- simulating the just-blocked key failing to reauthenticate. This proves
-        // the SecureChannelException wrap applies to ResetAsync's reinit call to InitializeAsync, not
-        // only to CreateAsync's.
+        // The fixture derives responses for initial SCP03 establishment and encrypted key enumeration,
+        // reports a blocked status on the raw reset attempt, then rejects reinitialization. Assertions
+        // check the wrapper, immediate status/inner exception and failed-session flags, not device reset
+        // or complete SCP03 protocol verification.
         var connection = new Scp03HandshakeFakeConnection();
         using var scpKeyParams = Scp03KeyParameters.Default;
 

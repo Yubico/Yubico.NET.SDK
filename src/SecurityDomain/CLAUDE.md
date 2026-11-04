@@ -27,33 +27,10 @@ The Security Domain module manages YubiKey's root security application, which co
 
 This module handles **highly sensitive cryptographic material**. Apply these rules strictly:
 
-```csharp
-// ✅ ALWAYS zero sensitive data after use
-CryptographicOperations.ZeroMemory(keySpan);
-
-// ✅ ALWAYS use ArrayPool for temporary key buffers
-byte[]? keyBuffer = ArrayPool<byte>.Shared.Rent(16);
-try
-{
-    // Use keyBuffer
-}
-finally
-{
-    if (keyBuffer is not null)
-    {
-        CryptographicOperations.ZeroMemory(keyBuffer.AsSpan(0, 16));
-        ArrayPool<byte>.Shared.Return(keyBuffer, clearArray: true);
-    }
-}
-
-// ✅ ALWAYS use fixed-time comparisons for crypto verification
-if (!CryptographicOperations.FixedTimeEquals(expected, actual))
-    throw new InvalidOperationException("Verification failed");
-
-// ❌ NEVER log sensitive data (keys, PINs, challenge/response data)
-_logger.LogDebug("Key imported"); // ✅ OK
-_logger.LogDebug($"Key value: {keyHex}"); // ❌ NEVER
-```
+Follow the root memory rules: use `stackalloc` for synchronous buffers up to 512 bytes, pooled arrays for
+larger synchronous buffers, and `Memory<byte>`/owned memory across awaits. Clear sensitive caller-owned
+buffers in `finally`, dispose cryptographic objects, and use fixed-time comparisons for secret-derived
+values. Log references and operation names, never key bytes, KCVs, or challenge/response payloads.
 
 ### Key Component Handling
 
@@ -62,101 +39,60 @@ The `SecurityDomainKeyMaterial.EncodeKeyComponent()` pattern demonstrates correc
 2. Copy sensitive data to rented buffer
 3. Perform encryption
 4. Zero the buffer in `finally` block
-5. Return buffer to pool with `clearArray: true`
+5. Return the array to the pool after clearing the used plaintext range
+
+This describes that helper's plaintext copy, not a guarantee that every temporary cryptographic value
+in the module or its fixtures is cleared. Supplied keys/parameters remain the caller's responsibility;
+do not infer deeper clone/borrow rules from this helper.
 
 ## Test Infrastructure
 
 ### Automatic SD Reset System
 
-**CRITICAL:** All Security Domain integration tests use an **automatic reset system** that factory-resets the SD before each test. Understanding this is essential when writing or debugging tests.
+Integration tests can request a destructive reset with `resetBeforeUse: true`. It is not unconditional:
+related successive sessions use `false` to preserve the keys created by the previous session. Use only
+authorized dedicated test devices; custom Security Domain keys and associated data can be lost.
 
 #### How It Works
 
 Tests use the `WithSecurityDomainSessionAsync` extension method in [`TestStateExtensions.cs`](tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs):
 
-```csharp
-extension(YubiKeyTestState state)
-{
-    public Task WithSecurityDomainSessionAsync(
-        bool resetBeforeUse,
-        Func<SecurityDomainSession, Task> action,
-        ProtocolConfiguration? configuration = null,
-        ScpKeyParameters? scpKeyParams = null,
-        CancellationToken cancellationToken = default)
-}
-```
+The helper takes `bool resetBeforeUse`, `Func<SecurityDomainSession, Task> action`, optional
+`ProtocolConfiguration? configuration`, `ScpKeyParameters? scpKeyParams`, and `CancellationToken` in that
+order. It passes the test state's firmware version and supplied configuration to each session factory.
 
 **Two-Session Reset Pattern:**
 1. Creates `resetSession` without SCP authentication
-2. Calls `ResetAsync()` to block all keys (65 failed auth attempts per key)
-3. Creates the actual test `session` with SCP parameters
+2. Calls `ResetAsync()` and disposes that session before creating another
+3. Creates the actual test `session` with the supplied SCP parameters (or none)
 4. Runs the test action
 
 #### The ResetAsync Method
 
 Located in [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs), the reset process:
 
-1. **Enumerates keys** via `ListKeyInformationAsync()`
-2. **For each key type**, determines the appropriate blocking instruction:
-   - SCP03 (KID=0x01): `INITIALIZE UPDATE`
+1. **Enumerates keys** via `ListKeyInformationAsync()`; an empty list skips reset
+2. **For each processed reference**, determines the blocking instruction:
+   - SCP03 (KID=0x01): `INITIALIZE UPDATE` with reference 00/00; component KIDs 02/03 are skipped
    - SCP11a/c (KID=0x11/0x15): `EXTERNAL AUTHENTICATE`
    - SCP11b (KID=0x13): `INTERNAL AUTHENTICATE`
    - Others: `PERFORM SECURITY OPERATION`
-3. **Sends up to 65 failed attempts** with bogus payload (`ResetAttemptPayload`)
-4. **Waits for block status**: `0x6983` (blocked) or `0x6988` (security not satisfied)
-5. **Reinitializes session** after all keys are blocked
+3. **Sends at most 65 raw attempts** per processed reference with `ResetAttemptPayload`, bypassing SCP
+4. **Stops that reference** on `AuthenticationMethodBlocked` or `SecurityStatusNotSatisfied`; ordinary
+   transmission errors are retried, cancellation is rethrown, and exhaustion itself does not throw
+5. **Reselects/reinitializes**, without verifying factory contents afterward
+
+Return alone is not proof of restoration, and cancellation/failure can leave partial persistent changes.
+Yubico documents factory SCP03 restoration after last-set deletion; do not extend that to a verified
+mixed-key/firmware guarantee. Retained SCP parameters can fail reauthentication. Reinitialization currently
+omits the original configuration/version and clears the explicit-version indicator; a fresh session with
+the required options is the workaround, not a claim that losing them is intended policy.
 
 #### Writing Tests
 
-```csharp
-// Standard pattern: reset enabled (clean slate for each test)
-[SkippableTheory]
-[WithYubiKey(MinFirmware = "5.7.2")]
-public async Task MyTest_DoesX_Succeeds(YubiKeyTestState state) =>
-    await state.WithSecurityDomainSessionAsync(
-        async session =>
-        {
-            // Test runs with default keys (0xFF) after reset
-            var keyInfo = await session.ListKeyInformationAsync(cancellationToken);
-            Assert.Contains(keyInfo, entry => entry.KeyReference.Kvn == 0xFF);
-        },
-        resetBeforeUse: true,  // Explicitly documented
-        cancellationToken: CancellationTokenSource.Token);
-
-// When testing reset itself
-[SkippableTheory]
-[WithYubiKey(MinFirmware = "5.4.3")]
-public async Task ResetAsync_ReinitializesSession(YubiKeyTestState state) =>
-    await state.WithSecurityDomainSessionAsync(
-        async session =>
-        {
-            await session.ResetAsync(cancellationToken);
-            // Verify reset worked
-        },
-        resetBeforeUse: false,  // Don't reset before testing reset!
-        cancellationToken: cancellationToken);
-
-// Multi-session tests
-await state.WithSecurityDomainSessionAsync(
-    async session =>
-    {
-        // Generate key
-        var publicKey = await session.GenerateKeyAsync(keyRef, 0, cancellationToken);
-    },
-    scpKeyParams: Scp03KeyParameters.Default,
-    resetBeforeUse: true,  // Clean start
-    cancellationToken: cancellationToken);
-
-// Second session verifies first session's changes
-await state.WithSecurityDomainSessionAsync(
-    async session =>
-    {
-        var keyInfo = await session.ListKeyInformationAsync(cancellationToken);
-        Assert.Contains(keyInfo, entry => entry.KeyReference.Kid == keyRef.Kid);
-    },
-    resetBeforeUse: false,  // Don't destroy what we just created!
-    cancellationToken: cancellationToken);
-```
+Use the typed xUnit-v2 patterns in [tests/CLAUDE.md](tests/CLAUDE.md) for reset, owned parameter scopes,
+and successive sessions. When testing reset itself, disable the helper's preliminary reset. Assert the
+specific state/readiness you need; a successful callback does not prove complete device restoration.
 
 ## Common Patterns
 
@@ -180,59 +116,20 @@ Use `CaIdentifierType` flags to select KLOC, KLCC, or both; preserve KLOC-before
 
 ### SCP Parameter Types
 
-```csharp
-// SCP03: Symmetric keys
-using var scp03Keys = new StaticKeys(encKey, macKey, dekKey);
-var scp03Params = new Scp03KeyParameters(keyRef, scp03Keys);
-
-// SCP11b: Public key only
-var scp11bParams = new Scp11KeyParameters(keyRef, publicKey);
-
-// SCP11a/c: Full certificate chain + private key
-var scp11aParams = new Scp11KeyParameters(
-    keyRef,
-    publicKey,
-    privateKey,
-    oceKeyRef,
-    certificateChain);
-```
+`Scp03KeyParameters` takes a key reference and static ENC/MAC/DEK set. `Scp11KeyParameters` takes a device
+key reference and trusted device public key; SCP11a/c also take the OCE private key, CA-KLOC reference and
+host certificate chain. SCP11b authenticates the device, not the host, so `IsAuthenticated` is not a
+management-authorization check. See the [README role table](README.md#understand-scp11ac-provisioning-roles):
+the device certificate store is not OCE-chain provisioning. Keep caller-owned parameters alive through
+session disposal, and do not infer unverified deep ownership rules from the retained `_scpKeyParams` reference.
 
 ### Session Initialization Pattern
 
-The module uses a two-phase initialization:
-
-```csharp
-// Phase 1: Constructor (private)
-private SecurityDomainSession(
-    ISmartCardConnection connection,
-    ScpKeyParameters? scpKeyParams = null)
-
-// Phase 2: Async initialization
-private async Task InitializeAsync(
-    FirmwareVersion? firmwareVersion = null,
-    ProtocolConfiguration? configuration = null,
-    CancellationToken cancellationToken = default)
-{
-    // 1. Create the internal protocol (uses global YubiKit logging)
-    var smartCardProtocol = ProtocolFactory.Create(connection);
-    var backend = new SecurityDomainBackend(smartCardProtocol);
-
-    // 2. Select SD application + configure protocol
-    firmwareVersion ??= FirmwareVersion.V5_3_0;
-    await backend.SelectAsync(cancellationToken);
-
-    // 3. Establish SCP if keys provided
-    await ConfigureProtocolAsync(smartCardProtocol, firmwareVersion, configuration, scpKeyParams, cancellationToken);
-    // Protocol and ISmartCardProtocol are Core-internal implementation seams.
-    var selectedProtocol = Protocol as ISmartCardProtocol;
-    if (selectedProtocol is null)
-        throw new InvalidOperationException();
-
-    _backend = new SecurityDomainBackend(selectedProtocol);
-}
-```
-
-**Pattern:** Factory method `CreateAsync()` combines both phases.
+`CreateAsync(ISmartCardConnection, SessionCreationOptions?, CancellationToken)` combines construction and
+asynchronous initialization. The constructor retains the connection and SCP parameters. `InitializeAsync`
+takes configuration, firmware version, then cancellation token. It prepares the protocol, selects the SD
+through `SecurityDomainBackend.SelectApplicationAsync`, and configures it with the supplied version or
+5.3.0 fallback. If configuration returns a different protocol, the backend is rebuilt for that protocol.
 
 `ProtocolFactory`, `IProtocol`, and `ISmartCardProtocol` are not consumer extension points. External low-level
 code should use `RawSmartCardSession`; SecurityDomain uses these types only as friend-assembly implementation
@@ -240,25 +137,15 @@ machinery for its applet session.
 
 ### Error Handling
 
-```csharp
-try
-{
-    return await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
-}
-catch (OperationCanceledException)
-{
-    throw;  // Always rethrow cancellation
-}
-catch (Exception ex)
-{
-    _logger.LogWarning(ex, "Operation failed");
-    throw;
-}
-```
+Initialization wraps `ApduException`, `BadResponseException`, or `NotSupportedException` from
+`ConfigureProtocolAsync` only when SCP parameters were supplied. Preparation and app selection precede
+that catch; cancellation is rethrown unchanged. Later operation failures retain their original types.
+`SecureChannelException.StatusWord` copies only an immediate `ApduException` status, not a nested one.
 
 ## GlobalPlatform Command Structure
 
-Commands follow GlobalPlatform specifications:
+The session builds these command instructions and TLV tags locally. This is a source-navigation aid,
+not evidence of complete GlobalPlatform conformance:
 
 ```csharp
 const byte ClaGlobalPlatform = 0x80;
@@ -281,28 +168,21 @@ const byte TagKidKvn = 0x83;
 
 ## Debugging Tips
 
-### Enable Verbose Logging
+### Logging
 
-```csharp
-var loggerFactory = LoggerFactory.Create(builder =>
-{
-    builder.SetMinimumLevel(LogLevel.Trace);
-    builder.AddConsole();
-});
-
-using var session = await SecurityDomainSession.CreateAsync(
-    connection,
-    loggerFactory: loggerFactory,
-    cancellationToken: cancellationToken);
-```
+Session creation does not take a logger factory. The module uses the inherited SDK logger; do not add a
+session-specific logging parameter or assume that verbose payload logging is safe for SCP traffic.
 
 ### Key Information Inspection
+
+This composable fragment requires `ISecurityDomainSession session`, `ILogger logger`, and
+`CancellationToken cancellationToken`, with the SecurityDomain and Microsoft.Extensions.Logging namespaces:
 
 ```csharp
 var keyInfo = await session.ListKeyInformationAsync(cancellationToken);
 foreach (var entry in keyInfo)
 {
-    _logger.LogDebug(
+    logger.LogDebug(
         "Key: KID={Kid:X2}, KVN={Kvn:X2}",
         entry.KeyReference.Kid,
         entry.KeyReference.Kvn);
@@ -312,20 +192,16 @@ foreach (var entry in keyInfo)
 ## Firmware Version Considerations
 
 - **5.3.0**: Initial Security Domain support, SCP03 only
-- **5.4.3**: Enhanced SCP03 features
-- **5.7.2**: SCP11 protocols added (4 keys reported instead of 3)
+- **5.4.3**: Minimum selected by the module's SCP03 integration tests, not the SCP03 introduction version
+- **5.7.2**: SCP11 support; existing factory-state tests expect four entries rather than three
 
-```csharp
-// Version-aware assertions
-Assert.Equal(
-    state.FirmwareVersion >= FirmwareVersion.V5_7_2 ? 4 : 3,
-    keyInformation.Count);
-```
+These count assertions describe the tested factory-state expectation, not a universal count after key
+management. `GenerateKeyAsync` locally gates SCP11 only when an exact version was supplied at creation.
 
 ## Known Gotchas
 
-1. **Reset is irreversible during test**: Once `ResetAsync()` is called, all custom keys are blocked. No undo.
-2. **Default keys are always KVN=0xFF**: After reset, the default SCP03 key has KVN=0xFF.
+1. **Reset is destructive**: Failed or cancelled reset may already have removed custom state; return is not factory-state verification.
+2. **Factory SCP03 reference**: KVN=0xFF is reserved; the first custom import replaces the factory set rather than retaining it for later deletion.
 3. **SCP11 requires 5.7.2+**: Don't test SCP11 features on older firmware.
 4. **Certificate chain order matters**: For SCP11a/c, leaf cert goes last in the chain.
 5. **ArrayPool buffer sizes**: Always rent exact or larger size, never assume exact size returned.

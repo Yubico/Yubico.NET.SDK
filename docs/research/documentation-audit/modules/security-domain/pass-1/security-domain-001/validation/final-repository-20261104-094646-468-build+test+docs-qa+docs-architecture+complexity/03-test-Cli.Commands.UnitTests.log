@@ -1,0 +1,12 @@
+$ dotnet run --project src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Yubico.YubiKit.Cli.Commands.UnitTests.csproj -c Release
+xUnit.net v3 Microsoft.Testing.Platform Runner v3.0.0+d0213fc4e5 (64-bit .NET 10.0.14)
+
+skipped Yubico.YubiKit.Cli.Commands.UnitTests.AuditV2.CliOtpAuditReproTests.YESDK1633_ChildBody_NegativeLength_ThrowsArgumentOutOfRange (0ms)
+  Child-process body; executed only via ChildProcessTestRunner.
+
+Test run summary: Passed! - /home/rupicola/Code/y/Yubico.Yubikit.NET/src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/bin/Release/net10.0/Yubico.YubiKit.Cli.Commands.UnitTests.dll (net10.0|x64)
+  total: 43
+  failed: 0
+  succeeded: 42
+  skipped: 1
+  duration: 551ms
